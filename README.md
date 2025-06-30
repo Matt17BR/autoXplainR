@@ -44,26 +44,32 @@ devtools::install_github("Matt17BR/AutoXplainR")
 library(AutoXplainR)
 ```
 
+## Configuration
+
+### Google Generative AI Setup
+Set your API key for natural language report generation:
+
+```r
+# Set environment variable
+Sys.setenv(GEMINI_API_KEY = "your_api_key_here")
+
+# Or pass directly to function
+generate_natural_language_report(result, api_key = "your_api_key_here")
+```
+
 ## Quick Start
 
 ```r
 # Basic usage
 data(mtcars)
-result <- autoxplain(mtcars, "mpg", max_models = 5, max_runtime_secs = 300)
+result <- autoxplain(mtcars, "mpg", max_models = 10, max_runtime_secs = 120)
 
 # Generate explanations
 importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
 pdp_data <- calculate_partial_dependence_multi(result$models[[1]], mtcars, c("wt", "hp"))
 
-# Create visualizations
-plot_permutation_importance(importance)
-plot_partial_dependence_multi(pdp_data)
-
 # Generate comprehensive dashboard
 generate_dashboard(result, "my_dashboard.html")
-
-# Create natural language report (requires GEMINI_API_KEY)
-report <- generate_natural_language_report(result, importance_data = importance)
 ```
 
 ## Core Functions
@@ -87,19 +93,6 @@ report <- generate_natural_language_report(result, importance_data = importance)
 - `create_simple_dashboard()`: Lightweight HTML dashboard
 - `generate_natural_language_report()`: LLM-powered report generation
 
-## Configuration
-
-### Google Generative AI Setup
-Set your API key for natural language report generation:
-
-```r
-# Set environment variable
-Sys.setenv(GEMINI_API_KEY = "your_api_key_here")
-
-# Or pass directly to function
-generate_natural_language_report(result, api_key = "your_api_key_here")
-```
-
 ## Example Workflow
 
 ```r
@@ -115,8 +108,7 @@ importance <- calculate_permutation_importance(model, mtcars, "mpg")
 top_features <- head(importance$feature, 3)
 pdp_data <- calculate_partial_dependence_multi(model, mtcars, top_features)
 
-
-# 4. Generate comprehensive dashboard
+# 3. Generate comprehensive dashboard
 generate_dashboard(
   result, 
   output_file = "mtcars_analysis.html",
@@ -125,7 +117,7 @@ generate_dashboard(
   include_llm_report = TRUE
 )
 
-# 5. Create individual plots
+# 4. Create individual plots
 plot_model_comparison(result)
 plot_permutation_importance(importance)
 plot_partial_dependence_multi(pdp_data)
