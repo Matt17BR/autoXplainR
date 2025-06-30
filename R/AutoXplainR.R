@@ -44,4 +44,5 @@
 #' @aliases AutoXplainR
 #' @author Matteo Mazzarelli \\email{matteo.mazzarelli@@gmail.com}
 #' @keywords package
+#' @importFrom magrittr %>%
 NULL

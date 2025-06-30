@@ -21,7 +21,8 @@ Imports:
     DT (>= 0.20.0),
     htmltools (>= 0.5.0),
     knitr (>= 1.40.0),
-    markdown (>= 1.1.0)
+    markdown (>= 1.1.0),
+    magrittr (>= 2.0.0)
 Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
