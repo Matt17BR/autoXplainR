@@ -145,17 +145,17 @@ plot_partial_dependence <- function(pdp_data,
   
   # Apply common layout
   if (show_legend) {
-    # Classification: legend at bottom, more bottom margin for legend
+    # Classification: legend at bottom, match regression "Top 3 Models" style
     p <- p %>%
       layout(
         title = list(text = title, font = list(size = 16)),
-        xaxis = list(title = feature_name),
+        xaxis = list(title = feature_name, titlefont = list(size = 9)),  # Match regression x-axis style
         yaxis = if (is.null(y_range)) {
           list(title = y_title)
         } else {
           list(title = y_title, range = y_range)
         },
-        margin = list(l = 50, r = 50, t = 50, b = 80),  # More bottom margin for legend
+        margin = list(l = 50, r = 50, t = 50, b = 50),  # Match regression margin
         height = height,
         width = width,
         showlegend = TRUE,
@@ -163,8 +163,9 @@ plot_partial_dependence <- function(pdp_data,
           orientation = "h",  # Horizontal legend
           x = 0.5,           # Center horizontally
           xanchor = "center",
-          y = -0.2,          # Position below plot
-          yanchor = "top"
+          y = -0.35,         # Position further down (match regression)
+          yanchor = "top",
+          font = list(size = 8)  # Match regression legend font size
         ),
         hovermode = "closest"
       ) %>%
