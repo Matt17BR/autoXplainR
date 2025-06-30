@@ -60,12 +60,16 @@ plot_permutation_importance <- function(importance_data,
 #' @param pdp_data Data.frame from calculate_partial_dependence()
 #' @param title Character. Plot title (default: auto-generated)
 #' @param color Character. Line color (default: "#A23B72")
+#' @param height Numeric. Plot height in pixels (default: 220)
+#' @param width Numeric. Plot width in pixels (default: 350)
 #' @return A plotly object
 #' @export
 #' @importFrom plotly plot_ly layout config add_trace
 plot_partial_dependence <- function(pdp_data,
                                    title = NULL,
-                                   color = "#A23B72") {
+                                   color = "#A23B72",
+                                   height = 220,
+                                   width = 350) {
   
   # Input validation
   if (!is.data.frame(pdp_data) || ncol(pdp_data) < 2) {
@@ -152,6 +156,8 @@ plot_partial_dependence <- function(pdp_data,
           list(title = y_title, range = y_range)
         },
         margin = list(l = 50, r = 50, t = 50, b = 80),  # More bottom margin for legend
+        height = height,
+        width = width,
         showlegend = TRUE,
         legend = list(
           orientation = "h",  # Horizontal legend
@@ -162,7 +168,7 @@ plot_partial_dependence <- function(pdp_data,
         ),
         hovermode = "closest"
       ) %>%
-      config(displayModeBar = FALSE)
+      config(displayModeBar = FALSE, responsive = TRUE)
   } else {
     # Regression: no legend, standard margins
     p <- p %>%
@@ -175,10 +181,12 @@ plot_partial_dependence <- function(pdp_data,
           list(title = y_title, range = y_range)
         },
         margin = list(l = 50, r = 50, t = 50, b = 50),
+        height = height,
+        width = width,
         showlegend = FALSE,
         hovermode = "closest"
       ) %>%
-      config(displayModeBar = FALSE)
+      config(displayModeBar = FALSE, responsive = TRUE)
   }
   
   return(p)
