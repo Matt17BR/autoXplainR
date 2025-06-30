@@ -195,7 +195,7 @@ If you encounter any issues or have questions:
 If you use AutoXplainR in your research, please cite:
 
 ```
-Mazzarelli, M. (2024). AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting. 
+Mazzarelli, M. (2025). AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting. 
 R package version 0.1.0. https://github.com/Matt17BR/AutoXplainR
 ```
 

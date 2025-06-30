@@ -4,11 +4,11 @@ citEntry(
   entry    = "Manual",
   title    = "AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting",
   author   = "Matteo Mazzarelli",
-  year     = "2024",
+  year     = "2025",
   note     = "R package version 0.1.0",
   url      = "https://github.com/Matt17BR/AutoXplainR",
   textVersion = paste(
-    "Mazzarelli, M. (2024).",
+    "Mazzarelli, M. (2025).",
     "AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting.",
     "R package version 0.1.0.",
     "https://github.com/Matt17BR/AutoXplainR"
