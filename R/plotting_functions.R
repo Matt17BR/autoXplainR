@@ -140,20 +140,46 @@ plot_partial_dependence <- function(pdp_data,
   }
   
   # Apply common layout
-  p <- p %>%
-    layout(
-      title = list(text = title, font = list(size = 16)),
-      xaxis = list(title = feature_name),
-      yaxis = if (is.null(y_range)) {
-        list(title = y_title)
-      } else {
-        list(title = y_title, range = y_range)
-      },
-      margin = list(l = 50, r = 50, t = 50, b = 50),
-      showlegend = show_legend,
-      hovermode = "closest"
-    ) %>%
-    config(displayModeBar = FALSE)
+  if (show_legend) {
+    # Classification: legend at bottom, more bottom margin for legend
+    p <- p %>%
+      layout(
+        title = list(text = title, font = list(size = 16)),
+        xaxis = list(title = feature_name),
+        yaxis = if (is.null(y_range)) {
+          list(title = y_title)
+        } else {
+          list(title = y_title, range = y_range)
+        },
+        margin = list(l = 50, r = 50, t = 50, b = 80),  # More bottom margin for legend
+        showlegend = TRUE,
+        legend = list(
+          orientation = "h",  # Horizontal legend
+          x = 0.5,           # Center horizontally
+          xanchor = "center",
+          y = -0.2,          # Position below plot
+          yanchor = "top"
+        ),
+        hovermode = "closest"
+      ) %>%
+      config(displayModeBar = FALSE)
+  } else {
+    # Regression: no legend, standard margins
+    p <- p %>%
+      layout(
+        title = list(text = title, font = list(size = 16)),
+        xaxis = list(title = feature_name),
+        yaxis = if (is.null(y_range)) {
+          list(title = y_title)
+        } else {
+          list(title = y_title, range = y_range)
+        },
+        margin = list(l = 50, r = 50, t = 50, b = 50),
+        showlegend = FALSE,
+        hovermode = "closest"
+      ) %>%
+      config(displayModeBar = FALSE)
+  }
   
   return(p)
 }
