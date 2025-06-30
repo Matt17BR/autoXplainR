@@ -333,6 +333,7 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
     sample_target <- autoxplain_result$training_data[[target_col]]
     is_classification <- !is.numeric(sample_target)
     
+    
     # Collect predictions and performance
     model_data <- list()
     for (i in seq_along(models)) {
@@ -355,14 +356,21 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
         
         # Extract appropriate prediction values for correlation analysis
         if (is_classification) {
-          # For classification: use probabilities, not class labels
+          # For classification: store the complete probability matrix for each model
+          # We'll compute correlations between these matrices later
           if (ncol(pred) > 2) {
-            # Multi-class: exclude the "predict" column (which contains class labels)
-            # Use the first actual probability column (numeric columns that aren't "predict")
+            # Multi-class: exclude the "predict" column and get all probability columns
             all_cols <- colnames(pred)
             prob_cols <- all_cols[all_cols != "predict"]  # All columns except "predict"
+            prob_cols <- sort(prob_cols)  # Ensure consistent ordering across models
+            
             if (length(prob_cols) > 0) {
-              pred_values <- as.vector(pred[, prob_cols[1]])  # First probability column
+              # Store the complete probability matrix for this model
+              prob_matrix <- matrix(nrow = nrow(pred), ncol = length(prob_cols))
+              for (j in seq_along(prob_cols)) {
+                prob_matrix[, j] <- as.vector(pred[, prob_cols[j]])
+              }
+              pred_values <- prob_matrix  # Store the full matrix
             } else {
               pred_values <- as.vector(pred[, 2])  # Fallback to second column
             }
@@ -477,19 +485,39 @@ create_clean_correlation_heatmap <- function(model_data, is_classification) {
       
       # Calculate correlation with robust error handling
       correlation <- tryCatch({
-        pred1 <- as.numeric(model_data[[model1]]$predictions)
-        pred2 <- as.numeric(model_data[[model2]]$predictions)
+        pred1 <- model_data[[model1]]$predictions
+        pred2 <- model_data[[model2]]$predictions
         
-        if (length(pred1) == length(pred2) && length(pred1) > 0) {
-          # Use Pearson correlation for both classification (probabilities) and regression
-          corr_val <- cor(pred1, pred2, use = "complete.obs")
-          if (is.numeric(corr_val) && !is.na(corr_val)) {
-            corr_val  # Keep actual correlation (can be negative)
+        # Handle different prediction types (vectors for regression, matrices for classification)
+        if (is.matrix(pred1) && is.matrix(pred2)) {
+          # Classification: compute correlation between flattened probability matrices
+          if (nrow(pred1) == nrow(pred2) && ncol(pred1) == ncol(pred2)) {
+            flat1 <- as.vector(pred1)
+            flat2 <- as.vector(pred2)
+            corr_val <- cor(flat1, flat2, use = "complete.obs")
+            if (is.numeric(corr_val) && !is.na(corr_val)) {
+              corr_val
+            } else {
+              NA
+            }
           } else {
-            NA  # Return NA instead of fake fallback
+            NA  # Incompatible matrix dimensions
           }
         } else {
-          NA  # Return NA for invalid data
+          # Regression: convert to numeric vectors and correlate
+          pred1_vec <- as.numeric(pred1)
+          pred2_vec <- as.numeric(pred2)
+          
+          if (length(pred1_vec) == length(pred2_vec) && length(pred1_vec) > 0) {
+            corr_val <- cor(pred1_vec, pred2_vec, use = "complete.obs")
+            if (is.numeric(corr_val) && !is.na(corr_val)) {
+              corr_val
+            } else {
+              NA
+            }
+          } else {
+            NA
+          }
         }
       }, error = function(e) {
         NA  # Return NA on error instead of fake value
