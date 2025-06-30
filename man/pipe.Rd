@@ -4,6 +4,10 @@
 \alias{\%>\%}
 \title{Pipe operator}
 \description{
-Re-export of magrittr's pipe operator
+Re-export of magrittr's pipe operator to ensure availability in user sessions
+}
+\examples{
+# The pipe operator is available after loading AutoXplainR
+1:5 \%>\% sum()
 }
 \keyword{internal}

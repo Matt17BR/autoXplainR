@@ -49,10 +49,23 @@ NULL
 
 #' Pipe operator
 #'
-#' Re-export of magrittr's pipe operator
+#' Re-export of magrittr's pipe operator to ensure availability in user sessions
 #' @importFrom magrittr %>%
 #' @export
 #' @rdname pipe
 #' @name %>%
 #' @keywords internal
+#' @examples
+#' # The pipe operator is available after loading AutoXplainR
+#' 1:5 %>% sum()
 NULL
+
+# Additional pipe export to ensure availability
+#' @export
+magrittr::`%>%`
+
+# Package loading hook to ensure magrittr is available
+.onLoad <- function(libname, pkgname) {
+  # Ensure magrittr namespace is loaded when AutoXplainR is loaded
+  requireNamespace("magrittr", quietly = TRUE)
+}
