@@ -1,7 +1,7 @@
 Package: AutoXplainR
 Type: Package
 Title: Automated Machine Learning Explanation and Comparative Reporting
-Version: 0.1.0
+Version: 0.1.1
 Author: Matteo Mazzarelli
 Maintainer: Matteo Mazzarelli <matteo.mazzarelli@gmail.com>
 Description: Provides an efficient, automated, and standardized method for machine learning practitioners to generate comparative model explanations from Automated Machine Learning (AutoML) outputs. Generates clear reports suitable for communicating model behavior to diverse audiences.
