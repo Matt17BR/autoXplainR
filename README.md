@@ -48,12 +48,12 @@ library(AutoXplainR)
 
 ```r
 # Basic usage
-data(iris)
-result <- autoxplain(iris, "Species", max_models = 5, max_runtime_secs = 300)
+data(mtcars)
+result <- autoxplain(mtcars, "mpg", max_models = 5, max_runtime_secs = 300)
 
 # Generate explanations
-importance <- calculate_permutation_importance(result$models[[1]], iris, "Species")
-pdp_data <- calculate_partial_dependence_multi(result$models[[1]], iris, c("Petal.Length", "Sepal.Width"))
+importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
+pdp_data <- calculate_partial_dependence_multi(result$models[[1]], mtcars, c("wt", "hp"))
 
 # Create visualizations
 plot_permutation_importance(importance)

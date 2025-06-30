@@ -29,7 +29,7 @@ model complexity metrics, and algorithm-specific details for AutoML comparison.
 }
 \examples{
 \dontrun{
-result <- autoxplain(iris, "Species", max_models = 3)
+result <- autoxplain(mtcars, "mpg", max_models = 3)
 model_details <- extract_model_characteristics(result)
 print(model_details)
 }

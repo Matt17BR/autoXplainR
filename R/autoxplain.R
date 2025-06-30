@@ -13,8 +13,8 @@
 #' @importFrom h2o h2o.init h2o.automl as.h2o h2o.getModel
 #' @examples
 #' \dontrun{
-#' data(iris)
-#' result <- autoxplain(iris, "Species", max_models = 3)
+#' data(mtcars)
+#' result <- autoxplain(mtcars, "mpg", max_models = 3)
 #' }
 autoxplain <- function(data, 
                       target_column, 

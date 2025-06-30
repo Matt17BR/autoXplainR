@@ -38,11 +38,11 @@ The package generates clear reports suitable for communicating model behavior to
 library(AutoXplainR)
 
 # Run AutoML analysis
-data(iris)
-result <- autoxplain(iris, "Species", max_models = 3)
+data(mtcars)
+result <- autoxplain(mtcars, "mpg", max_models = 3)
 
 # Generate explanations
-importance <- calculate_permutation_importance(result$models[[1]], iris, "Species")
+importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
 
 # Create dashboard
 generate_dashboard(result, "analysis_dashboard.html")

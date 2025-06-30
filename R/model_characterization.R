@@ -12,7 +12,7 @@
 #' @importFrom h2o h2o.varimp
 #' @examples
 #' \dontrun{
-#' result <- autoxplain(iris, "Species", max_models = 3)
+#' result <- autoxplain(mtcars, "mpg", max_models = 3)
 #' model_details <- extract_model_characteristics(result)
 #' print(model_details)
 #' }
