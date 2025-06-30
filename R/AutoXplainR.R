@@ -46,3 +46,13 @@
 #' @keywords package
 #' @importFrom magrittr %>%
 NULL
+
+#' Pipe operator
+#'
+#' Re-export of magrittr's pipe operator
+#' @importFrom magrittr %>%
+#' @export
+#' @rdname pipe
+#' @name %>%
+#' @keywords internal
+NULL

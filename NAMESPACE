@@ -2,6 +2,7 @@
 
 S3method(print,autoxplainr_model_characteristics)
 S3method(summary,autoxplainr_model_characteristics)
+export("%>%")
 export(autoxplain)
 export(calculate_partial_dependence)
 export(calculate_partial_dependence_multi)
