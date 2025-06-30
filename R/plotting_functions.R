@@ -357,8 +357,10 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
         if (is_classification) {
           # For classification: use probabilities, not class labels
           if (ncol(pred) > 2) {
-            # Multi-class: use probability of most frequent class
-            prob_cols <- grep("^p", colnames(pred), value = TRUE)
+            # Multi-class: exclude the "predict" column (which contains class labels)
+            # Use the first actual probability column (numeric columns that aren't "predict")
+            all_cols <- colnames(pred)
+            prob_cols <- all_cols[all_cols != "predict"]  # All columns except "predict"
             if (length(prob_cols) > 0) {
               pred_values <- as.vector(pred[, prob_cols[1]])  # First probability column
             } else {
