@@ -8,14 +8,16 @@
 #' @param feature Character. Name of the feature to calculate PDP for
 #' @param n_points Integer. Number of points to evaluate along the feature range (default: 50)
 #' @param quantile_range Numeric vector of length 2. Quantile range to evaluate (default: c(0.05, 0.95))
-#' @return A data.frame with feature values and corresponding partial dependence values
+#' @param return_all_classes Logical. For classification, return probabilities for all classes (default: FALSE)
+#' @return A data.frame with feature values and partial dependence values (single column for regression, multiple columns for multi-class when return_all_classes=TRUE)
 #' @export
 #' @importFrom h2o as.h2o h2o.predict
 calculate_partial_dependence <- function(model, 
                                        data, 
                                        feature, 
                                        n_points = 50,
-                                       quantile_range = c(0.05, 0.95)) {
+                                       quantile_range = c(0.05, 0.95),
+                                       return_all_classes = FALSE) {
   
   # Input validation
   if (!is.data.frame(data)) {
@@ -50,7 +52,11 @@ calculate_partial_dependence <- function(model,
   }
   
   # Calculate partial dependence for each feature value
-  pdp_values <- numeric(length(feature_values))
+  pdp_values <- if (return_all_classes) {
+    list()  # Will store class probabilities for each feature value
+  } else {
+    numeric(length(feature_values))  # Single value per feature value
+  }
   
   for (i in seq_along(feature_values)) {
     # Create modified dataset where all instances have the same feature value
@@ -66,44 +72,71 @@ calculate_partial_dependence <- function(model,
       # Regression: single prediction column
       avg_pred <- mean(as.vector(predictions$predict))
     } else {
-      # Classification: multiple columns, use predicted probabilities or classes
-      if ("predict" %in% colnames(predictions)) {
-        # Use the main prediction column for classification
-        if (is.numeric(as.vector(predictions$predict))) {
-          # Numeric predictions (e.g., binary classification probabilities)
-          avg_pred <- mean(as.vector(predictions$predict))
+      # Classification: use predicted probabilities
+      # H2O returns columns: "predict" (class), and one column per class with probabilities
+      prob_cols <- setdiff(colnames(predictions), "predict")
+      
+      if (length(prob_cols) > 0) {
+        if (return_all_classes) {
+          # Return probabilities for all classes
+          class_probs <- sapply(prob_cols, function(class_name) {
+            mean(as.vector(predictions[[class_name]]))
+          })
+          avg_pred <- class_probs
         } else {
-          # Categorical predictions - convert to numeric representation
-          pred_values <- as.vector(predictions$predict)
-          avg_pred <- mean(as.numeric(as.factor(pred_values)))
+          # Original behavior - return single class probability
+          if (length(prob_cols) == 2) {
+            # Binary classification - use last column (typically positive class)
+            positive_class_col <- prob_cols[length(prob_cols)]
+            avg_pred <- mean(as.vector(predictions[[positive_class_col]]))
+          } else {
+            # Multi-class - average probability of first class
+            avg_pred <- mean(as.vector(predictions[[prob_cols[1]]]))
+          }
         }
       } else {
-        # Multi-class: use first probability column or handle appropriately
-        prob_cols <- grep("^p[0-9]+", colnames(predictions))
-        if (length(prob_cols) > 0) {
-          avg_pred <- mean(as.vector(predictions[[prob_cols[1]]]))
-        } else {
-          stop("Unable to determine prediction values from model output")
-        }
+        stop("Unable to find probability predictions in model output. Expected probability columns in H2O predictions.")
       }
     }
     
-    pdp_values[i] <- avg_pred
+    if (return_all_classes && is.numeric(avg_pred) && length(avg_pred) > 1) {
+      # Store class probabilities for each feature value
+      pdp_values[[i]] <- avg_pred
+    } else {
+      # Store single value
+      pdp_values[i] <- avg_pred
+    }
   }
   
   # Create result data frame
-  result <- data.frame(
-    feature_value = feature_values,
-    partial_dependence = pdp_values,
-    stringsAsFactors = FALSE
-  )
-  
-  names(result)[1] <- feature  # Name the first column after the feature
+  if (return_all_classes && is.list(pdp_values)) {
+    # Multi-class case: create columns for each class
+    class_names <- names(pdp_values[[1]])
+    result <- data.frame(feature_value = feature_values, stringsAsFactors = FALSE)
+    names(result)[1] <- feature
+    
+    # Add a column for each class
+    for (class_name in class_names) {
+      result[[paste0("prob_", class_name)]] <- sapply(pdp_values, function(x) x[class_name])
+    }
+  } else {
+    # Single value case (regression or single class)
+    result <- data.frame(
+      feature_value = feature_values,
+      partial_dependence = pdp_values,
+      stringsAsFactors = FALSE
+    )
+    names(result)[1] <- feature  # Name the first column after the feature
+  }
   
   # Add metadata
   attr(result, "feature") <- feature
   attr(result, "n_points") <- n_points
   attr(result, "quantile_range") <- quantile_range
+  attr(result, "return_all_classes") <- return_all_classes
+  if (return_all_classes && is.list(pdp_values)) {
+    attr(result, "class_names") <- names(pdp_values[[1]])
+  }
   # Add data range (only for numeric features)
   if (is.numeric(data[[feature]])) {
     attr(result, "data_range") <- range(data[[feature]], na.rm = TRUE)
@@ -123,13 +156,15 @@ calculate_partial_dependence <- function(model,
 #' @param features Character vector. Names of features to calculate PDP for
 #' @param n_points Integer. Number of points to evaluate along each feature range (default: 50)
 #' @param quantile_range Numeric vector of length 2. Quantile range to evaluate (default: c(0.05, 0.95))
+#' @param return_all_classes Logical. For classification, return probabilities for all classes (default: FALSE)
 #' @return A named list of data.frames, one for each feature
 #' @export
 calculate_partial_dependence_multi <- function(model, 
                                              data, 
                                              features, 
                                              n_points = 50,
-                                             quantile_range = c(0.05, 0.95)) {
+                                             quantile_range = c(0.05, 0.95),
+                                             return_all_classes = FALSE) {
   
   if (!is.character(features) || length(features) == 0) {
     stop("features must be a non-empty character vector")
@@ -151,7 +186,8 @@ calculate_partial_dependence_multi <- function(model,
       data = data,
       feature = feature,
       n_points = n_points,
-      quantile_range = quantile_range
+      quantile_range = quantile_range,
+      return_all_classes = return_all_classes
     )
   }
   

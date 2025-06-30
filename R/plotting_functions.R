@@ -68,39 +68,89 @@ plot_partial_dependence <- function(pdp_data,
                                    color = "#A23B72") {
   
   # Input validation
-  if (!is.data.frame(pdp_data) || ncol(pdp_data) != 2) {
-    stop("pdp_data must be a data.frame with exactly 2 columns")
+  if (!is.data.frame(pdp_data) || ncol(pdp_data) < 2) {
+    stop("pdp_data must be a data.frame with at least 2 columns")
   }
   
   feature_name <- colnames(pdp_data)[1]
+  
+  # Check if this is multi-class PDP (has prob_* columns)
+  prob_cols <- grep("^prob_", colnames(pdp_data), value = TRUE)
+  is_multiclass <- length(prob_cols) > 0
+  
   if (is.null(title)) {
-    title <- paste("Partial Dependence Plot -", feature_name)
+    if (is_multiclass) {
+      title <- paste("Class Probabilities vs", feature_name)
+    } else {
+      title <- paste("Partial Dependence Plot -", feature_name)
+    }
   }
   
-  # Create hover text
-  hover_text <- paste0(
-    "<b>", feature_name, "</b>: ", pdp_data[[1]], "<br>",
-    "<b>Partial Dependence</b>: ", round(pdp_data$partial_dependence, 4)
-  )
+  if (is_multiclass) {
+    # Multi-class PDP: create multiple lines
+    p <- plot_ly()
+    
+    # Define colors for different classes
+    class_colors <- c("#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6", "#1abc9c")
+    
+    for (i in seq_along(prob_cols)) {
+      class_name <- gsub("^prob_", "", prob_cols[i])
+      p <- p %>% add_trace(
+        x = pdp_data[[feature_name]],
+        y = pdp_data[[prob_cols[i]]],
+        type = "scatter",
+        mode = "lines+markers",
+        name = paste0("P(", class_name, ")"),
+        line = list(color = class_colors[i %% length(class_colors) + 1], width = 3),
+        marker = list(color = class_colors[i %% length(class_colors) + 1], size = 6),
+        hovertemplate = paste0(
+          "<b>P(", class_name, ")</b><br>",
+          feature_name, ": %{x}<br>",
+          "Probability: %{y:.3f}<extra></extra>"
+        )
+      )
+    }
+    
+    y_title <- "Class Probability"
+    y_range <- c(0, 1)
+    show_legend <- TRUE
+    
+  } else {
+    # Single value PDP: original behavior
+    hover_text <- paste0(
+      "<b>", feature_name, "</b>: ", pdp_data[[1]], "<br>",
+      "<b>Partial Dependence</b>: ", round(pdp_data$partial_dependence, 4)
+    )
+    
+    p <- plot_ly(
+      data = pdp_data,
+      x = ~get(feature_name),
+      y = ~partial_dependence,
+      type = "scatter",
+      mode = "lines+markers",
+      line = list(color = color, width = 3),
+      marker = list(color = color, size = 6),
+      hovertemplate = hover_text,
+      name = "Partial Dependence"
+    )
+    
+    y_title <- "Partial Dependence"
+    y_range <- NULL
+    show_legend <- FALSE
+  }
   
-  # Create line plot
-  p <- plot_ly(
-    data = pdp_data,
-    x = ~get(feature_name),
-    y = ~partial_dependence,
-    type = "scatter",
-    mode = "lines+markers",
-    line = list(color = color, width = 3),
-    marker = list(color = color, size = 6),
-    hovertemplate = hover_text,
-    name = "Partial Dependence"
-  ) %>%
+  # Apply common layout
+  p <- p %>%
     layout(
       title = list(text = title, font = list(size = 16)),
       xaxis = list(title = feature_name),
-      yaxis = list(title = "Partial Dependence"),
+      yaxis = if (is.null(y_range)) {
+        list(title = y_title)
+      } else {
+        list(title = y_title, range = y_range)
+      },
       margin = list(l = 50, r = 50, t = 50, b = 50),
-      showlegend = FALSE,
+      showlegend = show_legend,
       hovermode = "closest"
     ) %>%
     config(displayModeBar = FALSE)
