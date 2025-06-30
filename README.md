@@ -34,7 +34,7 @@ if (!require(h2o)) {
 }
 ```
 
-### From GitHub (Recommended)
+### From GitHub
 
 ```r
 # Install from GitHub
