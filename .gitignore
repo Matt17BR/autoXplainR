@@ -90,6 +90,9 @@ CLAUDE.md
 *.gif
 *.svg
 
+# Exception: Track screenshots for README
+!screenshots/*.png
+
 # Development and test files
 test_*.R
 debug_*.R
@@ -108,3 +111,6 @@ classification/
 # Backup files
 *_backup.*
 *.bak
+
+# Script to run on all datasets
+run_all_datasets.R

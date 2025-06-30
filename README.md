@@ -8,15 +8,24 @@ An R package for automated machine learning explanation and comparative reportin
 
 🔗 **Repository**: [https://github.com/Matt17BR/AutoXplainR](https://github.com/Matt17BR/AutoXplainR)
 
-## Key Features
+## 📊 Dashboard Preview
 
-- **Automated ML Pipeline**: Seamless integration with H2O AutoML
-- **Custom Explanations**: Permutation importance and partial dependence plots implemented from scratch
-- **Interactive Visualizations**: Custom plotly-based plots for all explanation types
-- **Comparative Analysis**: Side-by-side model comparison and explanation
-- **Natural Language Reports**: LLM-generated summaries using Google Generative AI
-- **HTML Dashboards**: Comprehensive interactive dashboards using flexdashboard
-- **Self-Reliant**: No dependencies on existing XAI packages like DALEX or iml
+AutoXplainR generates comprehensive interactive dashboards that make machine learning models interpretable and actionable:
+
+<div align="center">
+  <img src="screenshots/1-overview.png" alt="Dashboard Overview" width="800">
+  <p><em>Main dashboard showing model performance overview and key insights</em></p>
+</div>
+
+## ✨ Key Features
+
+- 🤖 **Automated ML Pipeline**: Seamless integration with H2O AutoML
+- 🔍 **Custom Explanations**: Permutation importance and partial dependence plots implemented from scratch
+- 📊 **Interactive Visualizations**: Custom plotly-based plots for all explanation types
+- 🔬 **Comparative Analysis**: Side-by-side model comparison and explanation
+- 🧠 **Natural Language Reports**: LLM-generated summaries using Google Generative AI
+- 📈 **HTML Dashboards**: Comprehensive interactive dashboards using flexdashboard
+- 🎯 **Self-Reliant**: No dependencies on existing XAI packages like DALEX or iml
 
 ## Installation
 
@@ -78,16 +87,31 @@ generate_dashboard(result, "my_dashboard.html")
 - `calculate_partial_dependence()`: Partial dependence for single features
 - `calculate_partial_dependence_multi()`: Partial dependence for multiple features
 
+<div align="center">
+  <img src="screenshots/2-pdp.png" alt="Partial Dependence Plots" width="750">
+  <p><em>Interactive partial dependence plots showing feature effects on predictions</em></p>
+</div>
+
 ### Visualization
 - `plot_permutation_importance()`: Interactive importance bar charts
 - `plot_partial_dependence()`: Interactive PDP line plots
 - `plot_partial_dependence_multi()`: Multi-feature PDP subplots
 - `plot_model_comparison()`: Model performance scatter plots
 
+<div align="center">
+  <img src="screenshots/3-correlations.png" alt="Model Correlations" width="750">
+  <p><em>Model correlation analysis revealing ensemble diversity and prediction agreement</em></p>
+</div>
+
 ### Dashboard & Reporting
 - `generate_dashboard()`: Comprehensive HTML dashboard with flexdashboard
 - `create_simple_dashboard()`: Lightweight HTML dashboard
 - `generate_natural_language_report()`: LLM-powered report generation
+
+<div align="center">
+  <img src="screenshots/4-characteristics.png" alt="Model Characteristics" width="750">
+  <p><em>Detailed model characteristics and performance metrics for informed model selection</em></p>
+</div>
 
 ## Example Workflow
 
@@ -134,6 +158,37 @@ AutoXplainR follows a modular architecture:
 3. **Visualization Engine**: Interactive plotly-based charts
 4. **Reporting Engine**: Dashboard generation and LLM integration
 5. **Testing Suite**: Comprehensive test coverage
+
+## 🖼️ Visual Gallery
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="screenshots/1-overview.png" alt="Overview" width="350"><br>
+        <strong>📊 Dashboard Overview</strong><br>
+        <em>Performance metrics & insights</em>
+      </td>
+      <td align="center">
+        <img src="screenshots/2-pdp.png" alt="PDP" width="350"><br>
+        <strong>📈 Feature Effects</strong><br>
+        <em>Partial dependence analysis</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="screenshots/3-correlations.png" alt="Correlations" width="350"><br>
+        <strong>🔗 Model Correlations</strong><br>
+        <em>Ensemble diversity analysis</em>
+      </td>
+      <td align="center">
+        <img src="screenshots/4-characteristics.png" alt="Characteristics" width="350"><br>
+        <strong>🎯 Model Details</strong><br>
+        <em>Performance & characteristics</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## Dependencies
 
