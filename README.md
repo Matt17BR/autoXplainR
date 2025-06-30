@@ -20,16 +20,6 @@ An R package for automated machine learning explanation and comparative reportin
 
 ## Installation
 
-### From GitHub (Recommended)
-
-```r
-# Install from GitHub
-devtools::install_github("Matt17BR/AutoXplainR")
-
-# Load the package
-library(AutoXplainR)
-```
-
 ### Prerequisites
 
 Ensure you have the required dependencies installed:
@@ -42,6 +32,16 @@ if (!require(devtools)) install.packages("devtools")
 if (!require(h2o)) {
   install.packages("h2o")
 }
+```
+
+### From GitHub (Recommended)
+
+```r
+# Install from GitHub
+devtools::install_github("Matt17BR/AutoXplainR")
+
+# Load the package
+library(AutoXplainR)
 ```
 
 ## Quick Start
