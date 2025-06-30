@@ -743,18 +743,40 @@ plot_model_comparison <- function(autoxplain_result,
   
   # Auto-detect performance metric if not specified
   if (is.null(performance_metric)) {
+    # Determine if this is classification or regression
+    target_col <- autoxplain_result$target_column
+    sample_target <- autoxplain_result$training_data[[target_col]]
+    is_classification <- !is.numeric(sample_target)
+    
     # Check available metrics in leaderboard
     available_metrics <- colnames(leaderboard)
-    if ("auc" %in% available_metrics) {
-      performance_metric <- "auc"
-    } else if ("rmse" %in% available_metrics) {
-      performance_metric <- "rmse"
-    } else if ("logloss" %in% available_metrics) {
-      performance_metric <- "logloss"
+    
+    if (is_classification) {
+      # Classification: prefer classification-specific metrics
+      if ("auc" %in% available_metrics) {
+        performance_metric <- "auc"
+      } else if ("logloss" %in% available_metrics) {
+        performance_metric <- "logloss"
+      } else if ("mean_per_class_error" %in% available_metrics) {
+        performance_metric <- "mean_per_class_error"
+      } else {
+        # Fallback: use first numeric column after model_id
+        numeric_cols <- sapply(leaderboard, is.numeric)
+        performance_metric <- names(numeric_cols)[numeric_cols][1]
+      }
     } else {
-      # Use first numeric column after model_id
-      numeric_cols <- sapply(leaderboard, is.numeric)
-      performance_metric <- names(numeric_cols)[numeric_cols][1]
+      # Regression: prefer regression-specific metrics
+      if ("rmse" %in% available_metrics) {
+        performance_metric <- "rmse"
+      } else if ("mae" %in% available_metrics) {
+        performance_metric <- "mae"
+      } else if ("mse" %in% available_metrics) {
+        performance_metric <- "mse"
+      } else {
+        # Fallback: use first numeric column after model_id
+        numeric_cols <- sapply(leaderboard, is.numeric)
+        performance_metric <- names(numeric_cols)[numeric_cols][1]
+      }
     }
   }
   
