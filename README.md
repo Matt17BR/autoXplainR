@@ -64,10 +64,6 @@ generate_natural_language_report(result, api_key = "your_api_key_here")
 data(mtcars)
 result <- autoxplain(mtcars, "mpg", max_models = 10, max_runtime_secs = 120)
 
-# Generate explanations
-importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
-pdp_data <- calculate_partial_dependence_multi(result$models[[1]], mtcars, c("wt", "hp"))
-
 # Generate comprehensive dashboard
 generate_dashboard(result, "my_dashboard.html")
 ```
@@ -108,7 +104,11 @@ importance <- calculate_permutation_importance(model, mtcars, "mpg")
 top_features <- head(importance$feature, 3)
 pdp_data <- calculate_partial_dependence_multi(model, mtcars, top_features)
 
-# 3. Generate comprehensive dashboard
+# 3. Generate explanations for a specific model or variables
+importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
+pdp_data <- calculate_partial_dependence_multi(result$models[[1]], mtcars, c("wt", "hp"))
+
+# 4. Generate comprehensive dashboard
 generate_dashboard(
   result, 
   output_file = "mtcars_analysis.html",
@@ -117,7 +117,7 @@ generate_dashboard(
   include_llm_report = TRUE
 )
 
-# 4. Create individual plots
+# 5. Create individual plots
 plot_model_comparison(result)
 plot_permutation_importance(importance)
 plot_partial_dependence_multi(pdp_data)
