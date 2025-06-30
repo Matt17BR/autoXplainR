@@ -504,6 +504,7 @@ create_dashboard_rmd <- function(data_files) {
     "library(plotly)",
     "library(DT)",
     "library(knitr)",
+    "library(magrittr)",
     "library(AutoXplainR)",
     "knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)",
     "",
