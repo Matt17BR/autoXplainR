@@ -30,16 +30,6 @@ devtools::install_github("Matt17BR/AutoXplainR")
 library(AutoXplainR)
 ```
 
-### From Source
-
-```r
-# Download and install from local source
-devtools::install_local("path/to/autoxplainr")
-
-# Load the package
-library(AutoXplainR)
-```
-
 ### Prerequisites
 
 Ensure you have the required dependencies installed:
@@ -169,42 +159,8 @@ AutoXplainR follows a modular architecture:
 - DT (>= 0.20.0)
 - testthat (>= 3.0.0)
 
-## Development
-
-This package was developed following rigorous engineering practices:
-- Comprehensive testing after each component implementation
-- Custom explanations implemented from scratch
-- Extensive input validation and error handling
-- Modular, extensible architecture
-- Complete documentation with examples and vignettes
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-## Issues and Support
-
-If you encounter any issues or have questions:
-
-1. Check the [package vignette](vignettes/autoxplainr-introduction.Rmd) for detailed usage examples
-2. Search existing [GitHub Issues](https://github.com/Matt17BR/AutoXplainR/issues)
-3. Create a new issue with a reproducible example
-
-## Citation
-
-If you use AutoXplainR in your research, please cite:
-
-```
-Mazzarelli, M. (2025). AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting. 
-R package version 0.1.0. https://github.com/Matt17BR/AutoXplainR
-```
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Author
-
-**Matteo Mazzarelli**  
-📧 matteo.mazzarelli@gmail.com  
-🐙 [GitHub Profile](https://github.com/Matt17BR)
