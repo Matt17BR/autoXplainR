@@ -1,0 +1,364 @@
+---
+title: "Introduction to AutoXplainR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to AutoXplainR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  eval = FALSE
+)
+```
+
+```{r setup}
+library(AutoXplainR)
+```
+
+## Overview
+
+AutoXplainR provides an efficient, automated, and standardized method for machine learning practitioners to generate comparative model explanations from AutoML outputs. The package integrates seamlessly with H2O AutoML and provides custom implementations of key explainability methods, all wrapped in an intuitive interface.
+
+## Key Features
+
+- **Automated ML Pipeline**: Leverages H2O AutoML for diverse model generation
+- **Custom Explainability Suite**: Implements permutation importance and partial dependence from scratch
+- **Interactive Visualizations**: Creates publication-ready plots using plotly
+- **Comparative Analysis**: Enables side-by-side model comparison
+- **Natural Language Reports**: Generates accessible summaries using LLMs
+- **HTML Dashboards**: Produces comprehensive reports using flexdashboard
+
+## Installation
+
+```{r, eval = FALSE}
+# Install from local source
+devtools::install_local("path/to/autoxplainr")
+
+# Load the package
+library(AutoXplainR)
+```
+
+## Quick Start
+
+### Basic Usage
+
+The main entry point is the `autoxplain()` function, which handles the entire AutoML pipeline:
+
+```{r basic-usage}
+# Load sample data
+data_path <- system.file("extdata", "breast-cancer.csv", package = "AutoXplainR")
+breast_cancer <- read.csv(data_path, stringsAsFactors = FALSE)
+
+# Run AutoML with explanations
+result <- autoxplain(
+  data = breast_cancer,
+  target_column = "diagnosis",
+  max_models = 5,
+  max_runtime_secs = 300,
+  seed = 42
+)
+
+# View the results
+summary(result)
+```
+
+### Understanding the Results
+
+The `autoxplain()` function returns a comprehensive result object containing:
+
+- **models**: List of trained H2O models
+- **leaderboard**: Model performance rankings
+- **training_data**: The processed training data
+- **target_column**: Name of the target variable
+- **model_characteristics**: Detailed model metadata
+
+## Generating Explanations
+
+### Permutation Feature Importance
+
+Understand which features are most important for model predictions:
+
+```{r permutation-importance}
+# Calculate importance for the best model
+best_model <- result$models[[1]]
+importance <- calculate_permutation_importance(
+  model = best_model,
+  data = breast_cancer,
+  target_column = "diagnosis",
+  n_repeats = 10,
+  metric = "auto"
+)
+
+# Visualize the results
+plot_permutation_importance(
+  importance_data = importance,
+  title = "Feature Importance - Best Model",
+  max_features = 10
+)
+```
+
+### Partial Dependence Plots
+
+Examine how features affect predictions:
+
+```{r partial-dependence}
+# Single feature PDP
+pdp_single <- calculate_partial_dependence(
+  model = best_model,
+  data = breast_cancer,
+  feature = "radius_mean",
+  grid_size = 20
+)
+
+plot_partial_dependence(
+  pdp_data = pdp_single,
+  title = "Effect of Radius Mean on Diagnosis"
+)
+
+# Multiple features
+top_features <- head(importance$feature, 4)
+pdp_multi <- calculate_partial_dependence_multi(
+  model = best_model,
+  data = breast_cancer,
+  features = top_features
+)
+
+plot_partial_dependence_multi(
+  pdp_list = pdp_multi,
+  title = "Top Feature Effects"
+)
+```
+
+## Comparative Analysis
+
+### Model Correlation Analysis
+
+Understand how different models relate to each other:
+
+```{r model-correlation}
+# Create correlation heatmap
+plot_model_correlations(
+  autoxplain_result = result,
+  test_data = NULL  # Uses training data
+)
+```
+
+### Performance vs Complexity
+
+Compare models based on their trade-offs:
+
+```{r model-comparison}
+plot_model_comparison(
+  autoxplain_result = result,
+  performance_metric = "auc",
+  complexity_metric = "model_size"
+)
+```
+
+## Dashboard Generation
+
+### Comprehensive Dashboard
+
+Generate a full HTML report with all analyses:
+
+```{r dashboard-full}
+# With LLM-powered insights (requires GEMINI_API_KEY)
+Sys.setenv(GEMINI_API_KEY = "your_api_key_here")
+
+dashboard_path <- generate_dashboard(
+  autoxplain_result = result,
+  output_file = "breast_cancer_analysis.html",
+  top_features = 5,
+  include_llm_report = TRUE,
+  open_browser = TRUE
+)
+```
+
+### Simple Dashboard
+
+For a lightweight alternative:
+
+```{r dashboard-simple}
+simple_dashboard <- create_simple_dashboard(
+  autoxplain_result = result,
+  output_file = "breast_cancer_simple.html"
+)
+```
+
+## Working with Different Data Types
+
+### Regression Example
+
+```{r regression-example}
+# Load housing data
+housing_path <- system.file("extdata", "california-housing.csv", 
+                           package = "AutoXplainR")
+housing <- read.csv(housing_path, stringsAsFactors = FALSE)
+
+# Subset for faster processing
+housing_sample <- housing[sample(nrow(housing), 1000), ]
+
+# Run AutoML for regression
+housing_result <- autoxplain(
+  data = housing_sample,
+  target_column = "median_house_value",
+  max_models = 3,
+  max_runtime_secs = 180
+)
+
+# Generate explanations
+importance_reg <- calculate_permutation_importance(
+  model = housing_result$models[[1]],
+  data = housing_sample,
+  target_column = "median_house_value"
+)
+
+plot_permutation_importance(importance_reg)
+```
+
+### Handling Missing Data
+
+AutoXplainR automatically handles common data issues:
+
+```{r missing-data}
+# The package preprocesses data automatically
+# - Converts character columns to factors
+# - Handles ordered factors appropriately
+# - Removes ID-like columns
+# - Manages missing values
+
+# You can also use the preprocessing function directly
+processed <- preprocess_for_h2o(
+  data = your_data,
+  target_column = "target",
+  preprocessing_config = list(
+    handle_missing = TRUE,
+    convert_characters = TRUE,
+    remove_id_columns = TRUE
+  )
+)
+```
+
+## Advanced Usage
+
+### Custom Model Analysis
+
+```{r custom-analysis}
+# Extract detailed model characteristics
+model_chars <- extract_model_characteristics(
+  models = result$models,
+  leaderboard = result$leaderboard
+)
+
+# Create custom comparison report
+comparison <- create_model_comparison_report(
+  models = result$models[1:3],
+  test_data = breast_cancer,
+  target_column = "diagnosis"
+)
+```
+
+### Natural Language Reports
+
+Generate accessible summaries for stakeholders:
+
+```{r llm-reports}
+# Prepare explanation data
+importance_data <- calculate_permutation_importance(
+  result$models[[1]], breast_cancer, "diagnosis"
+)
+
+pdp_data <- calculate_partial_dependence_multi(
+  result$models[[1]], breast_cancer, 
+  features = head(importance_data$feature, 3)
+)
+
+# Generate report
+nlp_report <- generate_natural_language_report(
+  autoxplain_result = result,
+  importance_data = importance_data,
+  pdp_data = pdp_data,
+  model_characteristics = model_chars,
+  api_key = Sys.getenv("GEMINI_API_KEY")
+)
+
+cat(nlp_report)
+```
+
+## Best Practices
+
+### 1. Data Preparation
+- Ensure your target variable is properly formatted (factor for classification, numeric for regression)
+- Remove any columns that shouldn't be used for modeling (IDs, timestamps)
+- Consider data size - AutoML can be resource-intensive
+
+### 2. Model Selection
+- Start with `max_models = 5` and `max_runtime_secs = 300` for initial exploration
+- Increase these values for production models
+- Use `seed` for reproducibility
+
+### 3. Interpretation
+- Always validate explanations against domain knowledge
+- Use multiple explanation methods for comprehensive understanding
+- Consider model performance when interpreting results
+
+### 4. Reporting
+- Use dashboards for comprehensive analysis
+- Generate LLM reports for non-technical stakeholders
+- Include both global (importance) and local (PDP) explanations
+
+## Troubleshooting
+
+### H2O Initialization Issues
+
+If H2O fails to start:
+
+```{r h2o-troubleshoot}
+# Check if H2O is already running
+h2o::h2o.shutdown(prompt = FALSE)
+
+# Restart with custom settings
+h2o::h2o.init(
+  max_mem_size = "8G",
+  nthreads = 4
+)
+```
+
+### Memory Management
+
+For large datasets:
+
+```{r memory-management}
+# Use data sampling
+large_data_sample <- large_data[sample(nrow(large_data), 10000), ]
+
+# Or increase H2O memory before running autoxplain
+h2o::h2o.init(max_mem_size = "16G")
+```
+
+### API Key Issues
+
+For LLM features:
+
+```{r api-setup}
+# Set API key in environment
+Sys.setenv(GEMINI_API_KEY = "your_key")
+
+# Or pass directly to functions
+report <- generate_natural_language_report(
+  autoxplain_result = result,
+  api_key = "your_key"
+)
+```
+
+## Conclusion
+
+AutoXplainR streamlines the journey from AutoML to interpretable insights. By combining automated model generation with standardized explanations and clear visualizations, it enables data scientists to efficiently understand and communicate model behavior.
+
+For more examples and advanced usage, explore the package documentation and example datasets provided in `inst/extdata/`.
