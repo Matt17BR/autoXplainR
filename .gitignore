@@ -81,3 +81,30 @@ _targets/
 .env
 *.key
 CLAUDE.md
+
+# Generated output files
+*.html
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Development and test files
+test_*.R
+debug_*.R
+minimal_*.R
+simple_*.R
+comprehensive_*.R
+verify_*.R
+
+# Development artifacts
+uploads/
+usage_tracking*.json
+.claude/
+thesis/
+classification/
+
+# Backup files
+*_backup.*
+*.bak

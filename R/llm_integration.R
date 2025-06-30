@@ -166,9 +166,22 @@ create_report_prompt <- function(context) {
   )
   
   if (!is.null(context$best_performance)) {
+    # Add metric explanation
+    metric_explanation <- switch(tolower(context$best_metric),
+      "rmse" = "Root Mean Square Error - measures average prediction error; lower is better",
+      "mae" = "Mean Absolute Error - average absolute difference between predictions and actual values; lower is better", 
+      "r2" = "R-squared - proportion of variance explained by the model; higher is better (0-1 scale)",
+      "mse" = "Mean Square Error - average squared prediction error; lower is better",
+      "auc" = "Area Under Curve - model's ability to distinguish between classes; higher is better (0-1 scale)",
+      "logloss" = "Logarithmic Loss - penalizes confident wrong predictions; lower is better",
+      "mean_per_class_error" = "Classification Error Rate - percentage of incorrect predictions; lower is better",
+      "accuracy" = "Accuracy - percentage of correct predictions; higher is better",
+      paste("Performance metric:", context$best_metric)
+    )
+    
     prompt <- paste0(prompt, 
       "- **Best Model Performance**: ", round(context$best_performance, 4), 
-      " (", context$best_metric, " - this is the ONLY performance number available)\n"
+      " (", context$best_metric, " - ", metric_explanation, ")\n"
     )
   } else {
     prompt <- paste0(prompt, "- **Performance**: Results available but specific numbers not provided\n")
@@ -247,11 +260,12 @@ create_report_prompt <- function(context) {
     "**ABSOLUTELY CRITICAL: Do NOT make up any numbers. If you don't see a specific metric value above, don't mention numbers for it.**\n\n",
     "Structure your response like this:\n",
     "1. **Understanding the Best Performing Models**: Explain what the different algorithm types are (like Random Forest, Gradient Boosting, etc.) and what their hyperparameters mean in simple terms\n",
-    "2. **What Drives the Predictions**: Explain the most important features and what they mean practically\n",
-    "3. **How the Models Work**: Describe the algorithms in everyday language (e.g., 'Random Forest is like asking many experts and averaging their opinions')\n",
-    "4. **Practical Insights**: What this analysis tells us for decision-making\n",
-    "5. **Reliability & Limitations**: General guidance about model reliability\n\n",
-    "**Focus on education and understanding rather than performance numbers. Only mention specific values if they are explicitly provided in the data above.**\n\n",
+    "2. **Model Performance Interpretation**: If performance metrics are provided above, explain what they mean in practical terms (e.g., 'An RMSE of X means the model's predictions are typically off by X units', 'An AUC of Y means the model correctly distinguishes between classes Y% of the time')\n",
+    "3. **What Drives the Predictions**: Explain the most important features and what they mean practically\n",
+    "4. **How the Models Work**: Describe the algorithms in everyday language (e.g., 'Random Forest is like asking many experts and averaging their opinions')\n",
+    "5. **Practical Insights**: What this analysis tells us for decision-making and how good the model performance is for real-world use\n",
+    "6. **Reliability & Limitations**: General guidance about model reliability and when to trust the predictions\n\n",
+    "**Focus on education and understanding. When performance metrics are provided, explain what they mean for practical use of the model. Only mention specific values if they are explicitly provided in the data above.**\n\n",
     "Use a helpful, educational tone that explains concepts clearly. Use markdown formatting like `backticks` for technical terms, **bold** for emphasis, and proper headers."
   )
   
