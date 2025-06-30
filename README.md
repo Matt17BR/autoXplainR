@@ -169,13 +169,14 @@ AutoXplainR follows a modular architecture:
 - DT (>= 0.20.0)
 - testthat (>= 3.0.0)
 
-## Contributing
+## Development
 
 This package was developed following rigorous engineering practices:
 - Comprehensive testing after each component implementation
 - Custom explanations implemented from scratch
 - Extensive input validation and error handling
 - Modular, extensible architecture
+- Complete documentation with examples and vignettes
 
 ## Contributing
 
