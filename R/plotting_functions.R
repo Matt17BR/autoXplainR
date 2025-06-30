@@ -438,8 +438,26 @@ create_clean_correlation_heatmap <- function(model_data, is_classification) {
   
   # Dynamic color scale based on actual data range (excluding diagonal)
   actual_correlations <- cor_matrix[cor_matrix < 1 & !is.na(cor_matrix)]
-  min_corr <- if(length(actual_correlations) > 0) min(actual_correlations) else 0
-  max_corr <- if(length(actual_correlations) > 0) max(actual_correlations) else 1
+  
+  # Robust range calculation with validation
+  if(length(actual_correlations) > 0) {
+    min_corr <- min(actual_correlations)
+    max_corr <- max(actual_correlations)
+    
+    # Ensure valid range for plotly domain
+    if (is.infinite(min_corr) || is.infinite(max_corr) || is.na(min_corr) || is.na(max_corr)) {
+      min_corr <- -1
+      max_corr <- 1
+    } else if (min_corr == max_corr) {
+      # If all correlations are the same, create a small range
+      min_corr <- max(min_corr - 0.1, -1)
+      max_corr <- min(max_corr + 0.1, 1)
+    }
+  } else {
+    # No valid correlations found - use full correlation range
+    min_corr <- -1
+    max_corr <- 1
+  }
   
   # Create intuitive color scale optimized for correlation range
   color_scale <- list(
@@ -498,6 +516,23 @@ create_clean_correlation_heatmap <- function(model_data, is_classification) {
         }
       }
     }
+  }
+  
+  # Check if we have any valid data to plot
+  if (all(is.na(masked_matrix))) {
+    # Return error plot if no valid correlations
+    return(
+      plotly::plot_ly() %>%
+        plotly::add_text(x = 0.5, y = 0.5, 
+                         text = "Unable to calculate model correlations\n(Need at least 2 models with valid predictions)",
+                         textposition = "middle center",
+                         textfont = list(size = 14, color = "#666")) %>%
+        plotly::layout(
+          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+        ) %>%
+        plotly::config(displayModeBar = FALSE)
+    )
   }
   
   # Create the clean, properly-sized heatmap with better square separation
