@@ -4,10 +4,12 @@
 \alias{create_dashboard_rmd}
 \title{Create flexdashboard Rmd content}
 \usage{
-create_dashboard_rmd(data_files)
+create_dashboard_rmd(data_files, performance_weight = 0.7)
 }
 \arguments{
 \item{data_files}{List of file paths to data RDS files}
+
+\item{performance_weight}{Numeric. Weight for performance in efficiency calculation (0-1)}
 }
 \value{
 Character vector with Rmd content

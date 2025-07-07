@@ -11,7 +11,8 @@ generate_dashboard(
   sample_instances = 3,
   include_llm_report = TRUE,
   llm_api_key = NULL,
-  open_browser = TRUE
+  open_browser = TRUE,
+  performance_weight = 0.7
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ generate_dashboard(
 \item{llm_api_key}{Character. Google Generative AI API key (optional)}
 
 \item{open_browser}{Logical. Whether to open dashboard in browser (default: TRUE)}
+
+\item{performance_weight}{Numeric. Weight for performance in efficiency calculation (0-1). 
+Training time weight = 1 - performance_weight (default: 0.7)}
 }
 \value{
 Character. Path to generated HTML file

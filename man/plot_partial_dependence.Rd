@@ -4,7 +4,13 @@
 \alias{plot_partial_dependence}
 \title{Plot Partial Dependence}
 \usage{
-plot_partial_dependence(pdp_data, title = NULL, color = "#A23B72")
+plot_partial_dependence(
+  pdp_data,
+  title = NULL,
+  color = "#A23B72",
+  height = 220,
+  width = 350
+)
 }
 \arguments{
 \item{pdp_data}{Data.frame from calculate_partial_dependence()}
@@ -12,6 +18,10 @@ plot_partial_dependence(pdp_data, title = NULL, color = "#A23B72")
 \item{title}{Character. Plot title (default: auto-generated)}
 
 \item{color}{Character. Line color (default: "#A23B72")}
+
+\item{height}{Numeric. Plot height in pixels (default: 220)}
+
+\item{width}{Numeric. Plot width in pixels (default: 350)}
 }
 \value{
 A plotly object

@@ -9,7 +9,8 @@ calculate_partial_dependence_multi(
   data,
   features,
   n_points = 50,
-  quantile_range = c(0.05, 0.95)
+  quantile_range = c(0.05, 0.95),
+  return_all_classes = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ calculate_partial_dependence_multi(
 \item{n_points}{Integer. Number of points to evaluate along each feature range (default: 50)}
 
 \item{quantile_range}{Numeric vector of length 2. Quantile range to evaluate (default: c(0.05, 0.95))}
+
+\item{return_all_classes}{Logical. For classification, return probabilities for all classes (default: FALSE)}
 }
 \value{
 A named list of data.frames, one for each feature

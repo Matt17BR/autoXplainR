@@ -9,7 +9,8 @@ calculate_partial_dependence(
   data,
   feature,
   n_points = 50,
-  quantile_range = c(0.05, 0.95)
+  quantile_range = c(0.05, 0.95),
+  return_all_classes = FALSE
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ calculate_partial_dependence(
 \item{n_points}{Integer. Number of points to evaluate along the feature range (default: 50)}
 
 \item{quantile_range}{Numeric vector of length 2. Quantile range to evaluate (default: c(0.05, 0.95))}
+
+\item{return_all_classes}{Logical. For classification, return probabilities for all classes (default: FALSE)}
 }
 \value{
-A data.frame with feature values and corresponding partial dependence values
+A data.frame with feature values and partial dependence values (single column for regression, multiple columns for multi-class when return_all_classes=TRUE)
 }
 \description{
 Generates data for partial dependence plots by calculating model predictions
