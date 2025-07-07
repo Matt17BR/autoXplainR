@@ -10,6 +10,8 @@
 #' @param include_llm_report Logical. Whether to include LLM-generated report (default: TRUE)
 #' @param llm_api_key Character. Google Generative AI API key (optional)
 #' @param open_browser Logical. Whether to open dashboard in browser (default: TRUE)
+#' @param performance_weight Numeric. Weight for performance in efficiency calculation (0-1). 
+#'                          Training time weight = 1 - performance_weight (default: 0.7)
 #' @return Character. Path to generated HTML file
 #' @export
 #' @importFrom rmarkdown render
@@ -19,7 +21,8 @@ generate_dashboard <- function(autoxplain_result,
                               sample_instances = 3,
                               include_llm_report = TRUE,
                               llm_api_key = NULL,
-                              open_browser = TRUE) {
+                              open_browser = TRUE,
+                              performance_weight = 0.7) {
   
   # Input validation
   if (!inherits(autoxplain_result, "autoxplain_result")) {
@@ -90,7 +93,7 @@ generate_dashboard <- function(autoxplain_result,
   }
   
   # Create temporary Rmd file  
-  rmd_content <- create_dashboard_rmd(data_files)
+  rmd_content <- create_dashboard_rmd(data_files, performance_weight)
   temp_rmd <- tempfile(fileext = ".Rmd")
   writeLines(rmd_content, temp_rmd)
   
@@ -486,9 +489,10 @@ prepare_dashboard_data <- function(autoxplain_result, top_features, sample_insta
 #' Create flexdashboard Rmd content
 #'
 #' @param data_files List of file paths to data RDS files
+#' @param performance_weight Numeric. Weight for performance in efficiency calculation (0-1)
 #' @return Character vector with Rmd content
 #' @keywords internal
-create_dashboard_rmd <- function(data_files) {
+create_dashboard_rmd <- function(data_files, performance_weight = 0.7) {
   
   rmd_content <- c(
     "---",
@@ -2140,26 +2144,26 @@ create_dashboard_rmd <- function(data_files) {
     "  insights_data$Model[2] <- char_data$Algorithm[fastest_idx]",
     "  insights_data$Explanation[2] <- paste('Shortest training time:', round(char_data$Training_Score[fastest_idx], 3), 'seconds')",
     "  ",
-    "  # Find most efficient model (best performance-to-training-time efficiency)",
-    "  efficiency_scores <- if(is_classification) {",
-    "    # For classification: AUC/time (higher AUC is better, lower time is better)",
-    "    char_data$Performance_Score / char_data$Training_Score",
-    "  } else {",
-    "    # For regression: 1/(RMSE * time) - rewards both low RMSE and low time",
-    "    1 / (char_data$Performance_Score * char_data$Training_Score)",
-    "  }",
+    "  # Find most efficient model using weighted min-max scaling",
+    paste0("  performance_weight <- ", performance_weight),
+    "  efficiency_scores <- calculate_weighted_efficiency(",
+    "    performance_scores = char_data$Performance_Score,",
+    "    training_times = char_data$Training_Score,",
+    "    performance_weight = performance_weight,",
+    "    higher_is_better = is_classification",
+    "  )",
     "  most_efficient_idx <- which.max(efficiency_scores)",
     "  insights_data$Model[3] <- char_data$Algorithm[most_efficient_idx]",
     "  ",
-    "  # Create more meaningful explanation based on task type",
-    "  if(is_classification) {",
-    "    insights_data$Explanation[3] <- paste('Highest AUC/time ratio:', round(efficiency_scores[most_efficient_idx], 4))",
-    "  } else {",
-    "    # For regression, show the actual values to make it more interpretable",
-    "    rmse_val <- char_data$Performance_Score[most_efficient_idx]",
-    "    time_val <- char_data$Training_Score[most_efficient_idx]",
-    "    insights_data$Explanation[3] <- paste0('Lowest 1/(RMSE * time) - RMSE: ', round(rmse_val, 3), ', Time: ', round(time_val, 3), 's')",
-    "  }",
+    "  # Create explanation showing the weighted efficiency score",
+    "  perf_val <- char_data$Performance_Score[most_efficient_idx]",
+    "  time_val <- char_data$Training_Score[most_efficient_idx]",
+    "  metric_name <- if(is_classification) 'AUC' else 'RMSE'",
+    "  insights_data$Explanation[3] <- paste0(",
+    "    'Best weighted efficiency (', round(performance_weight*100), '% performance, ',",
+    "    round((1-performance_weight)*100), '% speed) - ',",
+    "    metric_name, ': ', round(perf_val, 3), ', Time: ', round(time_val, 3), 's'",
+    "  )",
     "  ",
     "  # Best balance (among top 3 performers, pick fastest)",
     "  top3_indices <- head(performance_rank, 3)",

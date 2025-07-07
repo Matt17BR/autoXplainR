@@ -291,6 +291,73 @@ summary.autoxplainr_model_characteristics <- function(object, ...) {
   invisible(object)
 }
 
+#' Calculate Weighted Efficiency Score with Min-Max Scaling
+#'
+#' Calculates an efficiency score that combines performance and training time
+#' using min-max scaling and user-defined weights.
+#'
+#' @param performance_scores Numeric vector of performance scores
+#' @param training_times Numeric vector of training times in seconds
+#' @param performance_weight Weight for performance (0-1), training time weight = 1 - performance_weight
+#' @param higher_is_better Logical. TRUE if higher performance scores are better (e.g., AUC), 
+#'                         FALSE if lower is better (e.g., RMSE)
+#' @return Numeric vector of efficiency scores
+#' @export
+calculate_weighted_efficiency <- function(performance_scores, 
+                                        training_times, 
+                                        performance_weight = 0.7,
+                                        higher_is_better = TRUE) {
+  
+  # Validate inputs
+  if (length(performance_scores) != length(training_times)) {
+    stop("performance_scores and training_times must have the same length")
+  }
+  
+  if (performance_weight < 0 || performance_weight > 1) {
+    stop("performance_weight must be between 0 and 1")
+  }
+  
+  n <- length(performance_scores)
+  if (n < 2) {
+    stop("Need at least 2 models to calculate relative efficiency")
+  }
+  
+  # Min-max scaling for performance
+  perf_min <- min(performance_scores, na.rm = TRUE)
+  perf_max <- max(performance_scores, na.rm = TRUE)
+  
+  if (perf_max == perf_min) {
+    # All performance scores are the same
+    scaled_performance <- rep(0.5, n)
+  } else {
+    if (higher_is_better) {
+      # Higher is better (e.g., AUC): scale to [0, 1] where 1 is best
+      scaled_performance <- (performance_scores - perf_min) / (perf_max - perf_min)
+    } else {
+      # Lower is better (e.g., RMSE): scale to [0, 1] where 1 is best (lowest value)
+      scaled_performance <- (perf_max - performance_scores) / (perf_max - perf_min)
+    }
+  }
+  
+  # Min-max scaling for training time (lower is better, so invert)
+  time_min <- min(training_times, na.rm = TRUE)
+  time_max <- max(training_times, na.rm = TRUE)
+  
+  if (time_max == time_min) {
+    # All training times are the same
+    scaled_time <- rep(0.5, n)
+  } else {
+    # Lower time is better: scale to [0, 1] where 1 is best (shortest time)
+    scaled_time <- (time_max - training_times) / (time_max - time_min)
+  }
+  
+  # Calculate weighted efficiency score
+  time_weight <- 1 - performance_weight
+  efficiency_scores <- performance_weight * scaled_performance + time_weight * scaled_time
+  
+  return(efficiency_scores)
+}
+
 #' Create Model Comparison Report
 #'
 #' Generates a detailed comparison report of all models including hyperparameters,
