@@ -319,8 +319,11 @@ contract](https://matt17br.github.io/autoXplainR/PRODUCT.md),
 [contribution
 guide](https://matt17br.github.io/autoXplainR/CONTRIBUTING.md),
 [security policy](https://matt17br.github.io/autoXplainR/SECURITY.md),
-[roadmap](https://matt17br.github.io/autoXplainR/ROADMAP.md), and
-[release notes](https://matt17br.github.io/autoXplainR/NEWS.md).
+[roadmap](https://matt17br.github.io/autoXplainR/ROADMAP.md), [release
+checklist](https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.md),
+and [release notes](https://matt17br.github.io/autoXplainR/NEWS.md).
+Usage questions and early design ideas belong in [GitHub
+Discussions](https://github.com/Matt17BR/autoXplainR/discussions).
 
 ## Literature foundations
 
@@ -329,7 +332,7 @@ guide](https://matt17br.github.io/autoXplainR/CONTRIBUTING.md),
   20(177).
 - Apley and Zhu (2020), [*Visualizing the Effects of Predictor Variables
   in Black Box Supervised Learning
-  Models*](https://doi.org/10.1111/rssb.12377), JRSS B 82(4).
+  Models*](https://arxiv.org/abs/1612.08468), JRSS B 82(4).
 - Biecek (2018), [*DALEX: Explainers for Complex Predictive Models in
   R*](https://jmlr.org/papers/v19/18-416.html), JMLR 19(84).
 

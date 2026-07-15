@@ -30,6 +30,9 @@ Evidence-first standalone report with provenance.
 Fast core tests, isolated H2O tests, enforced coverage, CI, pkgdown, and
 project policy.
 
+Version-checked source-package artifacts and draft GitHub releases for
+version tags.
+
 ## 0.3 — validation and estimands
 
 Observation-level loss deltas with explicitly supported inferential
