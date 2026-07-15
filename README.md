@@ -1,25 +1,34 @@
 # AutoXplainR
 
 [![R-CMD-check](https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml)
-[![lint](https://github.com/Matt17BR/autoXplainR/actions/workflows/lint.yaml/badge.svg)](https://github.com/Matt17BR/autoXplainR/actions/workflows/lint.yaml)
+[![coverage](https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml)
+[![pkgdown](https://github.com/Matt17BR/autoXplainR/actions/workflows/pkgdown.yaml/badge.svg)](https://matt17br.github.io/autoXplainR/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2f7d5b.svg)](LICENSE.md)
 
-**Fit a model. Check whether it works. Understand it. Explain it responsibly.**
+**Fit. Check. Compare. Understand. Explain.**
 
-AutoXplainR is for someone approaching tabular model fitting for the first
-time. Give it a data frame and the name of the outcome. It creates a held-out
-test set, fits an understandable model and a deliberately simple baseline,
-defines the evaluation metrics, investigates the fitted patterns, and builds a
-standalone report you can read or share.
+AutoXplainR helps someone fitting one of their first tabular models move from a
+data frame to a responsible, shareable explanation. It creates a held-out test
+set, compares an understandable model with a simple baseline, defines every
+metric, investigates fitted patterns, and tells the user what the evidence does
+and does not support.
 
-It works locally without Java, a cloud account, or an LLM. More experienced
-users can bring their own model, use H2O AutoML, configure the explanation
-audit, or opt into a hosted or local generative model.
+The default path is local and needs no Java, cloud account, or LLM. A comparison
+mode adds multiple approachable candidates and Pareto trade-offs. Advanced
+users can bring any fitted model, use H2O AutoML, or opt into local or hosted
+language models.
 
-![AutoXplainR guided report showing the modeling question, baseline comparison, and held-out metrics](man/figures/guided-report.png)
+**[Get started](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html)** ·
+**[Function reference](https://matt17br.github.io/autoXplainR/reference/index.html)** ·
+**[Product contract](PRODUCT.md)** · **[Roadmap](ROADMAP.md)**
 
-## The first model takes three lines
+<p align="center">
+  <img src="man/figures/guided-overview.png" alt="AutoXplainR report showing the modeling question, held-out baseline comparison, and four plain-language score cards" width="100%">
+  <br><sub>A complete first screen: the question, unseen-data result, baseline, and evaluation size. No scrolling inside the image.</sub>
+</p>
+
+## Start with one call
 
 ```r
 library(AutoXplainR)
@@ -29,60 +38,91 @@ result
 render_model_report(result, "my-model-report.html")
 ```
 
-The default call does seven important things:
+The default call fits two deliberately understandable references:
 
-1. recognizes regression, binary classification, or multiclass classification;
-2. reserves 20% of the rows for an evaluation the model does not train on;
-3. learns missing-value replacements and factor levels from the training rows;
-4. fits an interpretable linear, logistic, or multinomial logistic model;
-5. fits an intercept-only baseline that ignores all inputs;
-6. compares both models with plainly defined, task-appropriate metrics; and
-7. audits importance stability, feature dependence, and fitted effects for the
-   report.
+- a linear, logistic, or multinomial logistic primary model; and
+- an intercept-only baseline that ignores every input.
 
-The printed result answers the first practical question: did the primary model
-improve on a model that knows nothing about the inputs? The report then moves
-from evaluation to explanation and only then to technical reliability details.
+Both are evaluated on rows kept out of fitting. The printed result answers the
+first useful question—*did the model improve on a simple guess?*—before the
+package asks anyone to interpret feature importance.
 
-## Why this is more than an automatic model fit
-
-Most tools specialize in one part of the journey. AutoXplainR joins four parts
-that a new modeler otherwise has to assemble and interpret:
-
-| Question | AutoXplainR default |
-|---|---|
-| What did I fit? | names the task, target, model family, split, and preprocessing |
-| Does it work? | evaluates unseen rows and compares with a simple baseline |
-| What patterns does it use? | repeated permutation reliance plus ALE or diagnosed PDP effects |
-| What am I justified in saying? | warnings, permitted-claim language, provenance, and progressive disclosure |
-
-The distinctive object is the whole communication contract, not a novel bar
-chart. The underlying estimators are established methods. AutoXplainR's job is
-to make their assumptions, failure modes, and language hard to miss while
-remaining approachable.
-
-## Read the result before explaining it
-
-For regression, the main metrics are RMSE, MAE, and R-squared. For binary
-classification, they are log loss, Brier score, accuracy, balanced accuracy,
-and ROC AUC. For multiclass classification, they are log loss, Brier score,
-accuracy, and macro recall.
-Every definition is stored with the result and displayed beside the score.
-
-```r
-result$leaderboard
-result$evaluation$metric_definitions
-result$evaluation$improvement_over_baseline
+```text
+<AutoXplainR guided result>
+  question:   predict `mpg` (regression)
+  engine:     base
+  models:     2 (primary + baseline)
+  result:     primary model has rmse = ...
+  baseline:   ...% improvement in rmse
 ```
 
-An impressive training score is not evidence that a model generalizes. The
-default report therefore leads with held-out performance. If the primary model
-does not beat the baseline, the report says so directly and treats the fitted
-patterns as exploratory.
+## Compare models without hiding the trade-off
 
-## Understand fitted patterns without claiming causes
+Comparison is not out of scope. It is a first-class, opt-in extension of the
+same beginner workflow:
 
-The guided workflow can be opened into ordinary model-agnostic explainers:
+```r
+comparison <- autoxplain(
+  iris,
+  target_column = "Sepal.Length",
+  model_set = "comparison",
+  test_fraction = 0.4,
+  seed = 2026
+)
+
+model_tradeoffs(comparison)
+plot_model_comparison(comparison)  # optional interactive Plotly view
+render_model_report(comparison, "comparison-report.html")
+```
+
+The local comparison set contains the pre-specified statistical model, a small
+decision tree, a more flexible tree, and the simple baseline. AutoXplainR shows
+held-out performance, fit and prediction time, model size, complexity, and the
+candidate-relative Pareto frontier.
+
+It does **not** collapse those dimensions into a mysterious score. It also does
+not silently replace the primary model with whichever candidate happened to
+win on the holdout: doing that and then reporting the same holdout score as
+final performance would be optimistic.
+
+<p align="center">
+  <img src="man/figures/model-comparison.png" alt="Complete AutoXplainR model-comparison section with score cards, a labeled Pareto frontier, interpretation guidance, and candidate table" width="100%">
+  <br><sub>Performance versus model size, with the interpretation rule and full candidate table kept in the frame.</sub>
+</p>
+
+## One report, from result to responsible language
+
+| Question | What AutoXplainR provides |
+|---|---|
+| What am I predicting? | detected task, target, split, preprocessing, and fitted family |
+| Does the model work? | held-out metrics, plain definitions, baseline comparison, and failure warnings |
+| Are other models competitive? | explicit candidates, prediction comparisons, and Pareto trade-offs |
+| What patterns does it use? | repeated permutation reliance plus ALE or diagnosed PDP effects |
+| How much should I trust the explanation? | dependence, repeat stability, supplied-model disagreement, and next actions |
+| How do I communicate it? | a deterministic local narrative, optional LLM adapter, and standalone HTML |
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="man/figures/model-patterns.png" alt="AutoXplainR feature-reliance table and fitted-effect cards" width="100%"><br>
+      <strong>Explain fitted patterns</strong><br>
+      <sub>Reliance and effect direction, with causal boundaries adjacent to the result.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="man/figures/explanation-reliability.png" alt="AutoXplainR explanation-reliability grade, diagnostics, warnings, and next actions" width="100%"><br>
+      <strong>Stress-test the explanation</strong><br>
+      <sub>A diagnostic grade, evidence, and concrete next actions—not a certification.</sub>
+    </td>
+  </tr>
+</table>
+
+Every screenshot above is a crop of the package's dependency-free HTML report,
+not a separate design mock-up. The report remains readable after it is shared;
+it does not require R, H2O, Plotly, or an LLM at viewing time.
+
+## Open the analysis when you need more control
+
+The guided result converts into ordinary model-agnostic explainers:
 
 ```r
 explainer <- as_explainers(result, models = "main_model")$main_model
@@ -96,105 +136,15 @@ importance <- calculate_permutation_importance(
 effect <- explain_effect(explainer, feature = "wt")
 ```
 
-Permutation importance asks how much held-out performance changes after an
-input is shuffled. Its repeat interval measures randomness in that computation;
-it is not a population confidence interval. Accumulated local effects (ALE) are
-the default for numeric effects because marginal PDPs can extrapolate across
-implausible combinations when predictors are dependent.
+Permutation intervals describe variation across random shuffles; they are not
+population confidence intervals. ALE and PDP describe the fitted prediction
+function; they do not establish the effect of intervening on an input.
 
-Neither method establishes that intervening on a feature would change the
-outcome. It describes what the fitted prediction function does on the chosen
-evaluation distribution.
-
-## A complete report never requires an LLM
-
-The deterministic local narrative is the default even if an API key happens to
-exist in the environment:
-
-```r
-memo <- generate_natural_language_report(result)
-render_model_report(result, "my-model-report.html", narrative = memo)
-```
-
-Remote generation is always explicit. Only aggregate metrics, feature names,
-warnings, and provenance are sent—never raw rows, fitted objects, case-level
-predictions, or secrets.
-
-```r
-narrative_providers()
-
-# Recommended hosted free-tier option as of July 2026
-Sys.setenv(GEMINI_API_KEY = "...")
-memo <- generate_natural_language_report(result, provider = "gemini")
-
-# Fast hosted alternative
-Sys.setenv(GROQ_API_KEY = "...")
-memo <- generate_natural_language_report(result, provider = "groq")
-
-# Fully local generation after installing Ollama and the model
-memo <- generate_natural_language_report(result, provider = "ollama")
-```
-
-Current defaults and trade-offs are inspectable with `narrative_providers()`:
-
-- Gemini uses `gemini-3.5-flash`, which currently has an explicit free tier in
-  the [official Gemini pricing documentation](https://ai.google.dev/gemini-api/docs/pricing).
-- Groq uses `qwen/qwen3.6-27b`; free-plan limits are published in the
-  [official Groq rate-limit documentation](https://console.groq.com/docs/rate-limits).
-- Ollama uses `gemma3:4b` through its local
-  [OpenAI-compatible API](https://docs.ollama.com/api/openai-compatibility).
-- OpenRouter's `openrouter/free` router is experimental here because the
-  selected free model can vary; see its
-  [free-model routing documentation](https://openrouter.ai/docs/guides/routing/model-variants/free).
-
-Provider catalogs and limits change. Pin `model`, retain the attached
-`narrative_provenance`, and verify generated prose against the computed report.
-
-## Classification works the same way
-
-```r
-# Multiclass example
-flowers <- autoxplain(iris, target_column = "Species", seed = 2026)
-flowers
-
-# Binary outcomes may be factors, characters, logicals, or two-level numerics
-binary_result <- autoxplain(customer_data, target_column = "churned")
-```
-
-Classification splits are stratified. Probabilistic metrics are used because a
-model can assign the correct class while still being dangerously overconfident.
-If a class has fewer than two rows, AutoXplainR stops with an actionable error
-instead of pretending a reliable split is possible.
-
-## Bring your own fitted model
-
-`explain_model()` separates fitting from explanation. It supports ordinary R
-models directly and accepts a prediction function for any other framework:
-
-```r
-explainer <- explain_model(
-  model = fitted_object,
-  data = held_out_data,
-  y = "outcome",
-  task = "binary",
-  positive = "yes",
-  predict_function = function(model, newdata) {
-    # Return P(outcome == "yes") as a numeric vector.
-  },
-  metadata = list(evaluation_role = "test")
-)
-```
-
-Regression predictions are numeric vectors. Binary predictions are
-positive-class probabilities. Multiclass predictions are named probability
-matrices. AutoXplainR validates the contract before an expensive explanation
-starts.
-
-## Open the advanced evidence layer when you need it
+For a multi-model reliability review:
 
 ```r
 audit <- audit_explanations(
-  as_explainers(result),
+  as_explainers(comparison),
   n_repeats = 30,
   performance_tolerance = 0.05,
   seed = 2026
@@ -204,30 +154,73 @@ audit
 render_explanation_report(audit, "technical-evidence.html")
 ```
 
-The audit adds repeat-level values, sign stability, feature-dependence
-diagnostics, prediction agreement, and explanation disagreement among supplied
-near-optimal models. Its A–D grade is a transparent triage heuristic—not a
-p-value, causal result, fairness assessment, or certification.
+The audit retains repeat-level importance, feature-dependence diagnostics,
+near-optimal supplied models, prediction agreement, explanation disagreement,
+and explicit permitted-claim labels.
 
-## Optional H2O AutoML
+## A complete explanation never requires an LLM
 
-H2O remains an explicit fitting engine for users who want a broader candidate
-set. It requires Java and the `h2o` package; the default workflow does not.
+The deterministic local narrative is always the default—even if an API key is
+present:
 
 ```r
+memo <- generate_natural_language_report(result)
+render_model_report(result, "report.html", narrative = memo)
+```
+
+Remote generation requires an explicit provider. Only aggregate metrics,
+feature names, warnings, and provenance enter the prompt; raw rows, fitted
+objects, case-level predictions, and secrets do not.
+
+```r
+narrative_providers()
+
+memo <- generate_natural_language_report(result, provider = "gemini")
+memo <- generate_natural_language_report(result, provider = "groq")
+memo <- generate_natural_language_report(result, provider = "ollama")
+memo <- generate_natural_language_report(result, provider = "openrouter")
+```
+
+Current defaults are documented against the official [Gemini free-tier
+pricing](https://ai.google.dev/gemini-api/docs/pricing), [Groq rate
+limits](https://console.groq.com/docs/rate-limits), [Ollama local
+API](https://docs.ollama.com/api/openai-compatibility), and [OpenRouter free
+routing](https://openrouter.ai/docs/guides/routing/model-variants/free).
+Provider, resolved model, fallback, and prompt provenance are retained.
+
+## Classification, existing models, and H2O use the same contract
+
+```r
+# Multiclass classification
+flowers <- autoxplain(iris, target_column = "Species", seed = 2026)
+
+# Any existing model or framework
+existing <- explain_model(
+  fitted_object,
+  data = held_out_data,
+  y = "outcome",
+  task = "binary",
+  positive = "yes",
+  predict_function = function(model, newdata) {
+    # Return P(outcome == "yes") as a numeric vector.
+  }
+)
+
+# Broader optional AutoML candidate set; requires Java and h2o
 h2o_result <- autoxplain(
   training_data,
   target_column = "outcome",
   test_data = held_out_data,
   engine = "h2o",
   max_models = 10,
-  max_runtime_secs = 300,
   seed = 2026
 )
 ```
 
-Held-out test data are not passed to H2O as a validation frame unless requested
-explicitly. The fitted preprocessing recipe is reused for evaluation data.
+Regression predictions are numeric vectors. Binary predictions are
+positive-class probabilities. Multiclass predictions are named probability
+matrices. The package validates that contract before an expensive explanation
+begins.
 
 ## Installation
 
@@ -238,30 +231,32 @@ AutoXplainR is under active development and is not yet on CRAN.
 pak::pak("Matt17BR/autoXplainR")
 ```
 
-## Where it fits in the R ecosystem
-
-AutoXplainR is designed to complement, not obscure, strong existing packages.
-
-| Need | Strong existing work | AutoXplainR's role |
-|---|---|---|
-| Broad explanation methods | [DALEX](https://jmlr.org/papers/v19/18-416.html), ingredients, iml | a smaller beginner contract plus reliability and communication guardrails |
-| Formal importance inference | [xplainfi](https://mlr-org.github.io/xplainfi/articles/inference.html) | labels default intervals as computational and points formal claims to inferential tools |
-| Interactive exploration | modelStudio | produces a portable, dependency-free review artifact |
-| Modeling frameworks | tidymodels, mlr3, H2O | provides a first safe model locally and accepts models from other frameworks |
-| Predictive multiplicity | Rashomon/model-class-reliance literature | exposes supplied-model disagreement without claiming to enumerate every plausible model |
-
 ## Interpretation boundaries
 
 - Held-out performance describes the supplied evaluation data, not every future
   population or time period.
+- A Pareto frontier covers only the supplied models and displayed objectives.
 - Permutation importance estimates fitted-model reliance and is sensitive to
   dependent predictors.
-- ALE remains associational even though it reduces the most direct PDP
-  extrapolation problem.
-- A near-optimal set contains only the models supplied to the audit.
-- Generated prose can be wrong. The numerical report remains authoritative.
+- ALE reduces direct marginal extrapolation but remains associational.
+- Generated prose can be wrong; the numerical report remains authoritative.
 - AutoXplainR does not automate causal claims, fairness certification, safety
   approval, or deployment decisions.
+
+## Where it fits
+
+AutoXplainR complements modeling and explanation frameworks rather than hiding
+them. [DALEX](https://jmlr.org/papers/v19/18-416.html), ingredients, and iml
+provide broad explanation ecosystems; [xplainfi](https://mlr-org.github.io/xplainfi/articles/inference.html)
+provides formal importance-inference tools; tidymodels, mlr3, and H2O provide
+larger modeling systems. AutoXplainR's role is the approachable contract joining
+fit, unseen-data evaluation, comparison, explanation reliability, and careful
+communication.
+
+The methods are grounded in Fisher, Rudin, and Dominici's
+[model-class-reliance work](https://www.jmlr.org/papers/v20/18-760.html), Apley
+and Zhu's [ALE method](https://arxiv.org/abs/1612.08468), and Biecek's
+[DALEX framework](https://jmlr.org/papers/v19/18-416.html).
 
 ## Development and governance
 
@@ -271,29 +266,17 @@ devtools::test()
 devtools::check()
 ```
 
-Slow H2O integration tests are opt-in:
+The ordinary suite is dependency-light. Real H2O integration is isolated and
+opt-in:
 
 ```sh
 AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 ```
 
-See the [product contract](PRODUCT.md), [contribution guide](CONTRIBUTING.md),
-[security policy](SECURITY.md), [roadmap](ROADMAP.md),
-[release checklist](.github/RELEASE_CHECKLIST.md), and [release notes](NEWS.md).
-Usage questions and early design ideas belong in
+See the [contribution guide](CONTRIBUTING.md), [security policy](SECURITY.md),
+[governance](GOVERNANCE.md), [release checklist](.github/RELEASE_CHECKLIST.md),
+and [release notes](NEWS.md). Questions and early ideas belong in
 [GitHub Discussions](https://github.com/Matt17BR/autoXplainR/discussions).
-
-## Literature foundations
-
-- Fisher, Rudin, and Dominici (2019),
-  [*All Models are Wrong, but Many are Useful*](https://www.jmlr.org/papers/v20/18-760.html),
-  JMLR 20(177).
-- Apley and Zhu (2020),
-  [*Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models*](https://arxiv.org/abs/1612.08468),
-  JRSS B 82(4).
-- Biecek (2018),
-  [*DALEX: Explainers for Complex Predictive Models in R*](https://jmlr.org/papers/v19/18-416.html),
-  JMLR 19(84).
 
 ## License
 
