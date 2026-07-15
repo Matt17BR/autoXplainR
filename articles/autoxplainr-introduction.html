@@ -131,7 +131,7 @@ predictions.</p>
 <span><span class="co">#&gt; 2 -1.3212249                2      19.82812          1            </span></span>
 <span><span class="co">#&gt;   prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                  1</span></span>
-<span><span class="co">#&gt; 2                  1</span></span>
+<span><span class="co">#&gt; 2                  0</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                                                rmse </span></span>
 <span><span class="co">#&gt;            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
@@ -446,11 +446,33 @@ measurement quality, or model behavior and require domain-specific
 investigation.</p>
 </div>
 <div class="section level2">
+<h2 id="check-whether-missingness-changed">Check whether missingness changed<a class="anchor" aria-label="anchor" href="#check-whether-missingness-changed"></a>
+</h2>
+<p>The guided workflow retains per-column missing-value rates before
+imputation. This matters because a field that is absent much more often
+in evaluation or future use can change what the model is effectively
+being asked to do:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">training</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span></span>
+<span><span class="va">evaluation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">46</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">41</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span></span>
+<span><span class="va">missing_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">training</span>, <span class="st">"y"</span>, test_data <span class="op">=</span> <span class="va">evaluation</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/missingness_shift.html">missingness_shift</a></span><span class="op">(</span><span class="va">missing_fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;AutoXplainR missingness shift&gt;</span></span>
+<span><span class="co">#&gt;   data:        40 training + 20 evaluation rows</span></span>
+<span><span class="co">#&gt;   predictors:  1 with any missing values</span></span>
+<span><span class="co">#&gt;   flagged:     1 model inputs at 5 percentage points</span></span>
+<span><span class="co">#&gt;   caution:     practical flag; not a statistical test or general drift check</span></span></code></pre></div>
+<p>The default five-percentage-point flag is an investigation prompt,
+not a hypothesis test. The diagnostic does not claim that the complete
+predictor distribution is stable, and it reports the rates before the
+training-derived imputation was applied.</p>
+</div>
+<div class="section level2">
 <h2 id="bring-an-existing-model">Bring an existing model<a class="anchor" aria-label="anchor" href="#bring-an-existing-model"></a>
 </h2>
 <p>The explanation layer does not depend on the guided fitting engine.
 Wrap an ordinary R model directly:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span> <span class="op">+</span> <span class="va">disp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>

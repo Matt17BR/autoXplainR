@@ -103,7 +103,7 @@ _(Performance versus model size, with the interpretation rule and full candidate
 | Question | What AutoXplainR provides |
 |----|----|
 | What am I predicting? | detected task, target, split, preprocessing, and fitted family |
-| Does the model work? | held-out metrics, plain definitions, baseline comparison, probability calibration, optional subgroup checks, and failure warnings |
+| Does the model work? | held-out metrics, plain definitions, baseline comparison, probability calibration, missingness shift, optional subgroup checks, and failure warnings |
 | Are other models competitive? | explicit candidates, prediction comparisons, and Pareto trade-offs |
 | What patterns does it use? | repeated permutation reliance plus ALE or diagnosed PDP effects |
 | How much should I trust the explanation? | dependence, repeat stability, supplied-model disagreement, and next actions |
@@ -307,6 +307,8 @@ Matteo Mazzarelli.
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
   : Check whether held-out class probabilities behave literally
+- [`missingness_shift()`](https://matt17br.github.io/autoXplainR/reference/missingness_shift.md)
+  : Compare raw missing-value rates between training and evaluation data
 - [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
   : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)

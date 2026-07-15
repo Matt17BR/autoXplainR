@@ -8,6 +8,8 @@
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
   : Check whether held-out class probabilities behave literally
+- [`missingness_shift()`](https://matt17br.github.io/autoXplainR/reference/missingness_shift.md)
+  : Compare raw missing-value rates between training and evaluation data
 - [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
   : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)

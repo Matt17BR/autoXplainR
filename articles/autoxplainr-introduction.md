@@ -58,7 +58,7 @@ result$leaderboard
 #> 2 -1.3212249                2      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  1
+#> 2                  0
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -410,6 +410,31 @@ The same check can be included in the standalone report with
 sensitive, and it does not call this a fairness assessment. Observed
 gaps can come from small samples, different case mix, measurement
 quality, or model behavior and require domain-specific investigation.
+
+## Check whether missingness changed
+
+The guided workflow retains per-column missing-value rates before
+imputation. This matters because a field that is absent much more often
+in evaluation or future use can change what the model is effectively
+being asked to do:
+
+``` r
+
+training <- data.frame(x = c(NA, 2:40), y = 1:40)
+evaluation <- data.frame(x = c(rep(NA, 5), 46:60), y = 41:60)
+missing_fit <- autoxplain(training, "y", test_data = evaluation)
+missingness_shift(missing_fit)
+#> <AutoXplainR missingness shift>
+#>   data:        40 training + 20 evaluation rows
+#>   predictors:  1 with any missing values
+#>   flagged:     1 model inputs at 5 percentage points
+#>   caution:     practical flag; not a statistical test or general drift check
+```
+
+The default five-percentage-point flag is an investigation prompt, not a
+hypothesis test. The diagnostic does not claim that the complete
+predictor distribution is stable, and it reports the rates before the
+training-derived imputation was applied.
 
 ## Bring an existing model
 
