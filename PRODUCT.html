@@ -96,8 +96,12 @@
 <td>Strong prose and explicit free tier; data leaves the machine</td>
 </tr><tr><td>Groq</td>
 <td>Fast hosted alternative</td>
-<td><code>qwen/qwen3.6-27b</code></td>
-<td>Generous free limits; model catalog can change</td>
+<td><code>openai/gpt-oss-120b</code></td>
+<td>Strict schema output on a free plan; model catalog can change</td>
+</tr><tr><td>Cloudflare Workers AI</td>
+<td>Alternative hosted free allowance</td>
+<td><code>@cf/openai/gpt-oss-120b</code></td>
+<td>OpenAI-compatible endpoint; needs a token and account ID</td>
 </tr><tr><td>Ollama</td>
 <td>Local generative option</td>
 <td><code>gemma3:4b</code></td>
@@ -107,6 +111,7 @@
 <td><code>openrouter/free</code></td>
 <td>Broad access; selected model and availability are not reproducible</td>
 </tr></tbody></table><p>All provider adapters must share one prompt contract, expose the provider and resolved model in provenance, time out, handle rate limits, and fall back to the deterministic report without losing the analysis.</p>
+<p>Hosted-provider recommendations must be checked against official model, pricing, rate-limit, structured-output, and privacy documentation before every release. <code>LLM_PROVIDERS.md</code> is the dated decision record; the package must not describe a hosted plan as permanently free.</p>
 </div>
 <div class="section level2">
 <h2 id="non-goals">Non-goals<a class="anchor" aria-label="anchor" href="#non-goals"></a></h2>

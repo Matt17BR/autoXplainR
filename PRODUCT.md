@@ -71,13 +71,19 @@ configurable because model availability changes:
 |----|----|----|----|
 | Local template | Default | none | Reproducible and private; less fluent |
 | Google Gemini | Recommended hosted free tier | `gemini-3.5-flash` | Strong prose and explicit free tier; data leaves the machine |
-| Groq | Fast hosted alternative | `qwen/qwen3.6-27b` | Generous free limits; model catalog can change |
+| Groq | Fast hosted alternative | `openai/gpt-oss-120b` | Strict schema output on a free plan; model catalog can change |
+| Cloudflare Workers AI | Alternative hosted free allowance | `@cf/openai/gpt-oss-120b` | OpenAI-compatible endpoint; needs a token and account ID |
 | Ollama | Local generative option | `gemma3:4b` | Private and no API cost; requires a local runtime/model |
 | OpenRouter | Experimental free router | `openrouter/free` | Broad access; selected model and availability are not reproducible |
 
 All provider adapters must share one prompt contract, expose the
 provider and resolved model in provenance, time out, handle rate limits,
 and fall back to the deterministic report without losing the analysis.
+
+Hosted-provider recommendations must be checked against official model,
+pricing, rate-limit, structured-output, and privacy documentation before
+every release. `LLM_PROVIDERS.md` is the dated decision record; the
+package must not describe a hosted plan as permanently free.
 
 ## Non-goals
 

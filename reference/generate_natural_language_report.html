@@ -67,10 +67,11 @@ evaluation and explanation evidence.</p>
 <span>  pdp_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_characteristics <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  audit <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  provider <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"local"</span>, <span class="st">"gemini"</span>, <span class="st">"groq"</span>, <span class="st">"ollama"</span>, <span class="st">"openrouter"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
+<span>  provider <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"local"</span>, <span class="st">"gemini"</span>, <span class="st">"groq"</span>, <span class="st">"cloudflare"</span>, <span class="st">"ollama"</span>, <span class="st">"openrouter"</span>, <span class="st">"custom"</span><span class="op">)</span>,</span>
 <span>  api_key <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  base_url <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  account_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_tokens <span class="op">=</span> <span class="fl">1000L</span>,</span>
 <span>  temperature <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -105,8 +106,9 @@ evaluation and explanation evidence.</p>
 
 
 <dt id="arg-provider">provider<a class="anchor" aria-label="anchor" href="#arg-provider"></a></dt>
-<dd><p>One of <code>"local"</code>, <code>"gemini"</code>, <code>"groq"</code>, <code>"ollama"</code>,
-<code>"openrouter"</code>, or <code>"custom"</code>. The default is always <code>"local"</code>.</p></dd>
+<dd><p>One of <code>"local"</code>, <code>"gemini"</code>, <code>"groq"</code>,
+<code>"cloudflare"</code>, <code>"ollama"</code>, <code>"openrouter"</code>, or <code>"custom"</code>. The default
+is always <code>"local"</code>.</p></dd>
 
 
 <dt id="arg-api-key">api_key<a class="anchor" aria-label="anchor" href="#arg-api-key"></a></dt>
@@ -122,6 +124,11 @@ is consulted when this is <code>NULL</code>.</p></dd>
 
 <dt id="arg-base-url">base_url<a class="anchor" aria-label="anchor" href="#arg-base-url"></a></dt>
 <dd><p>Optional endpoint override. A custom provider requires it.</p></dd>
+
+
+<dt id="arg-account-id">account_id<a class="anchor" aria-label="anchor" href="#arg-account-id"></a></dt>
+<dd><p>Cloudflare account ID. When <code>NULL</code>,
+<code>CLOUDFLARE_ACCOUNT_ID</code> is consulted for the Cloudflare provider.</p></dd>
 
 
 <dt id="arg-max-tokens">max_tokens<a class="anchor" aria-label="anchor" href="#arg-max-tokens"></a></dt>

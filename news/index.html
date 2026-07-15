@@ -78,7 +78,8 @@
 <li>Preprocessing is conservative, returns a reusable recipe, and applies fitted levels/imputation values to evaluation data. Identifier removal and guessed ordinal conversion are opt-in.</li>
 <li>Added the engine-neutral <code><a href="../reference/preprocess_data.html">preprocess_data()</a></code> name; <code><a href="../reference/preprocess_for_h2o.html">preprocess_for_h2o()</a></code> is retained as a compatibility alias.</li>
 <li>Replaced the generated 2,300-line Flexdashboard implementation with the same evidence-report pipeline used by model-agnostic callers.</li>
-<li>Replaced fixed, ranking-first LLM prompts with local deterministic reports and explicit aggregated-data-only Gemini, Groq, Ollama, OpenRouter, and custom OpenAI-compatible adapters. Local deterministic reporting is always the default, even when an API key is present, and provider/model/fallback details are attached as provenance.</li>
+<li>Replaced fixed, ranking-first LLM prompts with local deterministic reports and explicit aggregated-data-only Gemini, Groq, Cloudflare Workers AI, Ollama, OpenRouter, and custom OpenAI-compatible adapters. Local deterministic reporting is always the default, even when an API key is present, and provider/model/fallback details are attached as provenance.</li>
+<li>Added a dated provider decision guide covering current free access, privacy, reproducibility, setup, and structured-output capabilities. The Groq default now uses schema-capable <code>openai/gpt-oss-120b</code>.</li>
 <li>Removed bundled third-party datasets whose provenance and redistribution terms were not documented.</li>
 </ul></div>
 <div class="section level3">

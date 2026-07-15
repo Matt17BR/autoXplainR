@@ -103,10 +103,14 @@
 - Replaced the generated 2,300-line Flexdashboard implementation with
   the same evidence-report pipeline used by model-agnostic callers.
 - Replaced fixed, ranking-first LLM prompts with local deterministic
-  reports and explicit aggregated-data-only Gemini, Groq, Ollama,
-  OpenRouter, and custom OpenAI-compatible adapters. Local deterministic
-  reporting is always the default, even when an API key is present, and
-  provider/model/fallback details are attached as provenance.
+  reports and explicit aggregated-data-only Gemini, Groq, Cloudflare
+  Workers AI, Ollama, OpenRouter, and custom OpenAI-compatible adapters.
+  Local deterministic reporting is always the default, even when an API
+  key is present, and provider/model/fallback details are attached as
+  provenance.
+- Added a dated provider decision guide covering current free access,
+  privacy, reproducibility, setup, and structured-output capabilities.
+  The Groq default now uses schema-capable `openai/gpt-oss-120b`.
 - Removed bundled third-party datasets whose provenance and
   redistribution terms were not documented.
 

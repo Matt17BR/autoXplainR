@@ -363,6 +363,10 @@ certification, fairness test, or safety assessment.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>GEMINI_API_KEY <span class="op">=</span> <span class="st">"..."</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"gemini"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Or use the Groq or Cloudflare free allowance</span></span>
+<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"groq"</span><span class="op">)</span></span>
+<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"cloudflare"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Or use a model running locally through Ollama</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"ollama"</span><span class="op">)</span></span></code></pre></div>
 <p>Only aggregated diagnostics are placed in the prompt. Raw rows,
@@ -370,6 +374,10 @@ fitted objects, case-level predictions, and secrets are excluded.
 Provider and model details are attached to the returned text so the
 prose can be audited. Generated prose still needs human review against
 the numerical report.</p>
+<p>See the repository’s narrative provider guide for the dated
+comparison of free access, structured-output support, privacy, and
+reproducibility. Provider plans and model catalogs can change
+independently of AutoXplainR.</p>
 </div>
 <div class="section level2">
 <h2 id="classification-uses-the-same-contract">Classification uses the same contract<a class="anchor" aria-label="anchor" href="#classification-uses-the-same-contract"></a>

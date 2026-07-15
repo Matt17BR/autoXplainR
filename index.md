@@ -178,17 +178,17 @@ narrative_providers()
 
 memo <- generate_natural_language_report(result, provider = "gemini")
 memo <- generate_natural_language_report(result, provider = "groq")
+memo <- generate_natural_language_report(result, provider = "cloudflare")
 memo <- generate_natural_language_report(result, provider = "ollama")
 memo <- generate_natural_language_report(result, provider = "openrouter")
 ```
 
-Current defaults are documented against the official [Gemini free-tier
-pricing](https://ai.google.dev/gemini-api/docs/pricing), [Groq rate
-limits](https://console.groq.com/docs/rate-limits), [Ollama local
-API](https://docs.ollama.com/api/openai-compatibility), and [OpenRouter
-free
-routing](https://openrouter.ai/docs/guides/routing/model-variants/free).
-Provider, resolved model, fallback, and prompt provenance are retained.
+The [narrative provider
+guide](https://matt17br.github.io/autoXplainR/LLM_PROVIDERS.md) compares
+current free access, privacy, structured-output support,
+reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI,
+Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt
+provenance are retained.
 
 ## Classification, existing models, and H2O use the same contract
 

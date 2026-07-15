@@ -15,10 +15,11 @@ generate_natural_language_report(
   pdp_data = NULL,
   model_characteristics = NULL,
   audit = NULL,
-  provider = c("local", "gemini", "groq", "ollama", "openrouter", "custom"),
+  provider = c("local", "gemini", "groq", "cloudflare", "ollama", "openrouter", "custom"),
   api_key = NULL,
   model = NULL,
   base_url = NULL,
+  account_id = NULL,
   max_tokens = 1000L,
   temperature = 0.2,
   timeout = 30,
@@ -52,8 +53,8 @@ generate_natural_language_report(
 
 - provider:
 
-  One of `"local"`, `"gemini"`, `"groq"`, `"ollama"`, `"openrouter"`, or
-  `"custom"`. The default is always `"local"`.
+  One of `"local"`, `"gemini"`, `"groq"`, `"cloudflare"`, `"ollama"`,
+  `"openrouter"`, or `"custom"`. The default is always `"local"`.
 
 - api_key:
 
@@ -71,6 +72,11 @@ generate_natural_language_report(
 - base_url:
 
   Optional endpoint override. A custom provider requires it.
+
+- account_id:
+
+  Cloudflare account ID. When `NULL`, `CLOUDFLARE_ACCOUNT_ID` is
+  consulted for the Cloudflare provider.
 
 - max_tokens:
 
