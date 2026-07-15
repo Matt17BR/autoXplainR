@@ -17,6 +17,17 @@
 - The guided workflow now rejects unsupported or non-finite inputs, removes and
   records constant predictors, and reapplies its fitted preprocessing recipe to
   raw evaluation data supplied later.
+- Added `model_set = "comparison"`, a dependency-light candidate set with the
+  pre-specified statistical model, two decision-tree complexities, and the
+  simple baseline. Held-out candidate ranks remain descriptive rather than
+  silently replacing the primary model.
+- Added candidate-set-relative Pareto analysis through `model_tradeoffs()` and
+  rebuilt `plot_model_comparison()` around explicit performance-versus-size
+  trade-offs rather than a subjective composite score.
+- Guided reports now include a plain-language multi-model trade-off section and
+  dependency-free Pareto SVG whenever more than two candidates were fitted.
+- Numerical fit warnings are captured in model diagnostics and translated into
+  an actionable report warning instead of being lost or printed without context.
 - Repositioned the model-agnostic explanation evidence audit as an advanced
   reliability layer behind the beginner workflow.
 - Added `explain_model()` with a validated prediction contract for regression,

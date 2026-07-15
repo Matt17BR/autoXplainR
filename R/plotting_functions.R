@@ -219,63 +219,67 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
     plotly::config(displayModeBar = FALSE, responsive = TRUE)
 }
 
-#' Plot AutoML model performance
+#' Plot model performance and complexity trade-offs
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param performance_metric Leaderboard metric; automatically selected when
 #'   `NULL`.
-#' @param complexity_metric Optional leaderboard complexity column. Model rank
-#'   is used when unavailable.
+#' @param complexity_metric Optional numeric leaderboard or model-metadata
+#'   column. Model size is preferred when `NULL`.
 #' @param title Plot title.
 #'
 #' @return A Plotly scatter plot.
 #' @export
 plot_model_comparison <- function(autoxplain_result,
                                   performance_metric = NULL,
-                                  complexity_metric = "model_size",
-                                  title = "Model Performance Landscape") {
+                                  complexity_metric = NULL,
+                                  title = "Model Trade-off Landscape") {
   require_optional("plotly", "interactive model comparison plots")
-  if (!inherits(autoxplain_result, "autoxplain_result")) {
-    stop("`autoxplain_result` must be returned by `autoxplain()`.", call. = FALSE)
-  }
-  leaderboard <- as.data.frame(autoxplain_result$leaderboard)
-  numeric_columns <- names(leaderboard)[vapply(leaderboard, is.numeric, logical(1))]
-  preferred <- if (autoxplain_result$task == "regression") {
-    c("rmse", "mae", "mse")
-  } else {
-    c("auc", "logloss", "mean_per_class_error")
-  }
-  if (is.null(performance_metric)) {
-    candidates <- intersect(preferred, numeric_columns)
-    performance_metric <- if (length(candidates)) candidates[[1L]] else NULL
-  }
-  if (is.null(performance_metric) || !performance_metric %in% names(leaderboard)) {
-    stop("No suitable numeric performance metric is available.", call. = FALSE)
-  }
-  if (!complexity_metric %in% names(leaderboard)) {
-    leaderboard$model_rank <- seq_len(nrow(leaderboard))
-    complexity_metric <- "model_rank"
-  }
-  leaderboard$model_type <- extract_model_type(as.character(leaderboard$model_id))
-  plotly::plot_ly(
-    leaderboard,
-    x = leaderboard[[complexity_metric]],
-    y = leaderboard[[performance_metric]],
-    color = ~model_type,
-    text = ~model_id,
+  tradeoffs <- model_tradeoffs(
+    autoxplain_result,
+    performance_metric = performance_metric,
+    complexity_metric = complexity_metric
+  )
+  performance_metric <- attr(tradeoffs, "performance_metric")
+  complexity_metric <- attr(tradeoffs, "complexity_metric")
+  tradeoffs$pareto_status <- ifelse(tradeoffs$pareto_optimal, "Pareto-efficient", "Dominated")
+  plot <- plotly::plot_ly(
+    tradeoffs,
+    x = tradeoffs[[complexity_metric]],
+    y = tradeoffs[[performance_metric]],
+    color = ~role,
+    symbol = ~pareto_status,
+    text = ~model,
     type = "scatter",
     mode = "markers",
-    marker = list(size = 11),
+    marker = list(size = 12, line = list(width = 1, color = "#ffffff")),
     hovertemplate = paste0(
       "<b>%{text}</b><br>", complexity_metric, ": %{x}<br>",
-      performance_metric, ": %{y:.5f}<extra></extra>"
+      performance_metric, ": %{y:.5f}<br>%{customdata}<extra></extra>"
+    ),
+    customdata = ~pareto_status
+  )
+  frontier <- tradeoffs[tradeoffs$pareto_optimal, , drop = FALSE]
+  frontier <- frontier[order(frontier[[complexity_metric]]), , drop = FALSE]
+  if (nrow(frontier) > 1L) {
+    plot <- plotly::add_lines(
+      plot,
+      data = frontier,
+      x = frontier[[complexity_metric]],
+      y = frontier[[performance_metric]],
+      inherit = FALSE,
+      line = list(color = "#176b4d", width = 2, dash = "dot"),
+      hoverinfo = "skip",
+      name = "Pareto frontier"
     )
-  ) |>
+  }
+  plot |>
     plotly::layout(
       title = title,
       xaxis = list(title = complexity_metric),
       yaxis = list(title = performance_metric),
-      margin = list(l = 60, r = 25, t = 55, b = 55)
+      margin = list(l = 70, r = 25, t = 55, b = 65),
+      legend = list(orientation = "h", x = 0, y = -0.2)
     ) |>
     plotly::config(displayModeBar = FALSE, responsive = TRUE)
 }

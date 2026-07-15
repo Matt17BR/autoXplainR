@@ -26,6 +26,11 @@
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
 #'   resolves to the dependency-free `"base"` workflow.
+#' @param model_set Guided base-engine candidates. `"quick"` fits the
+#'   pre-specified understandable model and baseline. `"comparison"` also fits
+#'   shallow and flexible decision trees for a descriptive multi-model and
+#'   Pareto trade-off view. Held-out ranks do not silently replace the
+#'   pre-specified primary model.
 #' @param enable_preprocessing Apply [preprocess_data()].
 #' @param preprocessing_config Named overrides for preprocessing. Identifier
 #'   removal defaults to `FALSE`.
@@ -64,6 +69,7 @@ autoxplain <- function(data,
                        test_data = NULL,
                        test_fraction = 0.2,
                        engine = c("auto", "base", "h2o"),
+                       model_set = c("quick", "comparison"),
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
                        task = c("auto", "regression", "binary", "multiclass"),
@@ -78,6 +84,7 @@ autoxplain <- function(data,
                        verbosity = c("quiet", "info")) {
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
+  model_set <- match.arg(model_set)
   task <- match.arg(task)
   verbosity <- match.arg(verbosity)
   validate_automl_inputs(data, target_column, test_data)
@@ -93,6 +100,7 @@ autoxplain <- function(data,
       test_fraction = test_fraction,
       seed = seed,
       task = task,
+      model_set = model_set,
       enable_preprocessing = enable_preprocessing,
       preprocessing_config = preprocessing_config,
       verbosity = verbosity
@@ -292,6 +300,11 @@ print.autoxplain_result <- function(x, ...) {
   cat("  engine:     ", x$engine %||% "h2o", "\n", sep = "")
   cat("  data:       ", nrow(x$training_data), " training + ",
       nrow(x$test_data %||% x$training_data), " evaluation rows\n", sep = "")
+  cat("  models:     ", length(x$models), if (length(x$models) > 2L) {
+    " (comparison set; primary remains pre-specified)"
+  } else {
+    " (primary + baseline)"
+  }, "\n", sep = "")
   if (!is.null(x$evaluation$primary_metric)) {
     reference <- if ("main_model" %in% names(x$evaluation$metrics)) {
       "main_model"

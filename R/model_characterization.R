@@ -35,6 +35,7 @@ extract_model_characteristics <- function(autoxplain_result,
       friendly_model_type(model)
     }
     row <- leaderboard[match(id, leaderboard$model_id), , drop = FALSE]
+    diagnostic <- result_model_diagnostic(autoxplain_result, id)
     numeric_metrics <- if (nrow(row)) {
       row[vapply(row, is.numeric, logical(1))]
     } else {
@@ -47,14 +48,15 @@ extract_model_characteristics <- function(autoxplain_result,
       training_time_s = if (h2o_model) {
         tryCatch(as.numeric(model@model$run_time) / 1000, error = function(error) NA_real_)
       } else {
-        NA_real_
+        diagnostic$training_time_ms / 1000
       },
       size_bytes = if (h2o_model) {
         tryCatch(as.numeric(model@model$output$model_size_in_bytes),
                  error = function(error) NA_real_)
       } else {
-        as.numeric(utils::object.size(model))
-      }
+        diagnostic$model_size_kb * 1024
+      },
+      complexity = if (h2o_model) NA_real_ else diagnostic$complexity
     )
     info$size_mb <- info$size_bytes / 1024^2
     if (include_performance) {
@@ -100,6 +102,25 @@ extract_model_characteristics <- function(autoxplain_result,
   )
   class(output) <- c("autoxplainr_model_characteristics", "list")
   output
+}
+
+result_model_diagnostic <- function(result, model_id) {
+  diagnostics <- result$model_diagnostics
+  if (is.data.frame(diagnostics) && "model_id" %in% names(diagnostics)) {
+    row <- diagnostics[match(model_id, diagnostics$model_id), , drop = FALSE]
+    if (nrow(row) && !is.na(row$model_id[[1L]])) {
+      return(list(
+        training_time_ms = row$training_time_ms[[1L]],
+        model_size_kb = row$model_size_kb[[1L]],
+        complexity = row$complexity[[1L]]
+      ))
+    }
+  }
+  list(
+    training_time_ms = NA_real_,
+    model_size_kb = as.numeric(utils::object.size(result$models[[model_id]])) / 1024,
+    complexity = model_complexity(result$models[[model_id]])
+  )
 }
 
 friendly_model_type <- function(model) {
@@ -247,6 +268,7 @@ model_characteristics_table <- function(x) {
     algorithm = vapply(x, `[[`, character(1), "algorithm"),
     training_time_s = vapply(x, `[[`, numeric(1), "training_time_s"),
     size_mb = vapply(x, `[[`, numeric(1), "size_mb"),
+    complexity = vapply(x, `[[`, numeric(1), "complexity"),
     stringsAsFactors = FALSE
   )
 }

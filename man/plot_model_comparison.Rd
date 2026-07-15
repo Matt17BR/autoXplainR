@@ -2,13 +2,13 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_model_comparison}
 \alias{plot_model_comparison}
-\title{Plot AutoML model performance}
+\title{Plot model performance and complexity trade-offs}
 \usage{
 plot_model_comparison(
   autoxplain_result,
   performance_metric = NULL,
-  complexity_metric = "model_size",
-  title = "Model Performance Landscape"
+  complexity_metric = NULL,
+  title = "Model Trade-off Landscape"
 )
 }
 \arguments{
@@ -17,8 +17,8 @@ plot_model_comparison(
 \item{performance_metric}{Leaderboard metric; automatically selected when
 \code{NULL}.}
 
-\item{complexity_metric}{Optional leaderboard complexity column. Model rank
-is used when unavailable.}
+\item{complexity_metric}{Optional numeric leaderboard or model-metadata
+column. Model size is preferred when \code{NULL}.}
 
 \item{title}{Plot title.}
 }
@@ -26,5 +26,5 @@ is used when unavailable.}
 A Plotly scatter plot.
 }
 \description{
-Plot AutoML model performance
+Plot model performance and complexity trade-offs
 }

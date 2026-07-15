@@ -13,6 +13,7 @@ autoxplain(
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
+  model_set = c("quick", "comparison"),
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
@@ -48,6 +49,12 @@ validation frame unless \code{use_test_as_validation = TRUE}.}
 
 \item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
 resolves to the dependency-free \code{"base"} workflow.}
+
+\item{model_set}{Guided base-engine candidates. \code{"quick"} fits the
+pre-specified understandable model and baseline. \code{"comparison"} also fits
+shallow and flexible decision trees for a descriptive multi-model and
+Pareto trade-off view. Held-out ranks do not silently replace the
+pre-specified primary model.}
 
 \item{enable_preprocessing}{Apply \code{\link[=preprocess_data]{preprocess_data()}}.}
 

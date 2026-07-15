@@ -82,6 +82,39 @@ The standalone report uses progressive disclosure:
 The report does not need an LLM, Plotly, H2O, or a browser runtime after it is
 written.
 
+## Compare a small candidate set
+
+The first call stays intentionally simple. When comparing a few approachable
+model shapes would help, use the explicit comparison mode:
+
+```{r comparison}
+comparison <- autoxplain(
+  iris,
+  target_column = "Sepal.Length",
+  model_set = "comparison",
+  test_fraction = 0.4,
+  seed = 2026
+)
+
+model_tradeoffs(comparison)
+```
+
+This adds a shallow tree and a more flexible tree to the pre-specified
+statistical model and intercept-only baseline. Pareto status asks whether
+another supplied model is at least as good on both held-out performance and
+model size, with a strict improvement on one.
+
+The comparison is descriptive. AutoXplainR does not silently promote the
+holdout winner to primary, because selecting on the holdout and reporting the
+same score as final performance would be optimistic. Use fresh validation or a
+pre-specified resampling procedure when model selection itself is the goal.
+
+An interactive view is available when Plotly is installed:
+
+```{r comparison-plot, eval=FALSE}
+plot_model_comparison(comparison)
+```
+
 ## Investigate one fitted pattern
 
 The guided result can be converted to a model-agnostic explainer. Select the

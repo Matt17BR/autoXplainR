@@ -4,6 +4,7 @@ fit_guided_base <- function(data,
                             test_fraction,
                             seed,
                             task,
+                            model_set,
                             enable_preprocessing,
                             preprocessing_config,
                             verbosity) {
@@ -78,7 +79,7 @@ fit_guided_base <- function(data,
 
   fit <- with_preserved_seed(
     seed,
-    fit_base_candidates(train, target_column, features, resolved_task)
+    fit_base_candidates(train, target_column, features, resolved_task, model_set)
   )
   evaluated <- evaluate_candidates(
     fit$models,
@@ -86,7 +87,8 @@ fit_guided_base <- function(data,
     target_column,
     resolved_task,
     fit$labels,
-    fit$roles
+    fit$roles,
+    fit$diagnostics
   )
   evaluated$summary$notes <- guided_evaluation_notes(
     train,
@@ -94,7 +96,8 @@ fit_guided_base <- function(data,
     target_column,
     resolved_task,
     evaluated$summary,
-    constant_result$removed
+    constant_result$removed,
+    stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id)
   )
 
   result <- structure(
@@ -110,6 +113,7 @@ fit_guided_base <- function(data,
       task = resolved_task,
       automl_object = NULL,
       model_characteristics = NULL,
+      model_diagnostics = evaluated$model_diagnostics,
       preprocessing_metadata = list(
         enabled = enable_preprocessing,
         training_data = processed$training,
@@ -119,6 +123,7 @@ fit_guided_base <- function(data,
         created_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
         seed = seed,
         engine_requested = "base",
+        model_set = model_set,
         evaluation_role = "held-out test",
         split_method = split$method,
         test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_,
@@ -127,7 +132,11 @@ fit_guided_base <- function(data,
         rows_moved_for_unseen_levels = split$moved_for_unseen_levels,
         constant_features_removed = constant_result$removed,
         baseline = "intercept-only model",
-        primary_model = fit$labels[["main_model"]]
+        primary_model = fit$labels[["main_model"]],
+        candidate_selection = paste(
+          "The main model was pre-specified; held-out candidate ranks are descriptive",
+          "and were not used to replace it."
+        )
       )
     ),
     class = "autoxplain_result"
@@ -370,40 +379,130 @@ validate_finite_guided_data <- function(data, target) {
   invisible(TRUE)
 }
 
-fit_base_candidates <- function(data, target, features, task) {
+fit_base_candidates <- function(data, target, features, task, model_set = "quick") {
   primary_formula <- stats::reformulate(features, response = target)
   baseline_formula <- stats::reformulate(character(), response = target)
-  started <- proc.time()[["elapsed"]]
   if (task == "regression") {
-    baseline <- stats::lm(baseline_formula, data = data)
-    primary <- stats::lm(primary_formula, data = data)
+    baseline <- timed_model_fit(function() stats::lm(baseline_formula, data = data))
+    primary <- timed_model_fit(function() stats::lm(primary_formula, data = data))
     label <- "linear regression"
   } else if (task == "binary") {
-    baseline <- stats::glm(baseline_formula, data = data, family = stats::binomial())
-    primary <- stats::glm(primary_formula, data = data, family = stats::binomial())
+    baseline <- timed_model_fit(function() {
+      stats::glm(baseline_formula, data = data, family = stats::binomial())
+    })
+    primary <- timed_model_fit(function() {
+      stats::glm(primary_formula, data = data, family = stats::binomial())
+    })
     label <- "logistic regression"
   } else {
-    baseline <- nnet::multinom(baseline_formula, data = data, trace = FALSE)
-    primary <- nnet::multinom(primary_formula, data = data, trace = FALSE)
+    baseline <- timed_model_fit(function() {
+      nnet::multinom(baseline_formula, data = data, trace = FALSE)
+    })
+    primary <- timed_model_fit(function() {
+      nnet::multinom(primary_formula, data = data, trace = FALSE)
+    })
     label <- "multinomial logistic regression"
   }
-  elapsed <- proc.time()[["elapsed"]] - started
-  models <- list(main_model = primary, simple_baseline = baseline)
+  fits <- list(main_model = primary, simple_baseline = baseline)
+  labels <- c(main_model = label, simple_baseline = "intercept-only baseline")
+  roles <- c(main_model = "primary", simple_baseline = "baseline")
+  if (identical(model_set, "comparison")) {
+    method <- if (task == "regression") "anova" else "class"
+    small_minsplit <- max(4L, min(20L, as.integer(floor(nrow(data) * 0.10))))
+    flexible_minsplit <- max(4L, min(10L, as.integer(floor(nrow(data) * 0.05))))
+    fits$small_tree <- timed_model_fit(function() {
+      rpart::rpart(
+        primary_formula,
+        data = data,
+        method = method,
+        control = rpart::rpart.control(
+          cp = 0.01, maxdepth = 2L, minsplit = small_minsplit, xval = 0L
+        )
+      )
+    })
+    fits$flexible_tree <- timed_model_fit(function() {
+      rpart::rpart(
+        primary_formula,
+        data = data,
+        method = method,
+        control = rpart::rpart.control(
+          cp = 0.001, maxdepth = 5L, minsplit = flexible_minsplit, xval = 0L
+        )
+      )
+    })
+    labels <- c(
+      labels,
+      small_tree = "small decision tree",
+      flexible_tree = "flexible decision tree"
+    )
+    roles <- c(roles, small_tree = "candidate", flexible_tree = "candidate")
+  }
+  models <- lapply(fits, `[[`, "model")
+  diagnostics <- data.frame(
+    model_id = names(models),
+    training_time_ms = vapply(fits, `[[`, numeric(1), "elapsed_ms"),
+    model_size_kb = vapply(
+      models,
+      function(model) as.numeric(utils::object.size(model)) / 1024,
+      numeric(1)
+    ),
+    complexity = vapply(models, model_complexity, numeric(1)),
+    fit_warning = vapply(
+      fits,
+      function(item) paste(unique(item$warnings), collapse = " | "),
+      character(1)
+    ),
+    stringsAsFactors = FALSE
+  )
   list(
     models = models,
-    labels = c(main_model = label, simple_baseline = "intercept-only baseline"),
-    roles = c(main_model = "primary", simple_baseline = "baseline"),
-    elapsed = elapsed
+    labels = labels,
+    roles = roles,
+    diagnostics = diagnostics
   )
 }
 
-evaluate_candidates <- function(models, data, target, task, labels, roles) {
+timed_model_fit <- function(callback) {
+  started <- proc.time()[["elapsed"]]
+  warnings <- character()
+  model <- withCallingHandlers(
+    callback(),
+    warning = function(condition) {
+      warnings <<- c(warnings, conditionMessage(condition))
+      invokeRestart("muffleWarning")
+    }
+  )
+  list(
+    model = model,
+    elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
+    warnings = warnings
+  )
+}
+
+model_complexity <- function(model) {
+  if (inherits(model, "rpart")) {
+    return(sum(as.character(model$frame$var) == "<leaf>"))
+  }
+  coefficients <- tryCatch(stats::coef(model), error = function(error) numeric())
+  sum(is.finite(as.numeric(coefficients)))
+}
+
+evaluate_candidates <- function(models,
+                                data,
+                                target,
+                                task,
+                                labels,
+                                roles,
+                                diagnostics = NULL) {
   evaluated <- lapply(names(models), function(id) {
     explainer <- explain_model(models[[id]], data, target, task = task, label = labels[[id]])
+    started <- proc.time()[["elapsed"]]
     predictions <- predict(explainer, explainer$data)
+    prediction_time_ms <- max(0, 1000 * (proc.time()[["elapsed"]] - started))
     list(
       metrics = evaluate_predictions(explainer$y, predictions, explainer),
       predictions = predictions,
+      prediction_time_ms = prediction_time_ms,
       explainer = explainer
     )
   })
@@ -434,10 +533,26 @@ evaluate_candidates <- function(models, data, target, task, labels, roles) {
       numeric(1)
     )
   }
+  if (!is.null(diagnostics)) {
+    diagnostics <- diagnostics[match(leaderboard$model_id, diagnostics$model_id), , drop = FALSE]
+    leaderboard$training_time_ms <- diagnostics$training_time_ms
+    leaderboard$model_size_kb <- diagnostics$model_size_kb
+    leaderboard$complexity <- diagnostics$complexity
+    leaderboard$fit_warning <- diagnostics$fit_warning
+  }
+  leaderboard$prediction_time_ms <- vapply(
+    leaderboard$model_id,
+    function(id) evaluated[[id]]$prediction_time_ms,
+    numeric(1)
+  )
   leaderboard <- leaderboard[order(leaderboard$rank, leaderboard$model_id), , drop = FALSE]
   rownames(leaderboard) <- NULL
   list(
     leaderboard = leaderboard,
+    model_diagnostics = leaderboard[c(
+      "model_id", "training_time_ms", "prediction_time_ms", "model_size_kb", "complexity",
+      "fit_warning"
+    )],
     summary = list(
       primary_metric = primary_metric,
       winner = winner,
@@ -566,7 +681,8 @@ guided_evaluation_notes <- function(training,
                                     target,
                                     task,
                                     summary,
-                                    constant_features = character()) {
+                                    constant_features = character(),
+                                    fit_warnings = character()) {
   notes <- list()
   add <- function(severity, code, message, recommendation) {
     notes[[length(notes) + 1L]] <<- data.frame(
@@ -591,6 +707,19 @@ guided_evaluation_notes <- function(training,
       "constant_inputs_removed",
       paste0("Constant training inputs were removed: ", paste(constant_features, collapse = ", "), "."),
       "Check whether constant inputs indicate a data-export or sampling problem."
+    )
+  }
+  warned_models <- names(fit_warnings)[nzchar(fit_warnings)]
+  if (length(warned_models)) {
+    add(
+      "warning",
+      "model_fit_warning",
+      paste0("Numerical fitting warnings occurred for: ",
+             paste(warned_models, collapse = ", "), "."),
+      paste(
+        "Inspect the recorded model diagnostics for separation, convergence, or",
+        "instability before trusting probabilities or coefficients."
+      )
     )
   }
   n_features <- ncol(training) - 1L

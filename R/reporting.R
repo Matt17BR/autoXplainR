@@ -85,6 +85,8 @@ validate_html_destination <- function(output_file, open) {
 model_report_html <- function(result, audit, effects, narrative, title) {
   evaluation <- model_report_evaluation(result, audit)
   narrative_html <- render_guided_narrative(narrative)
+  comparison_html <- render_model_comparison(result)
+  comparison_nav <- if (nzchar(comparison_html)) "<a href=\"#models\">Compare</a>" else ""
   paste0(
     "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
@@ -93,13 +95,16 @@ model_report_html <- function(result, audit, effects, narrative, title) {
     "<header><div class=\"shell\"><p class=\"eyebrow\">AutoXplainR / Guided model report</p>",
     "<h1>", html_escape(title), "</h1>",
     "<p class=\"lede\">What was fitted, how it performed on data kept out of fitting, ",
-    "which patterns it used, and how cautiously those patterns should be communicated.</p>",
+    "what trade-offs appeared across candidates, which patterns it used, and how cautiously ",
+    "those patterns should be communicated.</p>",
     "<nav aria-label=\"Report sections\"><a href=\"#overview\">Overview</a>",
-    "<a href=\"#evaluation\">Evaluation</a><a href=\"#patterns\">Patterns</a>",
+    "<a href=\"#evaluation\">Evaluation</a>", comparison_nav,
+    "<a href=\"#patterns\">Patterns</a>",
     "<a href=\"#reliability\">Reliability</a><a href=\"#limits\">Limits</a></nav>",
     "</div></header><main id=\"main\" class=\"shell\">",
     render_model_overview(result, evaluation),
     render_model_evaluation(result, evaluation),
+    comparison_html,
     narrative_html,
     "<section id=\"patterns\" aria-labelledby=\"patterns-title\"><p class=\"eyebrow\">How the model works</p>",
     "<h2 id=\"patterns-title\">Patterns used for prediction</h2>",
@@ -125,6 +130,147 @@ model_report_html <- function(result, audit, effects, narrative, title) {
   )
 }
 
+render_model_comparison <- function(result) {
+  if (length(result$models) <= 2L) return("")
+  tradeoffs <- tryCatch(
+    model_tradeoffs(result),
+    error = function(error) NULL
+  )
+  if (is.null(tradeoffs)) return("")
+  performance_metric <- attr(tradeoffs, "performance_metric")
+  complexity_metric <- attr(tradeoffs, "complexity_metric")
+  higher_is_better <- isTRUE(attr(tradeoffs, "higher_is_better"))
+  best_index <- if (higher_is_better) {
+    which.max(tradeoffs[[performance_metric]])[[1L]]
+  } else {
+    which.min(tradeoffs[[performance_metric]])[[1L]]
+  }
+  smallest_index <- which.min(tradeoffs[[complexity_metric]])[[1L]]
+  display <- data.frame(
+    Model = tradeoffs$model,
+    Role = tradeoffs$role,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  display[[pretty_metric(performance_metric)]] <- tradeoffs[[performance_metric]]
+  display[[pretty_complexity(complexity_metric)]] <- tradeoffs[[complexity_metric]]
+  display[["Pareto-efficient"]] <- tradeoffs$pareto_optimal
+  paste0(
+    "<section id=\"models\" class=\"comparison-section\" aria-labelledby=\"models-title\">",
+    "<p class=\"eyebrow\">Model comparison</p>",
+    "<h2 id=\"models-title\">What trade-offs did the candidates make?</h2>",
+    "<p>AutoXplainR compares the supplied candidates on two visible dimensions rather than ",
+    "hiding judgment inside one weighted score. A Pareto-efficient model is not beaten by ",
+    "another supplied model on both held-out performance and complexity.</p>",
+    "<div class=\"cards comparison-cards\">",
+    metric_card("Compared models", as.character(nrow(tradeoffs)),
+                "Primary, candidates, and simple baseline"),
+    metric_card("Pareto-efficient", as.character(sum(tradeoffs$pareto_optimal)),
+                "Not dominated on both displayed dimensions"),
+    metric_card("Best observed score", tradeoffs$model[[best_index]],
+                paste0(pretty_metric(performance_metric), " on this holdout")),
+    metric_card("Smallest model", tradeoffs$model[[smallest_index]],
+                pretty_complexity(complexity_metric)),
+    "</div><div class=\"tradeoff-layout\"><div>", tradeoff_svg(tradeoffs),
+    "</div><div class=\"tradeoff-explainer\"><h3>How to read this</h3><ol>",
+    "<li>Up means better held-out performance.</li>",
+    "<li>Left means lower measured complexity.</li>",
+    "<li>Outlined points form the supplied Pareto frontier.</li>",
+    "</ol><p><strong>The primary model remains pre-specified.</strong> Candidate ranks are ",
+    "descriptive; selecting a winner on these same held-out rows and quoting its score as ",
+    "final performance would be optimistic.</p></div></div>",
+    html_table(display, digits = 4L),
+    "<p class=\"microcopy\">", html_escape(attr(tradeoffs, "scope_note")), "</p></section>"
+  )
+}
+
+tradeoff_svg <- function(tradeoffs) {
+  performance_metric <- attr(tradeoffs, "performance_metric")
+  complexity_metric <- attr(tradeoffs, "complexity_metric")
+  higher_is_better <- isTRUE(attr(tradeoffs, "higher_is_better"))
+  width <- 720
+  height <- 360
+  left <- 76
+  right <- 36
+  top <- 34
+  bottom <- 68
+  x <- scale_plot_values(tradeoffs[[complexity_metric]], left, width - right)
+  performance <- if (higher_is_better) {
+    tradeoffs[[performance_metric]]
+  } else {
+    -tradeoffs[[performance_metric]]
+  }
+  y <- scale_plot_values(performance, height - bottom, top)
+  frontier <- which(tradeoffs$pareto_optimal)
+  frontier <- frontier[order(x[frontier])]
+  line <- if (length(frontier) > 1L) {
+    points <- paste0(round(x[frontier], 2L), ",", round(y[frontier], 2L), collapse = " ")
+    paste0("<polyline points=\"", points, "\" class=\"pareto-line\"/>")
+  } else {
+    ""
+  }
+  points <- vapply(seq_len(nrow(tradeoffs)), function(index) {
+    role <- if (tradeoffs$role[[index]] %in% c("primary", "baseline", "candidate")) {
+      tradeoffs$role[[index]]
+    } else {
+      "candidate"
+    }
+    label <- substr(tradeoffs$model[[index]], 1L, 28L)
+    label_on_left <- x[[index]] > width - 190
+    label_x <- x[[index]] + if (label_on_left) -13 else 13
+    label_y <- y[[index]] + if (y[[index]] < top + 24) 24 else -11
+    paste0(
+      "<g><circle cx=\"", round(x[[index]], 2L), "\" cy=\"", round(y[[index]], 2L),
+      "\" r=\"", if (tradeoffs$pareto_optimal[[index]]) "10" else "8",
+      "\" class=\"tradeoff-point tradeoff-", role,
+      if (tradeoffs$pareto_optimal[[index]]) " tradeoff-pareto" else "", "\"/>",
+      "<text x=\"", round(label_x, 2L), "\" y=\"", round(label_y, 2L),
+      "\" text-anchor=\"", if (label_on_left) "end" else "start",
+      "\" class=\"point-label\">", html_escape(label), "</text></g>"
+    )
+  }, character(1))
+  aria <- paste(
+    "Model trade-off chart comparing", pretty_metric(performance_metric), "and",
+    pretty_complexity(complexity_metric), "for", nrow(tradeoffs), "models."
+  )
+  paste0(
+    "<svg class=\"tradeoff-plot\" viewBox=\"0 0 ", width, " ", height,
+    "\" role=\"img\" aria-label=\"", html_escape(aria), "\">",
+    "<line x1=\"", left, "\" y1=\"", height - bottom, "\" x2=\"", width - right,
+    "\" y2=\"", height - bottom, "\" class=\"chart-axis\"/>",
+    "<line x1=\"", left, "\" y1=\"", top, "\" x2=\"", left,
+    "\" y2=\"", height - bottom, "\" class=\"chart-axis\"/>",
+    "<text x=\"", (left + width - right) / 2, "\" y=\"", height - 18,
+    "\" class=\"axis-label\">lower ", html_escape(pretty_complexity(complexity_metric)),
+    " →</text><text x=\"18\" y=\"", (top + height - bottom) / 2,
+    "\" transform=\"rotate(-90 18 ", (top + height - bottom) / 2,
+    ")\" class=\"axis-label\">better ",
+    html_escape(pretty_metric(performance_metric)), " →</text>",
+    line, paste(points, collapse = ""), "</svg>"
+  )
+}
+
+scale_plot_values <- function(values, lower, upper) {
+  limits <- range(values, na.rm = TRUE)
+  if (!is.finite(diff(limits)) || diff(limits) == 0) {
+    return(rep((lower + upper) / 2, length(values)))
+  }
+  lower + (values - limits[[1L]]) / diff(limits) * (upper - lower)
+}
+
+pretty_complexity <- function(metric) {
+  labels <- c(
+    model_size_kb = "model size (KB)",
+    size_mb = "model size (MB)",
+    model_size = "model size",
+    training_time_ms = "training time (ms)",
+    training_time_s = "training time (s)",
+    prediction_time_ms = "prediction time (ms)",
+    complexity = "model complexity"
+  )
+  if (metric %in% names(labels)) unname(labels[[metric]]) else gsub("_", " ", metric)
+}
+
 model_report_evaluation <- function(result, audit) {
   evaluation <- result$evaluation
   if (!is.null(evaluation$primary_metric) && "main_model" %in% names(evaluation$metrics)) {
@@ -140,7 +286,7 @@ model_report_evaluation <- function(result, audit) {
       beats_baseline = evaluation$beats_baseline,
       definition = definition,
       rows = evaluation$evaluated_rows,
-      table = result$leaderboard,
+      table = guided_leaderboard_table(result),
       notes = evaluation$notes,
       diagnostics = evaluation$diagnostics
     ))
@@ -157,10 +303,31 @@ model_report_evaluation <- function(result, audit) {
     beats_baseline = NA,
     definition = definitions[[definition_key]] %||% "See the model-engine documentation.",
     rows = nrow(result$test_data %||% result$training_data),
-    table = result$leaderboard,
+    table = guided_leaderboard_table(result),
     notes = NULL,
     diagnostics = NULL
   )
+}
+
+guided_leaderboard_table <- function(result) {
+  table <- as.data.frame(result$leaderboard)
+  definitions <- names(result$evaluation$metric_definitions %||% character())
+  preferred <- unique(c(
+    result$evaluation$primary_metric %||% character(),
+    definitions,
+    "rmse", "mae", "r_squared", "log_loss", "brier_score", "accuracy",
+    "balanced_accuracy", "roc_auc", "macro_recall", "auc", "logloss"
+  ))
+  identity <- if ("model" %in% names(table)) "model" else "model_id"
+  keep <- intersect(c("rank", identity, "role", preferred), names(table))
+  table <- table[keep]
+  names(table) <- vapply(names(table), function(name) {
+    if (name == "rank") return("Rank")
+    if (name %in% c("model", "model_id")) return("Model")
+    if (name == "role") return("Role")
+    pretty_metric(name)
+  }, character(1))
+  table
 }
 
 render_model_overview <- function(result, evaluation) {
@@ -742,13 +909,13 @@ report_css <- function() {
     "h2{font-size:clamp(1.55rem,3vw,2.25rem);line-height:1.15;margin:7px 0 18px;letter-spacing:-.025em}h3{line-height:1.25}.section-head{display:flex;align-items:center;justify-content:space-between;gap:20px}",
     ".grade{display:grid;place-items:center;width:82px;height:82px;border-radius:22px;font-weight:900;font-size:2.2rem}.grade-a,.mini-grade.grade-a{background:var(--mint);color:var(--green)}",
     ".grade-b,.mini-grade.grade-b{background:#e7f0fc;color:var(--blue)}.grade-c,.mini-grade.grade-c{background:var(--amber-bg);color:var(--amber)}.grade-d,.mini-grade.grade-d{background:var(--red-bg);color:var(--red)}",
-    ".callout{background:#eef3ee;border-left:4px solid #628071;padding:14px 16px;border-radius:7px}.verdict{font-size:1.18rem;font-weight:750;background:#e8f5ed;border-left:5px solid var(--green);padding:18px 20px;border-radius:9px}.microcopy{color:var(--muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.diagnostic-cards{grid-template-columns:repeat(3,1fr)}.guided-notes{margin-top:24px}.guided-note{border:1px solid #e3c783;border-left:5px solid #c77a0a;background:#fffaf0;border-radius:11px;padding:14px 18px;margin:10px 0}.guided-note h3{font-size:1rem;margin:0 0 6px}.guided-note p{margin:0;color:var(--muted)}.guided-note-warning{border-color:#e3a2a0;border-left-color:var(--red);background:#fff8f7}",
+    ".callout{background:#eef3ee;border-left:4px solid #628071;padding:14px 16px;border-radius:7px}.verdict{font-size:1.18rem;font-weight:750;background:#e8f5ed;border-left:5px solid var(--green);padding:18px 20px;border-radius:9px}.microcopy{color:var(--muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.diagnostic-cards{grid-template-columns:repeat(3,1fr)}.comparison-cards .metric strong{font-size:1.2rem;line-height:1.2;min-height:2.9em}.guided-notes{margin-top:24px}.guided-note{border:1px solid #e3c783;border-left:5px solid #c77a0a;background:#fffaf0;border-radius:11px;padding:14px 18px;margin:10px 0}.guided-note h3{font-size:1rem;margin:0 0 6px}.guided-note p{margin:0;color:var(--muted)}.guided-note-warning{border-color:#e3a2a0;border-left-color:var(--red);background:#fff8f7}",
     ".metric{background:#f5f7f3;border:1px solid var(--line);border-radius:13px;padding:17px}.metric p{margin:0;color:var(--muted);font-weight:700;font-size:.83rem}.metric strong{display:block;font-size:1.8rem;margin:5px 0}.metric small{color:var(--muted)}",
     ".findings{display:grid;gap:12px}.finding{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:18px}.finding h3{margin:9px 0}.finding p{margin:7px 0}.finding-critical{border-left-color:var(--red);background:#fff9f8}.finding-warning{border-left-color:#d18718;background:#fffdf6}.finding-note{border-left-color:#5283b7;background:#f9fcff}",
     ".severity{text-transform:uppercase;font-size:.72rem;font-weight:900;letter-spacing:.08em;margin-right:9px}code{background:#edf1ec;border-radius:5px;padding:2px 6px;color:#415149}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px}table{border-collapse:collapse;width:100%;font-size:.9rem;background:#fff}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7ebe6;vertical-align:middle}thead th{background:#edf2ed;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}",
     ".model-panel{margin:28px 0}.bar-cell{min-width:150px}.bar{display:block;height:9px;border-radius:999px;min-width:2px}.bar-positive{background:#2f8c65}.bar-negative{background:#c6534f}.mini-grade{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;font-weight:900}",
-    ".columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.columns>div{background:#f5f7f3;padding:18px 22px;border-radius:12px}.columns h3{margin-top:0}.narrative{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7f3;border:1px solid var(--line);border-radius:12px;padding:18px;font:inherit}.learn-more,.advanced{margin-top:24px;border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:#fbfcfa}.learn-more summary,.advanced summary{cursor:pointer;font-weight:850;color:var(--green);padding:5px}.advanced>h3:first-of-type{margin-top:24px}.effect-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.effect-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fbfcfa}.effect-card h3{font-size:1.35rem;margin:5px 0}.effect-plot{width:100%;height:auto;background:#f2f6f2;border-radius:9px}.axis{stroke:#9aa9a2;stroke-width:1}.effect-line{fill:none;stroke:#176b4d;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}dl{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:8px 18px}dt{font-weight:800}dd{margin:0;color:var(--muted);overflow-wrap:anywhere}",
-    "footer{background:#102a23;color:#cbe0d7;padding:28px 0}@media(max-width:820px){.cards{grid-template-columns:1fr 1fr}.columns,.effect-grid{grid-template-columns:1fr}}@media(max-width:520px){.shell{width:min(100% - 24px,1120px)}header{padding-top:42px}.cards{grid-template-columns:1fr}.section-head{align-items:flex-start}.grade{width:62px;height:62px;font-size:1.7rem}section{border-radius:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}}",
+    ".columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.columns>div{background:#f5f7f3;padding:18px 22px;border-radius:12px}.columns h3{margin-top:0}.narrative{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7f3;border:1px solid var(--line);border-radius:12px;padding:18px;font:inherit}.learn-more,.advanced{margin-top:24px;border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:#fbfcfa}.learn-more summary,.advanced summary{cursor:pointer;font-weight:850;color:var(--green);padding:5px}.advanced>h3:first-of-type{margin-top:24px}.tradeoff-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,.8fr);gap:20px;align-items:center;margin:24px 0}.tradeoff-plot{width:100%;height:auto;background:linear-gradient(145deg,#f7faf7,#eef5f0);border:1px solid var(--line);border-radius:14px}.tradeoff-explainer{background:#f5f7f3;border-radius:14px;padding:18px 22px}.tradeoff-explainer h3{margin-top:0}.tradeoff-explainer ol{padding-left:1.25rem}.chart-axis{stroke:#86968f;stroke-width:1.2}.pareto-line{fill:none;stroke:#176b4d;stroke-width:3;stroke-dasharray:7 6}.tradeoff-point{stroke:#fff;stroke-width:2;fill:#6d7c76}.tradeoff-primary{fill:#176b4d}.tradeoff-candidate{fill:#315c9b}.tradeoff-baseline{fill:#b46a22}.tradeoff-pareto{stroke:#102a23;stroke-width:4}.point-label{font-size:12px;font-weight:750;fill:#25352f}.axis-label{font-size:12px;font-weight:800;fill:#53635d;text-anchor:middle}.effect-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.effect-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fbfcfa}.effect-card h3{font-size:1.35rem;margin:5px 0}.effect-plot{width:100%;height:auto;background:#f2f6f2;border-radius:9px}.axis{stroke:#9aa9a2;stroke-width:1}.effect-line{fill:none;stroke:#176b4d;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}dl{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:8px 18px}dt{font-weight:800}dd{margin:0;color:var(--muted);overflow-wrap:anywhere}",
+    "footer{background:#102a23;color:#cbe0d7;padding:28px 0}@media(max-width:820px){.cards{grid-template-columns:1fr 1fr}.columns,.effect-grid,.tradeoff-layout{grid-template-columns:1fr}}@media(max-width:520px){.shell{width:min(100% - 24px,1120px)}header{padding-top:42px}.cards{grid-template-columns:1fr}.section-head{align-items:flex-start}.grade{width:62px;height:62px;font-size:1.7rem}section{border-radius:12px}.point-label{font-size:10px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}}",
     "@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}"
   )
 }

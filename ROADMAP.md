@@ -11,6 +11,8 @@ ordered by user and scientific leverage, not novelty theatre.
 - [x] Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.
 - [x] Beginner evaluation diagnostics: error summaries, confusion tables,
   probability scores, sample-size cautions, and baseline-failure warnings.
+- [x] Optional local comparison set with multiple understandable model
+  complexities, measured resource dimensions, and a labeled Pareto frontier.
 - [x] Model-agnostic prediction contract and H2O boundary.
 - [x] Repeated grouped permutation importance with retained draws.
 - [x] ALE, diagnosed PDP, feature association, and support outputs.
@@ -38,13 +40,17 @@ ordered by user and scientific leverage, not novelty theatre.
 
 ## 0.4 — model multiplicity
 
+- [x] First-class guided candidate-set mode that shares the ordinary result,
+  explainer, audit, visualization, and report contracts.
 - [ ] First-class Rashomon-set provider interface for AutoML, resampling,
   regularization paths, and user-defined candidate generators.
 - [ ] Rashomon ALE bands and class-reliance ranges with coverage diagnostics.
 - [ ] Case-level prediction ambiguity, feature-attribution disagreement, and
   decision-threshold sensitivity.
-- [ ] Pareto selection over performance, calibration, latency, stability, and
-  explanation agreement without hiding trade-offs in one weighted score.
+- [x] Candidate-relative Pareto selection over held-out performance and model
+  size without hiding trade-offs in one weighted score.
+- [ ] Extend Pareto objectives to calibration, latency, stability, and
+  explanation agreement with missing-objective diagnostics.
 
 ## 0.5 — reporting and governance
 

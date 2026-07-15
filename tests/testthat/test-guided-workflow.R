@@ -64,6 +64,41 @@ test_that("guided multiclass evaluation returns normalized class probabilities",
                     result$evaluation$predictions$primary_confidence <= 1))
 })
 
+test_that("comparison mode fits approachable local candidates without changing the primary", {
+  regression <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
+
+  expect_setequal(
+    names(regression$models),
+    c("main_model", "small_tree", "flexible_tree", "simple_baseline")
+  )
+  expect_equal(regression$provenance$model_set, "comparison")
+  expect_match(regression$provenance$candidate_selection, "pre-specified")
+  expect_equal(regression$leaderboard$role[regression$leaderboard$model_id == "main_model"],
+               "primary")
+  expect_true(all(c(
+    "training_time_ms", "prediction_time_ms", "model_size_kb", "complexity"
+  ) %in% names(regression$leaderboard)))
+  expect_true(all(regression$leaderboard$model_size_kb > 0))
+  expect_output(print(regression), "comparison set")
+
+  binary_data <- transform(mtcars, am = factor(am, labels = c("automatic", "manual")))
+  binary <- autoxplain(binary_data, "am", model_set = "comparison", seed = 2026)
+  expect_equal(length(binary$models), 4L)
+  expect_true("model_fit_warning" %in% binary$evaluation$notes$code)
+  expect_true(nzchar(binary$model_diagnostics$fit_warning[
+    binary$model_diagnostics$model_id == "main_model"
+  ]))
+  expect_true(all(vapply(binary$evaluation$metrics, function(x) {
+    is.finite(x[["log_loss"]])
+  }, logical(1))))
+
+  multiclass <- autoxplain(iris, "Species", model_set = "comparison", seed = 2026)
+  expect_equal(length(multiclass$models), 4L)
+  expect_true(all(vapply(multiclass$evaluation$metrics, function(x) {
+    is.finite(x[["log_loss"]])
+  }, logical(1))))
+})
+
 test_that("preprocessing learns imputations only from training data", {
   train <- data.frame(
     x = c(1, 2, 3, NA, 5, 6, 7, 8, 9, 10),

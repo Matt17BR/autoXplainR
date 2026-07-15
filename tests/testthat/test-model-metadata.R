@@ -16,6 +16,8 @@ test_that("guided models expose useful engine-neutral metadata", {
   expect_equal(length(metadata), 2L)
   expect_equal(metadata[[1L]]$algorithm, "linear regression")
   expect_true(is.finite(metadata[[1L]]$size_bytes))
+  expect_true(is.finite(metadata[[1L]]$training_time_s))
+  expect_true(is.finite(metadata[[1L]]$complexity))
   expect_match(metadata[[1L]]$hyperparameters$formula, "mpg")
   expect_null(metadata[[1L]]$native_variable_importance)
   expect_output(print(metadata), "linear regression")

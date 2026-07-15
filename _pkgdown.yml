@@ -43,6 +43,7 @@ reference:
   - title: Visualization and metadata
     contents:
       - starts_with("plot_")
+      - model_tradeoffs
       - extract_model_characteristics
       - create_model_comparison_report
       - calculate_weighted_efficiency

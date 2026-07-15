@@ -114,6 +114,19 @@ test_that("guided reports support classification effect targets", {
   expect_error(render_model_report(result, tempfile(fileext = ".txt")), "html")
 })
 
+test_that("comparison reports explain Pareto trade-offs without selecting on holdout", {
+  result <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
+  path <- tempfile(fileext = ".html")
+  render_model_report(result, path, top_features = 2, n_repeats = 2)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+
+  expect_match(html, "What trade-offs did the candidates make?", fixed = TRUE)
+  expect_match(html, "<svg class=\"tradeoff-plot\"", fixed = TRUE)
+  expect_match(html, "Pareto-efficient", fixed = TRUE)
+  expect_match(html, "primary model remains pre-specified", ignore.case = TRUE)
+  expect_match(html, "#models", fixed = TRUE)
+})
+
 test_that("legacy dashboard helpers remain functional compatibility layers", {
   set.seed(33)
   data <- data.frame(x = rnorm(100), z = rnorm(100))
