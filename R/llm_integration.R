@@ -71,15 +71,22 @@ narrative_providers <- function() {
 #' @param account_id Cloudflare account ID. When `NULL`,
 #'   `CLOUDFLARE_ACCOUNT_ID` is consulted for the Cloudflare provider.
 #' @param max_tokens Maximum response tokens.
-#' @param temperature Sampling temperature.
+#' @param temperature Sampling temperature. `NULL` uses 1 for Gemini, following
+#'   its current model guidance, and 0.2 for other providers.
 #' @param timeout Request timeout in seconds.
+#' @param structured Request a validated five-section JSON response when the
+#'   selected provider supports it. AutoXplainR renders the validated fields
+#'   and adds fixed interpretation boundaries locally. See
+#'   [narrative_providers()] for current capability declarations.
 #' @param fallback Return the deterministic narrative when the remote call
 #'   fails.
 #' @param use_remote Deprecated compatibility switch. `FALSE` forces local
 #'   generation; `TRUE` with no explicit provider selects Gemini. Prefer
 #'   `provider`.
 #' @param transport Optional advanced request function for testing or custom
-#'   networking. It receives one request list and must return narrative text.
+#'   networking. It receives one request list and must return response text;
+#'   when `request$structured` is `TRUE`, that text must be schema-conforming
+#'   JSON.
 #'
 #' @return A single character string with a `narrative_provenance` attribute.
 #' @export
@@ -97,20 +104,25 @@ generate_natural_language_report <- function(autoxplain_result,
                                              base_url = NULL,
                                              account_id = NULL,
                                              max_tokens = 1000L,
-                                             temperature = 0.2,
+                                             temperature = NULL,
                                              timeout = 30,
+                                             structured = TRUE,
                                              fallback = TRUE,
                                              use_remote = NULL,
                                              transport = NULL) {
   provider_was_missing <- missing(provider)
   provider <- match.arg(provider)
   max_tokens <- assert_count(max_tokens, "max_tokens")
-  if (length(temperature) != 1L || !is.numeric(temperature) || !is.finite(temperature) ||
-        temperature < 0 || temperature > 2) {
-    stop("`temperature` must be between 0 and 2.", call. = FALSE)
+  if (!is.null(temperature) &&
+        (length(temperature) != 1L || !is.numeric(temperature) ||
+           !is.finite(temperature) || temperature < 0 || temperature > 2)) {
+    stop("`temperature` must be NULL or between 0 and 2.", call. = FALSE)
   }
   if (length(timeout) != 1L || !is.numeric(timeout) || !is.finite(timeout) || timeout <= 0) {
     stop("`timeout` must be one positive number of seconds.", call. = FALSE)
+  }
+  if (!is.logical(structured) || length(structured) != 1L || is.na(structured)) {
+    stop("`structured` must be TRUE or FALSE.", call. = FALSE)
   }
   if (!is.logical(fallback) || length(fallback) != 1L || is.na(fallback)) {
     stop("`fallback` must be TRUE or FALSE.", call. = FALSE)
@@ -146,7 +158,8 @@ generate_natural_language_report <- function(autoxplain_result,
   if (provider == "local") {
     return(annotate_narrative(
       local_report, provider, "local", NULL, remote = FALSE,
-      fallback = FALSE, context$disclosure
+      fallback = FALSE, context$disclosure,
+      structured_requested = structured, structured_used = FALSE
     ))
   }
   prompt <- create_report_prompt(context)
@@ -159,16 +172,26 @@ generate_natural_language_report <- function(autoxplain_result,
         prompt = prompt,
         config = provider_config,
         max_tokens = max_tokens,
-        temperature = temperature,
-        timeout = timeout
+        temperature = temperature %||% if (provider == "gemini") 1 else 0.2,
+        timeout = timeout,
+        structured = structured
       )
       text <- if (is.null(transport)) perform_narrative_request(request) else transport(request)
       if (!is.character(text) || length(text) != 1L || is.na(text) || !nzchar(trimws(text))) {
         stop("The narrative provider returned no usable text.", call. = FALSE)
       }
+      text <- if (isTRUE(request$structured)) {
+        render_structured_narrative(
+          parse_structured_narrative(text), context$disclosure
+        )
+      } else {
+        append_required_narrative_limits(text, context$disclosure)
+      }
       annotate_narrative(
         text, provider, provider, provider_config$model,
-        remote = provider_config$remote, fallback = FALSE, context$disclosure
+        remote = provider_config$remote, fallback = FALSE, context$disclosure,
+        structured_requested = structured,
+        structured_used = request$structured
       )
     },
     error = function(error) {
@@ -177,7 +200,8 @@ generate_natural_language_report <- function(autoxplain_result,
               conditionMessage(error), call. = FALSE)
       annotate_narrative(
         local_report, provider, "local", NULL, remote = FALSE,
-        fallback = TRUE, context$disclosure, conditionMessage(error)
+        fallback = TRUE, context$disclosure, conditionMessage(error),
+        structured_requested = structured, structured_used = FALSE
       )
     }
   )
@@ -192,7 +216,7 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key, accou
     stop("`model` must be supplied for provider `", provider, "`.", call. = FALSE)
   }
   endpoints <- c(
-    gemini = "https://generativelanguage.googleapis.com/v1beta/models",
+    gemini = "https://generativelanguage.googleapis.com/v1beta/interactions",
     groq = "https://api.groq.com/openai/v1/chat/completions",
     ollama = "http://localhost:11434/v1/chat/completions",
     openrouter = "https://openrouter.ai/api/v1/chat/completions"
@@ -242,6 +266,7 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key, accou
     model = resolved_model,
     endpoint = endpoint,
     api_key = resolved_key %||% "",
+    structured_output = isTRUE(row$structured_output[[1L]]),
     remote = !grepl(
       "^https?://(localhost|127[.]0[.]0[.]1|\\[::1\\])(?=[:/])",
       endpoint,
@@ -250,30 +275,41 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key, accou
   )
 }
 
-build_narrative_request <- function(prompt, config, max_tokens, temperature, timeout) {
+build_narrative_request <- function(prompt,
+                                    config,
+                                    max_tokens,
+                                    temperature,
+                                    timeout,
+                                    structured = TRUE) {
+  use_structure <- isTRUE(structured) && isTRUE(config$structured_output)
   if (config$provider == "gemini") {
-    endpoint <- paste0(
-      sub("/$", "", config$endpoint), "/",
-      utils::URLencode(config$model, reserved = TRUE),
-      ":generateContent"
+    body <- list(
+      model = config$model,
+      input = prompt,
+      store = FALSE,
+      generation_config = list(
+        temperature = temperature,
+        max_output_tokens = max_tokens
+      )
     )
+    if (use_structure) {
+      body$response_format <- list(
+        type = "text",
+        mime_type = "application/json",
+        schema = narrative_output_schema()
+      )
+    }
     return(list(
       provider = config$provider,
       model = config$model,
-      url = endpoint,
+      url = config$endpoint,
       headers = c(
         `x-goog-api-key` = config$api_key,
         `Content-Type` = "application/json"
       ),
-      body = list(
-        contents = list(list(role = "user", parts = list(list(text = prompt)))),
-        generationConfig = list(
-          temperature = temperature,
-          maxOutputTokens = max_tokens,
-          candidateCount = 1L
-        )
-      ),
-      response_format = "gemini",
+      body = body,
+      response_format = "gemini_interactions",
+      structured = use_structure,
       timeout = timeout
     ))
   }
@@ -284,21 +320,197 @@ build_narrative_request <- function(prompt, config, max_tokens, temperature, tim
   if (config$provider == "openrouter") {
     headers <- c(headers, `X-Title` = "AutoXplainR")
   }
+  body <- list(
+    model = config$model,
+    messages = list(list(role = "user", content = prompt)),
+    temperature = temperature,
+    max_tokens = max_tokens,
+    stream = FALSE
+  )
+  if (use_structure) {
+    body$response_format <- list(
+      type = "json_schema",
+      json_schema = list(
+        name = "autoxplain_narrative",
+        strict = TRUE,
+        schema = narrative_output_schema()
+      )
+    )
+    if (config$provider == "openrouter") {
+      body$provider <- list(require_parameters = TRUE)
+    }
+  }
   list(
     provider = config$provider,
     model = config$model,
     url = config$endpoint,
     headers = headers,
-    body = list(
-      model = config$model,
-      messages = list(list(role = "user", content = prompt)),
-      temperature = temperature,
-      max_tokens = max_tokens,
-      stream = FALSE
-    ),
+    body = body,
     response_format = "openai",
+    structured = use_structure,
     timeout = timeout
   )
+}
+
+narrative_output_schema <- function() {
+  list(
+    type = "object",
+    properties = list(
+      headline = list(
+        type = "string",
+        description = "A plain-language title grounded only in the supplied evidence."
+      ),
+      performance = list(
+        type = "string",
+        description = paste(
+          "A short held-out performance summary that defines the main metric and",
+          "compares the reference model with the simple baseline."
+        )
+      ),
+      patterns = list(
+        type = "array",
+        description = paste(
+          "One to three descriptive model-pattern statements, with no causal",
+          "language. State when pattern evidence was not supplied."
+        ),
+        items = list(type = "string")
+      ),
+      cautions = list(
+        type = "array",
+        description = paste(
+          "One to three evidence-specific cautions drawn from the supplied",
+          "evaluation or explanation diagnostics."
+        ),
+        items = list(type = "string")
+      ),
+      next_steps = list(
+        type = "array",
+        description = paste(
+          "One to three practical validation or review steps supported by the",
+          "supplied evidence."
+        ),
+        items = list(type = "string")
+      )
+    ),
+    required = c("headline", "performance", "patterns", "cautions", "next_steps"),
+    additionalProperties = FALSE
+  )
+}
+
+parse_structured_narrative <- function(text) {
+  require_optional("jsonlite", "validated generated narratives")
+  cleaned <- trimws(text)
+  cleaned <- sub("^```(?:json)?[[:space:]]*", "", cleaned, ignore.case = TRUE, perl = TRUE)
+  cleaned <- sub("[[:space:]]*```$", "", cleaned, perl = TRUE)
+  parsed <- tryCatch(
+    jsonlite::fromJSON(cleaned, simplifyVector = FALSE),
+    error = function(error) {
+      stop("The narrative provider returned invalid JSON: ",
+           conditionMessage(error), call. = FALSE)
+    }
+  )
+  required <- narrative_output_schema()$required
+  if (!is.list(parsed) || is.null(names(parsed))) {
+    stop("The structured narrative must be one JSON object.", call. = FALSE)
+  }
+  missing_fields <- setdiff(required, names(parsed))
+  extra_fields <- setdiff(names(parsed), required)
+  if (length(missing_fields)) {
+    stop(
+      "The structured narrative is missing: ",
+      paste(missing_fields, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  if (length(extra_fields)) {
+    stop(
+      "The structured narrative contains unexpected fields: ",
+      paste(extra_fields, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  list(
+    headline = validate_narrative_scalar(parsed$headline, "headline"),
+    performance = validate_narrative_scalar(parsed$performance, "performance"),
+    patterns = validate_narrative_items(parsed$patterns, "patterns"),
+    cautions = validate_narrative_items(parsed$cautions, "cautions"),
+    next_steps = validate_narrative_items(parsed$next_steps, "next_steps")
+  )
+}
+
+validate_narrative_scalar <- function(value, field) {
+  if (!is.character(value) || length(value) != 1L || is.na(value)) {
+    stop("Structured narrative field `", field, "` must be one string.", call. = FALSE)
+  }
+  value <- gsub("[\r\n]+", " ", trimws(value))
+  if (!nzchar(value) || nchar(value, type = "chars") > 4000L) {
+    stop(
+      "Structured narrative field `", field,
+      "` must contain between 1 and 4,000 characters.",
+      call. = FALSE
+    )
+  }
+  value
+}
+
+validate_narrative_items <- function(value, field) {
+  if (!is.list(value) && !is.character(value)) {
+    stop("Structured narrative field `", field, "` must be an array of strings.",
+         call. = FALSE)
+  }
+  values <- if (is.list(value)) {
+    vapply(value, function(item) {
+      validate_narrative_scalar(item, field)
+    }, character(1))
+  } else {
+    vapply(value, validate_narrative_scalar, character(1), field = field)
+  }
+  if (length(values) < 1L || length(values) > 8L) {
+    stop("Structured narrative field `", field, "` must contain 1 to 8 items.",
+         call. = FALSE)
+  }
+  unname(values)
+}
+
+render_structured_narrative <- function(narrative, disclosure) {
+  sections <- c(
+    paste0("# ", narrative$headline),
+    "",
+    "## Held-out performance",
+    narrative$performance,
+    "",
+    "## Patterns used by the model",
+    paste0("- ", narrative$patterns),
+    "",
+    "## Cautions",
+    paste0("- ", narrative$cautions),
+    "",
+    "## Practical next steps",
+    paste0("- ", narrative$next_steps)
+  )
+  append_required_narrative_limits(paste(sections, collapse = "\n"), disclosure)
+}
+
+append_required_narrative_limits <- function(text, disclosure) {
+  paste(c(
+    trimws(text),
+    "",
+    "## Required interpretation boundaries",
+    paste(
+      "- This memo summarizes predictive associations in the supplied evaluation;",
+      "it does not establish causality."
+    ),
+    paste(
+      "- Schema validation checks the response format, not whether generated",
+      "statements are true. Verify every statement against the computed report."
+    ),
+    paste(
+      "- This analysis is not a fairness, safety, compliance, or deployment",
+      "certification. Validate it on relevant new data with domain review."
+    ),
+    "",
+    paste0("Data disclosure: ", disclosure)
+  ), collapse = "\n")
 }
 
 perform_narrative_request <- function(request) {
@@ -321,14 +533,37 @@ perform_narrative_request <- function(request) {
     message <- parsed$error$message %||% paste("HTTP", httr::status_code(response))
     stop(request$provider, " request failed: ", message, call. = FALSE)
   }
-  text <- if (request$response_format == "gemini") {
+  extract_narrative_text(parsed, request$response_format, request$provider)
+}
+
+extract_narrative_text <- function(parsed, response_format, provider) {
+  if (response_format == "gemini_interactions" &&
+        !identical(parsed$status, "completed")) {
+    stop(
+      provider, " interaction ended with status `",
+      parsed$status %||% "unknown", "`.",
+      call. = FALSE
+    )
+  }
+  text <- if (response_format == "gemini_interactions") {
+    output_steps <- Filter(
+      function(step) identical(step$type, "model_output"),
+      parsed$steps %||% list()
+    )
+    parts <- unlist(lapply(output_steps, function(step) {
+      vapply(step$content %||% list(), function(part) {
+        if (identical(part$type, "text")) part$text %||% "" else ""
+      }, character(1))
+    }), use.names = FALSE)
+    paste(parts[nzchar(parts)], collapse = "\n")
+  } else if (response_format == "gemini") {
     parts <- parsed$candidates[[1L]]$content$parts %||% list()
     paste(vapply(parts, function(part) part$text %||% "", character(1)), collapse = "\n")
   } else {
     parsed$choices[[1L]]$message$content %||% ""
   }
   if (!is.character(text) || length(text) != 1L || !nzchar(trimws(text))) {
-    stop(request$provider, " returned no narrative text.", call. = FALSE)
+    stop(provider, " returned no narrative text.", call. = FALSE)
   }
   text
 }
@@ -340,13 +575,17 @@ annotate_narrative <- function(text,
                                remote,
                                fallback,
                                disclosure,
-                               error = NULL) {
+                               error = NULL,
+                               structured_requested = FALSE,
+                               structured_used = FALSE) {
   attr(text, "narrative_provenance") <- list(
     provider_requested = provider_requested,
     provider_used = provider_used,
     model = model,
     remote = remote,
     fallback = fallback,
+    structured_requested = structured_requested,
+    structured_used = structured_used,
     disclosure = disclosure,
     error = error
   )

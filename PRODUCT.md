@@ -73,6 +73,16 @@ All provider adapters must share one prompt contract, expose the provider and
 resolved model in provenance, time out, handle rate limits, and fall back to
 the deterministic report without losing the analysis.
 
+Schema-capable providers must return a small validated object rather than final
+report markup. AutoXplainR renders those fields and adds fixed interpretation
+boundaries locally. Invalid or incomplete structured output triggers the same
+transparent deterministic fallback. Schema validity is a format guarantee, not
+evidence that generated claims are true.
+
+Gemini uses the stateless Interactions API with `store = false`; the package
+does not need provider-side conversation state for a one-shot aggregate memo.
+OpenRouter routing must require schema support when a schema is requested.
+
 Hosted-provider recommendations must be checked against official model,
 pricing, rate-limit, structured-output, and privacy documentation before every
 release. `LLM_PROVIDERS.md` is the dated decision record; the package must not

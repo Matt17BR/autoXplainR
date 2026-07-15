@@ -16,8 +16,9 @@ generate_natural_language_report(
   base_url = NULL,
   account_id = NULL,
   max_tokens = 1000L,
-  temperature = 0.2,
+  temperature = NULL,
   timeout = 30,
+  structured = TRUE,
   fallback = TRUE,
   use_remote = NULL,
   transport = NULL
@@ -52,9 +53,15 @@ is consulted when this is \code{NULL}.}
 
 \item{max_tokens}{Maximum response tokens.}
 
-\item{temperature}{Sampling temperature.}
+\item{temperature}{Sampling temperature. \code{NULL} uses 1 for Gemini, following
+its current model guidance, and 0.2 for other providers.}
 
 \item{timeout}{Request timeout in seconds.}
+
+\item{structured}{Request a validated five-section JSON response when the
+selected provider supports it. AutoXplainR renders the validated fields
+and adds fixed interpretation boundaries locally. See
+\code{\link[=narrative_providers]{narrative_providers()}} for current capability declarations.}
 
 \item{fallback}{Return the deterministic narrative when the remote call
 fails.}
@@ -64,7 +71,9 @@ generation; \code{TRUE} with no explicit provider selects Gemini. Prefer
 \code{provider}.}
 
 \item{transport}{Optional advanced request function for testing or custom
-networking. It receives one request list and must return narrative text.}
+networking. It receives one request list and must return response text;
+when \code{request$structured} is \code{TRUE}, that text must be schema-conforming
+JSON.}
 }
 \value{
 A single character string with a \code{narrative_provenance} attribute.
