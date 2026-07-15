@@ -1,8 +1,9 @@
-#' Generate an explanation evidence dashboard
+#' Generate a guided model report
 #'
-#' Compatibility entry point for H2O AutoML results. It converts retained H2O
-#' models to model-agnostic explainers, runs the same evidence audit available
-#' to every model framework, and writes a standalone HTML report.
+#' Creates a standalone report that starts with the modeling question,
+#' held-out performance, a simple-baseline comparison, and metric definitions.
+#' Fitted patterns and the more technical explanation evidence audit follow by
+#' progressive disclosure.
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param output_file Destination HTML file.
@@ -12,6 +13,11 @@
 #' @param sample_instances Retained for backward compatibility; no longer used.
 #' @param include_llm_report Whether to request an optional narrative. The
 #'   evidence report remains complete without it.
+#' @param narrative_provider Provider passed to
+#'   [generate_natural_language_report()] when `include_llm_report = TRUE`.
+#'   It defaults to the deterministic local provider.
+#' @param narrative_args Optional named arguments forwarded to
+#'   [generate_natural_language_report()].
 #' @param open_browser Open the result interactively.
 #' @param performance_weight Deprecated and ignored. Performance and
 #'   explanation reliability are reported separately rather than collapsed
@@ -26,6 +32,8 @@ generate_dashboard <- function(autoxplain_result,
                                top_features = 8L,
                                sample_instances = 3L,
                                include_llm_report = FALSE,
+                               narrative_provider = "local",
+                               narrative_args = list(),
                                open_browser = FALSE,
                                performance_weight = NULL,
                                n_repeats = 20L,
@@ -37,21 +45,70 @@ generate_dashboard <- function(autoxplain_result,
   assert_count(sample_instances, "sample_instances")
   n_repeats <- assert_count(n_repeats, "n_repeats")
   max_models <- assert_count(max_models, "max_models")
+  if (!is.list(narrative_args) || length(narrative_args) && is.null(names(narrative_args))) {
+    stop("`narrative_args` must be a named list.", call. = FALSE)
+  }
   if (!is.null(performance_weight)) {
     warning(
       "`performance_weight` is deprecated. Performance and evidence quality are no longer collapsed into one score.",
       call. = FALSE
     )
   }
+  report_data <- prepare_model_report_data(
+    autoxplain_result,
+    top_features = top_features,
+    n_repeats = n_repeats,
+    max_models = max_models
+  )
+
+  narrative <- NULL
+  if (isTRUE(include_llm_report)) {
+    narrative <- tryCatch(
+      do.call(
+        generate_natural_language_report,
+        utils::modifyList(
+          list(
+            autoxplain_result = autoxplain_result,
+            importance_data = report_data$screening,
+            model_characteristics = autoxplain_result$model_characteristics,
+            provider = narrative_provider
+          ),
+          narrative_args
+        )
+      ),
+      error = function(error) {
+        warning("Optional narrative was not generated: ", conditionMessage(error), call. = FALSE)
+        NULL
+      }
+    )
+  }
+  render_model_report(
+    autoxplain_result,
+    output_file = output_file,
+    title = paste("Understanding", autoxplain_result$target_column),
+    audit = report_data$audit,
+    effects = report_data$effects,
+    narrative = narrative,
+    open = open_browser
+  )
+}
+
+prepare_model_report_data <- function(autoxplain_result,
+                                      top_features = 8L,
+                                      n_repeats = 20L,
+                                      max_models = 5L) {
   selected <- seq_len(min(max_models, length(autoxplain_result$models)))
   explainers <- as_explainers(autoxplain_result, models = selected)
   screen_repeats <- min(5L, n_repeats)
   screening <- calculate_permutation_importance(
-    explainers[[1L]], n_repeats = screen_repeats,
+    explainers[[1L]],
+    n_repeats = screen_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L
   )
-  features <- head(screening$feature[order(screening$importance, decreasing = TRUE)],
-                   min(top_features, nrow(screening)))
+  features <- head(
+    screening$feature[order(screening$importance, decreasing = TRUE)],
+    min(top_features, nrow(screening))
+  )
   audit <- audit_explanations(
     explainers,
     features = features,
@@ -61,26 +118,28 @@ generate_dashboard <- function(autoxplain_result,
   audit$provenance$automl_created_at <- autoxplain_result$provenance$created_at
   audit$provenance$automl_target <- autoxplain_result$target_column
   audit$provenance$automl_task <- autoxplain_result$task
-
-  if (isTRUE(include_llm_report)) {
-    audit$optional_narrative <- tryCatch(
-      generate_natural_language_report(
-        autoxplain_result,
-        importance_data = screening,
-        model_characteristics = autoxplain_result$model_characteristics
+  effect_features <- head(features, min(3L, length(features)))
+  effects <- lapply(effect_features, function(feature) {
+    method <- if (is.numeric(explainers[[1L]]$data[[feature]])) "ale" else "pdp"
+    tryCatch(
+      explain_effect(
+        explainers[[1L]],
+        feature = feature,
+        method = method,
+        n_points = 16L,
+        seed = autoxplain_result$provenance$seed %||% 123L,
+        class = if (autoxplain_result$task == "multiclass") {
+          explainers[[1L]]$class_levels[[1L]]
+        } else {
+          NULL
+        }
       ),
-      error = function(error) {
-        warning("Optional narrative was not generated: ", conditionMessage(error), call. = FALSE)
-        NULL
-      }
+      error = function(error) NULL
     )
-  }
-  render_explanation_report(
-    audit,
-    output_file = output_file,
-    title = paste("Explanation Evidence Report -", autoxplain_result$target_column),
-    open = open_browser
-  )
+  })
+  names(effects) <- effect_features
+  effects <- effects[!vapply(effects, is.null, logical(1))]
+  list(screening = screening, audit = audit, effects = effects)
 }
 
 #' Create a lightweight AutoXplainR dashboard

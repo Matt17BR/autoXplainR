@@ -18,11 +18,10 @@ narratives are optional integrations rather than startup requirements.
 \enumerate{
 \item Call \code{\link[=autoxplain]{autoxplain()}} with a data frame and target column.
 \item Read the baseline comparison and held-out metrics.
-\item Convert the result with \code{\link[=as_explainers]{as_explainers()}} and investigate effects.
-\item Optionally run \code{\link[=audit_explanations]{audit_explanations()}} for advanced evidence checks.
-\item Investigate effects with \code{\link[=explain_effect]{explain_effect()}}, which defaults to ALE.
-\item Preserve the evidence and limitations with
-\code{\link[=render_explanation_report]{render_explanation_report()}}.
+\item Preserve the fitted patterns and limitations with
+\code{\link[=render_model_report]{render_model_report()}}.
+\item Convert the result with \code{\link[=as_explainers]{as_explainers()}} to investigate an effect
+with \code{\link[=explain_effect]{explain_effect()}} or run \code{\link[=audit_explanations]{audit_explanations()}} for advanced checks.
 }
 }
 

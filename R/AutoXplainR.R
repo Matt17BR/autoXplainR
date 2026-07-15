@@ -11,11 +11,10 @@
 #' \enumerate{
 #'   \item Call [autoxplain()] with a data frame and target column.
 #'   \item Read the baseline comparison and held-out metrics.
-#'   \item Convert the result with [as_explainers()] and investigate effects.
-#'   \item Optionally run [audit_explanations()] for advanced evidence checks.
-#'   \item Investigate effects with [explain_effect()], which defaults to ALE.
-#'   \item Preserve the evidence and limitations with
-#'     [render_explanation_report()].
+#'   \item Preserve the fitted patterns and limitations with
+#'     [render_model_report()].
+#'   \item Convert the result with [as_explainers()] to investigate an effect
+#'     with [explain_effect()] or run [audit_explanations()] for advanced checks.
 #' }
 #'
 #' @section Interpretation boundaries:

@@ -46,3 +46,67 @@ test_that("reports are standalone, escaped, and provenance-rich", {
   expect_match(html, "Explainer IDs", fixed = TRUE)
   expect_error(render_explanation_report(audit, tempfile(fileext = ".txt")), "html")
 })
+
+test_that("guided reports lead with evaluation and progressively disclose evidence", {
+  set.seed(120)
+  data <- data.frame(x = rnorm(120), z = rnorm(120))
+  data$y <- 3 * data$x + rnorm(120, sd = 0.4)
+  result <- autoxplain(data, "y", seed = 31)
+  narrative <- generate_natural_language_report(result)
+  path <- tempfile(fileext = ".html")
+  output <- render_model_report(
+    result,
+    path,
+    title = "Understanding <y>",
+    narrative = paste0(narrative, "\n<script>unsafe</script>"),
+    top_features = 2,
+    n_repeats = 3
+  )
+  html <- paste(readLines(output, warn = FALSE), collapse = "\n")
+
+  expect_match(html, "Guided model report", fixed = TRUE)
+  expect_match(html, "The modeling question", fixed = TRUE)
+  expect_match(html, "Did the model generalize?", fixed = TRUE)
+  expect_match(html, "Patterns used for prediction", fixed = TRUE)
+  expect_match(html, "What this analysis does not establish", fixed = TRUE)
+  expect_match(html, "Understanding &lt;y&gt;", fixed = TRUE)
+  expect_false(grepl("<script>unsafe</script>", html, fixed = TRUE))
+  expect_match(html, "&lt;script&gt;unsafe&lt;/script&gt;", fixed = TRUE)
+  expect_match(html, "<svg class=\"effect-plot\"", fixed = TRUE)
+  expect_match(html, "<details class=\"advanced\">", fixed = TRUE)
+  expect_false(grepl("<details class=\"advanced\" open", html, fixed = TRUE))
+  expect_match(html, "Verify this prose against", fixed = TRUE)
+})
+
+test_that("dashboard compatibility entry point produces the guided report", {
+  result <- autoxplain(mtcars, "mpg", seed = 18)
+  path <- tempfile(fileext = ".html")
+  output <- generate_dashboard(
+    result,
+    output_file = path,
+    top_features = 2,
+    n_repeats = 3,
+    include_llm_report = TRUE
+  )
+  html <- paste(readLines(output, warn = FALSE), collapse = "\n")
+
+  expect_match(html, "Understanding mpg", fixed = TRUE)
+  expect_match(html, "Plain-language memo", fixed = TRUE)
+  expect_match(html, "Provider used: local", fixed = TRUE)
+  expect_match(html, "simple baseline", ignore.case = TRUE)
+  expect_error(
+    generate_dashboard(result, tempfile(fileext = ".html"), narrative_args = list("bad")),
+    "named list"
+  )
+})
+
+test_that("guided reports support classification effect targets", {
+  result <- autoxplain(iris, "Species", seed = 21)
+  path <- tempfile(fileext = ".html")
+  render_model_report(result, path, top_features = 1, n_repeats = 2)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+
+  expect_match(html, "multiclass", fixed = TRUE)
+  expect_match(html, "probability for class", fixed = TRUE)
+  expect_error(render_model_report(result, tempfile(fileext = ".txt")), "html")
+})

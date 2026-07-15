@@ -2,7 +2,7 @@
 % Please edit documentation in R/dashboard_generation.R
 \name{generate_dashboard}
 \alias{generate_dashboard}
-\title{Generate an explanation evidence dashboard}
+\title{Generate a guided model report}
 \usage{
 generate_dashboard(
   autoxplain_result,
@@ -10,6 +10,8 @@ generate_dashboard(
   top_features = 8L,
   sample_instances = 3L,
   include_llm_report = FALSE,
+  narrative_provider = "local",
+  narrative_args = list(),
   open_browser = FALSE,
   performance_weight = NULL,
   n_repeats = 20L,
@@ -30,6 +32,13 @@ leading model, never from impurity importance.}
 \item{include_llm_report}{Whether to request an optional narrative. The
 evidence report remains complete without it.}
 
+\item{narrative_provider}{Provider passed to
+\code{\link[=generate_natural_language_report]{generate_natural_language_report()}} when \code{include_llm_report = TRUE}.
+It defaults to the deterministic local provider.}
+
+\item{narrative_args}{Optional named arguments forwarded to
+\code{\link[=generate_natural_language_report]{generate_natural_language_report()}}.}
+
 \item{open_browser}{Open the result interactively.}
 
 \item{performance_weight}{Deprecated and ignored. Performance and
@@ -44,7 +53,8 @@ into an arbitrary weighted score.}
 The normalized dashboard path, invisibly.
 }
 \description{
-Compatibility entry point for H2O AutoML results. It converts retained H2O
-models to model-agnostic explainers, runs the same evidence audit available
-to every model framework, and writes a standalone HTML report.
+Creates a standalone report that starts with the modeling question,
+held-out performance, a simple-baseline comparison, and metric definitions.
+Fitted patterns and the more technical explanation evidence audit follow by
+progressive disclosure.
 }

@@ -1,6 +1,6 @@
 #' Stress-test the evidence behind model explanations
 #'
-#' `audit_explanations()` is AutoXplainR's primary workflow. It evaluates
+#' `audit_explanations()` is AutoXplainR's advanced reliability layer. It evaluates
 #' repeated permutation importance, feature dependence, Monte Carlo stability,
 #' prediction disagreement, and explanation disagreement among near-equivalent
 #' models. The output distinguishes robust descriptive evidence from claims

@@ -8,6 +8,9 @@
 - Added local linear, logistic, and multinomial logistic workflows for
   regression, binary classification, and multiclass classification. H2O
   remains available explicitly through `engine = "h2o"`.
+- Added `render_model_report()`, a standalone beginner-first report that leads
+  with the modeling question, held-out baseline comparison, and metric
+  definitions before revealing feature patterns and a collapsed evidence audit.
 - Repositioned the model-agnostic explanation evidence audit as an advanced
   reliability layer behind the beginner workflow.
 - Added `explain_model()` with a validated prediction contract for regression,

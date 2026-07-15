@@ -1,8 +1,8 @@
 ---
-title: "Auditing Explanation Evidence with AutoXplainR"
+title: "Your First Model with AutoXplainR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Auditing Explanation Evidence with AutoXplainR}
+  %\VignetteIndexEntry{Your First Model with AutoXplainR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,72 +12,92 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(AutoXplainR)
 ```
 
-## From explanation output to evidence
+## What AutoXplainR is for
 
-Permutation importance and feature-effect plots are useful descriptions of a
-fitted model. They are also easy to over-interpret. A feature can appear
-important because of a particular random permutation, correlated predictors can
-make marginal perturbations unrealistic, and a different but equally accurate
-model can support a different story.
+Fitting a model is only one part of a useful analysis. A first-time modeler also
+needs to know whether the model works on unseen rows, whether it improves on a
+simple guess, which fitted patterns matter, and how to describe those patterns
+without claiming more than the analysis established.
 
-AutoXplainR treats an explanation as a claim that needs a recorded evidence
-contract:
+AutoXplainR puts those questions in one workflow. Its safe default is local and
+requires neither Java nor an API account. This vignette uses the small built-in
+`mtcars` data only so every step is reproducible.
 
-1. Which fitted model and evaluation distribution are being described?
-2. Does the numerical result survive repetition of its random computation?
-3. Are feature-dependence assumptions under pressure?
-4. Do similarly performing supplied models support the same ranking?
-5. What language is justified by those diagnostics?
+## Fit and evaluate in one call
 
-The resulting grade is a transparent triage heuristic. It is not a p-value,
-causal result, fairness assessment, or certification.
-
-## Use held-out data
-
-This small example uses a fixed split only to keep the vignette reproducible.
-A real analysis should design its evaluation split before fitting and retain
-enough observations for stable diagnostics.
-
-```{r fit}
-train <- mtcars[1:24, ]
-test <- mtcars[25:32, ]
-
-model_a <- lm(mpg ~ wt + hp + disp, data = train)
-model_b <- lm(mpg ~ wt + hp + qsec, data = train)
-```
-
-`explain_model()` validates how each model produces predictions. The explainer
-stores feature data, outcomes, task metadata, and a lightweight provenance ID.
-
-```{r explainers}
-explainer_a <- explain_model(
-  model_a,
-  test,
-  y = "mpg",
-  label = "displacement model",
-  metadata = list(evaluation_role = "test")
+```{r guided-fit}
+result <- autoxplain(
+  mtcars,
+  target_column = "mpg",
+  seed = 2026
 )
 
-explainer_b <- explain_model(
-  model_b,
-  test,
-  y = "mpg",
-  label = "acceleration model",
-  metadata = list(evaluation_role = "test")
-)
-
-explainer_a
+result
 ```
 
-For an unsupported model class, pass `predict_function`. Regression functions
-return numeric predictions; binary functions return the positive-class
-probability; multiclass functions return a named probability matrix.
+`mpg` is numeric with more than two distinct values, so this is recognized as a
+regression problem. AutoXplainR reproducibly holds out 20% of the rows, learns
+preprocessing from the remaining rows, and fits two models:
 
-## Inspect repeated permutation importance
+- a linear regression using the input features; and
+- an intercept-only baseline that ignores all input features.
+
+The baseline matters. It answers whether the fitted relationships improve on a
+very simple reference rather than merely producing predictions.
+
+## Read the held-out metrics
+
+```{r evaluation}
+result$leaderboard
+result$evaluation$metric_definitions
+result$evaluation$improvement_over_baseline
+```
+
+For regression, RMSE is the primary comparison metric. It is a typical error in
+the outcome's units, with larger errors weighted more heavily. Lower is better.
+MAE is the average absolute error. R-squared compares squared error with a
+held-out mean reference and can be negative on genuinely unseen data.
+
+The exact values from a six-row `mtcars` holdout are not a basis for scientific
+conclusions; the example demonstrates the contract. Real analyses need an
+evaluation set large and representative enough for the intended use.
+
+## Build the report
+
+```{r report}
+path <- tempfile(fileext = ".html")
+render_model_report(result, path, top_features = 4, n_repeats = 5)
+file.exists(path)
+unlink(path)
+```
+
+The standalone report uses progressive disclosure:
+
+1. the modeling question and baseline verdict;
+2. every held-out metric with definitions;
+3. input reliance and fitted effect directions;
+4. warnings and concrete next actions; and
+5. a collapsed technical evidence audit and complete provenance.
+
+The report does not need an LLM, Plotly, H2O, or a browser runtime after it is
+written.
+
+## Investigate one fitted pattern
+
+The guided result can be converted to a model-agnostic explainer. Select the
+primary model rather than the simple baseline:
+
+```{r explainer}
+explainer <- as_explainers(result, models = "main_model")$main_model
+explainer
+```
+
+Repeated permutation importance measures how much held-out performance changes
+when an input is shuffled:
 
 ```{r importance}
 importance <- calculate_permutation_importance(
-  explainer_a,
+  explainer,
   features = c("wt", "hp", "disp"),
   n_repeats = 10,
   seed = 2026
@@ -86,139 +106,117 @@ importance <- calculate_permutation_importance(
 importance
 ```
 
-The result deliberately retains negative values. Its interval is a Monte Carlo
-interval across permutation repeats. Repeating an algorithm does not create new
-independent observations from a population, so this is not population-level
-inference.
+The result keeps every repeat, a Monte Carlo interval, and sign stability. The
+interval describes randomness from shuffling. It is not a confidence interval
+for a population and cannot support a causal claim.
 
-Feature groups can be permuted jointly:
-
-```{r groups}
-calculate_permutation_importance(
-  explainer_a,
-  feature_groups = list(engine = c("hp", "disp"), weight = "wt"),
-  n_repeats = 5,
-  seed = 2026
-)
-```
-
-The optional `within` argument permutes within explicit strata. This is useful
-as a blocked sensitivity analysis, but it is not advertised as a general
-conditional permutation estimator.
-
-## Prefer ALE for dependent predictors
-
-Partial dependence replaces one feature while leaving all others unchanged.
-With dependent predictors, that can ask the model to score combinations absent
-from the reference data. Accumulated local effects (ALE) instead average local
-prediction differences within observed feature bins (Apley and Zhu, 2020).
+`explain_effect()` defaults to accumulated local effects (ALE) for numeric
+inputs:
 
 ```{r effects}
-ale <- explain_effect(explainer_a, feature = "wt")
-pdp <- explain_effect(explainer_a, feature = "wt", method = "pdp")
-
-ale
-attr(pdp, "max_association")
-attr(pdp, "dependence_warning")
+weight_effect <- explain_effect(explainer, feature = "wt")
+weight_effect
 ```
 
-Both effect outputs include relative empirical support. Their uncertainty
-columns remain descriptive computation diagnostics.
+ALE summarizes local prediction changes inside observed feature bins. It
+reduces the most direct extrapolation problem of a marginal partial-dependence
+plot under dependent inputs, but it still describes a fitted prediction
+function—not the effect of intervening on vehicle weight.
 
-## Audit several plausible models
+## Open the reliability layer
+
+The evidence audit is available when more technical review is useful:
 
 ```{r audit}
 audit <- audit_explanations(
-  list(explainer_a, explainer_b),
-  features = c("wt", "hp", "disp", "qsec"),
+  as_explainers(result),
+  features = c("wt", "hp", "disp"),
   n_repeats = 10,
-  performance_tolerance = 0.10,
-  dependence_threshold = 0.70,
   seed = 2026
 )
 
 audit
 ```
 
-The near-optimal indicator is relative to the models supplied to this call. It
-does not claim to enumerate every near-optimal model in a hypothesis class. If
-near-optimal supplied models disagree, the audit recommends reporting an
-importance range rather than a single-model ranking.
+The audit checks computation stability, feature association, supplied-model
+performance, and explanation agreement. Because this example supplies a
+primary model and a baseline, it can also demonstrate that only competitively
+performing supplied models should influence an explanation comparison.
 
-The main components are ordinary data structures:
+The A--D grade is a triage heuristic. It is not a p-value, certification,
+fairness test, or safety assessment.
 
-```{r components}
-audit$performance
-audit$dependence
-audit$explanation_agreement$importance_ranges
-audit$findings
-```
+## Add a narrative only if it helps communication
 
-Evidence grades control the wording that the report permits:
-
-- **A:** stable marginal evidence under the configured diagnostics;
-- **B:** usable with the stated uncertainty;
-- **C:** sensitivity finding only;
-- **D:** do not make a feature claim.
-
-These cutoffs are visible in the source and should be configured and justified
-for the application. A grade cannot turn an associational explanation into a
-causal one.
-
-## Preserve the review artifact
-
-```{r report}
-path <- tempfile(fileext = ".html")
-render_explanation_report(audit, path)
-file.exists(path)
-unlink(path)
-```
-
-The report is a standalone HTML file with findings, action items, model and
-feature tables, interpretation boundaries, configuration, timestamps, and
-explainer IDs. Store it with the model version, evaluation-data version, and
-analysis code.
-
-## Optional H2O AutoML adapter
-
-The explanation core does not require H2O or Java. If H2O is useful for fitting
-a candidate set, keep it at the boundary:
-
-```{r h2o, eval=FALSE}
-result <- autoxplain(
-  training_data,
-  target_column = "outcome",
-  test_data = held_out_data,
-  max_models = 10,
-  max_runtime_secs = 300,
-  seed = 2026
-)
-
-explainers <- as_explainers(result)
-audit <- audit_explanations(explainers)
-generate_dashboard(result, "automl-evidence.html")
-```
-
-Held-out test data are not passed to H2O as a validation frame by default.
-Numeric two-level outcomes are classified correctly, and training
-preprocessing is applied to evaluation data through a fitted recipe.
-
-## Optional narratives
+The deterministic provider works offline:
 
 ```{r narrative}
-memo <- generate_natural_language_report(audit, use_remote = FALSE)
-cat(substr(memo, 1, 300), "...")
+memo <- generate_natural_language_report(result)
+cat(substr(memo, 1, 400), "...")
+attr(memo, "narrative_provenance")
 ```
 
-The local narrative is deterministic. Remote Gemini generation is an explicit
-optional boundary and receives only aggregated diagnostics. The prompt forbids
-causal, safety, fairness, and compliance claims, but generated text still
-requires human review.
+Remote use requires an explicit provider:
 
-## Literature context
+```{r remote-narrative, eval=FALSE}
+Sys.setenv(GEMINI_API_KEY = "...")
+memo <- generate_natural_language_report(result, provider = "gemini")
 
-Permutation-based model reliance and model-class reliance are discussed by
-Fisher, Rudin, and Dominici (2019). ALE and the extrapolation problem of PDPs
-under dependent features are developed by Apley and Zhu (2020). AutoXplainR
-operationalizes these concerns as a review workflow; it does not claim a new
-formal inferential estimator.
+# Or use a model running locally through Ollama
+memo <- generate_natural_language_report(result, provider = "ollama")
+```
+
+Only aggregated diagnostics are placed in the prompt. Raw rows, fitted objects,
+case-level predictions, and secrets are excluded. Provider and model details
+are attached to the returned text so the prose can be audited. Generated prose
+still needs human review against the numerical report.
+
+## Classification uses the same contract
+
+```{r multiclass}
+flowers <- autoxplain(iris, target_column = "Species", seed = 2026)
+flowers
+flowers$evaluation$metric_definitions
+```
+
+Classification splits are stratified. Binary tasks report log loss, accuracy,
+balanced accuracy, and ROC AUC. Multiclass tasks report log loss, accuracy, and
+macro recall. Log loss is primary because it evaluates probability quality and
+penalizes confident wrong predictions.
+
+## Bring an existing model
+
+The explanation layer does not depend on the guided fitting engine. Wrap an
+ordinary R model directly:
+
+```{r existing-model}
+train <- mtcars[1:24, ]
+test <- mtcars[25:32, ]
+fit <- lm(mpg ~ wt + hp + disp, data = train)
+
+existing <- explain_model(
+  fit,
+  test,
+  y = "mpg",
+  label = "existing linear model",
+  metadata = list(evaluation_role = "test")
+)
+```
+
+Other frameworks can supply a `predict_function`. H2O AutoML remains an
+explicit optional fitting engine through `autoxplain(..., engine = "h2o")`.
+
+## What to say—and not say
+
+Reasonable language is specific to the fitted model and evaluation data:
+
+> On the held-out rows, shuffling `wt` changed the fitted model's RMSE by the
+> reported amount, with the displayed variation across permutation repeats.
+
+The following requires a different design and evidence:
+
+> Reducing vehicle weight will cause fuel economy to improve by the fitted ALE
+> amount in a target population.
+
+AutoXplainR makes the first statement easier to compute and preserve. It does
+not turn it into the second.

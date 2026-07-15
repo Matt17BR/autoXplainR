@@ -13,7 +13,16 @@ navbar:
     left: [intro, reference, articles, news]
     right: [search, github, lightswitch]
 reference:
-  - title: Evidence workflow
+  - title: Guided workflow
+    contents:
+      - autoxplain
+      - as_explainers
+      - render_model_report
+      - generate_dashboard
+      - create_simple_dashboard
+      - generate_natural_language_report
+      - narrative_providers
+  - title: Model-agnostic evidence workflow
     contents:
       - explain_model
       - predict.autoxplain_explainer
@@ -27,22 +36,15 @@ reference:
       - calculate_accumulated_local_effects
       - calculate_partial_dependence
       - calculate_partial_dependence_multi
-  - title: Optional AutoML adapter
+  - title: Fitting and preprocessing
     contents:
-      - autoxplain
-      - as_explainers
       - preprocess_for_h2o
-      - generate_dashboard
-      - create_simple_dashboard
   - title: Visualization and metadata
     contents:
       - starts_with("plot_")
       - extract_model_characteristics
       - create_model_comparison_report
       - calculate_weighted_efficiency
-  - title: Optional narrative
-    contents:
-      - generate_natural_language_report
 articles:
   - title: Get started
     navbar: ~

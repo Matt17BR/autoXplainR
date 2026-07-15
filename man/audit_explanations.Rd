@@ -41,7 +41,7 @@ PDP claims receive a dependence warning.}
 An object of class \code{autoxplain_audit}.
 }
 \description{
-\code{audit_explanations()} is AutoXplainR's primary workflow. It evaluates
+\code{audit_explanations()} is AutoXplainR's advanced reliability layer. It evaluates
 repeated permutation importance, feature dependence, Monte Carlo stability,
 prediction disagreement, and explanation disagreement among near-equivalent
 models. The output distinguishes robust descriptive evidence from claims
