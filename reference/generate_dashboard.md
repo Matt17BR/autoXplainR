@@ -1,8 +1,9 @@
-# Generate an explanation evidence dashboard
+# Generate a guided model report
 
-Compatibility entry point for H2O AutoML results. It converts retained
-H2O models to model-agnostic explainers, runs the same evidence audit
-available to every model framework, and writes a standalone HTML report.
+Creates a standalone report that starts with the modeling question,
+held-out performance, a simple-baseline comparison, and metric
+definitions. Fitted patterns and the more technical explanation evidence
+audit follow by progressive disclosure.
 
 ## Usage
 
@@ -13,6 +14,8 @@ generate_dashboard(
   top_features = 8L,
   sample_instances = 3L,
   include_llm_report = FALSE,
+  narrative_provider = "local",
+  narrative_args = list(),
   open_browser = FALSE,
   performance_weight = NULL,
   n_repeats = 20L,
@@ -44,6 +47,18 @@ generate_dashboard(
 
   Whether to request an optional narrative. The evidence report remains
   complete without it.
+
+- narrative_provider:
+
+  Provider passed to
+  [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
+  when `include_llm_report = TRUE`. It defaults to the deterministic
+  local provider.
+
+- narrative_args:
+
+  Optional named arguments forwarded to
+  [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md).
 
 - open_browser:
 

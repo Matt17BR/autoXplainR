@@ -16,20 +16,16 @@ startup requirements.
 
 2.  Read the baseline comparison and held-out metrics.
 
-3.  Convert the result with
+3.  Preserve the fitted patterns and limitations with
+    [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md).
+
+4.  Convert the result with
     [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
-    and investigate effects.
-
-4.  Optionally run
+    to investigate an effect with
+    [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)
+    or run
     [`audit_explanations()`](https://matt17br.github.io/autoXplainR/reference/audit_explanations.md)
-    for advanced evidence checks.
-
-5.  Investigate effects with
-    [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md),
-    which defaults to ALE.
-
-6.  Preserve the evidence and limitations with
-    [`render_explanation_report()`](https://matt17br.github.io/autoXplainR/reference/render_explanation_report.md).
+    for advanced checks.
 
 ## Interpretation boundaries
 

@@ -1,10 +1,10 @@
 # Generate an evidence-constrained narrative
 
-Produces a deterministic local narrative by default, or sends only an
-aggregated analysis context to the Gemini API when an API key is
-supplied. Raw rows, model objects, and predictions are never included in
-the prompt. The generated text is explicitly secondary to the numeric
-audit.
+Produces a deterministic local narrative by default. Remote or locally
+hosted generative models are used only when `provider` is set
+explicitly. Raw rows, fitted objects, case-level predictions, and
+secrets are never included in the prompt. Generated prose remains
+secondary to the computed evaluation and explanation evidence.
 
 ## Usage
 
@@ -15,12 +15,16 @@ generate_natural_language_report(
   pdp_data = NULL,
   model_characteristics = NULL,
   audit = NULL,
+  provider = c("local", "gemini", "groq", "ollama", "openrouter", "custom"),
   api_key = NULL,
-  model = "gemini-3.5-flash",
+  model = NULL,
+  base_url = NULL,
   max_tokens = 1000L,
   temperature = 0.2,
-  use_remote = TRUE,
-  fallback = TRUE
+  timeout = 30,
+  fallback = TRUE,
+  use_remote = NULL,
+  transport = NULL
 )
 ```
 
@@ -46,14 +50,27 @@ generate_natural_language_report(
 
   Optional `autoxplain_audit`.
 
+- provider:
+
+  One of `"local"`, `"gemini"`, `"groq"`, `"ollama"`, `"openrouter"`, or
+  `"custom"`. The default is always `"local"`.
+
 - api_key:
 
-  Gemini API key. When `NULL`, `GEMINI_API_KEY` is consulted. If no key
-  is available, a local deterministic narrative is returned.
+  Provider API key. For an explicitly selected hosted provider, the
+  corresponding environment variable shown by
+  [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
+  is consulted when this is `NULL`.
 
 - model:
 
-  Gemini model identifier.
+  Model identifier. `NULL` uses the provider default shown by
+  [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md).
+  A custom provider requires an explicit model.
+
+- base_url:
+
+  Optional endpoint override. A custom provider requires it.
 
 - max_tokens:
 
@@ -63,15 +80,24 @@ generate_natural_language_report(
 
   Sampling temperature.
 
-- use_remote:
+- timeout:
 
-  Whether remote generation is allowed. Set `FALSE` to guarantee
-  local-only operation.
+  Request timeout in seconds.
 
 - fallback:
 
   Return the deterministic narrative when the remote call fails.
 
+- use_remote:
+
+  Deprecated compatibility switch. `FALSE` forces local generation;
+  `TRUE` with no explicit provider selects Gemini. Prefer `provider`.
+
+- transport:
+
+  Optional advanced request function for testing or custom networking.
+  It receives one request list and must return narrative text.
+
 ## Value
 
-A single character string.
+A single character string with a `narrative_provenance` attribute.

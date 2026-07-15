@@ -31,6 +31,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/generate_dashboard.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/index.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/narrative_providers.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_comparison.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_correlations.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_partial_dependence.html</loc></url>
@@ -39,6 +40,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/predict.autoxplain_explainer.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/render_explanation_report.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/render_model_report.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/summary.autoxplain_audit.html</loc></url>
 </urlset>
 

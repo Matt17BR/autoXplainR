@@ -1,6 +1,23 @@
 # Package index
 
-## Evidence workflow
+## Guided workflow
+
+- [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+  : Fit and evaluate a model through a guided workflow
+- [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
+  : Convert an AutoML result to model-agnostic explainers
+- [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+  : Render a beginner-first model report
+- [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
+  : Generate a guided model report
+- [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
+  : Create a lightweight AutoXplainR dashboard
+- [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
+  : Generate an evidence-constrained narrative
+- [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
+  : List supported narrative providers
+
+## Model-agnostic evidence workflow
 
 - [`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
   : Create a model-agnostic explainer
@@ -26,18 +43,10 @@
 - [`calculate_partial_dependence_multi()`](https://matt17br.github.io/autoXplainR/reference/calculate_partial_dependence_multi.md)
   : Calculate PDPs for multiple features
 
-## Optional AutoML adapter
+## Fitting and preprocessing
 
-- [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
-  : Fit and evaluate a model through a guided workflow
-- [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
-  : Convert an AutoML result to model-agnostic explainers
 - [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
   : Prepare a data frame for H2O with an auditable recipe
-- [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
-  : Generate an explanation evidence dashboard
-- [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
-  : Create a lightweight AutoXplainR dashboard
 
 ## Visualization and metadata
 
@@ -57,8 +66,3 @@
   : Create a compact model metadata report
 - [`calculate_weighted_efficiency()`](https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.md)
   : Calculate a relative weighted model score
-
-## Optional narrative
-
-- [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
-  : Generate an evidence-constrained narrative

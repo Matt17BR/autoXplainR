@@ -143,7 +143,7 @@ result
 #>   question:   predict `mpg` (regression)
 #>   engine:     base
 #>   data:       26 training + 6 evaluation rows
-#>   result:     main_model has rmse = 2.4413
+#>   result:     primary model has rmse = 2.4413
 #>   baseline:   63.1% improvement in rmse
 #>   next:       use as_explainers() to investigate the fitted patterns
 explainers <- as_explainers(result)

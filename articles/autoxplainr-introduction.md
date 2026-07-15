@@ -1,82 +1,127 @@
-# Auditing Explanation Evidence with AutoXplainR
+# Your First Model with AutoXplainR
 
-## From explanation output to evidence
+## What AutoXplainR is for
 
-Permutation importance and feature-effect plots are useful descriptions
-of a fitted model. They are also easy to over-interpret. A feature can
-appear important because of a particular random permutation, correlated
-predictors can make marginal perturbations unrealistic, and a different
-but equally accurate model can support a different story.
+Fitting a model is only one part of a useful analysis. A first-time
+modeler also needs to know whether the model works on unseen rows,
+whether it improves on a simple guess, which fitted patterns matter, and
+how to describe those patterns without claiming more than the analysis
+established.
 
-AutoXplainR treats an explanation as a claim that needs a recorded
-evidence contract:
+AutoXplainR puts those questions in one workflow. Its safe default is
+local and requires neither Java nor an API account. This vignette uses
+the small built-in `mtcars` data only so every step is reproducible.
 
-1.  Which fitted model and evaluation distribution are being described?
-2.  Does the numerical result survive repetition of its random
-    computation?
-3.  Are feature-dependence assumptions under pressure?
-4.  Do similarly performing supplied models support the same ranking?
-5.  What language is justified by those diagnostics?
-
-The resulting grade is a transparent triage heuristic. It is not a
-p-value, causal result, fairness assessment, or certification.
-
-## Use held-out data
-
-This small example uses a fixed split only to keep the vignette
-reproducible. A real analysis should design its evaluation split before
-fitting and retain enough observations for stable diagnostics.
+## Fit and evaluate in one call
 
 ``` r
 
-train <- mtcars[1:24, ]
-test <- mtcars[25:32, ]
+result <- autoxplain(
+  mtcars,
+  target_column = "mpg",
+  seed = 2026
+)
 
-model_a <- lm(mpg ~ wt + hp + disp, data = train)
-model_b <- lm(mpg ~ wt + hp + qsec, data = train)
+result
+#> <AutoXplainR guided result>
+#>   question:   predict `mpg` (regression)
+#>   engine:     base
+#>   data:       26 training + 6 evaluation rows
+#>   result:     primary model has rmse = 3.5529
+#>   baseline:   30.3% improvement in rmse
+#>   next:       use as_explainers() to investigate the fitted patterns
 ```
 
-[`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
-validates how each model produces predictions. The explainer stores
-feature data, outcomes, task metadata, and a lightweight provenance ID.
+`mpg` is numeric with more than two distinct values, so this is
+recognized as a regression problem. AutoXplainR reproducibly holds out
+20% of the rows, learns preprocessing from the remaining rows, and fits
+two models:
+
+- a linear regression using the input features; and
+- an intercept-only baseline that ignores all input features.
+
+The baseline matters. It answers whether the fitted relationships
+improve on a very simple reference rather than merely producing
+predictions.
+
+## Read the held-out metrics
 
 ``` r
 
-explainer_a <- explain_model(
-  model_a,
-  test,
-  y = "mpg",
-  label = "displacement model",
-  metadata = list(evaluation_role = "test")
-)
+result$leaderboard
+#>   rank        model_id                   model     role     rmse      mae
+#> 1    1      main_model       linear regression  primary 3.552918 2.797996
+#> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
+#>    r_squared
+#> 1 -0.1281933
+#> 2 -1.3212249
+result$evaluation$metric_definitions
+#>                                                                                                rmse 
+#>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
+#>                                                                                                 mae 
+#>                         "Average absolute prediction error in the target's units; lower is better." 
+#>                                                                                           r_squared 
+#> "Share of held-out variation explained relative to predicting the held-out mean; higher is better."
+result$evaluation$improvement_over_baseline
+#> [1] 0.3028389
+```
 
-explainer_b <- explain_model(
-  model_b,
-  test,
-  y = "mpg",
-  label = "acceleration model",
-  metadata = list(evaluation_role = "test")
-)
+For regression, RMSE is the primary comparison metric. It is a typical
+error in the outcome’s units, with larger errors weighted more heavily.
+Lower is better. MAE is the average absolute error. R-squared compares
+squared error with a held-out mean reference and can be negative on
+genuinely unseen data.
 
-explainer_a
+The exact values from a six-row `mtcars` holdout are not a basis for
+scientific conclusions; the example demonstrates the contract. Real
+analyses need an evaluation set large and representative enough for the
+intended use.
+
+## Build the report
+
+``` r
+
+path <- tempfile(fileext = ".html")
+render_model_report(result, path, top_features = 4, n_repeats = 5)
+file.exists(path)
+#> [1] TRUE
+unlink(path)
+```
+
+The standalone report uses progressive disclosure:
+
+1.  the modeling question and baseline verdict;
+2.  every held-out metric with definitions;
+3.  input reliance and fitted effect directions;
+4.  warnings and concrete next actions; and
+5.  a collapsed technical evidence audit and complete provenance.
+
+The report does not need an LLM, Plotly, H2O, or a browser runtime after
+it is written.
+
+## Investigate one fitted pattern
+
+The guided result can be converted to a model-agnostic explainer. Select
+the primary model rather than the simple baseline:
+
+``` r
+
+explainer <- as_explainers(result, models = "main_model")$main_model
+explainer
 #> <AutoXplainR explainer>
-#>   model:    displacement model
+#>   model:    main_model
 #>   task:     regression
-#>   data:     8 rows x 10 features
-#>   id:       axr-0c9b3882
+#>   data:     6 rows x 10 features
+#>   id:       axr-7221ef31
 ```
 
-For an unsupported model class, pass `predict_function`. Regression
-functions return numeric predictions; binary functions return the
-positive-class probability; multiclass functions return a named
-probability matrix.
-
-## Inspect repeated permutation importance
+Repeated permutation importance measures how much held-out performance
+changes when an input is shuffled:
 
 ``` r
 
 importance <- calculate_permutation_importance(
-  explainer_a,
+  explainer,
   features = c("wt", "hp", "disp"),
   n_repeats = 10,
   seed = 2026
@@ -84,245 +129,215 @@ importance <- calculate_permutation_importance(
 
 importance
 #> <AutoXplainR permutation importance>
-#>   metric: rmse | repeats: 10 | baseline: 2.5436
-#>  feature importance  std_error   conf_low  conf_high sign_stability
-#>       hp  2.5556753 0.22940656  2.0367217 3.07462904            1.0
-#>       wt  0.9892010 0.21483320  0.5032146 1.47518747            0.9
-#>     disp -0.1262717 0.05856004 -0.2587437 0.00620031            0.7
-#>   intervals describe permutation Monte Carlo variation, not population inference
-```
-
-The result deliberately retains negative values. Its interval is a Monte
-Carlo interval across permutation repeats. Repeating an algorithm does
-not create new independent observations from a population, so this is
-not population-level inference.
-
-Feature groups can be permuted jointly:
-
-``` r
-
-calculate_permutation_importance(
-  explainer_a,
-  feature_groups = list(engine = c("hp", "disp"), weight = "wt"),
-  n_repeats = 5,
-  seed = 2026
-)
-#> <AutoXplainR permutation importance>
-#>   metric: rmse | repeats: 5 | baseline: 2.5436
+#>   metric: rmse | repeats: 10 | baseline: 3.5529
 #>  feature importance std_error  conf_low conf_high sign_stability
-#>   engine   2.872314 0.5134143 1.4468471   4.29778              1
-#>   weight   1.382660 0.1783360 0.8875198   1.87780              1
+#>       wt  1.7808278 0.3005901 1.1008457  2.460810            0.9
+#>     disp  0.8514659 0.2980729 0.1771782  1.525754            0.9
+#>       hp  0.6710299 0.1756528 0.2736757  1.068384            0.9
 #>   intervals describe permutation Monte Carlo variation, not population inference
 ```
 
-The optional `within` argument permutes within explicit strata. This is
-useful as a blocked sensitivity analysis, but it is not advertised as a
-general conditional permutation estimator.
+The result keeps every repeat, a Monte Carlo interval, and sign
+stability. The interval describes randomness from shuffling. It is not a
+confidence interval for a population and cannot support a causal claim.
 
-## Prefer ALE for dependent predictors
-
-Partial dependence replaces one feature while leaving all others
-unchanged. With dependent predictors, that can ask the model to score
-combinations absent from the reference data. Accumulated local effects
-(ALE) instead average local prediction differences within observed
-feature bins (Apley and Zhu, 2020).
+[`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)
+defaults to accumulated local effects (ALE) for numeric inputs:
 
 ``` r
 
-ale <- explain_effect(explainer_a, feature = "wt")
-pdp <- explain_effect(explainer_a, feature = "wt", method = "pdp")
-
-ale
+weight_effect <- explain_effect(explainer, feature = "wt")
+weight_effect
 #> <AutoXplainR ALE effect>
-#>   feature: wt | rows: 8 | max association: 0.929
+#>   feature: wt | rows: 6 | max association: 0.829
 #>        wt accumulated_effect std_error   conf_low  conf_high n support
-#>  1.586850          1.1613799         0  1.1613799  1.1613799 1       1
-#>  1.734550          1.1613799         0  1.1613799  1.1613799 0       0
-#>  1.876825          0.7780811         0  0.7780811  0.7780811 1       1
-#>  1.981125          0.7780811         0  0.7780811  0.7780811 0       0
-#>  2.052875          0.7780811         0  0.7780811  0.7780811 0       0
-#>  2.145875          0.4580819         0  0.4580819  0.4580819 1       1
-#>  2.313250          0.4580819         0  0.4580819  0.4580819 0       0
-#>  2.533750          0.4580819         0  0.4580819  0.4580819 0       0
-#>  2.707750          0.1009713         0  0.1009713  0.1009713 1       1
-#>  2.773250          0.1009713         0  0.1009713  0.1009713 0       0
-#>  2.776750          0.1009713         0  0.1009713  0.1009713 0       0
-#>  2.818250         -0.1216977         0 -0.1216977 -0.1216977 1       1
-#>  2.926250         -0.1216977         0 -0.1216977 -0.1216977 0       0
-#>  3.062750         -0.1216977         0 -0.1216977 -0.1216977 0       0
-#>  3.200500         -0.5110183         0 -0.5110183 -0.5110183 1       1
-#>  3.340000         -0.5110183         0 -0.5110183 -0.5110183 0       0
-#>  3.480000         -0.5110183         0 -0.5110183 -0.5110183 0       0
-#>  3.601250         -0.7981073         0 -0.7981073 -0.7981073 1       1
-#>  3.700625         -0.7981073         0 -0.7981073 -0.7981073 0       0
-#>  3.796875         -1.0676908         0 -1.0676908 -1.0676908 1       1
-attr(pdp, "max_association")
-#> [1] 0.9285714
-attr(pdp, "dependence_warning")
-#> [1] TRUE
+#>  2.688750          1.0055717         0  1.0055717  1.0055717 1       1
+#>  2.826250          1.0055717         0  1.0055717  1.0055717 0       0
+#>  2.963750          1.0055717         0  1.0055717  1.0055717 0       0
+#>  3.101250          1.0055717         0  1.0055717  1.0055717 0       0
+#>  3.206250          0.7587882         0  0.7587882  0.7587882 1       1
+#>  3.278750          0.7587882         0  0.7587882  0.7587882 0       0
+#>  3.351250          0.7587882         0  0.7587882  0.7587882 0       0
+#>  3.423750          0.7587882         0  0.7587882  0.7587882 0       0
+#>  3.493750          0.5290243         0  0.5290243  0.5290243 1       1
+#>  3.561250          0.5290243         0  0.5290243  0.5290243 0       0
+#>  3.628750          0.5290243         0  0.5290243  0.5290243 0       0
+#>  3.696250          0.5290243         0  0.5290243  0.5290243 0       0
+#>  3.744375          0.4311619         0  0.4311619  0.4311619 1       1
+#>  3.773125          0.4311619         0  0.4311619  0.4311619 0       0
+#>  3.801875          0.4311619         0  0.4311619  0.4311619 0       0
+#>  3.830625          0.4311619         0  0.4311619  0.4311619 0       0
+#>  4.020625         -0.7644614         0 -0.7644614 -0.7644614 1       1
+#>  4.371875         -0.7644614         0 -0.7644614 -0.7644614 0       0
+#>  4.723125         -0.7644614         0 -0.7644614 -0.7644614 0       0
+#>  5.074375         -1.9600847         0 -1.9600847 -1.9600847 1       1
 ```
 
-Both effect outputs include relative empirical support. Their
-uncertainty columns remain descriptive computation diagnostics.
+ALE summarizes local prediction changes inside observed feature bins. It
+reduces the most direct extrapolation problem of a marginal
+partial-dependence plot under dependent inputs, but it still describes a
+fitted prediction function—not the effect of intervening on vehicle
+weight.
 
-## Audit several plausible models
+## Open the reliability layer
+
+The evidence audit is available when more technical review is useful:
 
 ``` r
 
 audit <- audit_explanations(
-  list(explainer_a, explainer_b),
-  features = c("wt", "hp", "disp", "qsec"),
+  as_explainers(result),
+  features = c("wt", "hp", "disp"),
   n_repeats = 10,
-  performance_tolerance = 0.10,
-  dependence_threshold = 0.70,
   seed = 2026
 )
 
 audit
 #> <AutoXplainR explanation evidence audit>
-#>   grade:              D (diagnostic, not certification)
-#>   models:             2 (2 near-optimal)
-#>   stable claims:      0.0%
-#>   max dependence:     0.929
-#>   explanation accord: 0.6
-#>   prediction accord:  1
+#>   grade:              C (diagnostic, not certification)
+#>   models:             2 (1 near-optimal)
+#>   stable claims:      16.7%
+#>   max dependence:     0.829
+#>   explanation accord: n/a (one model)
+#>   prediction accord:  n/a (one model)
 #> 
 #> Findings
-#>   [warning] 4 feature(s) exceed the dependence threshold.
-#>   [warning] 8 model-feature claim(s) are qualified or unsupported.
-#>   [critical] Near-optimal models disagree on the feature-importance ranking.
+#>   [warning] 2 feature(s) exceed the dependence threshold.
+#>   [warning] 5 model-feature claim(s) are qualified or unsupported.
 #>   [note] The permutation budget is suitable for smoke testing, not a final report.
 ```
 
-The near-optimal indicator is relative to the models supplied to this
-call. It does not claim to enumerate every near-optimal model in a
-hypothesis class. If near-optimal supplied models disagree, the audit
-recommends reporting an importance range rather than a single-model
-ranking.
+The audit checks computation stability, feature association,
+supplied-model performance, and explanation agreement. Because this
+example supplies a primary model and a baseline, it can also demonstrate
+that only competitively performing supplied models should influence an
+explanation comparison.
 
-The main components are ordinary data structures:
+The A–D grade is a triage heuristic. It is not a p-value, certification,
+fairness test, or safety assessment.
 
-``` r
+## Add a narrative only if it helps communication
 
-audit$performance
-#>                                 model    score metric near_optimal relative_gap
-#> displacement model displacement model 2.543600   rmse         TRUE   0.05433181
-#> acceleration model acceleration model 2.412523   rmse         TRUE   0.00000000
-audit$dependence
-#>   feature max_association associated_feature high_dependence
-#> 1      wt       0.9285714               disp            TRUE
-#> 2      hp       0.8024096               disp            TRUE
-#> 3    disp       0.9285714                 wt            TRUE
-#> 4    qsec       0.7784571                 hp            TRUE
-audit$explanation_agreement$importance_ranges
-#>      feature min_importance max_importance mean_importance
-#> wt        wt     0.98920102       2.053720      1.52146039
-#> hp        hp     1.70166680       2.555675      2.12867108
-#> disp    disp    -0.12627171       0.000000     -0.06313585
-#> qsec    qsec    -0.09100309       0.000000     -0.04550155
-audit$findings
-#>   severity                        code
-#> 1  warning          feature_dependence
-#> 2  warning limited_importance_evidence
-#> 3 critical       rashomon_disagreement
-#> 4     note      low_monte_carlo_budget
-#>                                                                     message
-#> 1                             4 feature(s) exceed the dependence threshold.
-#> 2                    8 model-feature claim(s) are qualified or unsupported.
-#> 3           Near-optimal models disagree on the feature-importance ranking.
-#> 4 The permutation budget is suitable for smoke testing, not a final report.
-#>                                                                                          evidence
-#> 1                                                          Maximum observed association is 0.929.
-#> 2 4 interval(s) include zero; 2 have sign stability below 0.8; 8 exceed the dependence threshold.
-#> 3                                                                    Mean Spearman agreement: 0.6
-#> 4                                                              10 repeats per model-feature pair.
-#>                                                                                                                                recommendation
-#> 1                          Prefer ALE for effects; treat marginal PFI as model reliance, and use a conditional method for conditional claims.
-#> 2 Inspect repeat distributions and dependence, increase evaluation data when uncertainty is material, and avoid ranking unsupported features.
-#> 3                                              Report model-class importance ranges instead of presenting one best model's ranking as unique.
-#> 4                                                             Use at least 20 repeats for routine work and more when feature ranks are close.
-```
-
-Evidence grades control the wording that the report permits:
-
-- **A:** stable marginal evidence under the configured diagnostics;
-- **B:** usable with the stated uncertainty;
-- **C:** sensitivity finding only;
-- **D:** do not make a feature claim.
-
-These cutoffs are visible in the source and should be configured and
-justified for the application. A grade cannot turn an associational
-explanation into a causal one.
-
-## Preserve the review artifact
+The deterministic provider works offline:
 
 ``` r
 
-path <- tempfile(fileext = ".html")
-render_explanation_report(audit, path)
-file.exists(path)
-#> [1] TRUE
-unlink(path)
-```
-
-The report is a standalone HTML file with findings, action items, model
-and feature tables, interpretation boundaries, configuration,
-timestamps, and explainer IDs. Store it with the model version,
-evaluation-data version, and analysis code.
-
-## Optional H2O AutoML adapter
-
-The explanation core does not require H2O or Java. If H2O is useful for
-fitting a candidate set, keep it at the boundary:
-
-``` r
-
-result <- autoxplain(
-  training_data,
-  target_column = "outcome",
-  test_data = held_out_data,
-  max_models = 10,
-  max_runtime_secs = 300,
-  seed = 2026
-)
-
-explainers <- as_explainers(result)
-audit <- audit_explanations(explainers)
-generate_dashboard(result, "automl-evidence.html")
-```
-
-Held-out test data are not passed to H2O as a validation frame by
-default. Numeric two-level outcomes are classified correctly, and
-training preprocessing is applied to evaluation data through a fitted
-recipe.
-
-## Optional narratives
-
-``` r
-
-memo <- generate_natural_language_report(audit, use_remote = FALSE)
-cat(substr(memo, 1, 300), "...")
-#> # Explanation Evidence Report
+memo <- generate_natural_language_report(result)
+cat(substr(memo, 1, 400), "...")
+#> # Model Fit and Evaluation Report
 #> 
 #> ## Scope
-#> This is a descriptive summary of a unspecified task for `unspecified`, covering 2 model(s) and 4 feature(s).
+#> This is a descriptive summary of a regression task for `mpg`, covering 2 model(s) and 10 feature(s).
 #> 
-#> ## Reliability first
-#> The heuristic explanation-evidence grade is **D**; this is a diagnostic, not a certification.
-#> The stable-claim rate is 0.0%.
+#> ## Did the model improve on a simple baseline?
+#> The linear regression was evaluated on 6 held-out test rows. Its **rmse** was 3.5529.
+#> That is a 30.3% improvement over the intercept-only baseline (5.0963).
 #> 
-#> ##  ...
+#> ## What the main metric means
+#> **rmse:** Typical p ...
+attr(memo, "narrative_provenance")
+#> $provider_requested
+#> [1] "local"
+#> 
+#> $provider_used
+#> [1] "local"
+#> 
+#> $model
+#> NULL
+#> 
+#> $remote
+#> [1] FALSE
+#> 
+#> $fallback
+#> [1] FALSE
+#> 
+#> $disclosure
+#> [1] "Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included."
+#> 
+#> $error
+#> NULL
 ```
 
-The local narrative is deterministic. Remote Gemini generation is an
-explicit optional boundary and receives only aggregated diagnostics. The
-prompt forbids causal, safety, fairness, and compliance claims, but
-generated text still requires human review.
+Remote use requires an explicit provider:
 
-## Literature context
+``` r
 
-Permutation-based model reliance and model-class reliance are discussed
-by Fisher, Rudin, and Dominici (2019). ALE and the extrapolation problem
-of PDPs under dependent features are developed by Apley and Zhu (2020).
-AutoXplainR operationalizes these concerns as a review workflow; it does
-not claim a new formal inferential estimator.
+Sys.setenv(GEMINI_API_KEY = "...")
+memo <- generate_natural_language_report(result, provider = "gemini")
+
+# Or use a model running locally through Ollama
+memo <- generate_natural_language_report(result, provider = "ollama")
+```
+
+Only aggregated diagnostics are placed in the prompt. Raw rows, fitted
+objects, case-level predictions, and secrets are excluded. Provider and
+model details are attached to the returned text so the prose can be
+audited. Generated prose still needs human review against the numerical
+report.
+
+## Classification uses the same contract
+
+``` r
+
+flowers <- autoxplain(iris, target_column = "Species", seed = 2026)
+flowers
+#> <AutoXplainR guided result>
+#>   question:   predict `Species` (multiclass)
+#>   engine:     base
+#>   data:       120 training + 30 evaluation rows
+#>   result:     primary model has log_loss = 1.1513
+#>   baseline:   -4.8% improvement in log_loss
+#>   next:       use as_explainers() to investigate the fitted patterns
+flowers$evaluation$metric_definitions
+#>                                                                        log_loss 
+#>    "Probability error that penalizes confident wrong answers; lower is better." 
+#>                                                                        accuracy 
+#>       "Share of held-out rows assigned to the correct class; higher is better." 
+#>                                                                    macro_recall 
+#> "Recall calculated for each class and then averaged equally; higher is better."
+```
+
+Classification splits are stratified. Binary tasks report log loss,
+accuracy, balanced accuracy, and ROC AUC. Multiclass tasks report log
+loss, accuracy, and macro recall. Log loss is primary because it
+evaluates probability quality and penalizes confident wrong predictions.
+
+## Bring an existing model
+
+The explanation layer does not depend on the guided fitting engine. Wrap
+an ordinary R model directly:
+
+``` r
+
+train <- mtcars[1:24, ]
+test <- mtcars[25:32, ]
+fit <- lm(mpg ~ wt + hp + disp, data = train)
+
+existing <- explain_model(
+  fit,
+  test,
+  y = "mpg",
+  label = "existing linear model",
+  metadata = list(evaluation_role = "test")
+)
+```
+
+Other frameworks can supply a `predict_function`. H2O AutoML remains an
+explicit optional fitting engine through
+`autoxplain(..., engine = "h2o")`.
+
+## What to say—and not say
+
+Reasonable language is specific to the fitted model and evaluation data:
+
+> On the held-out rows, shuffling `wt` changed the fitted model’s RMSE
+> by the reported amount, with the displayed variation across
+> permutation repeats.
+
+The following requires a different design and evidence:
+
+> Reducing vehicle weight will cause fuel economy to improve by the
+> fitted ALE amount in a target population.
+
+AutoXplainR makes the first statement easier to compute and preserve. It
+does not turn it into the second.

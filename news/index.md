@@ -11,6 +11,11 @@
 - Added local linear, logistic, and multinomial logistic workflows for
   regression, binary classification, and multiclass classification. H2O
   remains available explicitly through `engine = "h2o"`.
+- Added
+  [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md),
+  a standalone beginner-first report that leads with the modeling
+  question, held-out baseline comparison, and metric definitions before
+  revealing feature patterns and a collapsed evidence audit.
 - Repositioned the model-agnostic explanation evidence audit as an
   advanced reliability layer behind the beginner workflow.
 - Added
@@ -54,7 +59,10 @@
 - Replaced the generated 2,300-line Flexdashboard implementation with
   the same evidence-report pipeline used by model-agnostic callers.
 - Replaced fixed, ranking-first LLM prompts with local deterministic
-  reports and an optional aggregated-data-only Gemini narrative.
+  reports and explicit aggregated-data-only Gemini, Groq, Ollama,
+  OpenRouter, and custom OpenAI-compatible adapters. Local deterministic
+  reporting is always the default, even when an API key is present, and
+  provider/model/fallback details are attached as provenance.
 - Removed bundled third-party datasets whose provenance and
   redistribution terms were not documented.
 
