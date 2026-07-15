@@ -27,6 +27,7 @@ result
 #>   question:   predict `mpg` (regression)
 #>   engine:     base
 #>   data:       26 training + 6 evaluation rows
+#>   models:     2 (primary + baseline)
 #>   result:     primary model has rmse = 3.5529
 #>   baseline:   30.3% improvement in rmse
 #>   next:       use as_explainers() to investigate the fitted patterns
@@ -52,9 +53,12 @@ result$leaderboard
 #>   rank        model_id                   model     role     rmse      mae
 #> 1    1      main_model       linear regression  primary 3.552918 2.797996
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
-#>    r_squared
-#> 1 -0.1281933
-#> 2 -1.3212249
+#>    r_squared training_time_ms model_size_kb complexity fit_warning
+#> 1 -0.1281933                2      44.43750         11            
+#> 2 -1.3212249                2      19.82812          1            
+#>   prediction_time_ms
+#> 1                  1
+#> 2                  0
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -98,6 +102,57 @@ The standalone report uses progressive disclosure:
 
 The report does not need an LLM, Plotly, H2O, or a browser runtime after
 it is written.
+
+## Compare a small candidate set
+
+The first call stays intentionally simple. When comparing a few
+approachable model shapes would help, use the explicit comparison mode:
+
+``` r
+
+comparison <- autoxplain(
+  iris,
+  target_column = "Sepal.Length",
+  model_set = "comparison",
+  test_fraction = 0.4,
+  seed = 2026
+)
+
+model_tradeoffs(comparison)
+#> <AutoXplainR model trade-offs>
+#>   performance: rmse (lower is better)
+#>   complexity:  model_size_kb (lower is better)
+#>   Pareto set:  3 / 4 supplied models
+#>         model_id                   model      role      rmse model_size_kb
+#>       main_model       linear regression   primary 0.2963068      49.46094
+#>       small_tree     small decision tree candidate 0.3744086      36.66406
+#>  simple_baseline intercept-only baseline  baseline 0.8691950      32.51562
+#>    flexible_tree  flexible decision tree candidate 0.4126230      43.25000
+#>  pareto_optimal
+#>            TRUE
+#>            TRUE
+#>            TRUE
+#>           FALSE
+#>   note: Pareto status compares only the supplied models on the supplied evaluation data; it is not a final model-selection rule.
+```
+
+This adds a shallow tree and a more flexible tree to the pre-specified
+statistical model and intercept-only baseline. Pareto status asks
+whether another supplied model is at least as good on both held-out
+performance and model size, with a strict improvement on one.
+
+The comparison is descriptive. AutoXplainR does not silently promote the
+holdout winner to primary, because selecting on the holdout and
+reporting the same score as final performance would be optimistic. Use
+fresh validation or a pre-specified resampling procedure when model
+selection itself is the goal.
+
+An interactive view is available when Plotly is installed:
+
+``` r
+
+plot_model_comparison(comparison)
+```
 
 ## Investigate one fitted pattern
 
@@ -285,6 +340,7 @@ flowers
 #>   question:   predict `Species` (multiclass)
 #>   engine:     base
 #>   data:       120 training + 30 evaluation rows
+#>   models:     2 (primary + baseline)
 #>   result:     primary model has log_loss = 1.1513
 #>   baseline:   -4.8% improvement in log_loss
 #>   next:       use as_explainers() to investigate the fitted patterns

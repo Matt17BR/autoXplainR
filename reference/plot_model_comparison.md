@@ -1,6 +1,6 @@
-# Plot AutoML model performance
+# Plot model performance and complexity trade-offs
 
-Plot AutoML model performance
+Plot model performance and complexity trade-offs
 
 ## Usage
 
@@ -8,8 +8,8 @@ Plot AutoML model performance
 plot_model_comparison(
   autoxplain_result,
   performance_metric = NULL,
-  complexity_metric = "model_size",
-  title = "Model Performance Landscape"
+  complexity_metric = NULL,
+  title = "Model Trade-off Landscape"
 )
 ```
 
@@ -25,8 +25,8 @@ plot_model_comparison(
 
 - complexity_metric:
 
-  Optional leaderboard complexity column. Model rank is used when
-  unavailable.
+  Optional numeric leaderboard or model-metadata column. Model size is
+  preferred when `NULL`.
 
 - title:
 

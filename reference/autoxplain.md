@@ -18,6 +18,7 @@ autoxplain(
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
+  model_set = c("quick", "comparison"),
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
@@ -71,6 +72,14 @@ autoxplain(
 
   One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently resolves to
   the dependency-free `"base"` workflow.
+
+- model_set:
+
+  Guided base-engine candidates. `"quick"` fits the pre-specified
+  understandable model and baseline. `"comparison"` also fits shallow
+  and flexible decision trees for a descriptive multi-model and Pareto
+  trade-off view. Held-out ranks do not silently replace the
+  pre-specified primary model.
 
 - enable_preprocessing:
 
@@ -145,6 +154,7 @@ result
 #>   question:   predict `mpg` (regression)
 #>   engine:     base
 #>   data:       26 training + 6 evaluation rows
+#>   models:     2 (primary + baseline)
 #>   result:     primary model has rmse = 2.4413
 #>   baseline:   63.1% improvement in rmse
 #>   next:       use as_explainers() to investigate the fitted patterns

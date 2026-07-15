@@ -33,8 +33,12 @@ The primary workflow must accept a data frame and target name, then:
 - optionally add an LLM narrative that is subordinate to computed
   results.
 
-Advanced users may supply their own split, model, prediction function,
-H2O AutoML run, explanation configuration, or narrative provider.
+The next step remains one explicit argument away:
+`model_set = "comparison"` adds a small, local candidate set and
+displays performance-versus-complexity trade-offs without silently
+changing the pre-specified primary model. Advanced users may supply
+their own split, model, prediction function, H2O AutoML run, explanation
+configuration, or narrative provider.
 
 ## Progressive disclosure
 
@@ -42,9 +46,12 @@ The same result should support three levels of detail:
 
 1.  **Guided:** what was fitted, whether it beats a simple baseline, the
     most important patterns, and concrete cautions.
-2.  **Evidence:** permutation variability, dependence, supplied-model
+2.  **Compare:** visible candidate performance, complexity, Pareto
+    status, and the warning that held-out ranks are descriptive rather
+    than a free tuning loop.
+3.  **Evidence:** permutation variability, dependence, supplied-model
     multiplicity, ALE/PDP support, and provenance.
-3.  **Developer:** repeat-level values, prediction contracts, recipes,
+4.  **Developer:** repeat-level values, prediction contracts, recipes,
     metrics, prompts, and machine-readable configuration.
 
 Every technical term in the guided report needs an adjacent definition.

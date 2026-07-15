@@ -70,6 +70,7 @@ does not require Java or a cloud account.</p>
 <span>  test_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  test_fraction <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"base"</span>, <span class="st">"h2o"</span><span class="op">)</span>,</span>
+<span>  model_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quick"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
 <span>  enable_preprocessing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  task <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"regression"</span>, <span class="st">"binary"</span>, <span class="st">"multiclass"</span><span class="op">)</span>,</span>
@@ -124,6 +125,14 @@ validation frame unless <code>use_test_as_validation = TRUE</code>.</p></dd>
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p>One of <code>"auto"</code>, <code>"base"</code>, or <code>"h2o"</code>. <code>"auto"</code> currently
 resolves to the dependency-free <code>"base"</code> workflow.</p></dd>
+
+
+<dt id="arg-model-set">model_set<a class="anchor" aria-label="anchor" href="#arg-model-set"></a></dt>
+<dd><p>Guided base-engine candidates. <code>"quick"</code> fits the
+pre-specified understandable model and baseline. <code>"comparison"</code> also fits
+shallow and flexible decision trees for a descriptive multi-model and
+Pareto trade-off view. Held-out ranks do not silently replace the
+pre-specified primary model.</p></dd>
 
 
 <dt id="arg-enable-preprocessing">enable_preprocessing<a class="anchor" aria-label="anchor" href="#arg-enable-preprocessing"></a></dt>
@@ -197,6 +206,7 @@ identifier removal, is opt-in and recorded in the result.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   question:   predict `mpg` (regression)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   engine:     base</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   data:       26 training + 6 evaluation rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   models:     2 (primary + baseline)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   result:     primary model has rmse = 2.4413</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   baseline:   63.1% improvement in rmse</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   next:       use as_explainers() to investigate the fitted patterns</span>

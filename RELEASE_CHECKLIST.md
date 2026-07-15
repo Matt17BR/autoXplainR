@@ -15,11 +15,13 @@ substitute for that review.
   unsupported causal, fairness, or certainty claims.
 - Run `devtools::document()` and ensure the generated files are
   committed.
-- Run `spelling::spell_check_package()` and `urlchecker::url_check()`.
+- Run `spelling::spell_check_package()` and
+  [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html).
 - Run `lintr::lint_package()`,
   [`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html),
-  and `covr::package_coverage()`; statement coverage must remain at
-  least 80%.
+  and
+  [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md);
+  statement coverage must remain at least 80%.
 - Run `devtools::check(args = "--as-cran")` and explain every remaining
   note in `cran-comments.md`.
 - Run the isolated real-H2O test with `AUTOXPLAIN_RUN_H2O=true`.
