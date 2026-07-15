@@ -21,6 +21,14 @@ and the linked provider page before relying on a hosted service.
 | [Ollama](https://docs.ollama.com/api/openai-compatibility) | `gemma3:4b` | Local compute | [JSON schema](https://ollama.com/blog/structured-outputs) | Data stays local; installation, model download, memory, and speed are the user’s responsibility |
 | [OpenRouter](https://openrouter.ai/openrouter/free/providers) | `openrouter/free` | [Limited free-model requests](https://openrouter.ai/docs/faq) | [Provider-dependent schema](https://openrouter.ai/docs/guides/features/structured-outputs) | Convenient experimentation; the selected free model and availability are not reproducible |
 
+The Gemini adapter uses the current [Interactions
+API](https://ai.google.dev/gemini-api/docs/interactions-overview) with
+`store = false`. Interactions are stored by default, so this explicit
+stateless setting is important for a one-shot model summary. Gemini’s
+own model guidance recommends its default temperature of 1; AutoXplainR
+uses that value unless `temperature =` is supplied. Other providers
+default to 0.2.
+
 ## Setup
 
 Never put a key in a script, report, issue, or committed `.Renviron`
@@ -52,6 +60,42 @@ An explicit `model =` overrides a provider default. A `custom` provider
 accepts an OpenAI-compatible `base_url`, but its security, privacy, and
 output contract are entirely the caller’s responsibility.
 
+## How generated output is controlled
+
+`structured = TRUE` is the default for remote generation. When a
+provider is marked as schema-capable, AutoXplainR asks for exactly five
+fields: a headline, a held-out performance summary, model patterns,
+cautions, and next steps. It then parses and validates the JSON, rejects
+missing or unexpected fields, and renders the Markdown locally. Groq
+uses strict constrained decoding on its GPT-OSS default; OpenRouter is
+instructed to route only to providers that accept the schema; Gemini and
+Ollama use their documented schema interfaces.
+
+Fixed causal, fairness, safety, and external-validation boundaries are
+inserted by AutoXplainR after parsing. They are never delegated to the
+model. If the provider returns invalid JSON, the usual `fallback = TRUE`
+path returns the deterministic evidence summary and records the failure
+in provenance.
+
+Set `structured = FALSE` only when testing an incompatible model or
+endpoint:
+
+``` r
+
+memo <- generate_natural_language_report(
+  result,
+  provider = "custom",
+  model = "my-model",
+  base_url = "http://127.0.0.1:9000/v1/chat/completions",
+  structured = FALSE
+)
+```
+
+AutoXplainR still appends its fixed interpretation boundaries to
+unstructured provider text. Cloudflare currently follows this path
+because its documented JSON-mode model list does not name the package’s
+GPT-OSS default.
+
 ## What leaves the machine
 
 For a remote provider, AutoXplainR sends a text prompt containing
@@ -59,7 +103,8 @@ aggregate metrics, metric definitions, feature names, explanation
 summaries, and diagnostic cautions. It excludes raw rows, fitted
 objects, case-level predictions, and API keys. The attached
 `narrative_provenance` attribute records the requested provider,
-provider used, resolved model, remote/local status, and fallback status.
+provider used, resolved model, remote/local status, structured-output
+request and use, and fallback status.
 
 This minimization does not make a remote call private. Feature or target
 names can themselves be sensitive, and provider logging and training

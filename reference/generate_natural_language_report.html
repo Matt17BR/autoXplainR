@@ -73,8 +73,9 @@ evaluation and explanation evidence.</p>
 <span>  base_url <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  account_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_tokens <span class="op">=</span> <span class="fl">1000L</span>,</span>
-<span>  temperature <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  temperature <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  structured <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  fallback <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  use_remote <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transport <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -136,11 +137,19 @@ is consulted when this is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-temperature">temperature<a class="anchor" aria-label="anchor" href="#arg-temperature"></a></dt>
-<dd><p>Sampling temperature.</p></dd>
+<dd><p>Sampling temperature. <code>NULL</code> uses 1 for Gemini, following
+its current model guidance, and 0.2 for other providers.</p></dd>
 
 
 <dt id="arg-timeout">timeout<a class="anchor" aria-label="anchor" href="#arg-timeout"></a></dt>
 <dd><p>Request timeout in seconds.</p></dd>
+
+
+<dt id="arg-structured">structured<a class="anchor" aria-label="anchor" href="#arg-structured"></a></dt>
+<dd><p>Request a validated five-section JSON response when the
+selected provider supports it. AutoXplainR renders the validated fields
+and adds fixed interpretation boundaries locally. See
+<code><a href="narrative_providers.html">narrative_providers()</a></code> for current capability declarations.</p></dd>
 
 
 <dt id="arg-fallback">fallback<a class="anchor" aria-label="anchor" href="#arg-fallback"></a></dt>
@@ -156,7 +165,9 @@ generation; <code>TRUE</code> with no explicit provider selects Gemini. Prefer
 
 <dt id="arg-transport">transport<a class="anchor" aria-label="anchor" href="#arg-transport"></a></dt>
 <dd><p>Optional advanced request function for testing or custom
-networking. It receives one request list and must return narrative text.</p></dd>
+networking. It receives one request list and must return response text;
+when <code>request$structured</code> is <code>TRUE</code>, that text must be schema-conforming
+JSON.</p></dd>
 
 </dl></div>
     <div class="section level2">

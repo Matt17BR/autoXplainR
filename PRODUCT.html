@@ -111,6 +111,8 @@
 <td><code>openrouter/free</code></td>
 <td>Broad access; selected model and availability are not reproducible</td>
 </tr></tbody></table><p>All provider adapters must share one prompt contract, expose the provider and resolved model in provenance, time out, handle rate limits, and fall back to the deterministic report without losing the analysis.</p>
+<p>Schema-capable providers must return a small validated object rather than final report markup. AutoXplainR renders those fields and adds fixed interpretation boundaries locally. Invalid or incomplete structured output triggers the same transparent deterministic fallback. Schema validity is a format guarantee, not evidence that generated claims are true.</p>
+<p>Gemini uses the stateless Interactions API with <code>store = false</code>; the package does not need provider-side conversation state for a one-shot aggregate memo. OpenRouter routing must require schema support when a schema is requested.</p>
 <p>Hosted-provider recommendations must be checked against official model, pricing, rate-limit, structured-output, and privacy documentation before every release. <code>LLM_PROVIDERS.md</code> is the dated decision record; the package must not describe a hosted plan as permanently free.</p>
 </div>
 <div class="section level2">

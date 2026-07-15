@@ -21,8 +21,9 @@ generate_natural_language_report(
   base_url = NULL,
   account_id = NULL,
   max_tokens = 1000L,
-  temperature = 0.2,
+  temperature = NULL,
   timeout = 30,
+  structured = TRUE,
   fallback = TRUE,
   use_remote = NULL,
   transport = NULL
@@ -84,11 +85,20 @@ generate_natural_language_report(
 
 - temperature:
 
-  Sampling temperature.
+  Sampling temperature. `NULL` uses 1 for Gemini, following its current
+  model guidance, and 0.2 for other providers.
 
 - timeout:
 
   Request timeout in seconds.
+
+- structured:
+
+  Request a validated five-section JSON response when the selected
+  provider supports it. AutoXplainR renders the validated fields and
+  adds fixed interpretation boundaries locally. See
+  [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
+  for current capability declarations.
 
 - fallback:
 
@@ -102,7 +112,9 @@ generate_natural_language_report(
 - transport:
 
   Optional advanced request function for testing or custom networking.
-  It receives one request list and must return narrative text.
+  It receives one request list and must return response text; when
+  `request$structured` is `TRUE`, that text must be schema-conforming
+  JSON.
 
 ## Value
 

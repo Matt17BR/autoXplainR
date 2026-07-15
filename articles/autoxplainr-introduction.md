@@ -306,6 +306,12 @@ attr(memo, "narrative_provenance")
 #> $fallback
 #> [1] FALSE
 #> 
+#> $structured_requested
+#> [1] TRUE
+#> 
+#> $structured_used
+#> [1] FALSE
+#> 
 #> $disclosure
 #> [1] "Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included."
 #> 
@@ -333,6 +339,13 @@ objects, case-level predictions, and secrets are excluded. Provider and
 model details are attached to the returned text so the prose can be
 audited. Generated prose still needs human review against the numerical
 report.
+
+Schema-capable providers return five validated fields by default.
+AutoXplainR renders them locally and inserts fixed interpretation
+boundaries that the model cannot omit. The schema constrains format, not
+truth; malformed output falls back to the deterministic report. Gemini
+uses its stateless Interactions API with provider storage disabled for
+this one-shot request.
 
 See the repository’s narrative provider guide for the dated comparison
 of free access, structured-output support, privacy, and reproducibility.

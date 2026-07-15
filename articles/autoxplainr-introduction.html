@@ -353,6 +353,12 @@ certification, fairness test, or safety assessment.</p>
 <span><span class="co">#&gt; $fallback</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span>
 <span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $structured_requested</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $structured_used</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $disclosure</span></span>
 <span><span class="co">#&gt; [1] "Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included."</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -374,6 +380,12 @@ fitted objects, case-level predictions, and secrets are excluded.
 Provider and model details are attached to the returned text so the
 prose can be audited. Generated prose still needs human review against
 the numerical report.</p>
+<p>Schema-capable providers return five validated fields by default.
+AutoXplainR renders them locally and inserts fixed interpretation
+boundaries that the model cannot omit. The schema constrains format, not
+truth; malformed output falls back to the deterministic report. Gemini
+uses its stateless Interactions API with provider storage disabled for
+this one-shot request.</p>
 <p>See the repository’s narrative provider guide for the dated
 comparison of free access, structured-output support, privacy, and
 reproducibility. Provider plans and model catalogs can change

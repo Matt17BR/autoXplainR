@@ -80,6 +80,8 @@
 <li>Replaced the generated 2,300-line Flexdashboard implementation with the same evidence-report pipeline used by model-agnostic callers.</li>
 <li>Replaced fixed, ranking-first LLM prompts with local deterministic reports and explicit aggregated-data-only Gemini, Groq, Cloudflare Workers AI, Ollama, OpenRouter, and custom OpenAI-compatible adapters. Local deterministic reporting is always the default, even when an API key is present, and provider/model/fallback details are attached as provenance.</li>
 <li>Added a dated provider decision guide covering current free access, privacy, reproducibility, setup, and structured-output capabilities. The Groq default now uses schema-capable <code>openai/gpt-oss-120b</code>.</li>
+<li>Schema-capable narrative providers now return a validated five-field object that AutoXplainR renders locally with fixed causal, fairness, safety, and external-validation boundaries. Invalid JSON falls back transparently and structured-output use is retained in provenance.</li>
+<li>Migrated Gemini to its current Interactions API with <code>store = false</code> and its provider-recommended default temperature. OpenRouter schema requests require a compatible routed provider; unsupported adapters remain explicitly unstructured.</li>
 <li>Removed bundled third-party datasets whose provenance and redistribution terms were not documented.</li>
 </ul></div>
 <div class="section level3">

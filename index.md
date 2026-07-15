@@ -188,7 +188,9 @@ guide](https://matt17br.github.io/autoXplainR/LLM_PROVIDERS.md) compares
 current free access, privacy, structured-output support,
 reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI,
 Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt
-provenance are retained.
+provenance are retained. Schema-capable providers return five validated
+fields that AutoXplainR renders locally with fixed interpretation
+boundaries; a schema controls format, not factual correctness.
 
 ## Classification, existing models, and H2O use the same contract
 
