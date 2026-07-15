@@ -45,8 +45,9 @@ configuration, or narrative provider.
 The same result should support three levels of detail:
 
 1.  **Guided:** what was fitted, whether it beats a simple baseline, the
-    most important patterns, probability calibration, missingness
-    context, and concrete cautions.
+    most important patterns, probability calibration, binary
+    decision-threshold trade-offs, missingness context, and concrete
+    cautions.
 2.  **Compare:** visible candidate performance, complexity, Pareto
     status, and the warning that held-out ranks are descriptive rather
     than a free tuning loop.

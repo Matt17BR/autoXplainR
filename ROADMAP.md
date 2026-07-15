@@ -67,8 +67,10 @@ regularization paths, and user-defined candidate generators.
 
 Rashomon ALE bands and class-reliance ranges with coverage diagnostics.
 
-Case-level prediction ambiguity, feature-attribution disagreement, and
-decision-threshold sensitivity.
+Binary decision-threshold sensitivity with explicit false-positive and
+false-negative trade-offs and no holdout-optimized recommendation.
+
+Case-level prediction ambiguity and feature-attribution disagreement.
 
 Candidate-relative Pareto selection over held-out performance and model
 size without hiding trade-offs in one weighted score.

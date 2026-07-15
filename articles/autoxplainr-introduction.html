@@ -128,10 +128,10 @@ predictions.</p>
 <span><span class="co">#&gt; 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692</span></span>
 <span><span class="co">#&gt;    r_squared training_time_ms model_size_kb complexity fit_warning</span></span>
 <span><span class="co">#&gt; 1 -0.1281933                1      44.43750         11            </span></span>
-<span><span class="co">#&gt; 2 -1.3212249                2      19.82812          1            </span></span>
+<span><span class="co">#&gt; 2 -1.3212249                3      19.82812          1            </span></span>
 <span><span class="co">#&gt;   prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                  1</span></span>
-<span><span class="co">#&gt; 2                  0</span></span>
+<span><span class="co">#&gt; 2                  1</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                                                rmse </span></span>
 <span><span class="co">#&gt;            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
@@ -438,6 +438,21 @@ the grouped values remain available directly:</p>
 <p>The binned gap is descriptive. It changes with the evaluation sample
 and the grouping, so it should be read beside log loss and Brier score
 rather than as a population guarantee.</p>
+<p>For a binary task, the report also makes the 0.5 decision convention
+visible. Use <code><a href="../reference/threshold_diagnostics.html">threshold_diagnostics()</a></code> to compare a
+deliberate set of cutoffs:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">binary_cars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span></span>
+<span>  <span class="va">mtcars</span>,</span>
+<span>  am <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">binary_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">binary_cars</span>, <span class="st">"am"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_fit</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Lower thresholds usually find more positive cases while creating more
+false positives; higher thresholds usually do the reverse. The relative
+consequences belong to the application. A threshold chosen on these
+held-out rows must be evaluated again on different representative
+data.</p>
 </div>
 <div class="section level2">
 <h2 id="check-an-explicitly-chosen-group">Check an explicitly chosen group<a class="anchor" aria-label="anchor" href="#check-an-explicitly-chosen-group"></a>
@@ -445,7 +460,7 @@ rather than as a population guarantee.</p>
 <p>Aggregate scores can hide weak spots. If the evaluation data contain
 a group that matters to the intended use, ask for the comparison
 directly:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cars_with_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span></span>
 <span>  <span class="va">mtcars</span>,</span>
 <span>  transmission <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span></span>
@@ -472,7 +487,7 @@ investigation.</p>
 imputation. This matters because a field that is absent much more often
 in evaluation or future use can change what the model is effectively
 being asked to do:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">training</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span></span>
 <span><span class="va">evaluation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">46</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">41</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span></span>
 <span><span class="va">missing_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">training</span>, <span class="st">"y"</span>, test_data <span class="op">=</span> <span class="va">evaluation</span><span class="op">)</span></span>
@@ -492,7 +507,7 @@ training-derived imputation was applied.</p>
 </h2>
 <p>The explanation layer does not depend on the guided fitting engine.
 Wrap an ordinary R model directly:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span> <span class="op">+</span> <span class="va">disp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>

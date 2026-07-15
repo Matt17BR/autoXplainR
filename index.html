@@ -238,12 +238,16 @@
 <span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Regression predictions are numeric vectors. Binary predictions are positive-class probabilities. Multiclass predictions are named probability matrices. The package validates that contract before an expensive explanation begins.</p>
+<p>For binary decisions, the report also shows what changes when the conventional 0.5 probability cutoff moves. The same values are available directly:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_result</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>This is a false-positive/false-negative sensitivity check, not permission to optimize a cutoff on the holdout and call that performance independently validated.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>AutoXplainR is under active development and is not yet on CRAN.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"Matt17BR/autoXplainR"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -268,12 +272,12 @@
 <div class="section level2">
 <h2 id="development-and-governance">Development and governance<a class="anchor" aria-label="anchor" href="#development-and-governance"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The ordinary suite is dependency-light. Real H2O integration is isolated and opt-in:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
 <p>See the <a href="CONTRIBUTING.html">contribution guide</a>, <a href="SECURITY.html">security policy</a>, <a href="GOVERNANCE.html">governance</a>, <a href="RELEASE_CHECKLIST.html">release checklist</a>, and <a href="NEWS.html">release notes</a>. Questions and early ideas belong in <a href="https://github.com/Matt17BR/autoXplainR/discussions" class="external-link">GitHub Discussions</a>.</p>
 </div>
 <div class="section level2">

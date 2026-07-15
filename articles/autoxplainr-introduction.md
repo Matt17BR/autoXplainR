@@ -55,10 +55,10 @@ result$leaderboard
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
 #>    r_squared training_time_ms model_size_kb complexity fit_warning
 #> 1 -0.1281933                1      44.43750         11            
-#> 2 -1.3212249                2      19.82812          1            
+#> 2 -1.3212249                3      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  0
+#> 2                  1
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -405,6 +405,26 @@ calibration_diagnostics(flowers)
 The binned gap is descriptive. It changes with the evaluation sample and
 the grouping, so it should be read beside log loss and Brier score
 rather than as a population guarantee.
+
+For a binary task, the report also makes the 0.5 decision convention
+visible. Use
+[`threshold_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.md)
+to compare a deliberate set of cutoffs:
+
+``` r
+
+binary_cars <- transform(
+  mtcars,
+  am = factor(am, labels = c("automatic", "manual"))
+)
+binary_fit <- autoxplain(binary_cars, "am", seed = 2026)
+threshold_diagnostics(binary_fit, thresholds = c(0.3, 0.5, 0.7))
+```
+
+Lower thresholds usually find more positive cases while creating more
+false positives; higher thresholds usually do the reverse. The relative
+consequences belong to the application. A threshold chosen on these
+held-out rows must be evaluated again on different representative data.
 
 ## Check an explicitly chosen group
 

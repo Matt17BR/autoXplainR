@@ -25,6 +25,12 @@
   and an adjacent report explanation that compares grouped probabilities
   with observed frequencies while making its sample- and
   grouping-dependence explicit.
+- Added
+  [`threshold_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.md)
+  and a default binary-report view showing how sensitivity, specificity,
+  precision, accuracy, false positives, and false negatives change when
+  the 0.5 decision convention moves. The report never presents a cutoff
+  optimized on its held-out rows as validated.
 - Added opt-in
   [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
   and `subgroup =` report support for comparing held-out metrics across

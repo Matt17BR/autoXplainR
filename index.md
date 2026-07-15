@@ -227,6 +227,19 @@ positive-class probabilities. Multiclass predictions are named
 probability matrices. The package validates that contract before an
 expensive explanation begins.
 
+For binary decisions, the report also shows what changes when the
+conventional 0.5 probability cutoff moves. The same values are available
+directly:
+
+``` r
+
+threshold_diagnostics(binary_result, thresholds = c(0.3, 0.5, 0.7))
+```
+
+This is a false-positive/false-negative sensitivity check, not
+permission to optimize a cutoff on the holdout and call that performance
+independently validated.
+
 ## Installation
 
 AutoXplainR is under active development and is not yet on CRAN.

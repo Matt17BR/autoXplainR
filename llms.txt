@@ -227,6 +227,19 @@ positive-class probabilities. Multiclass predictions are named
 probability matrices. The package validates that contract before an
 expensive explanation begins.
 
+For binary decisions, the report also shows what changes when the
+conventional 0.5 probability cutoff moves. The same values are available
+directly:
+
+``` r
+
+threshold_diagnostics(binary_result, thresholds = c(0.3, 0.5, 0.7))
+```
+
+This is a false-positive/false-negative sensitivity check, not
+permission to optimize a cutoff on the holdout and call that performance
+independently validated.
+
 ## Installation
 
 AutoXplainR is under active development and is not yet on CRAN.
@@ -309,6 +322,8 @@ Matteo Mazzarelli.
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
   : Check whether held-out class probabilities behave literally
+- [`threshold_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.md)
+  : Explore binary decision-threshold trade-offs
 - [`missingness_shift()`](https://matt17br.github.io/autoXplainR/reference/missingness_shift.md)
   : Compare raw missing-value rates between training and evaluation data
 - [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
