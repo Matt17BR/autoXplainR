@@ -6,6 +6,8 @@
   : Fit and evaluate a model through a guided workflow
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
   : Convert an AutoML result to model-agnostic explainers
+- [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
+  : Check whether held-out class probabilities behave literally
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
   : Render a beginner-first model report
 - [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)

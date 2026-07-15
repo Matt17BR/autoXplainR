@@ -17,8 +17,14 @@
   question, held-out baseline comparison, and metric definitions before
   revealing feature patterns and a collapsed evidence audit.
 - Added evaluation-row predictions, regression error diagnostics,
-  classification confusion matrices, Brier scores, and actionable
-  warnings for sample-size and baseline-performance failure modes.
+  classification confusion matrices, Brier scores, held-out probability
+  calibration groups, and actionable warnings for sample-size and
+  baseline-performance failure modes.
+- Added
+  [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
+  and an adjacent report explanation that compares grouped probabilities
+  with observed frequencies while making its sample- and
+  grouping-dependence explicit.
 - The guided workflow now rejects unsupported or non-finite inputs,
   removes and records constant predictors, and reapplies its fitted
   preprocessing recipe to raw evaluation data supplied later.

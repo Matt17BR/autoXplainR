@@ -128,7 +128,7 @@ predictions.</p>
 <span><span class="co">#&gt; 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692</span></span>
 <span><span class="co">#&gt;    r_squared training_time_ms model_size_kb complexity fit_warning</span></span>
 <span><span class="co">#&gt; 1 -0.1281933                1      44.43750         11            </span></span>
-<span><span class="co">#&gt; 2 -1.3212249                2      19.82812          1            </span></span>
+<span><span class="co">#&gt; 2 -1.3212249                3      19.82812          1            </span></span>
 <span><span class="co">#&gt;   prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                  1</span></span>
 <span><span class="co">#&gt; 2                  0</span></span>
@@ -386,26 +386,45 @@ the numerical report.</p>
 <span><span class="co">#&gt;   baseline:   -4.8% improvement in log_loss</span></span>
 <span><span class="co">#&gt;   next:       use as_explainers() to investigate the fitted patterns</span></span>
 <span><span class="va">flowers</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
-<span><span class="co">#&gt;                                                                        log_loss </span></span>
-<span><span class="co">#&gt;    "Probability error that penalizes confident wrong answers; lower is better." </span></span>
-<span><span class="co">#&gt;                                                                     brier_score </span></span>
-<span><span class="co">#&gt;                           "Average squared probability error; lower is better." </span></span>
-<span><span class="co">#&gt;                                                                        accuracy </span></span>
-<span><span class="co">#&gt;       "Share of held-out rows assigned to the correct class; higher is better." </span></span>
-<span><span class="co">#&gt;                                                                    macro_recall </span></span>
-<span><span class="co">#&gt; "Recall calculated for each class and then averaged equally; higher is better."</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                                                                                                                     log_loss </span></span>
+<span><span class="co">#&gt;                                                                                 "Probability error that penalizes confident wrong answers; lower is better." </span></span>
+<span><span class="co">#&gt;                                                                                                                                                  brier_score </span></span>
+<span><span class="co">#&gt;                                                                                                        "Average squared probability error; lower is better." </span></span>
+<span><span class="co">#&gt;                                                                                                                                            calibration_error </span></span>
+<span><span class="co">#&gt; "Average absolute gap between grouped probabilities and observed frequencies; lower is better, but the value depends on the evaluation sample and grouping." </span></span>
+<span><span class="co">#&gt;                                                                                                                                                     accuracy </span></span>
+<span><span class="co">#&gt;                                                                                    "Share of held-out rows assigned to the correct class; higher is better." </span></span>
+<span><span class="co">#&gt;                                                                                                                                                 macro_recall </span></span>
+<span><span class="co">#&gt;                                                                              "Recall calculated for each class and then averaged equally; higher is better."</span></span></code></pre></div>
 <p>Classification splits are stratified. Binary tasks report log loss,
-Brier score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks
-report log loss, Brier score, accuracy, and macro recall. Log loss is
-primary because it evaluates probability quality and penalizes confident
-wrong predictions.</p>
+Brier score, a binned calibration gap, accuracy, balanced accuracy, and
+ROC AUC. Multiclass tasks report log loss, Brier score, predicted-class
+calibration, accuracy, and macro recall. Log loss is primary because it
+evaluates probability quality and penalizes confident wrong
+predictions.</p>
+<p>Calibration asks a more literal question: when the model reports a
+probability near 70%, does the corresponding event happen about 70% of
+the time on the held-out rows? The report explains this visually, and
+the grouped values remain available directly:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/calibration_diagnostics.html">calibration_diagnostics</a></span><span class="op">(</span><span class="va">flowers</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;AutoXplainR probability calibration&gt;</span></span>
+<span><span class="co">#&gt;   model:      main_model</span></span>
+<span><span class="co">#&gt;   check:      confidence in the predicted class</span></span>
+<span><span class="co">#&gt;   rows:       30 in 1 probability groups</span></span>
+<span><span class="co">#&gt;   average:    1 predicted vs 0.967 observed</span></span>
+<span><span class="co">#&gt;   binned gap: 0.033 (lower is better)</span></span>
+<span><span class="co">#&gt;   caution:    sample- and grouping-dependent; not a population guarantee</span></span></code></pre></div>
+<p>The binned gap is descriptive. It changes with the evaluation sample
+and the grouping, so it should be read beside log loss and Brier score
+rather than as a population guarantee.</p>
 </div>
 <div class="section level2">
 <h2 id="bring-an-existing-model">Bring an existing model<a class="anchor" aria-label="anchor" href="#bring-an-existing-model"></a>
 </h2>
 <p>The explanation layer does not depend on the guided fitting engine.
 Wrap an ordinary R model directly:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span> <span class="op">+</span> <span class="va">disp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>

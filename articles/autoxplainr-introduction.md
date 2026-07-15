@@ -55,7 +55,7 @@ result$leaderboard
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
 #>    r_squared training_time_ms model_size_kb complexity fit_warning
 #> 1 -0.1281933                1      44.43750         11            
-#> 2 -1.3212249                2      19.82812          1            
+#> 2 -1.3212249                3      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
 #> 2                  0
@@ -345,21 +345,44 @@ flowers
 #>   baseline:   -4.8% improvement in log_loss
 #>   next:       use as_explainers() to investigate the fitted patterns
 flowers$evaluation$metric_definitions
-#>                                                                        log_loss 
-#>    "Probability error that penalizes confident wrong answers; lower is better." 
-#>                                                                     brier_score 
-#>                           "Average squared probability error; lower is better." 
-#>                                                                        accuracy 
-#>       "Share of held-out rows assigned to the correct class; higher is better." 
-#>                                                                    macro_recall 
-#> "Recall calculated for each class and then averaged equally; higher is better."
+#>                                                                                                                                                     log_loss 
+#>                                                                                 "Probability error that penalizes confident wrong answers; lower is better." 
+#>                                                                                                                                                  brier_score 
+#>                                                                                                        "Average squared probability error; lower is better." 
+#>                                                                                                                                            calibration_error 
+#> "Average absolute gap between grouped probabilities and observed frequencies; lower is better, but the value depends on the evaluation sample and grouping." 
+#>                                                                                                                                                     accuracy 
+#>                                                                                    "Share of held-out rows assigned to the correct class; higher is better." 
+#>                                                                                                                                                 macro_recall 
+#>                                                                              "Recall calculated for each class and then averaged equally; higher is better."
 ```
 
 Classification splits are stratified. Binary tasks report log loss,
-Brier score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks
-report log loss, Brier score, accuracy, and macro recall. Log loss is
-primary because it evaluates probability quality and penalizes confident
-wrong predictions.
+Brier score, a binned calibration gap, accuracy, balanced accuracy, and
+ROC AUC. Multiclass tasks report log loss, Brier score, predicted-class
+calibration, accuracy, and macro recall. Log loss is primary because it
+evaluates probability quality and penalizes confident wrong predictions.
+
+Calibration asks a more literal question: when the model reports a
+probability near 70%, does the corresponding event happen about 70% of
+the time on the held-out rows? The report explains this visually, and
+the grouped values remain available directly:
+
+``` r
+
+calibration_diagnostics(flowers)
+#> <AutoXplainR probability calibration>
+#>   model:      main_model
+#>   check:      confidence in the predicted class
+#>   rows:       30 in 1 probability groups
+#>   average:    1 predicted vs 0.967 observed
+#>   binned gap: 0.033 (lower is better)
+#>   caution:    sample- and grouping-dependent; not a population guarantee
+```
+
+The binned gap is descriptive. It changes with the evaluation sample and
+the grouping, so it should be read beside log loss and Brier score
+rather than as a population guarantee.
 
 ## Bring an existing model
 
