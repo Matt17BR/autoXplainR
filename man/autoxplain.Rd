@@ -2,7 +2,7 @@
 % Please edit documentation in R/autoxplain.R
 \name{autoxplain}
 \alias{autoxplain}
-\title{Fit a reproducible H2O AutoML candidate set}
+\title{Fit and evaluate a model through a guided workflow}
 \usage{
 autoxplain(
   data,
@@ -11,6 +11,8 @@ autoxplain(
   max_runtime_secs = 300L,
   seed = 123L,
   test_data = NULL,
+  test_fraction = 0.2,
+  engine = c("auto", "base", "h2o"),
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
@@ -38,6 +40,12 @@ autoxplain(
 
 \item{test_data}{Optional held-out evaluation data. It is not used as an H2O
 validation frame unless \code{use_test_as_validation = TRUE}.}
+
+\item{test_fraction}{Fraction of \code{data} reserved for evaluation when
+\code{test_data} is not supplied. Classification splits are stratified.}
+
+\item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
+resolves to the dependency-free \code{"base"} workflow.}
 
 \item{enable_preprocessing}{Apply \code{\link[=preprocess_for_h2o]{preprocess_for_h2o()}}.}
 
@@ -71,19 +79,27 @@ An \code{autoxplain_result} containing models, a data-frame leaderboard,
 task metadata, preprocessing provenance, and evaluation data.
 }
 \description{
-\code{autoxplain()} is the optional model-fitting convenience layer. The core
-explanation and audit API does not require H2O; users can call
-\code{\link[=explain_model]{explain_model()}} for any fitted model.
+\code{autoxplain()} is the beginner-first entry point. By default it creates a
+reproducible held-out split, fits an intercept-only baseline and an
+understandable statistical model, evaluates both on unseen rows, and stores
+everything needed for explanation and reporting. This path only uses R and
+does not require Java or a cloud account.
 }
 \details{
+Set \code{engine = "h2o"} to use the optional H2O AutoML adapter. The lower-level
+\code{\link[=explain_model]{explain_model()}} interface accepts models fitted by any framework.
+
 Numeric outcomes with exactly two distinct values are treated as binary
 classification by default. Potentially destructive preprocessing, such as
 identifier removal, is opt-in and recorded in the result.
 }
 \examples{
-\dontrun{
-result <- autoxplain(mtcars, "mpg", max_models = 3)
+result <- autoxplain(mtcars, "mpg")
+result
 explainers <- as_explainers(result)
 audit_explanations(explainers)
+
+\dontrun{
+h2o_result <- autoxplain(mtcars, "mpg", engine = "h2o", max_models = 3)
 }
 }

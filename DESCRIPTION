@@ -1,5 +1,5 @@
 Package: AutoXplainR
-Title: Stress-Testing Evidence Behind Model Explanations
+Title: Guided Model Fitting, Evaluation, and Explanation
 Version: 0.2.0
 Authors@R:
     person(
@@ -8,12 +8,13 @@ Authors@R:
       email = "matteo.mazzarelli@gmail.com",
       role = c("aut", "cre")
     )
-Description: Audits the reliability of model-agnostic explanations for tabular
-    predictive models. Repeated permutation importance is paired with Monte
-    Carlo stability, feature-dependence diagnostics, comparison across supplied
-    near-optimal models, accumulated local effects, and provenance-rich HTML
-    evidence reports. Optional adapters support 'H2O' AutoML, interactive
-    'Plotly' graphics, and evidence-constrained remote narratives.
+Description: Guides first-time modelers through fitting, held-out evaluation,
+    explanation, and communication for tabular prediction problems. Safe local
+    defaults compare an understandable model with a simple baseline and define
+    every reported metric. Model-agnostic tools add repeated permutation
+    importance, feature-dependence diagnostics, accumulated local effects, and
+    provenance-rich evidence audits. Optional adapters support 'H2O' AutoML,
+    interactive 'Plotly' graphics, and evidence-constrained narratives.
 License: MIT + file LICENSE
 URL: https://github.com/Matt17BR/autoXplainR,
     https://matt17br.github.io/autoXplainR/
@@ -21,6 +22,7 @@ BugReports: https://github.com/Matt17BR/autoXplainR/issues
 Depends:
     R (>= 4.1.0)
 Imports:
+    nnet,
     stats,
     tools,
     utils,

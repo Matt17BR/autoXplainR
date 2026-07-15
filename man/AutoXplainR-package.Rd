@@ -4,20 +4,22 @@
 \name{AutoXplainR-package}
 \alias{AutoXplainR-package}
 \alias{AutoXplainR}
-\title{AutoXplainR: Evidence audits for model explanations}
+\title{AutoXplainR: guided model fitting, evaluation, and explanation}
 \description{
-AutoXplainR stress-tests explanatory claims for tabular predictive models.
-Its model-agnostic core separates fitting from explanation, measures repeated
-permutation variability, diagnoses feature dependence, compares explanations
-across near-optimal supplied models, and renders a provenance-rich evidence
-report. H2O AutoML, Plotly, and remote narrative generation are optional
-integrations rather than package startup requirements.
+AutoXplainR gives a first-time modeler one safe path from a data frame to a
+held-out evaluation and plain-language explanation. Its advanced evidence
+layer stress-tests those explanations with repeated permutation importance,
+dependence diagnostics, comparisons across supplied models, accumulated
+local effects, and reproducible provenance. H2O AutoML, Plotly, and remote
+narratives are optional integrations rather than startup requirements.
 }
 \section{Primary workflow}{
 
 \enumerate{
-\item Wrap one or more fitted models with \code{\link[=explain_model]{explain_model()}}.
-\item Run \code{\link[=audit_explanations]{audit_explanations()}} on held-out evaluation data.
+\item Call \code{\link[=autoxplain]{autoxplain()}} with a data frame and target column.
+\item Read the baseline comparison and held-out metrics.
+\item Convert the result with \code{\link[=as_explainers]{as_explainers()}} and investigate effects.
+\item Optionally run \code{\link[=audit_explanations]{audit_explanations()}} for advanced evidence checks.
 \item Investigate effects with \code{\link[=explain_effect]{explain_effect()}}, which defaults to ALE.
 \item Preserve the evidence and limitations with
 \code{\link[=render_explanation_report]{render_explanation_report()}}.
@@ -47,6 +49,7 @@ Society: Series B}, 82(4), 1059--1086.
 Useful links:
 \itemize{
   \item \url{https://github.com/Matt17BR/autoXplainR}
+  \item \url{https://matt17br.github.io/autoXplainR/}
   \item Report bugs at \url{https://github.com/Matt17BR/autoXplainR/issues}
 }
 

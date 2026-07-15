@@ -1,8 +1,13 @@
-#' Fit a reproducible H2O AutoML candidate set
+#' Fit and evaluate a model through a guided workflow
 #'
-#' `autoxplain()` is the optional model-fitting convenience layer. The core
-#' explanation and audit API does not require H2O; users can call
-#' [explain_model()] for any fitted model.
+#' `autoxplain()` is the beginner-first entry point. By default it creates a
+#' reproducible held-out split, fits an intercept-only baseline and an
+#' understandable statistical model, evaluates both on unseen rows, and stores
+#' everything needed for explanation and reporting. This path only uses R and
+#' does not require Java or a cloud account.
+#'
+#' Set `engine = "h2o"` to use the optional H2O AutoML adapter. The lower-level
+#' [explain_model()] interface accepts models fitted by any framework.
 #'
 #' Numeric outcomes with exactly two distinct values are treated as binary
 #' classification by default. Potentially destructive preprocessing, such as
@@ -15,6 +20,10 @@
 #' @param seed Reproducible H2O seed.
 #' @param test_data Optional held-out evaluation data. It is not used as an H2O
 #'   validation frame unless `use_test_as_validation = TRUE`.
+#' @param test_fraction Fraction of `data` reserved for evaluation when
+#'   `test_data` is not supplied. Classification splits are stratified.
+#' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
+#'   resolves to the dependency-free `"base"` workflow.
 #' @param enable_preprocessing Apply [preprocess_for_h2o()].
 #' @param preprocessing_config Named overrides for preprocessing. Identifier
 #'   removal defaults to `FALSE`.
@@ -37,10 +46,13 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' result <- autoxplain(mtcars, "mpg", max_models = 3)
+#' result <- autoxplain(mtcars, "mpg")
+#' result
 #' explainers <- as_explainers(result)
 #' audit_explanations(explainers)
+#'
+#' \dontrun{
+#' h2o_result <- autoxplain(mtcars, "mpg", engine = "h2o", max_models = 3)
 #' }
 autoxplain <- function(data,
                        target_column,
@@ -48,6 +60,8 @@ autoxplain <- function(data,
                        max_runtime_secs = 300L,
                        seed = 123L,
                        test_data = NULL,
+                       test_fraction = 0.2,
+                       engine = c("auto", "base", "h2o"),
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
                        task = c("auto", "regression", "binary", "multiclass"),
@@ -60,10 +74,30 @@ autoxplain <- function(data,
                        h2o_nthreads = -1L,
                        h2o_max_mem_size = "2G",
                        verbosity = c("quiet", "info")) {
-  require_optional("h2o", "fitting H2O AutoML models")
+  engine <- match.arg(engine)
+  resolved_engine <- if (engine == "auto") "base" else engine
   task <- match.arg(task)
   verbosity <- match.arg(verbosity)
   validate_automl_inputs(data, target_column, test_data)
+  assert_probability(test_fraction, "test_fraction")
+  if (test_fraction <= 0 || test_fraction >= 1) {
+    stop("`test_fraction` must be greater than zero and less than one.", call. = FALSE)
+  }
+  if (resolved_engine == "base") {
+    return(fit_guided_base(
+      data = data,
+      target_column = target_column,
+      test_data = test_data,
+      test_fraction = test_fraction,
+      seed = seed,
+      task = task,
+      enable_preprocessing = enable_preprocessing,
+      preprocessing_config = preprocessing_config,
+      verbosity = verbosity
+    ))
+  }
+
+  require_optional("h2o", "fitting H2O AutoML models")
   max_models <- assert_count(max_models, "max_models")
   max_runtime_secs <- assert_count(max_runtime_secs, "max_runtime_secs")
   seed <- assert_count(seed, "seed", minimum = 0L)
@@ -154,6 +188,7 @@ autoxplain <- function(data,
 
   result <- structure(
     list(
+      engine = "h2o",
       models = models,
       leaderboard = leaderboard,
       training_data = train,
@@ -216,7 +251,10 @@ as_explainers <- function(x, data = NULL, models = NULL) {
   out <- lapply(names(selected), function(id) {
     explain_model(
       selected[[id]], evaluation, y = x$target_column, task = x$task,
-      label = id, metadata = list(evaluation_role = role, source = "H2O AutoML")
+      label = id, metadata = list(
+        evaluation_role = role,
+        source = if (identical(x$engine, "h2o")) "H2O AutoML" else "guided base workflow"
+      )
     )
   })
   names(out) <- names(selected)
@@ -225,13 +263,27 @@ as_explainers <- function(x, data = NULL, models = NULL) {
 
 #' @export
 print.autoxplain_result <- function(x, ...) {
-  cat("<AutoXplainR H2O AutoML result>\n")
-  cat("  task:       ", x$task, "\n", sep = "")
-  cat("  target:     ", x$target_column, "\n", sep = "")
-  cat("  models:     ", length(x$models), "\n", sep = "")
-  cat("  training:   ", nrow(x$training_data), " rows x ", length(x$features),
-      " features\n", sep = "")
-  cat("  evaluation: ", x$provenance$evaluation_role, "\n", sep = "")
+  cat("<AutoXplainR guided result>\n")
+  cat("  question:   predict `", x$target_column, "` (", x$task, ")\n", sep = "")
+  cat("  engine:     ", x$engine %||% "h2o", "\n", sep = "")
+  cat("  data:       ", nrow(x$training_data), " training + ",
+      nrow(x$test_data %||% x$training_data), " evaluation rows\n", sep = "")
+  if (!is.null(x$evaluation$primary_metric)) {
+    winner <- x$evaluation$winner
+    metric <- x$evaluation$primary_metric
+    score <- x$evaluation$metrics[[winner]][[metric]]
+    cat("  result:     ", winner, " has ", metric, " = ",
+        format(round(score, 4L), trim = TRUE), "\n", sep = "")
+    improvement <- x$evaluation$improvement_over_baseline
+    if (is.finite(improvement)) {
+      cat("  baseline:   ", format(round(100 * improvement, 1L), trim = TRUE),
+          "% improvement in ", metric, "\n", sep = "")
+    }
+    cat("  next:       use as_explainers() to investigate the fitted patterns\n")
+  } else {
+    cat("  models:     ", length(x$models), "\n", sep = "")
+    cat("  evaluation: ", x$provenance$evaluation_role, "\n", sep = "")
+  }
   invisible(x)
 }
 
@@ -243,6 +295,7 @@ summary.autoxplain_result <- function(object, ...) {
     n_models = length(object$models),
     n_features = length(object$features),
     leaderboard = object$leaderboard,
+    evaluation = object$evaluation,
     provenance = object$provenance
   )
 }

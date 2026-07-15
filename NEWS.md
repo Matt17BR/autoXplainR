@@ -1,9 +1,15 @@
 # AutoXplainR 0.2.0
 
-## New package direction
+## Beginner-first workflow
 
-- Repositioned AutoXplainR from an H2O-specific dashboard generator to a
-  model-agnostic explanation evidence auditor.
+- Added a dependency-light `autoxplain(data, target)` path that creates a
+  reproducible holdout, fits a simple baseline and an understandable primary
+  model, and evaluates both with task-appropriate metrics and definitions.
+- Added local linear, logistic, and multinomial logistic workflows for
+  regression, binary classification, and multiclass classification. H2O
+  remains available explicitly through `engine = "h2o"`.
+- Repositioned the model-agnostic explanation evidence audit as an advanced
+  reliability layer behind the beginner workflow.
 - Added `explain_model()` with a validated prediction contract for regression,
   binary classification, and multiclass classification.
 - Added `audit_explanations()` to combine repeated-importance stability,

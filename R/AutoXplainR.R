@@ -1,16 +1,18 @@
-#' AutoXplainR: Evidence audits for model explanations
+#' AutoXplainR: guided model fitting, evaluation, and explanation
 #'
-#' AutoXplainR stress-tests explanatory claims for tabular predictive models.
-#' Its model-agnostic core separates fitting from explanation, measures repeated
-#' permutation variability, diagnoses feature dependence, compares explanations
-#' across near-optimal supplied models, and renders a provenance-rich evidence
-#' report. H2O AutoML, Plotly, and remote narrative generation are optional
-#' integrations rather than package startup requirements.
+#' AutoXplainR gives a first-time modeler one safe path from a data frame to a
+#' held-out evaluation and plain-language explanation. Its advanced evidence
+#' layer stress-tests those explanations with repeated permutation importance,
+#' dependence diagnostics, comparisons across supplied models, accumulated
+#' local effects, and reproducible provenance. H2O AutoML, Plotly, and remote
+#' narratives are optional integrations rather than startup requirements.
 #'
 #' @section Primary workflow:
 #' \enumerate{
-#'   \item Wrap one or more fitted models with [explain_model()].
-#'   \item Run [audit_explanations()] on held-out evaluation data.
+#'   \item Call [autoxplain()] with a data frame and target column.
+#'   \item Read the baseline comparison and held-out metrics.
+#'   \item Convert the result with [as_explainers()] and investigate effects.
+#'   \item Optionally run [audit_explanations()] for advanced evidence checks.
 #'   \item Investigate effects with [explain_effect()], which defaults to ALE.
 #'   \item Preserve the evidence and limitations with
 #'     [render_explanation_report()].

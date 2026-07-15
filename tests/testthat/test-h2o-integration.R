@@ -7,7 +7,8 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   data$y <- as.integer(data$x1 + data$x2 > 0)
   result <- autoxplain(
     data[1:75, ], "y", test_data = data[76:100, ], max_models = 1,
-    max_runtime_secs = 30, nfolds = 0, seed = 101, verbosity = "quiet"
+    max_runtime_secs = 30, nfolds = 0, seed = 101, verbosity = "quiet",
+    engine = "h2o"
   )
   on.exit(try(h2o::h2o.shutdown(prompt = FALSE), silent = TRUE), add = TRUE)
 
