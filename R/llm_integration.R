@@ -8,19 +8,39 @@
 #' @export
 narrative_providers <- function() {
   data.frame(
-    provider = c("local", "gemini", "groq", "ollama", "openrouter", "custom"),
-    remote = c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE),
+    provider = c(
+      "local", "gemini", "groq", "cloudflare", "ollama", "openrouter", "custom"
+    ),
+    remote = c(FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE),
     default_model = c(
-      NA_character_, "gemini-3.5-flash", "qwen/qwen3.6-27b", "gemma3:4b",
-      "openrouter/free", NA_character_
+      NA_character_, "gemini-3.5-flash", "openai/gpt-oss-120b",
+      "@cf/openai/gpt-oss-120b", "gemma3:4b", "openrouter/free", NA_character_
     ),
     key_environment_variable = c(
-      NA_character_, "GEMINI_API_KEY", "GROQ_API_KEY", NA_character_,
-      "OPENROUTER_API_KEY", NA_character_
+      NA_character_, "GEMINI_API_KEY", "GROQ_API_KEY", "CLOUDFLARE_API_TOKEN",
+      NA_character_, "OPENROUTER_API_KEY", NA_character_
+    ),
+    account_environment_variable = c(
+      NA_character_, NA_character_, NA_character_, "CLOUDFLARE_ACCOUNT_ID",
+      NA_character_, NA_character_, NA_character_
+    ),
+    free_access = c(
+      "no API cost", "hosted free tier", "hosted free plan",
+      "10,000 neurons per day", "local compute", "limited free-model requests",
+      "endpoint-specific"
+    ),
+    structured_output = c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE),
+    privacy_note = c(
+      "data stays in R", "aggregates sent to Google; free-tier data-use terms apply",
+      "aggregates sent to Groq; consult provider terms",
+      "aggregates sent to Cloudflare; consult provider terms", "data stays local",
+      "aggregates may be routed to a third-party model provider",
+      "depends on the configured endpoint"
     ),
     reproducibility = c(
-      "deterministic", "model pinned", "model pinned", "local model pinned",
-      "router may select different free models", "depends on endpoint"
+      "deterministic", "model pinned", "model pinned", "model pinned",
+      "local model pinned", "router may select different free models",
+      "depends on endpoint"
     ),
     stringsAsFactors = FALSE
   )
@@ -39,14 +59,17 @@ narrative_providers <- function() {
 #' @param pdp_data Optional feature-effect list.
 #' @param model_characteristics Optional model metadata.
 #' @param audit Optional `autoxplain_audit`.
-#' @param provider One of `"local"`, `"gemini"`, `"groq"`, `"ollama"`,
-#'   `"openrouter"`, or `"custom"`. The default is always `"local"`.
+#' @param provider One of `"local"`, `"gemini"`, `"groq"`,
+#'   `"cloudflare"`, `"ollama"`, `"openrouter"`, or `"custom"`. The default
+#'   is always `"local"`.
 #' @param api_key Provider API key. For an explicitly selected hosted provider,
 #'   the corresponding environment variable shown by [narrative_providers()]
 #'   is consulted when this is `NULL`.
 #' @param model Model identifier. `NULL` uses the provider default shown by
 #'   [narrative_providers()]. A custom provider requires an explicit model.
 #' @param base_url Optional endpoint override. A custom provider requires it.
+#' @param account_id Cloudflare account ID. When `NULL`,
+#'   `CLOUDFLARE_ACCOUNT_ID` is consulted for the Cloudflare provider.
 #' @param max_tokens Maximum response tokens.
 #' @param temperature Sampling temperature.
 #' @param timeout Request timeout in seconds.
@@ -66,12 +89,13 @@ generate_natural_language_report <- function(autoxplain_result,
                                              model_characteristics = NULL,
                                              audit = NULL,
                                              provider = c(
-                                               "local", "gemini", "groq", "ollama",
-                                               "openrouter", "custom"
+                                               "local", "gemini", "groq", "cloudflare",
+                                               "ollama", "openrouter", "custom"
                                              ),
                                              api_key = NULL,
                                              model = NULL,
                                              base_url = NULL,
+                                             account_id = NULL,
                                              max_tokens = 1000L,
                                              temperature = 0.2,
                                              timeout = 30,
@@ -128,7 +152,9 @@ generate_natural_language_report <- function(autoxplain_result,
   prompt <- create_report_prompt(context)
   tryCatch(
     {
-      provider_config <- resolve_narrative_provider(provider, model, base_url, api_key)
+      provider_config <- resolve_narrative_provider(
+        provider, model, base_url, api_key, account_id
+      )
       request <- build_narrative_request(
         prompt = prompt,
         config = provider_config,
@@ -157,7 +183,7 @@ generate_natural_language_report <- function(autoxplain_result,
   )
 }
 
-resolve_narrative_provider <- function(provider, model, base_url, api_key) {
+resolve_narrative_provider <- function(provider, model, base_url, api_key, account_id = NULL) {
   registry <- narrative_providers()
   row <- registry[registry$provider == provider, , drop = FALSE]
   resolved_model <- model %||% row$default_model[[1L]]
@@ -172,6 +198,22 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key) {
     openrouter = "https://openrouter.ai/api/v1/chat/completions"
   )
   default_endpoint <- if (provider %in% names(endpoints)) endpoints[[provider]] else NULL
+  if (identical(provider, "cloudflare") && is.null(base_url)) {
+    account_environment <- row$account_environment_variable[[1L]]
+    resolved_account <- account_id %||% Sys.getenv(account_environment, unset = "")
+    if (!is.character(resolved_account) || length(resolved_account) != 1L ||
+          is.na(resolved_account) || !nzchar(resolved_account)) {
+      stop(
+        "Provider `cloudflare` requires `account_id` or CLOUDFLARE_ACCOUNT_ID.",
+        call. = FALSE
+      )
+    }
+    default_endpoint <- paste0(
+      "https://api.cloudflare.com/client/v4/accounts/",
+      utils::URLencode(resolved_account, reserved = TRUE),
+      "/ai/v1/chat/completions"
+    )
+  }
   endpoint <- base_url %||% default_endpoint
   if (!is.character(endpoint) || length(endpoint) != 1L || is.na(endpoint) ||
         !grepl("^https?://", endpoint)) {
@@ -183,9 +225,9 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key) {
   if (is.null(resolved_key) && !is.na(environment_name)) {
     resolved_key <- Sys.getenv(environment_name, unset = "")
   }
-  key_required <- provider %in% c("gemini", "groq", "openrouter")
+  key_required <- provider %in% c("gemini", "groq", "cloudflare", "openrouter")
   if (key_required && (!is.character(resolved_key) || length(resolved_key) != 1L ||
-                         !nzchar(resolved_key))) {
+                         is.na(resolved_key) || !nzchar(resolved_key))) {
     stop(
       "Provider `", provider, "` requires `api_key` or ", environment_name, ".",
       call. = FALSE
@@ -386,6 +428,34 @@ prepare_analysis_context <- function(autoxplain_result,
   } else {
     NULL
   }
+  diagnostics <- evaluation$diagnostics %||% list()
+  calibration <- diagnostics$calibration
+  calibration_summary <- if (!is.null(calibration)) {
+    list(
+      event = calibration$event_label,
+      gap = calibration$calibration_error,
+      mean_probability = calibration$mean_probability,
+      observed_rate = calibration$observed_rate,
+      groups = calibration$n_groups
+    )
+  } else {
+    NULL
+  }
+  missingness <- diagnostics$missingness_shift
+  missingness_summary <- if (!is.null(missingness)) {
+    flagged <- missingness$features[
+      missingness$features$flagged & missingness$features$used_by_model,
+      , drop = FALSE
+    ]
+    list(
+      flagged_model_inputs = flagged$feature,
+      n_flagged_model_inputs = nrow(flagged),
+      largest_shift = missingness$largest_shift,
+      threshold = missingness$threshold
+    )
+  } else {
+    NULL
+  }
   list(
     context_type = "model_result",
     task_type = autoxplain_result$task %||%
@@ -403,6 +473,10 @@ prepare_analysis_context <- function(autoxplain_result,
     metric_definition = metric_definition,
     evaluation_rows = nrow(autoxplain_result$test_data %||% autoxplain_result$training_data),
     evaluation_role = autoxplain_result$provenance$evaluation_role %||% "unspecified",
+    evaluation_notes = evaluation$notes,
+    calibration_summary = calibration_summary,
+    missingness_summary = missingness_summary,
+    candidate_selection = autoxplain_result$provenance$candidate_selection,
     importance_summary = importance_summary,
     pdp_summary = if (!is.null(pdp_data)) {
       list(features_analyzed = names(pdp_data), n_features = length(pdp_data))
@@ -460,6 +534,50 @@ context_to_text <- function(context) {
       paste("Relative improvement over baseline:",
             format_percent(context$improvement_over_baseline))
     )
+  }
+  if (!is.null(context$calibration_summary)) {
+    calibration <- context$calibration_summary
+    lines <- c(
+      lines,
+      paste(
+        "Probability calibration check:", calibration$event, "had a binned gap of",
+        report_number(calibration$gap, 4L), "across", calibration$groups, "groups;",
+        "mean reported probability was", format_percent(calibration$mean_probability),
+        "and observed frequency was", format_percent(calibration$observed_rate)
+      )
+    )
+  }
+  if (!is.null(context$missingness_summary)) {
+    missingness <- context$missingness_summary
+    lines <- c(
+      lines,
+      paste0(
+        "Missingness check: ", missingness$n_flagged_model_inputs,
+        " model input(s) crossed the ", format_percent(missingness$threshold),
+        " practical rate-change flag; largest absolute shift was ",
+        format_percent(missingness$largest_shift), "."
+      )
+    )
+    if (length(missingness$flagged_model_inputs)) {
+      lines <- c(
+        lines,
+        paste("Flagged missingness inputs:", paste(
+          missingness$flagged_model_inputs, collapse = ", "
+        ))
+      )
+    }
+  }
+  if (!is.null(context$candidate_selection)) {
+    lines <- c(lines, paste("Candidate-selection boundary:", context$candidate_selection))
+  }
+  if (!is.null(context$evaluation_notes) && nrow(context$evaluation_notes)) {
+    note_lines <- apply(context$evaluation_notes, 1L, function(row) {
+      paste0(
+        "- [", row[["severity"]], "] ", row[["message"]],
+        " Action: ", row[["recommendation"]]
+      )
+    })
+    lines <- c(lines, "Evaluation cautions:", note_lines)
   }
   if (!is.null(context$grade)) {
     lines <- c(lines, paste("Diagnostic evidence grade:", context$grade),
@@ -526,6 +644,33 @@ create_fallback_report <- function(context) {
       lines, "", "## What the main metric means",
       paste0("**", context$best_metric, ":** ", context$metric_definition)
     )
+    if (!is.null(context$calibration_summary)) {
+      calibration <- context$calibration_summary
+      lines <- c(
+        lines, "", "## Can the probabilities be taken literally?",
+        paste0(
+          "The descriptive binned calibration gap was ",
+          format_percent(calibration$gap), " across ", calibration$groups,
+          " groups. Mean reported probability was ",
+          format_percent(calibration$mean_probability), " and observed frequency was ",
+          format_percent(calibration$observed_rate), "."
+        ),
+        paste(
+          "This depends on the held-out sample and grouping; it is not a",
+          "population guarantee. Read it beside log loss and Brier score."
+        )
+      )
+    }
+    if (!is.null(context$evaluation_notes) && nrow(context$evaluation_notes)) {
+      lines <- c(lines, "", "## Score cautions")
+      for (index in seq_len(nrow(context$evaluation_notes))) {
+        lines <- c(lines, paste0(
+          "- **", context$evaluation_notes$severity[[index]], ":** ",
+          context$evaluation_notes$message[[index]], " ",
+          context$evaluation_notes$recommendation[[index]]
+        ))
+      }
+    }
   }
   if (!is.null(context$grade)) {
     lines <- c(

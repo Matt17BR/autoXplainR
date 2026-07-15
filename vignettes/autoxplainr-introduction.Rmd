@@ -195,6 +195,10 @@ Remote use requires an explicit provider:
 Sys.setenv(GEMINI_API_KEY = "...")
 memo <- generate_natural_language_report(result, provider = "gemini")
 
+# Or use the Groq or Cloudflare free allowance
+memo <- generate_natural_language_report(result, provider = "groq")
+memo <- generate_natural_language_report(result, provider = "cloudflare")
+
 # Or use a model running locally through Ollama
 memo <- generate_natural_language_report(result, provider = "ollama")
 ```
@@ -203,6 +207,10 @@ Only aggregated diagnostics are placed in the prompt. Raw rows, fitted objects,
 case-level predictions, and secrets are excluded. Provider and model details
 are attached to the returned text so the prose can be audited. Generated prose
 still needs human review against the numerical report.
+
+See the repository's narrative provider guide for the dated comparison of free
+access, structured-output support, privacy, and reproducibility. Provider plans
+and model catalogs can change independently of AutoXplainR.
 
 ## Classification uses the same contract
 

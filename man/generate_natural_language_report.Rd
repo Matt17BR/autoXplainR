@@ -10,10 +10,11 @@ generate_natural_language_report(
   pdp_data = NULL,
   model_characteristics = NULL,
   audit = NULL,
-  provider = c("local", "gemini", "groq", "ollama", "openrouter", "custom"),
+  provider = c("local", "gemini", "groq", "cloudflare", "ollama", "openrouter", "custom"),
   api_key = NULL,
   model = NULL,
   base_url = NULL,
+  account_id = NULL,
   max_tokens = 1000L,
   temperature = 0.2,
   timeout = 30,
@@ -33,8 +34,9 @@ generate_natural_language_report(
 
 \item{audit}{Optional \code{autoxplain_audit}.}
 
-\item{provider}{One of \code{"local"}, \code{"gemini"}, \code{"groq"}, \code{"ollama"},
-\code{"openrouter"}, or \code{"custom"}. The default is always \code{"local"}.}
+\item{provider}{One of \code{"local"}, \code{"gemini"}, \code{"groq"},
+\code{"cloudflare"}, \code{"ollama"}, \code{"openrouter"}, or \code{"custom"}. The default
+is always \code{"local"}.}
 
 \item{api_key}{Provider API key. For an explicitly selected hosted provider,
 the corresponding environment variable shown by \code{\link[=narrative_providers]{narrative_providers()}}
@@ -44,6 +46,9 @@ is consulted when this is \code{NULL}.}
 \code{\link[=narrative_providers]{narrative_providers()}}. A custom provider requires an explicit model.}
 
 \item{base_url}{Optional endpoint override. A custom provider requires it.}
+
+\item{account_id}{Cloudflare account ID. When \code{NULL},
+\code{CLOUDFLARE_ACCOUNT_ID} is consulted for the Cloudflare provider.}
 
 \item{max_tokens}{Maximum response tokens.}
 
