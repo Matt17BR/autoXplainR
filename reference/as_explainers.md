@@ -16,8 +16,9 @@ as_explainers(x, data = NULL, models = NULL)
 
 - data:
 
-  Evaluation data. Defaults to held-out `test_data` when available,
-  otherwise training data.
+  Optional raw evaluation data. The fitted preprocessing recipe is
+  applied automatically. Defaults to held-out `test_data` when
+  available, otherwise training data.
 
 - models:
 

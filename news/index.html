@@ -50,6 +50,7 @@
 <li>Added local linear, logistic, and multinomial logistic workflows for regression, binary classification, and multiclass classification. H2O remains available explicitly through <code>engine = "h2o"</code>.</li>
 <li>Added <code><a href="../reference/render_model_report.html">render_model_report()</a></code>, a standalone beginner-first report that leads with the modeling question, held-out baseline comparison, and metric definitions before revealing feature patterns and a collapsed evidence audit.</li>
 <li>Added evaluation-row predictions, regression error diagnostics, classification confusion matrices, Brier scores, and actionable warnings for sample-size and baseline-performance failure modes.</li>
+<li>The guided workflow now rejects unsupported or non-finite inputs, removes and records constant predictors, and reapplies its fitted preprocessing recipe to raw evaluation data supplied later.</li>
 <li>Repositioned the model-agnostic explanation evidence audit as an advanced reliability layer behind the beginner workflow.</li>
 <li>Added <code><a href="../reference/explain_model.html">explain_model()</a></code> with a validated prediction contract for regression, binary classification, and multiclass classification.</li>
 <li>Added <code><a href="../reference/audit_explanations.html">audit_explanations()</a></code> to combine repeated-importance stability, feature dependence, near-optimal-model importance ranges, prediction agreement, prioritized findings, and explicit permitted-claim labels.</li>
