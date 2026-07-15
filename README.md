@@ -85,6 +85,20 @@ not silently replace the primary model with whichever candidate happened to
 win on the holdout: doing that and then reporting the same holdout score as
 final performance would be optimistic.
 
+Comparison mode also asks where the supplied non-baseline models give different
+answers for the same held-out row:
+
+```r
+ambiguity <- prediction_ambiguity(comparison)
+head(ambiguity$rows)
+```
+
+For regression this is a range in target units; for classification it is hard-
+class disagreement plus a probability-distribution distance. These are model-
+specification sensitivity checks, not confidence intervals. Candidate scores
+remain beside the result because a poorly performing model can create large,
+uninformative disagreement.
+
 <p align="center">
   <img src="man/figures/model-comparison.png" alt="Complete AutoXplainR model-comparison section with score cards, a labeled Pareto frontier, interpretation guidance, and candidate table" width="100%">
   <br><sub>Performance versus model size, with the interpretation rule and full candidate table kept in the frame.</sub>

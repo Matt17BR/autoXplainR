@@ -26,6 +26,7 @@ reference:
       - create_simple_dashboard
       - generate_natural_language_report
       - narrative_providers
+      - prediction_ambiguity
   - title: Model-agnostic evidence workflow
     contents:
       - explain_model

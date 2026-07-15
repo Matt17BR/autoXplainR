@@ -41,8 +41,8 @@ The same result should support three levels of detail:
    important patterns, probability calibration, binary decision-threshold
    trade-offs, missingness context, and concrete cautions.
 2. **Compare:** visible candidate performance, complexity, Pareto status, and
-   the warning that held-out ranks are descriptive rather than a free tuning
-   loop.
+   case-level prediction disagreement, with the warning that held-out ranks are
+   descriptive rather than a free tuning loop.
 3. **Evidence:** permutation variability, dependence, supplied-model
    multiplicity, ALE/PDP support, and provenance.
 4. **Developer:** repeat-level values, prediction contracts, recipes, metrics,

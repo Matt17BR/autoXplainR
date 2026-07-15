@@ -238,7 +238,78 @@ render_model_comparison <- function(result) {
     "descriptive; selecting a winner on these same held-out rows and quoting its score as ",
     "final performance would be optimistic.</p></div></div>",
     html_table(display, digits = 4L),
+    render_prediction_ambiguity(result),
     "<p class=\"microcopy\">", html_escape(attr(tradeoffs, "scope_note")), "</p></section>"
+  )
+}
+
+render_prediction_ambiguity <- function(result) {
+  ambiguity <- tryCatch(
+    prediction_ambiguity(result),
+    error = function(error) NULL
+  )
+  if (is.null(ambiguity)) return("")
+  if (identical(ambiguity$task, "regression")) {
+    top <- ambiguity$rows[order(
+      ambiguity$rows$prediction_range, decreasing = TRUE
+    ), c(
+      "evaluation_row", "observed", "prediction_min", "prediction_max",
+      "prediction_range"
+    ), drop = FALSE]
+    top <- head(top, 5L)
+    names(top) <- c("Row", "Observed", "Lowest prediction", "Highest prediction", "Range")
+    cards <- paste0(
+      "<div class=\"cards diagnostic-cards\">",
+      metric_card("Compared candidates", as.character(ambiguity$n_models),
+                  "Simple baseline excluded"),
+      metric_card("Median prediction range",
+                  report_number(ambiguity$median_prediction_range, 4L),
+                  "In outcome units"),
+      metric_card("90th-percentile range",
+                  report_number(ambiguity$p90_prediction_range, 4L),
+                  "Nine in ten rows were below this"),
+      metric_card("Largest prediction range",
+                  report_number(ambiguity$max_prediction_range, 4L),
+                  "Most specification-sensitive row"),
+      "</div>"
+    )
+  } else {
+    top <- ambiguity$rows[order(
+      ambiguity$rows$probability_distance, decreasing = TRUE
+    ), c(
+      "evaluation_row", "observed", "predicted_classes", "class_disagreement",
+      "probability_distance"
+    ), drop = FALSE]
+    top <- head(top, 5L)
+    names(top) <- c(
+      "Row", "Observed", "Candidate predictions", "Different classes?",
+      "Probability distance"
+    )
+    cards <- paste0(
+      "<div class=\"cards diagnostic-cards\">",
+      metric_card("Compared candidates", as.character(ambiguity$n_models),
+                  "Simple baseline excluded"),
+      metric_card("Rows with class disagreement",
+                  format_percent(ambiguity$class_disagreement_rate),
+                  "Candidates chose different labels"),
+      metric_card("Median probability distance",
+                  format_percent(ambiguity$median_probability_distance),
+                  ambiguity$probability_distance),
+      metric_card("Largest probability distance",
+                  format_percent(ambiguity$max_probability_distance),
+                  "Most specification-sensitive row"),
+      "</div>"
+    )
+  }
+  paste0(
+    "<div class=\"ambiguity\"><h3>Where did supplied model choices disagree?</h3>",
+    "<p>The same held-out rows were scored by every supplied non-baseline candidate. ",
+    "A large gap means the answer depends on model specification, even when the data row ",
+    "is unchanged.</p>", cards, html_table(top, digits = 4L),
+    "<p class=\"callout\"><strong>Disagreement is a review signal, not an error bar.</strong> ",
+    "The compared candidates can have very different held-out performance; read this beside ",
+    "the score table above. It does not identify the correct prediction or provide uncertainty ",
+    "coverage.</p></div>"
   )
 }
 
