@@ -58,7 +58,7 @@ result$leaderboard
 #> 2 -1.3212249                3      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  0
+#> 2                  1
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
