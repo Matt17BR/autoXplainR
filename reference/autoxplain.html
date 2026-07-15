@@ -98,15 +98,17 @@ does not require Java or a cloud account.</p>
 
 
 <dt id="arg-max-models">max_models<a class="anchor" aria-label="anchor" href="#arg-max-models"></a></dt>
-<dd><p>Maximum number of base models.</p></dd>
+<dd><p>Maximum number of H2O base models; ignored by the guided
+base engine, which fits one primary model and one simple baseline.</p></dd>
 
 
 <dt id="arg-max-runtime-secs">max_runtime_secs<a class="anchor" aria-label="anchor" href="#arg-max-runtime-secs"></a></dt>
-<dd><p>Overall training time budget in seconds.</p></dd>
+<dd><p>H2O training time budget in seconds; ignored by the
+guided base engine.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Reproducible H2O seed.</p></dd>
+<dd><p>Reproducible split, fitting, and H2O seed.</p></dd>
 
 
 <dt id="arg-test-data">test_data<a class="anchor" aria-label="anchor" href="#arg-test-data"></a></dt>
@@ -125,7 +127,7 @@ resolves to the dependency-free <code>"base"</code> workflow.</p></dd>
 
 
 <dt id="arg-enable-preprocessing">enable_preprocessing<a class="anchor" aria-label="anchor" href="#arg-enable-preprocessing"></a></dt>
-<dd><p>Apply <code><a href="preprocess_for_h2o.html">preprocess_for_h2o()</a></code>.</p></dd>
+<dd><p>Apply <code><a href="preprocess_data.html">preprocess_data()</a></code>.</p></dd>
 
 
 <dt id="arg-preprocessing-config">preprocessing_config<a class="anchor" aria-label="anchor" href="#arg-preprocessing-config"></a></dt>

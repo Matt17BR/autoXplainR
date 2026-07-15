@@ -45,8 +45,10 @@
 
 ## Fitting and preprocessing
 
+- [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md)
+  : Prepare modeling data with an auditable recipe
 - [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
-  : Prepare a data frame for H2O with an auditable recipe
+  : Prepare a data frame for the H2O adapter
 
 ## Visualization and metadata
 
@@ -61,7 +63,7 @@
 - [`plot_permutation_importance()`](https://matt17br.github.io/autoXplainR/reference/plot_permutation_importance.md)
   : Plot permutation importance with uncertainty
 - [`extract_model_characteristics()`](https://matt17br.github.io/autoXplainR/reference/extract_model_characteristics.md)
-  : Extract comparable AutoML model metadata
+  : Extract comparable model metadata
 - [`create_model_comparison_report()`](https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.md)
   : Create a compact model metadata report
 - [`calculate_weighted_efficiency()`](https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.md)

@@ -16,6 +16,9 @@
   a standalone beginner-first report that leads with the modeling
   question, held-out baseline comparison, and metric definitions before
   revealing feature patterns and a collapsed evidence audit.
+- Added evaluation-row predictions, regression error diagnostics,
+  classification confusion matrices, Brier scores, and actionable
+  warnings for sample-size and baseline-performance failure modes.
 - Repositioned the model-agnostic explanation evidence audit as an
   advanced reliability layer behind the beginner workflow.
 - Added
@@ -56,6 +59,11 @@
 - Preprocessing is conservative, returns a reusable recipe, and applies
   fitted levels/imputation values to evaluation data. Identifier removal
   and guessed ordinal conversion are opt-in.
+- Added the engine-neutral
+  [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md)
+  name;
+  [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
+  is retained as a compatibility alias.
 - Replaced the generated 2,300-line Flexdashboard implementation with
   the same evidence-report pipeline used by model-agnostic callers.
 - Replaced fixed, ranking-first LLM prompts with local deterministic
@@ -71,6 +79,9 @@
 - Added CRAN-oriented metadata, automated checks, coverage, pkgdown
   deployment, issue forms, contribution and security policies, citation
   metadata, and a release checklist.
+- Enforced an 80% statement-coverage floor while exercising Plotly and
+  H2O integration paths; the full local suite currently measures above
+  that floor.
 - Split fast model-agnostic unit tests from opt-in H2O integration
   tests.
 - Rebuilt examples and the vignette around held-out evaluation and

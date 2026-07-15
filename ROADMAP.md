@@ -14,6 +14,9 @@ Plain-language model report with progressive evidence disclosure.
 Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative
 providers.
 
+Beginner evaluation diagnostics: error summaries, confusion tables,
+probability scores, sample-size cautions, and baseline-failure warnings.
+
 Model-agnostic prediction contract and H2O boundary.
 
 Repeated grouped permutation importance with retained draws.
@@ -24,7 +27,8 @@ Supplied near-optimal-model explanation and prediction agreement.
 
 Evidence-first standalone report with provenance.
 
-Fast core tests, isolated H2O tests, CI, pkgdown, and project policy.
+Fast core tests, isolated H2O tests, enforced coverage, CI, pkgdown, and
+project policy.
 
 ## 0.3 — validation and estimands
 

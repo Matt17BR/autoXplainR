@@ -1,8 +1,9 @@
-# Extract comparable AutoML model metadata
+# Extract comparable model metadata
 
-Extracts stable, compact metadata from retained H2O models and joins it
-to the AutoML leaderboard. Native H2O variable importance is labelled as
-such; it is not substituted for model-agnostic permutation importance.
+Extracts stable, compact metadata from guided base models or retained
+H2O models and joins it to the leaderboard. Native H2O variable
+importance is labelled as such; it is not substituted for model-agnostic
+permutation importance.
 
 ## Usage
 

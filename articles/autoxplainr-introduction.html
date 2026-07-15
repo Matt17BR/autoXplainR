@@ -338,15 +338,17 @@ the numerical report.</p>
 <span><span class="va">flowers</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                        log_loss </span></span>
 <span><span class="co">#&gt;    "Probability error that penalizes confident wrong answers; lower is better." </span></span>
+<span><span class="co">#&gt;                                                                     brier_score </span></span>
+<span><span class="co">#&gt;                           "Average squared probability error; lower is better." </span></span>
 <span><span class="co">#&gt;                                                                        accuracy </span></span>
 <span><span class="co">#&gt;       "Share of held-out rows assigned to the correct class; higher is better." </span></span>
 <span><span class="co">#&gt;                                                                    macro_recall </span></span>
 <span><span class="co">#&gt; "Recall calculated for each class and then averaged equally; higher is better."</span></span></code></pre></div>
 <p>Classification splits are stratified. Binary tasks report log loss,
-accuracy, balanced accuracy, and ROC AUC. Multiclass tasks report log
-loss, accuracy, and macro recall. Log loss is primary because it
-evaluates probability quality and penalizes confident wrong
-predictions.</p>
+Brier score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks
+report log loss, Brier score, accuracy, and macro recall. Log loss is
+primary because it evaluates probability quality and penalizes confident
+wrong predictions.</p>
 </div>
 <div class="section level2">
 <h2 id="bring-an-existing-model">Bring an existing model<a class="anchor" aria-label="anchor" href="#bring-an-existing-model"></a>

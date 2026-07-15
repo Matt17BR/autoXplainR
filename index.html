@@ -129,7 +129,7 @@
 <div class="section level2">
 <h2 id="read-the-result-before-explaining-it">Read the result before explaining it<a class="anchor" aria-label="anchor" href="#read-the-result-before-explaining-it"></a>
 </h2>
-<p>For regression, the main metrics are RMSE, MAE, and R-squared. For binary classification, they are log loss, accuracy, balanced accuracy, and ROC AUC. For multiclass classification, they are log loss, accuracy, and macro recall. Every definition is stored with the result and displayed beside the score.</p>
+<p>For regression, the main metrics are RMSE, MAE, and R-squared. For binary classification, they are log loss, Brier score, accuracy, balanced accuracy, and ROC AUC. For multiclass classification, they are log loss, Brier score, accuracy, and macro recall. Every definition is stored with the result and displayed beside the score.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">leaderboard</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>

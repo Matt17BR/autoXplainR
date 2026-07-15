@@ -48,6 +48,9 @@ AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 - Add NEWS and user documentation for visible changes.
 - Run `devtools::document()`, `devtools::test()`, and
   `devtools::check()`.
+- Keep measured statement coverage at or above the enforced 80% project
+  floor; new statistical branches should be covered substantially more
+  deeply.
 - Keep optional packages behind
   [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) checks.
 

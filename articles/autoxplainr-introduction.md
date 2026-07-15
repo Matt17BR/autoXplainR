@@ -291,6 +291,8 @@ flowers
 flowers$evaluation$metric_definitions
 #>                                                                        log_loss 
 #>    "Probability error that penalizes confident wrong answers; lower is better." 
+#>                                                                     brier_score 
+#>                           "Average squared probability error; lower is better." 
 #>                                                                        accuracy 
 #>       "Share of held-out rows assigned to the correct class; higher is better." 
 #>                                                                    macro_recall 
@@ -298,9 +300,10 @@ flowers$evaluation$metric_definitions
 ```
 
 Classification splits are stratified. Binary tasks report log loss,
-accuracy, balanced accuracy, and ROC AUC. Multiclass tasks report log
-loss, accuracy, and macro recall. Log loss is primary because it
-evaluates probability quality and penalizes confident wrong predictions.
+Brier score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks
+report log loss, Brier score, accuracy, and macro recall. Log loss is
+primary because it evaluates probability quality and penalizes confident
+wrong predictions.
 
 ## Bring an existing model
 

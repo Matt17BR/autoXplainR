@@ -45,15 +45,17 @@ autoxplain(
 
 - max_models:
 
-  Maximum number of base models.
+  Maximum number of H2O base models; ignored by the guided base engine,
+  which fits one primary model and one simple baseline.
 
 - max_runtime_secs:
 
-  Overall training time budget in seconds.
+  H2O training time budget in seconds; ignored by the guided base
+  engine.
 
 - seed:
 
-  Reproducible H2O seed.
+  Reproducible split, fitting, and H2O seed.
 
 - test_data:
 
@@ -73,7 +75,7 @@ autoxplain(
 - enable_preprocessing:
 
   Apply
-  [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md).
+  [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md).
 
 - preprocessing_config:
 
