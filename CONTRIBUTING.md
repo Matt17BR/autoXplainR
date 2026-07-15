@@ -16,7 +16,9 @@ Describe:
 - validation evidence or a simulation plan.
 
 Features are not accepted solely because they produce an attractive
-chart.
+chart. Changes must also preserve the beginner-first workflow and
+progressive disclosure rules in
+[PRODUCT.md](https://matt17br.github.io/autoXplainR/PRODUCT.md).
 
 ## Local setup
 
