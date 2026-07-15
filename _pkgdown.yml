@@ -1,0 +1,48 @@
+url: https://matt17br.github.io/autoXplainR/
+template:
+  bootstrap: 5
+  light-switch: true
+  bslib:
+    primary: "#176b4d"
+    base_font:
+      google: Inter
+    heading_font:
+      google: Inter
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github, lightswitch]
+reference:
+  - title: Evidence workflow
+    contents:
+      - explain_model
+      - audit_explanations
+      - render_explanation_report
+      - explain_effect
+  - title: Explanation estimators
+    contents:
+      - calculate_permutation_importance
+      - calculate_accumulated_local_effects
+      - calculate_partial_dependence
+      - calculate_partial_dependence_multi
+  - title: Optional AutoML adapter
+    contents:
+      - autoxplain
+      - as_explainers
+      - preprocess_for_h2o
+      - generate_dashboard
+      - create_simple_dashboard
+  - title: Visualization and metadata
+    contents:
+      - starts_with("plot_")
+      - extract_model_characteristics
+      - create_model_comparison_report
+      - calculate_weighted_efficiency
+  - title: Optional narrative
+    contents:
+      - generate_natural_language_report
+articles:
+  - title: Get started
+    navbar: ~
+    contents:
+      - autoxplainr-introduction

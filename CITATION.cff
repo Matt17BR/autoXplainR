@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use AutoXplainR, please cite it using this metadata."
+title: "AutoXplainR: Stress-Testing Evidence Behind Model Explanations"
+type: software
+authors:
+  - given-names: Matteo
+    family-names: Mazzarelli
+    email: matteo.mazzarelli@gmail.com
+repository-code: "https://github.com/Matt17BR/autoXplainR"
+url: "https://matt17br.github.io/autoXplainR/"
+license: MIT
+version: 0.2.0
+date-released: 2026-07-15
+keywords:
+  - explainable artificial intelligence
+  - model interpretation
+  - permutation importance
+  - accumulated local effects
+  - predictive multiplicity

@@ -1,0 +1,32 @@
+name: Method or feature proposal
+description: Propose a statistical method, adapter, or evidence diagnostic
+title: "[Proposal]: "
+labels: [enhancement, design]
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: User claim supported
+      description: What should a user be justified in saying after using this feature?
+    validations:
+      required: true
+  - type: textarea
+    id: estimand
+    attributes:
+      label: Estimand and assumptions
+      description: Define the target quantity, assumptions, and known failure modes.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Literature, simulations, reference implementations, and edge cases.
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Proposed API and output contract
+    validations:
+      required: true

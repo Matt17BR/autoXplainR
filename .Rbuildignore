@@ -1,0 +1,16 @@
+^\.github$
+^\.git$
+^\.gitignore$
+^\.lintr$
+^.*\.Rproj$
+^\.Rproj\.user$
+^CODE_OF_CONDUCT\.md$
+^CONTRIBUTING\.md$
+^GOVERNANCE\.md$
+^LICENSE\.md$
+^ROADMAP\.md$
+^SECURITY\.md$
+^cran-comments\.md$
+^CITATION\.cff$
+^_pkgdown\.yml$
+^docs$
