@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use AutoXplainR, please cite it using this metadata."
-title: "AutoXplainR: Stress-Testing Evidence Behind Model Explanations"
+title: "AutoXplainR: Guided Model Fitting, Evaluation, and Explanation"
 type: software
 authors:
   - given-names: Matteo
@@ -12,6 +12,8 @@ license: MIT
 version: 0.2.0
 date-released: 2026-07-15
 keywords:
+  - beginner model fitting
+  - held-out evaluation
   - explainable artificial intelligence
   - model interpretation
   - permutation importance

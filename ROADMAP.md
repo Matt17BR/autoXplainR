@@ -18,6 +18,8 @@ ordered by user and scientific leverage, not novelty theatre.
 - [x] Evidence-first standalone report with provenance.
 - [x] Fast core tests, isolated H2O tests, enforced coverage, CI, pkgdown, and
   project policy.
+- [x] Version-checked source-package artifacts and draft GitHub releases for
+  version tags.
 
 ## 0.3 — validation and estimands
 

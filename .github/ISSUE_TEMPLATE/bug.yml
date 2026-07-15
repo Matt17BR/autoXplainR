@@ -32,6 +32,14 @@ body:
     id: integration
     attributes:
       label: Optional integration
-      options: [None, H2O, Plotly, Gemini]
+      options:
+        - None / guided base workflow
+        - H2O
+        - Plotly
+        - Gemini
+        - Groq
+        - Ollama
+        - OpenRouter
+        - Custom narrative endpoint
     validations:
       required: true

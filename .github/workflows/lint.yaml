@@ -20,8 +20,14 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::lintr
+          extra-packages: any::lintr, any::spelling
           needs: lint
       - name: Lint package
         run: lintr::lint_package()
+        shell: Rscript {0}
+      - name: Check spelling
+        run: |
+          misspellings <- spelling::spell_check_package()
+          print(misspellings)
+          if (nrow(misspellings)) stop("Spelling check found unrecognized words.")
         shell: Rscript {0}

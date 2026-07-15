@@ -1,6 +1,6 @@
 bibentry(
   bibtype = "Manual",
-  title = "AutoXplainR: Stress-Testing Evidence Behind Model Explanations",
+  title = "AutoXplainR: Guided Model Fitting, Evaluation, and Explanation",
   author = person("Matteo", "Mazzarelli"),
   year = "2026",
   note = paste("R package version", meta$Version),

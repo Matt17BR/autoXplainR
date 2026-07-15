@@ -278,7 +278,10 @@ AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 ```
 
 See the [product contract](PRODUCT.md), [contribution guide](CONTRIBUTING.md),
-[security policy](SECURITY.md), [roadmap](ROADMAP.md), and [release notes](NEWS.md).
+[security policy](SECURITY.md), [roadmap](ROADMAP.md),
+[release checklist](.github/RELEASE_CHECKLIST.md), and [release notes](NEWS.md).
+Usage questions and early design ideas belong in
+[GitHub Discussions](https://github.com/Matt17BR/autoXplainR/discussions).
 
 ## Literature foundations
 
@@ -286,7 +289,7 @@ See the [product contract](PRODUCT.md), [contribution guide](CONTRIBUTING.md),
   [*All Models are Wrong, but Many are Useful*](https://www.jmlr.org/papers/v20/18-760.html),
   JMLR 20(177).
 - Apley and Zhu (2020),
-  [*Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models*](https://doi.org/10.1111/rssb.12377),
+  [*Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models*](https://arxiv.org/abs/1612.08468),
   JRSS B 82(4).
 - Biecek (2018),
   [*DALEX: Explainers for Complex Predictive Models in R*](https://jmlr.org/papers/v19/18-416.html),
