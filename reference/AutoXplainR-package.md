@@ -1,27 +1,34 @@
-# AutoXplainR: Evidence audits for model explanations
+# AutoXplainR: guided model fitting, evaluation, and explanation
 
-AutoXplainR stress-tests explanatory claims for tabular predictive
-models. Its model-agnostic core separates fitting from explanation,
-measures repeated permutation variability, diagnoses feature dependence,
-compares explanations across near-optimal supplied models, and renders a
-provenance-rich evidence report. H2O AutoML, Plotly, and remote
-narrative generation are optional integrations rather than package
+AutoXplainR gives a first-time modeler one safe path from a data frame
+to a held-out evaluation and plain-language explanation. Its advanced
+evidence layer stress-tests those explanations with repeated permutation
+importance, dependence diagnostics, comparisons across supplied models,
+accumulated local effects, and reproducible provenance. H2O AutoML,
+Plotly, and remote narratives are optional integrations rather than
 startup requirements.
 
 ## Primary workflow
 
-1.  Wrap one or more fitted models with
-    [`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md).
+1.  Call
+    [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+    with a data frame and target column.
 
-2.  Run
+2.  Read the baseline comparison and held-out metrics.
+
+3.  Convert the result with
+    [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
+    and investigate effects.
+
+4.  Optionally run
     [`audit_explanations()`](https://matt17br.github.io/autoXplainR/reference/audit_explanations.md)
-    on held-out evaluation data.
+    for advanced evidence checks.
 
-3.  Investigate effects with
+5.  Investigate effects with
     [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md),
     which defaults to ALE.
 
-4.  Preserve the evidence and limitations with
+6.  Preserve the evidence and limitations with
     [`render_explanation_report()`](https://matt17br.github.io/autoXplainR/reference/render_explanation_report.md).
 
 ## Interpretation boundaries
@@ -49,6 +56,8 @@ Statistical Society: Series B*, 82(4), 1059–1086.
 Useful links:
 
 - <https://github.com/Matt17BR/autoXplainR>
+
+- <https://matt17br.github.io/autoXplainR/>
 
 - Report bugs at <https://github.com/Matt17BR/autoXplainR/issues>
 

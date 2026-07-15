@@ -1,9 +1,10 @@
-# Fit a reproducible H2O AutoML candidate set
+# Fit and evaluate a model through a guided workflow
 
-`autoxplain()` is the optional model-fitting convenience layer. The core
-explanation and audit API does not require H2O; users can call
-[`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
-for any fitted model.
+`autoxplain()` is the beginner-first entry point. By default it creates
+a reproducible held-out split, fits an intercept-only baseline and an
+understandable statistical model, evaluates both on unseen rows, and
+stores everything needed for explanation and reporting. This path only
+uses R and does not require Java or a cloud account.
 
 ## Usage
 
@@ -15,6 +16,8 @@ autoxplain(
   max_runtime_secs = 300L,
   seed = 123L,
   test_data = NULL,
+  test_fraction = 0.2,
+  engine = c("auto", "base", "h2o"),
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
@@ -56,6 +59,16 @@ autoxplain(
 
   Optional held-out evaluation data. It is not used as an H2O validation
   frame unless `use_test_as_validation = TRUE`.
+
+- test_fraction:
+
+  Fraction of `data` reserved for evaluation when `test_data` is not
+  supplied. Classification splits are stratified.
+
+- engine:
+
+  One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently resolves to
+  the dependency-free `"base"` workflow.
 
 - enable_preprocessing:
 
@@ -112,6 +125,11 @@ metadata, preprocessing provenance, and evaluation data.
 
 ## Details
 
+Set `engine = "h2o"` to use the optional H2O AutoML adapter. The
+lower-level
+[`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
+interface accepts models fitted by any framework.
+
 Numeric outcomes with exactly two distinct values are treated as binary
 classification by default. Potentially destructive preprocessing, such
 as identifier removal, is opt-in and recorded in the result.
@@ -119,9 +137,30 @@ as identifier removal, is opt-in and recorded in the result.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-result <- autoxplain(mtcars, "mpg", max_models = 3)
+result <- autoxplain(mtcars, "mpg")
+result
+#> <AutoXplainR guided result>
+#>   question:   predict `mpg` (regression)
+#>   engine:     base
+#>   data:       26 training + 6 evaluation rows
+#>   result:     main_model has rmse = 2.4413
+#>   baseline:   63.1% improvement in rmse
+#>   next:       use as_explainers() to investigate the fitted patterns
 explainers <- as_explainers(result)
 audit_explanations(explainers)
+#> <AutoXplainR explanation evidence audit>
+#>   grade:              C (diagnostic, not certification)
+#>   models:             2 (1 near-optimal)
+#>   stable claims:      0.0%
+#>   max dependence:     0.949
+#>   explanation accord: n/a (one model)
+#>   prediction accord:  n/a (one model)
+#> 
+#> Findings
+#>   [warning] 10 feature(s) exceed the dependence threshold.
+#>   [warning] 20 model-feature claim(s) are qualified or unsupported.
+
+if (FALSE) { # \dontrun{
+h2o_result <- autoxplain(mtcars, "mpg", engine = "h2o", max_models = 3)
 } # }
 ```

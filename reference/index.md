@@ -29,7 +29,7 @@
 ## Optional AutoML adapter
 
 - [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
-  : Fit a reproducible H2O AutoML candidate set
+  : Fit and evaluate a model through a guided workflow
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
   : Convert an AutoML result to model-agnostic explainers
 - [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
