@@ -42,7 +42,10 @@
 - Replaced the generated 2,300-line Flexdashboard implementation with the same
   evidence-report pipeline used by model-agnostic callers.
 - Replaced fixed, ranking-first LLM prompts with local deterministic reports and
-  an optional aggregated-data-only Gemini narrative.
+  explicit aggregated-data-only Gemini, Groq, Ollama, OpenRouter, and custom
+  OpenAI-compatible adapters. Local deterministic reporting is always the
+  default, even when an API key is present, and provider/model/fallback details
+  are attached as provenance.
 - Removed bundled third-party datasets whose provenance and redistribution
   terms were not documented.
 

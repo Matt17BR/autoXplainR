@@ -10,12 +10,16 @@ generate_natural_language_report(
   pdp_data = NULL,
   model_characteristics = NULL,
   audit = NULL,
+  provider = c("local", "gemini", "groq", "ollama", "openrouter", "custom"),
   api_key = NULL,
-  model = "gemini-3.5-flash",
+  model = NULL,
+  base_url = NULL,
   max_tokens = 1000L,
   temperature = 0.2,
-  use_remote = TRUE,
-  fallback = TRUE
+  timeout = 30,
+  fallback = TRUE,
+  use_remote = NULL,
+  transport = NULL
 )
 }
 \arguments{
@@ -29,27 +33,41 @@ generate_natural_language_report(
 
 \item{audit}{Optional \code{autoxplain_audit}.}
 
-\item{api_key}{Gemini API key. When \code{NULL}, \code{GEMINI_API_KEY} is consulted.
-If no key is available, a local deterministic narrative is returned.}
+\item{provider}{One of \code{"local"}, \code{"gemini"}, \code{"groq"}, \code{"ollama"},
+\code{"openrouter"}, or \code{"custom"}. The default is always \code{"local"}.}
 
-\item{model}{Gemini model identifier.}
+\item{api_key}{Provider API key. For an explicitly selected hosted provider,
+the corresponding environment variable shown by \code{\link[=narrative_providers]{narrative_providers()}}
+is consulted when this is \code{NULL}.}
+
+\item{model}{Model identifier. \code{NULL} uses the provider default shown by
+\code{\link[=narrative_providers]{narrative_providers()}}. A custom provider requires an explicit model.}
+
+\item{base_url}{Optional endpoint override. A custom provider requires it.}
 
 \item{max_tokens}{Maximum response tokens.}
 
 \item{temperature}{Sampling temperature.}
 
-\item{use_remote}{Whether remote generation is allowed. Set \code{FALSE} to
-guarantee local-only operation.}
+\item{timeout}{Request timeout in seconds.}
 
 \item{fallback}{Return the deterministic narrative when the remote call
 fails.}
+
+\item{use_remote}{Deprecated compatibility switch. \code{FALSE} forces local
+generation; \code{TRUE} with no explicit provider selects Gemini. Prefer
+\code{provider}.}
+
+\item{transport}{Optional advanced request function for testing or custom
+networking. It receives one request list and must return narrative text.}
 }
 \value{
-A single character string.
+A single character string with a \code{narrative_provenance} attribute.
 }
 \description{
-Produces a deterministic local narrative by default, or sends only an
-aggregated analysis context to the Gemini API when an API key is supplied.
-Raw rows, model objects, and predictions are never included in the prompt.
-The generated text is explicitly secondary to the numeric audit.
+Produces a deterministic local narrative by default. Remote or locally
+hosted generative models are used only when \code{provider} is set explicitly.
+Raw rows, fitted objects, case-level predictions, and secrets are never
+included in the prompt. Generated prose remains secondary to the computed
+evaluation and explanation evidence.
 }

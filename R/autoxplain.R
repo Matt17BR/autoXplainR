@@ -269,10 +269,14 @@ print.autoxplain_result <- function(x, ...) {
   cat("  data:       ", nrow(x$training_data), " training + ",
       nrow(x$test_data %||% x$training_data), " evaluation rows\n", sep = "")
   if (!is.null(x$evaluation$primary_metric)) {
-    winner <- x$evaluation$winner
+    reference <- if ("main_model" %in% names(x$evaluation$metrics)) {
+      "main_model"
+    } else {
+      x$evaluation$winner
+    }
     metric <- x$evaluation$primary_metric
-    score <- x$evaluation$metrics[[winner]][[metric]]
-    cat("  result:     ", winner, " has ", metric, " = ",
+    score <- x$evaluation$metrics[[reference]][[metric]]
+    cat("  result:     primary model has ", metric, " = ",
         format(round(score, 4L), trim = TRUE), "\n", sep = "")
     improvement <- x$evaluation$improvement_over_baseline
     if (is.finite(improvement)) {

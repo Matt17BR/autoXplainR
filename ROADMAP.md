@@ -8,7 +8,7 @@ ordered by user and scientific leverage, not novelty theatre.
 
 - [x] Guided base-R fitting and held-out evaluation with no Java requirement.
 - [ ] Plain-language model report with progressive evidence disclosure.
-- [ ] Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.
+- [x] Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.
 - [x] Model-agnostic prediction contract and H2O boundary.
 - [x] Repeated grouped permutation importance with retained draws.
 - [x] ALE, diagnosed PDP, feature association, and support outputs.
