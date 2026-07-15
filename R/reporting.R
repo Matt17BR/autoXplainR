@@ -479,7 +479,42 @@ render_prediction_diagnostics <- function(result, diagnostics) {
     "Off-diagonal rows show the specific mistakes.</p>",
     html_table(diagnostics$confusion_matrix, digits = 0L),
     render_calibration_diagnostic(result, diagnostics$calibration),
+    render_threshold_diagnostic(result),
     missingness_html
+  )
+}
+
+render_threshold_diagnostic <- function(result) {
+  if (!identical(result$task, "binary")) return("")
+  diagnostic <- tryCatch(
+    threshold_diagnostics(result, thresholds = c(0.3, 0.5, 0.7)),
+    error = function(error) NULL
+  )
+  if (is.null(diagnostic)) return("")
+  display <- diagnostic$performance[c(
+    "threshold", "predicted_positive_rate", "sensitivity", "specificity",
+    "precision", "accuracy", "false_positives", "false_negatives"
+  )]
+  percentage_columns <- c(
+    "predicted_positive_rate", "sensitivity", "specificity", "precision", "accuracy"
+  )
+  for (column in percentage_columns) {
+    display[[column]] <- vapply(display[[column]], format_percent, character(1))
+  }
+  names(display) <- c(
+    "Cutoff", "Predicted positive", "Sensitivity", "Specificity", "Precision",
+    "Accuracy", "False positives", "False negatives"
+  )
+  paste0(
+    "<h3>What changes when the decision cutoff moves?</h3>",
+    "<p>The model reports the probability of <strong>",
+    html_escape(diagnostic$positive_class),
+    "</strong>. Calling that class at 0.5 is a convention. A lower cutoff usually catches ",
+    "more positives and creates more false positives; a higher cutoff usually does the reverse.</p>",
+    html_table(display, digits = 2L),
+    "<p class=\"callout\"><strong>No cutoff is recommended here.</strong> The relative ",
+    "consequences of false positives and false negatives belong to the application. If a cutoff ",
+    "is chosen using these held-out rows, evaluate it again on different representative data.</p>"
   )
 }
 

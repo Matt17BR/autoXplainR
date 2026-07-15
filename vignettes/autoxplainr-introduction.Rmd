@@ -245,6 +245,23 @@ The binned gap is descriptive. It changes with the evaluation sample and the
 grouping, so it should be read beside log loss and Brier score rather than as a
 population guarantee.
 
+For a binary task, the report also makes the 0.5 decision convention visible.
+Use `threshold_diagnostics()` to compare a deliberate set of cutoffs:
+
+```{r thresholds, eval=FALSE}
+binary_cars <- transform(
+  mtcars,
+  am = factor(am, labels = c("automatic", "manual"))
+)
+binary_fit <- autoxplain(binary_cars, "am", seed = 2026)
+threshold_diagnostics(binary_fit, thresholds = c(0.3, 0.5, 0.7))
+```
+
+Lower thresholds usually find more positive cases while creating more false
+positives; higher thresholds usually do the reverse. The relative consequences
+belong to the application. A threshold chosen on these held-out rows must be
+evaluated again on different representative data.
+
 ## Check an explicitly chosen group
 
 Aggregate scores can hide weak spots. If the evaluation data contain a group
