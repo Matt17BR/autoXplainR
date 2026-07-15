@@ -8,6 +8,8 @@
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
   : Check whether held-out class probabilities behave literally
+- [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
+  : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
   : Render a beginner-first model report
 - [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)

@@ -128,10 +128,10 @@ predictions.</p>
 <span><span class="co">#&gt; 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692</span></span>
 <span><span class="co">#&gt;    r_squared training_time_ms model_size_kb complexity fit_warning</span></span>
 <span><span class="co">#&gt; 1 -0.1281933                1      44.43750         11            </span></span>
-<span><span class="co">#&gt; 2 -1.3212249                3      19.82812          1            </span></span>
+<span><span class="co">#&gt; 2 -1.3212249                2      19.82812          1            </span></span>
 <span><span class="co">#&gt;   prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                  1</span></span>
-<span><span class="co">#&gt; 2                  0</span></span>
+<span><span class="co">#&gt; 2                  1</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                                                rmse </span></span>
 <span><span class="co">#&gt;            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
@@ -420,11 +420,37 @@ and the grouping, so it should be read beside log loss and Brier score
 rather than as a population guarantee.</p>
 </div>
 <div class="section level2">
+<h2 id="check-an-explicitly-chosen-group">Check an explicitly chosen group<a class="anchor" aria-label="anchor" href="#check-an-explicitly-chosen-group"></a>
+</h2>
+<p>Aggregate scores can hide weak spots. If the evaluation data contain
+a group that matters to the intended use, ask for the comparison
+directly:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cars_with_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span></span>
+<span>  <span class="va">mtcars</span>,</span>
+<span>  transmission <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">group_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">cars_with_group</span>, <span class="st">"mpg"</span>, test_fraction <span class="op">=</span> <span class="fl">0.4</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/subgroup_performance.html">subgroup_performance</a></span><span class="op">(</span><span class="va">group_fit</span>, by <span class="op">=</span> <span class="st">"transmission"</span>, min_rows <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;AutoXplainR subgroup performance&gt;</span></span>
+<span><span class="co">#&gt;   model:       main_model</span></span>
+<span><span class="co">#&gt;   compared by: transmission (2 groups)</span></span>
+<span><span class="co">#&gt;   metric:      rmse (lower is better)</span></span>
+<span><span class="co">#&gt;   largest gap: 0.9029</span></span>
+<span><span class="co">#&gt;   caution:     descriptive holdout check; not fairness certification</span></span></code></pre></div>
+<p>The same check can be included in the standalone report with
+<code>subgroup = "transmission"</code>. AutoXplainR does not guess which
+column is sensitive, and it does not call this a fairness assessment.
+Observed gaps can come from small samples, different case mix,
+measurement quality, or model behavior and require domain-specific
+investigation.</p>
+</div>
+<div class="section level2">
 <h2 id="bring-an-existing-model">Bring an existing model<a class="anchor" aria-label="anchor" href="#bring-an-existing-model"></a>
 </h2>
 <p>The explanation layer does not depend on the guided fitting engine.
 Wrap an ordinary R model directly:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span> <span class="op">+</span> <span class="va">disp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>

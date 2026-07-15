@@ -65,6 +65,7 @@ and an explanation evidence audit follow with progressively more detail.</p>
 <span>  audit <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  effects <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  narrative <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  subgroup <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  open <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  top_features <span class="op">=</span> <span class="fl">8L</span>,</span>
 <span>  n_repeats <span class="op">=</span> <span class="fl">20L</span>,</span>
@@ -99,6 +100,12 @@ and an explanation evidence audit follow with progressively more detail.</p>
 <dt id="arg-narrative">narrative<a class="anchor" aria-label="anchor" href="#arg-narrative"></a></dt>
 <dd><p>Optional narrative returned by
 <code><a href="generate_natural_language_report.html">generate_natural_language_report()</a></code>.</p></dd>
+
+
+<dt id="arg-subgroup">subgroup<a class="anchor" aria-label="anchor" href="#arg-subgroup"></a></dt>
+<dd><p>Optional name of one categorical or low-cardinality column.
+When supplied, the report includes an explicit held-out subgroup
+performance check. See <code><a href="subgroup_performance.html">subgroup_performance()</a></code>.</p></dd>
 
 
 <dt id="arg-open">open<a class="anchor" aria-label="anchor" href="#arg-open"></a></dt>

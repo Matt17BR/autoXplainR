@@ -17,6 +17,7 @@ render_model_report(
   audit = NULL,
   effects = NULL,
   narrative = NULL,
+  subgroup = NULL,
   open = FALSE,
   top_features = 8L,
   n_repeats = 20L,
@@ -50,6 +51,13 @@ render_model_report(
 
   Optional narrative returned by
   [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md).
+
+- subgroup:
+
+  Optional name of one categorical or low-cardinality column. When
+  supplied, the report includes an explicit held-out subgroup
+  performance check. See
+  [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md).
 
 - open:
 

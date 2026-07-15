@@ -103,7 +103,7 @@ _(Performance versus model size, with the interpretation rule and full candidate
 | Question | What AutoXplainR provides |
 |----|----|
 | What am I predicting? | detected task, target, split, preprocessing, and fitted family |
-| Does the model work? | held-out metrics, plain definitions, baseline comparison, probability calibration, and failure warnings |
+| Does the model work? | held-out metrics, plain definitions, baseline comparison, probability calibration, optional subgroup checks, and failure warnings |
 | Are other models competitive? | explicit candidates, prediction comparisons, and Pareto trade-offs |
 | What patterns does it use? | repeated permutation reliance plus ALE or diagnosed PDP effects |
 | How much should I trust the explanation? | dependence, repeat stability, supplied-model disagreement, and next actions |

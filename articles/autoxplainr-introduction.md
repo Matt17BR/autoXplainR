@@ -55,10 +55,10 @@ result$leaderboard
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
 #>    r_squared training_time_ms model_size_kb complexity fit_warning
 #> 1 -0.1281933                1      44.43750         11            
-#> 2 -1.3212249                3      19.82812          1            
+#> 2 -1.3212249                2      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  0
+#> 2                  1
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -383,6 +383,33 @@ calibration_diagnostics(flowers)
 The binned gap is descriptive. It changes with the evaluation sample and
 the grouping, so it should be read beside log loss and Brier score
 rather than as a population guarantee.
+
+## Check an explicitly chosen group
+
+Aggregate scores can hide weak spots. If the evaluation data contain a
+group that matters to the intended use, ask for the comparison directly:
+
+``` r
+
+cars_with_group <- transform(
+  mtcars,
+  transmission = factor(am, labels = c("automatic", "manual"))
+)
+group_fit <- autoxplain(cars_with_group, "mpg", test_fraction = 0.4, seed = 2026)
+subgroup_performance(group_fit, by = "transmission", min_rows = 3)
+#> <AutoXplainR subgroup performance>
+#>   model:       main_model
+#>   compared by: transmission (2 groups)
+#>   metric:      rmse (lower is better)
+#>   largest gap: 0.9029
+#>   caution:     descriptive holdout check; not fairness certification
+```
+
+The same check can be included in the standalone report with
+`subgroup = "transmission"`. AutoXplainR does not guess which column is
+sensitive, and it does not call this a fairness assessment. Observed
+gaps can come from small samples, different case mix, measurement
+quality, or model behavior and require domain-specific investigation.
 
 ## Bring an existing model
 
