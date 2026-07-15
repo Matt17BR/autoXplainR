@@ -15,7 +15,8 @@ Description: Audits the reliability of model-agnostic explanations for tabular
     evidence reports. Optional adapters support 'H2O' AutoML, interactive
     'Plotly' graphics, and evidence-constrained remote narratives.
 License: MIT + file LICENSE
-URL: https://github.com/Matt17BR/autoXplainR
+URL: https://github.com/Matt17BR/autoXplainR,
+    https://matt17br.github.io/autoXplainR/
 BugReports: https://github.com/Matt17BR/autoXplainR/issues
 Depends:
     R (>= 4.1.0)

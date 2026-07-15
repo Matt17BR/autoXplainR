@@ -16,7 +16,9 @@ reference:
   - title: Evidence workflow
     contents:
       - explain_model
+      - predict.autoxplain_explainer
       - audit_explanations
+      - summary.autoxplain_audit
       - render_explanation_report
       - explain_effect
   - title: Explanation estimators
