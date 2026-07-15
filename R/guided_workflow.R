@@ -20,6 +20,7 @@ fit_guided_base <- function(data,
   }
   validate_guided_predictors(data, target_column)
   resolved_task <- if (task == "auto") detect_task(data[[target_column]]) else task
+  validate_guided_target(data[[target_column]], resolved_task)
 
   split <- if (is.null(test_data)) {
     make_evaluation_split(data, target_column, resolved_task, test_fraction, seed)
@@ -45,6 +46,15 @@ fit_guided_base <- function(data,
     ),
     preprocessing_config
   )
+  raw_constant_features <- guided_constant_predictors(split$training, target_column)
+  if (length(raw_constant_features)) {
+    split$training <- split$training[
+      setdiff(names(split$training), raw_constant_features)
+    ]
+    split$evaluation <- split$evaluation[
+      setdiff(names(split$evaluation), raw_constant_features)
+    ]
+  }
   processed <- preprocess_guided_split(
     split$training,
     split$evaluation,
@@ -53,6 +63,12 @@ fit_guided_base <- function(data,
     enable_preprocessing,
     config
   )
+  constant_result <- remove_guided_constant_predictors(
+    processed,
+    target_column,
+    already_removed = raw_constant_features
+  )
+  processed <- constant_result$processed
   train <- processed$training$data
   evaluation_data <- processed$evaluation$data
   features <- setdiff(names(train), target_column)
@@ -77,7 +93,8 @@ fit_guided_base <- function(data,
     evaluation_data,
     target_column,
     resolved_task,
-    evaluated$summary
+    evaluated$summary,
+    constant_result$removed
   )
 
   result <- structure(
@@ -108,6 +125,7 @@ fit_guided_base <- function(data,
         training_rows = nrow(train),
         evaluation_rows = nrow(evaluation_data),
         rows_moved_for_unseen_levels = split$moved_for_unseen_levels,
+        constant_features_removed = constant_result$removed,
         baseline = "intercept-only model",
         primary_model = fit$labels[["main_model"]]
       )
@@ -220,6 +238,15 @@ preprocess_guided_split <- function(training,
   fitted$data[[target]] <- coerce_outcome_for_task(fitted$data[[target]], task)
   levels <- if (is.factor(fitted$data[[target]])) base::levels(fitted$data[[target]]) else NULL
   applied$data[[target]] <- coerce_outcome_for_task(applied$data[[target]], task, levels)
+  if (anyNA(applied$data[[target]])) {
+    stop(
+      "Evaluation outcomes contain missing values or classes absent from the training data.",
+      call. = FALSE
+    )
+  }
+  if (task == "regression" && any(!is.finite(applied$data[[target]]))) {
+    stop("Evaluation outcomes must be finite numeric values.", call. = FALSE)
+  }
   applied$data <- validate_train_test_schema(fitted$data, applied$data, target)
   validate_finite_guided_data(fitted$data, target)
   validate_finite_guided_data(applied$data, target)
@@ -242,11 +269,12 @@ unprocessed_metadata <- function(data) {
 validate_guided_predictors <- function(data, target) {
   predictors <- setdiff(names(data), target)
   if (!length(predictors)) stop("`data` must contain at least one predictor.", call. = FALSE)
-  unsupported <- predictors[!vapply(data[predictors], is.atomic, logical(1))]
+  unsupported <- predictors[!vapply(data[predictors], supported_guided_predictor, logical(1))]
   if (length(unsupported)) {
     stop(
-      "The guided workflow does not support list-like predictors: ",
-      paste(unsupported, collapse = ", "), ". Use `explain_model()` with a custom model instead.",
+      "The guided workflow supports numeric, logical, factor, and character predictors. ",
+      "Convert or remove unsupported columns: ", paste(unsupported, collapse = ", "),
+      ". Use `explain_model()` with a custom model when those columns are required.",
       call. = FALSE
     )
   }
@@ -256,6 +284,76 @@ validate_guided_predictors <- function(data, target) {
          call. = FALSE)
   }
   invisible(TRUE)
+}
+
+supported_guided_predictor <- function(x) {
+  is.null(dim(x)) && (
+    (is.numeric(x) && !is.complex(x)) || is.logical(x) || is.factor(x) || is.character(x)
+  )
+}
+
+validate_guided_target <- function(y, task) {
+  values <- unique(y[!is.na(y)])
+  if (task == "regression") {
+    if (!is.numeric(y) || is.complex(y) || any(!is.finite(y))) {
+      stop("Regression requires a finite numeric target.", call. = FALSE)
+    }
+    return(invisible(TRUE))
+  }
+  if (is.numeric(y) && any(!is.finite(y))) {
+    stop("Classification targets must contain finite observed values.", call. = FALSE)
+  }
+  expected <- if (task == "binary") 2L else 3L
+  valid <- if (task == "binary") length(values) == expected else length(values) >= expected
+  if (!valid) {
+    stop(
+      if (task == "binary") {
+        "Binary classification requires exactly two observed outcome classes."
+      } else {
+        "Multiclass classification requires at least three observed outcome classes."
+      },
+      call. = FALSE
+    )
+  }
+  invisible(TRUE)
+}
+
+guided_constant_predictors <- function(data, target) {
+  predictors <- setdiff(names(data), target)
+  predictors[vapply(
+    data[predictors],
+    function(x) length(unique(x[!is.na(x)])) < 2L,
+    logical(1)
+  )]
+}
+
+remove_guided_constant_predictors <- function(processed,
+                                              target,
+                                              already_removed = character()) {
+  predictors <- setdiff(names(processed$training$data), target)
+  constant <- unique(c(already_removed, guided_constant_predictors(
+    processed$training$data,
+    target
+  )))
+  if (!length(constant)) return(list(processed = processed, removed = character()))
+  for (partition in c("training", "evaluation")) {
+    item <- processed[[partition]]
+    item$data <- item$data[setdiff(names(item$data), constant)]
+    item$final_info <- data_info(item$data)
+    item$preprocessing_log$constant_predictors <- list(
+      action = "removed",
+      columns = constant,
+      reason = "fewer than two observed training values"
+    )
+    if (length(item$recipe)) {
+      item$recipe$removed_columns <- unique(c(item$recipe$removed_columns, constant))
+      item$recipe$final_columns <- setdiff(item$recipe$final_columns, constant)
+      item$recipe$factor_levels[constant] <- NULL
+      item$recipe$imputations[constant] <- NULL
+    }
+    processed[[partition]] <- item
+  }
+  list(processed = processed, removed = constant)
 }
 
 validate_finite_guided_data <- function(data, target) {
@@ -463,7 +561,12 @@ guided_prediction_diagnostics <- function(evaluated, task) {
   list(confusion_matrix = confusion)
 }
 
-guided_evaluation_notes <- function(training, evaluation, target, task, summary) {
+guided_evaluation_notes <- function(training,
+                                    evaluation,
+                                    target,
+                                    task,
+                                    summary,
+                                    constant_features = character()) {
   notes <- list()
   add <- function(severity, code, message, recommendation) {
     notes[[length(notes) + 1L]] <<- data.frame(
@@ -480,6 +583,14 @@ guided_evaluation_notes <- function(training, evaluation, target, task, summary)
       "small_evaluation_set",
       paste0("Only ", nrow(evaluation), " rows were available for held-out evaluation."),
       "Treat the scores as preliminary and validate on more representative unseen rows."
+    )
+  }
+  if (length(constant_features)) {
+    add(
+      "note",
+      "constant_inputs_removed",
+      paste0("Constant training inputs were removed: ", paste(constant_features, collapse = ", "), "."),
+      "Check whether constant inputs indicate a data-export or sampling problem."
     )
   }
   n_features <- ncol(training) - 1L

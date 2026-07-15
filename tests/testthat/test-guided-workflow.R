@@ -111,8 +111,16 @@ test_that("guided workflow reports actionable input errors", {
   )
   expect_error(
     autoxplain(data.frame(x = I(replicate(10, list(1))), y = 1:10), "y"),
-    "list-like predictors"
+    "supports numeric"
   )
+  expect_error(
+    autoxplain(data.frame(when = as.Date("2020-01-01") + 0:9, y = 1:10), "y"),
+    "unsupported columns"
+  )
+  infinite_target <- data
+  infinite_target$y[[1L]] <- Inf
+  expect_error(autoxplain(infinite_target, "y"), "finite numeric target")
+  expect_error(autoxplain(data, "y", task = "binary"), "exactly two")
   rare <- data.frame(x = 1:10, y = factor(c("rare", rep("common", 9))))
   expect_error(autoxplain(rare, "y"), "at least two rows")
 })
@@ -152,4 +160,49 @@ test_that("guided evaluation flags fragile score contexts", {
     training, evaluation, "y", "regression", good_summary
   )
   expect_equal(nrow(good_notes), 0L)
+})
+
+test_that("constant inputs are removed, recorded, and reused in new evaluations", {
+  data <- data.frame(
+    x = c(NA, seq_len(29)),
+    constant_number = 1,
+    constant_group = factor("same"),
+    y = seq_len(30) + rnorm(30, sd = 0.1)
+  )
+  result <- autoxplain(data, "y", seed = 13)
+
+  expect_false(any(c("constant_number", "constant_group") %in% result$features))
+  expect_true("constant_inputs_removed" %in% result$evaluation$notes$code)
+  expect_true(all(c("constant_number", "constant_group") %in%
+                    result$preprocessing_metadata$training_data$recipe$removed_columns))
+
+  new_data <- data.frame(
+    x = c(NA, 50),
+    constant_number = 1,
+    constant_group = factor("same"),
+    y = c(40, 50)
+  )
+  explainer <- as_explainers(result, data = new_data, models = "main_model")$main_model
+  expect_equal(names(explainer$data), "x")
+  expect_false(anyNA(explainer$data))
+
+  holdout <- data.frame(
+    x = c(40, 50),
+    constant_number = 2,
+    constant_group = factor("different"),
+    y = c(40, 50)
+  )
+  supplied <- autoxplain(data, "y", test_data = holdout, seed = 13)
+  expect_equal(supplied$features, "x")
+  expect_true(all(c("constant_number", "constant_group") %in%
+                    supplied$provenance$constant_features_removed))
+})
+
+test_that("evaluation outcomes must match the training outcome contract", {
+  train <- data.frame(x = 1:20, y = rep(c(0, 1), 10))
+  unseen <- data.frame(x = 21:22, y = c(0, 2))
+  missing <- data.frame(x = 21:22, y = c(0, NA))
+
+  expect_error(autoxplain(train, "y", test_data = unseen), "classes absent")
+  expect_error(autoxplain(train, "y", test_data = missing), "missing values")
 })

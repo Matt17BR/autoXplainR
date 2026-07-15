@@ -232,7 +232,8 @@ autoxplain <- function(data,
 #' Convert an AutoML result to model-agnostic explainers
 #'
 #' @param x An `autoxplain_result`.
-#' @param data Evaluation data. Defaults to held-out `test_data` when available,
+#' @param data Optional raw evaluation data. The fitted preprocessing recipe is
+#'   applied automatically. Defaults to held-out `test_data` when available,
 #'   otherwise training data.
 #' @param models Model indices, IDs, or `NULL` for all retained models.
 #'
@@ -243,6 +244,27 @@ as_explainers <- function(x, data = NULL, models = NULL) {
     stop("`x` must be an `autoxplain_result`.", call. = FALSE)
   }
   evaluation <- data %||% x$test_data %||% x$training_data
+  if (!is.null(data) && isTRUE(x$preprocessing_metadata$enabled)) {
+    recipe <- x$preprocessing_metadata$training_data$recipe
+    strategy <- recipe$missing_value_strategy %||% "keep"
+    evaluation <- apply_preprocessing_recipe(
+      data,
+      recipe,
+      x$target_column,
+      missing_value_strategy = strategy
+    )$data
+    target_levels <- if (is.factor(x$training_data[[x$target_column]])) {
+      levels(x$training_data[[x$target_column]])
+    } else {
+      NULL
+    }
+    evaluation[[x$target_column]] <- coerce_outcome_for_task(
+      evaluation[[x$target_column]],
+      x$task,
+      target_levels
+    )
+    evaluation <- validate_train_test_schema(x$training_data, evaluation, x$target_column)
+  }
   assert_data_frame(evaluation, "data")
   if (!x$target_column %in% names(evaluation)) {
     stop("Evaluation data must contain target column `", x$target_column, "`.",

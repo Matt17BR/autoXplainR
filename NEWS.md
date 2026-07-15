@@ -14,6 +14,9 @@
 - Added evaluation-row predictions, regression error diagnostics,
   classification confusion matrices, Brier scores, and actionable warnings for
   sample-size and baseline-performance failure modes.
+- The guided workflow now rejects unsupported or non-finite inputs, removes and
+  records constant predictors, and reapplies its fitted preprocessing recipe to
+  raw evaluation data supplied later.
 - Repositioned the model-agnostic explanation evidence audit as an advanced
   reliability layer behind the beginner workflow.
 - Added `explain_model()` with a validated prediction contract for regression,

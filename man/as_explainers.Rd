@@ -9,7 +9,8 @@ as_explainers(x, data = NULL, models = NULL)
 \arguments{
 \item{x}{An \code{autoxplain_result}.}
 
-\item{data}{Evaluation data. Defaults to held-out \code{test_data} when available,
+\item{data}{Optional raw evaluation data. The fitted preprocessing recipe is
+applied automatically. Defaults to held-out \code{test_data} when available,
 otherwise training data.}
 
 \item{models}{Model indices, IDs, or \code{NULL} for all retained models.}
