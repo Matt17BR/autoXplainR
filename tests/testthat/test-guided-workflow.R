@@ -36,13 +36,17 @@ test_that("guided binary evaluation is stratified and probability-aware", {
 
   expect_equal(result$task, "binary")
   expect_setequal(unique(result$test_data$clicked), levels(result$training_data$clicked))
-  expect_true(all(c("log_loss", "brier_score", "accuracy", "balanced_accuracy", "roc_auc") %in%
-                    names(result$evaluation$metrics$main_model)))
+  expect_true(all(c(
+    "log_loss", "brier_score", "calibration_error", "accuracy",
+    "balanced_accuracy", "roc_auc"
+  ) %in% names(result$evaluation$metrics$main_model)))
   expect_true(result$evaluation$metrics$main_model[["roc_auc"]] > 0.8)
   expect_true(all(result$evaluation$predictions$primary_probability >= 0 &
                     result$evaluation$predictions$primary_probability <= 1))
   expect_true(all(c("observed", "predicted", "rows") %in%
                     names(result$evaluation$diagnostics$confusion_matrix)))
+  expect_true(all(c("calibration_error", "groups") %in%
+                    names(result$evaluation$diagnostics$calibration)))
   expect_equal(result$provenance$split_method, "reproducible stratified holdout")
   explainers <- as_explainers(result, models = "main_model")
   expect_s3_class(explainers$main_model, "autoxplain_explainer")
@@ -58,8 +62,9 @@ test_that("guided multiclass evaluation returns normalized class probabilities",
   expect_equal(result$task, "multiclass")
   expect_equal(ncol(probability), 3L)
   expect_equal(unname(rowSums(probability)), rep(1, nrow(probability)), tolerance = 1e-7)
-  expect_true(all(c("log_loss", "brier_score", "accuracy", "macro_recall") %in%
-                    names(result$evaluation$metrics$main_model)))
+  expect_true(all(c(
+    "log_loss", "brier_score", "calibration_error", "accuracy", "macro_recall"
+  ) %in% names(result$evaluation$metrics$main_model)))
   expect_true(all(result$evaluation$predictions$primary_confidence >= 0 &
                     result$evaluation$predictions$primary_confidence <= 1))
 })

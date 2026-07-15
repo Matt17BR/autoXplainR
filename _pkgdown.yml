@@ -17,6 +17,7 @@ reference:
     contents:
       - autoxplain
       - as_explainers
+      - calibration_diagnostics
       - render_model_report
       - generate_dashboard
       - create_simple_dashboard

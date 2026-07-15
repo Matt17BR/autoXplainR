@@ -134,7 +134,10 @@ resolve_tradeoff_metric <- function(leaderboard, metric, task, kind) {
     if (task == "regression") {
       c("rmse", "mae", "mse", "r_squared")
     } else {
-      c("log_loss", "logloss", "mean_per_class_error", "brier_score", "accuracy", "auc")
+      c(
+        "log_loss", "logloss", "mean_per_class_error", "brier_score",
+        "calibration_error", "accuracy", "auc"
+      )
     }
   } else {
     c(

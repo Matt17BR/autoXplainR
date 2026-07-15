@@ -213,9 +213,23 @@ flowers$evaluation$metric_definitions
 ```
 
 Classification splits are stratified. Binary tasks report log loss, Brier
-score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks report log
-loss, Brier score, accuracy, and macro recall. Log loss is primary because it
-evaluates probability quality and penalizes confident wrong predictions.
+score, a binned calibration gap, accuracy, balanced accuracy, and ROC AUC.
+Multiclass tasks report log loss, Brier score, predicted-class calibration,
+accuracy, and macro recall. Log loss is primary because it evaluates
+probability quality and penalizes confident wrong predictions.
+
+Calibration asks a more literal question: when the model reports a probability
+near 70%, does the corresponding event happen about 70% of the time on the
+held-out rows? The report explains this visually, and the grouped values remain
+available directly:
+
+```{r calibration}
+calibration_diagnostics(flowers)
+```
+
+The binned gap is descriptive. It changes with the evaluation sample and the
+grouping, so it should be read beside log loss and Brier score rather than as a
+population guarantee.
 
 ## Bring an existing model
 

@@ -499,10 +499,20 @@ evaluate_candidates <- function(models,
     started <- proc.time()[["elapsed"]]
     predictions <- predict(explainer, explainer$data)
     prediction_time_ms <- max(0, 1000 * (proc.time()[["elapsed"]] - started))
+    calibration <- if (identical(task, "regression")) {
+      NULL
+    } else {
+      calibration_from_explainer(explainer, predicted = predictions)
+    }
+    metrics <- evaluate_predictions(explainer$y, predictions, explainer)
+    if (!is.null(calibration)) {
+      metrics <- c(metrics, calibration_error = calibration$calibration_error)
+    }
     list(
-      metrics = evaluate_predictions(explainer$y, predictions, explainer),
+      metrics = metrics,
       predictions = predictions,
       prediction_time_ms = prediction_time_ms,
+      calibration = calibration,
       explainer = explainer
     )
   })
@@ -673,7 +683,15 @@ guided_prediction_diagnostics <- function(evaluated, task) {
     stringsAsFactors = FALSE
   )
   names(confusion)[[3L]] <- "rows"
-  list(confusion_matrix = confusion)
+  reference_id <- if ("main_model" %in% names(evaluated)) {
+    "main_model"
+  } else {
+    names(evaluated)[[1L]]
+  }
+  list(
+    confusion_matrix = confusion,
+    calibration = evaluated[[reference_id]]$calibration
+  )
 }
 
 guided_evaluation_notes <- function(training,
@@ -788,6 +806,10 @@ metric_definitions <- function(task) {
   definitions <- c(
     log_loss = "Probability error that penalizes confident wrong answers; lower is better.",
     brier_score = "Average squared probability error; lower is better.",
+    calibration_error = paste(
+      "Average absolute gap between grouped probabilities and observed frequencies;",
+      "lower is better, but the value depends on the evaluation sample and grouping."
+    ),
     accuracy = "Share of held-out rows assigned to the correct class; higher is better."
   )
   if (task == "binary") {

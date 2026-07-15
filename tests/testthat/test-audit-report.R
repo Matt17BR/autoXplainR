@@ -111,6 +111,8 @@ test_that("guided reports support classification effect targets", {
   expect_match(html, "multiclass", fixed = TRUE)
   expect_match(html, "probability for class", fixed = TRUE)
   expect_match(html, "Which classes were confused?", fixed = TRUE)
+  expect_match(html, "Can the reported probabilities be taken literally?", fixed = TRUE)
+  expect_match(html, "Binned calibration gap", fixed = TRUE)
   expect_error(render_model_report(result, tempfile(fileext = ".txt")), "html")
 })
 

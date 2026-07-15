@@ -242,10 +242,10 @@ tradeoff_svg <- function(tradeoffs) {
     "\" y2=\"", height - bottom, "\" class=\"chart-axis\"/>",
     "<text x=\"", (left + width - right) / 2, "\" y=\"", height - 18,
     "\" class=\"axis-label\">lower ", html_escape(pretty_complexity(complexity_metric)),
-    " →</text><text x=\"18\" y=\"", (top + height - bottom) / 2,
+    " &rarr;</text><text x=\"18\" y=\"", (top + height - bottom) / 2,
     "\" transform=\"rotate(-90 18 ", (top + height - bottom) / 2,
     ")\" class=\"axis-label\">better ",
-    html_escape(pretty_metric(performance_metric)), " →</text>",
+    html_escape(pretty_metric(performance_metric)), " &rarr;</text>",
     line, paste(points, collapse = ""), "</svg>"
   )
 }
@@ -316,7 +316,8 @@ guided_leaderboard_table <- function(result) {
     result$evaluation$primary_metric %||% character(),
     definitions,
     "rmse", "mae", "r_squared", "log_loss", "brier_score", "accuracy",
-    "balanced_accuracy", "roc_auc", "macro_recall", "auc", "logloss"
+    "calibration_error", "balanced_accuracy", "roc_auc", "macro_recall", "auc",
+    "logloss"
   ))
   identity <- if ("model" %in% names(table)) "model" else "model_id"
   keep <- intersect(c("rank", identity, "role", preferred), names(table))
@@ -417,7 +418,54 @@ render_prediction_diagnostics <- function(result, diagnostics) {
   paste0(
     "<h3>Which classes were confused?</h3><p>Rows on the diagonal are correct predictions. ",
     "Off-diagonal rows show the specific mistakes.</p>",
-    html_table(diagnostics$confusion_matrix, digits = 0L)
+    html_table(diagnostics$confusion_matrix, digits = 0L),
+    render_calibration_diagnostic(result, diagnostics$calibration)
+  )
+}
+
+render_calibration_diagnostic <- function(result, calibration) {
+  if (is.null(calibration)) return("")
+  binary <- identical(result$task, "binary")
+  observed_label <- if (binary) "Observed positive rate" else "Observed accuracy"
+  probability_label <- if (binary) "Average predicted probability" else "Average confidence"
+  display <- calibration$groups[c(
+    "probability_group", "rows", "mean_probability", "observed_rate", "calibration_gap"
+  )]
+  names(display) <- c(
+    "Probability group", "Rows", probability_label, observed_label, "Absolute gap"
+  )
+  event <- if (binary) {
+    paste0(
+      "the model's probability for the positive class <strong>",
+      html_escape(calibration$positive_class), "</strong>"
+    )
+  } else {
+    "the confidence attached to the model's predicted class"
+  }
+  paste0(
+    "<h3>Can the reported probabilities be taken literally?</h3>",
+    "<p>Calibration compares ", event, " with how often that event occurred on held-out rows. ",
+    "For example, predictions near 70% are well calibrated when the event happens about 70% ",
+    "of the time in comparable evaluation groups.</p>",
+    "<div class=\"cards diagnostic-cards\">",
+    metric_card(
+      if (binary) "Average probability" else "Average confidence",
+      format_percent(calibration$mean_probability),
+      if (binary) "Mean positive-class probability" else "Mean predicted-class confidence"
+    ),
+    metric_card(
+      if (binary) "Observed positive rate" else "Observed accuracy",
+      format_percent(calibration$observed_rate),
+      "What actually happened on held-out rows"
+    ),
+    metric_card(
+      "Binned calibration gap", format_percent(calibration$calibration_error),
+      "Average absolute discrepancy; lower is better"
+    ),
+    "</div>", html_table(display, digits = 3L),
+    "<p class=\"microcopy\">This binned gap is descriptive and changes with the held-out ",
+    "sample and grouping. It is not an uncertainty interval or a guarantee for future data. ",
+    "Use log loss and Brier score alongside it.</p>"
   )
 }
 
@@ -434,6 +482,7 @@ pretty_metric <- function(metric) {
     rmse = "RMSE", mae = "MAE", r_squared = "R-squared",
     log_loss = "log loss", logloss = "log loss", accuracy = "accuracy",
     brier_score = "Brier score",
+    calibration_error = "binned calibration gap",
     balanced_accuracy = "balanced accuracy", roc_auc = "ROC AUC",
     macro_recall = "macro recall", auc = "ROC AUC"
   )
