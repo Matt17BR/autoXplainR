@@ -1,8 +1,9 @@
-#' Extract comparable AutoML model metadata
+#' Extract comparable model metadata
 #'
-#' Extracts stable, compact metadata from retained H2O models and joins it to
-#' the AutoML leaderboard. Native H2O variable importance is labelled as such;
-#' it is not substituted for model-agnostic permutation importance.
+#' Extracts stable, compact metadata from guided base models or retained H2O
+#' models and joins it to the leaderboard. Native H2O variable importance is
+#' labelled as such; it is not substituted for model-agnostic permutation
+#' importance.
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param include_hyperparams Include a compact set of configured parameters.
@@ -27,9 +28,12 @@ extract_model_characteristics <- function(autoxplain_result,
   output <- lapply(seq_along(models), function(index) {
     model <- models[[index]]
     id <- names(models)[[index]]
-    algorithm <- tryCatch(as.character(model@algorithm), error = function(error) {
-      extract_model_type(id)
-    })
+    h2o_model <- inherits(model, "H2OModel")
+    algorithm <- if (h2o_model) {
+      tryCatch(as.character(model@algorithm), error = function(error) extract_model_type(id))
+    } else {
+      friendly_model_type(model)
+    }
     row <- leaderboard[match(id, leaderboard$model_id), , drop = FALSE]
     numeric_metrics <- if (nrow(row)) {
       row[vapply(row, is.numeric, logical(1))]
@@ -40,10 +44,17 @@ extract_model_characteristics <- function(autoxplain_result,
       rank = index,
       model_id = id,
       algorithm = algorithm,
-      training_time_s = tryCatch(as.numeric(model@model$run_time) / 1000,
-                                 error = function(error) NA_real_),
-      size_bytes = tryCatch(as.numeric(model@model$output$model_size_in_bytes),
-                            error = function(error) NA_real_)
+      training_time_s = if (h2o_model) {
+        tryCatch(as.numeric(model@model$run_time) / 1000, error = function(error) NA_real_)
+      } else {
+        NA_real_
+      },
+      size_bytes = if (h2o_model) {
+        tryCatch(as.numeric(model@model$output$model_size_in_bytes),
+                 error = function(error) NA_real_)
+      } else {
+        as.numeric(utils::object.size(model))
+      }
     )
     info$size_mb <- info$size_bytes / 1024^2
     if (include_performance) {
@@ -54,18 +65,27 @@ extract_model_characteristics <- function(autoxplain_result,
       }
     }
     if (include_hyperparams) {
-      parameters <- tryCatch(model@allparameters, error = function(error) list())
-      info$hyperparameters <- compact_hyperparameters(parameters, algorithm)
+      info$hyperparameters <- if (h2o_model) {
+        parameters <- tryCatch(model@allparameters, error = function(error) list())
+        compact_hyperparameters(parameters, algorithm)
+      } else {
+        base_model_hyperparameters(model)
+      }
     }
     if (include_varimp) {
-      info$native_variable_importance <- tryCatch({
-        require_optional("h2o", "extracting native H2O variable importance")
-        value <- h2o::h2o.varimp(model, use_pandas = FALSE)
-        if (is.null(value)) NULL else head(as.data.frame(value), 10L)
-      }, error = function(error) NULL)
+      info$native_variable_importance <- if (h2o_model) {
+        tryCatch({
+          require_optional("h2o", "extracting native H2O variable importance")
+          value <- h2o::h2o.varimp(model, use_pandas = FALSE)
+          if (is.null(value)) NULL else head(as.data.frame(value), 10L)
+        }, error = function(error) NULL)
+      } else {
+        NULL
+      }
     }
     info
   })
+  names(output) <- names(models)
   total_time <- sum(vapply(output, function(x) x$training_time_s, numeric(1)), na.rm = TRUE)
   attr(output, "summary") <- list(
     total_models = length(output),
@@ -79,6 +99,24 @@ extract_model_characteristics <- function(autoxplain_result,
     )
   )
   class(output) <- c("autoxplainr_model_characteristics", "list")
+  output
+}
+
+friendly_model_type <- function(model) {
+  if (inherits(model, "glm") && !is.null(model$family) && model$family$family == "binomial") {
+    return("logistic regression")
+  }
+  if (inherits(model, "lm")) return("linear regression")
+  if (inherits(model, "multinom")) return("multinomial logistic regression")
+  paste(class(model), collapse = "/")
+}
+
+base_model_hyperparameters <- function(model) {
+  formula <- tryCatch(paste(deparse(stats::formula(model)), collapse = " "),
+                      error = function(error) NA_character_)
+  output <- list(formula = formula)
+  if (inherits(model, "glm")) output$family <- model$family$family
+  if (inherits(model, "multinom")) output$decay <- model$decay %||% 0
   output
 }
 

@@ -67,6 +67,7 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
   expect_match(html, "Guided model report", fixed = TRUE)
   expect_match(html, "The modeling question", fixed = TRUE)
   expect_match(html, "Did the model generalize?", fixed = TRUE)
+  expect_match(html, "How large were individual errors?", fixed = TRUE)
   expect_match(html, "Patterns used for prediction", fixed = TRUE)
   expect_match(html, "What this analysis does not establish", fixed = TRUE)
   expect_match(html, "Understanding &lt;y&gt;", fixed = TRUE)
@@ -94,6 +95,7 @@ test_that("dashboard compatibility entry point produces the guided report", {
   expect_match(html, "Plain-language memo", fixed = TRUE)
   expect_match(html, "Provider used: local", fixed = TRUE)
   expect_match(html, "simple baseline", ignore.case = TRUE)
+  expect_match(html, "Important context for these scores", fixed = TRUE)
   expect_error(
     generate_dashboard(result, tempfile(fileext = ".html"), narrative_args = list("bad")),
     "named list"
@@ -108,5 +110,41 @@ test_that("guided reports support classification effect targets", {
 
   expect_match(html, "multiclass", fixed = TRUE)
   expect_match(html, "probability for class", fixed = TRUE)
+  expect_match(html, "Which classes were confused?", fixed = TRUE)
   expect_error(render_model_report(result, tempfile(fileext = ".txt")), "html")
+})
+
+test_that("legacy dashboard helpers remain functional compatibility layers", {
+  set.seed(33)
+  data <- data.frame(x = rnorm(100), z = rnorm(100))
+  data$y <- 2 * data$x + rnorm(100, sd = 0.5)
+  result <- autoxplain(data, "y", seed = 33)
+  prepared <- AutoXplainR:::prepare_dashboard_data(
+    result,
+    top_features = 2,
+    n_repeats = 2,
+    max_models = 2
+  )
+
+  expect_s3_class(prepared$audit, "autoxplain_audit")
+  expect_length(prepared$importance_list, 2L)
+  expect_length(prepared$pdp_data, 2L)
+  expect_match(prepared$correlation_insights_html, "supplied models only")
+
+  one_model <- result
+  one_model$models <- one_model$models["main_model"]
+  expect_match(
+    AutoXplainR:::calculate_correlation_insights(one_model),
+    "One model supplied"
+  )
+  expect_warning(
+    retired <- AutoXplainR:::create_dashboard_rmd(list()),
+    "retired"
+  )
+  expect_match(paste(retired, collapse = "\n"), "Retired AutoXplainR")
+  expect_match(
+    AutoXplainR:::create_simple_html(autoxplain_result = result),
+    "<!doctype html>",
+    fixed = TRUE
+  )
 })

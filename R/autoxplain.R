@@ -15,16 +15,18 @@
 #'
 #' @param data Training data frame.
 #' @param target_column Name of the outcome column.
-#' @param max_models Maximum number of base models.
-#' @param max_runtime_secs Overall training time budget in seconds.
-#' @param seed Reproducible H2O seed.
+#' @param max_models Maximum number of H2O base models; ignored by the guided
+#'   base engine, which fits one primary model and one simple baseline.
+#' @param max_runtime_secs H2O training time budget in seconds; ignored by the
+#'   guided base engine.
+#' @param seed Reproducible split, fitting, and H2O seed.
 #' @param test_data Optional held-out evaluation data. It is not used as an H2O
 #'   validation frame unless `use_test_as_validation = TRUE`.
 #' @param test_fraction Fraction of `data` reserved for evaluation when
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
 #'   resolves to the dependency-free `"base"` workflow.
-#' @param enable_preprocessing Apply [preprocess_for_h2o()].
+#' @param enable_preprocessing Apply [preprocess_data()].
 #' @param preprocessing_config Named overrides for preprocessing. Identifier
 #'   removal defaults to `FALSE`.
 #' @param task One of `"auto"`, `"regression"`, `"binary"`, or
@@ -129,7 +131,7 @@ autoxplain <- function(data,
   )
 
   train_processed <- if (enable_preprocessing) {
-    do.call(preprocess_for_h2o, c(list(data = data, target_column = target_column), config))
+    do.call(preprocess_data, c(list(data = data, target_column = target_column), config))
   } else {
     list(data = data, preprocessing_log = list(), original_info = data_info(data),
          final_info = data_info(data), recipe = list())

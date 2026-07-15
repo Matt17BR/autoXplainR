@@ -2,62 +2,21 @@
 % Please edit documentation in R/data_preprocessing.R
 \name{preprocess_for_h2o}
 \alias{preprocess_for_h2o}
-\title{Prepare a data frame for H2O with an auditable recipe}
+\title{Prepare a data frame for the H2O adapter}
 \usage{
-preprocess_for_h2o(
-  data,
-  target_column,
-  enable_target_handling = TRUE,
-  enable_character_to_factors = TRUE,
-  enable_ordered_factors = FALSE,
-  enable_ordinal_factors = FALSE,
-  enable_id_removal = FALSE,
-  missing_value_strategy = "keep",
-  missing_column_threshold = 0.5,
-  verbose = FALSE,
-  handle_missing = NULL,
-  convert_characters = NULL,
-  remove_id_columns = NULL
-)
+preprocess_for_h2o(data, target_column, ...)
 }
 \arguments{
 \item{data}{Data frame to prepare.}
 
 \item{target_column}{Outcome column name.}
 
-\item{enable_target_handling}{Convert a character outcome to a factor.}
-
-\item{enable_character_to_factors}{Convert character predictors to factors.}
-
-\item{enable_ordered_factors}{Convert explicitly ordered predictors to their
-integer scores. Defaults to \code{FALSE} because spacing may not be meaningful.}
-
-\item{enable_ordinal_factors}{Convert factors whose levels are integer-like
-strings to numeric. Defaults to \code{FALSE}.}
-
-\item{enable_id_removal}{Remove columns with identifier-like names. Defaults
-to \code{FALSE}; unique values alone never trigger removal.}
-
-\item{missing_value_strategy}{One of \code{"keep"}, \code{"drop_rows"},
-\code{"drop_columns"}, or \code{"impute"}. Legacy names \code{"remove_rows"} and
-\code{"remove_columns"} are accepted.}
-
-\item{missing_column_threshold}{Fraction missing above which \code{drop_columns}
-removes a predictor.}
-
-\item{verbose}{Emit concise progress messages.}
-
-\item{handle_missing, convert_characters, remove_id_columns}{Deprecated logical
-aliases retained for compatibility.}
+\item{...}{Additional preprocessing controls passed to \code{\link[=preprocess_data]{preprocess_data()}}.}
 }
 \value{
-A list containing \code{data}, a structured \code{preprocessing_log}, data
-summaries, and a reusable \code{recipe}.
+The same auditable preprocessing result as \code{\link[=preprocess_data]{preprocess_data()}}.
 }
 \description{
-Performs conservative type normalization and missing-value handling. The
-fitted recipe is returned and can be applied to evaluation data with the same
-factor levels and imputation values. Identifier removal and ordinal coercion
-are opt-in because guessing either can silently change the scientific
-question.
+Compatibility alias for \code{\link[=preprocess_data]{preprocess_data()}}. New code should use the
+engine-neutral name.
 }

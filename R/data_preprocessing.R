@@ -1,4 +1,4 @@
-#' Prepare a data frame for H2O with an auditable recipe
+#' Prepare modeling data with an auditable recipe
 #'
 #' Performs conservative type normalization and missing-value handling. The
 #' fitted recipe is returned and can be applied to evaluation data with the same
@@ -28,19 +28,19 @@
 #' @return A list containing `data`, a structured `preprocessing_log`, data
 #'   summaries, and a reusable `recipe`.
 #' @export
-preprocess_for_h2o <- function(data,
-                               target_column,
-                               enable_target_handling = TRUE,
-                               enable_character_to_factors = TRUE,
-                               enable_ordered_factors = FALSE,
-                               enable_ordinal_factors = FALSE,
-                               enable_id_removal = FALSE,
-                               missing_value_strategy = "keep",
-                               missing_column_threshold = 0.5,
-                               verbose = FALSE,
-                               handle_missing = NULL,
-                               convert_characters = NULL,
-                               remove_id_columns = NULL) {
+preprocess_data <- function(data,
+                            target_column,
+                            enable_target_handling = TRUE,
+                            enable_character_to_factors = TRUE,
+                            enable_ordered_factors = FALSE,
+                            enable_ordinal_factors = FALSE,
+                            enable_id_removal = FALSE,
+                            missing_value_strategy = "keep",
+                            missing_column_threshold = 0.5,
+                            verbose = FALSE,
+                            handle_missing = NULL,
+                            convert_characters = NULL,
+                            remove_id_columns = NULL) {
   assert_data_frame(data, "data")
   if (!is.character(target_column) || length(target_column) != 1L ||
         !target_column %in% names(data)) {
@@ -136,6 +136,20 @@ preprocess_for_h2o <- function(data,
   class(result) <- c("autoxplain_preprocessing", "list")
   preprocessing_message(verbose, "Preprocessing complete: ", nrow(data), " rows x ", ncol(data), " columns.")
   result
+}
+
+#' Prepare a data frame for the H2O adapter
+#'
+#' Compatibility alias for [preprocess_data()]. New code should use the
+#' engine-neutral name.
+#'
+#' @inheritParams preprocess_data
+#' @param ... Additional preprocessing controls passed to [preprocess_data()].
+#'
+#' @return The same auditable preprocessing result as [preprocess_data()].
+#' @export
+preprocess_for_h2o <- function(data, target_column, ...) {
+  preprocess_data(data, target_column, ...)
 }
 
 apply_preprocessing_recipe <- function(data,

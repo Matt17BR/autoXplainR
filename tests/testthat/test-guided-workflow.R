@@ -18,6 +18,10 @@ test_that("guided regression uses a reproducible untouched holdout", {
   expect_true(first$evaluation$beats_baseline)
   expect_lt(first$evaluation$metrics$main_model[["rmse"]], 0.5)
   expect_match(first$evaluation$metric_definitions[["rmse"]], "lower is better")
+  expect_true(all(c("observed", "primary_prediction", "error", "absolute_error") %in%
+                    names(first$evaluation$predictions)))
+  expect_true(all(c("mean_error", "median_absolute_error", "p90_absolute_error") %in%
+                    names(first$evaluation$diagnostics)))
   expect_output(print(first), "improvement")
   expect_named(summary(first), c(
     "task", "target", "n_models", "n_features", "leaderboard", "evaluation", "provenance"
@@ -32,9 +36,13 @@ test_that("guided binary evaluation is stratified and probability-aware", {
 
   expect_equal(result$task, "binary")
   expect_setequal(unique(result$test_data$clicked), levels(result$training_data$clicked))
-  expect_true(all(c("log_loss", "accuracy", "balanced_accuracy", "roc_auc") %in%
+  expect_true(all(c("log_loss", "brier_score", "accuracy", "balanced_accuracy", "roc_auc") %in%
                     names(result$evaluation$metrics$main_model)))
   expect_true(result$evaluation$metrics$main_model[["roc_auc"]] > 0.8)
+  expect_true(all(result$evaluation$predictions$primary_probability >= 0 &
+                    result$evaluation$predictions$primary_probability <= 1))
+  expect_true(all(c("observed", "predicted", "rows") %in%
+                    names(result$evaluation$diagnostics$confusion_matrix)))
   expect_equal(result$provenance$split_method, "reproducible stratified holdout")
   explainers <- as_explainers(result, models = "main_model")
   expect_s3_class(explainers$main_model, "autoxplain_explainer")
@@ -50,8 +58,10 @@ test_that("guided multiclass evaluation returns normalized class probabilities",
   expect_equal(result$task, "multiclass")
   expect_equal(ncol(probability), 3L)
   expect_equal(unname(rowSums(probability)), rep(1, nrow(probability)), tolerance = 1e-7)
-  expect_true(all(c("log_loss", "accuracy", "macro_recall") %in%
+  expect_true(all(c("log_loss", "brier_score", "accuracy", "macro_recall") %in%
                     names(result$evaluation$metrics$main_model)))
+  expect_true(all(result$evaluation$predictions$primary_confidence >= 0 &
+                    result$evaluation$predictions$primary_confidence <= 1))
 })
 
 test_that("preprocessing learns imputations only from training data", {
@@ -110,4 +120,36 @@ test_that("guided workflow reports actionable input errors", {
 test_that("binary AUC handles ties and single-class evaluation", {
   expect_equal(AutoXplainR:::guided_binary_auc(c(FALSE, TRUE), c(0.5, 0.5)), 0.5)
   expect_true(is.na(AutoXplainR:::guided_binary_auc(c(TRUE, TRUE), c(0.2, 0.8))))
+})
+
+test_that("guided evaluation flags fragile score contexts", {
+  result <- autoxplain(mtcars, "mpg", seed = 10)
+  expect_true(all(c("small_evaluation_set", "few_rows_per_feature") %in%
+                    result$evaluation$notes$code))
+
+  set.seed(4)
+  data <- data.frame(x = rnorm(100), y = factor(c(rep("rare", 5), rep("common", 95))))
+  classification <- autoxplain(data, "y", test_fraction = 0.2, seed = 4)
+  expect_true("few_rows_in_class" %in% classification$evaluation$notes$code)
+
+  training <- data.frame(x = seq_len(500), y = seq_len(500))
+  evaluation <- data.frame(x = seq_len(100), y = seq_len(100))
+  poor_summary <- list(
+    beats_baseline = FALSE,
+    metrics = list(main_model = c(r_squared = -0.2))
+  )
+  poor_notes <- AutoXplainR:::guided_evaluation_notes(
+    training, evaluation, "y", "regression", poor_summary
+  )
+  expect_true(all(c("baseline_not_beaten", "negative_heldout_r_squared") %in%
+                    poor_notes$code))
+
+  good_summary <- list(
+    beats_baseline = TRUE,
+    metrics = list(main_model = c(r_squared = 0.8))
+  )
+  good_notes <- AutoXplainR:::guided_evaluation_notes(
+    training, evaluation, "y", "regression", good_summary
+  )
+  expect_equal(nrow(good_notes), 0L)
 })

@@ -72,8 +72,15 @@ fit_guided_base <- function(data,
     fit$labels,
     fit$roles
   )
+  evaluated$summary$notes <- guided_evaluation_notes(
+    train,
+    evaluation_data,
+    target_column,
+    resolved_task,
+    evaluated$summary
+  )
 
-  structure(
+  result <- structure(
     list(
       engine = "base",
       models = fit$models,
@@ -107,6 +114,11 @@ fit_guided_base <- function(data,
     ),
     class = "autoxplain_result"
   )
+  result$model_characteristics <- extract_model_characteristics(
+    result,
+    include_varimp = FALSE
+  )
+  result
 }
 
 make_evaluation_split <- function(data, target, task, fraction, seed) {
@@ -185,7 +197,7 @@ preprocess_guided_split <- function(training,
                                     config) {
   if (enabled) {
     fitted <- do.call(
-      preprocess_for_h2o,
+      preprocess_data,
       c(list(data = training, target_column = target), config)
     )
     applied <- apply_preprocessing_recipe(
@@ -288,12 +300,17 @@ fit_base_candidates <- function(data, target, features, task) {
 }
 
 evaluate_candidates <- function(models, data, target, task, labels, roles) {
-  metrics <- lapply(names(models), function(id) {
+  evaluated <- lapply(names(models), function(id) {
     explainer <- explain_model(models[[id]], data, target, task = task, label = labels[[id]])
     predictions <- predict(explainer, explainer$data)
-    evaluate_predictions(explainer$y, predictions, explainer)
+    list(
+      metrics = evaluate_predictions(explainer$y, predictions, explainer),
+      predictions = predictions,
+      explainer = explainer
+    )
   })
-  names(metrics) <- names(models)
+  names(evaluated) <- names(models)
+  metrics <- lapply(evaluated, `[[`, "metrics")
   primary_metric <- if (task == "regression") "rmse" else "log_loss"
   scores <- vapply(metrics, function(x) x[[primary_metric]], numeric(1))
   winner <- names(which.min(scores))[[1L]]
@@ -330,7 +347,9 @@ evaluate_candidates <- function(models, data, target, task, labels, roles) {
       improvement_over_baseline = improvement,
       beats_baseline = is.finite(improvement) && improvement > 0,
       metric_definitions = metric_definitions(task),
-      evaluated_rows = nrow(data)
+      evaluated_rows = nrow(data),
+      predictions = guided_prediction_table(evaluated, task),
+      diagnostics = guided_prediction_diagnostics(evaluated, task)
     )
   )
 }
@@ -353,6 +372,7 @@ evaluate_predictions <- function(observed, predicted, explainer) {
     specificity <- if (any(!truth)) mean(!hard[!truth]) else NA_real_
     return(c(
       log_loss = -mean(ifelse(truth, log(probability), log1p(-probability))),
+      brier_score = mean((probability - as.numeric(truth))^2),
       accuracy = mean(hard == truth),
       balanced_accuracy = mean(c(sensitivity, specificity), na.rm = TRUE),
       roc_auc = guided_binary_auc(truth, probability)
@@ -362,15 +382,151 @@ evaluate_predictions <- function(observed, predicted, explainer) {
   truth <- as.character(observed)
   selected <- probability[cbind(seq_along(truth), match(truth, explainer$class_levels))]
   predicted_class <- explainer$class_levels[max.col(probability, ties.method = "first")]
+  one_hot <- matrix(0, nrow(probability), ncol(probability))
+  one_hot[cbind(seq_along(truth), match(truth, explainer$class_levels))] <- 1
   recalls <- vapply(explainer$class_levels, function(level) {
     rows <- truth == level
     if (any(rows)) mean(predicted_class[rows] == level) else NA_real_
   }, numeric(1))
   c(
     log_loss = -mean(log(pmax(selected, 1e-15))),
+    brier_score = mean(rowSums((probability - one_hot)^2)),
     accuracy = mean(predicted_class == truth),
     macro_recall = mean(recalls, na.rm = TRUE)
   )
+}
+
+guided_prediction_table <- function(evaluated, task) {
+  reference_id <- if ("main_model" %in% names(evaluated)) "main_model" else names(evaluated)[[1L]]
+  reference <- evaluated[[reference_id]]
+  baseline <- evaluated[["simple_baseline"]]
+  observed <- reference$explainer$y
+  output <- data.frame(
+    evaluation_row = seq_along(observed),
+    observed = if (task == "regression") as.numeric(observed) else as.character(observed),
+    stringsAsFactors = FALSE
+  )
+  if (task == "regression") {
+    output$primary_prediction <- as.numeric(reference$predictions)
+    output$baseline_prediction <- if (is.null(baseline)) {
+      NA_real_
+    } else {
+      as.numeric(baseline$predictions)
+    }
+    output$error <- output$observed - output$primary_prediction
+    output$absolute_error <- abs(output$error)
+    return(output)
+  }
+  levels <- reference$explainer$class_levels
+  if (task == "binary") {
+    positive <- reference$explainer$positive
+    negative <- setdiff(levels, positive)[[1L]]
+    probability <- as.numeric(reference$predictions)
+    output$primary_probability <- probability
+    output$primary_prediction <- ifelse(probability >= 0.5, positive, negative)
+    output$baseline_probability <- if (is.null(baseline)) {
+      NA_real_
+    } else {
+      as.numeric(baseline$predictions)
+    }
+  } else {
+    probability <- as.matrix(reference$predictions)[, levels, drop = FALSE]
+    output$primary_prediction <- levels[max.col(probability, ties.method = "first")]
+    output$primary_confidence <- apply(probability, 1L, max)
+    if (!is.null(baseline)) {
+      baseline_probability <- as.matrix(baseline$predictions)[, levels, drop = FALSE]
+      output$baseline_prediction <- levels[max.col(baseline_probability, ties.method = "first")]
+    }
+  }
+  output$correct <- output$observed == output$primary_prediction
+  output
+}
+
+guided_prediction_diagnostics <- function(evaluated, task) {
+  predictions <- guided_prediction_table(evaluated, task)
+  if (task == "regression") {
+    return(list(
+      mean_error = mean(predictions$error),
+      median_absolute_error = stats::median(predictions$absolute_error),
+      p90_absolute_error = as.numeric(stats::quantile(
+        predictions$absolute_error,
+        0.9,
+        names = FALSE
+      ))
+    ))
+  }
+  confusion <- as.data.frame(
+    table(observed = predictions$observed, predicted = predictions$primary_prediction),
+    stringsAsFactors = FALSE
+  )
+  names(confusion)[[3L]] <- "rows"
+  list(confusion_matrix = confusion)
+}
+
+guided_evaluation_notes <- function(training, evaluation, target, task, summary) {
+  notes <- list()
+  add <- function(severity, code, message, recommendation) {
+    notes[[length(notes) + 1L]] <<- data.frame(
+      severity = severity,
+      code = code,
+      message = message,
+      recommendation = recommendation,
+      stringsAsFactors = FALSE
+    )
+  }
+  if (nrow(evaluation) < 50L) {
+    add(
+      "caution",
+      "small_evaluation_set",
+      paste0("Only ", nrow(evaluation), " rows were available for held-out evaluation."),
+      "Treat the scores as preliminary and validate on more representative unseen rows."
+    )
+  }
+  n_features <- ncol(training) - 1L
+  if (nrow(training) / max(1L, n_features) < 10) {
+    add(
+      "caution",
+      "few_rows_per_feature",
+      paste0(nrow(training), " training rows were used with ", n_features, " input features."),
+      "Use fewer justified features or more training data, and expect unstable coefficients."
+    )
+  }
+  if (task %in% c("binary", "multiclass")) {
+    counts <- table(evaluation[[target]])
+    if (any(counts < 5L)) {
+      scarce <- paste(names(counts)[counts < 5L], collapse = ", ")
+      add(
+        "caution",
+        "few_rows_in_class",
+        paste0("Fewer than five evaluation rows were observed for: ", scarce, "."),
+        "Collect more held-out examples for each class before trusting class-specific metrics."
+      )
+    }
+  }
+  if (identical(summary$beats_baseline, FALSE)) {
+    add(
+      "warning",
+      "baseline_not_beaten",
+      "The primary model did not improve on the intercept-only baseline.",
+      "Revisit data quality and model assumptions before interpreting fitted patterns as useful."
+    )
+  }
+  if (task == "regression" && is.finite(summary$metrics$main_model[["r_squared"]]) &&
+        summary$metrics$main_model[["r_squared"]] < 0) {
+    add(
+      "warning",
+      "negative_heldout_r_squared",
+      "Held-out R-squared is negative, so squared error exceeded a held-out-mean reference.",
+      "Do not rely on this model for prediction without substantially better validation performance."
+    )
+  }
+  if (!length(notes)) {
+    return(data.frame(
+      severity = character(), code = character(), message = character(),
+      recommendation = character(), stringsAsFactors = FALSE
+    ))
+  }
+  do.call(rbind, notes)
 }
 
 guided_binary_auc <- function(truth, score) {
@@ -391,6 +547,7 @@ metric_definitions <- function(task) {
   }
   definitions <- c(
     log_loss = "Probability error that penalizes confident wrong answers; lower is better.",
+    brier_score = "Average squared probability error; lower is better.",
     accuracy = "Share of held-out rows assigned to the correct class; higher is better."
   )
   if (task == "binary") {

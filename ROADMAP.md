@@ -9,12 +9,15 @@ ordered by user and scientific leverage, not novelty theatre.
 - [x] Guided base-R fitting and held-out evaluation with no Java requirement.
 - [x] Plain-language model report with progressive evidence disclosure.
 - [x] Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.
+- [x] Beginner evaluation diagnostics: error summaries, confusion tables,
+  probability scores, sample-size cautions, and baseline-failure warnings.
 - [x] Model-agnostic prediction contract and H2O boundary.
 - [x] Repeated grouped permutation importance with retained draws.
 - [x] ALE, diagnosed PDP, feature association, and support outputs.
 - [x] Supplied near-optimal-model explanation and prediction agreement.
 - [x] Evidence-first standalone report with provenance.
-- [x] Fast core tests, isolated H2O tests, CI, pkgdown, and project policy.
+- [x] Fast core tests, isolated H2O tests, enforced coverage, CI, pkgdown, and
+  project policy.
 
 ## 0.3 — validation and estimands
 

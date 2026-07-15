@@ -64,8 +64,9 @@ remaining approachable.
 ## Read the result before explaining it
 
 For regression, the main metrics are RMSE, MAE, and R-squared. For binary
-classification, they are log loss, accuracy, balanced accuracy, and ROC AUC.
-For multiclass classification, they are log loss, accuracy, and macro recall.
+classification, they are log loss, Brier score, accuracy, balanced accuracy,
+and ROC AUC. For multiclass classification, they are log loss, Brier score,
+accuracy, and macro recall.
 Every definition is stored with the result and displayed beside the score.
 
 ```r

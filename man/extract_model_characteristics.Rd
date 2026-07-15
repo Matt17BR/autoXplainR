@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_characterization.R
 \name{extract_model_characteristics}
 \alias{extract_model_characteristics}
-\title{Extract comparable AutoML model metadata}
+\title{Extract comparable model metadata}
 \usage{
 extract_model_characteristics(
   autoxplain_result,
@@ -24,7 +24,8 @@ extract_model_characteristics(
 A list of class \code{autoxplainr_model_characteristics}.
 }
 \description{
-Extracts stable, compact metadata from retained H2O models and joins it to
-the AutoML leaderboard. Native H2O variable importance is labelled as such;
-it is not substituted for model-agnostic permutation importance.
+Extracts stable, compact metadata from guided base models or retained H2O
+models and joins it to the leaderboard. Native H2O variable importance is
+labelled as such; it is not substituted for model-agnostic permutation
+importance.
 }

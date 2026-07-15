@@ -38,6 +38,7 @@ reference:
       - calculate_partial_dependence_multi
   - title: Fitting and preprocessing
     contents:
+      - preprocess_data
       - preprocess_for_h2o
   - title: Visualization and metadata
     contents:

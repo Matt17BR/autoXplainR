@@ -42,6 +42,8 @@ AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 - State whether intervals are Monte Carlo, bootstrap, or inferential.
 - Add NEWS and user documentation for visible changes.
 - Run `devtools::document()`, `devtools::test()`, and `devtools::check()`.
+- Keep measured statement coverage at or above the enforced 80% project floor;
+  new statistical branches should be covered substantially more deeply.
 - Keep optional packages behind `requireNamespace()` checks.
 
 All contributions are licensed under the project MIT license. Participation is

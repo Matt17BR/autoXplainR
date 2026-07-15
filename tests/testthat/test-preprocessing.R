@@ -1,8 +1,11 @@
 test_that("preprocessing is conservative by default", {
   data <- data.frame(id = 1:5, category = c("a", "b", "a", "b", "a"), y = 1:5)
-  result <- preprocess_for_h2o(data, "y")
+  result <- preprocess_data(data, "y")
   expect_true("id" %in% names(result$data))
   expect_true(is.factor(result$data$category))
+
+  compatibility_result <- preprocess_for_h2o(data, "y")
+  expect_equal(compatibility_result, result)
 
   removed <- preprocess_for_h2o(data, "y", enable_id_removal = TRUE)
   expect_false("id" %in% names(removed$data))

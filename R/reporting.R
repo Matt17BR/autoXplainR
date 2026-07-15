@@ -140,7 +140,9 @@ model_report_evaluation <- function(result, audit) {
       beats_baseline = evaluation$beats_baseline,
       definition = definition,
       rows = evaluation$evaluated_rows,
-      table = result$leaderboard
+      table = result$leaderboard,
+      notes = evaluation$notes,
+      diagnostics = evaluation$diagnostics
     ))
   }
   best <- which.min(audit$performance$relative_gap)[[1L]]
@@ -155,7 +157,9 @@ model_report_evaluation <- function(result, audit) {
     beats_baseline = NA,
     definition = definitions[[definition_key]] %||% "See the model-engine documentation.",
     rows = nrow(result$test_data %||% result$training_data),
-    table = result$leaderboard
+    table = result$leaderboard,
+    notes = NULL,
+    diagnostics = NULL
   )
 }
 
@@ -199,7 +203,7 @@ render_model_overview <- function(result, evaluation) {
                 "Positive means the primary error was lower"),
     metric_card("Held-out rows", as.character(evaluation$rows),
                 "Not used to fit the primary model"),
-    "</div></section>"
+    "</div>", render_guided_notes(evaluation$notes), "</section>"
   )
 }
 
@@ -211,7 +215,42 @@ render_model_evaluation <- function(result, evaluation) {
     ":</strong> ", html_escape(evaluation$definition), "</p>",
     "<p>The table reports every computed held-out metric. Compare models using the metric definitions, ",
     "not the rank column alone.</p>", html_table(evaluation$table, digits = 4L),
-    render_metric_definitions(result), "</section>"
+    render_metric_definitions(result), render_prediction_diagnostics(result, evaluation$diagnostics),
+    "</section>"
+  )
+}
+
+render_guided_notes <- function(notes) {
+  if (is.null(notes) || !nrow(notes)) return("")
+  items <- vapply(seq_len(nrow(notes)), function(index) {
+    paste0(
+      "<article class=\"guided-note guided-note-", html_escape(notes$severity[[index]]), "\">",
+      "<h3>", html_escape(notes$message[[index]]), "</h3><p><strong>Next step:</strong> ",
+      html_escape(notes$recommendation[[index]]), "</p></article>"
+    )
+  }, character(1))
+  paste0("<div class=\"guided-notes\"><h3>Important context for these scores</h3>",
+         paste(items, collapse = ""), "</div>")
+}
+
+render_prediction_diagnostics <- function(result, diagnostics) {
+  if (is.null(diagnostics)) return("")
+  if (result$task == "regression") {
+    return(paste0(
+      "<h3>How large were individual errors?</h3><div class=\"cards diagnostic-cards\">",
+      metric_card("Mean error", report_number(diagnostics$mean_error, 4L),
+                  "Observed minus predicted; near zero means little average bias"),
+      metric_card("Median absolute error", report_number(diagnostics$median_absolute_error, 4L),
+                  "Half of absolute errors were below this value"),
+      metric_card("90th-percentile error", report_number(diagnostics$p90_absolute_error, 4L),
+                  "Nine in ten absolute errors were below this value"),
+      "</div>"
+    ))
+  }
+  paste0(
+    "<h3>Which classes were confused?</h3><p>Rows on the diagonal are correct predictions. ",
+    "Off-diagonal rows show the specific mistakes.</p>",
+    html_table(diagnostics$confusion_matrix, digits = 0L)
   )
 }
 
@@ -227,10 +266,15 @@ pretty_metric <- function(metric) {
   labels <- c(
     rmse = "RMSE", mae = "MAE", r_squared = "R-squared",
     log_loss = "log loss", logloss = "log loss", accuracy = "accuracy",
+    brier_score = "Brier score",
     balanced_accuracy = "balanced accuracy", roc_auc = "ROC AUC",
     macro_recall = "macro recall", auc = "ROC AUC"
   )
-  unname(labels[[metric]] %||% gsub("_", " ", metric, fixed = TRUE))
+  if (metric %in% names(labels)) {
+    unname(labels[[metric]])
+  } else {
+    gsub("_", " ", metric, fixed = TRUE)
+  }
 }
 
 render_guided_narrative <- function(narrative) {
@@ -698,7 +742,7 @@ report_css <- function() {
     "h2{font-size:clamp(1.55rem,3vw,2.25rem);line-height:1.15;margin:7px 0 18px;letter-spacing:-.025em}h3{line-height:1.25}.section-head{display:flex;align-items:center;justify-content:space-between;gap:20px}",
     ".grade{display:grid;place-items:center;width:82px;height:82px;border-radius:22px;font-weight:900;font-size:2.2rem}.grade-a,.mini-grade.grade-a{background:var(--mint);color:var(--green)}",
     ".grade-b,.mini-grade.grade-b{background:#e7f0fc;color:var(--blue)}.grade-c,.mini-grade.grade-c{background:var(--amber-bg);color:var(--amber)}.grade-d,.mini-grade.grade-d{background:var(--red-bg);color:var(--red)}",
-    ".callout{background:#eef3ee;border-left:4px solid #628071;padding:14px 16px;border-radius:7px}.verdict{font-size:1.18rem;font-weight:750;background:#e8f5ed;border-left:5px solid var(--green);padding:18px 20px;border-radius:9px}.microcopy{color:var(--muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}",
+    ".callout{background:#eef3ee;border-left:4px solid #628071;padding:14px 16px;border-radius:7px}.verdict{font-size:1.18rem;font-weight:750;background:#e8f5ed;border-left:5px solid var(--green);padding:18px 20px;border-radius:9px}.microcopy{color:var(--muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.diagnostic-cards{grid-template-columns:repeat(3,1fr)}.guided-notes{margin-top:24px}.guided-note{border:1px solid #e3c783;border-left:5px solid #c77a0a;background:#fffaf0;border-radius:11px;padding:14px 18px;margin:10px 0}.guided-note h3{font-size:1rem;margin:0 0 6px}.guided-note p{margin:0;color:var(--muted)}.guided-note-warning{border-color:#e3a2a0;border-left-color:var(--red);background:#fff8f7}",
     ".metric{background:#f5f7f3;border:1px solid var(--line);border-radius:13px;padding:17px}.metric p{margin:0;color:var(--muted);font-weight:700;font-size:.83rem}.metric strong{display:block;font-size:1.8rem;margin:5px 0}.metric small{color:var(--muted)}",
     ".findings{display:grid;gap:12px}.finding{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:18px}.finding h3{margin:9px 0}.finding p{margin:7px 0}.finding-critical{border-left-color:var(--red);background:#fff9f8}.finding-warning{border-left-color:#d18718;background:#fffdf6}.finding-note{border-left-color:#5283b7;background:#f9fcff}",
     ".severity{text-transform:uppercase;font-size:.72rem;font-weight:900;letter-spacing:.08em;margin-right:9px}code{background:#edf1ec;border-radius:5px;padding:2px 6px;color:#415149}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px}table{border-collapse:collapse;width:100%;font-size:.9rem;background:#fff}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7ebe6;vertical-align:middle}thead th{background:#edf2ed;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}",

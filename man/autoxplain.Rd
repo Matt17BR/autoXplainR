@@ -32,11 +32,13 @@ autoxplain(
 
 \item{target_column}{Name of the outcome column.}
 
-\item{max_models}{Maximum number of base models.}
+\item{max_models}{Maximum number of H2O base models; ignored by the guided
+base engine, which fits one primary model and one simple baseline.}
 
-\item{max_runtime_secs}{Overall training time budget in seconds.}
+\item{max_runtime_secs}{H2O training time budget in seconds; ignored by the
+guided base engine.}
 
-\item{seed}{Reproducible H2O seed.}
+\item{seed}{Reproducible split, fitting, and H2O seed.}
 
 \item{test_data}{Optional held-out evaluation data. It is not used as an H2O
 validation frame unless \code{use_test_as_validation = TRUE}.}
@@ -47,7 +49,7 @@ validation frame unless \code{use_test_as_validation = TRUE}.}
 \item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
 resolves to the dependency-free \code{"base"} workflow.}
 
-\item{enable_preprocessing}{Apply \code{\link[=preprocess_for_h2o]{preprocess_for_h2o()}}.}
+\item{enable_preprocessing}{Apply \code{\link[=preprocess_data]{preprocess_data()}}.}
 
 \item{preprocessing_config}{Named overrides for preprocessing. Identifier
 removal defaults to \code{FALSE}.}

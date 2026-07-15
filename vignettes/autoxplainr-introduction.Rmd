@@ -179,10 +179,10 @@ flowers
 flowers$evaluation$metric_definitions
 ```
 
-Classification splits are stratified. Binary tasks report log loss, accuracy,
-balanced accuracy, and ROC AUC. Multiclass tasks report log loss, accuracy, and
-macro recall. Log loss is primary because it evaluates probability quality and
-penalizes confident wrong predictions.
+Classification splits are stratified. Binary tasks report log loss, Brier
+score, accuracy, balanced accuracy, and ROC AUC. Multiclass tasks report log
+loss, Brier score, accuracy, and macro recall. Log loss is primary because it
+evaluates probability quality and penalizes confident wrong predictions.
 
 ## Bring an existing model
 
