@@ -2,27 +2,31 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_permutation_importance}
 \alias{plot_permutation_importance}
-\title{Plot Permutation Feature Importance}
+\title{Plot permutation importance with uncertainty}
 \usage{
 plot_permutation_importance(
   importance_data,
-  title = "Permutation Feature Importance",
-  max_features = 15,
-  color = "#2E86AB"
+  title = "Permutation Importance Evidence",
+  max_features = 15L,
+  color = "#237a57",
+  negative_color = "#b24747"
 )
 }
 \arguments{
-\item{importance_data}{Data.frame from calculate_permutation_importance()}
+\item{importance_data}{Data frame returned by
+\code{\link[=calculate_permutation_importance]{calculate_permutation_importance()}}.}
 
-\item{title}{Character. Plot title (default: "Permutation Feature Importance")}
+\item{title}{Plot title.}
 
-\item{max_features}{Integer. Maximum number of features to display (default: 15)}
+\item{max_features}{Maximum features displayed.}
 
-\item{color}{Character. Bar color (default: "#2E86AB")}
+\item{color}{Positive-importance color.}
+
+\item{negative_color}{Negative-importance color.}
 }
 \value{
-A plotly object
+A Plotly htmlwidget.
 }
 \description{
-Creates an interactive bar chart showing feature importance scores.
+Plot permutation importance with uncertainty
 }

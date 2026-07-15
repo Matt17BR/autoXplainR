@@ -1,445 +1,292 @@
-#' Generate Natural Language Report using Google Generative AI
+#' Generate an evidence-constrained narrative
 #'
-#' Creates a natural language summary of AutoML results and explanations using
-#' Google's Gemini API with the gemma-3-27b-it model.
+#' Produces a deterministic local narrative by default, or sends only an
+#' aggregated analysis context to the Gemini API when an API key is supplied.
+#' Raw rows, model objects, and predictions are never included in the prompt.
+#' The generated text is explicitly secondary to the numeric audit.
 #'
-#' @param autoxplain_result Object from autoxplain() function
-#' @param importance_data Data.frame from calculate_permutation_importance() (optional)
-#' @param pdp_data List from calculate_partial_dependence_multi() (optional)
-#' @param model_characteristics List from extract_model_characteristics() (optional)
-#' @param api_key Character. Google Generative AI API key. If NULL, uses GEMINI_API_KEY environment variable
-#' @param model Character. Model to use (default: "gemma-3-27b-it")
-#' @param max_tokens Integer. Maximum tokens in response (default: 1000)
-#' @param temperature Numeric. Sampling temperature (default: 0.3)
-#' @return Character. Generated natural language report
+#' @param autoxplain_result An `autoxplain_result` or `autoxplain_audit`.
+#' @param importance_data Optional permutation importance data.
+#' @param pdp_data Optional feature-effect list.
+#' @param model_characteristics Optional model metadata.
+#' @param audit Optional `autoxplain_audit`.
+#' @param api_key Gemini API key. When `NULL`, `GEMINI_API_KEY` is consulted.
+#'   If no key is available, a local deterministic narrative is returned.
+#' @param model Gemini model identifier.
+#' @param max_tokens Maximum response tokens.
+#' @param temperature Sampling temperature.
+#' @param use_remote Whether remote generation is allowed. Set `FALSE` to
+#'   guarantee local-only operation.
+#' @param fallback Return the deterministic narrative when the remote call
+#'   fails.
+#'
+#' @return A single character string.
 #' @export
-#' @importFrom httr POST content add_headers timeout
-#' @importFrom jsonlite toJSON fromJSON
 generate_natural_language_report <- function(autoxplain_result,
-                                            importance_data = NULL,
-                                            pdp_data = NULL,
-                                            model_characteristics = NULL,
-                                            api_key = NULL,
-                                            model = "gemma-3-27b-it",
-                                            max_tokens = 1500,
-                                            temperature = 0.3) {
-  
-  # Input validation
-  if (!inherits(autoxplain_result, "autoxplain_result")) {
-    stop("autoxplain_result must be an object from autoxplain() function")
+                                             importance_data = NULL,
+                                             pdp_data = NULL,
+                                             model_characteristics = NULL,
+                                             audit = NULL,
+                                             api_key = NULL,
+                                             model = "gemini-3.5-flash",
+                                             max_tokens = 1000L,
+                                             temperature = 0.2,
+                                             use_remote = TRUE,
+                                             fallback = TRUE) {
+  max_tokens <- assert_count(max_tokens, "max_tokens")
+  if (length(temperature) != 1L || !is.numeric(temperature) || !is.finite(temperature) ||
+        temperature < 0 || temperature > 2) {
+    stop("`temperature` must be between 0 and 2.", call. = FALSE)
   }
-  
-  # Get API key
-  if (is.null(api_key)) {
-    api_key <- Sys.getenv("GEMINI_API_KEY")
-    if (api_key == "") {
-      stop("Google Generative AI API key not found. Please set GEMINI_API_KEY environment variable or provide api_key parameter.")
-    }
+  if (inherits(autoxplain_result, "autoxplain_audit")) {
+    audit <- autoxplain_result
+    autoxplain_result <- NULL
   }
-  
-  # Prepare context summary
-  context <- prepare_analysis_context(autoxplain_result, importance_data, pdp_data, model_characteristics)
-  
-  # Create prompt
-  prompt <- create_report_prompt(context)
-  
-  # Call Google Generative AI API
-  tryCatch({
-    response <- call_gemini_api(prompt, api_key, model, max_tokens, temperature)
-    return(response)
-  }, error = function(e) {
-    warning("Failed to generate natural language report: ", e$message)
-    return(create_fallback_report(context))
-  })
-}
-
-#' Prepare analysis context summary
-#'
-#' @param autoxplain_result AutoML results
-#' @param importance_data Feature importance data
-#' @param pdp_data Partial dependence data
-#' @return List with context information
-#' @keywords internal
-prepare_analysis_context <- function(autoxplain_result, importance_data, pdp_data, model_characteristics = NULL) {
-  
-  # Extract leaderboard data safely
-  leaderboard <- tryCatch({
-    as.data.frame(autoxplain_result$leaderboard)
-  }, error = function(e) {
-    # Create minimal leaderboard if H2O data not available
-    data.frame(
-      model_id = names(autoxplain_result$models),
-      stringsAsFactors = FALSE
-    )
-  })
-  
-  target_column <- autoxplain_result$target_column
-  n_features <- length(autoxplain_result$features)
-  n_models <- length(autoxplain_result$models)
-  
-  # Determine task type
-  sample_data <- autoxplain_result$training_data
-  is_classification <- !is.numeric(sample_data[[target_column]])
-  
-  # Best model info
-  best_model_id <- as.vector(leaderboard$model_id)[1]
-  best_model_type <- extract_model_type_simple(best_model_id)
-  
-  # Do not pass specific performance metrics to avoid hallucination
-  best_performance <- NULL
-  best_metric <- NULL
-  
-  # Feature importance summary
-  importance_summary <- NULL
-  if (!is.null(importance_data)) {
-    top_features <- head(importance_data$feature, 3)
-    importance_summary <- list(
-      top_features = top_features,
-      metric = attr(importance_data, "metric") %||% "unknown"
-    )
+  if (!is.null(autoxplain_result) && !inherits(autoxplain_result, "autoxplain_result")) {
+    stop("The first argument must be an AutoXplainR result or audit.", call. = FALSE)
   }
-  
-  # PDP summary
-  pdp_summary <- NULL
-  if (!is.null(pdp_data) && length(pdp_data) > 0) {
-    pdp_features <- names(pdp_data)
-    pdp_summary <- list(
-      features_analyzed = pdp_features,
-      n_features = length(pdp_features)
-    )
+  if (!is.null(audit) && !inherits(audit, "autoxplain_audit")) {
+    stop("`audit` must be returned by `audit_explanations()`.", call. = FALSE)
   }
-  
-  
-  # Model characteristics summary
-  model_char_summary <- NULL
-  if (!is.null(model_characteristics)) {
-    summary_info <- attr(model_characteristics, "summary")
-    if (!is.null(summary_info)) {
-      model_char_summary <- list(
-        total_models = summary_info$total_models,
-        algorithms_used = summary_info$algorithms_used,
-        total_training_time_s = summary_info$total_training_time_s,
-        models_details = head(model_characteristics, 3)  # Top 3 models
-      )
-    }
-  }
-  
-  return(list(
-    task_type = if (is_classification) "classification" else "regression",
-    target_column = target_column,
-    n_features = n_features,
-    n_models = n_models,
-    best_model_type = best_model_type,
-    best_performance = best_performance,
-    best_metric = best_metric %||% "performance",
-    importance_summary = importance_summary,
-    pdp_summary = pdp_summary,
-    model_characteristics = model_char_summary
-  ))
-}
-
-#' Create prompt for natural language report generation
-#'
-#' @param context List with analysis context
-#' @return Character. Formatted prompt
-#' @keywords internal
-create_report_prompt <- function(context) {
-  
-  prompt <- paste0(
-    "You are an AI assistant helping to explain machine learning model results. ",
-    "Create a clear, educational summary that helps people understand the analysis.\n\n",
-    "CRITICAL INSTRUCTIONS:\n",
-    "- NEVER make up numbers, metrics, or statistics that are not explicitly provided below\n",
-    "- If a specific number is not given, do NOT invent one - describe concepts instead\n",
-    "- Focus on explaining WHAT the different model types are and HOW they work\n",
-    "- Explain hyperparameters in practical terms (e.g., 'number of decision trees', 'how deep each tree goes')\n",
-    "- Emphasize understanding the methods rather than citing performance figures\n",
-    "- Only use numbers that are explicitly listed in the data below\n",
-    "- Use clear markdown formatting for better readability (headers, bold, italic, code formatting)\n\n",
-    
-    "## Analysis Overview\n",
-    "- **Task Type**: ", context$task_type, "\n",
-    "- **Target Variable**: ", context$target_column, "\n",
-    "- **Number of Features**: ", context$n_features, "\n",
-    "- **Number of Models Trained**: ", context$n_models, "\n",
-    "- **Best Model Type**: ", context$best_model_type, "\n"
-  )
-  
-  if (!is.null(context$best_performance)) {
-    # Add metric explanation
-    metric_explanation <- switch(tolower(context$best_metric),
-      "rmse" = "Root Mean Square Error - measures average prediction error; lower is better",
-      "mae" = "Mean Absolute Error - average absolute difference between predictions and actual values; lower is better", 
-      "r2" = "R-squared - proportion of variance explained by the model; higher is better (0-1 scale)",
-      "mse" = "Mean Square Error - average squared prediction error; lower is better",
-      "auc" = "Area Under Curve - model's ability to distinguish between classes; higher is better (0-1 scale)",
-      "logloss" = "Logarithmic Loss - penalizes confident wrong predictions; lower is better",
-      "mean_per_class_error" = "Classification Error Rate - percentage of incorrect predictions; lower is better",
-      "accuracy" = "Accuracy - percentage of correct predictions; higher is better",
-      paste("Performance metric:", context$best_metric)
-    )
-    
-    prompt <- paste0(prompt, 
-      "- **Best Model Performance**: ", round(context$best_performance, 4), 
-      " (", context$best_metric, " - ", metric_explanation, ")\n"
-    )
+  context <- if (!is.null(audit)) {
+    prepare_audit_context(audit)
   } else {
-    prompt <- paste0(prompt, "- **Performance**: Results available but specific numbers not provided\n")
-  }
-  
-  if (!is.null(context$importance_summary)) {
-    prompt <- paste0(prompt, "\n## Feature Importance Analysis\n",
-      "The most important features for prediction are: ",
-      paste(context$importance_summary$top_features, collapse = ", "), ".\n",
-      "Feature importance was calculated using: ", context$importance_summary$metric, ".\n"
+    prepare_analysis_context(
+      autoxplain_result, importance_data, pdp_data, model_characteristics
     )
   }
-  
-  if (!is.null(context$pdp_summary)) {
-    prompt <- paste0(prompt, "\n## Partial Dependence Analysis\n",
-      "Partial dependence plots were generated for ", context$pdp_summary$n_features, " features: ",
-      paste(context$pdp_summary$features_analyzed, collapse = ", "), ".\n"
-    )
-  }
-  
-  
-  if (!is.null(context$model_characteristics)) {
-    char <- context$model_characteristics
-    
-    # Only include reasonable total training times
-    training_time_text <- ""
-    if (!is.null(char$total_training_time_s)) {
-      total_time <- as.numeric(char$total_training_time_s)
-      if (!is.na(total_time) && total_time > 0 && total_time < 7200) {  # Less than 2 hours
-        training_time_text <- paste0("Total Training Time: ", round(total_time, 2), " seconds\n")
-      }
+  local_report <- create_fallback_report(context)
+  if (!isTRUE(use_remote)) return(local_report)
+  api_key <- api_key %||% Sys.getenv("GEMINI_API_KEY", unset = "")
+  if (!nzchar(api_key)) return(local_report)
+  prompt <- create_report_prompt(context)
+  tryCatch(
+    call_gemini_api(prompt, api_key, model, max_tokens, temperature),
+    error = function(error) {
+      if (!isTRUE(fallback)) stop(error)
+      warning("Remote narrative failed; returning the local evidence summary: ",
+              conditionMessage(error), call. = FALSE)
+      local_report
     }
-    
-    prompt <- paste0(prompt, "\n## Model Characteristics & Hyperparameters\n",
-      training_time_text,
-      "Algorithms Used: ", paste(char$algorithms_used, collapse = ", "), "\n\n"
-    )
-    
-    # Add detailed model info for top models
-    if (!is.null(char$models_details) && length(char$models_details) > 0) {
-      prompt <- paste0(prompt, "**Top Model Details:**\n")
-      for (i in 1:min(3, length(char$models_details))) {
-        model <- char$models_details[[i]]
-        prompt <- paste0(prompt, "Model ", i, " (", model$algorithm, "):\n")
-        
-        if (!is.null(model$training_time_s)) {
-          # Only include reasonable training times (between 0.001 and 3600 seconds)
-          time_val <- as.numeric(model$training_time_s)
-          if (!is.na(time_val) && time_val > 0.001 && time_val < 3600) {
-            prompt <- paste0(prompt, "- Training time: ", round(time_val, 2), " seconds\n")
-          }
-        }
-        
-        if (!is.null(model$hyperparameters)) {
-          prompt <- paste0(prompt, "- Key hyperparameters: ")
-          hyperparams <- head(names(model$hyperparameters), 3)
-          for (param in hyperparams) {
-            value <- model$hyperparameters[[param]]
-            if (nchar(as.character(value)) > 20) {
-              value <- paste0(substr(as.character(value), 1, 17), "...")
-            }
-            prompt <- paste0(prompt, param, " = ", value, "; ")
-          }
-          prompt <- paste0(prompt, "\n")
-        }
-        
-        # Do not include specific performance metrics to prevent number hallucination
-        prompt <- paste0(prompt, "\n")
-      }
-    }
-  }
-  
-  prompt <- paste0(prompt, 
-    "\n## Task\n",
-    "Create an educational summary that explains how the machine learning analysis works and what it found. ",
-    "**ABSOLUTELY CRITICAL: Do NOT make up any numbers. If you don't see a specific metric value above, don't mention numbers for it.**\n\n",
-    "Structure your response like this:\n",
-    "1. **Understanding the Best Performing Models**: Explain what the different algorithm types are (like Random Forest, Gradient Boosting, etc.) and what their hyperparameters mean in simple terms\n",
-    "2. **Model Performance Interpretation**: If performance metrics are provided above, explain what they mean in practical terms (e.g., 'An RMSE of X means the model's predictions are typically off by X units', 'An AUC of Y means the model correctly distinguishes between classes Y% of the time')\n",
-    "3. **What Drives the Predictions**: Explain the most important features and what they mean practically\n",
-    "4. **How the Models Work**: Describe the algorithms in everyday language (e.g., 'Random Forest is like asking many experts and averaging their opinions')\n",
-    "5. **Practical Insights**: What this analysis tells us for decision-making and how good the model performance is for real-world use\n",
-    "6. **Reliability & Limitations**: General guidance about model reliability and when to trust the predictions\n\n",
-    "**Focus on education and understanding. When performance metrics are provided, explain what they mean for practical use of the model. Only mention specific values if they are explicitly provided in the data above.**\n\n",
-    "Use a helpful, educational tone that explains concepts clearly. Use markdown formatting like `backticks` for technical terms, **bold** for emphasis, and proper headers."
   )
-  
-  return(prompt)
 }
 
-#' Call Google Generative AI API
-#'
-#' @param prompt Character. Input prompt
-#' @param api_key Character. API key
-#' @param model Character. Model name
-#' @param max_tokens Integer. Maximum tokens
-#' @param temperature Numeric. Temperature parameter
-#' @return Character. Generated text
-#' @keywords internal
-call_gemini_api <- function(prompt, api_key, model, max_tokens, temperature) {
-  
-  # Prepare API endpoint
-  url <- paste0("https://generativelanguage.googleapis.com/v1beta/models/", model, ":generateContent?key=", api_key)
-  
-  # Prepare request body
-  request_body <- list(
-    contents = list(
-      list(
-        parts = list(
-          list(text = prompt)
-        )
-      )
+prepare_audit_context <- function(audit) {
+  top <- audit$importance[order(audit$importance$importance, decreasing = TRUE), , drop = FALSE]
+  top <- top[!duplicated(top$feature), , drop = FALSE]
+  top <- head(top, 8L)
+  list(
+    context_type = "audit",
+    task_type = audit$provenance$automl_task %||% "unspecified",
+    target_column = audit$provenance$automl_target %||% "unspecified",
+    n_features = length(audit$config$features),
+    n_models = audit$summary$n_models,
+    best_model_type = audit$performance$model[[which.min(audit$performance$relative_gap)]],
+    best_performance = audit$performance$score[[which.min(audit$performance$relative_gap)]],
+    best_metric = audit$config$metric,
+    grade = audit$summary$grade,
+    grade_note = audit$summary$grade_note,
+    stable_claim_rate = audit$summary$stable_claim_rate,
+    importance_summary = list(
+      top_features = top$feature,
+      evidence_grades = as.character(top$evidence_grade),
+      claims = top$claim,
+      metric = audit$config$metric
     ),
+    findings = audit$findings[c("severity", "code", "message", "recommendation")],
+    pdp_summary = NULL,
+    disclosure = paste(
+      "Aggregated diagnostics only. No raw rows, model objects, case-level",
+      "predictions, or secrets are included."
+    )
+  )
+}
+
+prepare_analysis_context <- function(autoxplain_result,
+                                     importance_data = NULL,
+                                     pdp_data = NULL,
+                                     model_characteristics = NULL) {
+  if (!inherits(autoxplain_result, "autoxplain_result")) {
+    stop("`autoxplain_result` must be returned by `autoxplain()`.", call. = FALSE)
+  }
+  leaderboard <- as.data.frame(autoxplain_result$leaderboard)
+  numeric_columns <- names(leaderboard)[vapply(leaderboard, is.numeric, logical(1))]
+  metric <- if (length(numeric_columns)) numeric_columns[[1L]] else "unavailable"
+  performance <- if (length(numeric_columns)) leaderboard[[metric]][[1L]] else NA_real_
+  importance_summary <- if (!is.null(importance_data) && is.data.frame(importance_data) &&
+                              all(c("feature", "importance") %in% names(importance_data))) {
+    ordered <- importance_data[order(importance_data$importance, decreasing = TRUE), , drop = FALSE]
+    list(top_features = head(ordered$feature, 3L), metric = attr(importance_data, "metric") %||%
+           "permutation importance")
+  } else {
+    NULL
+  }
+  list(
+    context_type = "automl",
+    task_type = autoxplain_result$task %||%
+      detect_task(autoxplain_result$training_data[[autoxplain_result$target_column]]),
+    target_column = autoxplain_result$target_column,
+    n_features = length(autoxplain_result$features),
+    n_models = length(autoxplain_result$models),
+    best_model_type = extract_model_type(names(autoxplain_result$models)[[1L]]),
+    best_performance = performance,
+    best_metric = metric,
+    importance_summary = importance_summary,
+    pdp_summary = if (!is.null(pdp_data)) {
+      list(features_analyzed = names(pdp_data), n_features = length(pdp_data))
+    } else {
+      NULL
+    },
+    disclosure = "Aggregated AutoML metadata only; no raw rows are included."
+  )
+}
+
+create_report_prompt <- function(context) {
+  serialized <- context_to_text(context)
+  paste0(
+    "You are writing a short model-explanation evidence memo. Use only the facts below.\n",
+    "Rules:\n",
+    "- Never imply causality, fairness, safety, or regulatory compliance.\n",
+    "- Distinguish descriptive permutation variability from population inference.\n",
+    "- Treat grade labels as heuristic diagnostics, never certification.\n",
+    "- Lead with critical limitations and disagreement before feature rankings.\n",
+    "- Do not invent metrics, model behavior, domain meaning, or recommendations.\n",
+    "- Use plain language and at most 500 words.\n\n",
+    serialized
+  )
+}
+
+context_to_text <- function(context) {
+  lines <- c(
+    paste("Task:", context$task_type %||% "unspecified"),
+    paste("Target:", context$target_column %||% "unspecified"),
+    paste("Models:", context$n_models %||% "unspecified"),
+    paste("Features:", context$n_features %||% "unspecified"),
+    paste("Reference model:", context$best_model_type %||% "unspecified"),
+    paste("Reference score:", context$best_metric %||% "metric", "=",
+          context$best_performance %||% "unavailable")
+  )
+  if (!is.null(context$grade)) {
+    lines <- c(lines, paste("Diagnostic evidence grade:", context$grade),
+               paste("Stable claim rate:", format_percent(context$stable_claim_rate)))
+  }
+  if (!is.null(context$importance_summary)) {
+    lines <- c(lines, paste("Top features:",
+                            paste(context$importance_summary$top_features, collapse = ", ")))
+  }
+  if (!is.null(context$findings) && nrow(context$findings)) {
+    finding_lines <- apply(context$findings, 1L, function(row) {
+      paste0("- [", row[["severity"]], "] ", row[["message"]],
+             " Action: ", row[["recommendation"]])
+    })
+    lines <- c(lines, "Audit findings:", finding_lines)
+  }
+  lines <- c(lines, paste("Disclosure:", context$disclosure %||% "Aggregated context only."))
+  paste(lines, collapse = "\n")
+}
+
+call_gemini_api <- function(prompt, api_key, model, max_tokens, temperature) {
+  require_optional("httr", "the optional Gemini narrative")
+  require_optional("jsonlite", "the optional Gemini narrative")
+  if (!is.character(model) || length(model) != 1L || !nzchar(model)) {
+    stop("`model` must be a non-empty Gemini model identifier.", call. = FALSE)
+  }
+  endpoint <- paste0(
+    "https://generativelanguage.googleapis.com/v1beta/models/",
+    utils::URLencode(model, reserved = TRUE),
+    ":generateContent"
+  )
+  body <- list(
+    contents = list(list(role = "user", parts = list(list(text = prompt)))),
     generationConfig = list(
       temperature = temperature,
       maxOutputTokens = max_tokens,
-      topP = 0.8,
-      topK = 10
+      candidateCount = 1L
     )
   )
-  
-  # Make API call
-  response <- POST(
-    url = url,
-    body = toJSON(request_body, auto_unbox = TRUE),
-    add_headers(`Content-Type` = "application/json"),
-    timeout(30)
+  response <- httr::POST(
+    endpoint,
+    httr::add_headers(
+      `x-goog-api-key` = api_key,
+      `Content-Type` = "application/json"
+    ),
+    body = charToRaw(jsonlite::toJSON(body, auto_unbox = TRUE, null = "null")),
+    encode = "raw",
+    httr::timeout(30)
   )
-  
-  # Check response status
-  if (response$status_code != 200) {
-    stop("API request failed with status code: ", response$status_code, 
-         ". Response: ", content(response, "text"))
+  raw_text <- httr::content(response, as = "text", encoding = "UTF-8")
+  parsed <- tryCatch(jsonlite::fromJSON(raw_text, simplifyVector = FALSE),
+                     error = function(error) NULL)
+  if (httr::http_error(response)) {
+    message <- parsed$error$message %||% paste("HTTP", httr::status_code(response))
+    stop("Gemini request failed: ", message, call. = FALSE)
   }
-  
-  # Parse response
-  response_content <- content(response, "text", encoding = "UTF-8")
-  response_json <- fromJSON(response_content)
-  
-  # Extract generated text with robust error handling for data.frame structure
-  tryCatch({
-    if (!is.null(response_json$candidates) && 
-        length(response_json$candidates) > 0) {
-      
-      # Handle data.frame structure (what the API actually returns)
-      if (is.data.frame(response_json$candidates)) {
-        candidate <- response_json$candidates[1, ]
-        
-        # Navigate the nested data.frame structure
-        if (!is.null(candidate$content) && is.data.frame(candidate$content)) {
-          content_row <- candidate$content[1, ]
-          if (!is.null(content_row$parts) && is.list(content_row$parts)) {
-            parts_list <- content_row$parts[[1]]
-            if (is.data.frame(parts_list) && !is.null(parts_list$text)) {
-              return(as.character(parts_list$text[1]))
-            }
-          }
-        }
-      } else {
-        # Handle list structure (fallback)
-        candidate <- response_json$candidates[[1]]
-        
-        # Check for different response structures
-        if (!is.null(candidate$content$parts[[1]]$text)) {
-          return(candidate$content$parts[[1]]$text)
-        } else if (!is.null(candidate$content) && !is.null(candidate$content$text)) {
-          return(candidate$content$text)
-        } else if (!is.null(candidate$text)) {
-          return(candidate$text)
-        }
-      }
-    }
-    
-    # Check for error messages in response
-    if (!is.null(response_json$error)) {
-      stop("API error: ", response_json$error$message)
-    }
-    
-    stop("Unable to extract text from API response structure")
-    
-  }, error = function(e) {
-    # Enhanced error message with response details
-    stop("Failed to parse API response: ", e$message, 
-         ". Raw response: ", substr(response_content, 1, 500))
-  })
+  parts <- parsed$candidates[[1L]]$content$parts %||% list()
+  text <- paste(vapply(parts, function(part) part$text %||% "", character(1)), collapse = "\n")
+  if (!nzchar(text)) stop("Gemini returned no narrative text.", call. = FALSE)
+  text
 }
 
-#' Create fallback report when API fails
-#'
-#' @param context List with analysis context
-#' @return Character. Fallback report
-#' @keywords internal
 create_fallback_report <- function(context) {
-  
-  report <- paste0(
-    "# AutoML Analysis Report\n\n",
-    "## Executive Summary\n",
-    "An automated machine learning analysis was performed on the dataset targeting the '", 
-    context$target_column, "' variable for ", context$task_type, ".\n\n",
-    
-    "## Model Performance\n",
-    "- **Models Trained**: ", context$n_models, " different algorithms were evaluated\n",
-    "- **Best Model**: ", context$best_model_type, "\n"
+  heading <- if (identical(context$context_type, "audit")) {
+    "# Explanation Evidence Report"
+  } else {
+    "# AutoML Analysis Report"
+  }
+  lines <- c(
+    heading,
+    "",
+    "## Scope",
+    paste0(
+      "This is a descriptive summary of a ", context$task_type %||% "modeling",
+      " task for `", context$target_column %||% "unspecified", "`, covering ",
+      context$n_models %||% "an unspecified number of", " model(s) and ",
+      context$n_features %||% "an unspecified number of", " feature(s)."
+    )
   )
-  
-  if (!is.null(context$best_performance)) {
-    report <- paste0(report,
-      "- **Performance**: ", round(context$best_performance, 4), " (", context$best_metric, ")\n"
+  if (!is.null(context$grade)) {
+    lines <- c(
+      lines, "", "## Reliability first",
+      paste0("The heuristic explanation-evidence grade is **", context$grade,
+             "**; this is a diagnostic, not a certification."),
+      paste0("The stable-claim rate is ", format_percent(context$stable_claim_rate), ".")
     )
   }
-  
+  if (!is.null(context$findings) && nrow(context$findings)) {
+    lines <- c(lines, "", "## Findings")
+    for (index in seq_len(nrow(context$findings))) {
+      lines <- c(lines, paste0(
+        "- **", context$findings$severity[[index]], " - ",
+        context$findings$code[[index]], ":** ", context$findings$message[[index]],
+        " ", context$findings$recommendation[[index]]
+      ))
+    }
+  }
   if (!is.null(context$importance_summary)) {
-    report <- paste0(report, "\n## Key Findings\n",
-      "The analysis identified the most influential features for prediction: ",
-      paste(context$importance_summary$top_features, collapse = ", "), ".\n"
+    lines <- c(
+      lines, "", "## Feature evidence",
+      paste0(
+        "The leading descriptive permutation-importance features are ",
+        paste(context$importance_summary$top_features, collapse = ", "),
+        ". They describe model reliance on the evaluation data and should not be read as causal effects."
+      )
     )
   }
-  
-  report <- paste0(report, "\n## Technical Details\n",
-    "- **Features Used**: ", context$n_features, " input variables\n",
-    "- **Analysis Type**: ", stringr::str_to_title(context$task_type), " modeling\n"
-  )
-  
   if (!is.null(context$pdp_summary)) {
-    report <- paste0(report,
-      "- **Partial Dependence**: Analyzed ", context$pdp_summary$n_features, " key features\n"
+    lines <- c(
+      lines, "", "## Partial Dependence",
+      paste0("Partial dependence was evaluated for ", context$pdp_summary$n_features,
+             " feature(s). Inspect support and dependence warnings before interpreting the curves.")
     )
   }
-  
-  
-  report <- paste0(report, 
-    "\n## Recommendations\n",
-    "The model shows promise for ", context$task_type, " tasks. ",
-    "Further validation and domain expert review are recommended before deployment.\n"
+  lines <- c(
+    lines, "", "## Required limitations",
+    "Permutation repeats quantify computation-level variability, not population uncertainty. ",
+    "Feature explanations do not establish causality, fairness, safety, or deployment readiness. ",
+    "Use held-out data, domain review, and external validation.",
+    "", paste0("Data disclosure: ", context$disclosure %||% "Aggregated context only.")
   )
-  
-  return(report)
+  paste(lines, collapse = "\n")
 }
 
-#' Extract simplified model type from H2O model ID
-#'
-#' @param model_id Character. H2O model ID
-#' @return Character. Simplified model type
-#' @keywords internal
-extract_model_type_simple <- function(model_id) {
-  if (grepl("GBM", model_id, ignore.case = TRUE)) {
-    return("Gradient Boosting")
-  } else if (grepl("RandomForest|DRF", model_id, ignore.case = TRUE)) {
-    return("Random Forest")
-  } else if (grepl("GLM", model_id, ignore.case = TRUE)) {
-    return("Linear Model")
-  } else if (grepl("DeepLearning", model_id, ignore.case = TRUE)) {
-    return("Neural Network")
-  } else if (grepl("XGBoost", model_id, ignore.case = TRUE)) {
-    return("XGBoost")
-  } else if (grepl("StackedEnsemble", model_id, ignore.case = TRUE)) {
-    return("Ensemble Model")
-  } else {
-    return("Advanced Model")
-  }
-}
+extract_model_type_simple <- function(model_id) extract_model_type(model_id)

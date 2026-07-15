@@ -2,45 +2,88 @@
 % Please edit documentation in R/autoxplain.R
 \name{autoxplain}
 \alias{autoxplain}
-\title{AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting}
+\title{Fit a reproducible H2O AutoML candidate set}
 \usage{
 autoxplain(
   data,
   target_column,
-  max_models = 50,
-  max_runtime_secs = 300,
-  seed = 123,
+  max_models = 10L,
+  max_runtime_secs = 300L,
+  seed = 123L,
   test_data = NULL,
   enable_preprocessing = TRUE,
-  preprocessing_config = list()
+  preprocessing_config = list(),
+  task = c("auto", "regression", "binary", "multiclass"),
+  nfolds = 5L,
+  sort_metric = "AUTO",
+  include_algos = NULL,
+  exclude_algos = NULL,
+  use_test_as_validation = FALSE,
+  init_h2o = TRUE,
+  h2o_nthreads = -1L,
+  h2o_max_mem_size = "2G",
+  verbosity = c("quiet", "info")
 )
 }
 \arguments{
-\item{data}{A data.frame containing the training data}
+\item{data}{Training data frame.}
 
-\item{target_column}{Character. Name of the target column}
+\item{target_column}{Name of the outcome column.}
 
-\item{max_models}{Integer. Maximum number of models to train (default: 50)}
+\item{max_models}{Maximum number of base models.}
 
-\item{max_runtime_secs}{Integer. Maximum runtime in seconds (default: 300)}
+\item{max_runtime_secs}{Overall training time budget in seconds.}
 
-\item{seed}{Integer. Random seed for reproducibility (default: 123)}
+\item{seed}{Reproducible H2O seed.}
 
-\item{test_data}{Optional data.frame for testing. If NULL, uses train/validation split}
+\item{test_data}{Optional held-out evaluation data. It is not used as an H2O
+validation frame unless \code{use_test_as_validation = TRUE}.}
 
-\item{enable_preprocessing}{Logical. Enable automatic data preprocessing for H2O compatibility (default: TRUE)}
+\item{enable_preprocessing}{Apply \code{\link[=preprocess_for_h2o]{preprocess_for_h2o()}}.}
 
-\item{preprocessing_config}{List. Configuration for preprocessing steps (see details)}
+\item{preprocessing_config}{Named overrides for preprocessing. Identifier
+removal defaults to \code{FALSE}.}
+
+\item{task}{One of \code{"auto"}, \code{"regression"}, \code{"binary"}, or
+\code{"multiclass"}.}
+
+\item{nfolds}{Number of H2O cross-validation folds. At least two folds are
+required when stacked ensembles are desired.}
+
+\item{sort_metric}{H2O AutoML leaderboard metric.}
+
+\item{include_algos, exclude_algos}{Optional H2O algorithm filters. Supply at
+most one.}
+
+\item{use_test_as_validation}{Whether to pass \code{test_data} to H2O as a
+validation frame. The default keeps held-out explanation data independent.}
+
+\item{init_h2o}{Start a local H2O cluster when no connection is available.}
+
+\item{h2o_nthreads}{Threads used when starting H2O.}
+
+\item{h2o_max_mem_size}{Memory used when starting H2O.}
+
+\item{verbosity}{One of \code{"quiet"} or \code{"info"}.}
 }
 \value{
-A list containing trained models, explanations, and preprocessing metadata
+An \code{autoxplain_result} containing models, a data-frame leaderboard,
+task metadata, preprocessing provenance, and evaluation data.
 }
 \description{
-AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting
+\code{autoxplain()} is the optional model-fitting convenience layer. The core
+explanation and audit API does not require H2O; users can call
+\code{\link[=explain_model]{explain_model()}} for any fitted model.
+}
+\details{
+Numeric outcomes with exactly two distinct values are treated as binary
+classification by default. Potentially destructive preprocessing, such as
+identifier removal, is opt-in and recorded in the result.
 }
 \examples{
 \dontrun{
-data(mtcars)
 result <- autoxplain(mtcars, "mpg", max_models = 3)
+explainers <- as_explainers(result)
+audit_explanations(explainers)
 }
 }

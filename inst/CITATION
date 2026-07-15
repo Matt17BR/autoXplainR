@@ -1,16 +1,8 @@
-citHeader("To cite AutoXplainR in publications use:")
-
-citEntry(
-  entry    = "Manual",
-  title    = "AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting",
-  author   = "Matteo Mazzarelli",
-  year     = "2025",
-  note     = "R package version 0.1.0",
-  url      = "https://github.com/Matt17BR/AutoXplainR",
-  textVersion = paste(
-    "Mazzarelli, M. (2025).",
-    "AutoXplainR: Automated Machine Learning Explanation and Comparative Reporting.",
-    "R package version 0.1.0.",
-    "https://github.com/Matt17BR/AutoXplainR"
-  )
+bibentry(
+  bibtype = "Manual",
+  title = "AutoXplainR: Stress-Testing Evidence Behind Model Explanations",
+  author = person("Matteo", "Mazzarelli"),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  url = "https://github.com/Matt17BR/autoXplainR"
 )

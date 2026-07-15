@@ -1,484 +1,220 @@
-#' Extract Detailed Model Characteristics
+#' Extract comparable AutoML model metadata
 #'
-#' Provides comprehensive model analysis including hyperparameters, training times,
-#' model complexity metrics, and algorithm-specific details for AutoML comparison.
+#' Extracts stable, compact metadata from retained H2O models and joins it to
+#' the AutoML leaderboard. Native H2O variable importance is labelled as such;
+#' it is not substituted for model-agnostic permutation importance.
 #'
-#' @param autoxplain_result Object from autoxplain() function
-#' @param include_hyperparams Logical. Whether to extract hyperparameters (default: TRUE)
-#' @param include_performance Logical. Whether to extract performance metrics (default: TRUE)
-#' @param include_varimp Logical. Whether to extract variable importance (default: TRUE)
-#' @return List with detailed model characteristics for each model
+#' @param autoxplain_result An `autoxplain_result`.
+#' @param include_hyperparams Include a compact set of configured parameters.
+#' @param include_performance Include numeric leaderboard metrics.
+#' @param include_varimp Include native H2O importance when available.
+#'
+#' @return A list of class `autoxplainr_model_characteristics`.
 #' @export
-#' @importFrom h2o h2o.varimp
-#' @examples
-#' \dontrun{
-#' result <- autoxplain(mtcars, "mpg", max_models = 3)
-#' model_details <- extract_model_characteristics(result)
-#' print(model_details)
-#' }
-extract_model_characteristics <- function(autoxplain_result, 
-                                        include_hyperparams = TRUE,
-                                        include_performance = TRUE,
-                                        include_varimp = TRUE) {
-  
-  # Input validation
+extract_model_characteristics <- function(autoxplain_result,
+                                          include_hyperparams = TRUE,
+                                          include_performance = TRUE,
+                                          include_varimp = TRUE) {
   if (!inherits(autoxplain_result, "autoxplain_result")) {
-    stop("autoxplain_result must be an object from autoxplain() function")
+    stop("`autoxplain_result` must be returned by `autoxplain()`.", call. = FALSE)
   }
-  
+  switches <- c(include_hyperparams, include_performance, include_varimp)
+  if (anyNA(switches) || !all(vapply(as.list(switches), is.logical, logical(1)))) {
+    stop("Inclusion switches must be TRUE or FALSE.", call. = FALSE)
+  }
+  leaderboard <- as.data.frame(autoxplain_result$leaderboard)
   models <- autoxplain_result$models
-  if (length(models) == 0) {
-    stop("No models found in autoxplain_result")
-  }
-  
-  model_characteristics <- list()
-  
-  for (i in seq_along(models)) {
-    model <- models[[i]]
-    
-    # Basic model information
-    model_info <- list(
-      rank = i,
-      model_id = model@model_id,
-      algorithm = model@algorithm
+  output <- lapply(seq_along(models), function(index) {
+    model <- models[[index]]
+    id <- names(models)[[index]]
+    algorithm <- tryCatch(as.character(model@algorithm), error = function(error) {
+      extract_model_type(id)
+    })
+    row <- leaderboard[match(id, leaderboard$model_id), , drop = FALSE]
+    numeric_metrics <- if (nrow(row)) {
+      row[vapply(row, is.numeric, logical(1))]
+    } else {
+      data.frame()
+    }
+    info <- list(
+      rank = index,
+      model_id = id,
+      algorithm = algorithm,
+      training_time_s = tryCatch(as.numeric(model@model$run_time) / 1000,
+                                 error = function(error) NA_real_),
+      size_bytes = tryCatch(as.numeric(model@model$output$model_size_in_bytes),
+                            error = function(error) NA_real_)
     )
-    
-    # Training time and resources
-    if (!is.null(model@model$run_time)) {
-      model_info$training_time_ms <- model@model$run_time
-      model_info$training_time_s <- model@model$run_time / 1000
-    }
-    
-    # Model size and complexity
-    if (!is.null(model@model$output) && !is.null(model@model$output$model_size_in_bytes)) {
-      model_info$size_bytes <- model@model$output$model_size_in_bytes
-      model_info$size_mb <- model@model$output$model_size_in_bytes / (1024^2)
-    }
-    
-    # Hyperparameters (algorithm-specific)
-    if (include_hyperparams && !is.null(model@allparameters)) {
-      params <- model@allparameters
-      
-      # Extract algorithm-specific important parameters
-      important_params <- switch(model@algorithm,
-        "glm" = c("alpha", "lambda", "family", "solver", "standardize"),
-        "gbm" = c("ntrees", "max_depth", "learn_rate", "sample_rate", "col_sample_rate", "min_rows"),
-        "drf" = c("ntrees", "max_depth", "sample_rate", "mtries", "min_rows"),
-        "xgboost" = c("ntrees", "max_depth", "learn_rate", "sample_rate", "reg_alpha", "reg_lambda", "subsample", "colsample_bytree"),
-        "deeplearning" = c("hidden", "epochs", "activation", "input_dropout_ratio", "l1", "l2"),
-        "stackedensemble" = c("base_models", "metalearner_algorithm"),
-        names(params)  # fallback: all params
-      )
-      
-      extracted_params <- list()
-      for (param in important_params) {
-        if (param %in% names(params) && !is.null(params[[param]])) {
-          value <- params[[param]]
-          
-          # Special handling for base_models parameter (H2O Key objects)
-          if (param == "base_models" && is.list(value)) {
-            # Extract model IDs from H2O Key objects, filtering out "Key" objects
-            model_ids <- character()
-            for (item in value) {
-              if (is.list(item)) {
-                # Try to find the model ID in the list structure
-                # Look for character strings that look like model IDs
-                for (element in item) {
-                  if (is.character(element) && length(element) == 1 && 
-                      nchar(element) > 10 && grepl("AutoML", element) &&
-                      !grepl("^Key", element)) {  # Filter out "Key" objects
-                    model_ids <- c(model_ids, element)
-                    break
-                  }
-                }
-              } else if (is.character(item) && length(item) == 1 && 
-                         nchar(item) > 10 && grepl("AutoML", item) &&
-                         !grepl("^Key", item)) {  # Filter out "Key" objects
-                # Direct character element
-                model_ids <- c(model_ids, item)
-              }
-            }
-            if (length(model_ids) > 0) {
-              # Clean up model IDs for better readability
-              clean_ids <- sapply(model_ids, function(id) {
-                # Extract algorithm and short identifier
-                if (grepl("GLM", id)) {
-                  return("GLM")
-                } else if (grepl("XGBoost", id)) {
-                  return("XGBoost")
-                } else if (grepl("GBM", id)) {
-                  return("GBM")
-                } else if (grepl("DRF", id)) {
-                  return("RandomForest")
-                } else if (grepl("DeepLearning", id)) {
-                  return("DeepLearning")
-                } else {
-                  # Return first part before underscore
-                  parts <- strsplit(id, "_")[[1]]
-                  return(parts[1])
-                }
-              })
-              value <- paste(clean_ids, collapse = ", ")
-            } else {
-              value <- paste(length(value), "base models")
-            }
-          } else if (is.list(value) && length(value) > 0) {
-            # For other list parameters, handle more carefully
-            # Check if it's a simple list of values
-            if (all(sapply(value, function(x) is.atomic(x) && length(x) == 1))) {
-              value <- paste(unlist(value), collapse = ", ")
-            } else {
-              # For complex nested lists, provide a summary
-              value <- paste("Complex parameter with", length(value), "elements")
-            }
-          }
-          
-          # Handle multiple values
-          if (length(value) > 1) {
-            value <- paste(value, collapse = ", ")
-          }
-          
-          # Don't truncate here - let the dashboard handle display formatting
-          # This preserves all data for the dashboard's intelligent expandable display
-          value_str <- as.character(value)
-          
-          extracted_params[[param]] <- value
-        }
-      }
-      model_info$hyperparameters <- extracted_params
-    }
-    
-    # Performance metrics
-    if (include_performance && !is.null(model@model$training_metrics)) {
-      metrics <- model@model$training_metrics
-      if (!is.null(metrics@metrics)) {
-        performance_metrics <- list()
-        for (metric_name in names(metrics@metrics)) {
-          metric_value <- metrics@metrics[[metric_name]]
-          if (is.numeric(metric_value) && length(metric_value) == 1) {
-            performance_metrics[[metric_name]] <- round(metric_value, 6)
-          }
-        }
-        model_info$performance_metrics <- performance_metrics
+    info$size_mb <- info$size_bytes / 1024^2
+    if (include_performance) {
+      info$performance_metrics <- if (ncol(numeric_metrics)) {
+        as.list(numeric_metrics[1L, , drop = TRUE])
+      } else {
+        list()
       }
     }
-    
-    # Variable importance
+    if (include_hyperparams) {
+      parameters <- tryCatch(model@allparameters, error = function(error) list())
+      info$hyperparameters <- compact_hyperparameters(parameters, algorithm)
+    }
     if (include_varimp) {
-      tryCatch({
-        varimp <- h2o.varimp(model, use_pandas = FALSE)
-        if (!is.null(varimp) && nrow(varimp) > 0) {
-          # Store top 10 important variables
-          top_vars <- head(varimp, 10)
-          model_info$variable_importance <- list(
-            variables = top_vars$variable,
-            relative_importance = round(top_vars$relative_importance, 6),
-            scaled_importance = round(top_vars$scaled_importance, 6)
-          )
-        }
-      }, error = function(e) {
-        model_info$variable_importance <- NULL
-      })
+      info$native_variable_importance <- tryCatch({
+        require_optional("h2o", "extracting native H2O variable importance")
+        value <- h2o::h2o.varimp(model, use_pandas = FALSE)
+        if (is.null(value)) NULL else head(as.data.frame(value), 10L)
+      }, error = function(error) NULL)
     }
-    
-    model_characteristics[[i]] <- model_info
-  }
-  
-  # Add summary statistics
-  attr(model_characteristics, "summary") <- list(
-    total_models = length(models),
-    algorithms_used = unique(sapply(model_characteristics, function(x) x$algorithm)),
-    total_training_time_s = sum(sapply(model_characteristics, function(x) 
-      if(!is.null(x$training_time_s)) x$training_time_s else 0)),
+    info
+  })
+  total_time <- sum(vapply(output, function(x) x$training_time_s, numeric(1)), na.rm = TRUE)
+  attr(output, "summary") <- list(
+    total_models = length(output),
+    algorithms_used = unique(vapply(output, `[[`, character(1), "algorithm")),
+    total_training_time_s = total_time,
     dataset_info = list(
       target_column = autoxplain_result$target_column,
       n_rows = nrow(autoxplain_result$training_data),
-      n_features = ncol(autoxplain_result$training_data) - 1
+      n_features = length(autoxplain_result$features),
+      evaluation_role = autoxplain_result$provenance$evaluation_role %||% "unspecified"
     )
   )
-  
-  class(model_characteristics) <- c("autoxplainr_model_characteristics", "list")
-  return(model_characteristics)
+  class(output) <- c("autoxplainr_model_characteristics", "list")
+  output
 }
 
-#' Print Method for Model Characteristics
-#'
-#' @param x Object of class autoxplainr_model_characteristics
-#' @param ... Additional arguments (unused)
 #' @export
 print.autoxplainr_model_characteristics <- function(x, ...) {
-  summary_info <- attr(x, "summary")
-  
-  cat("AutoXplainR Model Characteristics\n")
-  cat("=================================\n\n")
-  
-  cat("Dataset Information:\n")
-  cat("- Target variable:", summary_info$dataset_info$target_column, "\n")
-  cat("- Rows:", summary_info$dataset_info$n_rows, "\n")
-  cat("- Features:", summary_info$dataset_info$n_features, "\n\n")
-  
-  cat("AutoML Summary:\n")
-  cat("- Total models:", summary_info$total_models, "\n")
-  cat("- Algorithms used:", paste(summary_info$algorithms_used, collapse = ", "), "\n")
-  cat("- Total training time:", round(summary_info$total_training_time_s, 2), "seconds\n\n")
-  
-  cat("Model Rankings:\n")
-  cat(sprintf("%-4s %-20s %-12s %-10s %-15s\n", "Rank", "Algorithm", "Time(s)", "Size(MB)", "Top Feature"))
-  cat(strrep("-", 70), "\n")
-  
-  for (i in seq_along(x)) {
-    model <- x[[i]]
-    algo <- substr(model$algorithm, 1, 18)
-    time_s <- if (!is.null(model$training_time_s)) round(model$training_time_s, 2) else "N/A"
-    size_mb <- if (!is.null(model$size_mb)) round(model$size_mb, 3) else "N/A"
-    top_feature <- if (!is.null(model$variable_importance)) {
-      substr(model$variable_importance$variables[1], 1, 13)
-    } else "N/A"
-    
-    cat(sprintf("%-4d %-20s %-12s %-10s %-15s\n", i, algo, time_s, size_mb, top_feature))
-  }
-  
-  cat("\nUse summary() for detailed hyperparameter information.\n")
+  summary <- attr(x, "summary")
+  cat("<AutoXplainR model characteristics>\n")
+  cat("  models:   ", summary$total_models, "\n", sep = "")
+  cat("  families: ", paste(summary$algorithms_used, collapse = ", "), "\n", sep = "")
+  cat("  target:   ", summary$dataset_info$target_column, "\n", sep = "")
+  table <- model_characteristics_table(x)
+  print.data.frame(table, row.names = FALSE, ...)
   invisible(x)
 }
 
-#' Summary Method for Model Characteristics
-#'
-#' @param object Object of class autoxplainr_model_characteristics
-#' @param ... Additional arguments (unused)
 #' @export
 summary.autoxplainr_model_characteristics <- function(object, ...) {
-  print(object)
-  
-  cat("\nDetailed Model Information:\n")
-  cat("===========================\n")
-  
-  for (i in seq_along(object)) {
-    model <- object[[i]]
-    cat("\nModel", i, ":", model$algorithm, "\n")
-    cat("- Model ID:", model$model_id, "\n")
-    
-    if (!is.null(model$hyperparameters)) {
-      cat("- Key Hyperparameters:\n")
-      for (param in names(model$hyperparameters)) {
-        cat("  ", param, ":", model$hyperparameters[[param]], "\n")
-      }
-    }
-    
-    if (!is.null(model$performance_metrics)) {
-      cat("- Performance Metrics:\n")
-      # Show top 3 most relevant metrics
-      metrics <- model$performance_metrics
-      important_metrics <- c("rmse", "mse", "logloss", "auc", "r2", "mae")
-      shown_metrics <- intersect(important_metrics, names(metrics))
-      if (length(shown_metrics) == 0) shown_metrics <- names(metrics)[1:min(3, length(metrics))]
-      
-      for (metric in shown_metrics) {
-        if (metric %in% names(metrics)) {
-          cat("  ", metric, ":", metrics[[metric]], "\n")
-        }
-      }
-    }
-    
-    if (!is.null(model$variable_importance)) {
-      cat("- Top 3 Important Features:\n")
-      for (j in 1:min(3, length(model$variable_importance$variables))) {
-        cat("  ", j, ".", model$variable_importance$variables[j], 
-            "(", round(model$variable_importance$relative_importance[j], 4), ")\n")
-      }
-    }
-  }
-  invisible(object)
+  list(summary = attr(object, "summary"), models = model_characteristics_table(object))
 }
 
-#' Calculate Weighted Efficiency Score with Min-Max Scaling
+#' Calculate a relative weighted model score
 #'
-#' Calculates an efficiency score that combines performance and training time
-#' using min-max scaling and user-defined weights.
+#' Min-max combines predictive performance and training time. Because results
+#' depend on the candidate set and the subjective weight, use this only as a
+#' sensitivity analysis; AutoXplainR reports the underlying dimensions
+#' separately in its primary workflow.
 #'
-#' @param performance_scores Numeric vector of performance scores
-#' @param training_times Numeric vector of training times in seconds
-#' @param performance_weight Weight for performance (0-1), training time weight = 1 - performance_weight
-#' @param higher_is_better Logical. TRUE if higher performance scores are better (e.g., AUC), 
-#'                         FALSE if lower is better (e.g., RMSE)
-#' @return Numeric vector of efficiency scores
+#' @param performance_scores Numeric model scores.
+#' @param training_times Numeric training times in seconds.
+#' @param performance_weight Weight on predictive performance.
+#' @param higher_is_better Whether larger performance is better.
+#'
+#' @return Numeric relative scores from zero to one.
 #' @export
-calculate_weighted_efficiency <- function(performance_scores, 
-                                        training_times, 
-                                        performance_weight = 0.7,
-                                        higher_is_better = TRUE) {
-  
-  # Validate inputs
-  if (length(performance_scores) != length(training_times)) {
-    stop("performance_scores and training_times must have the same length")
+calculate_weighted_efficiency <- function(performance_scores,
+                                          training_times,
+                                          performance_weight = 0.7,
+                                          higher_is_better = TRUE) {
+  if (!is.numeric(performance_scores) || !is.numeric(training_times) ||
+        length(performance_scores) != length(training_times) || length(performance_scores) < 2L) {
+    stop("Scores and times must be numeric vectors of equal length with at least two models.",
+         call. = FALSE)
   }
-  
-  if (performance_weight < 0 || performance_weight > 1) {
-    stop("performance_weight must be between 0 and 1")
+  if (any(!is.finite(performance_scores)) || any(!is.finite(training_times)) ||
+        any(training_times < 0)) {
+    stop("Scores and times must be finite, and times cannot be negative.", call. = FALSE)
   }
-  
-  n <- length(performance_scores)
-  if (n < 2) {
-    stop("Need at least 2 models to calculate relative efficiency")
+  assert_probability(performance_weight, "performance_weight")
+  if (!is.logical(higher_is_better) || length(higher_is_better) != 1L || is.na(higher_is_better)) {
+    stop("`higher_is_better` must be TRUE or FALSE.", call. = FALSE)
   }
-  
-  # Min-max scaling for performance
-  perf_min <- min(performance_scores, na.rm = TRUE)
-  perf_max <- max(performance_scores, na.rm = TRUE)
-  
-  if (perf_max == perf_min) {
-    # All performance scores are the same
-    scaled_performance <- rep(0.5, n)
-  } else {
-    if (higher_is_better) {
-      # Higher is better (e.g., AUC): scale to [0, 1] where 1 is best
-      scaled_performance <- (performance_scores - perf_min) / (perf_max - perf_min)
-    } else {
-      # Lower is better (e.g., RMSE): scale to [0, 1] where 1 is best (lowest value)
-      scaled_performance <- (perf_max - performance_scores) / (perf_max - perf_min)
-    }
-  }
-  
-  # Min-max scaling for training time (lower is better, so invert)
-  time_min <- min(training_times, na.rm = TRUE)
-  time_max <- max(training_times, na.rm = TRUE)
-  
-  if (time_max == time_min) {
-    # All training times are the same
-    scaled_time <- rep(0.5, n)
-  } else {
-    # Lower time is better: scale to [0, 1] where 1 is best (shortest time)
-    scaled_time <- (time_max - training_times) / (time_max - time_min)
-  }
-  
-  # Calculate weighted efficiency score
-  time_weight <- 1 - performance_weight
-  efficiency_scores <- performance_weight * scaled_performance + time_weight * scaled_time
-  
-  return(efficiency_scores)
+  warning(
+    "Weighted efficiency is candidate-set-relative and weight-dependent; report both raw dimensions.",
+    call. = FALSE
+  )
+  performance <- minmax(performance_scores)
+  if (!higher_is_better) performance <- 1 - performance
+  speed <- 1 - minmax(training_times)
+  performance_weight * performance + (1 - performance_weight) * speed
 }
 
-#' Create Model Comparison Report
+#' Create a compact model metadata report
 #'
-#' Generates a detailed comparison report of all models including hyperparameters,
-#' performance metrics, and training characteristics.
+#' @param model_characteristics Output from [extract_model_characteristics()].
+#' @param output_file Destination HTML file.
+#' @param include_plots Retained for compatibility and ignored.
 #'
-#' @param model_characteristics Object from extract_model_characteristics()
-#' @param output_file Character. Path for output file (default: "model_comparison_report.html")
-#' @param include_plots Logical. Whether to include comparison plots (default: TRUE)
-#' @return Character. Path to generated report file
+#' @return The normalized output path, invisibly.
 #' @export
-create_model_comparison_report <- function(model_characteristics, 
-                                         output_file = "model_comparison_report.html",
-                                         include_plots = TRUE) {
-  
+create_model_comparison_report <- function(model_characteristics,
+                                           output_file = "model-comparison.html",
+                                           include_plots = FALSE) {
   if (!inherits(model_characteristics, "autoxplainr_model_characteristics")) {
-    stop("model_characteristics must be from extract_model_characteristics()")
+    stop("`model_characteristics` must be returned by `extract_model_characteristics()`.",
+         call. = FALSE)
   }
-  
-  summary_info <- attr(model_characteristics, "summary")
-  
-  # Create HTML report
-  html_content <- c(
-    "<!DOCTYPE html>",
-    "<html>",
-    "<head>",
-    "  <title>AutoXplainR Model Comparison Report</title>",
-    "  <style>",
-    "    body { font-family: Arial, sans-serif; margin: 20px; }",
-    "    table { border-collapse: collapse; width: 100%; margin: 20px 0; }",
-    "    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }",
-    "    th { background-color: #f2f2f2; }",
-    "    .model-section { margin: 30px 0; padding: 20px; border: 1px solid #ccc; }",
-    "    .hyperparams { background-color: #f9f9f9; padding: 10px; }",
-    "  </style>",
-    "</head>",
-    "<body>",
-    "  <h1>AutoXplainR Model Comparison Report</h1>",
-    "",
-    "  <h2>Dataset Summary</h2>",
-    paste0("  <p><strong>Target Variable:</strong> ", summary_info$dataset_info$target_column, "</p>"),
-    paste0("  <p><strong>Dataset Size:</strong> ", summary_info$dataset_info$n_rows, " rows × ", summary_info$dataset_info$n_features, " features</p>"),
-    paste0("  <p><strong>Models Trained:</strong> ", summary_info$total_models, "</p>"),
-    paste0("  <p><strong>Total Training Time:</strong> ", round(summary_info$total_training_time_s, 2), " seconds</p>"),
-    "",
-    "  <h2>Model Comparison Table</h2>",
-    "  <table>",
-    "    <tr><th>Rank</th><th>Algorithm</th><th>Model ID</th><th>Training Time (s)</th><th>Model Size (MB)</th></tr>"
+  if (!is.character(output_file) || length(output_file) != 1L ||
+        tolower(tools::file_ext(output_file)) != "html") {
+    stop("`output_file` must be a single .html path.", call. = FALSE)
+  }
+  summary <- attr(model_characteristics, "summary")
+  table <- model_characteristics_table(model_characteristics)
+  html <- paste0(
+    "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">",
+    "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
+    "<title>AutoXplainR model metadata</title><style>", report_css(), "</style></head><body>",
+    "<header><div class=\"shell\"><p class=\"eyebrow\">AutoXplainR</p>",
+    "<h1>Model metadata</h1><p class=\"lede\">Training characteristics and leaderboard metrics. ",
+    "Model selection should use held-out performance and the separate explanation evidence audit.</p>",
+    "</div></header><main class=\"shell\"><section><h2>Run summary</h2>",
+    definition_list(c(
+      Target = summary$dataset_info$target_column,
+      Models = as.character(summary$total_models),
+      Features = as.character(summary$dataset_info$n_features),
+      `Evaluation role` = summary$dataset_info$evaluation_role,
+      `Total model runtime (s)` = report_number(summary$total_training_time_s, 2L)
+    )), "</section><section><h2>Retained models</h2>", html_table(table, digits = 4L),
+    "</section></main></body></html>"
   )
-  
-  # Add model rows
-  for (i in seq_along(model_characteristics)) {
-    model <- model_characteristics[[i]]
-    time_s <- if (!is.null(model$training_time_s)) round(model$training_time_s, 3) else "N/A"
-    size_mb <- if (!is.null(model$size_mb)) round(model$size_mb, 3) else "N/A"
-    
-    html_content <- c(html_content,
-      paste0("    <tr><td>", i, "</td><td>", model$algorithm, "</td><td>", model$model_id, 
-             "</td><td>", time_s, "</td><td>", size_mb, "</td></tr>")
-    )
-  }
-  
-  html_content <- c(html_content, "  </table>")
-  
-  # Add detailed model sections
-  for (i in seq_along(model_characteristics)) {
-    model <- model_characteristics[[i]]
-    
-    html_content <- c(html_content,
-      "",
-      paste0("  <div class='model-section'>"),
-      paste0("    <h3>Model ", i, ": ", model$algorithm, "</h3>"),
-      paste0("    <p><strong>Model ID:</strong> ", model$model_id, "</p>")
-    )
-    
-    # Hyperparameters
-    if (!is.null(model$hyperparameters)) {
-      html_content <- c(html_content,
-        "    <h4>Hyperparameters</h4>",
-        "    <div class='hyperparams'>"
-      )
-      
-      for (param in names(model$hyperparameters)) {
-        html_content <- c(html_content,
-          paste0("      <p><strong>", param, ":</strong> ", model$hyperparameters[[param]], "</p>")
-        )
-      }
-      
-      html_content <- c(html_content, "    </div>")
-    }
-    
-    # Performance metrics
-    if (!is.null(model$performance_metrics)) {
-      html_content <- c(html_content,
-        "    <h4>Performance Metrics</h4>",
-        "    <ul>"
-      )
-      
-      for (metric in names(model$performance_metrics)) {
-        html_content <- c(html_content,
-          paste0("      <li><strong>", metric, ":</strong> ", model$performance_metrics[[metric]], "</li>")
-        )
-      }
-      
-      html_content <- c(html_content, "    </ul>")
-    }
-    
-    html_content <- c(html_content, "  </div>")
-  }
-  
-  html_content <- c(html_content,
-    "",
-    "  <footer>",
-    paste0("    <p>Generated by AutoXplainR on ", Sys.Date(), "</p>"),
-    "  </footer>",
-    "</body>",
-    "</html>"
+  directory <- dirname(output_file)
+  if (!dir.exists(directory)) dir.create(directory, recursive = TRUE, showWarnings = FALSE)
+  writeLines(html, output_file, useBytes = TRUE)
+  invisible(normalizePath(output_file, mustWork = TRUE))
+}
+
+compact_hyperparameters <- function(parameters, algorithm) {
+  preferred <- switch(
+    tolower(algorithm),
+    glm = c("family", "alpha", "lambda", "solver", "standardize"),
+    gbm = c("ntrees", "max_depth", "learn_rate", "sample_rate", "min_rows"),
+    drf = c("ntrees", "max_depth", "sample_rate", "mtries", "min_rows"),
+    xgboost = c("ntrees", "max_depth", "learn_rate", "sample_rate", "reg_alpha", "reg_lambda"),
+    deeplearning = c("hidden", "epochs", "activation", "input_dropout_ratio", "l1", "l2"),
+    stackedensemble = c("metalearner_algorithm"),
+    names(parameters)
   )
-  
-  # Write HTML file
-  writeLines(html_content, output_file)
-  
-  message("Model comparison report generated: ", output_file)
-  return(output_file)
+  selected <- intersect(preferred, names(parameters))
+  values <- lapply(parameters[selected], function(value) {
+    if (is.atomic(value) && length(value) <= 8L) value else paste0("<", length(value), " values>")
+  })
+  values
+}
+
+model_characteristics_table <- function(x) {
+  data.frame(
+    rank = vapply(x, `[[`, integer(1), "rank"),
+    model_id = vapply(x, `[[`, character(1), "model_id"),
+    algorithm = vapply(x, `[[`, character(1), "algorithm"),
+    training_time_s = vapply(x, `[[`, numeric(1), "training_time_s"),
+    size_mb = vapply(x, `[[`, numeric(1), "size_mb"),
+    stringsAsFactors = FALSE
+  )
+}
+
+minmax <- function(x) {
+  range <- range(x)
+  if (range[[1L]] == range[[2L]]) return(rep(0.5, length(x)))
+  (x - range[[1L]]) / diff(range)
 }

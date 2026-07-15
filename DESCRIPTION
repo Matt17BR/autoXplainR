@@ -1,30 +1,44 @@
 Package: AutoXplainR
-Type: Package
-Title: Automated Machine Learning Explanation and Comparative Reporting
-Version: 0.1.2
-Author: Matteo Mazzarelli
-Maintainer: Matteo Mazzarelli <matteo.mazzarelli@gmail.com>
-Description: Provides an efficient, automated, and standardized method for machine learning practitioners to generate comparative model explanations from Automated Machine Learning (AutoML) outputs. Generates clear reports suitable for communicating model behavior to diverse audiences.
+Title: Stress-Testing Evidence Behind Model Explanations
+Version: 0.2.0
+Authors@R:
+    person(
+      given = "Matteo",
+      family = "Mazzarelli",
+      email = "matteo.mazzarelli@gmail.com",
+      role = c("aut", "cre")
+    )
+Description: Audits the reliability of model-agnostic explanations for tabular
+    predictive models. Repeated permutation importance is paired with Monte
+    Carlo stability, feature-dependence diagnostics, comparison across supplied
+    near-optimal models, accumulated local effects, and provenance-rich HTML
+    evidence reports. Optional adapters support 'H2O' AutoML, interactive
+    'Plotly' graphics, and evidence-constrained remote narratives.
 License: MIT + file LICENSE
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.3.2
+URL: https://github.com/Matt17BR/autoXplainR
+BugReports: https://github.com/Matt17BR/autoXplainR/issues
+Depends:
+    R (>= 4.1.0)
 Imports:
-    h2o (>= 3.40.0),
-    plotly (>= 4.10.0),
-    flexdashboard (>= 0.6.0),
-    data.table (>= 1.14.0),
-    jsonlite (>= 1.8.0),
-    httr (>= 1.4.0),
-    stringr (>= 1.4.0),
-    rmarkdown (>= 2.0.0),
-    DT (>= 0.20.0),
-    htmltools (>= 0.5.0),
-    knitr (>= 1.40.0),
-    markdown (>= 1.1.0),
-    magrittr (>= 2.0.0)
+    stats,
+    tools,
+    utils,
+    withr (>= 2.5.0)
 Suggests:
-    testthat (>= 3.0.0)
+    h2o (>= 3.40.0),
+    httr (>= 1.4.0),
+    jsonlite (>= 1.8.0),
+    knitr (>= 1.40.0),
+    plotly (>= 4.10.0),
+    rmarkdown (>= 2.20.0),
+    testthat (>= 3.2.0)
 VignetteBuilder: knitr
-URL: https://github.com/Matt17BR/AutoXplainR
-BugReports: https://github.com/Matt17BR/AutoXplainR/issues
+Config/testthat/edition: 3
+Config/Needs/coverage: covr
+Config/Needs/lint: lintr
+Config/Needs/website: pkgdown
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+NeedsCompilation: no

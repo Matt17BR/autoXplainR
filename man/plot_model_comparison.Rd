@@ -2,27 +2,29 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_model_comparison}
 \alias{plot_model_comparison}
-\title{Plot Model Performance Comparison}
+\title{Plot AutoML model performance}
 \usage{
 plot_model_comparison(
   autoxplain_result,
   performance_metric = NULL,
   complexity_metric = "model_size",
-  title = NULL
+  title = "Model Performance Landscape"
 )
 }
 \arguments{
-\item{autoxplain_result}{Object from autoxplain() function}
+\item{autoxplain_result}{An \code{autoxplain_result}.}
 
-\item{performance_metric}{Character. Metric to use for y-axis (default: "auc" for classification, "rmse" for regression)}
+\item{performance_metric}{Leaderboard metric; automatically selected when
+\code{NULL}.}
 
-\item{complexity_metric}{Character. Metric to use for x-axis (default: "model_size")}
+\item{complexity_metric}{Optional leaderboard complexity column. Model rank
+is used when unavailable.}
 
-\item{title}{Character. Plot title (default: auto-generated)}
+\item{title}{Plot title.}
 }
 \value{
-A plotly object
+A Plotly scatter plot.
 }
 \description{
-Creates a scatter plot comparing model performance vs complexity.
+Plot AutoML model performance
 }

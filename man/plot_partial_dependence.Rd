@@ -2,30 +2,28 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_partial_dependence}
 \alias{plot_partial_dependence}
-\title{Plot Partial Dependence}
+\title{Plot a PDP or ALE feature effect}
 \usage{
 plot_partial_dependence(
   pdp_data,
   title = NULL,
-  color = "#A23B72",
-  height = 220,
-  width = 350
+  color = "#6f3f86",
+  height = 320,
+  width = NULL
 )
 }
 \arguments{
-\item{pdp_data}{Data.frame from calculate_partial_dependence()}
+\item{pdp_data}{Data frame returned by \code{\link[=explain_effect]{explain_effect()}}.}
 
-\item{title}{Character. Plot title (default: auto-generated)}
+\item{title}{Optional title.}
 
-\item{color}{Character. Line color (default: "#A23B72")}
+\item{color}{Effect-line color.}
 
-\item{height}{Numeric. Plot height in pixels (default: 220)}
-
-\item{width}{Numeric. Plot width in pixels (default: 350)}
+\item{height, width}{Widget dimensions.}
 }
 \value{
-A plotly object
+A Plotly htmlwidget.
 }
 \description{
-Creates an interactive line plot showing partial dependence values.
+Plot a PDP or ALE feature effect
 }

@@ -2,39 +2,62 @@
 % Please edit documentation in R/data_preprocessing.R
 \name{preprocess_for_h2o}
 \alias{preprocess_for_h2o}
-\title{Main preprocessing function that orchestrates all preprocessing steps}
+\title{Prepare a data frame for H2O with an auditable recipe}
 \usage{
 preprocess_for_h2o(
   data,
   target_column,
   enable_target_handling = TRUE,
   enable_character_to_factors = TRUE,
-  enable_ordered_factors = TRUE,
-  enable_ordinal_factors = TRUE,
-  enable_id_removal = TRUE,
-  missing_value_strategy = "remove_rows"
+  enable_ordered_factors = FALSE,
+  enable_ordinal_factors = FALSE,
+  enable_id_removal = FALSE,
+  missing_value_strategy = "keep",
+  missing_column_threshold = 0.5,
+  verbose = FALSE,
+  handle_missing = NULL,
+  convert_characters = NULL,
+  remove_id_columns = NULL
 )
 }
 \arguments{
-\item{data}{A data.frame to preprocess}
+\item{data}{Data frame to prepare.}
 
-\item{target_column}{Character. Name of the target column}
+\item{target_column}{Outcome column name.}
 
-\item{enable_target_handling}{Logical. Handle target variable type conversion (default: TRUE)}
+\item{enable_target_handling}{Convert a character outcome to a factor.}
 
-\item{enable_character_to_factors}{Logical. Convert character variables to factors (default: TRUE)}
+\item{enable_character_to_factors}{Convert character predictors to factors.}
 
-\item{enable_ordered_factors}{Logical. Convert ordered factors to numeric (default: TRUE)}
+\item{enable_ordered_factors}{Convert explicitly ordered predictors to their
+integer scores. Defaults to \code{FALSE} because spacing may not be meaningful.}
 
-\item{enable_ordinal_factors}{Logical. Convert ordinal factors to numeric (default: TRUE)}
+\item{enable_ordinal_factors}{Convert factors whose levels are integer-like
+strings to numeric. Defaults to \code{FALSE}.}
 
-\item{enable_id_removal}{Logical. Remove ID-like columns (default: TRUE)}
+\item{enable_id_removal}{Remove columns with identifier-like names. Defaults
+to \code{FALSE}; unique values alone never trigger removal.}
 
-\item{missing_value_strategy}{Character. How to handle missing values (default: "remove_rows")}
+\item{missing_value_strategy}{One of \code{"keep"}, \code{"drop_rows"},
+\code{"drop_columns"}, or \code{"impute"}. Legacy names \code{"remove_rows"} and
+\code{"remove_columns"} are accepted.}
+
+\item{missing_column_threshold}{Fraction missing above which \code{drop_columns}
+removes a predictor.}
+
+\item{verbose}{Emit concise progress messages.}
+
+\item{handle_missing, convert_characters, remove_id_columns}{Deprecated logical
+aliases retained for compatibility.}
 }
 \value{
-List with preprocessed data and comprehensive metadata
+A list containing \code{data}, a structured \code{preprocessing_log}, data
+summaries, and a reusable \code{recipe}.
 }
 \description{
-Main preprocessing function that orchestrates all preprocessing steps
+Performs conservative type normalization and missing-value handling. The
+fitted recipe is returned and can be applied to evaluation data with the same
+factor levels and imputation values. Identifier removal and ordinal coercion
+are opt-in because guessing either can silently change the scientific
+question.
 }

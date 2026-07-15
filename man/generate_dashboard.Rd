@@ -2,41 +2,49 @@
 % Please edit documentation in R/dashboard_generation.R
 \name{generate_dashboard}
 \alias{generate_dashboard}
-\title{Generate AutoXplainR Dashboard}
+\title{Generate an explanation evidence dashboard}
 \usage{
 generate_dashboard(
   autoxplain_result,
-  output_file = "autoxplainr_dashboard.html",
-  top_features = 5,
-  sample_instances = 3,
-  include_llm_report = TRUE,
-  llm_api_key = NULL,
-  open_browser = TRUE,
-  performance_weight = 0.7
+  output_file = "autoxplain-dashboard.html",
+  top_features = 8L,
+  sample_instances = 3L,
+  include_llm_report = FALSE,
+  open_browser = FALSE,
+  performance_weight = NULL,
+  n_repeats = 20L,
+  max_models = 5L
 )
 }
 \arguments{
-\item{autoxplain_result}{Object from autoxplain() function}
+\item{autoxplain_result}{An \code{autoxplain_result}.}
 
-\item{output_file}{Character. Path for output HTML file (default: "autoxplainr_dashboard.html")}
+\item{output_file}{Destination HTML file.}
 
-\item{top_features}{Integer. Number of top features to analyze in detail (default: 5)}
+\item{top_features}{Maximum number of features included in the audit. The
+initial ranking is obtained from repeated permutation importance on the
+leading model, never from impurity importance.}
 
-\item{sample_instances}{Integer. DEPRECATED - no longer used (default: 3)}
+\item{sample_instances}{Retained for backward compatibility; no longer used.}
 
-\item{include_llm_report}{Logical. Whether to include LLM-generated report (default: TRUE)}
+\item{include_llm_report}{Whether to request an optional narrative. The
+evidence report remains complete without it.}
 
-\item{llm_api_key}{Character. Google Generative AI API key (optional)}
+\item{open_browser}{Open the result interactively.}
 
-\item{open_browser}{Logical. Whether to open dashboard in browser (default: TRUE)}
+\item{performance_weight}{Deprecated and ignored. Performance and
+explanation reliability are reported separately rather than collapsed
+into an arbitrary weighted score.}
 
-\item{performance_weight}{Numeric. Weight for performance in efficiency calculation (0-1). 
-Training time weight = 1 - performance_weight (default: 0.7)}
+\item{n_repeats}{Permutation repeats in the final audit.}
+
+\item{max_models}{Maximum retained models to compare.}
 }
 \value{
-Character. Path to generated HTML file
+The normalized dashboard path, invisibly.
 }
 \description{
-Creates a comprehensive HTML dashboard with comparative model explanations,
-visualizations, and natural language summaries.
+Compatibility entry point for H2O AutoML results. It converts retained H2O
+models to model-agnostic explainers, runs the same evidence audit available
+to every model framework, and writes a standalone HTML report.
 }

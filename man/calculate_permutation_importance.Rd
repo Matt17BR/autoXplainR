@@ -2,34 +2,81 @@
 % Please edit documentation in R/permutation_importance.R
 \name{calculate_permutation_importance}
 \alias{calculate_permutation_importance}
-\title{Calculate Permutation Feature Importance}
+\title{Repeated permutation feature importance with uncertainty diagnostics}
 \usage{
 calculate_permutation_importance(
   model,
-  data,
-  target_column,
+  data = NULL,
+  target_column = NULL,
   metric = "auto",
-  n_repeats = 5,
-  seed = 123
+  n_repeats = 20L,
+  seed = 123L,
+  features = NULL,
+  feature_groups = NULL,
+  within = NULL,
+  confidence = 0.95,
+  predict_function = NULL,
+  task = "auto",
+  positive = NULL,
+  n_permutations = NULL
 )
 }
 \arguments{
-\item{model}{An H2O model object}
+\item{model}{An \code{autoxplain_explainer} or a fitted model.}
 
-\item{data}{A data.frame containing the test data}
+\item{data}{Evaluation data. Required for a fitted model; ignored when
+\code{model} is an explainer unless supplied to replace its evaluation data.}
 
-\item{target_column}{Character. Name of the target column}
+\item{target_column}{Outcome column name when \code{model} is a fitted model.}
 
-\item{metric}{Character. Metric to use for importance calculation ("rmse", "mae", "auc", "logloss", "accuracy")}
+\item{metric}{One of \code{"auto"}, \code{"rmse"}, \code{"mae"}, \code{"logloss"},
+\code{"accuracy"}, or \code{"auc"}.}
 
-\item{n_repeats}{Integer. Number of permutation repeats for stability (default: 5)}
+\item{n_repeats}{Number of independent permutations.}
 
-\item{seed}{Integer. Random seed for reproducibility (default: 123)}
+\item{seed}{Random seed. The caller's random-number state is restored.}
+
+\item{features}{Character vector of features to evaluate. Defaults to all.}
+
+\item{feature_groups}{Optional named list of character vectors. Features in
+each element are permuted together, which is useful for one-hot encodings
+and semantically coupled predictors.}
+
+\item{within}{Optional character vector naming columns that define strata,
+or a vector/factor with one stratum per row. Permutations occur within
+strata. This is a blocked sensitivity analysis, not a general conditional
+permutation importance estimator.}
+
+\item{confidence}{Confidence level for Monte Carlo intervals.}
+
+\item{predict_function}{Optional prediction function for a fitted model.}
+
+\item{task}{Task type passed to \code{\link[=explain_model]{explain_model()}}.}
+
+\item{positive}{Positive class passed to \code{\link[=explain_model]{explain_model()}}.}
+
+\item{n_permutations}{Deprecated alias for \code{n_repeats}.}
 }
 \value{
-A data.frame with feature names and their importance scores
+A data frame of class \code{autoxplain_importance} with repeat-level
+values stored in the \code{repeat_scores} attribute.
 }
 \description{
-Calculates feature importance by measuring the decrease in model performance
-when individual features are randomly permuted.
+Measures the change in out-of-sample performance after jointly permuting one
+feature (or a user-defined feature group). Unlike a single permutation bar
+chart, the result retains every repeat, Monte Carlo uncertainty, sign
+stability, and the evaluation contract required for an explanation audit.
+}
+\details{
+The confidence limits quantify Monte Carlo variation across permutations.
+They are not confidence intervals for population-level variable importance.
+Use a genuinely held-out evaluation set and a formal inference method when
+population claims are required.
+}
+\examples{
+train <- mtcars[1:24, ]
+test <- mtcars[25:32, ]
+fit <- lm(mpg ~ wt + hp + disp, data = train)
+x <- explain_model(fit, test, y = "mpg")
+calculate_permutation_importance(x, n_repeats = 10)
 }

@@ -2,33 +2,59 @@
 % Please edit documentation in R/partial_dependence.R
 \name{calculate_partial_dependence_multi}
 \alias{calculate_partial_dependence_multi}
-\title{Calculate Partial Dependence for Multiple Features}
+\title{Calculate PDPs for multiple features}
 \usage{
 calculate_partial_dependence_multi(
   model,
-  data,
+  data = NULL,
   features,
-  n_points = 50,
+  n_points = 50L,
   quantile_range = c(0.05, 0.95),
-  return_all_classes = FALSE
+  return_all_classes = FALSE,
+  grid_size = NULL,
+  sample_size = 1000L,
+  seed = 123L,
+  predict_function = NULL,
+  task = "auto",
+  positive = NULL,
+  class = NULL
 )
 }
 \arguments{
-\item{model}{An H2O model object}
+\item{model}{An \code{autoxplain_explainer} or fitted model.}
 
-\item{data}{A data.frame containing the training/reference data}
+\item{data}{Reference data for a fitted model. For an explainer, defaults to
+its stored feature data.}
 
-\item{features}{Character vector. Names of features to calculate PDP for}
+\item{features}{Non-empty character vector of feature names.}
 
-\item{n_points}{Integer. Number of points to evaluate along each feature range (default: 50)}
+\item{n_points}{Number of quantile bins for ALE or grid points for PDP.}
 
-\item{quantile_range}{Numeric vector of length 2. Quantile range to evaluate (default: c(0.05, 0.95))}
+\item{quantile_range}{Numeric length-two range used for a numeric PDP grid.}
 
-\item{return_all_classes}{Logical. For classification, return probabilities for all classes (default: FALSE)}
+\item{return_all_classes}{Retained for compatibility. Multiclass callers
+should make separate class-specific explainers; \code{TRUE} is not supported by
+ALE.}
+
+\item{grid_size}{Deprecated alias for \code{n_points}.}
+
+\item{sample_size}{Maximum number of reference rows used by PDP. \code{NULL} uses
+all rows. ALE always uses all rows that fall inside its bins.}
+
+\item{seed}{Sampling seed; the caller's random-number state is restored.}
+
+\item{predict_function}{Optional prediction function for a fitted model.}
+
+\item{task}{Prediction task for a fitted model.}
+
+\item{positive}{Positive class for binary classification.}
+
+\item{class}{For multiclass predictions, the class whose probability is
+explained. By default the first prediction column is used.}
 }
 \value{
-A named list of data.frames, one for each feature
+A named list of effect data frames.
 }
 \description{
-Convenience function to calculate partial dependence for multiple features at once.
+Calculate PDPs for multiple features
 }

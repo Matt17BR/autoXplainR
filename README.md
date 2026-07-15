@@ -1,213 +1,268 @@
 # AutoXplainR
 
-[![R](https://img.shields.io/badge/R-%3E%3D4.0.0-blue.svg)](https://www.r-project.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml)
+[![lint](https://github.com/Matt17BR/autoXplainR/actions/workflows/lint.yaml/badge.svg)](https://github.com/Matt17BR/autoXplainR/actions/workflows/lint.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2f7d5b.svg)](LICENSE.md)
 
-An R package for automated machine learning explanation and comparative reporting. AutoXplainR provides an efficient, automated, and standardized method for generating comparative model explanations from AutoML outputs with clear reports suitable for diverse audiences.
+**Stress-test the evidence behind model explanations.**
 
-🔗 **Repository**: [https://github.com/Matt17BR/AutoXplainR](https://github.com/Matt17BR/AutoXplainR)
+Most explainability tools calculate an importance ranking or effect curve.
+AutoXplainR asks the next question: *is the resulting claim stable, supported
+by the data, and consistent across similarly performing models?*
 
-## 📊 Dashboard Preview
+The package wraps fitted tabular models behind one prediction contract, then
+combines repeated permutation importance, Monte Carlo stability, feature
+dependence, accumulated local effects (ALE), predictive multiplicity, and
+near-optimal-model explanation disagreement in one auditable report.
 
-AutoXplainR generates comprehensive interactive dashboards that make machine learning models interpretable and actionable:
+> AutoXplainR is diagnostic software. Its grades are transparent heuristics,
+> not causal evidence, statistical certification, fairness validation, safety
+> approval, or regulatory compliance.
 
-<div align="center">
-  <img src="screenshots/1-overview.png" alt="Dashboard Overview" width="800">
-  <p><em>Main dashboard showing model performance overview and key insights</em></p>
-</div>
+![AutoXplainR evidence report showing a decision summary and reliability grade](man/figures/evidence-audit.png)
 
-## ✨ Key Features
+## Why this package exists
 
-- 🤖 **Automated ML Pipeline**: Seamless integration with H2O AutoML
-- 🔍 **Custom Explanations**: Permutation importance and partial dependence plots implemented from scratch
-- 📊 **Interactive Visualizations**: Custom plotly-based plots for all explanation types
-- 🔬 **Comparative Analysis**: Side-by-side model comparison and explanation
-- 🧠 **Natural Language Reports**: LLM-generated summaries using Google Generative AI
-- 📈 **HTML Dashboards**: Comprehensive interactive dashboards using flexdashboard
-- 🎯 **Self-Reliant**: No dependencies on existing XAI packages like DALEX or iml
+A polished feature-importance chart can conceal several different problems:
+
+- the ranking changes when the permutation is repeated;
+- correlated predictors make marginal permutations or PDP combinations
+  implausible;
+- several models perform about equally well but rely on different features;
+- an interval across random permutations is mistaken for population inference;
+- a generated narrative overstates what the numerical analysis established.
+
+AutoXplainR makes those failure modes first-class outputs. Its distinctive
+unit of work is not a plot—it is an **explanation evidence audit** with
+findings, permitted-claim labels, configuration, and provenance.
 
 ## Installation
 
-### Prerequisites
-
-Ensure you have the required dependencies installed:
+AutoXplainR is under active development and is not yet on CRAN.
 
 ```r
-# Install devtools if not already installed
-if (!require(devtools)) install.packages("devtools")
-
-# H2O installation (if not already installed)
-if (!require(h2o)) {
-  install.packages("h2o")
-}
+# install.packages("pak")
+pak::pak("Matt17BR/autoXplainR")
 ```
 
-### From GitHub
+The model-agnostic core has a lightweight runtime dependency set. H2O AutoML,
+Plotly charts, and remote Gemini narratives are optional integrations.
 
-```r
-# Install from GitHub
-devtools::install_github("Matt17BR/AutoXplainR")
+## Quick start
 
-# Load the package
-library(AutoXplainR)
-```
-
-## Configuration
-
-### Google Generative AI Setup
-Set your API key for natural language report generation:
-
-```r
-# Set environment variable
-Sys.setenv(GEMINI_API_KEY = "your_api_key_here")
-
-# Or pass directly to function
-generate_natural_language_report(result, api_key = "your_api_key_here")
-```
-
-## Quick Start
-
-```r
-# Basic usage
-data(mtcars)
-result <- autoxplain(mtcars, "mpg", max_models = 10, max_runtime_secs = 120)
-
-# Generate comprehensive dashboard
-generate_dashboard(result, "my_dashboard.html")
-```
-
-## Core Functions
-
-### AutoML Integration
-- `autoxplain()`: Main function for automated ML with explanation pipeline
-
-### Explanation Methods
-- `calculate_permutation_importance()`: Feature importance via permutation
-- `calculate_partial_dependence()`: Partial dependence for single features
-- `calculate_partial_dependence_multi()`: Partial dependence for multiple features
-
-<div align="center">
-  <img src="screenshots/2-pdp.png" alt="Partial Dependence Plots" width="750">
-  <p><em>Interactive partial dependence plots showing feature effects on predictions</em></p>
-</div>
-
-### Visualization
-- `plot_permutation_importance()`: Interactive importance bar charts
-- `plot_partial_dependence()`: Interactive PDP line plots
-- `plot_partial_dependence_multi()`: Multi-feature PDP subplots
-- `plot_model_comparison()`: Model performance scatter plots
-
-<div align="center">
-  <img src="screenshots/3-correlations.png" alt="Model Correlations" width="750">
-  <p><em>Model correlation analysis revealing ensemble diversity and prediction agreement</em></p>
-</div>
-
-### Dashboard & Reporting
-- `generate_dashboard()`: Comprehensive HTML dashboard with flexdashboard
-- `create_simple_dashboard()`: Lightweight HTML dashboard
-- `generate_natural_language_report()`: LLM-powered report generation
-
-<div align="center">
-  <img src="screenshots/4-characteristics.png" alt="Model Characteristics" width="750">
-  <p><em>Detailed model characteristics and performance metrics for informed model selection</em></p>
-</div>
-
-## Example Workflow
+Use genuinely held-out data for explanations whenever possible.
 
 ```r
 library(AutoXplainR)
 
-# 1. Run AutoML
-data(mtcars)
-result <- autoxplain(mtcars, "mpg", max_models = 3, max_runtime_secs = 180)
+train <- mtcars[1:24, ]
+test  <- mtcars[25:32, ]
 
-# 2. Generate explanations for best model
-model <- result$models[[1]]
-importance <- calculate_permutation_importance(model, mtcars, "mpg")
-top_features <- head(importance$feature, 3)
-pdp_data <- calculate_partial_dependence_multi(model, mtcars, top_features)
+model_a <- lm(mpg ~ wt + hp + disp, data = train)
+model_b <- lm(mpg ~ wt + hp + qsec, data = train)
 
-# 3. Generate explanations for a specific model or variables
-importance <- calculate_permutation_importance(result$models[[1]], mtcars, "mpg")
-pdp_data <- calculate_partial_dependence_multi(result$models[[1]], mtcars, c("wt", "hp"))
-
-# 4. Generate comprehensive dashboard
-generate_dashboard(
-  result, 
-  output_file = "mtcars_analysis.html",
-  top_features = 5,
-  sample_instances = 3,
-  include_llm_report = TRUE
+explainer_a <- explain_model(
+  model_a,
+  test,
+  y = "mpg",
+  label = "weight + power + displacement",
+  metadata = list(evaluation_role = "test")
 )
 
-# 5. Create individual plots
-plot_model_comparison(result)
-plot_permutation_importance(importance)
-plot_partial_dependence_multi(pdp_data)
+explainer_b <- explain_model(
+  model_b,
+  test,
+  y = "mpg",
+  label = "weight + power + acceleration",
+  metadata = list(evaluation_role = "test")
+)
+
+audit <- audit_explanations(
+  list(explainer_a, explainer_b),
+  n_repeats = 30,
+  performance_tolerance = 0.05,
+  seed = 2026
+)
+
+audit
+render_explanation_report(audit, "explanation-evidence.html")
 ```
 
-## Architecture
+The audit contains:
 
-AutoXplainR follows a modular architecture:
+- baseline held-out performance and the supplied near-optimal model set;
+- repeat-level permutation scores, Monte Carlo intervals, and sign stability;
+- pairwise feature-dependence warnings;
+- importance ranges and rank agreement across near-optimal models;
+- prediction agreement or ambiguity diagnostics;
+- prioritized findings with a concrete next action;
+- package version, configuration, seed, model labels, and explainer IDs.
 
-1. **AutoML Engine**: H2O AutoML integration for model training
-2. **Explanation Engine**: Custom implementations of:
-   - Permutation feature importance
-   - Partial dependence plots
-3. **Visualization Engine**: Interactive plotly-based charts
-4. **Reporting Engine**: Dashboard generation and LLM integration
-5. **Testing Suite**: Comprehensive test coverage
+## Feature effects: ALE first
 
-## 🖼️ Visual Gallery
+ALE is the default effect estimator because marginal PDPs can extrapolate over
+unrealistic combinations when predictors are dependent.
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <img src="screenshots/1-overview.png" alt="Overview" width="350"><br>
-        <strong>📊 Dashboard Overview</strong><br>
-        <em>Performance metrics & insights</em>
-      </td>
-      <td align="center">
-        <img src="screenshots/2-pdp.png" alt="PDP" width="350"><br>
-        <strong>📈 Feature Effects</strong><br>
-        <em>Partial dependence analysis</em>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="screenshots/3-correlations.png" alt="Correlations" width="350"><br>
-        <strong>🔗 Model Correlations</strong><br>
-        <em>Ensemble diversity analysis</em>
-      </td>
-      <td align="center">
-        <img src="screenshots/4-characteristics.png" alt="Characteristics" width="350"><br>
-        <strong>🎯 Model Details</strong><br>
-        <em>Performance & characteristics</em>
-      </td>
-    </tr>
-  </table>
-</div>
+```r
+ale <- explain_effect(explainer_a, feature = "wt")
+pdp <- explain_effect(explainer_a, feature = "wt", method = "pdp")
 
-## Dependencies
+ale
+attr(pdp, "dependence_warning")
+```
 
-### Required
-- h2o (>= 3.40.0)
-- plotly (>= 4.10.0) 
-- data.table (>= 1.14.0)
-- jsonlite (>= 1.8.0)
-- httr (>= 1.4.0)
-- stringr (>= 1.4.0)
+PDP remains available for compatibility and returns relative support plus a
+dependence warning. The plotted intervals are descriptive computation-level
+diagnostics, not population confidence intervals.
 
-### Suggested
-- flexdashboard (>= 0.6.0)
-- rmarkdown (>= 2.0.0)
-- DT (>= 0.20.0)
-- testthat (>= 3.0.0)
+## Model-agnostic prediction contract
 
+For unsupported model classes, provide a function with signature
+`function(model, newdata)` or `function(newdata)`:
+
+```r
+explainer <- explain_model(
+  model = fitted_object,
+  data = held_out_data,
+  y = "outcome",
+  task = "binary",
+  positive = "yes",
+  predict_function = function(model, newdata) {
+    # Return P(outcome == "yes") as a numeric vector.
+  }
+)
+```
+
+Regression functions return a numeric vector. Binary classifiers return the
+positive-class probability. Multiclass classifiers return a named probability
+matrix with one column per outcome class. AutoXplainR validates this contract
+before starting an audit.
+
+## Optional H2O AutoML
+
+`autoxplain()` is now an adapter, not the package architecture. It treats a
+numeric two-level outcome as classification, keeps held-out test data separate
+from H2O validation by default, applies the training preprocessing recipe to
+evaluation data, and records the full fitting contract.
+
+```r
+# install.packages("h2o")
+result <- autoxplain(
+  training_data,
+  target_column = "outcome",
+  test_data = test_data,
+  max_models = 10,
+  max_runtime_secs = 300,
+  seed = 2026
+)
+
+explainers <- as_explainers(result)
+audit <- audit_explanations(explainers)
+generate_dashboard(result, "automl-evidence.html")
+```
+
+Potentially destructive preprocessing such as identifier removal or guessed
+ordinal conversion is opt-in. Every applied transformation is returned as a
+reusable recipe.
+
+## Optional narrative generation
+
+The local deterministic narrative is complete without a network call. A remote
+Gemini narrative is only attempted when `use_remote = TRUE` and an API key is
+available. Only aggregated diagnostics are sent—never raw rows, model objects,
+case-level predictions, or the key itself.
+
+```r
+local_memo <- generate_natural_language_report(audit, use_remote = FALSE)
+
+# Explicit remote opt-in:
+Sys.setenv(GEMINI_API_KEY = "...")
+remote_memo <- generate_natural_language_report(audit, use_remote = TRUE)
+```
+
+The prompt forbids causal, fairness, safety, and compliance claims and requires
+limitations to precede rankings. The numerical audit remains authoritative.
+
+## Where AutoXplainR fits
+
+The R explainability ecosystem already has excellent tools. AutoXplainR does
+not claim to replace them.
+
+| Need | Strong existing options | AutoXplainR focus |
+|---|---|---|
+| Broad explanation methods and adapters | DALEX, ingredients, iml | consumes any model through a small prediction contract |
+| Formal feature-importance inference | xplainfi | clearly labels its default intervals as Monte Carlo diagnostics and points formal claims elsewhere |
+| Interactive exploration | modelStudio | produces an evidence-first, dependency-free review artifact |
+| AutoML training | H2O | treats AutoML as one optional source of a candidate model set |
+| Explanation reliability | methods are spread across workflows | integrates stability, dependence, model multiplicity, claim grading, and provenance |
+
+The product thesis is deliberately narrow: **calculate explanations elsewhere
+if desired; use AutoXplainR to decide what you are justified in saying.**
+
+## Statistical interpretation
+
+- Permutation importance estimates fitted-model reliance on the chosen
+  evaluation distribution. Correlated predictors can share or mask reliance.
+- The default repeat interval captures random-permutation variation. Repeating
+  a permutation does not create independent observations from a population.
+- The “near-optimal set” contains only models supplied to the audit and is an
+  empirical approximation, not an enumeration of a full Rashomon set.
+- ALE summarizes local prediction differences within observed feature bins. It
+  is safer than PDP under dependence, but it is still associational.
+- Negative importance values are retained. They can reflect noise, finite data,
+  model misspecification, or a genuinely harmful predictor.
+
+For population inference or conditional feature importance, pair this package
+with a method designed for that estimand (for example, `xplainfi`) and record
+the result in the audit metadata.
+
+## Package architecture
+
+```text
+fitted models
+  └─ explain_model()          validated prediction contract + provenance
+       ├─ calculate_permutation_importance()
+       ├─ explain_effect()    ALE or diagnosed PDP
+       └─ audit_explanations()
+            ├─ stability and dependence
+            ├─ near-optimal model disagreement
+            ├─ prioritized findings and permitted claims
+            └─ render_explanation_report()
+```
+
+External systems sit at the edge: H2O for optional fitting, Plotly for optional
+interactive views, and Gemini for an optional secondary narrative. The audit
+and HTML evidence report do not require any of them.
+
+## Development
+
+```r
+devtools::document()
+devtools::test()
+devtools::check()
+```
+
+Slow H2O integration tests are opt-in locally:
+
+```sh
+AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and the
+[development roadmap](ROADMAP.md). API changes are recorded in [NEWS.md](NEWS.md).
+
+## Literature foundations
+
+- Fisher, Rudin, and Dominici (2019), *All Models are Wrong, but Many are
+  Useful*, JMLR 20(177).
+- Apley and Zhu (2020), *Visualizing the Effects of Predictor Variables in
+  Black Box Supervised Learning Models*, JRSS B 82(4).
+- Molnar et al. (2018), *iml: An R package for Interpretable Machine Learning*,
+  JOSS 3(26).
+- Biecek (2018), *DALEX: Explainers for Complex Predictive Models in R*, JMLR
+  19(84).
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
+[MIT](LICENSE.md) © 2025–2026 Matteo Mazzarelli.

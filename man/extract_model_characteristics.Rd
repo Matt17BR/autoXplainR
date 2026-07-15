@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_characterization.R
 \name{extract_model_characteristics}
 \alias{extract_model_characteristics}
-\title{Extract Detailed Model Characteristics}
+\title{Extract comparable AutoML model metadata}
 \usage{
 extract_model_characteristics(
   autoxplain_result,
@@ -12,25 +12,19 @@ extract_model_characteristics(
 )
 }
 \arguments{
-\item{autoxplain_result}{Object from autoxplain() function}
+\item{autoxplain_result}{An \code{autoxplain_result}.}
 
-\item{include_hyperparams}{Logical. Whether to extract hyperparameters (default: TRUE)}
+\item{include_hyperparams}{Include a compact set of configured parameters.}
 
-\item{include_performance}{Logical. Whether to extract performance metrics (default: TRUE)}
+\item{include_performance}{Include numeric leaderboard metrics.}
 
-\item{include_varimp}{Logical. Whether to extract variable importance (default: TRUE)}
+\item{include_varimp}{Include native H2O importance when available.}
 }
 \value{
-List with detailed model characteristics for each model
+A list of class \code{autoxplainr_model_characteristics}.
 }
 \description{
-Provides comprehensive model analysis including hyperparameters, training times,
-model complexity metrics, and algorithm-specific details for AutoML comparison.
-}
-\examples{
-\dontrun{
-result <- autoxplain(mtcars, "mpg", max_models = 3)
-model_details <- extract_model_characteristics(result)
-print(model_details)
-}
+Extracts stable, compact metadata from retained H2O models and joins it to
+the AutoML leaderboard. Native H2O variable importance is labelled as such;
+it is not substituted for model-agnostic permutation importance.
 }

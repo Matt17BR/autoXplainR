@@ -1,364 +1,224 @@
 ---
-title: "Introduction to AutoXplainR"
+title: "Auditing Explanation Evidence with AutoXplainR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to AutoXplainR}
+  %\VignetteIndexEntry{Auditing Explanation Evidence with AutoXplainR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.height = 5,
-  eval = FALSE
-)
-```
-
-```{r setup}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(AutoXplainR)
 ```
 
-## Overview
+## From explanation output to evidence
 
-AutoXplainR provides an efficient, automated, and standardized method for machine learning practitioners to generate comparative model explanations from AutoML outputs. The package integrates seamlessly with H2O AutoML and provides custom implementations of key explainability methods, all wrapped in an intuitive interface.
+Permutation importance and feature-effect plots are useful descriptions of a
+fitted model. They are also easy to over-interpret. A feature can appear
+important because of a particular random permutation, correlated predictors can
+make marginal perturbations unrealistic, and a different but equally accurate
+model can support a different story.
 
-## Key Features
+AutoXplainR treats an explanation as a claim that needs a recorded evidence
+contract:
 
-- **Automated ML Pipeline**: Leverages H2O AutoML for diverse model generation
-- **Custom Explainability Suite**: Implements permutation importance and partial dependence from scratch
-- **Interactive Visualizations**: Creates publication-ready plots using plotly
-- **Comparative Analysis**: Enables side-by-side model comparison
-- **Natural Language Reports**: Generates accessible summaries using LLMs
-- **HTML Dashboards**: Produces comprehensive reports using flexdashboard
+1. Which fitted model and evaluation distribution are being described?
+2. Does the numerical result survive repetition of its random computation?
+3. Are feature-dependence assumptions under pressure?
+4. Do similarly performing supplied models support the same ranking?
+5. What language is justified by those diagnostics?
 
-## Installation
+The resulting grade is a transparent triage heuristic. It is not a p-value,
+causal result, fairness assessment, or certification.
 
-```{r, eval = FALSE}
-# Install from local source
-devtools::install_local("path/to/autoxplainr")
+## Use held-out data
 
-# Load the package
-library(AutoXplainR)
+This small example uses a fixed split only to keep the vignette reproducible.
+A real analysis should design its evaluation split before fitting and retain
+enough observations for stable diagnostics.
+
+```{r fit}
+train <- mtcars[1:24, ]
+test <- mtcars[25:32, ]
+
+model_a <- lm(mpg ~ wt + hp + disp, data = train)
+model_b <- lm(mpg ~ wt + hp + qsec, data = train)
 ```
 
-## Quick Start
+`explain_model()` validates how each model produces predictions. The explainer
+stores feature data, outcomes, task metadata, and a lightweight provenance ID.
 
-### Basic Usage
-
-The main entry point is the `autoxplain()` function, which handles the entire AutoML pipeline:
-
-```{r basic-usage}
-# Load sample data
-data_path <- system.file("extdata", "breast-cancer.csv", package = "AutoXplainR")
-breast_cancer <- read.csv(data_path, stringsAsFactors = FALSE)
-
-# Run AutoML with explanations
-result <- autoxplain(
-  data = breast_cancer,
-  target_column = "diagnosis",
-  max_models = 5,
-  max_runtime_secs = 300,
-  seed = 42
+```{r explainers}
+explainer_a <- explain_model(
+  model_a,
+  test,
+  y = "mpg",
+  label = "displacement model",
+  metadata = list(evaluation_role = "test")
 )
 
-# View the results
-summary(result)
+explainer_b <- explain_model(
+  model_b,
+  test,
+  y = "mpg",
+  label = "acceleration model",
+  metadata = list(evaluation_role = "test")
+)
+
+explainer_a
 ```
 
-### Understanding the Results
+For an unsupported model class, pass `predict_function`. Regression functions
+return numeric predictions; binary functions return the positive-class
+probability; multiclass functions return a named probability matrix.
 
-The `autoxplain()` function returns a comprehensive result object containing:
+## Inspect repeated permutation importance
 
-- **models**: List of trained H2O models
-- **leaderboard**: Model performance rankings
-- **training_data**: The processed training data
-- **target_column**: Name of the target variable
-- **model_characteristics**: Detailed model metadata
-
-## Generating Explanations
-
-### Permutation Feature Importance
-
-Understand which features are most important for model predictions:
-
-```{r permutation-importance}
-# Calculate importance for the best model
-best_model <- result$models[[1]]
+```{r importance}
 importance <- calculate_permutation_importance(
-  model = best_model,
-  data = breast_cancer,
-  target_column = "diagnosis",
+  explainer_a,
+  features = c("wt", "hp", "disp"),
   n_repeats = 10,
-  metric = "auto"
+  seed = 2026
 )
 
-# Visualize the results
-plot_permutation_importance(
-  importance_data = importance,
-  title = "Feature Importance - Best Model",
-  max_features = 10
+importance
+```
+
+The result deliberately retains negative values. Its interval is a Monte Carlo
+interval across permutation repeats. Repeating an algorithm does not create new
+independent observations from a population, so this is not population-level
+inference.
+
+Feature groups can be permuted jointly:
+
+```{r groups}
+calculate_permutation_importance(
+  explainer_a,
+  feature_groups = list(engine = c("hp", "disp"), weight = "wt"),
+  n_repeats = 5,
+  seed = 2026
 )
 ```
 
-### Partial Dependence Plots
+The optional `within` argument permutes within explicit strata. This is useful
+as a blocked sensitivity analysis, but it is not advertised as a general
+conditional permutation estimator.
 
-Examine how features affect predictions:
+## Prefer ALE for dependent predictors
 
-```{r partial-dependence}
-# Single feature PDP
-pdp_single <- calculate_partial_dependence(
-  model = best_model,
-  data = breast_cancer,
-  feature = "radius_mean",
-  grid_size = 20
-)
+Partial dependence replaces one feature while leaving all others unchanged.
+With dependent predictors, that can ask the model to score combinations absent
+from the reference data. Accumulated local effects (ALE) instead average local
+prediction differences within observed feature bins (Apley and Zhu, 2020).
 
-plot_partial_dependence(
-  pdp_data = pdp_single,
-  title = "Effect of Radius Mean on Diagnosis"
-)
+```{r effects}
+ale <- explain_effect(explainer_a, feature = "wt")
+pdp <- explain_effect(explainer_a, feature = "wt", method = "pdp")
 
-# Multiple features
-top_features <- head(importance$feature, 4)
-pdp_multi <- calculate_partial_dependence_multi(
-  model = best_model,
-  data = breast_cancer,
-  features = top_features
-)
-
-plot_partial_dependence_multi(
-  pdp_list = pdp_multi,
-  title = "Top Feature Effects"
-)
+ale
+attr(pdp, "max_association")
+attr(pdp, "dependence_warning")
 ```
 
-## Comparative Analysis
+Both effect outputs include relative empirical support. Their uncertainty
+columns remain descriptive computation diagnostics.
 
-### Model Correlation Analysis
+## Audit several plausible models
 
-Understand how different models relate to each other:
-
-```{r model-correlation}
-# Create correlation heatmap
-plot_model_correlations(
-  autoxplain_result = result,
-  test_data = NULL  # Uses training data
+```{r audit}
+audit <- audit_explanations(
+  list(explainer_a, explainer_b),
+  features = c("wt", "hp", "disp", "qsec"),
+  n_repeats = 10,
+  performance_tolerance = 0.10,
+  dependence_threshold = 0.70,
+  seed = 2026
 )
+
+audit
 ```
 
-### Performance vs Complexity
+The near-optimal indicator is relative to the models supplied to this call. It
+does not claim to enumerate every near-optimal model in a hypothesis class. If
+near-optimal supplied models disagree, the audit recommends reporting an
+importance range rather than a single-model ranking.
 
-Compare models based on their trade-offs:
+The main components are ordinary data structures:
 
-```{r model-comparison}
-plot_model_comparison(
-  autoxplain_result = result,
-  performance_metric = "auc",
-  complexity_metric = "model_size"
-)
+```{r components}
+audit$performance
+audit$dependence
+audit$explanation_agreement$importance_ranges
+audit$findings
 ```
 
-## Dashboard Generation
+Evidence grades control the wording that the report permits:
 
-### Comprehensive Dashboard
+- **A:** stable marginal evidence under the configured diagnostics;
+- **B:** usable with the stated uncertainty;
+- **C:** sensitivity finding only;
+- **D:** do not make a feature claim.
 
-Generate a full HTML report with all analyses:
+These cutoffs are visible in the source and should be configured and justified
+for the application. A grade cannot turn an associational explanation into a
+causal one.
 
-```{r dashboard-full}
-# With LLM-powered insights (requires GEMINI_API_KEY)
-Sys.setenv(GEMINI_API_KEY = "your_api_key_here")
+## Preserve the review artifact
 
-dashboard_path <- generate_dashboard(
-  autoxplain_result = result,
-  output_file = "breast_cancer_analysis.html",
-  top_features = 5,
-  include_llm_report = TRUE,
-  open_browser = TRUE
-)
+```{r report}
+path <- tempfile(fileext = ".html")
+render_explanation_report(audit, path)
+file.exists(path)
+unlink(path)
 ```
 
-### Simple Dashboard
+The report is a standalone HTML file with findings, action items, model and
+feature tables, interpretation boundaries, configuration, timestamps, and
+explainer IDs. Store it with the model version, evaluation-data version, and
+analysis code.
 
-For a lightweight alternative:
+## Optional H2O AutoML adapter
 
-```{r dashboard-simple}
-simple_dashboard <- create_simple_dashboard(
-  autoxplain_result = result,
-  output_file = "breast_cancer_simple.html"
+The explanation core does not require H2O or Java. If H2O is useful for fitting
+a candidate set, keep it at the boundary:
+
+```{r h2o, eval=FALSE}
+result <- autoxplain(
+  training_data,
+  target_column = "outcome",
+  test_data = held_out_data,
+  max_models = 10,
+  max_runtime_secs = 300,
+  seed = 2026
 )
+
+explainers <- as_explainers(result)
+audit <- audit_explanations(explainers)
+generate_dashboard(result, "automl-evidence.html")
 ```
 
-## Working with Different Data Types
+Held-out test data are not passed to H2O as a validation frame by default.
+Numeric two-level outcomes are classified correctly, and training
+preprocessing is applied to evaluation data through a fitted recipe.
 
-### Regression Example
+## Optional narratives
 
-```{r regression-example}
-# Load housing data
-housing_path <- system.file("extdata", "california-housing.csv", 
-                           package = "AutoXplainR")
-housing <- read.csv(housing_path, stringsAsFactors = FALSE)
-
-# Subset for faster processing
-housing_sample <- housing[sample(nrow(housing), 1000), ]
-
-# Run AutoML for regression
-housing_result <- autoxplain(
-  data = housing_sample,
-  target_column = "median_house_value",
-  max_models = 3,
-  max_runtime_secs = 180
-)
-
-# Generate explanations
-importance_reg <- calculate_permutation_importance(
-  model = housing_result$models[[1]],
-  data = housing_sample,
-  target_column = "median_house_value"
-)
-
-plot_permutation_importance(importance_reg)
+```{r narrative}
+memo <- generate_natural_language_report(audit, use_remote = FALSE)
+cat(substr(memo, 1, 300), "...")
 ```
 
-### Handling Missing Data
+The local narrative is deterministic. Remote Gemini generation is an explicit
+optional boundary and receives only aggregated diagnostics. The prompt forbids
+causal, safety, fairness, and compliance claims, but generated text still
+requires human review.
 
-AutoXplainR automatically handles common data issues:
+## Literature context
 
-```{r missing-data}
-# The package preprocesses data automatically
-# - Converts character columns to factors
-# - Handles ordered factors appropriately
-# - Removes ID-like columns
-# - Manages missing values
-
-# You can also use the preprocessing function directly
-processed <- preprocess_for_h2o(
-  data = your_data,
-  target_column = "target",
-  preprocessing_config = list(
-    handle_missing = TRUE,
-    convert_characters = TRUE,
-    remove_id_columns = TRUE
-  )
-)
-```
-
-## Advanced Usage
-
-### Custom Model Analysis
-
-```{r custom-analysis}
-# Extract detailed model characteristics
-model_chars <- extract_model_characteristics(
-  models = result$models,
-  leaderboard = result$leaderboard
-)
-
-# Create custom comparison report
-comparison <- create_model_comparison_report(
-  models = result$models[1:3],
-  test_data = breast_cancer,
-  target_column = "diagnosis"
-)
-```
-
-### Natural Language Reports
-
-Generate accessible summaries for stakeholders:
-
-```{r llm-reports}
-# Prepare explanation data
-importance_data <- calculate_permutation_importance(
-  result$models[[1]], breast_cancer, "diagnosis"
-)
-
-pdp_data <- calculate_partial_dependence_multi(
-  result$models[[1]], breast_cancer, 
-  features = head(importance_data$feature, 3)
-)
-
-# Generate report
-nlp_report <- generate_natural_language_report(
-  autoxplain_result = result,
-  importance_data = importance_data,
-  pdp_data = pdp_data,
-  model_characteristics = model_chars,
-  api_key = Sys.getenv("GEMINI_API_KEY")
-)
-
-cat(nlp_report)
-```
-
-## Best Practices
-
-### 1. Data Preparation
-- Ensure your target variable is properly formatted (factor for classification, numeric for regression)
-- Remove any columns that shouldn't be used for modeling (IDs, timestamps)
-- Consider data size - AutoML can be resource-intensive
-
-### 2. Model Selection
-- Start with `max_models = 5` and `max_runtime_secs = 300` for initial exploration
-- Increase these values for production models
-- Use `seed` for reproducibility
-
-### 3. Interpretation
-- Always validate explanations against domain knowledge
-- Use multiple explanation methods for comprehensive understanding
-- Consider model performance when interpreting results
-
-### 4. Reporting
-- Use dashboards for comprehensive analysis
-- Generate LLM reports for non-technical stakeholders
-- Include both global (importance) and local (PDP) explanations
-
-## Troubleshooting
-
-### H2O Initialization Issues
-
-If H2O fails to start:
-
-```{r h2o-troubleshoot}
-# Check if H2O is already running
-h2o::h2o.shutdown(prompt = FALSE)
-
-# Restart with custom settings
-h2o::h2o.init(
-  max_mem_size = "8G",
-  nthreads = 4
-)
-```
-
-### Memory Management
-
-For large datasets:
-
-```{r memory-management}
-# Use data sampling
-large_data_sample <- large_data[sample(nrow(large_data), 10000), ]
-
-# Or increase H2O memory before running autoxplain
-h2o::h2o.init(max_mem_size = "16G")
-```
-
-### API Key Issues
-
-For LLM features:
-
-```{r api-setup}
-# Set API key in environment
-Sys.setenv(GEMINI_API_KEY = "your_key")
-
-# Or pass directly to functions
-report <- generate_natural_language_report(
-  autoxplain_result = result,
-  api_key = "your_key"
-)
-```
-
-## Conclusion
-
-AutoXplainR streamlines the journey from AutoML to interpretable insights. By combining automated model generation with standardized explanations and clear visualizations, it enables data scientists to efficiently understand and communicate model behavior.
-
-For more examples and advanced usage, explore the package documentation and example datasets provided in `inst/extdata/`.
+Permutation-based model reliance and model-class reliance are discussed by
+Fisher, Rudin, and Dominici (2019). ALE and the extrapolation problem of PDPs
+under dependent features are developed by Apley and Zhu (2020). AutoXplainR
+operationalizes these concerns as a review workflow; it does not claim a new
+formal inferential estimator.

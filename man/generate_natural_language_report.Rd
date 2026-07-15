@@ -2,40 +2,54 @@
 % Please edit documentation in R/llm_integration.R
 \name{generate_natural_language_report}
 \alias{generate_natural_language_report}
-\title{Generate Natural Language Report using Google Generative AI}
+\title{Generate an evidence-constrained narrative}
 \usage{
 generate_natural_language_report(
   autoxplain_result,
   importance_data = NULL,
   pdp_data = NULL,
   model_characteristics = NULL,
+  audit = NULL,
   api_key = NULL,
-  model = "gemma-3-27b-it",
-  max_tokens = 1500,
-  temperature = 0.3
+  model = "gemini-3.5-flash",
+  max_tokens = 1000L,
+  temperature = 0.2,
+  use_remote = TRUE,
+  fallback = TRUE
 )
 }
 \arguments{
-\item{autoxplain_result}{Object from autoxplain() function}
+\item{autoxplain_result}{An \code{autoxplain_result} or \code{autoxplain_audit}.}
 
-\item{importance_data}{Data.frame from calculate_permutation_importance() (optional)}
+\item{importance_data}{Optional permutation importance data.}
 
-\item{pdp_data}{List from calculate_partial_dependence_multi() (optional)}
+\item{pdp_data}{Optional feature-effect list.}
 
-\item{model_characteristics}{List from extract_model_characteristics() (optional)}
+\item{model_characteristics}{Optional model metadata.}
 
-\item{api_key}{Character. Google Generative AI API key. If NULL, uses GEMINI_API_KEY environment variable}
+\item{audit}{Optional \code{autoxplain_audit}.}
 
-\item{model}{Character. Model to use (default: "gemma-3-27b-it")}
+\item{api_key}{Gemini API key. When \code{NULL}, \code{GEMINI_API_KEY} is consulted.
+If no key is available, a local deterministic narrative is returned.}
 
-\item{max_tokens}{Integer. Maximum tokens in response (default: 1000)}
+\item{model}{Gemini model identifier.}
 
-\item{temperature}{Numeric. Sampling temperature (default: 0.3)}
+\item{max_tokens}{Maximum response tokens.}
+
+\item{temperature}{Sampling temperature.}
+
+\item{use_remote}{Whether remote generation is allowed. Set \code{FALSE} to
+guarantee local-only operation.}
+
+\item{fallback}{Return the deterministic narrative when the remote call
+fails.}
 }
 \value{
-Character. Generated natural language report
+A single character string.
 }
 \description{
-Creates a natural language summary of AutoML results and explanations using
-Google's Gemini API with the gemma-3-27b-it model.
+Produces a deterministic local narrative by default, or sends only an
+aggregated analysis context to the Gemini API when an API key is supplied.
+Raw rows, model objects, and predictions are never included in the prompt.
+The generated text is explicitly secondary to the numeric audit.
 }

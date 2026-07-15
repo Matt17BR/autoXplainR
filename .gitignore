@@ -92,6 +92,7 @@ CLAUDE.md
 
 # Exception: Track screenshots for README
 !screenshots/*.png
+!man/figures/*.png
 
 # Development and test files
 test_*.R

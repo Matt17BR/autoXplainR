@@ -2,24 +2,39 @@
 % Please edit documentation in R/dashboard_generation.R
 \name{create_simple_dashboard}
 \alias{create_simple_dashboard}
-\title{Create simple dashboard without flexdashboard dependency}
+\title{Create a lightweight AutoXplainR dashboard}
 \usage{
 create_simple_dashboard(
   autoxplain_result,
-  output_file = "simple_dashboard.html",
-  top_features = 5
+  output_file = "autoxplain-dashboard.html",
+  top_features = 8L,
+  sample_instances = 3L,
+  open_browser = FALSE,
+  n_repeats = 10L,
+  ...
 )
 }
 \arguments{
-\item{autoxplain_result}{Object from autoxplain() function}
+\item{autoxplain_result}{An \code{autoxplain_result}.}
 
-\item{output_file}{Character. Path for output HTML file}
+\item{output_file}{Destination HTML file.}
 
-\item{top_features}{Integer. Number of top features to analyze}
+\item{top_features}{Maximum number of features included in the audit. The
+initial ranking is obtained from repeated permutation importance on the
+leading model, never from impurity importance.}
+
+\item{sample_instances}{Retained for backward compatibility; no longer used.}
+
+\item{open_browser}{Open the result interactively.}
+
+\item{n_repeats}{Permutation repeats in the final audit.}
+
+\item{...}{Additional arguments forwarded to \code{\link[=generate_dashboard]{generate_dashboard()}}.}
 }
 \value{
-Character. Path to generated HTML file
+The normalized output path, invisibly.
 }
 \description{
-Create simple dashboard without flexdashboard dependency
+\code{create_simple_dashboard()} now uses the same dependency-free evidence
+report as \code{\link[=generate_dashboard]{generate_dashboard()}}.
 }

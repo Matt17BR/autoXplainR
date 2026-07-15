@@ -2,27 +2,27 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_partial_dependence_multi}
 \alias{plot_partial_dependence_multi}
-\title{Plot Multiple Partial Dependence Plots}
+\title{Plot multiple feature effects}
 \usage{
 plot_partial_dependence_multi(
   pdp_list,
-  title = "Partial Dependence Plots",
+  title = "Feature Effects",
   colors = NULL,
-  ncol = 2
+  ncol = 2L
 )
 }
 \arguments{
-\item{pdp_list}{Named list of data.frames from calculate_partial_dependence_multi()}
+\item{pdp_list}{Named list of feature effects.}
 
-\item{title}{Character. Overall plot title (default: "Partial Dependence Plots")}
+\item{title}{Overall title.}
 
-\item{colors}{Character vector. Colors for each plot (default: predefined palette)}
+\item{colors}{Line colors.}
 
-\item{ncol}{Integer. Number of columns in subplot layout (default: 2)}
+\item{ncol}{Number of subplot columns.}
 }
 \value{
-A plotly object
+A Plotly htmlwidget.
 }
 \description{
-Creates a subplot with multiple partial dependence plots.
+Plot multiple feature effects
 }

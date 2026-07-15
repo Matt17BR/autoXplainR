@@ -2,25 +2,24 @@
 % Please edit documentation in R/model_characterization.R
 \name{create_model_comparison_report}
 \alias{create_model_comparison_report}
-\title{Create Model Comparison Report}
+\title{Create a compact model metadata report}
 \usage{
 create_model_comparison_report(
   model_characteristics,
-  output_file = "model_comparison_report.html",
-  include_plots = TRUE
+  output_file = "model-comparison.html",
+  include_plots = FALSE
 )
 }
 \arguments{
-\item{model_characteristics}{Object from extract_model_characteristics()}
+\item{model_characteristics}{Output from \code{\link[=extract_model_characteristics]{extract_model_characteristics()}}.}
 
-\item{output_file}{Character. Path for output file (default: "model_comparison_report.html")}
+\item{output_file}{Destination HTML file.}
 
-\item{include_plots}{Logical. Whether to include comparison plots (default: TRUE)}
+\item{include_plots}{Retained for compatibility and ignored.}
 }
 \value{
-Character. Path to generated report file
+The normalized output path, invisibly.
 }
 \description{
-Generates a detailed comparison report of all models including hyperparameters,
-performance metrics, and training characteristics.
+Create a compact model metadata report
 }

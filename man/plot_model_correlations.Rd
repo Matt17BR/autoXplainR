@@ -2,18 +2,18 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_model_correlations}
 \alias{plot_model_correlations}
-\title{Create Model Correlation Heatmap}
+\title{Plot prediction agreement among retained AutoML models}
 \usage{
 plot_model_correlations(autoxplain_result, test_data = NULL)
 }
 \arguments{
-\item{autoxplain_result}{AutoXplainR result object}
+\item{autoxplain_result}{An \code{autoxplain_result}.}
 
-\item{test_data}{Optional test data. If NULL, uses training data}
+\item{test_data}{Optional evaluation data.}
 }
 \value{
-plotly heatmap object
+A Plotly heatmap.
 }
 \description{
-Creates a correlation heatmap showing how similar different models' predictions are
+Plot prediction agreement among retained AutoML models
 }

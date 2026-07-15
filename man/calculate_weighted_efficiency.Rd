@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_characterization.R
 \name{calculate_weighted_efficiency}
 \alias{calculate_weighted_efficiency}
-\title{Calculate Weighted Efficiency Score with Min-Max Scaling}
+\title{Calculate a relative weighted model score}
 \usage{
 calculate_weighted_efficiency(
   performance_scores,
@@ -12,19 +12,20 @@ calculate_weighted_efficiency(
 )
 }
 \arguments{
-\item{performance_scores}{Numeric vector of performance scores}
+\item{performance_scores}{Numeric model scores.}
 
-\item{training_times}{Numeric vector of training times in seconds}
+\item{training_times}{Numeric training times in seconds.}
 
-\item{performance_weight}{Weight for performance (0-1), training time weight = 1 - performance_weight}
+\item{performance_weight}{Weight on predictive performance.}
 
-\item{higher_is_better}{Logical. TRUE if higher performance scores are better (e.g., AUC), 
-FALSE if lower is better (e.g., RMSE)}
+\item{higher_is_better}{Whether larger performance is better.}
 }
 \value{
-Numeric vector of efficiency scores
+Numeric relative scores from zero to one.
 }
 \description{
-Calculates an efficiency score that combines performance and training time
-using min-max scaling and user-defined weights.
+Min-max combines predictive performance and training time. Because results
+depend on the candidate set and the subjective weight, use this only as a
+sensitivity analysis; AutoXplainR reports the underlying dimensions
+separately in its primary workflow.
 }
