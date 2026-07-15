@@ -33,7 +33,7 @@ ordered by user and scientific leverage, not novelty theatre.
   evaluation-sample, and model-fitting variability.
 - [ ] Cross-fitted audit orchestration that prevents training/evaluation leakage
   by construction.
-- [ ] Calibration, subgroup performance, and missingness-shift diagnostics as
+- [x] Calibration, subgroup performance, and missingness-shift diagnostics as
   context for explanation claims—not as fairness certification.
 - [ ] Simulation corpus with known ground truth, correlated features,
   interactions, null predictors, extrapolation, and label noise.

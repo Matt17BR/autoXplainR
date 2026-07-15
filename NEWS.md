@@ -22,6 +22,10 @@
   comparing held-out metrics across one explicitly chosen column. Small groups
   remain visible and flagged, and the output rejects fairness-certification
   language.
+- Added `missingness_shift()` using pre-imputation, per-predictor rates retained
+  in preprocessing provenance. Guided results flag practical training-versus-
+  evaluation differences without presenting them as a statistical test or a
+  general drift check.
 - The guided workflow now rejects unsupported or non-finite inputs, removes and
   records constant predictors, and reapplies its fitted preprocessing recipe to
   raw evaluation data supplied later.

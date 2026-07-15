@@ -320,12 +320,15 @@ statistical_mode <- function(x) {
 }
 
 data_info <- function(data) {
+  missing_by_column <- vapply(data, function(column) sum(is.na(column)), integer(1))
   list(
     nrows = nrow(data),
     ncols = ncol(data),
     column_names = names(data),
     column_types = vapply(data, class1, character(1)),
-    missing_values = sum(is.na(data))
+    missing_values = sum(missing_by_column),
+    missing_by_column = missing_by_column,
+    missing_fraction_by_column = missing_by_column / max(1L, nrow(data))
   )
 }
 

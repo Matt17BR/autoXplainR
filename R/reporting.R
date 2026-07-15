@@ -461,6 +461,7 @@ render_guided_notes <- function(notes) {
 
 render_prediction_diagnostics <- function(result, diagnostics) {
   if (is.null(diagnostics)) return("")
+  missingness_html <- render_missingness_shift(diagnostics$missingness_shift)
   if (result$task == "regression") {
     return(paste0(
       "<h3>How large were individual errors?</h3><div class=\"cards diagnostic-cards\">",
@@ -470,14 +471,67 @@ render_prediction_diagnostics <- function(result, diagnostics) {
                   "Half of absolute errors were below this value"),
       metric_card("90th-percentile error", report_number(diagnostics$p90_absolute_error, 4L),
                   "Nine in ten absolute errors were below this value"),
-      "</div>"
+      "</div>", missingness_html
     ))
   }
   paste0(
     "<h3>Which classes were confused?</h3><p>Rows on the diagonal are correct predictions. ",
     "Off-diagonal rows show the specific mistakes.</p>",
     html_table(diagnostics$confusion_matrix, digits = 0L),
-    render_calibration_diagnostic(result, diagnostics$calibration)
+    render_calibration_diagnostic(result, diagnostics$calibration),
+    missingness_html
+  )
+}
+
+render_missingness_shift <- function(shift) {
+  if (is.null(shift) || shift$n_with_missing == 0L) return("")
+  display <- shift$features[
+    shift$features$training_missing_rate > 0 |
+      shift$features$evaluation_missing_rate > 0,
+    c(
+      "feature", "used_by_model", "training_missing_rate", "evaluation_missing_rate",
+      "rate_change", "flagged"
+    ),
+    drop = FALSE
+  ]
+  display$training_missing_rate <- vapply(
+    display$training_missing_rate, format_percent, character(1)
+  )
+  display$evaluation_missing_rate <- vapply(
+    display$evaluation_missing_rate, format_percent, character(1)
+  )
+  display$rate_change <- vapply(display$rate_change, function(value) {
+    paste0(if (value > 0) "+" else "", format_percent(value))
+  }, character(1))
+  names(display) <- c(
+    "Input", "Used by model?", "Training missing", "Evaluation missing",
+    "Change", "Flagged?"
+  )
+  verdict <- if (shift$n_flagged_model_features > 0L) {
+    paste0(
+      "<p class=\"callout\"><strong>Some model inputs crossed the practical flag.</strong> ",
+      "Check whether collection or pipeline behavior changed before treating the held-out ",
+      "result as representative.</p>"
+    )
+  } else {
+    paste0(
+      "<p class=\"callout\"><strong>No model input crossed the practical flag.</strong> ",
+      "Missingness can still matter even when rate differences are smaller.</p>"
+    )
+  }
+  paste0(
+    "<h3>Did missing data change between fitting and evaluation?</h3>",
+    "<p>This compares raw missing-value rates before the configured <strong>",
+    html_escape(shift$preprocessing_strategy), "</strong> handling was applied.</p>",
+    "<div class=\"cards diagnostic-cards\">",
+    metric_card("Inputs with missing values", as.character(shift$n_with_missing),
+                "Observed before preprocessing"),
+    metric_card("Flagged model inputs", as.character(shift$n_flagged_model_features),
+                paste0("At least ", format_percent(shift$threshold), " absolute change")),
+    metric_card("Largest observed shift", format_percent(shift$largest_shift),
+                "Absolute training-versus-evaluation difference"),
+    "</div>", verdict, html_table(display, digits = 3L),
+    "<p class=\"microcopy\">", html_escape(shift$scope_note), "</p>"
   )
 }
 
@@ -964,7 +1018,11 @@ html_table <- function(data, digits = 3L) {
   rows <- vapply(seq_len(nrow(data)), function(row) {
     cells <- vapply(data, function(column) {
       value <- column[[row]]
-      if (is.numeric(value)) value <- report_number(value, digits)
+      if (is.integer(value)) {
+        value <- format(value, trim = TRUE)
+      } else if (is.numeric(value)) {
+        value <- report_number(value, digits)
+      }
       if (is.logical(value)) value <- if (isTRUE(value)) "yes" else "no"
       paste0("<td>", html_escape(as.character(value)), "</td>")
     }, character(1))

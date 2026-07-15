@@ -3,6 +3,8 @@ test_that("preprocessing is conservative by default", {
   result <- preprocess_data(data, "y")
   expect_true("id" %in% names(result$data))
   expect_true(is.factor(result$data$category))
+  expect_equal(result$original_info$missing_by_column, c(id = 0L, category = 0L, y = 0L))
+  expect_equal(result$original_info$missing_fraction_by_column, c(id = 0, category = 0, y = 0))
 
   compatibility_result <- preprocess_for_h2o(data, "y")
   expect_equal(compatibility_result, result)

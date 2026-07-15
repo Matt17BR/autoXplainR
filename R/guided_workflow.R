@@ -141,6 +141,29 @@ fit_guided_base <- function(data,
     ),
     class = "autoxplain_result"
   )
+  shift <- missingness_shift(result)
+  result$evaluation$diagnostics$missingness_shift <- shift
+  flagged <- shift$features$feature[
+    shift$features$flagged & shift$features$used_by_model
+  ]
+  if (length(flagged)) {
+    result$evaluation$notes <- rbind(
+      result$evaluation$notes,
+      data.frame(
+        severity = "caution",
+        code = "missingness_shift",
+        message = paste0(
+          "Raw missing-data rates shifted by at least five percentage points for: ",
+          paste(flagged, collapse = ", "), "."
+        ),
+        recommendation = paste(
+          "Investigate collection or pipeline differences and validate performance",
+          "on data with the missingness pattern expected in use."
+        ),
+        stringsAsFactors = FALSE
+      )
+    )
+  }
   result$model_characteristics <- extract_model_characteristics(
     result,
     include_varimp = FALSE
