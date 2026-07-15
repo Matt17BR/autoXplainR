@@ -231,6 +231,26 @@ The binned gap is descriptive. It changes with the evaluation sample and the
 grouping, so it should be read beside log loss and Brier score rather than as a
 population guarantee.
 
+## Check an explicitly chosen group
+
+Aggregate scores can hide weak spots. If the evaluation data contain a group
+that matters to the intended use, ask for the comparison directly:
+
+```{r subgroups}
+cars_with_group <- transform(
+  mtcars,
+  transmission = factor(am, labels = c("automatic", "manual"))
+)
+group_fit <- autoxplain(cars_with_group, "mpg", test_fraction = 0.4, seed = 2026)
+subgroup_performance(group_fit, by = "transmission", min_rows = 3)
+```
+
+The same check can be included in the standalone report with
+`subgroup = "transmission"`. AutoXplainR does not guess which column is
+sensitive, and it does not call this a fairness assessment. Observed gaps can
+come from small samples, different case mix, measurement quality, or model
+behavior and require domain-specific investigation.
+
 ## Bring an existing model
 
 The explanation layer does not depend on the guided fitting engine. Wrap an

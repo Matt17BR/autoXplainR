@@ -18,6 +18,10 @@
 - Added `calibration_diagnostics()` and an adjacent report explanation that
   compares grouped probabilities with observed frequencies while making its
   sample- and grouping-dependence explicit.
+- Added opt-in `subgroup_performance()` and `subgroup =` report support for
+  comparing held-out metrics across one explicitly chosen column. Small groups
+  remain visible and flagged, and the output rejects fairness-certification
+  language.
 - The guided workflow now rejects unsupported or non-finite inputs, removes and
   records constant predictors, and reapplies its fitted preprocessing recipe to
   raw evaluation data supplied later.

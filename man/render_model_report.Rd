@@ -11,6 +11,7 @@ render_model_report(
   audit = NULL,
   effects = NULL,
   narrative = NULL,
+  subgroup = NULL,
   open = FALSE,
   top_features = 8L,
   n_repeats = 20L,
@@ -30,6 +31,10 @@ render_model_report(
 
 \item{narrative}{Optional narrative returned by
 \code{\link[=generate_natural_language_report]{generate_natural_language_report()}}.}
+
+\item{subgroup}{Optional name of one categorical or low-cardinality column.
+When supplied, the report includes an explicit held-out subgroup
+performance check. See \code{\link[=subgroup_performance]{subgroup_performance()}}.}
 
 \item{open}{Open the report in a browser after writing it.}
 
