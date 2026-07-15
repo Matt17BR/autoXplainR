@@ -14,6 +14,8 @@ For a material API or statistical-method change, open an issue first. Describe:
 - validation evidence or a simulation plan.
 
 Features are not accepted solely because they produce an attractive chart.
+Changes must also preserve the beginner-first workflow and progressive
+disclosure rules in [PRODUCT.md](PRODUCT.md).
 
 ## Local setup
 

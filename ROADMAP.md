@@ -1,10 +1,14 @@
 # AutoXplainR Roadmap
 
-The 0.2 architecture establishes a model-agnostic evidence audit. The roadmap
-below is ordered by scientific leverage, not novelty theatre.
+The 0.2 architecture establishes a beginner-first fit, evaluate, explain, and
+communicate workflow backed by a model-agnostic evidence audit. The roadmap is
+ordered by user and scientific leverage, not novelty theatre.
 
 ## 0.2 — reliable foundation
 
+- [ ] Guided base-R fitting and held-out evaluation with no Java requirement.
+- [ ] Plain-language model report with progressive evidence disclosure.
+- [ ] Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.
 - [x] Model-agnostic prediction contract and H2O boundary.
 - [x] Repeated grouped permutation importance with retained draws.
 - [x] ALE, diagnosed PDP, feature association, and support outputs.
