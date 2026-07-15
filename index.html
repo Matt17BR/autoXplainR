@@ -111,6 +111,11 @@
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"comparison-report.html"</span><span class="op">)</span></span></code></pre></div>
 <p>The local comparison set contains the pre-specified statistical model, a small decision tree, a more flexible tree, and the simple baseline. AutoXplainR shows held-out performance, fit and prediction time, model size, complexity, and the candidate-relative Pareto frontier.</p>
 <p>It does <strong>not</strong> collapse those dimensions into a mysterious score. It also does not silently replace the primary model with whichever candidate happened to win on the holdout: doing that and then reporting the same holdout score as final performance would be optimistic.</p>
+<p>Comparison mode also asks where the supplied non-baseline models give different answers for the same held-out row:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ambiguity</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prediction_ambiguity.html">prediction_ambiguity</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ambiguity</span><span class="op">$</span><span class="va">rows</span><span class="op">)</span></span></code></pre></div>
+<p>For regression this is a range in target units; for classification it is hard- class disagreement plus a probability-distribution distance. These are model- specification sensitivity checks, not confidence intervals. Candidate scores remain beside the result because a poorly performing model can create large, uninformative disagreement.</p>
 <p align="center">
 <img src="reference/figures/model-comparison.png" alt="Complete AutoXplainR model-comparison section with score cards, a labeled Pareto frontier, interpretation guidance, and candidate table" width="100%"><br><sub>Performance versus model size, with the interpretation rule and full candidate table kept in the frame.</sub></p>
 </div>
@@ -167,7 +172,7 @@
 <h2 id="open-the-analysis-when-you-need-more-control">Open the analysis when you need more control<a class="anchor" aria-label="anchor" href="#open-the-analysis-when-you-need-more-control"></a>
 </h2>
 <p>The guided result converts into ordinary model-agnostic explainers:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">explainer</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span>, models <span class="op">=</span> <span class="st">"main_model"</span><span class="op">)</span><span class="op">$</span><span class="va">main_model</span></span>
 <span></span>
 <span><span class="va">importance</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/calculate_permutation_importance.html">calculate_permutation_importance</a></span><span class="op">(</span></span>
@@ -179,7 +184,7 @@
 <span><span class="va">effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/explain_effect.html">explain_effect</a></span><span class="op">(</span><span class="va">explainer</span>, feature <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></code></pre></div>
 <p>Permutation intervals describe variation across random shuffles; they are not population confidence intervals. ALE and PDP describe the fitted prediction function; they do not establish the effect of intervening on an input.</p>
 <p>For a multi-model reliability review:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/audit_explanations.html">audit_explanations</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span>,</span>
 <span>  n_repeats <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -195,11 +200,11 @@
 <h2 id="a-complete-explanation-never-requires-an-llm">A complete explanation never requires an LLM<a class="anchor" aria-label="anchor" href="#a-complete-explanation-never-requires-an-llm"></a>
 </h2>
 <p>The deterministic local narrative is always the default—even if an API key is present:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"report.html"</span>, narrative <span class="op">=</span> <span class="va">memo</span><span class="op">)</span></span></code></pre></div>
 <p>Remote generation requires an explicit provider. Only aggregate metrics, feature names, warnings, and provenance enter the prompt; raw rows, fitted objects, case-level predictions, and secrets do not.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/narrative_providers.html">narrative_providers</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"gemini"</span><span class="op">)</span></span>
@@ -212,7 +217,7 @@
 <div class="section level2">
 <h2 id="classification-existing-models-and-h2o-use-the-same-contract">Classification, existing models, and H2O use the same contract<a class="anchor" aria-label="anchor" href="#classification-existing-models-and-h2o-use-the-same-contract"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multiclass classification</span></span>
 <span><span class="va">flowers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, target_column <span class="op">=</span> <span class="st">"Species"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span></span>
@@ -239,7 +244,7 @@
 <span><span class="op">)</span></span></code></pre></div>
 <p>Regression predictions are numeric vectors. Binary predictions are positive-class probabilities. Multiclass predictions are named probability matrices. The package validates that contract before an expensive explanation begins.</p>
 <p>For binary decisions, the report also shows what changes when the conventional 0.5 probability cutoff moves. The same values are available directly:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_result</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>This is a false-positive/false-negative sensitivity check, not permission to optimize a cutoff on the holdout and call that performance independently validated.</p>
 </div>
@@ -247,7 +252,7 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>AutoXplainR is under active development and is not yet on CRAN.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"Matt17BR/autoXplainR"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -272,12 +277,12 @@
 <div class="section level2">
 <h2 id="development-and-governance">Development and governance<a class="anchor" aria-label="anchor" href="#development-and-governance"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The ordinary suite is dependency-light. Real H2O integration is isolated and opt-in:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
 <p>See the <a href="CONTRIBUTING.html">contribution guide</a>, <a href="SECURITY.html">security policy</a>, <a href="GOVERNANCE.html">governance</a>, <a href="RELEASE_CHECKLIST.html">release checklist</a>, and <a href="NEWS.html">release notes</a>. Questions and early ideas belong in <a href="https://github.com/Matt17BR/autoXplainR/discussions" class="external-link">GitHub Discussions</a>.</p>
 </div>
 <div class="section level2">

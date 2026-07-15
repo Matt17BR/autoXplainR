@@ -58,7 +58,7 @@ result$leaderboard
 #> 2 -1.3212249                3      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  1
+#> 2                  0
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -146,6 +146,35 @@ holdout winner to primary, because selecting on the holdout and
 reporting the same score as final performance would be optimistic. Use
 fresh validation or a pre-specified resampling procedure when model
 selection itself is the goal.
+
+The same comparison can reveal rows whose prediction depends strongly on
+model specification:
+
+``` r
+
+ambiguity <- prediction_ambiguity(comparison)
+head(ambiguity$rows)
+#>   evaluation_row row_id observed prediction_min prediction_max prediction_range
+#> 1              1    121      6.9       6.302632       6.854533        0.5519014
+#> 2              2     38      4.9       5.042424       5.150000        0.1075758
+#> 3              3     45      5.1       5.042424       5.569338        0.5269134
+#> 4              4    111      6.5       6.302632       6.655556        0.3529240
+#> 5              5     91      5.5       5.939797       6.500000        0.5602030
+#> 6              6    108      7.3       7.143343       7.700000        0.5566568
+#>   prediction_sd
+#> 1    0.27950628
+#> 2    0.05421837
+#> 3    0.27157039
+#> 4    0.18215693
+#> 5    0.28414510
+#> 6    0.28013427
+```
+
+Regression rows report the range of supplied candidate predictions.
+Binary and multiclass rows report hard-class disagreement and
+probability distance. This is not uncertainty coverage: the supplied
+models can perform very differently, and their held-out scores must
+remain beside the disagreement summary.
 
 An interactive view is available when Plotly is installed:
 

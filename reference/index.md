@@ -24,6 +24,8 @@
   : Generate an evidence-constrained narrative
 - [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
   : List supported narrative providers
+- [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
+  : Find held-out rows where supplied models disagree
 
 ## Model-agnostic evidence workflow
 

@@ -58,6 +58,12 @@
 - Guided reports now include a plain-language multi-model trade-off
   section and dependency-free Pareto SVG whenever more than two
   candidates were fitted.
+- Added
+  [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
+  and a comparison-report section that finds held-out rows where
+  supplied non-baseline candidates predict different values, classes, or
+  probability distributions. Candidate performance remains beside
+  disagreement so weak-model variation is not mislabeled as uncertainty.
 - Numerical fit warnings are captured in model diagnostics and
   translated into an actionable report warning instead of being lost or
   printed without context.
