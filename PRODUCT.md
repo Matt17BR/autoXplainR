@@ -2,7 +2,7 @@
 
 ## North star
 
-AutoXplainR helps a person fitting one of their first tabular models answer four
+AutoXplainR helps a person fitting one of their first tabular models answer five
 questions without needing to assemble a modeling stack:
 
 1. What kind of prediction problem do I have?
@@ -29,9 +29,10 @@ The primary workflow must accept a data frame and target name, then:
 - optionally add an LLM narrative that is subordinate to computed results.
 
 Two next steps remain one explicit argument away. `model_set = "tuned"` uses
-training-only resampling to choose among statistical, decision-tree, and scaled
-neural-network configurations before opening the outer holdout. `model_set =
-"comparison"` adds a small, pre-specified local candidate set and displays
+training-only resampling to compare a named portfolio spanning linear,
+regularized, additive, tree, forest, boosting, neural, kernel, neighbor, and
+MARS families before opening the outer holdout. `model_set = "comparison"`
+adds a small, pre-specified local candidate set and displays
 performance-versus-complexity trade-offs without silently changing the primary
 model. Advanced users may supply their own split, model, prediction function,
 H2O AutoML run, explanation configuration, or narrative provider.
@@ -43,12 +44,16 @@ Local automatic tuning must remain comprehensible enough for a first model:
 - the final evaluation set cannot rank configurations, tune thresholds, learn
   preprocessing, or trigger another search;
 - preprocessing is refitted within every training resample;
-- the search covers at least a statistical reference, decision trees, and a
-  scaled neural network for regression, binary, and multiclass outcomes;
+- the recommended search covers linear, regularized, additive where supported,
+  decision-tree, random-forest, and gradient-boosted-tree families; an extended
+  portfolio adds neural, kernel, neighbor, and MARS alternatives;
+- a requested portfolio is fixed before resampling and never changes according
+  to which optional packages happen to be installed;
 - the candidate settings, fold scores, failures, timing, selection rule, and
   selected hyperparameters remain inspectable;
-- the default one-standard-error rule prefers the simpler near-best
-  configuration, while an explicit `"best"` rule remains available; and
+- the default one-standard-error rule uses a reviewed family priority and then
+  a family-specific flexibility proxy; it never compares unlike raw complexity
+  units, while an explicit `"best"` rule remains available; and
 - reports distinguish the training-resampled selection score from the final
   held-out evaluation score in adjacent plain language.
 
@@ -57,7 +62,7 @@ the dependency-light workflow from providing meaningful supervised tuning.
 
 ## Progressive disclosure
 
-The same result should support three levels of detail:
+The same result should support five levels of detail:
 
 1. **Guided:** what was fitted, whether it beats a simple baseline, the most
    important patterns, probability calibration, binary decision-threshold

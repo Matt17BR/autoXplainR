@@ -2,11 +2,12 @@
 #'
 #' AutoXplainR gives a first-time modeler one safe path from a data frame to a
 #' held-out evaluation and plain-language explanation. An explicit local mode
-#' tunes statistical, tree, and neural-network configurations using only the
-#' training portion before the final holdout is scored. Its advanced evidence
-#' layer stress-tests those explanations with repeated permutation importance,
-#' dependence diagnostics, comparisons across supplied models, accumulated
-#' local effects, and reproducible provenance. H2O AutoML, Plotly, and remote
+#' tunes a portfolio spanning linear, regularized, additive, tree, forest,
+#' boosting, neural, kernel, nearest-neighbor, and piecewise-linear behavior
+#' using only the training portion before the final holdout is scored. Its
+#' evidence layer compares what viable model families learned, then stress-tests
+#' explanations with repeated permutation importance, dependence diagnostics,
+#' accumulated local effects, and reproducible provenance. H2O AutoML, Plotly, and remote
 #' narratives are optional integrations rather than startup requirements.
 #'
 #' @section Primary workflow:

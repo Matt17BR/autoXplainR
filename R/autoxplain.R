@@ -16,8 +16,10 @@
 #' @param data Training data frame.
 #' @param target_column Name of the outcome column.
 #' @param max_models Maximum number of configurations in local tuning or H2O
-#'   base models. Local tuning requires at least three and counts the statistical
-#'   reference alongside tree and neural-network configurations.
+#'   base models. The local budget is shared across requested learner families.
+#'   `NULL` chooses a portfolio-aware tuning budget (15 for core, 30 for
+#'   recommended, and 40 for extended) or 24 for H2O. Explicit values are
+#'   honored without a hidden cap.
 #' @param max_runtime_secs H2O training time budget in seconds; ignored by the
 #'   guided base engine.
 #' @param seed Reproducible split, fitting, and H2O seed.
@@ -30,9 +32,17 @@
 #' @param model_set Guided base-engine workflow. `"quick"` fits the
 #'   pre-specified understandable model and baseline. `"comparison"` also fits
 #'   two pre-specified trees for a descriptive Pareto view. `"tuned"` compares
-#'   statistical, decision-tree, and scaled neural-network configurations using
-#'   training-only resampling, then evaluates the selected configuration once on
-#'   the untouched holdout.
+#'   the requested behaviorally diverse learner portfolio using training-only
+#'   resampling, retains its family winners for comparison, then evaluates the
+#'   selected configuration once on the untouched holdout.
+#' @param portfolio Local tuned-model portfolio. `"recommended"` compares
+#'   linear, regularized, additive (when supported), tree, forest, and boosting
+#'   families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
+#'   families. `"core"` retains the dependency-light linear/tree/neural
+#'   tournament. Missing optional backends produce one installation command
+#'   rather than silently changing the tournament.
+#' @param learners Optional explicit learner-family vector overriding
+#'   `portfolio`. Inspect valid names with [learner_catalog()].
 #' @param enable_preprocessing Apply [preprocess_data()].
 #' @param preprocessing_config Named overrides for preprocessing. Identifier
 #'   removal defaults to `FALSE`.
@@ -42,9 +52,11 @@
 #'   cross-validation. Local tuning automatically reduces this when an outcome
 #'   class contains fewer rows.
 #' @param tuning_rule Local tuning selection rule. `"one_se"` chooses the
-#'   simplest configuration whose resampled error is within one standard error
-#'   of the best; `"best"` chooses the lowest resampled error. Ignored by other
-#'   workflows.
+#'   most interpretable eligible family, then its least-flexible configuration,
+#'   among candidates whose resampled error is within one standard error of the
+#'   best. The reviewed family priority and family-specific flexibility proxies
+#'   are shown by [learner_catalog()]. `"best"` chooses the lowest resampled
+#'   error. Ignored by other workflows.
 #' @param sort_metric H2O AutoML leaderboard metric.
 #' @param include_algos,exclude_algos Optional H2O algorithm filters. Supply at
 #'   most one.
@@ -70,13 +82,15 @@
 #' }
 autoxplain <- function(data,
                        target_column,
-                       max_models = 10L,
+                       max_models = NULL,
                        max_runtime_secs = 300L,
                        seed = 123L,
                        test_data = NULL,
                        test_fraction = 0.2,
                        engine = c("auto", "base", "h2o"),
                        model_set = c("quick", "tuned", "comparison"),
+                       portfolio = c("recommended", "core", "extended"),
+                       learners = NULL,
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
                        task = c("auto", "regression", "binary", "multiclass"),
@@ -93,6 +107,7 @@ autoxplain <- function(data,
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
+  portfolio <- match.arg(portfolio)
   task <- match.arg(task)
   tuning_rule <- match.arg(tuning_rule)
   verbosity <- match.arg(verbosity)
@@ -102,13 +117,27 @@ autoxplain <- function(data,
     stop("`test_fraction` must be greater than zero and less than one.", call. = FALSE)
   }
   if (resolved_engine == "base") {
+    resolved_task <- if (task == "auto") detect_task(data[[target_column]]) else task
+    resolved_learners <- NULL
     if (identical(model_set, "tuned")) {
+      resolved_learners <- resolve_tuning_learners(portfolio, learners, resolved_task)
+      if (is.null(max_models)) {
+        max_models <- default_local_tuning_budget(portfolio, learners)
+      }
       max_models <- assert_count(max_models, "max_models")
-      if (max_models < 3L) {
-        stop("`max_models` must be at least 3 for local tuning.", call. = FALSE)
+      if (max_models < length(resolved_learners)) {
+        stop(
+          "`max_models` must be at least the number of requested learner families (",
+          length(resolved_learners), ").",
+          call. = FALSE
+        )
       }
       nfolds <- assert_count(nfolds, "nfolds")
       if (nfolds < 2L) stop("`nfolds` must be at least 2 for local tuning.", call. = FALSE)
+    } else if (is.null(max_models)) {
+      # Kept for a stable result/provenance shape; quick workflows do not use
+      # this budget to search models.
+      max_models <- 24L
     }
     return(fit_guided_base(
       data = data,
@@ -116,8 +145,10 @@ autoxplain <- function(data,
       test_data = test_data,
       test_fraction = test_fraction,
       seed = seed,
-      task = task,
+      task = resolved_task,
       model_set = model_set,
+      portfolio = portfolio,
+      learners = resolved_learners,
       max_models = max_models,
       nfolds = nfolds,
       tuning_rule = tuning_rule,
@@ -128,6 +159,7 @@ autoxplain <- function(data,
   }
 
   require_optional("h2o", "fitting H2O AutoML models")
+  if (is.null(max_models)) max_models <- 24L
   max_models <- assert_count(max_models, "max_models")
   max_runtime_secs <- assert_count(max_runtime_secs, "max_runtime_secs")
   seed <- assert_count(seed, "seed", minimum = 0L)
@@ -257,6 +289,17 @@ autoxplain <- function(data,
     error = function(error) structure(list(), class = "autoxplainr_model_characteristics")
   )
   result
+}
+
+default_local_tuning_budget <- function(portfolio, learners = NULL) {
+  if (!is.null(learners)) return(as.integer(5L * length(learners)))
+  switch(
+    portfolio,
+    core = 15L,
+    recommended = 30L,
+    extended = 40L,
+    stop("Unknown model portfolio.", call. = FALSE)
+  )
 }
 
 #' Convert an AutoML result to model-agnostic explainers
@@ -401,10 +444,16 @@ coerce_outcome_for_task <- function(y, task, target_levels = NULL) {
     if (!is.numeric(y)) stop("Regression requires a numeric target.", call. = FALSE)
     return(y)
   }
-  factor(
-    y,
-    levels = target_levels %||% if (is.factor(y)) base::levels(y) else sort(unique(y[!is.na(y)]))
-  )
+  levels <- target_levels
+  if (is.null(levels)) {
+    observed <- unique(as.character(y[!is.na(y)]))
+    levels <- if (is.factor(y)) {
+      base::levels(y)[base::levels(y) %in% observed]
+    } else {
+      sort(observed)
+    }
+  }
+  factor(as.character(y), levels = levels)
 }
 
 validate_train_test_schema <- function(train, test, target) {

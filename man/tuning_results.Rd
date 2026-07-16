@@ -11,16 +11,36 @@ tuning_results(result)
 }
 \value{
 An object of class \code{autoxplain_tuning} containing the candidate table,
-fold-level scores, selected configuration, resampling boundary, and search
-settings.
+fold-level scores, out-of-fold predictions, selected configuration,
+resampling boundary, and search settings.
 }
 \description{
 Returns the complete training-only resampling record created by
 \code{autoxplain(..., model_set = "tuned")}. The outer evaluation rows are never
 used to rank configurations.
 }
+\details{
+\code{out_of_fold_predictions} stores one row per outer-training case and
+configuration. \code{training_row} is the stable position used for paired model
+comparisons, \code{source_row} preserves the input row name, and \code{case_loss}
+stores squared error or negative log likelihood. Classification probability
+vectors are stored compactly as the matrix-column \code{probabilities}. If
+fold-specific preprocessing removes rows (for example with
+\code{missing_value_strategy = "drop_rows"}), \code{omitted_rows} records their identity
+and fold, while \code{rows_evaluated} and candidate \code{evaluated_rows} count only
+cases that actually received out-of-fold predictions.
+
+\code{refit} records every full-training refit attempt. If the resampling-selected
+configuration cannot be refitted, AutoXplainR tries the remaining valid
+configurations in resampled-score order, records the first successful one in
+\code{final_configuration}, and marks \code{fallback_used}. Failed alternative-family
+refits are diagnosed but do not discard a usable primary model. Families for
+which every configuration failed resampling remain visible in
+\code{families_resampling_failed} and are excluded from paired prediction evidence.
+}
 \examples{
 tuned <- autoxplain(iris, "Sepal.Length", model_set = "tuned",
-                    max_models = 4, nfolds = 3, seed = 2026)
+                    portfolio = "core", max_models = 4,
+                    nfolds = 3, seed = 2026)
 tuning_results(tuned)
 }

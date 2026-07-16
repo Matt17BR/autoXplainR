@@ -151,14 +151,26 @@ render_model_tuning <- function(result) {
   if (!inherits(tuning, "autoxplain_tuning")) return("")
   candidates <- tuning$candidates
   selected <- candidates[candidates$selected, , drop = FALSE]
-  display <- candidates[c(
+  final_id <- tuning$final_configuration %||% selected$configuration_id[[1L]]
+  if (length(final_id) != 1L || is.na(final_id) || !nzchar(final_id)) {
+    final_id <- selected$configuration_id[[1L]]
+  }
+  final <- candidates[candidates$configuration_id == final_id, , drop = FALSE]
+  if (!nrow(final)) final <- selected
+  fallback_used <- isTRUE(tuning$refit$fallback_used)
+  display_columns <- intersect(c(
     "configuration_id", "model", "hyperparameters", "cv_score", "cv_se",
-    "complexity_proxy", "selected", "status"
-  )]
-  names(display) <- c(
-    "Configuration", "Model family", "Settings", pretty_metric(tuning$metric),
-    "Score SE", "Complexity proxy", "Selected", "Status"
+    "complexity_proxy", "selected", "status", "refit_status", "retained_model_id"
+  ), names(candidates))
+  display <- candidates[display_columns]
+  display_labels <- c(
+    configuration_id = "Configuration", model = "Model family", Settings = "Settings",
+    hyperparameters = "Settings", cv_score = pretty_metric(tuning$metric),
+    cv_se = "Score SE", complexity_proxy = "Within-family flexibility proxy",
+    selected = "Resampling choice", status = "Resampling status",
+    refit_status = "Full-training refit", retained_model_id = "Retained model ID"
   )
+  names(display) <- unname(display_labels[names(display)])
   failed <- sum(candidates$status != "ok")
   paste0(
     "<section id=\"tuning\" class=\"tuning-section\" aria-labelledby=\"tuning-title\">",
@@ -173,32 +185,76 @@ render_model_tuning <- function(result) {
                 paste(length(unique(candidates$family)), "model families")),
     metric_card("Training folds", as.character(tuning$folds_used),
                 "Fold-specific preprocessing"),
-    metric_card("Selected model", selected$model[[1L]],
+    metric_card("Resampling choice", selected$model[[1L]],
                 selected$configuration_id[[1L]]),
+    metric_card("Final fitted configuration", final$model[[1L]],
+                paste0(final_id, if (fallback_used) "; recorded fallback" else "; refit succeeded")),
     metric_card("Resampled score", report_number(selected$cv_score[[1L]], 4L),
                 paste0(pretty_metric(tuning$metric), "; lower is better")),
     "</div><div class=\"columns\"><div><h3>Selection rule</h3><p>",
     html_escape(tuning_rule_label(tuning$selection_rule)),
-    ". The default one-standard-error rule prefers a simpler configuration when its ",
-    "resampled score is statistically hard to distinguish from the best observed score.</p></div>",
+    ". The default one-standard-error rule first uses the reviewed family priority, then ",
+    "prefers the least-flexible eligible setting inside that family. Use the best-score ",
+    "rule when predictive score alone should decide.</p></div>",
     "<div><h3>Selected settings</h3><p><strong>",
     html_escape(selected$model[[1L]]), ":</strong> ",
-    html_escape(selected$hyperparameters[[1L]]), ".</p></div></div>",
+    html_escape(selected$hyperparameters[[1L]]), ".</p>",
+    if (fallback_used) paste0(
+      "<p><strong>Final fallback settings (", html_escape(final_id), "):</strong> ",
+      html_escape(final$hyperparameters[[1L]]), ".</p>"
+    ) else "",
+    "</div></div>",
     html_table(display, digits = 5L),
-    "<p class=\"microcopy\"><strong>Complexity proxy:</strong> fitted coefficient count ",
-    "for the statistical reference, potential leaves for trees, and connection count for ",
-    "neural networks. It implements a transparent simplicity preference; it is not a universal ",
-    "measure of model difficulty.</p>",
+    "<p class=\"microcopy\"><strong>Within-family flexibility proxy:</strong> each family ",
+    "uses the definition recorded in <code>tuning_results(result)$learner_manifest</code>. ",
+    "Those values order settings only inside the same family; their units are not comparable ",
+    "across linear, additive, tree, ensemble, kernel, neighbor, or neural models.</p>",
     if (failed) paste0(
       "<p class=\"callout\"><strong>", failed,
       " configuration(s) failed.</strong> They were not eligible for selection; inspect ",
       "<code>tuning_results(result)$fold_scores</code> for the recorded errors.</p>"
     ) else "",
+    render_tuning_refit_status(tuning, selected$configuration_id[[1L]], final_id),
     "<p class=\"callout\"><strong>Do not quote the resampled tuning score as final performance.</strong> ",
     "It guided model selection. The held-out result above is the separate estimate of how the ",
     "selected, refitted model performed on unseen rows.</p>",
     "<p class=\"microcopy\">", html_escape(tuning$scope_note), "</p></section>"
   )
+}
+
+render_tuning_refit_status <- function(tuning, selected_id, final_id) {
+  refit <- tuning$refit %||% list()
+  resampling_failed <- unique(
+    tuning$families_resampling_failed %||% refit$families_resampling_failed %||% character()
+  )
+  refit_failed <- unique(refit$families_refit_failed %||% character())
+  messages <- c(paste0(
+    "<p class=\"microcopy\"><strong>Actual final configuration:</strong> <code>",
+    html_escape(final_id), "</code>. This is the configuration behind the primary fitted model.</p>"
+  ))
+  if (isTRUE(refit$fallback_used)) {
+    messages <- c(messages, paste0(
+      "<p class=\"callout\"><strong>The resampling choice could not be refitted.</strong> ",
+      "AutoXplainR recorded <code>", html_escape(selected_id), "</code> as the training-only ",
+      "choice and used <code>", html_escape(final_id), "</code> as the first successful ",
+      "resampling-valid fallback.</p>"
+    ))
+  }
+  if (length(resampling_failed)) {
+    messages <- c(messages, paste0(
+      "<p class=\"callout\"><strong>No complete resampling result:</strong> ",
+      html_escape(paste(resampling_failed, collapse = ", ")),
+      ". These families were not eligible for selection.</p>"
+    ))
+  }
+  if (length(refit_failed)) {
+    messages <- c(messages, paste0(
+      "<p class=\"callout\"><strong>Full-training refit failed:</strong> ",
+      html_escape(paste(refit_failed, collapse = ", ")),
+      ". They remain in the audit trail but have no retained fitted model.</p>"
+    ))
+  }
+  paste(messages, collapse = "")
 }
 
 render_subgroup_performance <- function(subgroups) {
@@ -255,6 +311,7 @@ render_model_comparison <- function(result) {
   if (is.null(tradeoffs)) return("")
   performance_metric <- attr(tradeoffs, "performance_metric")
   complexity_metric <- attr(tradeoffs, "complexity_metric")
+  tradeoff_kind <- behavior_tradeoff_kind(complexity_metric)
   higher_is_better <- isTRUE(attr(tradeoffs, "higher_is_better"))
   best_index <- if (higher_is_better) {
     which.max(tradeoffs[[performance_metric]])[[1L]]
@@ -290,7 +347,8 @@ render_model_comparison <- function(result) {
     "<h2 id=\"models-title\">What trade-offs did the candidates make?</h2>",
     "<p>AutoXplainR compares the supplied candidates on two visible dimensions rather than ",
     "hiding judgment inside one weighted score. A Pareto-efficient model is not beaten by ",
-    "another supplied model on both held-out performance and complexity.</p>",
+    "another supplied model on both held-out performance and the displayed ",
+    html_escape(tradeoff_kind), ".</p>",
     "<div class=\"cards comparison-cards\">",
     metric_card("Compared models", as.character(nrow(tradeoffs)),
                 "Primary, candidates, and simple baseline"),
@@ -298,17 +356,70 @@ render_model_comparison <- function(result) {
                 "Not dominated on both displayed dimensions"),
     metric_card("Best observed score", tradeoffs$model[[best_index]],
                 paste0(pretty_metric(performance_metric), " on this holdout")),
-    metric_card("Smallest model", tradeoffs$model[[smallest_index]],
-                pretty_complexity(complexity_metric)),
+    metric_card("Lowest trade-off proxy", tradeoffs$model[[smallest_index]],
+                paste0(pretty_complexity(complexity_metric), "; ", tradeoff_kind)),
     "</div><div class=\"tradeoff-layout\"><div>", tradeoff_svg(tradeoffs),
     "</div><div class=\"tradeoff-explainer\"><h3>How to read this</h3><ol>",
     "<li>Up means better held-out performance.</li>",
-    "<li>Left means lower measured complexity.</li>",
+    "<li>Left means lower ", html_escape(pretty_complexity(complexity_metric)),
+    ", used here as a ", html_escape(tradeoff_kind), ".</li>",
     "<li>Outlined points form the supplied Pareto frontier.</li>",
     "</ol>", selection_explanation, "</div></div>",
     html_table(display, digits = 4L),
+    render_behavior_comparison(result),
     render_prediction_ambiguity(result),
-    "<p class=\"microcopy\">", html_escape(attr(tradeoffs, "scope_note")), "</p></section>"
+    "<p class=\"microcopy\"><strong>Trade-off boundary:</strong> ",
+    if (identical(tradeoff_kind, "resource proxy")) {
+      "Serialized model size or runtime measures operational resource use, not structural complexity. "
+    } else {
+      "The displayed proxy does not prove which available model capacity was used. "
+    },
+    html_escape(attr(tradeoffs, "scope_note")), "</p></section>"
+  )
+}
+
+render_behavior_comparison <- function(result) {
+  behavior <- tryCatch(
+    compare_model_behavior(result),
+    error = function(error) NULL
+  )
+  if (is.null(behavior)) return("")
+  models <- behavior$models
+  display <- data.frame(
+    Model = models$model,
+    Family = models$family,
+    Backend = models$backend,
+    `Capacity: nonlinearity` = models$nonlinearity,
+    `Capacity: interactions` = models$interactions,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+  display[[paste0("Computed ", pretty_metric(behavior$performance_metric))]] <-
+    models$performance_score
+  computed <- behavior$findings$message[
+    behavior$findings$evidence_kind == "computed"
+  ]
+  computed_html <- if (length(computed)) {
+    paste0(
+      "<ul>",
+      paste0("<li>", vapply(computed, html_escape, character(1L)), "</li>", collapse = ""),
+      "</ul>"
+    )
+  } else {
+    ""
+  }
+  paste0(
+    "<div class=\"behavior-comparison\"><h3>How are these model families different?</h3>",
+    "<p><strong>Prior/model-capacity knowledge:</strong> the nonlinearity and interaction ",
+    "columns are reviewed behavior cards. They say what each family can represent; they do ",
+    "not show that this fitted model actually used those patterns.</p>",
+    html_table(display, digits = 4L),
+    "<p><strong>Computed evidence from this analysis:</strong> held-out performance and ",
+    "paired prediction disagreement are calculated on common evaluation rows. Repeated ",
+    "permutation feature importance in the Patterns section is also computed evidence of ",
+    "model reliance, not a property guaranteed by the family card.</p>",
+    computed_html,
+    "</div>"
   )
 }
 

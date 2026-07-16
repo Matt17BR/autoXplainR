@@ -6,10 +6,12 @@ test_that("local tuning is reproducible and isolated from the outer holdout", {
   state <- .Random.seed
 
   first <- autoxplain(
-    data, "y", model_set = "tuned", max_models = 7, nfolds = 4, seed = 2026
+    data, "y", model_set = "tuned", portfolio = "core",
+    max_models = 7, nfolds = 4, seed = 2026
   )
   second <- autoxplain(
-    data, "y", model_set = "tuned", max_models = 7, nfolds = 4, seed = 2026
+    data, "y", model_set = "tuned", portfolio = "core",
+    max_models = 7, nfolds = 4, seed = 2026
   )
 
   expect_identical(.Random.seed, state)
@@ -53,6 +55,7 @@ test_that("best-score tuning rule chooses the minimum resampled loss", {
     data,
     "y",
     model_set = "tuned",
+    portfolio = "core",
     max_models = 8,
     nfolds = 3,
     tuning_rule = "best",
@@ -66,12 +69,32 @@ test_that("best-score tuning rule chooses the minimum resampled loss", {
   expect_output(print(result$tuning), "lowest resampled error")
 })
 
+test_that("one-SE selection never compares raw complexity units across families", {
+  candidates <- data.frame(
+    configuration_id = c("a_simple", "a_complex", "b_simple", "b_complex"),
+    family = c("a", "a", "b", "b"),
+    simplicity_rank = 2L,
+    complexity_proxy = c(1000, 2000, 1, 2),
+    cv_score = c(0.18, 0.10, 0.20, 0.11),
+    stringsAsFactors = FALSE
+  )
+  selected <- AutoXplainR:::select_one_se_candidate(
+    candidates,
+    rep(TRUE, nrow(candidates))
+  )
+
+  # The least-flexible candidate is chosen inside each family first. Their CV
+  # scores then break the cross-family tie; raw proxy units never compete.
+  expect_identical(candidates$configuration_id[[selected]], "a_simple")
+})
+
 test_that("tuned classification models retain valid probability contracts", {
   set.seed(41)
   binary <- data.frame(x = rnorm(180), z = rnorm(180))
   binary$event <- factor(ifelse(binary$x^2 + binary$z > 0.7, "yes", "no"))
   binary_fit <- autoxplain(
-    binary, "event", model_set = "tuned", max_models = 6, nfolds = 3, seed = 17
+    binary, "event", model_set = "tuned", portfolio = "core",
+    max_models = 6, nfolds = 3, seed = 17
   )
   binary_explainer <- as_explainers(binary_fit, models = "main_model")$main_model
   binary_probability <- predict(binary_explainer, binary_explainer$data)
@@ -82,7 +105,8 @@ test_that("tuned classification models retain valid probability contracts", {
   }, logical(1))))
 
   multiclass_fit <- autoxplain(
-    iris, "Species", model_set = "tuned", max_models = 6, nfolds = 3, seed = 19
+    iris, "Species", model_set = "tuned", portfolio = "core",
+    max_models = 6, nfolds = 3, seed = 19
   )
   multiclass_explainer <- as_explainers(multiclass_fit, models = "main_model")$main_model
   probability <- predict(multiclass_explainer, multiclass_explainer$data)
@@ -99,7 +123,8 @@ test_that("tuning refits preprocessing inside folds and records novel-level mapp
   )
   data$y <- 2 * data$x + rnorm(80, sd = 0.2)
   result <- autoxplain(
-    data, "y", model_set = "tuned", max_models = 3, nfolds = 4, seed = 7
+    data, "y", model_set = "tuned", portfolio = "core",
+    max_models = 3, nfolds = 4, seed = 7
   )
   expect_true(all(result$tuning$fold_scores$validation_rows >= 2L))
   expect_true(all(result$tuning$fold_scores$novel_levels_mapped >= 0L))
@@ -117,11 +142,11 @@ test_that("outer evaluation values cannot change training-only tuning", {
   test_two <- transform(test_one, x = x * 1e6, y = y * -1e8)
 
   first <- autoxplain(
-    training, "y", test_data = test_one, model_set = "tuned",
+    training, "y", test_data = test_one, model_set = "tuned", portfolio = "core",
     max_models = 5, nfolds = 3, seed = 818
   )
   second <- autoxplain(
-    training, "y", test_data = test_two, model_set = "tuned",
+    training, "y", test_data = test_two, model_set = "tuned", portfolio = "core",
     max_models = 5, nfolds = 3, seed = 818
   )
 
@@ -138,11 +163,11 @@ test_that("outer evaluation values cannot change training-only tuning", {
 
 test_that("tuning validation is actionable", {
   expect_error(
-    autoxplain(mtcars, "mpg", model_set = "tuned", max_models = 2),
-    "at least 3"
+    autoxplain(mtcars, "mpg", model_set = "tuned", portfolio = "core", max_models = 2),
+    "number of requested learner families"
   )
   expect_error(
-    autoxplain(mtcars, "mpg", model_set = "tuned", nfolds = 1),
+    autoxplain(mtcars, "mpg", model_set = "tuned", portfolio = "core", nfolds = 1),
     "at least 2"
   )
   expect_error(tuning_results(autoxplain(mtcars, "mpg")), "No local tuning")
@@ -155,6 +180,7 @@ test_that("tuning validation is actionable", {
     scarce,
     "y",
     model_set = "tuned",
+    portfolio = "core",
     max_models = 3,
     nfolds = 5,
     test_data = scarce[c(1L, 11L), ],
@@ -168,7 +194,8 @@ test_that("guided report explains tuning separately from final evaluation", {
   data <- data.frame(x = runif(120, -2, 2), z = rnorm(120))
   data$y <- data$x^2 + data$z + rnorm(120, sd = 0.2)
   result <- autoxplain(
-    data, "y", model_set = "tuned", max_models = 5, nfolds = 3, seed = 10
+    data, "y", model_set = "tuned", portfolio = "core",
+    max_models = 5, nfolds = 3, seed = 10
   )
   path <- tempfile(fileext = ".html")
   render_model_report(result, path, top_features = 2, n_repeats = 2)

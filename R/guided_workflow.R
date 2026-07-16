@@ -5,6 +5,8 @@ fit_guided_base <- function(data,
                             seed,
                             task,
                             model_set,
+                            portfolio,
+                            learners,
                             max_models,
                             nfolds,
                             tuning_rule,
@@ -51,6 +53,12 @@ fit_guided_base <- function(data,
     ),
     preprocessing_config
   )
+  # Keep the complete outer-training schema for resampling. Predictor removal
+  # below is learned from all outer-training rows and is appropriate for the
+  # final refit, but exposing it to inner resampling would leak feature-screening
+  # decisions across folds. Each tuning fold therefore starts from this raw copy
+  # and learns its own ID, missing-column, and constant-predictor removals.
+  raw_tuning_data <- split$training
   raw_constant_features <- guided_constant_predictors(split$training, target_column)
   if (length(raw_constant_features)) {
     split$training <- split$training[
@@ -81,11 +89,9 @@ fit_guided_base <- function(data,
     stop("At least one predictor must remain after preprocessing.", call. = FALSE)
   }
 
-  raw_tuning_data <- split$training[c(features, target_column)]
   raw_tuning_data[[target_column]] <- coerce_outcome_for_task(
     raw_tuning_data[[target_column]],
-    resolved_task,
-    target_levels = if (is.factor(train[[target_column]])) levels(train[[target_column]]) else NULL
+    resolved_task
   )
   fit <- with_preserved_seed(seed, fit_base_candidates(
     data = train,
@@ -99,7 +105,8 @@ fit_guided_base <- function(data,
     max_models = max_models,
     nfolds = nfolds,
     tuning_rule = tuning_rule,
-    seed = seed
+    seed = seed,
+    learners = learners %||% c("linear", "tree", "neural")
   ))
   evaluated <- evaluate_candidates(
     fit$models,
@@ -119,6 +126,12 @@ fit_guided_base <- function(data,
     constant_result$removed,
     stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id)
   )
+  if (identical(model_set, "tuned")) {
+    evaluated$summary$notes <- rbind(
+      evaluated$summary$notes,
+      guided_tuning_refit_notes(fit$tuning)
+    )
+  }
 
   result <- structure(
     list(
@@ -145,6 +158,8 @@ fit_guided_base <- function(data,
         seed = seed,
         engine_requested = "base",
         model_set = model_set,
+        portfolio = if (identical(model_set, "tuned")) portfolio else NA_character_,
+        learners = if (identical(model_set, "tuned")) fit$tuning$learners else character(),
         evaluation_role = "held-out test",
         split_method = split$method,
         test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_,
@@ -158,11 +173,22 @@ fit_guided_base <- function(data,
         baseline = "intercept-only model",
         primary_model = fit$labels[["main_model"]],
         candidate_selection = if (identical(model_set, "tuned")) {
-          paste(
-            "The main model was selected by", fit$tuning$folds_used,
-            "fold training-only resampling using the",
-            tuning_rule_label(fit$tuning$selection_rule),
-            "rule; held-out evaluation rows were untouched until final scoring."
+          paste0(
+            paste(
+              "The main model was selected by", fit$tuning$folds_used,
+              "fold training-only resampling using the",
+              tuning_rule_label(fit$tuning$selection_rule),
+              "rule; held-out evaluation rows were untouched until final scoring."
+            ),
+            if (isTRUE(fit$tuning$refit$fallback_used)) {
+              paste0(
+                " The selected configuration could not be refitted on all training rows; ",
+                fit$tuning$final_configuration,
+                " was used as the recorded fallback."
+              )
+            } else {
+              ""
+            }
           )
         } else {
           paste(
@@ -416,27 +442,33 @@ fit_base_candidates <- function(data,
                                 tuning_rule = "one_se",
                                 seed = 123L,
                                 learners = c("linear", "tree", "neural")) {
-  primary_formula <- stats::reformulate(features, response = target)
-  baseline_formula <- stats::reformulate(character(), response = target)
+  primary_formula <- safe_reformulate(features, response = target)
+  baseline_formula <- safe_reformulate(character(), response = target)
   if (task == "regression") {
     baseline <- timed_model_fit(function() stats::lm(baseline_formula, data = data))
-    primary <- timed_model_fit(function() stats::lm(primary_formula, data = data))
+    if (!identical(model_set, "tuned")) {
+      primary <- timed_model_fit(function() stats::lm(primary_formula, data = data))
+    }
     label <- "linear regression"
   } else if (task == "binary") {
     baseline <- timed_model_fit(function() {
       stats::glm(baseline_formula, data = data, family = stats::binomial())
     })
-    primary <- timed_model_fit(function() {
-      stats::glm(primary_formula, data = data, family = stats::binomial())
-    })
+    if (!identical(model_set, "tuned")) {
+      primary <- timed_model_fit(function() {
+        stats::glm(primary_formula, data = data, family = stats::binomial())
+      })
+    }
     label <- "logistic regression"
   } else {
     baseline <- timed_model_fit(function() {
       nnet::multinom(baseline_formula, data = data, trace = FALSE)
     })
-    primary <- timed_model_fit(function() {
-      nnet::multinom(primary_formula, data = data, trace = FALSE)
-    })
+    if (!identical(model_set, "tuned")) {
+      primary <- timed_model_fit(function() {
+        nnet::multinom(primary_formula, data = data, trace = FALSE)
+      })
+    }
     label <- "multinomial logistic regression"
   }
   tuning <- NULL
@@ -453,50 +485,11 @@ fit_base_candidates <- function(data,
       seed = seed,
       learners = learners
     )
-    valid <- tuning$candidates[tuning$candidates$status == "ok", , drop = FALSE]
-    selected <- valid[valid$selected, , drop = FALSE]
-    retained <- selected
-    for (family in setdiff(unique(valid$family), selected$family[[1L]])) {
-      family_rows <- valid[valid$family == family, , drop = FALSE]
-      retained <- rbind(retained, family_rows[which.min(family_rows$cv_score), , drop = FALSE])
-    }
-    final_fits <- list()
-    final_labels <- character()
-    final_roles <- character()
-    tuning$candidates$retained_model_id <- NA_character_
-    for (index in seq_len(nrow(retained))) {
-      row <- retained[index, , drop = FALSE]
-      model_id <- if (isTRUE(row$selected[[1L]])) {
-        "main_model"
-      } else {
-        learner_definition(row$family[[1L]])$model_id
-      }
-      configuration <- tuning$plan[
-        tuning$plan$configuration_id == row$configuration_id[[1L]],
-        , drop = FALSE
-      ]
-      final_fits[[model_id]] <- timed_model_fit(function() {
-        fit_tuning_configuration(configuration, data, target, task)
-      })
-      final_labels[[model_id]] <- if (model_id == "main_model") {
-        if (row$family[[1L]] == "linear") {
-          paste("resampling-selected", row$model[[1L]])
-        } else {
-          paste("tuned", row$model[[1L]])
-        }
-      } else if (row$family[[1L]] == "linear") {
-        paste(row$model[[1L]], "reference")
-      } else {
-        paste("tuned", row$model[[1L]], "alternative")
-      }
-      final_roles[[model_id]] <- if (model_id == "main_model") "primary" else "candidate"
-      tuning$candidates$retained_model_id[
-        tuning$candidates$configuration_id == row$configuration_id[[1L]]
-      ] <- model_id
-    }
-    fits <- c(final_fits, list(simple_baseline = baseline))
-    labels <- c(final_labels, simple_baseline = "intercept-only baseline")
-    roles <- c(final_roles, simple_baseline = "baseline")
+    refitted <- refit_tuned_candidates(tuning, data, target, task)
+    tuning <- refitted$tuning
+    fits <- c(refitted$fits, list(simple_baseline = baseline))
+    labels <- c(refitted$labels, simple_baseline = "intercept-only baseline")
+    roles <- c(refitted$roles, simple_baseline = "baseline")
   } else {
     fits <- list(main_model = primary, simple_baseline = baseline)
     labels <- c(main_model = label, simple_baseline = "intercept-only baseline")
@@ -559,6 +552,207 @@ fit_base_candidates <- function(data,
   )
 }
 
+refit_tuned_candidates <- function(tuning,
+                                   data,
+                                   target,
+                                   task,
+                                   fitter = fit_tuning_configuration) {
+  valid <- tuning$candidates[
+    tuning$candidates$status == "ok" & is.finite(tuning$candidates$cv_score),
+    , drop = FALSE
+  ]
+  if (!nrow(valid) || sum(valid$selected) != 1L) {
+    stop("Tuning must contain exactly one valid selected configuration.", call. = FALSE)
+  }
+  tuning$candidates$retained_model_id <- NA_character_
+  tuning$candidates$refit_status <- "not_attempted"
+  tuning$candidates$refit_role <- NA_character_
+  tuning$candidates$refit_warning <- ""
+  tuning$candidates$refit_error <- ""
+
+  attempts <- list()
+  attempted_ids <- character()
+  record_attempt <- function(row, role, model_id, result) {
+    id <- row$configuration_id[[1L]]
+    candidate_index <- match(id, tuning$candidates$configuration_id)
+    tuning$candidates$refit_status[[candidate_index]] <<- if (result$ok) "ok" else "failed"
+    tuning$candidates$refit_role[[candidate_index]] <<- role
+    tuning$candidates$refit_warning[[candidate_index]] <<- paste(
+      unique(result$warnings), collapse = " | "
+    )
+    tuning$candidates$refit_error[[candidate_index]] <<- result$error
+    if (result$ok) {
+      tuning$candidates$retained_model_id[[candidate_index]] <<- model_id
+    }
+    attempts[[length(attempts) + 1L]] <<- data.frame(
+      configuration_id = id,
+      family = row$family[[1L]],
+      role = role,
+      model_id = model_id,
+      status = if (result$ok) "ok" else "failed",
+      elapsed_ms = result$elapsed_ms,
+      warning = paste(unique(result$warnings), collapse = " | "),
+      error = result$error,
+      stringsAsFactors = FALSE
+    )
+    attempted_ids <<- c(attempted_ids, id)
+  }
+  fit_row <- function(row, role, model_id) {
+    configuration <- tuning$plan[
+      tuning$plan$configuration_id == row$configuration_id[[1L]],
+      , drop = FALSE
+    ]
+    result <- safely_timed_model_fit(function() {
+      fitter(configuration, data, target, task)
+    })
+    record_attempt(row, role, model_id, result)
+    result
+  }
+
+  primary_order <- order(
+    !valid$selected,
+    valid$cv_score,
+    valid$simplicity_rank,
+    valid$complexity_proxy,
+    valid$configuration_id
+  )
+  primary_fit <- NULL
+  primary_row <- NULL
+  for (index in primary_order) {
+    row <- valid[index, , drop = FALSE]
+    role <- if (isTRUE(row$selected[[1L]])) "selected" else "fallback"
+    result <- fit_row(row, role, "main_model")
+    if (result$ok) {
+      primary_fit <- result
+      primary_row <- row
+      break
+    }
+  }
+  if (is.null(primary_fit)) {
+    attempt_table <- do.call(rbind, attempts)
+    details <- unique(attempt_table$error[nzchar(attempt_table$error)])
+    stop(
+      "No resampling-valid configuration could be refitted on the complete training data",
+      if (length(details)) paste0(": ", details[[1L]]) else ".",
+      call. = FALSE
+    )
+  }
+
+  fits <- list(main_model = list(
+    model = primary_fit$model,
+    elapsed_ms = primary_fit$elapsed_ms,
+    warnings = primary_fit$warnings
+  ))
+  selected_id <- tuning$selected_configuration
+  final_id <- primary_row$configuration_id[[1L]]
+  fallback_used <- !identical(final_id, selected_id)
+  labels <- c(main_model = if (fallback_used) {
+    paste("refit fallback", primary_row$model[[1L]])
+  } else if (primary_row$family[[1L]] == "linear") {
+    paste("resampling-selected", primary_row$model[[1L]])
+  } else {
+    paste("tuned", primary_row$model[[1L]])
+  })
+  roles <- c(main_model = "primary")
+
+  alternative_families <- setdiff(unique(valid$family), primary_row$family[[1L]])
+  for (family in alternative_families) {
+    family_rows <- valid[
+      valid$family == family & !valid$configuration_id %in% attempted_ids,
+      , drop = FALSE
+    ]
+    family_rows <- family_rows[order(
+      family_rows$cv_score,
+      family_rows$simplicity_rank,
+      family_rows$complexity_proxy,
+      family_rows$configuration_id
+    ), , drop = FALSE]
+    if (!nrow(family_rows)) next
+    model_id <- learner_definition(family)$model_id
+    for (index in seq_len(nrow(family_rows))) {
+      row <- family_rows[index, , drop = FALSE]
+      result <- fit_row(row, "alternative", model_id)
+      if (!result$ok) next
+      fits[[model_id]] <- list(
+        model = result$model,
+        elapsed_ms = result$elapsed_ms,
+        warnings = result$warnings
+      )
+      labels[[model_id]] <- if (family == "linear") {
+        paste(row$model[[1L]], "reference")
+      } else {
+        paste("tuned", row$model[[1L]], "alternative")
+      }
+      roles[[model_id]] <- "candidate"
+      break
+    }
+  }
+
+  attempt_table <- do.call(rbind, attempts)
+  requested_families <- tuning$learners %||% unique(tuning$candidates$family)
+  resampling_failed_families <- tuning$families_resampling_failed %||% setdiff(
+    requested_families,
+    unique(valid$family)
+  )
+  retained_families <- unique(c(
+    primary_row$family[[1L]],
+    attempt_table$family[attempt_table$role == "alternative" & attempt_table$status == "ok"]
+  ))
+  refit_failed_families <- setdiff(unique(valid$family), retained_families)
+  failed_families <- unique(c(resampling_failed_families, refit_failed_families))
+  tuning$final_configuration <- final_id
+  tuning$refit <- list(
+    status = if (length(failed_families)) {
+      "partial"
+    } else if (fallback_used) {
+      "fallback"
+    } else {
+      "ok"
+    },
+    selected_configuration = selected_id,
+    final_configuration = final_id,
+    fallback_used = fallback_used,
+    families_requested = requested_families,
+    families_retained = retained_families,
+    families_resampling_failed = resampling_failed_families,
+    families_refit_failed = refit_failed_families,
+    families_not_retained = failed_families,
+    attempts = attempt_table,
+    note = paste(
+      "Full-training refits were attempted independently. A failed alternative does not",
+      "invalidate the primary model; if the resampling-selected fit fails, the next",
+      "resampling-valid configuration is used and recorded as a fallback."
+    )
+  )
+  list(fits = fits, labels = labels, roles = roles, tuning = tuning)
+}
+
+safely_timed_model_fit <- function(callback) {
+  started <- proc.time()[["elapsed"]]
+  warnings <- character()
+  error <- ""
+  model <- tryCatch(
+    withCallingHandlers(
+      callback(),
+      warning = function(condition) {
+        warnings <<- c(warnings, conditionMessage(condition))
+        invokeRestart("muffleWarning")
+      }
+    ),
+    error = function(condition) {
+      error <<- conditionMessage(condition)
+      NULL
+    }
+  )
+  list(
+    ok = !is.null(model) && !nzchar(error),
+    model = model,
+    elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
+    warnings = warnings,
+    error = error
+  )
+}
+
 timed_model_fit <- function(callback) {
   started <- proc.time()[["elapsed"]]
   warnings <- character()
@@ -577,6 +771,9 @@ timed_model_fit <- function(callback) {
 }
 
 model_complexity <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model")) {
+    return(fitted_model_complexity(model))
+  }
   if (inherits(model, "rpart")) {
     return(sum(as.character(model$frame$var) == "<leaf>"))
   }
@@ -634,6 +831,13 @@ evaluate_candidates <- function(models,
     model_id = names(models),
     model = unname(labels[names(models)]),
     role = unname(roles[names(models)]),
+    family = vapply(names(models), function(id) {
+      if (identical(roles[[id]], "baseline")) return("baseline")
+      model_family_name(models[[id]])
+    }, character(1)),
+    backend = vapply(names(models), function(id) {
+      model_backend_name(models[[id]])
+    }, character(1)),
     stringsAsFactors = FALSE
   )
   for (metric in metric_names) {
@@ -675,6 +879,23 @@ evaluate_candidates <- function(models,
       diagnostics = guided_prediction_diagnostics(evaluated, task)
     )
   )
+}
+
+model_family_name <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model")) return(model$family)
+  if (inherits(model, "rpart")) return("tree")
+  if (inherits(model, "autoxplain_tuned_nnet")) return("neural")
+  if (inherits(model, c("lm", "glm", "multinom"))) return("linear")
+  class(model)[[1L]]
+}
+
+model_backend_name <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model")) return(model$backend)
+  if (inherits(model, "rpart")) return("rpart")
+  if (inherits(model, "autoxplain_tuned_nnet")) return("nnet")
+  if (inherits(model, "multinom")) return("nnet")
+  if (inherits(model, c("lm", "glm"))) return("stats")
+  class(model)[[1L]]
 }
 
 evaluate_predictions <- function(observed, predicted, explainer) {
@@ -792,6 +1013,69 @@ guided_prediction_diagnostics <- function(evaluated, task) {
     confusion_matrix = confusion,
     calibration = evaluated[[reference_id]]$calibration
   )
+}
+
+guided_tuning_refit_notes <- function(tuning) {
+  notes <- list()
+  if (isTRUE(tuning$refit$fallback_used)) {
+    selected_attempt <- tuning$refit$attempts[
+      tuning$refit$attempts$configuration_id == tuning$selected_configuration,
+      , drop = FALSE
+    ]
+    failure <- unique(selected_attempt$error[nzchar(selected_attempt$error)])
+    notes[[length(notes) + 1L]] <- data.frame(
+      severity = "warning",
+      code = "tuning_refit_fallback",
+      message = paste0(
+        "The resampling-selected configuration `", tuning$selected_configuration,
+        "` failed when refitted on all training rows",
+        if (length(failure)) paste0(": ", failure[[1L]]) else "",
+        ". The primary model therefore uses `", tuning$final_configuration, "`."
+      ),
+      recommendation = paste(
+        "Inspect `tuning_results(result)$refit$attempts`; treat the fallback as an",
+        "operational recovery and investigate why the selected refit failed."
+      ),
+      stringsAsFactors = FALSE
+    )
+  }
+  if (length(tuning$refit$families_resampling_failed)) {
+    notes[[length(notes) + 1L]] <- data.frame(
+      severity = "note",
+      code = "tuning_family_resampling_failed",
+      message = paste0(
+        "Every attempted configuration failed in at least one training-only fold for: ",
+        paste(tuning$refit$families_resampling_failed, collapse = ", "), "."
+      ),
+      recommendation = paste(
+        "Inspect `tuning_results(result)$fold_scores$error`; these families were excluded",
+        "from selection and cannot be compared using complete out-of-fold evidence."
+      ),
+      stringsAsFactors = FALSE
+    )
+  }
+  if (length(tuning$refit$families_refit_failed)) {
+    notes[[length(notes) + 1L]] <- data.frame(
+      severity = "note",
+      code = "tuning_alternative_refit_failed",
+      message = paste0(
+        "No full-training alternative was retained for: ",
+        paste(tuning$refit$families_refit_failed, collapse = ", "), "."
+      ),
+      recommendation = paste(
+        "The primary model remains usable. Inspect the refit attempts before comparing",
+        "model families, because the final leaderboard omits these alternatives."
+      ),
+      stringsAsFactors = FALSE
+    )
+  }
+  if (!length(notes)) {
+    return(data.frame(
+      severity = character(), code = character(), message = character(),
+      recommendation = character(), stringsAsFactors = FALSE
+    ))
+  }
+  do.call(rbind, notes)
 }
 
 guided_evaluation_notes <- function(training,

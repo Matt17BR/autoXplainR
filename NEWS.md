@@ -8,11 +8,24 @@
 - Added local linear, logistic, and multinomial logistic workflows for
   regression, binary classification, and multiclass classification. H2O
   remains available explicitly through `engine = "h2o"`.
-- Added `model_set = "tuned"` and `tuning_results()`. The dependency-light
-  search compares statistical, decision-tree, and scaled neural-network
-  configurations using fold-specific preprocessing inside the outer training
-  set. The default one-standard-error rule is inspectable, and the final
-  holdout is untouched until the selected configuration is refitted and scored.
+- Added `model_set = "tuned"`, `tuning_results()`, and a ten-family learner
+  registry. The recommended portfolio compares linear, regularized, additive,
+  tree, forest, and boosting models; extended mode adds neural, radial-kernel,
+  nearest-neighbor, and MARS models. Every backend shares one serializable
+  prediction contract and is tuned with fold-specific preprocessing inside the
+  outer training set.
+- Added portfolio-aware automatic search budgets, space-filling low-budget
+  grids, stable per-configuration seeds, explicit dependency/version status,
+  retained family winners, paired out-of-fold predictions, and deterministic
+  fallback when a full-data refit fails. Explicit model budgets are not silently
+  capped.
+- The one-standard-error rule now uses a reviewed family priority followed by a
+  family-specific flexibility proxy; raw proxy values are never compared across
+  unrelated model families. The final holdout remains untouched until selection
+  and full-training refit are complete.
+- Added `compare_model_behavior()` to separate reviewed model-capacity cards
+  from computed same-row prediction disagreement and optional permutation-
+  importance evidence across retained families.
 - Added `render_model_report()`, a standalone beginner-first report that leads
   with the modeling question, held-out baseline comparison, and metric
   definitions before revealing feature patterns and a collapsed evidence audit.

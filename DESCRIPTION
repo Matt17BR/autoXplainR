@@ -11,13 +11,15 @@ Authors@R:
 Description: Guides first-time modelers through fitting, held-out evaluation,
     explanation, and communication for tabular prediction problems. Safe local
     defaults compare an understandable model with a simple baseline and define
-    every reported metric. Training-only resampling can tune statistical,
-    decision-tree, and neural-network candidates without opening the final
-    holdout; another local candidate set exposes Pareto performance-complexity
-    trade-offs. Model-agnostic tools add repeated permutation
-    importance, feature-dependence diagnostics, accumulated local effects, and
-    provenance-rich evidence audits. Optional adapters support 'H2O' AutoML,
-    interactive 'Plotly' graphics, and evidence-constrained narratives.
+    every reported metric. Training-only resampling can tune behaviorally
+    diverse linear, regularized, additive, tree, forest, boosting, neural,
+    kernel, nearest-neighbor, and multivariate adaptive regression spline families
+    without opening the final holdout. Model-agnostic tools compare predictive
+    disagreement and fitted reliance across families, and add repeated
+    permutation importance, feature-dependence diagnostics, accumulated local
+    effects, and provenance-rich evidence audits. Optional adapters support
+    'H2O' AutoML, interactive 'Plotly' graphics, and evidence-constrained
+    narratives.
 License: MIT + file LICENSE
 URL: https://github.com/Matt17BR/autoXplainR,
     https://matt17br.github.io/autoXplainR/
@@ -32,13 +34,20 @@ Imports:
     utils,
     withr (>= 2.5.0)
 Suggests:
+    e1071 (>= 1.7.0),
+    earth (>= 5.3.0),
+    glmnet (>= 4.1.0),
     h2o (>= 3.40.0),
     httr (>= 1.4.0),
     jsonlite (>= 1.8.0),
+    kknn (>= 1.4.0),
     knitr (>= 1.40.0),
+    mgcv (>= 1.8.0),
     plotly (>= 4.10.0),
+    ranger (>= 0.16.0),
     rmarkdown (>= 2.20.0),
-    testthat (>= 3.2.0)
+    testthat (>= 3.2.0),
+    xgboost (>= 2.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/Needs/coverage: covr

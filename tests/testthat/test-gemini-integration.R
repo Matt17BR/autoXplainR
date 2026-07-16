@@ -12,6 +12,7 @@ test_that("Gemini returns a validated evidence narrative", {
     iris,
     "Species",
     model_set = "tuned",
+    portfolio = "core",
     max_models = 5,
     nfolds = 3,
     test_fraction = 0.25,

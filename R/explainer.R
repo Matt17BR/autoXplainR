@@ -200,7 +200,13 @@ make_prediction_adapter <- function(model,
     } else {
       default_predict(model, newdata, task)
     }
-    normalize_predictions(raw, task, positive, class_levels)
+    normalize_predictions(
+      raw,
+      task,
+      positive,
+      class_levels,
+      n = nrow(newdata)
+    )
   }
 }
 
@@ -223,7 +229,11 @@ default_predict <- function(model, newdata, task) {
   )
 }
 
-normalize_predictions <- function(x, task, positive = NULL, class_levels = NULL) {
+normalize_predictions <- function(x,
+                                  task,
+                                  positive = NULL,
+                                  class_levels = NULL,
+                                  n = NULL) {
   if (task == "regression") {
     if (is.data.frame(x) || is.matrix(x)) {
       if ("predict" %in% colnames(x)) x <- x[, "predict"] else x <- x[, 1L]
@@ -256,6 +266,16 @@ normalize_predictions <- function(x, task, positive = NULL, class_levels = NULL)
     return(as.numeric(x))
   }
 
+  if (is.numeric(x) && is.vector(x) && !is.null(n) && n == 1L &&
+        length(x) == length(class_levels)) {
+    columns <- names(x)
+    if (is.null(columns) || !setequal(columns, class_levels)) columns <- class_levels
+    return(matrix(
+      as.numeric(x),
+      nrow = 1L,
+      dimnames = list(NULL, columns)
+    ))
+  }
   if (is.vector(x) && !is.list(x)) {
     # Hard multiclass predictions remain usable for accuracy, but probability
     # metrics will reject them with a targeted message.
@@ -303,7 +323,9 @@ assert_data_frame <- function(x, name) {
 }
 
 assert_count <- function(x, name, minimum = 1L) {
-  if (length(x) != 1L || is.na(x) || !is.numeric(x) || x < minimum || x != as.integer(x)) {
+  valid <- length(x) == 1L && is.numeric(x) && !is.na(x) && is.finite(x)
+  valid <- valid && x >= minimum && x <= .Machine$integer.max && x == floor(x)
+  if (!valid) {
     stop("`", name, "` must be a whole number >= ", minimum, ".", call. = FALSE)
   }
   as.integer(x)

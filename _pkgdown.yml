@@ -28,6 +28,7 @@ reference:
       - generate_natural_language_report
       - narrative_providers
       - prediction_ambiguity
+      - compare_model_behavior
   - title: Model-agnostic evidence workflow
     contents:
       - explain_model
@@ -44,6 +45,8 @@ reference:
       - calculate_partial_dependence_multi
   - title: Fitting and preprocessing
     contents:
+      - learner_catalog
+      - install_model_engines
       - preprocess_data
       - preprocess_for_h2o
   - title: Visualization and metadata

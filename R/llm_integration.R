@@ -705,6 +705,19 @@ prepare_analysis_context <- function(autoxplain_result,
   tuning <- autoxplain_result$tuning
   tuning_summary <- if (inherits(tuning, "autoxplain_tuning")) {
     selected <- tuning$candidates[tuning$candidates$selected, , drop = FALSE]
+    final_configuration <- tuning$final_configuration %||%
+      selected$configuration_id[[1L]]
+    if (length(final_configuration) != 1L || is.na(final_configuration) ||
+          !nzchar(final_configuration)) {
+      final_configuration <- selected$configuration_id[[1L]]
+    }
+    final <- tuning$candidates[
+      tuning$candidates$configuration_id == final_configuration,
+      ,
+      drop = FALSE
+    ]
+    if (!nrow(final)) final <- selected
+    refit <- tuning$refit %||% list()
     list(
       method = tuning$method,
       folds = tuning$folds_used,
@@ -715,11 +728,27 @@ prepare_analysis_context <- function(autoxplain_result,
       selected_model = selected$model[[1L]],
       selected_hyperparameters = selected$hyperparameters[[1L]],
       selected_score = selected$cv_score[[1L]],
+      selected_configuration = selected$configuration_id[[1L]],
+      final_configuration = final_configuration,
+      final_model = final$model[[1L]],
+      final_hyperparameters = final$hyperparameters[[1L]],
+      fallback_used = isTRUE(refit$fallback_used),
+      refit_status = refit$status %||% "not recorded",
+      families_resampling_failed = unique(
+        tuning$families_resampling_failed %||%
+          refit$families_resampling_failed %||% character()
+      ),
+      families_refit_failed = unique(refit$families_refit_failed %||% character()),
       scope_note = tuning$scope_note
     )
   } else {
     NULL
   }
+  retained_models <- analysis_retained_model_context(
+    autoxplain_result,
+    leaderboard
+  )
+  behavior_summary <- analysis_behavior_context(autoxplain_result)
   list(
     context_type = "model_result",
     task_type = autoxplain_result$task %||%
@@ -741,6 +770,8 @@ prepare_analysis_context <- function(autoxplain_result,
     calibration_summary = calibration_summary,
     missingness_summary = missingness_summary,
     tuning_summary = tuning_summary,
+    retained_models = retained_models,
+    model_behavior_summary = behavior_summary,
     candidate_selection = autoxplain_result$provenance$candidate_selection,
     importance_summary = importance_summary,
     pdp_summary = if (!is.null(pdp_data)) {
@@ -752,6 +783,78 @@ prepare_analysis_context <- function(autoxplain_result,
       "Aggregated diagnostics only. No raw rows, fitted model objects, case-level",
       "predictions, or secrets are included."
     )
+  )
+}
+
+analysis_retained_model_context <- function(result, leaderboard) {
+  model_ids <- names(result$models)
+  if (!length(model_ids)) return(NULL)
+  index <- if ("model_id" %in% names(leaderboard)) {
+    match(model_ids, leaderboard$model_id)
+  } else {
+    rep(NA_integer_, length(model_ids))
+  }
+  rows <- lapply(seq_along(model_ids), function(position) {
+    model_id <- model_ids[[position]]
+    row_index <- index[[position]]
+    model <- result$models[[model_id]]
+    value <- function(column, fallback) {
+      if (!column %in% names(leaderboard) || is.na(row_index)) return(fallback)
+      candidate <- as.character(leaderboard[[column]][[row_index]])
+      if (is.na(candidate) || !nzchar(candidate)) fallback else candidate
+    }
+    role <- value("role", if (grepl("baseline", model_id)) "baseline" else "candidate")
+    family <- value("family", model_family_name(model))
+    backend <- value("backend", model_backend_name(model))
+    if (identical(role, "baseline") || identical(family, "baseline")) return(NULL)
+    card <- behavior_card(family)
+    data.frame(
+      model_id = model_id,
+      model = value("model", model_id),
+      role = role,
+      family = family,
+      backend = backend,
+      capacity_nonlinearity = card$nonlinearity,
+      capacity_interactions = card$interactions,
+      capacity_cautions = card$cautions,
+      stringsAsFactors = FALSE
+    )
+  })
+  rows <- rows[!vapply(rows, is.null, logical(1L))]
+  if (!length(rows)) return(NULL)
+  output <- do.call(rbind, rows)
+  rownames(output) <- NULL
+  output
+}
+
+analysis_behavior_context <- function(result) {
+  comparison <- tryCatch(
+    compare_model_behavior(result),
+    error = function(error) NULL
+  )
+  if (is.null(comparison)) return(NULL)
+  performance <- comparison$models[c(
+    "model_id", "family", "backend", "performance_score",
+    "relative_performance_gap", "best_performance"
+  )]
+  widest <- comparison$prediction_pairs[1L, , drop = FALSE]
+  list(
+    card_evidence_kind = "prior/model-capacity knowledge",
+    card_scope = paste(
+      "Family cards describe patterns a learner can represent; they do not",
+      "show that the fitted model used those patterns."
+    ),
+    computed_evidence_kind = "computed evidence",
+    performance_metric = comparison$performance_metric,
+    performance = performance,
+    largest_disagreement = list(
+      model_a = widest$model_a[[1L]],
+      model_b = widest$model_b[[1L]],
+      mean_distance = widest$mean_prediction_distance[[1L]],
+      distance_definition = widest$distance_definition[[1L]],
+      class_disagreement_rate = widest$class_disagreement_rate[[1L]]
+    ),
+    scope_note = comparison$summary$scope_note
   )
 }
 
@@ -769,6 +872,14 @@ create_report_prompt <- function(context) {
     "- Define technical terms next to the result and use plain language.\n",
     "- Never imply causality, fairness, safety, or regulatory compliance.\n",
     "- Distinguish descriptive permutation variability from population inference.\n",
+    paste0(
+      "- Treat model-family behavior cards only as prior knowledge about capacity; ",
+      "never claim that the fitted model empirically used an available capacity.\n"
+    ),
+    paste0(
+      "- Treat held-out performance, prediction disagreement, and supplied repeated ",
+      "permutation importance as computed evidence.\n"
+    ),
     "- Treat grade labels as heuristic diagnostics, never certification.\n",
     "- For an explanation audit, lead with critical limitations and disagreement before rankings.\n",
     "- Do not invent metrics, model behavior, domain meaning, or recommendations.\n",
@@ -851,7 +962,72 @@ context_to_text <- function(context) {
         tuning$selected_hyperparameters, "; resampled ", tuning$metric, " = ",
         report_number(tuning$selected_score, 5L), "."
       ),
+      paste0(
+        "Resampling-selected configuration: ", tuning$selected_configuration,
+        ". Actual final fitted configuration: ", tuning$final_configuration,
+        " (", tuning$final_model, "; fallback used: ",
+        if (tuning$fallback_used) "yes" else "no", ")."
+      ),
       paste("Tuning boundary:", tuning$scope_note)
+    )
+    if (length(tuning$families_resampling_failed)) {
+      lines <- c(lines, paste(
+        "Families with no complete resampling result:",
+        paste(tuning$families_resampling_failed, collapse = ", ")
+      ))
+    }
+    if (length(tuning$families_refit_failed)) {
+      lines <- c(lines, paste(
+        "Families that failed full-training refit:",
+        paste(tuning$families_refit_failed, collapse = ", ")
+      ))
+    }
+  }
+  if (!is.null(context$retained_models) && nrow(context$retained_models)) {
+    identities <- apply(context$retained_models, 1L, function(row) {
+      paste0(
+        row[["model_id"]], " [family=", row[["family"]],
+        ", backend=", row[["backend"]], ", role=", row[["role"]], "]"
+      )
+    })
+    capacities <- apply(context$retained_models, 1L, function(row) {
+      paste0(
+        row[["model_id"]], ": can represent ", row[["capacity_nonlinearity"]],
+        "; interaction capacity: ", row[["capacity_interactions"]]
+      )
+    })
+    lines <- c(
+      lines,
+      "Retained model identities (aggregate metadata):",
+      paste0("- ", identities),
+      paste(
+        "PRIOR/MODEL-CAPACITY KNOWLEDGE:",
+        "the following reviewed cards describe what each family can represent;",
+        "they do not show that the fitted models used those patterns."
+      ),
+      paste0("- ", capacities)
+    )
+  }
+  if (!is.null(context$model_behavior_summary)) {
+    behavior <- context$model_behavior_summary
+    score_lines <- apply(behavior$performance, 1L, function(row) {
+      paste0(
+        row[["model_id"]], " ", behavior$performance_metric, "=",
+        report_number(as.numeric(row[["performance_score"]]), 5L)
+      )
+    })
+    disagreement <- behavior$largest_disagreement
+    lines <- c(
+      lines,
+      "COMPUTED MODEL-COMPARISON EVIDENCE:",
+      paste0("- Held-out ", score_lines),
+      paste0(
+        "- Largest mean paired prediction difference: ", disagreement$model_a,
+        " versus ", disagreement$model_b, " = ",
+        report_number(disagreement$mean_distance, 5L), " (",
+        disagreement$distance_definition, ")."
+      ),
+      paste("Computed-comparison boundary:", behavior$scope_note)
     )
   }
   if (!is.null(context$candidate_selection)) {
@@ -871,8 +1047,11 @@ context_to_text <- function(context) {
                paste("Stable claim rate:", format_percent(context$stable_claim_rate)))
   }
   if (!is.null(context$importance_summary)) {
-    lines <- c(lines, paste("Top features:",
-                            paste(context$importance_summary$top_features, collapse = ", ")))
+    lines <- c(lines, paste(
+      "COMPUTED repeated-permutation-importance features:",
+      paste(context$importance_summary$top_features, collapse = ", "),
+      "(model reliance on supplied evaluation rows; not family capacity or causality)."
+    ))
   }
   if (!is.null(context$findings) && nrow(context$findings)) {
     finding_lines <- apply(context$findings, 1L, function(row) {
@@ -974,11 +1153,66 @@ create_fallback_report <- function(context) {
         ". Its resampled ", tuning$metric, " was ",
         report_number(tuning$selected_score, 5L), "."
       ),
+      paste0(
+        "The resampling-selected configuration was `", tuning$selected_configuration,
+        "`; the actual final fitted configuration was `", tuning$final_configuration,
+        "` (", tuning$final_model, "). A recorded refit fallback was ",
+        if (tuning$fallback_used) "used" else "not needed", "."
+      ),
       paste(
         "That resampled score selected a configuration; it is not the final",
         "performance estimate. The held-out score above evaluated the selected,",
         "refitted model on different rows."
       )
+    )
+    if (length(tuning$families_resampling_failed)) {
+      lines <- c(lines, paste0(
+        "Families without a complete resampling result: ",
+        paste(tuning$families_resampling_failed, collapse = ", "), "."
+      ))
+    }
+    if (length(tuning$families_refit_failed)) {
+      lines <- c(lines, paste0(
+        "Families that failed full-training refit: ",
+        paste(tuning$families_refit_failed, collapse = ", "), "."
+      ))
+    }
+  }
+  if (!is.null(context$retained_models) && nrow(context$retained_models)) {
+    lines <- c(
+      lines, "", "## What kinds of models were retained?",
+      paste(
+        "The family descriptions below are prior/model-capacity knowledge.",
+        "They describe what a family can represent, not patterns proven to have",
+        "been used by these fitted models."
+      )
+    )
+    for (index in seq_len(nrow(context$retained_models))) {
+      model <- context$retained_models[index, , drop = FALSE]
+      lines <- c(lines, paste0(
+        "- `", model$model_id[[1L]], "`: ", model$family[[1L]], " via ",
+        model$backend[[1L]], "; can represent ",
+        model$capacity_nonlinearity[[1L]], "; interaction capacity: ",
+        model$capacity_interactions[[1L]], "."
+      ))
+    }
+  }
+  if (!is.null(context$model_behavior_summary)) {
+    behavior <- context$model_behavior_summary
+    widest <- behavior$largest_disagreement
+    lines <- c(
+      lines, "", "## What did the retained models do differently?",
+      paste(
+        "This section is computed evidence from common evaluation rows, not a",
+        "claim inferred from model-family names."
+      ),
+      paste0(
+        "The largest average paired prediction difference was between `",
+        widest$model_a, "` and `", widest$model_b, "`: ",
+        report_number(widest$mean_distance, 4L), " using ",
+        widest$distance_definition, "."
+      ),
+      behavior$scope_note
     )
   }
   if (!is.null(context$grade)) {
@@ -1001,11 +1235,12 @@ create_fallback_report <- function(context) {
   }
   if (!is.null(context$importance_summary)) {
     lines <- c(
-      lines, "", "## Feature evidence",
+      lines, "", "## Computed feature evidence",
       paste0(
         "The leading descriptive permutation-importance features are ",
         paste(context$importance_summary$top_features, collapse = ", "),
-        ". They describe model reliance on the evaluation data and should not be read as causal effects."
+        ". They are computed evidence of model reliance on the evaluation data, ",
+        "not family-capacity claims, and should not be read as causal effects."
       )
     )
   }

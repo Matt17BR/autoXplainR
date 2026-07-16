@@ -91,6 +91,7 @@ tuned <- autoxplain(
   iris,
   target_column = "Species",
   model_set = "tuned",
+  portfolio = "core",
   max_models = 6,
   nfolds = 3,
   seed = 2026
@@ -102,16 +103,43 @@ tuning$candidates[, c(
 )]
 ```
 
-This is ordinary supervised hyperparameter tuning made visible. AutoXplainR
-compares a statistical reference, decision-tree pruning/depth settings, and
-scaled neural-network hidden-unit/weight-decay settings. It learns
-preprocessing separately inside each training fold.
+This executable vignette uses the dependency-light `core` portfolio: a
+statistical reference, decision-tree pruning/depth settings, and scaled
+neural-network hidden-unit/weight-decay settings. It learns preprocessing
+separately inside each training fold.
 
-The default one-standard-error rule chooses the simplest configuration whose
-resampled error is within one standard error of the best observed
-configuration. Use `tuning_rule = "best"` when the explicitly desired rule is
-minimum resampled error instead. Both rules and every fold score remain in the
-result.
+For a real model search, the default `recommended` portfolio is broader. It
+compares linear, regularized, additive (where supported), decision-tree,
+random-forest, and gradient-boosted-tree behavior. Installation is explicit so
+the tournament never changes silently with the packages present on one
+machine:
+
+```{r recommended-portfolio, eval=FALSE}
+install_model_engines("recommended")
+
+recommended <- autoxplain(
+  my_data,
+  target_column = "outcome",
+  model_set = "tuned",
+  portfolio = "recommended", # the default for tuned fits
+  nfolds = 5,
+  seed = 2026
+)
+
+learner_catalog()
+compare_model_behavior(recommended)
+```
+
+The `extended` portfolio additionally covers neural, radial-kernel,
+nearest-neighbor, and multivariate adaptive regression spline behavior when
+the task supports them. Advanced users can supply an explicit `learners`
+vector and change `max_models`, `nfolds`, and `tuning_rule`.
+
+The default one-standard-error rule first uses the documented family priority,
+then chooses the least-flexible eligible setting inside that family. Its
+family-specific flexibility proxies are never compared as if they shared one
+unit. Use `tuning_rule = "best"` when the explicitly desired rule is minimum
+resampled error instead. Both rules and every fold score remain in the result.
 
 The resampled score answers *which configuration should be refitted?* The
 held-out score answers *how did that selected, refitted model perform on unseen

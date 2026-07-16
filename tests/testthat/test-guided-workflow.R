@@ -58,15 +58,58 @@ test_that("guided multiclass evaluation returns normalized class probabilities",
   result <- autoxplain(iris, "Species", seed = 15)
   explainer <- as_explainers(result, models = 1)$main_model
   probability <- predict(explainer, explainer$data)
+  one_probability <- predict(explainer, explainer$data[1L, , drop = FALSE])
 
   expect_equal(result$task, "multiclass")
   expect_equal(ncol(probability), 3L)
+  expect_equal(dim(one_probability), c(1L, 3L))
+  expect_identical(colnames(one_probability), levels(iris$Species))
   expect_equal(unname(rowSums(probability)), rep(1, nrow(probability)), tolerance = 1e-7)
   expect_true(all(c(
     "log_loss", "brier_score", "calibration_error", "accuracy", "macro_recall"
   ) %in% names(result$evaluation$metrics$main_model)))
   expect_true(all(result$evaluation$predictions$primary_confidence >= 0 &
                     result$evaluation$predictions$primary_confidence <= 1))
+})
+
+test_that("unused outcome levels do not become phantom classes", {
+  set.seed(411)
+  binary <- data.frame(x = stats::rnorm(80))
+  binary$y <- factor(
+    ifelse(binary$x + stats::rnorm(80, sd = 0.4) > 0, "yes", "no"),
+    levels = c("no", "unused", "yes")
+  )
+  quick_binary <- autoxplain(binary, "y", seed = 18)
+  tuned_binary <- autoxplain(
+    binary,
+    "y",
+    model_set = "tuned",
+    portfolio = "core",
+    max_models = 3,
+    nfolds = 2,
+    seed = 18
+  )
+  expect_identical(levels(quick_binary$training_data$y), c("no", "yes"))
+  expect_identical(levels(tuned_binary$training_data$y), c("no", "yes"))
+
+  multiclass <- iris
+  multiclass$Species <- factor(
+    as.character(multiclass$Species),
+    levels = c(levels(iris$Species), "unused")
+  )
+  quick_multiclass <- autoxplain(multiclass, "Species", seed = 19)
+  tuned_multiclass <- autoxplain(
+    multiclass,
+    "Species",
+    model_set = "tuned",
+    portfolio = "core",
+    max_models = 3,
+    nfolds = 2,
+    seed = 19
+  )
+  expected <- levels(iris$Species)
+  expect_identical(levels(quick_multiclass$training_data$Species), expected)
+  expect_identical(levels(tuned_multiclass$training_data$Species), expected)
 })
 
 test_that("comparison mode fits approachable local candidates without changing the primary", {

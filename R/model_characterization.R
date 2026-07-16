@@ -42,7 +42,12 @@ extract_model_characteristics <- function(autoxplain_result,
       data.frame()
     }
     info <- list(
-      rank = index,
+      rank = if (nrow(row) && "rank" %in% names(row) &&
+                   is.numeric(row$rank[[1L]]) && is.finite(row$rank[[1L]])) {
+        as.integer(row$rank[[1L]])
+      } else {
+        as.integer(match(id, leaderboard$model_id))
+      },
       model_id = id,
       algorithm = algorithm,
       training_time_s = if (h2o_model) {
@@ -92,7 +97,7 @@ extract_model_characteristics <- function(autoxplain_result,
   attr(output, "summary") <- list(
     total_models = length(output),
     algorithms_used = unique(vapply(output, `[[`, character(1), "algorithm")),
-    total_training_time_s = total_time,
+    total_final_refit_time_s = total_time,
     dataset_info = list(
       target_column = autoxplain_result$target_column,
       n_rows = nrow(autoxplain_result$training_data),
@@ -124,6 +129,9 @@ result_model_diagnostic <- function(result, model_id) {
 }
 
 friendly_model_type <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model")) {
+    return(learner_model_label(learner_definition(model$family), model$task))
+  }
   if (inherits(model, "autoxplain_tuned_nnet")) return("tuned neural network")
   if (inherits(model, "glm") && !is.null(model$family) && model$family$family == "binomial") {
     return("logistic regression")
@@ -134,6 +142,15 @@ friendly_model_type <- function(model) {
 }
 
 base_model_hyperparameters <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model")) {
+    output <- model$parameters
+    if (identical(model$backend, "glmnet")) {
+      output$selected_lambda <- model$fit_details$lambda
+    }
+    output$backend <- model$backend
+    output$backend_version <- model$package_version
+    return(output)
+  }
   if (inherits(model, "autoxplain_tuned_nnet")) {
     return(list(
       hidden_units = model$size,
@@ -241,7 +258,7 @@ create_model_comparison_report <- function(model_characteristics,
       Models = as.character(summary$total_models),
       Features = as.character(summary$dataset_info$n_features),
       `Evaluation role` = summary$dataset_info$evaluation_role,
-      `Total model runtime (s)` = report_number(summary$total_training_time_s, 2L)
+      `Total final-refit runtime (s)` = report_number(summary$total_final_refit_time_s, 2L)
     )), "</section><section><h2>Retained models</h2>", html_table(table, digits = 4L),
     "</section></main></body></html>"
   )

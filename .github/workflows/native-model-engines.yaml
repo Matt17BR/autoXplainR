@@ -1,0 +1,40 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+name: native-model-engines
+
+permissions:
+  contents: read
+
+jobs:
+  diverse-model-portfolio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      AUTOXPLAIN_RUN_H2O: false
+    steps:
+      - uses: actions/checkout@v7
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: >-
+            any::devtools,
+            any::testthat,
+            any::glmnet,
+            any::mgcv,
+            any::ranger,
+            any::xgboost,
+            any::e1071,
+            any::earth,
+            any::kknn
+      - name: Exercise every native learner adapter and portfolio
+        run: devtools::test(filter = "native-engines", stop_on_failure = TRUE)
+        shell: Rscript {0}
