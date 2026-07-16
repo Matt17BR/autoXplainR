@@ -8,6 +8,9 @@
 - local Ubuntu 26.04 LTS, R 4.5.2, with `qpdf` and HTML Tidy
 - GitHub Actions matrix: Ubuntu (R devel, release, oldrel-1), Windows
   (release), and macOS (release)
+- Win-builder, Windows Server 2022 x64 (ucrt), R 4.6.1 release
+- Win-builder, Windows Server 2022 x64 (ucrt), R Under development
+  (2026-07-15 r90261)
 
 ## R CMD check results
 
@@ -17,6 +20,16 @@
 - Local results: 0 errors, 0 warnings, and 2 NOTEs. The first NOTE is expected
   for a new submission. The second says that the check machine was unable to
   verify the current time; it is specific to the local environment.
+- Win-builder R-release result: 0 errors, 0 warnings, and 1 NOTE.
+  <https://win-builder.r-project.org/l7C4ssRV9x51/>
+- Win-builder R-devel result: 0 errors, 0 warnings, and 1 NOTE.
+  <https://win-builder.r-project.org/5lnmYebB6bLX/>
+- The Win-builder NOTE is the expected incoming-feasibility NOTE for a new
+  submission. Its spelling list contains `AutoML`, an established abbreviation
+  for automated machine learning, and the correctly spelled surnames Apley,
+  Cawley, Dominici, Rudin, and Zhu from the cited statistical literature.
+- On both Win-builder services, installation, examples, tests, vignette
+  rebuilding, and PDF and HTML manual generation completed successfully.
 - Dependency-light suite: 1,391 passed expectations, 0 failed, and 30 deliberate
   skips for optional native engines and live-service integrations.
 - All-native-engine suite: 1,812 passed expectations, 0 failed, with only the
