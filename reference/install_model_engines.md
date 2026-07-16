@@ -48,7 +48,6 @@ invisibly.
 
 ``` r
 install_model_engines("recommended", task = "regression", dry_run = TRUE)
-#> Dry run only; no packages were installed. Missing backends: glmnet, ranger, xgboost.
-#> Would run: install.packages(c("glmnet", "ranger", "xgboost"))
-#> [1] "glmnet"  "ranger"  "xgboost"
+#> Dry run only; no packages were installed. All `recommended` portfolio backends for `regression` are available.
+#> character(0)
 ```

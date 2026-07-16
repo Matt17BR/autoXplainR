@@ -30,18 +30,18 @@ language behavior notes.
 learner_catalog()
 #> <AutoXplainR learner catalog>
 #>   families:  10
-#>   available: 4
+#>   available: 9
 #>       family    backend                supported_tasks available
 #>       linear stats/nnet regression, binary, multiclass      TRUE
-#>  regularized     glmnet regression, binary, multiclass     FALSE
+#>  regularized     glmnet regression, binary, multiclass      TRUE
 #>     additive       mgcv             regression, binary      TRUE
 #>         tree      rpart regression, binary, multiclass      TRUE
-#>       forest     ranger regression, binary, multiclass     FALSE
-#>     boosting    xgboost regression, binary, multiclass     FALSE
+#>       forest     ranger regression, binary, multiclass      TRUE
+#>     boosting    xgboost regression, binary, multiclass      TRUE
 #>       neural       nnet regression, binary, multiclass      TRUE
-#>       kernel      e1071 regression, binary, multiclass     FALSE
+#>       kernel      e1071 regression, binary, multiclass      TRUE
 #>    neighbors       kknn regression, binary, multiclass     FALSE
-#>         mars      earth             regression, binary     FALSE
+#>         mars      earth             regression, binary      TRUE
 #>                      nonlinearity
 #>   none unless encoded in features
 #>   none unless encoded in features
@@ -67,18 +67,18 @@ learner_catalog()
 learner_catalog("regression")
 #> <AutoXplainR learner catalog>
 #>   families:  10
-#>   available: 4
+#>   available: 9
 #>       family    backend                supported_tasks available
 #>       linear stats/nnet regression, binary, multiclass      TRUE
-#>  regularized     glmnet regression, binary, multiclass     FALSE
+#>  regularized     glmnet regression, binary, multiclass      TRUE
 #>     additive       mgcv             regression, binary      TRUE
 #>         tree      rpart regression, binary, multiclass      TRUE
-#>       forest     ranger regression, binary, multiclass     FALSE
-#>     boosting    xgboost regression, binary, multiclass     FALSE
+#>       forest     ranger regression, binary, multiclass      TRUE
+#>     boosting    xgboost regression, binary, multiclass      TRUE
 #>       neural       nnet regression, binary, multiclass      TRUE
-#>       kernel      e1071 regression, binary, multiclass     FALSE
+#>       kernel      e1071 regression, binary, multiclass      TRUE
 #>    neighbors       kknn regression, binary, multiclass     FALSE
-#>         mars      earth             regression, binary     FALSE
+#>         mars      earth             regression, binary      TRUE
 #>                      nonlinearity
 #>   none unless encoded in features
 #>   none unless encoded in features

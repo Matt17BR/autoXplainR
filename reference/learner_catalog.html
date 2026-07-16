@@ -81,18 +81,18 @@ language behavior notes.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">learner_catalog</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR learner catalog&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   families:  10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   available: 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   available: 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       family    backend                supported_tasks available</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       linear stats/nnet regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  regularized     glmnet regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  regularized     glmnet regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     additive       mgcv             regression, binary      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         tree      rpart regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       forest     ranger regression, binary, multiclass     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     boosting    xgboost regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       forest     ranger regression, binary, multiclass      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     boosting    xgboost regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       neural       nnet regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       kernel      e1071 regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       kernel      e1071 regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    neighbors       kknn regression, binary, multiclass     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mars      earth             regression, binary     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         mars      earth             regression, binary      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      nonlinearity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   none unless encoded in features</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   none unless encoded in features</span>
@@ -118,18 +118,18 @@ language behavior notes.</p>
 <span class="r-in"><span><span class="fu">learner_catalog</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR learner catalog&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   families:  10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   available: 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   available: 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       family    backend                supported_tasks available</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       linear stats/nnet regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  regularized     glmnet regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  regularized     glmnet regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     additive       mgcv             regression, binary      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         tree      rpart regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       forest     ranger regression, binary, multiclass     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     boosting    xgboost regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       forest     ranger regression, binary, multiclass      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     boosting    xgboost regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       neural       nnet regression, binary, multiclass      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       kernel      e1071 regression, binary, multiclass     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       kernel      e1071 regression, binary, multiclass      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    neighbors       kknn regression, binary, multiclass     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mars      earth             regression, binary     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         mars      earth             regression, binary      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      nonlinearity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   none unless encoded in features</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   none unless encoded in features</span>

@@ -55,7 +55,7 @@ result$leaderboard
 #> 1    1      main_model       linear regression  primary   linear   stats
 #> 2    2 simple_baseline intercept-only baseline baseline baseline   stats
 #>       rmse      mae  r_squared training_time_ms model_size_kb complexity
-#> 1 3.552918 2.797996 -0.1281933                1      44.43750         11
+#> 1 3.552918 2.797996 -0.1281933                2      44.43750         11
 #> 2 5.096266 3.907692 -1.3212249                2      19.82812          1
 #>   fit_warning prediction_time_ms
 #> 1                              1
@@ -173,15 +173,15 @@ catalog[, c(
 #> 10        mars      earth             regression, binary
 #>                     portfolios available
 #> 1  core, recommended, extended      TRUE
-#> 2        recommended, extended     FALSE
+#> 2        recommended, extended      TRUE
 #> 3        recommended, extended      TRUE
 #> 4  core, recommended, extended      TRUE
-#> 5        recommended, extended     FALSE
-#> 6        recommended, extended     FALSE
+#> 5        recommended, extended      TRUE
+#> 6        recommended, extended      TRUE
 #> 7               core, extended      TRUE
-#> 8                     extended     FALSE
+#> 8                     extended      TRUE
 #> 9                     extended     FALSE
-#> 10                    extended     FALSE
+#> 10                    extended      TRUE
 ```
 
 The presets are deliberately easy to explain:

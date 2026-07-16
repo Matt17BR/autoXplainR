@@ -13,15 +13,19 @@ substitute for that review.
   beginner-first product contract in `PRODUCT.md`.
 - Review user-facing metrics, warnings, and narrative prompts for
   unsupported causal, fairness, or certainty claims.
-- Run `devtools::document()` and ensure the generated files are
-  committed.
-- Run `spelling::spell_check_package()` and
+- Run
+  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
+  and ensure the generated files are committed.
+- Run
+  [`spelling::spell_check_package()`](https://docs.ropensci.org/spelling//reference/spell_check_package.html)
+  and
   [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html).
   Review every response manually; automated release gating treats
   canonical-form failures and permanent 404/410 responses as blocking
   because DOI publishers commonly return bot-specific 202/403/503
   responses.
-- Run `lintr::lint_package()`,
+- Run
+  [`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html),
   [`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html),
   and
   [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md);

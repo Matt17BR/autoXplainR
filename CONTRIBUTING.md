@@ -60,8 +60,11 @@ devtools::test(
 - Do not silently drop columns, rows, or factor levels.
 - State whether intervals are Monte Carlo, bootstrap, or inferential.
 - Add NEWS and user documentation for visible changes.
-- Run `devtools::document()`, `devtools::test()`, and
-  `devtools::check()`.
+- Run
+  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html),
+  [`devtools::test()`](https://devtools.r-lib.org/reference/test.html),
+  and
+  [`devtools::check()`](https://devtools.r-lib.org/reference/check.html).
 - Keep measured statement coverage at or above the enforced 80% project
   floor; new statistical branches should be covered substantially more
   deeply.
