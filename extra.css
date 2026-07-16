@@ -1,0 +1,7 @@
+/* Keep pkgdown's stacked home-page sidebar inside narrow viewports. */
+@media (max-width: 767.98px) {
+  .template-home > .row > aside.col-md-3 {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
