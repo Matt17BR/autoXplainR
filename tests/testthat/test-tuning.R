@@ -21,7 +21,7 @@ test_that("local tuning is reproducible and isolated from the outer holdout", {
   expect_equal(nrow(first$tuning$candidates), 7L)
   expect_setequal(
     unique(first$tuning$candidates$family),
-    c("statistical_reference", "decision_tree", "neural_network")
+    c("linear", "tree", "neural")
   )
   expect_true(all(first$tuning$candidates$folds_completed == 4L))
   expect_true(all(first$tuning$candidates$evaluated_rows == nrow(first$training_data)))
@@ -35,7 +35,7 @@ test_that("local tuning is reproducible and isolated from the outer holdout", {
   expect_equal(length(first$models), 4L)
   expect_true(all(c("main_model", "simple_baseline") %in% names(first$models)))
   expect_equal(sum(names(first$models) %in% c(
-    "reference_model", "tuned_tree", "tuned_neural_network"
+    "linear_model", "tree_model", "neural_model"
   )), 2L)
   expect_output(print(first), "training-resampled configurations")
   expect_output(print(tuning_results(first)), "outer training rows")
@@ -91,7 +91,7 @@ test_that("tuned classification models retain valid probability contracts", {
   expect_equal(unname(rowSums(probability)), rep(1, nrow(probability)), tolerance = 1e-6)
 })
 
-test_that("tuning refits preprocessing inside folds and records level repairs", {
+test_that("tuning refits preprocessing inside folds and records novel-level mappings", {
   set.seed(9)
   data <- data.frame(
     x = rnorm(80),
@@ -102,11 +102,38 @@ test_that("tuning refits preprocessing inside folds and records level repairs", 
     data, "y", model_set = "tuned", max_models = 3, nfolds = 4, seed = 7
   )
   expect_true(all(result$tuning$fold_scores$validation_rows >= 2L))
-  expect_true(all(result$tuning$fold_scores$rows_moved_for_unseen_levels >= 0L))
+  expect_true(all(result$tuning$fold_scores$novel_levels_mapped >= 0L))
   expect_equal(
     length(unique(result$tuning$fold_scores$fold)),
     result$tuning$folds_used
   )
+})
+
+test_that("outer evaluation values cannot change training-only tuning", {
+  set.seed(15)
+  training <- data.frame(x = rnorm(90), group = rep(c("a", "b", "c"), 30))
+  training$y <- 2 * training$x + as.numeric(factor(training$group)) + rnorm(90, sd = 0.2)
+  test_one <- data.frame(x = rnorm(20), group = rep(c("a", "b"), 10), y = rnorm(20))
+  test_two <- transform(test_one, x = x * 1e6, y = y * -1e8)
+
+  first <- autoxplain(
+    training, "y", test_data = test_one, model_set = "tuned",
+    max_models = 5, nfolds = 3, seed = 818
+  )
+  second <- autoxplain(
+    training, "y", test_data = test_two, model_set = "tuned",
+    max_models = 5, nfolds = 3, seed = 818
+  )
+
+  expect_identical(first$tuning$plan, second$tuning$plan)
+  stable_columns <- setdiff(names(first$tuning$fold_scores), "elapsed_ms")
+  expect_equal(
+    first$tuning$fold_scores[stable_columns],
+    second$tuning$fold_scores[stable_columns],
+    tolerance = 1e-12
+  )
+  expect_identical(first$tuning$selected_configuration, second$tuning$selected_configuration)
+  expect_false(identical(first$evaluation$metrics, second$evaluation$metrics))
 })
 
 test_that("tuning validation is actionable", {

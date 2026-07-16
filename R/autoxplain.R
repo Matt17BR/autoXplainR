@@ -153,6 +153,7 @@ autoxplain <- function(data,
       enable_ordinal_factors = FALSE,
       enable_id_removal = FALSE,
       missing_value_strategy = "keep",
+      novel_level_strategy = "mode",
       verbose = verbosity == "info"
     ),
     preprocessing_config
@@ -172,7 +173,8 @@ autoxplain <- function(data,
   if (!is.null(test_data)) {
     test_processed <- if (enable_preprocessing) {
       apply_preprocessing_recipe(test_data, train_processed$recipe, target_column,
-                                 missing_value_strategy = config$missing_value_strategy)
+                                 missing_value_strategy = config$missing_value_strategy,
+                                 novel_level_strategy = config$novel_level_strategy)
     } else {
       list(data = test_data, preprocessing_log = list(), original_info = data_info(test_data),
            final_info = data_info(test_data), recipe = list())

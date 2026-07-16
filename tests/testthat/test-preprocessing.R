@@ -28,6 +28,13 @@ test_that("training imputations and levels are reused", {
     AutoXplainR:::apply_preprocessing_recipe(unseen, fitted$recipe, "y"),
     "unseen levels"
   )
+
+  fallback_fit <- preprocess_for_h2o(
+    train, "y", missing_value_strategy = "impute", novel_level_strategy = "mode"
+  )
+  mapped <- AutoXplainR:::apply_preprocessing_recipe(unseen, fallback_fit$recipe, "y")
+  expect_equal(as.character(mapped$data$group), "a")
+  expect_equal(mapped$preprocessing_log$novel_level_mappings, c(group = 1L))
 })
 
 test_that("missing strategies and inputs are validated", {

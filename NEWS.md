@@ -78,6 +78,16 @@
 
 ## Architecture and reliability
 
+- Replaced the hard-coded three-column tuning dispatcher with a learner-family
+  registry and generic list-column search plan. `learner_catalog()` now exposes
+  the distinction between a model family, its backend, supported tasks, and a
+  reviewed plain-language behavior card.
+- Tuning seeds are now derived per configuration, so adding or reordering a
+  learner cannot silently change the random initialization of another one.
+- Held-out and fold-validation rows are never moved into training to repair
+  categorical levels. Training recipes instead learn a modal fallback for
+  novel predictor levels, record mapping counts, and retain a strict
+  `novel_level_strategy = "error"` option.
 - H2O AutoML is now an optional fitting adapter; core audits use a lightweight
   runtime dependency set.
 - Test data remain held out from H2O validation by default.

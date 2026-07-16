@@ -21,6 +21,9 @@
 #'   `"remove_columns"` are accepted.
 #' @param missing_column_threshold Fraction missing above which `drop_columns`
 #'   removes a predictor.
+#' @param novel_level_strategy How evaluation-time predictor categories absent
+#'   from training are handled. `"error"` stops; `"mode"` maps them to the
+#'   most frequent observed training category and records the mapping count.
 #' @param verbose Emit concise progress messages.
 #' @param handle_missing,convert_characters,remove_id_columns Deprecated logical
 #'   aliases retained for compatibility.
@@ -37,6 +40,7 @@ preprocess_data <- function(data,
                             enable_id_removal = FALSE,
                             missing_value_strategy = "keep",
                             missing_column_threshold = 0.5,
+                            novel_level_strategy = c("error", "mode"),
                             verbose = FALSE,
                             handle_missing = NULL,
                             convert_characters = NULL,
@@ -50,6 +54,7 @@ preprocess_data <- function(data,
   if (!is.null(remove_id_columns)) enable_id_removal <- isTRUE(remove_id_columns)
   if (!is.null(handle_missing) && !isTRUE(handle_missing)) missing_value_strategy <- "keep"
   missing_value_strategy <- normalize_missing_strategy(missing_value_strategy)
+  novel_level_strategy <- match.arg(novel_level_strategy)
   assert_probability(missing_column_threshold, "missing_column_threshold")
   logical_arguments <- list(
     enable_target_handling = enable_target_handling,
@@ -71,7 +76,9 @@ preprocess_data <- function(data,
     ordered_columns = list(),
     numeric_factor_columns = character(),
     imputations = list(),
-    missing_value_strategy = missing_value_strategy
+    missing_value_strategy = missing_value_strategy,
+    novel_level_strategy = novel_level_strategy,
+    factor_fallbacks = list()
   )
 
   if (enable_id_removal) {
@@ -124,8 +131,24 @@ preprocess_data <- function(data,
     log$numeric_factors <- list(columns = numeric_factors)
   }
 
+  factor_predictors <- setdiff(names(data)[vapply(data, is.factor, logical(1))], target_column)
+  for (column in factor_predictors) {
+    data[[column]] <- droplevels(data[[column]])
+  }
+  log$unused_factor_levels <- list(
+    action = "dropped from the training recipe",
+    columns = factor_predictors
+  )
+
   recipe$final_columns <- names(data)
   recipe$factor_levels <- lapply(data[vapply(data, is.factor, logical(1))], base::levels)
+  factor_predictors <- setdiff(names(recipe$factor_levels), target_column)
+  recipe$factor_fallbacks <- lapply(factor_predictors, function(column) {
+    values <- data[[column]][!is.na(data[[column]])]
+    if (!length(values)) return(NULL)
+    as.character(statistical_mode(values))
+  })
+  names(recipe$factor_fallbacks) <- factor_predictors
   result <- list(
     data = data,
     preprocessing_log = log,
@@ -155,9 +178,12 @@ preprocess_for_h2o <- function(data, target_column, ...) {
 apply_preprocessing_recipe <- function(data,
                                        recipe,
                                        target_column,
-                                       missing_value_strategy = recipe$missing_value_strategy) {
+                                       missing_value_strategy = recipe$missing_value_strategy,
+                                       novel_level_strategy = recipe$novel_level_strategy %||% "error") {
   assert_data_frame(data, "data")
+  novel_level_strategy <- match.arg(novel_level_strategy, c("error", "mode"))
   original <- data_info(data)
+  novel_level_mappings <- integer()
   if (length(recipe$removed_columns)) {
     data <- data[setdiff(names(data), recipe$removed_columns)]
   }
@@ -181,8 +207,18 @@ apply_preprocessing_recipe <- function(data,
     raw <- as.character(data[[column]])
     unseen <- setdiff(unique(raw[!is.na(raw)]), recipe$factor_levels[[column]])
     if (length(unseen)) {
-      stop("Column `", column, "` has unseen levels: ", paste(unseen, collapse = ", "),
-           call. = FALSE)
+      if (identical(column, target_column) || identical(novel_level_strategy, "error")) {
+        stop("Column `", column, "` has unseen levels: ", paste(unseen, collapse = ", "),
+             call. = FALSE)
+      }
+      fallback <- recipe$factor_fallbacks[[column]] %||% NULL
+      if (is.null(fallback) || !fallback %in% recipe$factor_levels[[column]]) {
+        stop("Column `", column, "` has no observed training level for fallback mapping.",
+             call. = FALSE)
+      }
+      replace <- !is.na(raw) & raw %in% unseen
+      novel_level_mappings[[column]] <- sum(replace)
+      raw[replace] <- fallback
     }
     data[[column]] <- factor(raw, levels = recipe$factor_levels[[column]])
   }
@@ -193,7 +229,11 @@ apply_preprocessing_recipe <- function(data,
   structure(
     list(
       data = data,
-      preprocessing_log = list(action = "applied_training_recipe"),
+      preprocessing_log = list(
+        action = "applied_training_recipe",
+        novel_level_strategy = novel_level_strategy,
+        novel_level_mappings = novel_level_mappings
+      ),
       original_info = original,
       final_info = data_info(data),
       recipe = recipe
@@ -208,6 +248,7 @@ print.autoxplain_preprocessing <- function(x, ...) {
   cat("  before: ", x$original_info$nrows, " rows x ", x$original_info$ncols, " columns\n", sep = "")
   cat("  after:  ", x$final_info$nrows, " rows x ", x$final_info$ncols, " columns\n", sep = "")
   cat("  missing strategy: ", x$recipe$missing_value_strategy, "\n", sep = "")
+  cat("  novel levels:     ", x$recipe$novel_level_strategy %||% "error", "\n", sep = "")
   if (length(x$recipe$removed_columns)) {
     cat("  removed: ", paste(x$recipe$removed_columns, collapse = ", "), "\n", sep = "")
   }

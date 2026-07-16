@@ -120,21 +120,23 @@ test_that("preprocessing learns imputations only from training data", {
   expect_equal(result$provenance$evaluation_rows, 2L)
 })
 
-test_that("automatic splitting keeps categorical levels learnable", {
+test_that("automatic splitting never moves holdout rows and maps novel predictor levels", {
   data <- data.frame(
-    category = c(rep("common", 18), "rare", "rare"),
+    category = c(rep("common-a", 9), rep("common-b", 9), "rare", "rare"),
     x = seq_len(20),
     y = seq_len(20) + c(rep(0, 19), 1)
   )
   found <- NULL
   for (seed in seq_len(100)) {
     candidate <- autoxplain(data, "y", seed = seed, test_fraction = 0.4)
-    if (candidate$provenance$rows_moved_for_unseen_levels > 0L) {
+    if (candidate$provenance$novel_levels_mapped > 0L) {
       found <- candidate
       break
     }
   }
   expect_false(is.null(found))
+  expect_equal(found$provenance$rows_moved_for_unseen_levels, 0L)
+  expect_equal(found$provenance$evaluation_rows, 8L)
   expect_true(all(as.character(found$test_data$category) %in%
                     as.character(found$training_data$category)))
 })

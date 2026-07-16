@@ -57,13 +57,17 @@ tune_supervised_candidates <- function(raw_data,
                                        preprocessing_config,
                                        max_models,
                                        nfolds,
-                                       selection_rule) {
+                                       selection_rule,
+                                       seed = 123L,
+                                       learners = c("linear", "tree", "neural")) {
   plan <- local_tuning_plan(
     max_models = max_models,
     n = nrow(raw_data),
     p = ncol(raw_data) - 1L,
     task = task,
-    n_classes = if (task == "regression") 1L else length(levels(raw_data[[target]]))
+    n_classes = if (task == "regression") 1L else length(levels(raw_data[[target]])),
+    learners = learners,
+    seed = seed
   )
   fold_assignment <- tuning_fold_assignment(
     raw_data[[target]], task = task, requested = nfolds
@@ -109,6 +113,7 @@ tune_supervised_candidates <- function(raw_data,
     seq_len(nrow(candidates)) == best_index
   }
   selected_index <- which(eligible)[order(
+    candidates$simplicity_rank[eligible],
     candidates$complexity_proxy[eligible],
     candidates$cv_score[eligible],
     candidates$configuration_id[eligible]
@@ -134,6 +139,7 @@ tune_supervised_candidates <- function(raw_data,
       folds_requested = nfolds,
       folds_used = fold_assignment$folds,
       configurations_requested = max_models,
+      learners = unique(plan$family),
       candidates = candidates,
       fold_scores = fold_scores,
       plan = plan,
@@ -147,108 +153,102 @@ tune_supervised_candidates <- function(raw_data,
   )
 }
 
-local_tuning_plan <- function(max_models, n, p, task, n_classes) {
+local_tuning_plan <- function(max_models,
+                              n,
+                              p,
+                              task,
+                              n_classes,
+                              learners = c("linear", "tree", "neural"),
+                              seed = 123L) {
   max_models <- assert_count(max_models, "max_models")
-  if (max_models < 3L) {
-    stop("`max_models` must be at least 3 for local tuning.", call. = FALSE)
+  seed <- assert_count(seed, "seed", minimum = 0L)
+  if (!is.character(learners) || !length(learners) || anyNA(learners) ||
+        any(!nzchar(learners)) || anyDuplicated(learners)) {
+    stop("`learners` must be a unique, non-empty character vector.", call. = FALSE)
   }
-  max_models <- min(max_models, 25L)
-  tree <- data.frame(
-    maxdepth = c(2L, 4L, 6L, 10L, 3L, 5L, 8L, 10L, 2L, 4L, 6L, 10L),
-    cp = c(0.03, 0.01, 0.003, 0.0005, 0.01, 0.003, 0.001, 0, 0.01, 0.003, 0.001, 0),
-    minsplit_fraction = c(0.20, 0.12, 0.08, 0.05, 0.20, 0.08, 0.05, 0.03,
-                          0.08, 0.05, 0.03, 0.02),
-    stringsAsFactors = FALSE
-  )
-  tree$minsplit <- pmax(4L, as.integer(round(n * tree$minsplit_fraction)))
-  tree$minsplit_fraction <- NULL
-  tree$family <- "decision_tree"
-  tree$size <- NA_integer_
-  tree$decay <- NA_real_
-  tree$complexity_proxy <- pmax(
-    2,
-    pmin(2^tree$maxdepth, ceiling(n / tree$minsplit))
-  )
-
-  neural <- data.frame(
-    size = c(1L, 2L, 4L, 6L, 8L, 2L, 4L, 6L, 8L, 12L, 12L, 16L),
-    decay = c(0.1, 0.03, 0.01, 0.01, 0.001, 0.001, 0.001, 0, 0, 0.001, 0, 0.0001),
-    stringsAsFactors = FALSE
-  )
-  neural$family <- "neural_network"
-  neural$maxdepth <- NA_integer_
-  neural$cp <- NA_real_
-  neural$minsplit <- NA_integer_
-  outputs <- if (task == "multiclass") n_classes else 1L
-  neural$complexity_proxy <- (p + 1L) * neural$size +
-    (neural$size + 1L) * outputs
-
-  tunable_count <- max_models - 1L
-  tree_count <- ceiling(tunable_count / 2)
-  neural_count <- floor(tunable_count / 2)
-  interleaved <- list()
-  for (index in seq_len(max(tree_count, neural_count))) {
-    if (index <= tree_count) {
-      interleaved[[length(interleaved) + 1L]] <- tree[index, , drop = FALSE]
+  registry <- autoxplain_learner_registry()
+  unknown <- setdiff(learners, names(registry))
+  if (length(unknown)) {
+    stop(
+      "Unknown learner families: ", paste(unknown, collapse = ", "),
+      ". Use `learner_catalog()` to inspect supported families.",
+      call. = FALSE
+    )
+  }
+  unsupported <- learners[!vapply(learners, function(family) {
+    task %in% registry[[family]]$tasks
+  }, logical(1))]
+  if (length(unsupported)) {
+    stop(
+      "Learner families do not support the `", task, "` task: ",
+      paste(unsupported, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  unavailable <- learners[!vapply(learners, function(family) {
+    learner_is_available(registry[[family]])
+  }, logical(1))]
+  if (length(unavailable)) {
+    packages <- unique(vapply(unavailable, function(family) {
+      registry[[family]]$package %||% family
+    }, character(1)))
+    stop(
+      "Learner dependencies are not installed: ", paste(packages, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  if (max_models < length(learners)) {
+    stop(
+      "`max_models` must be at least the number of learner families (",
+      length(learners), ").",
+      call. = FALSE
+    )
+  }
+  max_models <- min(max_models, 50L)
+  grids <- lapply(learners, function(family) {
+    registry[[family]]$grid(n = n, p = p, task = task, n_classes = n_classes)
+  })
+  names(grids) <- learners
+  selected <- list()
+  depth <- 1L
+  while (length(selected) < max_models) {
+    added <- FALSE
+    for (family in learners) {
+      if (length(selected) >= max_models) break
+      if (length(grids[[family]]) >= depth) {
+        selected[[length(selected) + 1L]] <- list(
+          family = family,
+          parameters = grids[[family]][[depth]]
+        )
+        added <- TRUE
+      }
     }
-    if (index <= neural_count) {
-      interleaved[[length(interleaved) + 1L]] <- neural[index, , drop = FALSE]
-    }
+    if (!added) break
+    depth <- depth + 1L
   }
-  tunable <- do.call(rbind, interleaved)
-  reference_complexity <- if (task == "multiclass") {
-    (p + 1L) * (n_classes - 1L)
-  } else {
-    p + 1L
-  }
-  reference <- data.frame(
-    maxdepth = NA_integer_, cp = NA_real_, minsplit = NA_integer_,
-    family = "statistical_reference", size = NA_integer_, decay = NA_real_,
-    complexity_proxy = max(1, reference_complexity),
-    stringsAsFactors = FALSE
-  )
-  plan <- rbind(reference, tunable)
-  counts <- stats::ave(seq_len(nrow(plan)), plan$family, FUN = seq_along)
-  prefixes <- c(
-    statistical_reference = "reference",
-    decision_tree = "tree",
-    neural_network = "neural"
-  )
-  plan$configuration_id <- paste0(prefixes[plan$family], "_", sprintf("%02d", counts))
-  plan$model <- unname(c(
-    statistical_reference = switch(
-      task,
-      regression = "linear regression",
-      binary = "logistic regression",
-      multiclass = "multinomial logistic regression"
-    ),
-    decision_tree = "decision tree",
-    neural_network = "neural network"
-  )[plan$family])
-  plan$hyperparameters <- vapply(seq_len(nrow(plan)), function(index) {
-    tuning_hyperparameters(plan[index, , drop = FALSE])
-  }, character(1))
-  plan$selected <- FALSE
-  plan[c(
-    "configuration_id", "family", "model", "hyperparameters", "maxdepth", "cp",
-    "minsplit", "size", "decay", "complexity_proxy", "selected"
-  )]
-}
-
-tuning_hyperparameters <- function(configuration) {
-  family <- configuration$family[[1L]]
-  if (family == "statistical_reference") return("default statistical fit")
-  if (family == "decision_tree") {
-    return(paste0(
-      "max depth = ", configuration$maxdepth[[1L]],
-      ", pruning cp = ", format(configuration$cp[[1L]], trim = TRUE),
-      ", minimum split = ", configuration$minsplit[[1L]]
-    ))
-  }
-  paste0(
-    "hidden units = ", configuration$size[[1L]],
-    ", weight decay = ", format(configuration$decay[[1L]], trim = TRUE)
-  )
+  family_counts <- setNames(integer(length(learners)), learners)
+  rows <- lapply(seq_along(selected), function(index) {
+    family <- selected[[index]]$family
+    parameters <- selected[[index]]$parameters
+    definition <- registry[[family]]
+    family_counts[[family]] <<- family_counts[[family]] + 1L
+    data.frame(
+      configuration_id = paste0(family, "_", sprintf("%02d", family_counts[[family]])),
+      family = family,
+      backend = definition$backend,
+      model = learner_model_label(definition, task),
+      hyperparameters = definition$describe(parameters),
+      parameters = I(list(parameters)),
+      simplicity_rank = definition$simplicity_rank,
+      complexity_proxy = max(1, definition$complexity(
+        parameters, n = n, p = p, task = task, n_classes = n_classes
+      )),
+      seed = as.integer((as.double(seed) + index - 1) %% .Machine$integer.max),
+      selected = FALSE,
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, rows)
 }
 
 tuning_fold_assignment <- function(y, task, requested) {
@@ -288,16 +288,9 @@ prepare_tuning_fold <- function(raw_data,
                                 preprocessing_config) {
   training <- raw_data[fold_assignment != fold, , drop = FALSE]
   validation <- raw_data[fold_assignment == fold, , drop = FALSE]
-  repaired <- keep_known_predictor_levels(training, validation, target)
-  if (nrow(repaired$evaluation) < 2L) {
-    stop(
-      "A tuning fold retained fewer than two validation rows after categorical-level checks.",
-      call. = FALSE
-    )
-  }
   processed <- preprocess_guided_split(
-    repaired$training,
-    repaired$evaluation,
+    training,
+    validation,
     target,
     task,
     enable_preprocessing,
@@ -311,7 +304,9 @@ prepare_tuning_fold <- function(raw_data,
   list(
     training = processed$training$data,
     validation = processed$evaluation$data,
-    rows_moved_for_unseen_levels = repaired$moved,
+    novel_levels_mapped = sum(
+      processed$evaluation$preprocessing_log$novel_level_mappings %||% integer()
+    ),
     removed_features = constant$removed
   )
 }
@@ -353,7 +348,7 @@ score_tuning_configuration <- function(configuration, fold, target, task, fold_i
     fold = fold_id,
     score = score,
     validation_rows = nrow(fold$validation),
-    rows_moved_for_unseen_levels = fold$rows_moved_for_unseen_levels,
+    novel_levels_mapped = fold$novel_levels_mapped,
     elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
     warning = paste(unique(fit_warning), collapse = " | "),
     error = error,
@@ -378,6 +373,7 @@ summarize_tuning_candidates <- function(plan, fold_scores, expected_folds, task)
     data.frame(
       configuration_id = id,
       family = plan$family[[index]],
+      backend = plan$backend[[index]],
       model = plan$model[[index]],
       hyperparameters = plan$hyperparameters[[index]],
       cv_score = cv_score,
@@ -389,6 +385,7 @@ summarize_tuning_candidates <- function(plan, fold_scores, expected_folds, task)
       },
       folds_completed = complete,
       evaluated_rows = sum(scores$validation_rows[is.finite(scores$score)]),
+      simplicity_rank = plan$simplicity_rank[[index]],
       complexity_proxy = plan$complexity_proxy[[index]],
       selected = FALSE,
       status = if (complete == expected_folds) "ok" else "failed",
@@ -400,34 +397,18 @@ summarize_tuning_candidates <- function(plan, fold_scores, expected_folds, task)
 
 fit_tuning_configuration <- function(configuration, data, target, task) {
   family <- configuration$family[[1L]]
-  features <- setdiff(names(data), target)
-  formula <- stats::reformulate(features, response = target)
-  if (family == "statistical_reference") {
-    if (task == "regression") return(stats::lm(formula, data = data))
-    if (task == "binary") {
-      return(stats::glm(formula, data = data, family = stats::binomial()))
-    }
-    return(nnet::multinom(formula, data = data, trace = FALSE))
-  }
-  if (family == "decision_tree") {
-    return(rpart::rpart(
-      formula,
+  definition <- learner_definition(family)
+  parameters <- configuration$parameters[[1L]]
+  fit_seed <- configuration$seed[[1L]]
+  with_preserved_seed(
+    fit_seed,
+    definition$fit(
       data = data,
-      method = if (task == "regression") "anova" else "class",
-      control = rpart::rpart.control(
-        cp = configuration$cp[[1L]],
-        maxdepth = configuration$maxdepth[[1L]],
-        minsplit = configuration$minsplit[[1L]],
-        xval = 0L
-      )
-    ))
-  }
-  fit_tuned_neural_network(
-    data = data,
-    target = target,
-    task = task,
-    size = configuration$size[[1L]],
-    decay = configuration$decay[[1L]]
+      target = target,
+      task = task,
+      parameters = parameters,
+      seed = fit_seed
+    )
   )
 }
 

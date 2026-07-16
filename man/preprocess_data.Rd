@@ -14,6 +14,7 @@ preprocess_data(
   enable_id_removal = FALSE,
   missing_value_strategy = "keep",
   missing_column_threshold = 0.5,
+  novel_level_strategy = c("error", "mode"),
   verbose = FALSE,
   handle_missing = NULL,
   convert_characters = NULL,
@@ -44,6 +45,10 @@ to \code{FALSE}; unique values alone never trigger removal.}
 
 \item{missing_column_threshold}{Fraction missing above which \code{drop_columns}
 removes a predictor.}
+
+\item{novel_level_strategy}{How evaluation-time predictor categories absent
+from training are handled. \code{"error"} stops; \code{"mode"} maps them to the
+most frequent observed training category and records the mapping count.}
 
 \item{verbose}{Emit concise progress messages.}
 

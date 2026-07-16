@@ -46,6 +46,7 @@ fit_guided_base <- function(data,
       enable_ordinal_factors = FALSE,
       enable_id_removal = FALSE,
       missing_value_strategy = "impute",
+      novel_level_strategy = "mode",
       verbose = verbosity == "info"
     ),
     preprocessing_config
@@ -97,7 +98,8 @@ fit_guided_base <- function(data,
     preprocessing_config = config,
     max_models = max_models,
     nfolds = nfolds,
-    tuning_rule = tuning_rule
+    tuning_rule = tuning_rule,
+    seed = seed
   ))
   evaluated <- evaluate_candidates(
     fit$models,
@@ -148,7 +150,10 @@ fit_guided_base <- function(data,
         test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_,
         training_rows = nrow(train),
         evaluation_rows = nrow(evaluation_data),
-        rows_moved_for_unseen_levels = split$moved_for_unseen_levels,
+        rows_moved_for_unseen_levels = 0L,
+        novel_levels_mapped = sum(
+          processed$evaluation$preprocessing_log$novel_level_mappings %||% integer()
+        ),
         constant_features_removed = constant_result$removed,
         baseline = "intercept-only model",
         primary_model = fit$labels[["main_model"]],
@@ -222,49 +227,16 @@ make_evaluation_split <- function(data, target, task, fraction, seed) {
     }
   })
   training_indices <- setdiff(seq_len(n), indices)
-  repaired <- keep_known_predictor_levels(
-    data[training_indices, , drop = FALSE],
-    data[indices, , drop = FALSE],
-    target
-  )
-  if (nrow(repaired$evaluation) < 2L) {
-    stop(
-      "The automatic split left fewer than two evaluable rows after preserving categorical levels. ",
-      "Supply `test_data` or use more observations.",
-      call. = FALSE
-    )
-  }
   list(
-    training = repaired$training,
-    evaluation = repaired$evaluation,
+    training = data[training_indices, , drop = FALSE],
+    evaluation = data[indices, , drop = FALSE],
     method = if (task == "regression") {
       "reproducible random holdout"
     } else {
       "reproducible stratified holdout"
     },
-    moved_for_unseen_levels = repaired$moved
+    moved_for_unseen_levels = 0L
   )
-}
-
-keep_known_predictor_levels <- function(training, evaluation, target) {
-  categorical <- setdiff(names(training), target)
-  categorical <- categorical[vapply(
-    training[categorical],
-    function(x) is.factor(x) || is.character(x),
-    logical(1)
-  )]
-  move <- rep(FALSE, nrow(evaluation))
-  for (feature in categorical) {
-    known <- unique(as.character(training[[feature]][!is.na(training[[feature]])]))
-    value <- as.character(evaluation[[feature]])
-    move <- move | (!is.na(value) & !value %in% known)
-  }
-  moved <- sum(move)
-  if (moved) {
-    training <- rbind(training, evaluation[move, , drop = FALSE])
-    evaluation <- evaluation[!move, , drop = FALSE]
-  }
-  list(training = training, evaluation = evaluation, moved = moved)
 }
 
 preprocess_guided_split <- function(training,
@@ -282,7 +254,8 @@ preprocess_guided_split <- function(training,
       evaluation,
       fitted$recipe,
       target,
-      missing_value_strategy = config$missing_value_strategy
+      missing_value_strategy = config$missing_value_strategy,
+      novel_level_strategy = config$novel_level_strategy %||% "error"
     )
   } else {
     if (anyNA(training) || anyNA(evaluation)) {
@@ -440,7 +413,9 @@ fit_base_candidates <- function(data,
                                 preprocessing_config = list(),
                                 max_models = 10L,
                                 nfolds = 5L,
-                                tuning_rule = "one_se") {
+                                tuning_rule = "one_se",
+                                seed = 123L,
+                                learners = c("linear", "tree", "neural")) {
   primary_formula <- stats::reformulate(features, response = target)
   baseline_formula <- stats::reformulate(character(), response = target)
   if (task == "regression") {
@@ -474,7 +449,9 @@ fit_base_candidates <- function(data,
       preprocessing_config = preprocessing_config,
       max_models = max_models,
       nfolds = nfolds,
-      selection_rule = tuning_rule
+      selection_rule = tuning_rule,
+      seed = seed,
+      learners = learners
     )
     valid <- tuning$candidates[tuning$candidates$status == "ok", , drop = FALSE]
     selected <- valid[valid$selected, , drop = FALSE]
@@ -483,11 +460,6 @@ fit_base_candidates <- function(data,
       family_rows <- valid[valid$family == family, , drop = FALSE]
       retained <- rbind(retained, family_rows[which.min(family_rows$cv_score), , drop = FALSE])
     }
-    identifiers <- c(
-      statistical_reference = "reference_model",
-      decision_tree = "tuned_tree",
-      neural_network = "tuned_neural_network"
-    )
     final_fits <- list()
     final_labels <- character()
     final_roles <- character()
@@ -497,7 +469,7 @@ fit_base_candidates <- function(data,
       model_id <- if (isTRUE(row$selected[[1L]])) {
         "main_model"
       } else {
-        unname(identifiers[[row$family[[1L]]]])
+        learner_definition(row$family[[1L]])$model_id
       }
       configuration <- tuning$plan[
         tuning$plan$configuration_id == row$configuration_id[[1L]],
@@ -507,12 +479,12 @@ fit_base_candidates <- function(data,
         fit_tuning_configuration(configuration, data, target, task)
       })
       final_labels[[model_id]] <- if (model_id == "main_model") {
-        if (row$family[[1L]] == "statistical_reference") {
+        if (row$family[[1L]] == "linear") {
           paste("resampling-selected", row$model[[1L]])
         } else {
           paste("tuned", row$model[[1L]])
         }
-      } else if (row$family[[1L]] == "statistical_reference") {
+      } else if (row$family[[1L]] == "linear") {
         paste(row$model[[1L]], "reference")
       } else {
         paste("tuned", row$model[[1L]], "alternative")
