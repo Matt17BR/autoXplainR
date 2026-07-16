@@ -48,24 +48,28 @@
 <div class="section level2">
 <h2 id="prepare">Prepare<a class="anchor" aria-label="anchor" href="#prepare"></a></h2>
 <ul><li>Confirm the version and release date in <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code>, and <code>cran-comments.md</code>.</li>
+<li>Confirm every person and copyright holder is represented in <code>Authors@R</code> with the appropriate role. Add an ORCID only when the person has supplied or publicly verified that identifier; never infer one from a name match.</li>
+<li>Review <code>PROVENANCE.md</code> against the complete release diff and retain notices for any accepted third-party material.</li>
 <li>Confirm that README and vignette examples still express the beginner-first product contract in <code>PRODUCT.md</code>.</li>
 <li>Review user-facing metrics, warnings, and narrative prompts for unsupported causal, fairness, or certainty claims.</li>
 <li>Run <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> and ensure the generated files are committed.</li>
 <li>Run <code><a href="https://docs.ropensci.org/spelling//reference/spell_check_package.html" class="external-link">spelling::spell_check_package()</a></code> and <code><a href="https://urlchecker.r-lib.org/reference/url_check.html" class="external-link">urlchecker::url_check()</a></code>. Review every response manually; automated release gating treats canonical-form failures and permanent 404/410 responses as blocking because DOI publishers commonly return bot-specific 202/403/503 responses.</li>
-<li>Run <code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code>, and <code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>; statement coverage must remain at least 80%.</li>
-<li>Run <code>devtools::check(args = "--as-cran")</code> and explain every remaining note in <code>cran-comments.md</code>.</li>
+<li>Run <code>lintr::lint_package(cache = FALSE)</code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code>, and <code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>; statement coverage must remain at least 80%.</li>
+<li>Run <code>.github/scripts/build-check-source.sh &lt;artifact-dir&gt; &lt;check-dir&gt;</code> with current R-patched or R-release. This builds once, checks that exact archive with <code>--as-cran</code> including the PDF and HTML manuals, and verifies that its SHA-256 digest did not change during checking.</li>
+<li>Check that same source archive with current R-devel and explain every remaining note in <code>cran-comments.md</code>.</li>
 <li>Run the isolated real-H2O test with <code>AUTOXPLAIN_RUN_H2O=true</code>.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="validate-remotely">Validate remotely<a class="anchor" aria-label="anchor" href="#validate-remotely"></a></h2>
 <ul><li>Require successful R CMD checks on Ubuntu (devel, release, and oldrel), Windows, and macOS.</li>
+<li>Submit the checked archive to Win-builder’s R-devel service and retain its result email or URL with the release evidence.</li>
 <li>Require successful lint, spelling, link, coverage, pkgdown, and H2O jobs.</li>
 <li>Open the deployed pkgdown site and smoke-test the beginner workflow on a narrow mobile viewport as well as desktop.</li>
 <li>Verify that no workflow log, fixture, or report contains an API key or raw private data.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="publish">Publish<a class="anchor" aria-label="anchor" href="#publish"></a></h2>
-<ul><li>Create and push the signed version tag <code>v&lt;DESCRIPTION version&gt;</code>.</li>
+<ul><li>Create and push an annotated version tag <code>v&lt;DESCRIPTION version&gt;</code>. Sign it only when the maintainer already has a verified signing key; signing is not a substitute for the recorded commit and source-archive SHA-256 digests.</li>
 <li>Inspect the workflow-built source package and its SHA-256 checksum.</li>
 <li>Review and publish the draft GitHub release created by the release workflow.</li>
 <li>Submit the exact checked source archive to CRAN and record any reviewer feedback in <code>cran-comments.md</code>.</li>

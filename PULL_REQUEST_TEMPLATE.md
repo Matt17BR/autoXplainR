@@ -23,3 +23,12 @@ pass
 User-facing changes recorded in NEWS
 
 ## Data and privacy
+
+I have the right to contribute every added or modified component under
+the project license
+
+Derived material is identified, attributed, and accompanied by its
+original copyright and license notices
+
+Added data or fixtures are original, generated, or documented as
+redistributable
