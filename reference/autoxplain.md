@@ -26,6 +26,7 @@ autoxplain(
   task = c("auto", "regression", "binary", "multiclass"),
   nfolds = 5L,
   tuning_rule = c("one_se", "best"),
+  tuning_control = NULL,
   sort_metric = "AUTO",
   include_algos = NULL,
   exclude_algos = NULL,
@@ -33,7 +34,9 @@ autoxplain(
   init_h2o = TRUE,
   h2o_nthreads = -1L,
   h2o_max_mem_size = "2G",
-  verbosity = c("quiet", "info")
+  verbosity = c("quiet", "info"),
+  evaluation_role = c("auto", "test", "validation", "evaluation"),
+  overlap_action = c("warn", "error", "ignore")
 )
 ```
 
@@ -58,16 +61,22 @@ autoxplain(
 - max_runtime_secs:
 
   H2O training time budget in seconds; ignored by the guided base
-  engine.
+  engine. Use zero to disable the wall-clock limit and let the fixed
+  `max_models` budget govern the search.
 
 - seed:
 
-  Reproducible split, fitting, and H2O seed.
+  Reproducible split and local-fitting seed. For H2O, the seed controls
+  supported stochastic components but cannot guarantee an identical
+  time-limited search; see the returned reproducibility provenance.
 
 - test_data:
 
-  Optional held-out evaluation data. It is not used as an H2O validation
-  frame unless `use_test_as_validation = TRUE`.
+  Optional evaluation data. Supplied rows are labeled as a neutral
+  evaluation by default; use `evaluation_role = "test"` only when their
+  provenance supports an independent-test interpretation. H2O uses them
+  as validation rows only when `use_test_as_validation = TRUE` and
+  `nfolds = 0`.
 
 - test_fraction:
 
@@ -86,8 +95,8 @@ autoxplain(
   pre-specified trees for a descriptive Pareto view. `"tuned"` compares
   the requested behaviorally diverse learner portfolio using
   training-only resampling, retains its family winners for comparison,
-  then evaluates the selected configuration once on the untouched
-  holdout.
+  then evaluates the selected configuration once on the configured
+  evaluation rows.
 
 - portfolio:
 
@@ -122,18 +131,27 @@ autoxplain(
 
   Number of training-only folds for local tuning or H2O
   cross-validation. Local tuning automatically reduces this when an
-  outcome class contains fewer rows.
+  outcome class contains fewer rows. For H2O, zero is accepted only with
+  explicit `test_data` and `use_test_as_validation = TRUE`; this
+  prevents model ranking by training error alone.
 
 - tuning_rule:
 
-  Local tuning selection rule. `"one_se"` chooses the most interpretable
-  eligible family, then its least-flexible configuration, among
-  candidates whose resampled error is within one standard error of the
-  best. The reviewed family priority and family-specific flexibility
-  proxies are shown by
+  Local tuning selection rule. `"one_se"` chooses the first eligible
+  family in the documented reviewed priority, then its least-flexible
+  configuration, among candidates whose resampled error is within one
+  standard error of the best. The family priority and family-specific
+  flexibility proxies are shown by
   [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
   `"best"` chooses the lowest resampled error. Ignored by other
   workflows.
+
+- tuning_control:
+
+  Optional advanced local-tuning settings returned by
+  [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md).
+  Leave `NULL` for the beginner defaults. This argument is available
+  only with `engine = "base"` and `model_set = "tuned"`.
 
 - sort_metric:
 
@@ -145,8 +163,10 @@ autoxplain(
 
 - use_test_as_validation:
 
-  Whether to pass `test_data` to H2O as a validation frame. The default
-  keeps held-out explanation data independent.
+  Whether to pass `test_data` to H2O as a validation frame when
+  `nfolds = 0`. With H2O cross-validation (`nfolds >= 2`), the supplied
+  frame is not passed because H2O ranks models using cross-validation
+  metrics.
 
 - init_h2o:
 
@@ -163,6 +183,20 @@ autoxplain(
 - verbosity:
 
   One of `"quiet"` or `"info"`.
+
+- evaluation_role:
+
+  How to describe the evaluation rows. `"auto"` labels package-generated
+  outer splits as `"test"`, supplied data as the neutral `"evaluation"`,
+  and data actually used for H2O selection as `"validation"`. Use an
+  explicit value to record a role established by the study design.
+
+- overlap_action:
+
+  What to do when supplied evaluation rows have exactly the same values
+  as training rows: warn (the default), error, or ignore. Exact equality
+  can indicate leakage but can also occur naturally, so this check
+  cannot establish whether the samples are independent.
 
 ## Value
 
@@ -192,7 +226,8 @@ result
 #>   models:     2 (primary + baseline)
 #>   result:     primary model has rmse = 2.4413
 #>   baseline:   63.1% improvement in rmse
-#>   next:       use as_explainers() to investigate the fitted patterns
+#>   compare:    use model_set = "tuned" for automatic multi-family selection
+#>   explain:    use render_model_report() or as_explainers() for fitted patterns
 explainers <- as_explainers(result)
 audit_explanations(explainers)
 #> <AutoXplainR explanation evidence audit>

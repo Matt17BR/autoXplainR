@@ -28,6 +28,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/compare_model_effects.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/explain_effect.html</loc></url>
@@ -41,6 +42,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/missingness_shift.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/model_tradeoffs.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/narrative_providers.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/plot.autoxplain_model_effects.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_comparison.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_correlations.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_partial_dependence.html</loc></url>
@@ -55,6 +57,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/subgroup_performance.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/summary.autoxplain_audit.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/tuning_control.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/tuning_results.html</loc></url>
 </urlset>
 

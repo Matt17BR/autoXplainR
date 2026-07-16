@@ -2,8 +2,7 @@
 
 The 0.2 architecture establishes a beginner-first fit, evaluate,
 explain, and communicate workflow backed by a model-agnostic evidence
-audit. The roadmap is ordered by user and scientific leverage, not
-novelty theatre.
+audit. The roadmap is ordered by user and scientific leverage.
 
 ## 0.2 — reliable foundation
 
@@ -11,8 +10,8 @@ Guided base-R fitting and held-out evaluation with no Java requirement.
 
 Plain-language model report with progressive evidence disclosure.
 
-Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative
-providers.
+Explicit Gemini, Groq, Cloudflare, Ollama, OpenRouter, and local
+narrative providers.
 
 Beginner evaluation diagnostics: error summaries, confusion tables,
 probability scores, sample-size cautions, and baseline-failure warnings.
@@ -27,9 +26,25 @@ nearest-neighbor, and MARS, with fold-specific preprocessing,
 inspectable one-standard-error selection, and untouched final
 evaluation.
 
+Validated
+[`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
+escape hatch for custom family grids and budgets, supported selection
+losses, supplied ordinary V-fold IDs, out-of-fold retention, and failure
+policy, without complicating the beginner presets.
+
 Unified serializable prediction adapters, retained family winners,
 paired out-of-fold evidence, and cross-model prediction/importance
 comparison.
+
+Separate portfolio-level behavior comparison from aligned, support-aware
+per-feature ALE/PDP comparison across retained models.
+
+Calibration, subgroup performance, missingness-shift, and binary
+threshold-sensitivity diagnostics with explicit interpretation
+boundaries.
+
+Case-level prediction ambiguity and candidate-relative Pareto comparison
+without holdout-based re-selection.
 
 Model-agnostic prediction contract and H2O boundary.
 
@@ -61,32 +76,20 @@ evaluation-sample, and model-fitting variability.
 Cross-fitted audit orchestration that prevents training/evaluation
 leakage by construction.
 
-Calibration, subgroup performance, and missingness-shift diagnostics as
-context for explanation claims—not as fairness certification.
+First-class grouped and temporal resampling strategies with explicit
+estimands; do not relabel ordinary supplied V-fold IDs as either design.
 
 Simulation corpus with known ground truth, correlated features,
 interactions, null predictors, extrapolation, and label noise.
 
 ## 0.4 — model multiplicity
 
-First-class guided candidate-set mode that shares the ordinary result,
-explainer, audit, visualization, and report contracts.
-
 First-class Rashomon-set provider interface for AutoML, resampling,
 regularization paths, and user-defined candidate generators.
 
 Rashomon ALE bands and class-reliance ranges with coverage diagnostics.
 
-Binary decision-threshold sensitivity with explicit false-positive and
-false-negative trade-offs and no holdout-optimized recommendation.
-
-Case-level prediction ambiguity across supplied candidate models, with
-their performance gaps retained beside every disagreement summary.
-
 Case-level feature-attribution disagreement.
-
-Candidate-relative Pareto selection over held-out performance and model
-size without hiding trade-offs in one weighted score.
 
 Extend Pareto objectives to calibration, latency, stability, and
 explanation agreement with missing-objective diagnostics.

@@ -91,7 +91,13 @@ explain_effect(
 
 ## Value
 
-A data frame of class `autoxplain_effect`.
+A data frame of class `autoxplain_effect`. Both methods return the
+effect estimate, relative empirical support, a descriptive standard
+error, and normal-approximation limits. PDP limits summarize across-row
+variation in fixed-model predictions at each grid value. ALE limits
+propagate within-bin variation in fixed-model local prediction
+differences and are unavailable when any bin has fewer than two rows.
+Neither is a model-fitting or population confidence interval.
 
 ## Examples
 
@@ -101,24 +107,26 @@ x <- explain_model(fit, mtcars, y = "mpg")
 explain_effect(x, feature = "wt")
 #> <AutoXplainR ALE effect>
 #>   feature: wt | rows: 32 | max association: 0.898
-#>        wt accumulated_effect    std_error     conf_low    conf_high n support
-#>  1.624500        6.043000304 1.776357e-15  6.043000304  6.043000304 2    0.50
-#>  1.845750        5.208704821 2.512148e-15  5.208704821  5.208704821 2    0.50
-#>  2.067250        4.359205776 2.512148e-15  4.359205776  4.359205776 1    0.25
-#>  2.264000        3.713054377 2.512148e-15  3.713054377  3.713054377 2    0.50
-#>  2.465125        2.830297539 2.512148e-15  2.830297539  2.830297539 1    0.25
-#>  2.677125        2.101476770 2.512148e-15  2.101476770  2.101476770 2    0.50
-#>  2.816875        1.767948621 2.512148e-15  1.767948621  1.767948621 1    0.25
-#>  3.009375        0.638133895 3.076740e-15  0.638133895  0.638133895 2    0.50
-#>  3.173500        0.520306287 3.076740e-15  0.520306287  0.520306287 1    0.25
-#>  3.257000        0.003385168 3.076740e-15  0.003385168  0.003385168 2    0.50
-#>  3.382500       -0.433717249 3.076740e-15 -0.433717249 -0.433717249 1    0.25
-#>  3.454500       -0.543943076 3.515511e-15 -0.543943076 -0.543943076 4    1.00
-#>  3.512000       -0.870819666 3.515511e-15 -0.870819666 -0.870819666 1    0.25
-#>  3.582500       -1.079868648 3.515511e-15 -1.079868648 -1.079868648 2    0.50
-#>  3.690000       -1.688011141 3.515511e-15 -1.688011141 -1.688011141 1    0.25
-#>  3.805875       -1.960725040 3.515511e-15 -1.960725040 -1.960725040 2    0.50
-#>  3.944625       -2.742758278 3.515511e-15 -2.742758278 -2.742758278 1    0.25
-#>  4.670125       -7.475817276 3.625973e-15 -7.475817276 -7.475817276 2    0.50
-#>  5.358375       -7.974684165 3.625973e-15 -7.974684165 -7.974684165 2    0.50
+#>   target:  predicted value
+#>   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.
+#>        wt accumulated_effect std_error conf_low conf_high n support
+#>  1.624500        6.043000304        NA       NA        NA 2    0.50
+#>  1.845750        5.208704821        NA       NA        NA 2    0.50
+#>  2.067250        4.359205776        NA       NA        NA 1    0.25
+#>  2.264000        3.713054377        NA       NA        NA 2    0.50
+#>  2.465125        2.830297539        NA       NA        NA 1    0.25
+#>  2.677125        2.101476770        NA       NA        NA 2    0.50
+#>  2.816875        1.767948621        NA       NA        NA 1    0.25
+#>  3.009375        0.638133895        NA       NA        NA 2    0.50
+#>  3.173500        0.520306287        NA       NA        NA 1    0.25
+#>  3.257000        0.003385168        NA       NA        NA 2    0.50
+#>  3.382500       -0.433717249        NA       NA        NA 1    0.25
+#>  3.454500       -0.543943076        NA       NA        NA 4    1.00
+#>  3.512000       -0.870819666        NA       NA        NA 1    0.25
+#>  3.582500       -1.079868648        NA       NA        NA 2    0.50
+#>  3.690000       -1.688011141        NA       NA        NA 1    0.25
+#>  3.805875       -1.960725040        NA       NA        NA 2    0.50
+#>  3.944625       -2.742758278        NA       NA        NA 1    0.25
+#>  4.670125       -7.475817276        NA       NA        NA 2    0.50
+#>  5.358375       -7.974684165        NA       NA        NA 2    0.50
 ```

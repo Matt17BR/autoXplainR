@@ -50,7 +50,7 @@ prediction_ambiguity(fit)
 #> <AutoXplainR prediction ambiguity>
 #>   task:       regression
 #>   models:     3 (flexible_tree, small_tree, main_model)
-#>   rows:       6 (held-out test)
+#>   rows:       6 (test)
 #>   median gap: 2.4701 target units
 #>   caution:    supplied-model disagreement is descriptive, not uncertainty coverage
 ```

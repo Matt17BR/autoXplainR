@@ -64,11 +64,11 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="autoxplainr">AutoXplainR<a class="anchor" aria-label="anchor" href="#autoxplainr"></a>
 </h1></div>
-<p><a href="https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml/badge.svg" alt="coverage"></a> <a href="https://matt17br.github.io/autoXplainR/"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="LICENSE.html"><img src="https://img.shields.io/badge/license-MIT-2f7d5b.svg" alt="License: MIT"></a></p>
+<p><a href="https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/test-coverage.yaml/badge.svg" alt="coverage"></a> <a href="https://matt17br.github.io/autoXplainR/"><img src="https://github.com/Matt17BR/autoXplainR/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/Matt17BR/autoXplainR/blob/main/LICENSE.md" class="external-link"><img src="https://img.shields.io/badge/license-MIT-2f7d5b.svg" alt="License: MIT"></a></p>
 <p><strong>Fit. Check. Compare. Understand. Explain.</strong></p>
 <p>AutoXplainR helps someone fitting one of their first tabular models move from a data frame to a responsible, shareable explanation. It creates a held-out test set, compares an understandable model with a simple baseline, defines every metric, investigates fitted patterns, and tells the user what the evidence does and does not support.</p>
 <p>The default path is local and needs no Java, cloud account, or LLM. One explicit mode runs a leak-safe tournament across genuinely different model families—from regularized and additive models to forests, boosting, kernels, neighbors, and neural networks—without peeking at the final holdout. Advanced users can choose families and search budgets, bring any fitted model, use H2O AutoML, or opt into local or hosted language models.</p>
-<p><strong><a href="https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html">Get started</a></strong> · <strong><a href="https://matt17br.github.io/autoXplainR/reference/index.html">Function reference</a></strong> · <strong><a href="PRODUCT.html">Product contract</a></strong> · <strong><a href="ROADMAP.html">Roadmap</a></strong></p>
+<p><strong><a href="https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html">Get started</a></strong> · <strong><a href="https://matt17br.github.io/autoXplainR/reference/index.html">Function reference</a></strong> · <strong><a href="https://matt17br.github.io/autoXplainR/PRODUCT.html">Product contract</a></strong> · <strong><a href="https://matt17br.github.io/autoXplainR/ROADMAP.html">Roadmap</a></strong></p>
 <p align="center">
 <img src="reference/figures/guided-overview.png" alt="AutoXplainR report showing the modeling question, held-out baseline comparison, and four plain-language score cards" width="100%"><br><sub>A complete first screen: the question, unseen-data result, baseline, and evaluation size. No scrolling inside the image.</sub></p>
 <div class="section level2">
@@ -99,7 +99,8 @@
 <p>Automatic tuning is a first-class local workflow, not an H2O-only escape hatch:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># One-time installation of the recommended native engines</span></span>
-<span><span class="fu"><a href="reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span>, task <span class="op">=</span> <span class="st">"multiclass"</span>, dry_run <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span>, task <span class="op">=</span> <span class="st">"multiclass"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span>,</span>
@@ -111,20 +112,89 @@
 <span></span>
 <span><span class="fu"><a href="reference/tuning_results.html">tuning_results</a></span><span class="op">(</span><span class="va">tuned</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">tuned</span>, <span class="st">"tuned-model-report.html"</span><span class="op">)</span></span></code></pre></div>
-<p>The recommended portfolio compares linear, regularized, additive (for regression and binary outcomes), tree, random-forest, and gradient-boosted-tree families. <code>portfolio = "extended"</code> adds neural networks, radial SVMs, weighted nearest neighbors, and MARS. <code>portfolio = "core"</code> is the dependency-light linear/tree/neural tournament. Missing engines produce one explicit installation instruction; AutoXplainR never changes the tournament according to whatever happens to be installed.</p>
+<p>The three presets keep the first choice understandable:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Portfolio</th>
+<th>Families</th>
+<th>When to use it</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>core</code></td>
+<td>linear, tree, neural</td>
+<td>dependency-light teaching, examples, and a fast first tournament</td>
+</tr>
+<tr>
+<td><code>recommended</code></td>
+<td>linear, regularized, additive, tree, forest, boosting</td>
+<td>the default serious tabular comparison after one explicit engine installation</td>
+</tr>
+<tr>
+<td><code>extended</code></td>
+<td>all ten families, adding neural, radial-kernel, nearest-neighbor, and MARS models</td>
+<td>a broader sensitivity analysis when runtime and optional dependencies are acceptable</td>
+</tr>
+</tbody>
+</table>
+<p>The package itself supports R 4.1 and the dependency-light <code>core</code> portfolio. The current CRAN release of XGBoost requires R 4.3 or newer; on older R, <code>install_model_engines(..., dry_run = TRUE)</code> reports that constraint before anything is installed.</p>
+<p>Additive and MARS models support regression and binary outcomes, so they are omitted from a multiclass tournament by the declared task contract—not by the packages that happen to be installed. Missing engines produce one explicit installation instruction; AutoXplainR never silently changes the requested tournament.</p>
 <p>Preprocessing is relearned inside each resampling fold. Automatic budgets are large enough to vary the important controls in each family (15 core, 30 recommended, or 40 extended), while an explicit <code>max_models</code> is honored without a hidden cap. The default one-standard-error rule first uses a documented, reviewed family priority and then the least-flexible setting <em>within that family</em>. It never compares arbitrary “complexity” numbers between unlike model families.</p>
 <p>Only the outer training rows take part in that search. The chosen configuration is refitted on all training rows and then scored once on the held-out rows. The report keeps these two numbers separate: the resampled score selects the model; the held-out score evaluates the selected model.</p>
 <p>The complete candidate grid, fold-level scores, paired out-of-fold predictions, omitted-row accounting, warnings, failures, elapsed times, selected hyperparameters, and data boundary remain available in <code>tuning_results(tuned)</code>. Each family’s best fitted model is retained so disagreement can be inspected, not merely reported as a leaderboard number:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">behavior</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_model_behavior.html">compare_model_behavior</a></span><span class="op">(</span><span class="va">tuned</span><span class="op">)</span></span>
-<span><span class="va">behavior</span></span></code></pre></div>
-<p>Behavior cards describe known representational capacity; held-out performance, same-row prediction gaps, and optional permutation-importance differences are computed evidence. Keeping those labels separate prevents “this model <em>can</em> learn interactions” from becoming the false claim that it <em>did</em> use an interaction in this fit. H2O AutoML remains optional when a Java-backed search or stacked ensemble is appropriate.</p>
+<span><span class="va">behavior</span></span>
+<span></span>
+<span><span class="co"># Compare one fitted feature shape on aligned rows and common support</span></span>
+<span><span class="va">effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_model_effects.html">compare_model_effects</a></span><span class="op">(</span></span>
+<span>  <span class="va">tuned</span>,</span>
+<span>  feature <span class="op">=</span> <span class="st">"Petal.Length"</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"ale"</span>,</span>
+<span>  class <span class="op">=</span> <span class="st">"virginica"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">effects</span><span class="op">)</span></span></code></pre></div>
+<p>The two comparison functions answer different questions:</p>
+<ul>
+<li>
+<code><a href="reference/compare_model_behavior.html">compare_model_behavior()</a></code> is the portfolio overview: family capacities, held-out scores, and same-row prediction disagreement, with optional permutation-importance rank evidence.</li>
+<li>
+<code><a href="reference/compare_model_effects.html">compare_model_effects()</a></code> asks how the retained fits respond to one named input on aligned evaluation rows and a common, support-checked grid.</li>
+</ul>
+<p>Behavior cards are reviewed prior knowledge about representational capacity; scores, prediction gaps, importance, and fitted curves are computed evidence. Keeping those labels separate prevents “this model <em>can</em> learn interactions” from becoming the false claim that it <em>did</em> use an interaction in this fit. Neither an ALE nor a PDP curve estimates the causal effect of changing an input.</p>
+<p>Most users should stop at the presets. The advanced escape hatch is a validated control object rather than another set of loose arguments:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">control</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tuning_control.html">tuning_control</a></span><span class="op">(</span></span>
+<span>  grids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    maxdepth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">5L</span><span class="op">)</span>,</span>
+<span>    cp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.002</span><span class="op">)</span>,</span>
+<span>    minsplit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12L</span>, <span class="fl">6L</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span>,</span>
+<span>  family_budgets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>linear <span class="op">=</span> <span class="fl">1L</span>, tree <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span>,</span>
+<span>  metric <span class="op">=</span> <span class="st">"mae"</span>,</span>
+<span>  retain_oof <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">advanced</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
+<span>  <span class="va">mtcars</span>,</span>
+<span>  <span class="st">"mpg"</span>,</span>
+<span>  model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span>
+<span>  learners <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"tree"</span><span class="op">)</span>,</span>
+<span>  tuning_control <span class="op">=</span> <span class="va">control</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="reference/tuning_control.html">tuning_control()</a></code> can also accept ordinary supplied V-fold IDs and a strict failure policy. Supplied IDs require an explicit outer <code>test_data</code>; they do not silently turn random V-fold resampling into grouped or forward-chaining validation. H2O AutoML remains optional when a Java-backed search or stacked ensemble is appropriate.</p>
 </div>
 <div class="section level2">
 <h2 id="compare-models-without-hiding-the-trade-off">Compare models without hiding the trade-off<a class="anchor" aria-label="anchor" href="#compare-models-without-hiding-the-trade-off"></a>
 </h2>
 <p>Comparison is not out of scope. It is a first-class, opt-in extension of the same beginner workflow:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span>,</span>
 <span>  target_column <span class="op">=</span> <span class="st">"Sepal.Length"</span>,</span>
@@ -136,15 +206,15 @@
 <span><span class="fu"><a href="reference/model_tradeoffs.html">model_tradeoffs</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/plot_model_comparison.html">plot_model_comparison</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span>  <span class="co"># optional interactive Plotly view</span></span>
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"comparison-report.html"</span><span class="op">)</span></span></code></pre></div>
-<p>The local comparison set contains the pre-specified statistical model, a small decision tree, a more flexible tree, and the simple baseline. AutoXplainR shows held-out performance, fit and prediction time, model size, complexity, and the candidate-relative Pareto frontier.</p>
+<p>The local comparison set contains the pre-specified statistical model, a small decision tree, a more flexible tree, and the simple baseline. AutoXplainR shows held-out performance, fit and prediction time, approximate R object size, family-specific flexibility proxies, and the candidate-relative Pareto frontier.</p>
 <p>It does <strong>not</strong> collapse those dimensions into a mysterious score. It also does not silently replace the primary model with whichever candidate happened to win on the holdout: doing that and then reporting the same holdout score as final performance would be optimistic.</p>
 <p>Comparison mode also asks where the supplied non-baseline models give different answers for the same held-out row:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ambiguity</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prediction_ambiguity.html">prediction_ambiguity</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ambiguity</span><span class="op">$</span><span class="va">rows</span><span class="op">)</span></span></code></pre></div>
 <p>For regression this is a range in target units; for classification it is hard- class disagreement plus a probability-distribution distance. These are model- specification sensitivity checks, not confidence intervals. Candidate scores remain beside the result because a poorly performing model can create large, uninformative disagreement.</p>
 <p align="center">
-<img src="reference/figures/model-comparison.png" alt="Complete AutoXplainR model-comparison section with score cards, a labeled Pareto frontier, interpretation guidance, and candidate table" width="100%"><br><sub>Performance versus model size, with the interpretation rule and full candidate table kept in the frame.</sub></p>
+<img src="reference/figures/model-comparison.png" alt="Complete AutoXplainR model-comparison section with score cards, a labeled Pareto frontier, interpretation guidance, and candidate table" width="100%"><br><sub>Performance versus an approximate model-object-size resource proxy, with the interpretation rule and full candidate table kept in the frame.</sub></p>
 </div>
 <div class="section level2">
 <h2 id="one-report-from-result-to-responsible-language">One report, from result to responsible language<a class="anchor" aria-label="anchor" href="#one-report-from-result-to-responsible-language"></a>
@@ -203,7 +273,7 @@
 <h2 id="open-the-analysis-when-you-need-more-control">Open the analysis when you need more control<a class="anchor" aria-label="anchor" href="#open-the-analysis-when-you-need-more-control"></a>
 </h2>
 <p>The guided result converts into ordinary model-agnostic explainers:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">explainer</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span>, models <span class="op">=</span> <span class="st">"main_model"</span><span class="op">)</span><span class="op">$</span><span class="va">main_model</span></span>
 <span></span>
 <span><span class="va">importance</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/calculate_permutation_importance.html">calculate_permutation_importance</a></span><span class="op">(</span></span>
@@ -215,7 +285,7 @@
 <span><span class="va">effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/explain_effect.html">explain_effect</a></span><span class="op">(</span><span class="va">explainer</span>, feature <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span></code></pre></div>
 <p>Permutation intervals describe variation across random shuffles; they are not population confidence intervals. ALE and PDP describe the fitted prediction function; they do not establish the effect of intervening on an input.</p>
 <p>For a multi-model reliability review:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/audit_explanations.html">audit_explanations</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span>,</span>
 <span>  n_repeats <span class="op">=</span> <span class="fl">30</span>,</span>
@@ -231,11 +301,11 @@
 <h2 id="a-complete-explanation-never-requires-an-llm">A complete explanation never requires an LLM<a class="anchor" aria-label="anchor" href="#a-complete-explanation-never-requires-an-llm"></a>
 </h2>
 <p>The deterministic local narrative is always the default—even if an API key is present:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"report.html"</span>, narrative <span class="op">=</span> <span class="va">memo</span><span class="op">)</span></span></code></pre></div>
 <p>Remote generation requires an explicit provider. Only aggregate metrics, feature names, warnings, and provenance enter the prompt; raw rows, fitted objects, case-level predictions, and secrets do not.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/narrative_providers.html">narrative_providers</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"gemini"</span><span class="op">)</span></span>
@@ -246,19 +316,19 @@
 <div class="section level3">
 <h3 id="what-does-the-generated-output-look-like">What does the generated output look like?<a class="anchor" aria-label="anchor" href="#what-does-the-generated-output-look-like"></a>
 </h3>
-<p>The repository includes <a href="LLM_EXAMPLES.html">complete verified narrative snapshots</a> from one reproducible tuned <code>iris</code> analysis: the deterministic local memo and a live <code>gemini-3.5-flash</code> response generated on 2026-07-16. The Gemini call used validated structured output, <code>store = false</code>, and no fallback.</p>
+<p>The repository includes <a href="https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.html">complete narrative snapshots</a>: a deterministic memo refreshed from the current reproducible <code>iris</code> analysis and an explicitly versioned live <code>gemini-3.5-flash</code> transport capture. The latter is a communication example, not a numerical regression test. The live request used validated structured output, <code>store = false</code>, and no fallback.</p>
 <p>Here is a short excerpt from that Gemini response:</p>
 <blockquote>
-<p><strong>Held-out performance.</strong> On the held-out test set, the reference tuned neural network achieved a final log loss of 0.08206, a 92.5% relative improvement over the simple baseline. This final held-out performance is distinct from the training-resampled selection score of 0.09566, calculated with five training-only folds.</p>
+<p><strong>Held-out performance.</strong> The generated memo separates the training-resampled selection score from the final score on different evaluation rows, then keeps causal, fairness, safety, and deployment claims outside the model’s remit.</p>
 </blockquote>
 <p>The full page shows the exact reproduction code, complete outputs, provider provenance, what Gemini generated, and which interpretation boundaries the package appended locally. Generated wording can vary; the computed evidence is authoritative.</p>
-<p>The <a href="LLM_PROVIDERS.html">narrative provider guide</a> compares current free access, privacy, structured-output support, reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI, Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt provenance are retained. Schema-capable providers return five validated fields that AutoXplainR renders locally with fixed interpretation boundaries; a schema controls format, not factual correctness.</p>
+<p>The <a href="https://matt17br.github.io/autoXplainR/LLM_PROVIDERS.html">narrative provider guide</a> compares current free access, privacy, structured-output support, reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI, Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt provenance are retained. Schema-capable providers return five validated fields that AutoXplainR renders locally with fixed interpretation boundaries; a schema controls format, not factual correctness.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="classification-existing-models-and-h2o-use-the-same-contract">Classification, existing models, and H2O use the same contract<a class="anchor" aria-label="anchor" href="#classification-existing-models-and-h2o-use-the-same-contract"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multiclass classification</span></span>
 <span><span class="va">flowers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, target_column <span class="op">=</span> <span class="st">"Species"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span></span>
@@ -281,19 +351,30 @@
 <span>  test_data <span class="op">=</span> <span class="va">held_out_data</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"h2o"</span>,</span>
 <span>  max_models <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  max_runtime_secs <span class="op">=</span> <span class="fl">0</span>,              <span class="co"># let the fixed model budget stop the run</span></span>
+<span>  exclude_algos <span class="op">=</span> <span class="st">"DeepLearning"</span>,   <span class="co"># H2O's reproducibility recommendation</span></span>
+<span>  evaluation_role <span class="op">=</span> <span class="st">"test"</span>,         <span class="co"># assert only when study provenance supports it</span></span>
 <span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># H2O's own selection evidence stays separate from common-row evaluation</span></span>
+<span><span class="va">h2o_result</span><span class="op">$</span><span class="va">engine_leaderboard</span></span>
+<span><span class="va">h2o_result</span><span class="op">$</span><span class="va">leaderboard</span></span></code></pre></div>
+<p>The first table records H2O’s model-selection evidence. The second evaluates that already selected primary model, alternative fitted models, and an intercept-only baseline on aligned outer rows; outer ranks do not silently select a new winner. H2O documents that wall-clock-constrained AutoML and Deep Learning weaken reproducibility, so the returned provenance records both caveats. See the official <a href="https://docs.h2o.ai/h2o/latest-stable/h2o-r/docs/reference/h2o.automl.html" class="external-link">H2O AutoML reference</a>.</p>
+<p>Supplied <code>test_data</code> is deliberately called neutral <code>evaluation</code> data unless you explicitly set <code>evaluation_role = "test"</code> or <code>"validation"</code>. Exact duplicate-valued records across training and evaluation data produce a possible-leakage warning because they may be the same observational unit—or legitimate coincident records. Use <code>overlap_action = "error"</code> for a strict pipeline, or <code>"ignore"</code> only after checking the data provenance.</p>
 <p>Regression predictions are numeric vectors. Binary predictions are positive-class probabilities. Multiclass predictions are named probability matrices. The package validates that contract before an expensive explanation begins.</p>
 <p>For binary decisions, the report also shows what changes when the conventional 0.5 probability cutoff moves. The same values are available directly:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_result</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">binary_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">mtcars</span>, am <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">binary_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">binary_data</span>, <span class="st">"am"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_result</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>This is a false-positive/false-negative sensitivity check, not permission to optimize a cutoff on the holdout and call that performance independently validated.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>AutoXplainR is under active development and is not yet on CRAN.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>Install the current development version from GitHub. After a CRAN release is available, the standard <code>install.packages("AutoXplainR")</code> path will be supported as well.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"Matt17BR/autoXplainR"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -318,18 +399,18 @@
 <div class="section level2">
 <h2 id="development-and-governance">Development and governance<a class="anchor" aria-label="anchor" href="#development-and-governance"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The ordinary suite is dependency-light. Real H2O integration is isolated and opt-in:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
-<p>See the <a href="CONTRIBUTING.html">contribution guide</a>, <a href="SECURITY.html">security policy</a>, <a href="GOVERNANCE.html">governance</a>, <a href="RELEASE_CHECKLIST.html">release checklist</a>, and <a href="NEWS.html">release notes</a>. Questions and early ideas belong in <a href="https://github.com/Matt17BR/autoXplainR/discussions" class="external-link">GitHub Discussions</a>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="va">AUTOXPLAIN_RUN_H2O</span><span class="op">=</span>true <span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "h2o")'</span></span></code></pre></div>
+<p>See the <a href="https://matt17br.github.io/autoXplainR/CONTRIBUTING.html">contribution guide</a>, <a href="https://matt17br.github.io/autoXplainR/SECURITY.html">security policy</a>, <a href="https://matt17br.github.io/autoXplainR/GOVERNANCE.html">governance</a>, <a href="https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.html">release checklist</a>, and <a href="https://matt17br.github.io/autoXplainR/news/index.html">release notes</a>. Questions and early ideas belong in <a href="https://github.com/Matt17BR/autoXplainR/discussions" class="external-link">GitHub Discussions</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p><a href="LICENSE.html">MIT</a> © 2025–2026 Matteo Mazzarelli.</p>
+<p><a href="https://github.com/Matt17BR/autoXplainR/blob/main/LICENSE.md" class="external-link">MIT</a> © 2025–2026 Matteo Mazzarelli.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

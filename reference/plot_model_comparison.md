@@ -1,6 +1,6 @@
-# Plot model performance and complexity trade-offs
+# Plot model performance and resource trade-offs
 
-Plot model performance and complexity trade-offs
+Plot model performance and resource trade-offs
 
 ## Usage
 

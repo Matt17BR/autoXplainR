@@ -34,7 +34,9 @@ subgroup_performance(result, by, model = NULL, min_rows = 10L)
 ## Value
 
 An `autoxplain_subgroups` object containing overall metrics and a
-group-level `performance` data frame.
+group-level `performance` data frame. Its primary metric matches the
+result's evaluation metric (including MAE or Brier score), and
+`secondary_metric` names a different supporting metric.
 
 ## Details
 

@@ -51,7 +51,7 @@
 <li>Confirm that README and vignette examples still express the beginner-first product contract in <code>PRODUCT.md</code>.</li>
 <li>Review user-facing metrics, warnings, and narrative prompts for unsupported causal, fairness, or certainty claims.</li>
 <li>Run <code>devtools::document()</code> and ensure the generated files are committed.</li>
-<li>Run <code>spelling::spell_check_package()</code> and <code><a href="https://urlchecker.r-lib.org/reference/url_check.html" class="external-link">urlchecker::url_check()</a></code>.</li>
+<li>Run <code>spelling::spell_check_package()</code> and <code><a href="https://urlchecker.r-lib.org/reference/url_check.html" class="external-link">urlchecker::url_check()</a></code>. Review every response manually; automated release gating treats canonical-form failures and permanent 404/410 responses as blocking because DOI publishers commonly return bot-specific 202/403/503 responses.</li>
 <li>Run <code>lintr::lint_package()</code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code>, and <code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>; statement coverage must remain at least 80%.</li>
 <li>Run <code>devtools::check(args = "--as-cran")</code> and explain every remaining note in <code>cran-comments.md</code>.</li>
 <li>Run the isolated real-H2O test with <code>AUTOXPLAIN_RUN_H2O=true</code>.</li>

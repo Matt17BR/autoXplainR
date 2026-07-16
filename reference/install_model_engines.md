@@ -30,7 +30,8 @@ install_model_engines(
 
 - dry_run:
 
-  Return missing package names without installing them.
+  Print and visibly return the missing package plan without installing
+  anything.
 
 - ...:
 
@@ -39,5 +40,15 @@ install_model_engines(
 
 ## Value
 
-The missing package names, invisibly. With `dry_run = FALSE`, these are
-the packages whose installation was requested.
+With `dry_run = TRUE`, the missing package names visibly. With
+`dry_run = FALSE`, the package names whose installation was requested,
+invisibly.
+
+## Examples
+
+``` r
+install_model_engines("recommended", task = "regression", dry_run = TRUE)
+#> Dry run only; no packages were installed. Missing backends: glmnet, ranger, xgboost.
+#> Would run: install.packages(c("glmnet", "ranger", "xgboost"))
+#> [1] "glmnet"  "ranger"  "xgboost"
+```

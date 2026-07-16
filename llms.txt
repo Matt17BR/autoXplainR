@@ -6,7 +6,7 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![License:
-MIT](https://img.shields.io/badge/license-MIT-2f7d5b.svg)](https://matt17br.github.io/autoXplainR/LICENSE.md)
+MIT](https://img.shields.io/badge/license-MIT-2f7d5b.svg)](https://github.com/Matt17BR/autoXplainR/blob/main/LICENSE.md)
 
 **Fit. Check. Compare. Understand. Explain.**
 
@@ -29,8 +29,8 @@ started](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introductio
 · **[Function
 reference](https://matt17br.github.io/autoXplainR/reference/index.html)**
 · **[Product
-contract](https://matt17br.github.io/autoXplainR/PRODUCT.md)** ·
-**[Roadmap](https://matt17br.github.io/autoXplainR/ROADMAP.md)**
+contract](https://matt17br.github.io/autoXplainR/PRODUCT.html)** ·
+**[Roadmap](https://matt17br.github.io/autoXplainR/ROADMAP.html)**
 
 ![AutoXplainR report showing the modeling question, held-out baseline
 comparison, and four plain-language score
@@ -74,7 +74,8 @@ hatch:
 ``` r
 
 # One-time installation of the recommended native engines
-install_model_engines("recommended")
+install_model_engines("recommended", task = "multiclass", dry_run = TRUE)
+install_model_engines("recommended", task = "multiclass")
 
 tuned <- autoxplain(
   iris,
@@ -88,14 +89,24 @@ tuning_results(tuned)
 render_model_report(tuned, "tuned-model-report.html")
 ```
 
-The recommended portfolio compares linear, regularized, additive (for
-regression and binary outcomes), tree, random-forest, and
-gradient-boosted-tree families. `portfolio = "extended"` adds neural
-networks, radial SVMs, weighted nearest neighbors, and MARS.
-`portfolio = "core"` is the dependency-light linear/tree/neural
-tournament. Missing engines produce one explicit installation
-instruction; AutoXplainR never changes the tournament according to
-whatever happens to be installed.
+The three presets keep the first choice understandable:
+
+| Portfolio | Families | When to use it |
+|----|----|----|
+| `core` | linear, tree, neural | dependency-light teaching, examples, and a fast first tournament |
+| `recommended` | linear, regularized, additive, tree, forest, boosting | the default serious tabular comparison after one explicit engine installation |
+| `extended` | all ten families, adding neural, radial-kernel, nearest-neighbor, and MARS models | a broader sensitivity analysis when runtime and optional dependencies are acceptable |
+
+The package itself supports R 4.1 and the dependency-light `core`
+portfolio. The current CRAN release of XGBoost requires R 4.3 or newer;
+on older R, `install_model_engines(..., dry_run = TRUE)` reports that
+constraint before anything is installed.
+
+Additive and MARS models support regression and binary outcomes, so they
+are omitted from a multiclass tournament by the declared task
+contract—not by the packages that happen to be installed. Missing
+engines produce one explicit installation instruction; AutoXplainR never
+silently changes the requested tournament.
 
 Preprocessing is relearned inside each resampling fold. Automatic
 budgets are large enough to vary the important controls in each family
@@ -123,15 +134,66 @@ number:
 
 behavior <- compare_model_behavior(tuned)
 behavior
+
+# Compare one fitted feature shape on aligned rows and common support
+effects <- compare_model_effects(
+  tuned,
+  feature = "Petal.Length",
+  method = "ale",
+  class = "virginica"
+)
+plot(effects)
 ```
 
-Behavior cards describe known representational capacity; held-out
-performance, same-row prediction gaps, and optional
-permutation-importance differences are computed evidence. Keeping those
-labels separate prevents “this model *can* learn interactions” from
-becoming the false claim that it *did* use an interaction in this fit.
-H2O AutoML remains optional when a Java-backed search or stacked
-ensemble is appropriate.
+The two comparison functions answer different questions:
+
+- [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
+  is the portfolio overview: family capacities, held-out scores, and
+  same-row prediction disagreement, with optional permutation-importance
+  rank evidence.
+- [`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md)
+  asks how the retained fits respond to one named input on aligned
+  evaluation rows and a common, support-checked grid.
+
+Behavior cards are reviewed prior knowledge about representational
+capacity; scores, prediction gaps, importance, and fitted curves are
+computed evidence. Keeping those labels separate prevents “this model
+*can* learn interactions” from becoming the false claim that it *did*
+use an interaction in this fit. Neither an ALE nor a PDP curve estimates
+the causal effect of changing an input.
+
+Most users should stop at the presets. The advanced escape hatch is a
+validated control object rather than another set of loose arguments:
+
+``` r
+
+control <- tuning_control(
+  grids = list(tree = data.frame(
+    maxdepth = c(2L, 5L),
+    cp = c(0.02, 0.002),
+    minsplit = c(12L, 6L)
+  )),
+  family_budgets = c(linear = 1L, tree = 2L),
+  metric = "mae",
+  retain_oof = FALSE
+)
+
+advanced <- autoxplain(
+  mtcars,
+  "mpg",
+  model_set = "tuned",
+  learners = c("linear", "tree"),
+  tuning_control = control,
+  seed = 2026
+)
+```
+
+[`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
+can also accept ordinary supplied V-fold IDs and a strict failure
+policy. Supplied IDs require an explicit outer `test_data`; they do not
+silently turn random V-fold resampling into grouped or forward-chaining
+validation. H2O AutoML remains optional when a Java-backed search or
+stacked ensemble is appropriate.
 
 ## Compare models without hiding the trade-off
 
@@ -155,8 +217,9 @@ render_model_report(comparison, "comparison-report.html")
 
 The local comparison set contains the pre-specified statistical model, a
 small decision tree, a more flexible tree, and the simple baseline.
-AutoXplainR shows held-out performance, fit and prediction time, model
-size, complexity, and the candidate-relative Pareto frontier.
+AutoXplainR shows held-out performance, fit and prediction time,
+approximate R object size, family-specific flexibility proxies, and the
+candidate-relative Pareto frontier.
 
 It does **not** collapse those dimensions into a mysterious score. It
 also does not silently replace the primary model with whichever
@@ -181,7 +244,7 @@ model can create large, uninformative disagreement.
 ![Complete AutoXplainR model-comparison section with score cards, a
 labeled Pareto frontier, interpretation guidance, and candidate
 table](reference/figures/model-comparison.png)  
-_(Performance versus model size, with the interpretation rule and full candidate table kept in the frame.)
+_(Performance versus an approximate model-object-size resource proxy, with the interpretation rule and full candidate table kept in the frame.)
 
 ## One report, from result to responsible language
 
@@ -271,19 +334,20 @@ memo <- generate_natural_language_report(result, provider = "openrouter")
 
 ### What does the generated output look like?
 
-The repository includes [complete verified narrative
-snapshots](https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.md) from
-one reproducible tuned `iris` analysis: the deterministic local memo and
-a live `gemini-3.5-flash` response generated on 2026-07-16. The Gemini
-call used validated structured output, `store = false`, and no fallback.
+The repository includes [complete narrative
+snapshots](https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.html): a
+deterministic memo refreshed from the current reproducible `iris`
+analysis and an explicitly versioned live `gemini-3.5-flash` transport
+capture. The latter is a communication example, not a numerical
+regression test. The live request used validated structured output,
+`store = false`, and no fallback.
 
 Here is a short excerpt from that Gemini response:
 
-> **Held-out performance.** On the held-out test set, the reference
-> tuned neural network achieved a final log loss of 0.08206, a 92.5%
-> relative improvement over the simple baseline. This final held-out
-> performance is distinct from the training-resampled selection score of
-> 0.09566, calculated with five training-only folds.
+> **Held-out performance.** The generated memo separates the
+> training-resampled selection score from the final score on different
+> evaluation rows, then keeps causal, fairness, safety, and deployment
+> claims outside the model’s remit.
 
 The full page shows the exact reproduction code, complete outputs,
 provider provenance, what Gemini generated, and which interpretation
@@ -291,8 +355,8 @@ boundaries the package appended locally. Generated wording can vary; the
 computed evidence is authoritative.
 
 The [narrative provider
-guide](https://matt17br.github.io/autoXplainR/LLM_PROVIDERS.md) compares
-current free access, privacy, structured-output support,
+guide](https://matt17br.github.io/autoXplainR/LLM_PROVIDERS.html)
+compares current free access, privacy, structured-output support,
 reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI,
 Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt
 provenance are retained. Schema-capable providers return five validated
@@ -325,9 +389,33 @@ h2o_result <- autoxplain(
   test_data = held_out_data,
   engine = "h2o",
   max_models = 10,
+  max_runtime_secs = 0,              # let the fixed model budget stop the run
+  exclude_algos = "DeepLearning",   # H2O's reproducibility recommendation
+  evaluation_role = "test",         # assert only when study provenance supports it
   seed = 2026
 )
+
+# H2O's own selection evidence stays separate from common-row evaluation
+h2o_result$engine_leaderboard
+h2o_result$leaderboard
 ```
+
+The first table records H2O’s model-selection evidence. The second
+evaluates that already selected primary model, alternative fitted
+models, and an intercept-only baseline on aligned outer rows; outer
+ranks do not silently select a new winner. H2O documents that
+wall-clock-constrained AutoML and Deep Learning weaken reproducibility,
+so the returned provenance records both caveats. See the official [H2O
+AutoML
+reference](https://docs.h2o.ai/h2o/latest-stable/h2o-r/docs/reference/h2o.automl.html).
+
+Supplied `test_data` is deliberately called neutral `evaluation` data
+unless you explicitly set `evaluation_role = "test"` or `"validation"`.
+Exact duplicate-valued records across training and evaluation data
+produce a possible-leakage warning because they may be the same
+observational unit—or legitimate coincident records. Use
+`overlap_action = "error"` for a strict pipeline, or `"ignore"` only
+after checking the data provenance.
 
 Regression predictions are numeric vectors. Binary predictions are
 positive-class probabilities. Multiclass predictions are named
@@ -340,6 +428,8 @@ directly:
 
 ``` r
 
+binary_data <- transform(mtcars, am = factor(am, labels = c("automatic", "manual")))
+binary_result <- autoxplain(binary_data, "am", seed = 2026)
 threshold_diagnostics(binary_result, thresholds = c(0.3, 0.5, 0.7))
 ```
 
@@ -349,7 +439,9 @@ independently validated.
 
 ## Installation
 
-AutoXplainR is under active development and is not yet on CRAN.
+Install the current development version from GitHub. After a CRAN
+release is available, the standard `install.packages("AutoXplainR")`
+path will be supported as well.
 
 ``` r
 
@@ -405,19 +497,20 @@ AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 ```
 
 See the [contribution
-guide](https://matt17br.github.io/autoXplainR/CONTRIBUTING.md),
-[security policy](https://matt17br.github.io/autoXplainR/SECURITY.md),
-[governance](https://matt17br.github.io/autoXplainR/GOVERNANCE.md),
+guide](https://matt17br.github.io/autoXplainR/CONTRIBUTING.html),
+[security policy](https://matt17br.github.io/autoXplainR/SECURITY.html),
+[governance](https://matt17br.github.io/autoXplainR/GOVERNANCE.html),
 [release
-checklist](https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.md),
-and [release notes](https://matt17br.github.io/autoXplainR/NEWS.md).
+checklist](https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.html),
+and [release
+notes](https://matt17br.github.io/autoXplainR/news/index.html).
 Questions and early ideas belong in [GitHub
 Discussions](https://github.com/Matt17BR/autoXplainR/discussions).
 
 ## License
 
-[MIT](https://matt17br.github.io/autoXplainR/LICENSE.md) © 2025–2026
-Matteo Mazzarelli.
+[MIT](https://github.com/Matt17BR/autoXplainR/blob/main/LICENSE.md) ©
+2025–2026 Matteo Mazzarelli.
 
 # Package index
 
@@ -427,6 +520,8 @@ Matteo Mazzarelli.
   : Fit and evaluate a model through a guided workflow
 - [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
   : Inspect automatic tuning evidence
+- [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
+  : Advanced controls for local model tuning
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
@@ -439,10 +534,6 @@ Matteo Mazzarelli.
   : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
   : Render a beginner-first model report
-- [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
-  : Generate a guided model report
-- [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
-  : Create a lightweight AutoXplainR dashboard
 - [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
   : Generate an evidence-constrained narrative
 - [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
@@ -451,6 +542,8 @@ Matteo Mazzarelli.
   : Find held-out rows where supplied models disagree
 - [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
   : Compare what retained models do differently
+- [`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md)
+  : Compare one fitted feature effect across retained models
 
 ## Model-agnostic evidence workflow
 
@@ -486,13 +579,11 @@ Matteo Mazzarelli.
   : Install optional model backends
 - [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md)
   : Prepare modeling data with an auditable recipe
-- [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
-  : Prepare a data frame for the H2O adapter
 
 ## Visualization and metadata
 
 - [`plot_model_comparison()`](https://matt17br.github.io/autoXplainR/reference/plot_model_comparison.md)
-  : Plot model performance and complexity trade-offs
+  : Plot model performance and resource trade-offs
 - [`plot_model_correlations()`](https://matt17br.github.io/autoXplainR/reference/plot_model_correlations.md)
   : Plot prediction agreement among retained AutoML models
 - [`plot_partial_dependence()`](https://matt17br.github.io/autoXplainR/reference/plot_partial_dependence.md)
@@ -501,14 +592,28 @@ Matteo Mazzarelli.
   : Plot multiple feature effects
 - [`plot_permutation_importance()`](https://matt17br.github.io/autoXplainR/reference/plot_permutation_importance.md)
   : Plot permutation importance with uncertainty
+- [`plot(`*`<autoxplain_model_effects>`*`)`](https://matt17br.github.io/autoXplainR/reference/plot.autoxplain_model_effects.md)
+  : Plot aligned cross-model effects
 - [`model_tradeoffs()`](https://matt17br.github.io/autoXplainR/reference/model_tradeoffs.md)
   : Compare supplied models without hiding trade-offs
 - [`extract_model_characteristics()`](https://matt17br.github.io/autoXplainR/reference/extract_model_characteristics.md)
   : Extract comparable model metadata
+
+## Compatibility helpers
+
+Legacy entry points retained for existing code; new analyses should use
+the guided evidence workflow above.
+
+- [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
+  : Generate a guided model report
+- [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
+  : Create a lightweight AutoXplainR dashboard
 - [`create_model_comparison_report()`](https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.md)
   : Create a compact model metadata report
 - [`calculate_weighted_efficiency()`](https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.md)
   : Calculate a relative weighted model score
+- [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)
+  : Prepare a data frame for the H2O adapter
 
 # Articles
 

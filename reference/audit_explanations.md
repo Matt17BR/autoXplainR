@@ -36,6 +36,9 @@ audit_explanations(
 
   Performance metric passed to
   [`calculate_permutation_importance()`](https://matt17br.github.io/autoXplainR/reference/calculate_permutation_importance.md).
+  With `"auto"`, explainers carrying an `autoxplain_result` primary
+  metric use that same metric for both performance screening and
+  permutation importance.
 
 - n_repeats:
 

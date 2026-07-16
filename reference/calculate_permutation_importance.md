@@ -44,8 +44,12 @@ calculate_permutation_importance(
 
 - metric:
 
-  One of `"auto"`, `"rmse"`, `"mae"`, `"logloss"`, `"accuracy"`, or
-  `"auc"`.
+  One of `"auto"`, `"rmse"`, `"mae"`, `"logloss"`, `"brier"`,
+  `"accuracy"`, or `"auc"`. The result-style names `"log_loss"` and
+  `"brier_score"` are accepted as aliases. With `"auto"`, an explainer
+  made from an `autoxplain_result` uses that result's primary evaluation
+  metric; otherwise regression defaults to RMSE and classification to
+  log loss.
 
 - n_repeats:
 
@@ -105,6 +109,13 @@ The confidence limits quantify Monte Carlo variation across
 permutations. They are not confidence intervals for population-level
 variable importance. Use a genuinely held-out evaluation set and a
 formal inference method when population claims are required.
+
+For binary classification, `"brier"` is the mean squared error of the
+positive-class probability and lies from 0 (best) to 1 (worst). For
+multiclass classification, it is the unscaled mean row sum of squared
+errors across all class probabilities and lies from 0 to 2. Multiclass
+values can depend on the class set and should not be compared directly
+with binary Brier scores or scores from a different outcome definition.
 
 ## Examples
 

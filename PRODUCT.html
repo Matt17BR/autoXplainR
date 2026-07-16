@@ -64,7 +64,8 @@
 <li>compute global importance and feature effects with limitations attached;</li>
 <li>produce one self-contained, accessible report;</li>
 <li>optionally add an LLM narrative that is subordinate to computed results.</li>
-</ul><p>Two next steps remain one explicit argument away. <code>model_set = "tuned"</code> uses training-only resampling to compare a named portfolio spanning linear, regularized, additive, tree, forest, boosting, neural, kernel, neighbor, and MARS families before opening the outer holdout. <code>model_set = "comparison"</code> adds a small, pre-specified local candidate set and displays performance-versus-complexity trade-offs without silently changing the primary model. Advanced users may supply their own split, model, prediction function, H2O AutoML run, explanation configuration, or narrative provider.</p>
+</ul><p>Two next steps remain one explicit argument away. <code>model_set = "tuned"</code> uses training-only resampling to compare a named portfolio spanning linear, regularized, additive, tree, forest, boosting, neural, kernel, neighbor, and MARS families before opening the outer holdout. <code>model_set = "comparison"</code> adds a small, pre-specified local candidate set and displays performance-versus-resource trade-offs without silently changing the primary model. Advanced users may supply their own split, model, prediction function, H2O AutoML run, explanation configuration, or narrative provider.</p>
+<p>User-supplied evaluation rows are neutral by default. A caller may assert a test or validation role when the study design supports it; the package must not infer independence from an argument name. Exact duplicate-valued records across training and evaluation data are a possible-leakage diagnostic, not proof that the observational units overlap.</p>
 </div>
 <div class="section level2">
 <h2 id="tuning-contract">Tuning contract<a class="anchor" aria-label="anchor" href="#tuning-contract"></a></h2>
@@ -76,7 +77,17 @@
 <li>the candidate settings, fold scores, failures, timing, selection rule, and selected hyperparameters remain inspectable;</li>
 <li>the default one-standard-error rule uses a reviewed family priority and then a family-specific flexibility proxy; it never compares unlike raw complexity units, while an explicit <code>"best"</code> rule remains available; and</li>
 <li>reports distinguish the training-resampled selection score from the final held-out evaluation score in adjacent plain language.</li>
-</ul><p>H2O remains an optional broader AutoML engine. Its availability does not excuse the dependency-light workflow from providing meaningful supervised tuning.</p>
+</ul><p>The beginner presets have fixed meanings: <code>core</code> is the dependency-light linear/tree/neural tournament; <code>recommended</code> compares linear, regularized, additive where supported, tree, forest, and boosting families; and <code>extended</code> adds neural, kernel, neighbor, and MARS families. Task-incompatible families may be excluded before tuning, but installed-package state must never redefine a requested portfolio.</p>
+<p><code><a href="reference/tuning_control.html">tuning_control()</a></code> is the advanced escape hatch, not part of the first screen. It may validate custom per-family grids and exact budgets, an alternate supported loss, ordinary supplied V-fold IDs, out-of-fold retention, and a failure policy. Supplied folds require an explicit outer test set and must be described honestly: ordinary V-fold IDs are not grouped resampling, forward-chaining, or rolling-origin validation unless the user constructs a design with the required scientific meaning outside the package.</p>
+<p>H2O remains an optional Java-backed AutoML engine for broader searches and stacked ensembles. It shares the result and explanation contracts, but it is not required for the local portfolio. Its engine leaderboard remains separate from the common outer-evaluation leaderboard: H2O cross-validation, or an explicitly supplied validation frame when <code>nfolds = 0</code>, selects the primary model. The latter compares that fixed choice, alternative fitted models, and a simple baseline on aligned rows without re-selecting from the outer scores. By default, external evaluation rows remain outside H2O validation as well as fitting. Seeded H2O runs must disclose that wall-clock limits and eligible Deep Learning models weaken reproducibility.</p>
+</div>
+<div class="section level2">
+<h2 id="cross-model-explanation-contract">Cross-model explanation contract<a class="anchor" aria-label="anchor" href="#cross-model-explanation-contract"></a></h2>
+<p>Every retained family must be comparable through the same prediction and evaluation interfaces. The package must keep three statements distinct:</p>
+<ol style="list-style-type: decimal"><li>a behavior card is reviewed prior knowledge about what a family can represent;</li>
+<li>held-out scores, same-row prediction gaps, and permutation reliance are computed from the supplied analysis; and</li>
+<li>aligned ALE or PDP curves describe how fitted prediction functions differ for one named input over common supported values.</li>
+</ol><p><code><a href="reference/compare_model_behavior.html">compare_model_behavior()</a></code> serves the portfolio-level question; <code><a href="reference/compare_model_effects.html">compare_model_effects()</a></code> serves the feature-level question. Neither family capacity nor a fitted curve establishes that an interaction was used, that an input caused an outcome, or that the result transfers to another population.</p>
 </div>
 <div class="section level2">
 <h2 id="progressive-disclosure">Progressive disclosure<a class="anchor" aria-label="anchor" href="#progressive-disclosure"></a></h2>
@@ -86,7 +97,7 @@
 <li>
 <strong>Tune:</strong> model families, hyperparameter settings, training-only fold scores, selection rule, and the boundary between tuning and final evaluation.</li>
 <li>
-<strong>Compare:</strong> visible candidate performance, complexity, Pareto status, and case-level prediction disagreement, with the warning that held-out ranks are descriptive rather than a free tuning loop.</li>
+<strong>Compare:</strong> visible candidate performance, explicitly labeled resource or structural proxies, Pareto status, case-level prediction disagreement, and optional aligned feature curves, with the warning that held-out ranks are descriptive rather than a free tuning loop.</li>
 <li>
 <strong>Evidence:</strong> permutation variability, dependence, supplied-model multiplicity, ALE/PDP support, and provenance.</li>
 <li>

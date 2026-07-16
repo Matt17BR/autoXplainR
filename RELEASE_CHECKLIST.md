@@ -17,6 +17,10 @@ substitute for that review.
   committed.
 - Run `spelling::spell_check_package()` and
   [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html).
+  Review every response manually; automated release gating treats
+  canonical-form failures and permanent 404/410 responses as blocking
+  because DOI publishers commonly return bot-specific 202/403/503
+  responses.
 - Run `lintr::lint_package()`,
   [`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html),
   and

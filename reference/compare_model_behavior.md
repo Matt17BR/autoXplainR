@@ -54,9 +54,9 @@ top-feature ranks and pairwise explanation-rank agreement; and
   data;
 
 - performance and paired prediction differences are computed from the
-  result's common evaluation rows; serialized size or runtime, when
-  shown, is an operational resource proxy rather than structural model
-  complexity.
+  result's common evaluation rows; approximate R object size or runtime,
+  when shown, is an operational resource proxy rather than structural
+  model complexity.
 
 Optionally, pass an audit created with
 `audit_explanations(as_explainers(result, models = ...))`. The
@@ -78,7 +78,7 @@ fit <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
 compare_model_behavior(fit)
 #> <AutoXplainR model behavior comparison>
 #>   models:      3 (flexible_tree, small_tree, main_model)
-#>   evidence:    6 held-out test rows
+#>   evidence:    6 test rows
 #>   performance: rmse (lower is better)
 #>   trade-off:   model_size_kb (resource proxy)
 #>   distance:    absolute difference in predicted target units

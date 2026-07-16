@@ -44,16 +44,20 @@
 
 <div id="autoxplainr-roadmap" class="section level1">
 
-<p>The 0.2 architecture establishes a beginner-first fit, evaluate, explain, and communicate workflow backed by a model-agnostic evidence audit. The roadmap is ordered by user and scientific leverage, not novelty theatre.</p>
+<p>The 0.2 architecture establishes a beginner-first fit, evaluate, explain, and communicate workflow backed by a model-agnostic evidence audit. The roadmap is ordered by user and scientific leverage.</p>
 <div class="section level2">
 <h2 id="id_02--reliable-foundation">0.2 — reliable foundation<a class="anchor" aria-label="anchor" href="#id_02--reliable-foundation"></a></h2>
 <ul class="task-list"><li><label><input type="checkbox" checked>Guided base-R fitting and held-out evaluation with no Java requirement.</label></li>
 <li><label><input type="checkbox" checked>Plain-language model report with progressive evidence disclosure.</label></li>
-<li><label><input type="checkbox" checked>Explicit Gemini, Groq, Ollama, OpenRouter, and local narrative providers.</label></li>
+<li><label><input type="checkbox" checked>Explicit Gemini, Groq, Cloudflare, Ollama, OpenRouter, and local narrative providers.</label></li>
 <li><label><input type="checkbox" checked>Beginner evaluation diagnostics: error summaries, confusion tables, probability scores, sample-size cautions, and baseline-failure warnings.</label></li>
 <li><label><input type="checkbox" checked>Optional local comparison set with multiple understandable model complexities, measured resource dimensions, and a labeled Pareto frontier.</label></li>
 <li><label><input type="checkbox" checked>Training-only local hyperparameter tuning through a ten-family registry: linear, regularized, additive, tree, forest, boosting, neural, kernel, nearest-neighbor, and MARS, with fold-specific preprocessing, inspectable one-standard-error selection, and untouched final evaluation.</label></li>
+<li><label><input type="checkbox" checked>Validated <code><a href="reference/tuning_control.html">tuning_control()</a></code> escape hatch for custom family grids and budgets, supported selection losses, supplied ordinary V-fold IDs, out-of-fold retention, and failure policy, without complicating the beginner presets.</label></li>
 <li><label><input type="checkbox" checked>Unified serializable prediction adapters, retained family winners, paired out-of-fold evidence, and cross-model prediction/importance comparison.</label></li>
+<li><label><input type="checkbox" checked>Separate portfolio-level behavior comparison from aligned, support-aware per-feature ALE/PDP comparison across retained models.</label></li>
+<li><label><input type="checkbox" checked>Calibration, subgroup performance, missingness-shift, and binary threshold-sensitivity diagnostics with explicit interpretation boundaries.</label></li>
+<li><label><input type="checkbox" checked>Case-level prediction ambiguity and candidate-relative Pareto comparison without holdout-based re-selection.</label></li>
 <li><label><input type="checkbox" checked>Model-agnostic prediction contract and H2O boundary.</label></li>
 <li><label><input type="checkbox" checked>Repeated grouped permutation importance with retained draws.</label></li>
 <li><label><input type="checkbox" checked>ALE, diagnosed PDP, feature association, and support outputs.</label></li>
@@ -68,18 +72,14 @@
 <li><label><input type="checkbox">Conditional-sampler interface rather than treating blocked permutations as a general conditional estimator.</label></li>
 <li><label><input type="checkbox">Bootstrap over observations and refits to separate permutation, evaluation-sample, and model-fitting variability.</label></li>
 <li><label><input type="checkbox">Cross-fitted audit orchestration that prevents training/evaluation leakage by construction.</label></li>
-<li><label><input type="checkbox" checked>Calibration, subgroup performance, and missingness-shift diagnostics as context for explanation claims—not as fairness certification.</label></li>
+<li><label><input type="checkbox">First-class grouped and temporal resampling strategies with explicit estimands; do not relabel ordinary supplied V-fold IDs as either design.</label></li>
 <li><label><input type="checkbox">Simulation corpus with known ground truth, correlated features, interactions, null predictors, extrapolation, and label noise.</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="id_04--model-multiplicity">0.4 — model multiplicity<a class="anchor" aria-label="anchor" href="#id_04--model-multiplicity"></a></h2>
-<ul class="task-list"><li><label><input type="checkbox" checked>First-class guided candidate-set mode that shares the ordinary result, explainer, audit, visualization, and report contracts.</label></li>
-<li><label><input type="checkbox">First-class Rashomon-set provider interface for AutoML, resampling, regularization paths, and user-defined candidate generators.</label></li>
+<ul class="task-list"><li><label><input type="checkbox">First-class Rashomon-set provider interface for AutoML, resampling, regularization paths, and user-defined candidate generators.</label></li>
 <li><label><input type="checkbox">Rashomon ALE bands and class-reliance ranges with coverage diagnostics.</label></li>
-<li><label><input type="checkbox" checked>Binary decision-threshold sensitivity with explicit false-positive and false-negative trade-offs and no holdout-optimized recommendation.</label></li>
-<li><label><input type="checkbox" checked>Case-level prediction ambiguity across supplied candidate models, with their performance gaps retained beside every disagreement summary.</label></li>
 <li><label><input type="checkbox">Case-level feature-attribution disagreement.</label></li>
-<li><label><input type="checkbox" checked>Candidate-relative Pareto selection over held-out performance and model size without hiding trade-offs in one weighted score.</label></li>
 <li><label><input type="checkbox">Extend Pareto objectives to calibration, latency, stability, and explanation agreement with missing-objective diagnostics.</label></li>
 </ul></div>
 <div class="section level2">

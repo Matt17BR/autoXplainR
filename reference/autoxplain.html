@@ -78,6 +78,7 @@ does not require Java or a cloud account.</p>
 <span>  task <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"regression"</span>, <span class="st">"binary"</span>, <span class="st">"multiclass"</span><span class="op">)</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  tuning_rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"one_se"</span>, <span class="st">"best"</span><span class="op">)</span>,</span>
+<span>  tuning_control <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sort_metric <span class="op">=</span> <span class="st">"AUTO"</span>,</span>
 <span>  include_algos <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  exclude_algos <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -85,7 +86,9 @@ does not require Java or a cloud account.</p>
 <span>  init_h2o <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  h2o_nthreads <span class="op">=</span> <span class="op">-</span><span class="fl">1L</span>,</span>
 <span>  h2o_max_mem_size <span class="op">=</span> <span class="st">"2G"</span>,</span>
-<span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quiet"</span>, <span class="st">"info"</span><span class="op">)</span></span>
+<span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quiet"</span>, <span class="st">"info"</span><span class="op">)</span>,</span>
+<span>  evaluation_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"test"</span>, <span class="st">"validation"</span>, <span class="st">"evaluation"</span><span class="op">)</span>,</span>
+<span>  overlap_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"ignore"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -111,16 +114,22 @@ honored without a hidden cap.</p></dd>
 
 <dt id="arg-max-runtime-secs">max_runtime_secs<a class="anchor" aria-label="anchor" href="#arg-max-runtime-secs"></a></dt>
 <dd><p>H2O training time budget in seconds; ignored by the
-guided base engine.</p></dd>
+guided base engine. Use zero to disable the wall-clock limit and let the
+fixed <code>max_models</code> budget govern the search.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Reproducible split, fitting, and H2O seed.</p></dd>
+<dd><p>Reproducible split and local-fitting seed. For H2O, the seed
+controls supported stochastic components but cannot guarantee an identical
+time-limited search; see the returned reproducibility provenance.</p></dd>
 
 
 <dt id="arg-test-data">test_data<a class="anchor" aria-label="anchor" href="#arg-test-data"></a></dt>
-<dd><p>Optional held-out evaluation data. It is not used as an H2O
-validation frame unless <code>use_test_as_validation = TRUE</code>.</p></dd>
+<dd><p>Optional evaluation data. Supplied rows are labeled as a
+neutral evaluation by default; use <code>evaluation_role = "test"</code> only when
+their provenance supports an independent-test interpretation. H2O uses
+them as validation rows only when <code>use_test_as_validation = TRUE</code> and
+<code>nfolds = 0</code>.</p></dd>
 
 
 <dt id="arg-test-fraction">test_fraction<a class="anchor" aria-label="anchor" href="#arg-test-fraction"></a></dt>
@@ -139,7 +148,7 @@ pre-specified understandable model and baseline. <code>"comparison"</code> also 
 two pre-specified trees for a descriptive Pareto view. <code>"tuned"</code> compares
 the requested behaviorally diverse learner portfolio using training-only
 resampling, retains its family winners for comparison, then evaluates the
-selected configuration once on the untouched holdout.</p></dd>
+selected configuration once on the configured evaluation rows.</p></dd>
 
 
 <dt id="arg-portfolio">portfolio<a class="anchor" aria-label="anchor" href="#arg-portfolio"></a></dt>
@@ -173,16 +182,25 @@ removal defaults to <code>FALSE</code>.</p></dd>
 <dt id="arg-nfolds">nfolds<a class="anchor" aria-label="anchor" href="#arg-nfolds"></a></dt>
 <dd><p>Number of training-only folds for local tuning or H2O
 cross-validation. Local tuning automatically reduces this when an outcome
-class contains fewer rows.</p></dd>
+class contains fewer rows. For H2O, zero is accepted only with explicit
+<code>test_data</code> and <code>use_test_as_validation = TRUE</code>; this prevents model ranking
+by training error alone.</p></dd>
 
 
 <dt id="arg-tuning-rule">tuning_rule<a class="anchor" aria-label="anchor" href="#arg-tuning-rule"></a></dt>
 <dd><p>Local tuning selection rule. <code>"one_se"</code> chooses the
-most interpretable eligible family, then its least-flexible configuration,
-among candidates whose resampled error is within one standard error of the
-best. The reviewed family priority and family-specific flexibility proxies
+first eligible family in the documented reviewed priority, then its
+least-flexible configuration, among candidates whose resampled error is
+within one standard error of the best. The family priority and
+family-specific flexibility proxies
 are shown by <code><a href="learner_catalog.html">learner_catalog()</a></code>. <code>"best"</code> chooses the lowest resampled
 error. Ignored by other workflows.</p></dd>
+
+
+<dt id="arg-tuning-control">tuning_control<a class="anchor" aria-label="anchor" href="#arg-tuning-control"></a></dt>
+<dd><p>Optional advanced local-tuning settings returned by
+<code><a href="tuning_control.html">tuning_control()</a></code>. Leave <code>NULL</code> for the beginner defaults. This argument
+is available only with <code>engine = "base"</code> and <code>model_set = "tuned"</code>.</p></dd>
 
 
 <dt id="arg-sort-metric">sort_metric<a class="anchor" aria-label="anchor" href="#arg-sort-metric"></a></dt>
@@ -196,7 +214,8 @@ most one.</p></dd>
 
 <dt id="arg-use-test-as-validation">use_test_as_validation<a class="anchor" aria-label="anchor" href="#arg-use-test-as-validation"></a></dt>
 <dd><p>Whether to pass <code>test_data</code> to H2O as a
-validation frame. The default keeps held-out explanation data independent.</p></dd>
+validation frame when <code>nfolds = 0</code>. With H2O cross-validation (<code>nfolds &gt;= 2</code>), the supplied frame is not passed because H2O ranks models using
+cross-validation metrics.</p></dd>
 
 
 <dt id="arg-init-h-o">init_h2o<a class="anchor" aria-label="anchor" href="#arg-init-h-o"></a></dt>
@@ -213,6 +232,21 @@ validation frame. The default keeps held-out explanation data independent.</p></
 
 <dt id="arg-verbosity">verbosity<a class="anchor" aria-label="anchor" href="#arg-verbosity"></a></dt>
 <dd><p>One of <code>"quiet"</code> or <code>"info"</code>.</p></dd>
+
+
+<dt id="arg-evaluation-role">evaluation_role<a class="anchor" aria-label="anchor" href="#arg-evaluation-role"></a></dt>
+<dd><p>How to describe the evaluation rows. <code>"auto"</code> labels
+package-generated outer splits as <code>"test"</code>, supplied data as the neutral
+<code>"evaluation"</code>, and data actually used for H2O selection as
+<code>"validation"</code>. Use an explicit value to record a role established by the
+study design.</p></dd>
+
+
+<dt id="arg-overlap-action">overlap_action<a class="anchor" aria-label="anchor" href="#arg-overlap-action"></a></dt>
+<dd><p>What to do when supplied evaluation rows have exactly
+the same values as training rows: warn (the default), error, or ignore.
+Exact equality can indicate leakage but can also occur naturally, so this
+check cannot establish whether the samples are independent.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -240,7 +274,8 @@ identifier removal, is opt-in and recorded in the result.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   models:     2 (primary + baseline)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   result:     primary model has rmse = 2.4413</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   baseline:   63.1% improvement in rmse</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   next:       use as_explainers() to investigate the fitted patterns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   compare:    use model_set = "tuned" for automatic multi-family selection</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   explain:    use render_model_report() or as_explainers() for fitted patterns</span>
 <span class="r-in"><span><span class="va">explainers</span> <span class="op">&lt;-</span> <span class="fu"><a href="as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="audit_explanations.html">audit_explanations</a></span><span class="op">(</span><span class="va">explainers</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR explanation evidence audit&gt;</span>

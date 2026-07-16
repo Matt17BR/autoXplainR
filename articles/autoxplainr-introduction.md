@@ -30,7 +30,8 @@ result
 #>   models:     2 (primary + baseline)
 #>   result:     primary model has rmse = 3.5529
 #>   baseline:   30.3% improvement in rmse
-#>   next:       use as_explainers() to investigate the fitted patterns
+#>   compare:    use model_set = "tuned" for automatic multi-family selection
+#>   explain:    use render_model_report() or as_explainers() for fitted patterns
 ```
 
 `mpg` is numeric with more than two distinct values, so this is
@@ -58,14 +59,14 @@ result$leaderboard
 #> 2 5.096266 3.907692 -1.3212249                2      19.82812          1
 #>   fit_warning prediction_time_ms
 #> 1                              1
-#> 2                              1
+#> 2                              0
 result$evaluation$metric_definitions
-#>                                                                                                rmse 
-#>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
-#>                                                                                                 mae 
-#>                         "Average absolute prediction error in the target's units; lower is better." 
-#>                                                                                           r_squared 
-#> "Share of held-out variation explained relative to predicting the held-out mean; higher is better."
+#>                                                                                                            rmse 
+#>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
+#>                                                                                                             mae 
+#>                                     "Average absolute prediction error in the target's units; lower is better." 
+#>                                                                                                       r_squared 
+#> "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."
 result$evaluation$improvement_over_baseline
 #> [1] 0.3028389
 ```
@@ -131,12 +132,12 @@ tuning$candidates[, c(
 #> 5                   decision tree
 #> 6                   decision tree
 #>                                         hyperparameters   cv_score      cv_se
-#> 1                 hidden units = 2, weight decay = 0.03 0.09446072 0.03629471
-#> 2                  hidden units = 1, weight decay = 0.1 0.29339319 0.01038619
-#> 3                               default statistical fit 0.37178519 0.20404352
-#> 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.39532699
-#> 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.39241141
-#> 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.39241141
+#> 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199
+#> 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168
+#> 3                               default statistical fit 0.37178519 0.20170924
+#> 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486
+#> 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488
+#> 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488
 #>   selected
 #> 1     TRUE
 #> 2    FALSE
@@ -150,6 +151,50 @@ This executable vignette uses the dependency-light `core` portfolio: a
 statistical reference, decision-tree pruning/depth settings, and scaled
 neural-network hidden-unit/weight-decay settings. It learns
 preprocessing separately inside each training fold.
+
+The full registry is inspectable without installing any optional engine:
+
+``` r
+
+catalog <- as.data.frame(learner_catalog())
+catalog[, c(
+  "family", "backend", "supported_tasks", "portfolios", "available"
+)]
+#>         family    backend                supported_tasks
+#> 1       linear stats/nnet regression, binary, multiclass
+#> 2  regularized     glmnet regression, binary, multiclass
+#> 3     additive       mgcv             regression, binary
+#> 4         tree      rpart regression, binary, multiclass
+#> 5       forest     ranger regression, binary, multiclass
+#> 6     boosting    xgboost regression, binary, multiclass
+#> 7       neural       nnet regression, binary, multiclass
+#> 8       kernel      e1071 regression, binary, multiclass
+#> 9    neighbors       kknn regression, binary, multiclass
+#> 10        mars      earth             regression, binary
+#>                     portfolios available
+#> 1  core, recommended, extended      TRUE
+#> 2        recommended, extended     FALSE
+#> 3        recommended, extended      TRUE
+#> 4  core, recommended, extended      TRUE
+#> 5        recommended, extended     FALSE
+#> 6        recommended, extended     FALSE
+#> 7               core, extended      TRUE
+#> 8                     extended     FALSE
+#> 9                     extended     FALSE
+#> 10                    extended     FALSE
+```
+
+The presets are deliberately easy to explain:
+
+| Portfolio | Families | Intended first use |
+|----|----|----|
+| `core` | linear, tree, neural | dependency-light examples and a fast first tournament |
+| `recommended` | linear, regularized, additive, tree, forest, boosting | the default serious tabular comparison after explicit engine installation |
+| `extended` | all ten, adding neural, radial-kernel, neighbor, and MARS families | broader model-specification sensitivity when extra runtime is acceptable |
+
+Additive and MARS fits currently support regression and binary outcomes,
+not multiclass outcomes. That task contract is why the exact number of
+participating families can differ by problem.
 
 For a real model search, the default `recommended` portfolio is broader.
 It compares linear, regularized, additive (where supported),
@@ -177,19 +222,84 @@ compare_model_behavior(recommended)
 The `extended` portfolio additionally covers neural, radial-kernel,
 nearest-neighbor, and multivariate adaptive regression spline behavior
 when the task supports them. Advanced users can supply an explicit
-`learners` vector and change `max_models`, `nfolds`, and `tuning_rule`.
+`learners` vector, but most users should keep a named preset.
 
 The default one-standard-error rule first uses the documented family
 priority, then chooses the least-flexible eligible setting inside that
 family. Its family-specific flexibility proxies are never compared as if
 they shared one unit. Use `tuning_rule = "best"` when the explicitly
 desired rule is minimum resampled error instead. Both rules and every
-fold score remain in the result.
+fold score remain in the result. The within-family parsimony heuristic
+follows the classic one-standard-error rule of Breiman, Friedman,
+Olshen, and Stone (1984); the reviewed cross-family priority is an
+explicit AutoXplainR policy choice, not a statistical ordering of unlike
+model families.
 
 The resampled score answers *which configuration should be refitted?*
 The held-out score answers *how did that selected, refitted model
 perform on unseen rows?* AutoXplainR keeps the outer evaluation rows out
 of tuning and labels the two numbers separately in the report.
+
+When you supply `test_data` yourself, AutoXplainR uses the neutral role
+`evaluation` unless you explicitly set `evaluation_role = "test"` or
+`"validation"`. Set a role from the study design, not from the argument
+name. Exact duplicate-valued records across training and evaluation rows
+trigger a possible-leakage warning; choose `overlap_action = "error"`
+for strict pipeline enforcement or `"ignore"` only after confirming that
+coincident records are legitimate.
+
+### Advanced tuning is an escape hatch
+
+When a study has a pre-specified search design,
+[`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
+validates it without expanding the beginner call. This small example
+stays dependency-light:
+
+``` r
+
+control <- tuning_control(
+  grids = list(tree = data.frame(
+    maxdepth = c(2L, 5L),
+    cp = c(0.02, 0.002),
+    minsplit = c(10L, 5L)
+  )),
+  family_budgets = c(linear = 1L, tree = 2L),
+  metric = "mae",
+  retain_oof = FALSE
+)
+
+advanced <- autoxplain(
+  mtcars,
+  target_column = "mpg",
+  model_set = "tuned",
+  learners = c("linear", "tree"),
+  nfolds = 3,
+  tuning_control = control,
+  seed = 2026
+)
+
+tuning_results(advanced)$control[c(
+  "family_budgets", "metric", "retain_oof", "failure_policy"
+)]
+#> $family_budgets
+#> linear   tree 
+#>      1      2 
+#> 
+#> $metric
+#> [1] "mae"
+#> 
+#> $retain_oof
+#> [1] FALSE
+#> 
+#> $failure_policy
+#> [1] "continue"
+```
+
+The same object can carry `fold_ids`, a supported task-specific loss,
+and `failure_policy = "stop"`. Supplied fold IDs require explicit
+`test_data` so they stay aligned with unchanged training rows. They
+define ordinary V-fold resampling; they are not automatically a grouped,
+rolling-origin, or forward-chaining design.
 
 ## Compare a small candidate set
 
@@ -209,7 +319,7 @@ comparison <- autoxplain(
 model_tradeoffs(comparison)
 #> <AutoXplainR model trade-offs>
 #>   performance: rmse (lower is better)
-#>   complexity:  model_size_kb (lower is better)
+#>   secondary:   model_size_kb (resource proxy; lower is better)
 #>   Pareto set:  3 / 4 supplied models
 #>         model_id                   model      role      rmse model_size_kb
 #>       main_model       linear regression   primary 0.2963068      49.46094
@@ -221,13 +331,16 @@ model_tradeoffs(comparison)
 #>            TRUE
 #>            TRUE
 #>           FALSE
-#>   note: Pareto status compares only the supplied models on the supplied evaluation data; it is not a final model-selection rule.
+#>   note: Pareto status compares only the supplied models on the supplied evaluation data and exact displayed axes. Resource proxies are not structural complexity; this is not a final model-selection rule.
 ```
 
 This adds a shallow tree and a more flexible tree to the pre-specified
 statistical model and intercept-only baseline. Pareto status asks
 whether another supplied model is at least as good on both held-out
-performance and model size, with a strict improvement on one.
+performance and approximate model-object size, with a strict improvement
+on one. For local models, the size axis is R’s in-memory
+[`object.size()`](https://rdrr.io/r/utils/object.size.html) estimate; it
+is a resource proxy rather than structural model complexity.
 
 The comparison is descriptive. AutoXplainR does not silently promote the
 holdout winner to primary, because selecting on the holdout and
@@ -263,6 +376,81 @@ Binary and multiclass rows report hard-class disagreement and
 probability distance. This is not uncertainty coverage: the supplied
 models can perform very differently, and their held-out scores must
 remain beside the disagreement summary.
+
+[`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
+gives the portfolio-level view. Its behavior cards are reviewed prior
+knowledge about what each family can represent; its scores and
+prediction gaps are computed from common held-out rows:
+
+``` r
+
+behavior <- compare_model_behavior(comparison)
+behavior
+#> <AutoXplainR model behavior comparison>
+#>   models:      3 (main_model, small_tree, flexible_tree)
+#>   evidence:    60 test rows
+#>   performance: rmse (lower is better)
+#>   trade-off:   model_size_kb (resource proxy)
+#>   distance:    absolute difference in predicted target units
+#>   feature check: not computed
+#> 
+#> Models at a glance
+#>          model family backend   rmse relative_gap model_size_kb
+#>   main_model * linear   stats 0.2963         0.0%         49.46
+#>     small_tree   tree   rpart 0.3744        26.4%         36.66
+#>  flexible_tree   tree   rpart 0.4126        39.3%         43.25
+#>   * best supplied evaluation score; rankings remain descriptive
+#> 
+#> What differs
+#>   - main_model has the best supplied rmse score (0.2963).
+#>   - small_tree and flexible_tree differ most on average (0.284 using absolute difference in predicted target units).
+#>   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.
+#> 
+#> Evidence key
+#>   behavior cards = prior knowledge about model capacity
+#>   metrics, prediction gaps, and optional permutation importance = computed evidence
+#>   caution: descriptive comparison, not causal or uncertainty coverage
+```
+
+[`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md)
+answers the narrower feature-level question by evaluating one named
+input on aligned rows and a common grid:
+
+``` r
+
+petal_effects <- compare_model_effects(
+  comparison,
+  feature = "Petal.Length",
+  method = "ale",
+  n_points = 8,
+  seed = 2026
+)
+petal_effects$comparisons
+#>      model_a family_a       model_b family_b n_overlap        overlap
+#> 1 main_model   linear flexible_tree     tree         8 [1.35, 6.3125]
+#> 2 main_model   linear    small_tree     tree         8 [1.35, 6.3125]
+#> 3 small_tree     tree flexible_tree     tree         8 [1.35, 6.3125]
+#>   mean_absolute_level_gap centered_shape_rmse max_absolute_gap
+#> 1               0.5741751           0.6781914        1.2514697
+#> 2               0.4929357           0.6105097        1.1414220
+#> 3               0.1512730           0.2136835        0.5334924
+#>   effect_rank_correlation direction_agreement method support_threshold
+#> 1               0.9157291           0.5714286    ale               0.1
+#> 2               0.9636241           0.4285714    ale               0.1
+#> 3               0.9753048           0.6000000    ale               0.1
+#>   dependence_warning
+#> 1              FALSE
+#> 2              FALSE
+#> 3              FALSE
+plot(petal_effects)
+```
+
+![](autoxplainr-introduction_files/figure-html/effect-comparison-1.png)
+
+Curve differences describe the supplied fitted prediction functions over
+the displayed support. They are not confidence intervals, intervention
+effects, or proof that a family used every nonlinear or interaction
+capacity available to it.
 
 An interactive view is available when Plotly is installed:
 
@@ -322,27 +510,29 @@ weight_effect <- explain_effect(explainer, feature = "wt")
 weight_effect
 #> <AutoXplainR ALE effect>
 #>   feature: wt | rows: 6 | max association: 0.829
-#>        wt accumulated_effect std_error   conf_low  conf_high n support
-#>  2.688750          1.0055717         0  1.0055717  1.0055717 1       1
-#>  2.826250          1.0055717         0  1.0055717  1.0055717 0       0
-#>  2.963750          1.0055717         0  1.0055717  1.0055717 0       0
-#>  3.101250          1.0055717         0  1.0055717  1.0055717 0       0
-#>  3.206250          0.7587882         0  0.7587882  0.7587882 1       1
-#>  3.278750          0.7587882         0  0.7587882  0.7587882 0       0
-#>  3.351250          0.7587882         0  0.7587882  0.7587882 0       0
-#>  3.423750          0.7587882         0  0.7587882  0.7587882 0       0
-#>  3.493750          0.5290243         0  0.5290243  0.5290243 1       1
-#>  3.561250          0.5290243         0  0.5290243  0.5290243 0       0
-#>  3.628750          0.5290243         0  0.5290243  0.5290243 0       0
-#>  3.696250          0.5290243         0  0.5290243  0.5290243 0       0
-#>  3.744375          0.4311619         0  0.4311619  0.4311619 1       1
-#>  3.773125          0.4311619         0  0.4311619  0.4311619 0       0
-#>  3.801875          0.4311619         0  0.4311619  0.4311619 0       0
-#>  3.830625          0.4311619         0  0.4311619  0.4311619 0       0
-#>  4.020625         -0.7644614         0 -0.7644614 -0.7644614 1       1
-#>  4.371875         -0.7644614         0 -0.7644614 -0.7644614 0       0
-#>  4.723125         -0.7644614         0 -0.7644614 -0.7644614 0       0
-#>  5.074375         -1.9600847         0 -1.9600847 -1.9600847 1       1
+#>   target:  predicted value
+#>   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.
+#>        wt accumulated_effect std_error conf_low conf_high n support
+#>  2.688750          1.0055717        NA       NA        NA 1       1
+#>  2.826250          1.0055717        NA       NA        NA 0       0
+#>  2.963750          1.0055717        NA       NA        NA 0       0
+#>  3.101250          1.0055717        NA       NA        NA 0       0
+#>  3.206250          0.7587882        NA       NA        NA 1       1
+#>  3.278750          0.7587882        NA       NA        NA 0       0
+#>  3.351250          0.7587882        NA       NA        NA 0       0
+#>  3.423750          0.7587882        NA       NA        NA 0       0
+#>  3.493750          0.5290243        NA       NA        NA 1       1
+#>  3.561250          0.5290243        NA       NA        NA 0       0
+#>  3.628750          0.5290243        NA       NA        NA 0       0
+#>  3.696250          0.5290243        NA       NA        NA 0       0
+#>  3.744375          0.4311619        NA       NA        NA 1       1
+#>  3.773125          0.4311619        NA       NA        NA 0       0
+#>  3.801875          0.4311619        NA       NA        NA 0       0
+#>  3.830625          0.4311619        NA       NA        NA 0       0
+#>  4.020625         -0.7644614        NA       NA        NA 1       1
+#>  4.371875         -0.7644614        NA       NA        NA 0       0
+#>  4.723125         -0.7644614        NA       NA        NA 0       0
+#>  5.074375         -1.9600847        NA       NA        NA 1       1
 ```
 
 ALE summarizes local prediction changes inside observed feature bins. It
@@ -402,11 +592,11 @@ cat(substr(memo, 1, 400), "...")
 #> This is a descriptive summary of a regression task for `mpg`, covering 2 model(s) and 10 feature(s).
 #> 
 #> ## Did the model improve on a simple baseline?
-#> The linear regression was evaluated on 6 held-out test rows. Its **rmse** was 3.5529.
+#> The linear regression was evaluated on 6 test rows. Its **rmse** was 3.5529.
 #> That is a 30.3% improvement over the intercept-only baseline (5.0963).
 #> 
 #> ## What the main metric means
-#> **rmse:** Typical p ...
+#> **rmse:** Typical prediction ...
 attr(memo, "narrative_provenance")
 #> $provider_requested
 #> [1] "local"
@@ -482,18 +672,19 @@ flowers
 #>   models:     2 (primary + baseline)
 #>   result:     primary model has log_loss = 1.1513
 #>   baseline:   -4.8% improvement in log_loss
-#>   next:       use as_explainers() to investigate the fitted patterns
+#>   compare:    use model_set = "tuned" for automatic multi-family selection
+#>   explain:    use render_model_report() or as_explainers() for fitted patterns
 flowers$evaluation$metric_definitions
-#>                                                                                                                                                     log_loss 
-#>                                                                                 "Probability error that penalizes confident wrong answers; lower is better." 
-#>                                                                                                                                                  brier_score 
-#>                                                                                                        "Average squared probability error; lower is better." 
-#>                                                                                                                                            calibration_error 
-#> "Average absolute gap between grouped probabilities and observed frequencies; lower is better, but the value depends on the evaluation sample and grouping." 
-#>                                                                                                                                                     accuracy 
-#>                                                                                    "Share of held-out rows assigned to the correct class; higher is better." 
-#>                                                                                                                                                 macro_recall 
-#>                                                                              "Recall calculated for each class and then averaged equally; higher is better."
+#>                                                                                                                                                                                                                                                   log_loss 
+#>                                                                                                                                                                               "Probability error that penalizes confident wrong answers; lower is better." 
+#>                                                                                                                                                                                                                                                brier_score 
+#> "Unscaled mean sum of squared errors across all class probabilities, from 0 (best) to 2 (worst); lower is better. Its scale depends on the class set, so do not compare it directly with binary Brier scores or scores for a differently defined outcome." 
+#>                                                                                                                                                                                                                                          calibration_error 
+#>                                                                                               "Average absolute gap between grouped probabilities and observed frequencies; lower is better, but the value depends on the evaluation sample and grouping." 
+#>                                                                                                                                                                                                                                                   accuracy 
+#>                                                                                                                                                                                "Share of evaluation rows assigned to the correct class; higher is better." 
+#>                                                                                                                                                                                                                                               macro_recall 
+#>                                                                                                     "Recall calculated for each class and then averaged equally; higher is better. Unavailable when any trained class is absent from the evaluation rows."
 ```
 
 Classification splits are stratified. Binary tasks report log loss,
@@ -615,9 +806,45 @@ existing <- explain_model(
 )
 ```
 
-Other frameworks can supply a `predict_function`. H2O AutoML remains an
-explicit optional fitting engine through
-`autoxplain(..., engine = "h2o")`.
+Other frameworks can supply a `predict_function`.
+
+## Where optional H2O AutoML fits
+
+The native ten-family portfolio is the main local tuning path. H2O
+remains a separate, optional Java-backed engine when a broader AutoML
+search or stacked ensemble is appropriate:
+
+``` r
+
+holdout_rows <- seq(5L, nrow(iris), by = 5L)
+
+h2o_result <- autoxplain(
+  iris[-holdout_rows, ],
+  target_column = "Species",
+  test_data = iris[holdout_rows, ],
+  engine = "h2o",
+  max_models = 10,
+  max_runtime_secs = 0,
+  exclude_algos = "DeepLearning",
+  use_test_as_validation = FALSE,
+  evaluation_role = "test",
+  seed = 2026
+)
+
+render_model_report(h2o_result, "h2o-report.html")
+```
+
+This requires the suggested `h2o` package, Java, and an H2O process. The
+default keeps the explicit test rows out of H2O validation so they
+retain their final-evaluation role. `engine_leaderboard` keeps H2O’s
+selection evidence; the ordinary `leaderboard` scores the fixed H2O
+primary, alternatives, and a simple baseline on common outer rows
+without re-selecting from those scores. Setting a fixed model budget,
+disabling the wall-clock limit, and excluding Deep Learning follows
+H2O’s documented route to a more reproducible AutoML search. The result
+records remaining caveats. H2O results still enter the same explainer,
+audit, and report contracts; H2O is not required to obtain a complete
+AutoXplainR report.
 
 ## What to say—and not say
 
@@ -634,3 +861,65 @@ The following requires a different design and evidence:
 
 AutoXplainR makes the first statement easier to compute and preserve. It
 does not turn it into the second.
+
+## Primary method literature
+
+The portfolio is a common evaluation and explanation layer over
+established methods, not a claim that the learners themselves are new.
+Primary references for the implemented family ideas include:
+
+- Nelder and Wedderburn (1972), [generalized linear
+  models](https://doi.org/10.2307/2344614), and Friedman, Hastie, and
+  Tibshirani (2010), [regularization paths for
+  GLMs](https://doi.org/10.18637/jss.v033.i01);
+- Hastie and Tibshirani (1986), [generalized additive
+  models](https://doi.org/10.1214/ss/1177013604), and Breiman et
+  al. (1984), [classification and regression
+  trees](https://doi.org/10.1201/9781315139470);
+- Breiman (2001), [random
+  forests](https://doi.org/10.1023/A:1010933404324), and Chen and
+  Guestrin (2016), [XGBoost](https://doi.org/10.1145/2939672.2939785);
+- Hornik, Stinchcombe, and White (1989), [single-hidden-layer
+  approximation capacity](https://doi.org/10.1016/0893-6080(89)90020-8),
+  Cortes and Vapnik (1995), [support-vector
+  classification](https://doi.org/10.1007/BF00994018), and Drucker et
+  al. (1997), [epsilon-insensitive support-vector
+  regression](https://proceedings.neurips.cc/paper/1996/hash/d38901788c533e8286cb6400b40b386d-Abstract.html);
+- Cover and Hart (1967), [nearest-neighbor
+  classification](https://doi.org/10.1109/TIT.1967.1053964), and Stone
+  (1977), [weighted nearest-neighbor regression
+  consistency](https://doi.org/10.1214/aos/1176343886);
+- Friedman (1991), [multivariate adaptive regression
+  splines](https://doi.org/10.1214/aos/1176347963); and
+- Fisher, Rudin, and Dominici (2019), [model-class
+  reliance](https://www.jmlr.org/papers/v20/18-760.html), and Apley and
+  Zhu (2020), [accumulated local
+  effects](https://doi.org/10.1111/rssb.12377), for the explanation
+  scope used here.
+
+The package-level evaluation features have their own methodological
+basis; they are not consequences of whichever learner backend is
+installed:
+
+| AutoXplainR feature | Methodological anchor | Scope in this package |
+|----|----|----|
+| training-only selection plus an outer evaluation split | Stone (1974), [cross-validatory model choice](https://doi.org/10.1111/j.2517-6161.1974.tb00994.x), and Varma and Simon (2006), [bias from non-nested error estimation](https://doi.org/10.1186/1471-2105-7-91) | separates configuration choice from final descriptive evaluation |
+| one-standard-error eligibility | Breiman, Friedman, Olshen, and Stone (1984), [Classification and Regression Trees](https://doi.org/10.1201/9781315139470) | adapts a parsimony heuristic within each family; the package’s cross-family priority remains a disclosed policy choice |
+| log loss and Brier score | Brier (1950), [probability forecast verification](https://doi.org/10.1175/1520-0493(1950)078%3C0001:VOFEIT%3E2.0.CO;2), and Gneiting and Raftery (2007), [strictly proper scoring rules](https://doi.org/10.1198/016214506000001437) | scores probabilities without reducing them immediately to classes |
+| binned calibration check | Murphy (1973), [probability-score decomposition](https://doi.org/10.1175/1520-0450%281973%29012%3C0595%3AANVPOT%3E2.0.CO%3B2) | descriptive grouping diagnostic, not a population calibration interval |
+| decision-threshold sensitivity | Fawcett (2006), [ROC analysis](https://doi.org/10.1016/j.patrec.2005.10.010) | displays false-positive/false-negative trade-offs without optimizing on the holdout |
+| candidate-relative Pareto status | Miettinen (1999), [nonlinear multiobjective optimization](https://doi.org/10.1007/978-1-4615-5563-6) | dominance only over supplied models and displayed objectives |
+
+Implementation-specific behavior is also versioned in
+[`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
+For example, the forest adapter follows Wright and Ziegler’s [ranger
+implementation](https://doi.org/10.18637/jss.v077.i01), while the SVM
+adapter inherits probability-estimation behavior from Chang and Lin’s
+[LIBSVM](https://doi.org/10.1145/1961189.1961199). Backend citations
+describe software and algorithms; they do not change the evaluation
+estimand above.
+
+These references motivate family capacity and model-agnostic explanation
+estimands. They do not make a fitted AutoXplainR result causal or
+externally valid; those claims still require an appropriate study design
+and new evidence.

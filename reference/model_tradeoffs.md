@@ -3,8 +3,12 @@
 Builds a two-objective comparison from an
 [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
 result. Predictive performance is taken from the evaluation leaderboard
-and complexity defaults to serialized model size. A model is
-Pareto-efficient when no other supplied model is at least as good on
+and the secondary axis defaults to approximate model-object size. For
+local models this is R's in-memory
+[`object.size()`](https://rdrr.io/r/utils/object.size.html) estimate;
+H2O uses an engine-reported size when available. Size and runtime are
+operational resource proxies, not structural model complexity. A model
+is Pareto-efficient when no other supplied model is at least as good on
 both dimensions and strictly better on one.
 
 ## Usage
@@ -31,8 +35,10 @@ model_tradeoffs(
 
 - complexity_metric:
 
-  Numeric leaderboard or model-metadata column. `NULL` prefers model
-  size, then training or prediction time.
+  Numeric leaderboard or model-metadata column. The argument name is
+  retained for compatibility; `NULL` prefers model size, then training
+  or prediction time, and the returned object labels the exact metric as
+  a resource or structural-complexity proxy.
 
 - include_baseline:
 

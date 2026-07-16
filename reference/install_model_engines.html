@@ -77,7 +77,8 @@ regression, whose recommended portfolio also covers binary classification.</p></
 
 
 <dt id="arg-dry-run">dry_run<a class="anchor" aria-label="anchor" href="#arg-dry-run"></a></dt>
-<dd><p>Return missing package names without installing them.</p></dd>
+<dd><p>Print and visibly return the missing package plan without
+installing anything.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -86,10 +87,19 @@ regression, whose recommended portfolio also covers binary classification.</p></
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The missing package names, invisibly. With <code>dry_run = FALSE</code>, these
-are the packages whose installation was requested.</p>
+    <p>With <code>dry_run = TRUE</code>, the missing package names visibly. With
+<code>dry_run = FALSE</code>, the package names whose installation was requested,
+invisibly.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">install_model_engines</span><span class="op">(</span><span class="st">"recommended"</span>, task <span class="op">=</span> <span class="st">"regression"</span>, dry_run <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dry run only; no packages were installed. Missing backends: glmnet, ranger, xgboost.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Would run: install.packages(c("glmnet", "ranger", "xgboost"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "glmnet"  "ranger"  "xgboost"</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

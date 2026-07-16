@@ -100,8 +100,9 @@ comparison statements.</p>
 <ul><li><p>learner behavior cards describe what each model family can represent;
 they are reviewed prior knowledge, not findings from the supplied data;</p></li>
 <li><p>performance and paired prediction differences are computed from the
-result's common evaluation rows; serialized size or runtime, when shown,
-is an operational resource proxy rather than structural model complexity.</p></li>
+result's common evaluation rows; approximate R object size or runtime,
+when shown, is an operational resource proxy rather than structural model
+complexity.</p></li>
 </ul><p>Optionally, pass an audit created with
 <code>audit_explanations(as_explainers(result, models = ...))</code>. The comparison
 then adds compact repeated-permutation-importance ranks and pairwise rank
@@ -119,7 +120,7 @@ named feature after reviewing the audit's dependence diagnostics.</p>
 <span class="r-in"><span><span class="fu">compare_model_behavior</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR model behavior comparison&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   models:      3 (flexible_tree, small_tree, main_model)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:    6 held-out test rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:    6 test rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   performance: rmse (lower is better)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   trade-off:   model_size_kb (resource proxy)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   distance:    absolute difference in predicted target units</span>

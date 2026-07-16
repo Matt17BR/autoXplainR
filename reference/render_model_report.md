@@ -2,10 +2,10 @@
 
 Creates a standalone HTML report from an
 [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
-result. The report leads with the prediction question, held-out
-evaluation, simple-baseline comparison, and plain metric definitions.
-Feature reliance, fitted effects, and an explanation evidence audit
-follow with progressively more detail.
+result. The report leads with the prediction question, evaluation role,
+simple-baseline comparison, and plain metric definitions. Feature
+reliance, fitted effects, and an explanation evidence audit follow with
+progressively more detail.
 
 ## Usage
 
@@ -55,7 +55,7 @@ render_model_report(
 - subgroup:
 
   Optional name of one categorical or low-cardinality column. When
-  supplied, the report includes an explicit held-out subgroup
+  supplied, the report includes an explicit evaluation-set subgroup
   performance check. See
   [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md).
 

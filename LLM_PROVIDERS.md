@@ -30,8 +30,10 @@ uses that value unless `temperature =` is supplied. Other providers
 default to 0.2. A live integration check on 2026-07-16 authenticated,
 returned schema-valid output, used no fallback, and confirmed that the
 4,000-token default leaves enough room for Gemini reasoning plus the
-requested memo. See the [complete local and Gemini output
-snapshots](https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.md).
+requested memo. See the [current deterministic snapshot and versioned
+live Gemini transport
+capture](https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.md); the
+archived remote wording is not used as a numerical regression test.
 
 ## Setup
 
@@ -62,7 +64,10 @@ memo <- generate_natural_language_report(result, provider = "ollama")
 
 An explicit `model =` overrides a provider default. A `custom` provider
 accepts an OpenAI-compatible `base_url`, but its security, privacy, and
-output contract are entirely the caller’s responsibility.
+output contract are entirely the caller’s responsibility. AutoXplainR
+requires HTTPS for every non-loopback endpoint; plain HTTP is accepted
+only for `localhost`, the `127.0.0.0/8` loopback range, and `[::1]`, so
+provider credentials are not sent unencrypted across a network.
 
 ## How generated output is controlled
 
@@ -70,10 +75,11 @@ output contract are entirely the caller’s responsibility.
 provider is marked as schema-capable, AutoXplainR asks for exactly five
 fields: a headline, a held-out performance summary, model patterns,
 cautions, and next steps. It then parses and validates the JSON, rejects
-missing or unexpected fields, and renders the Markdown locally. Groq
-uses strict constrained decoding on its GPT-OSS default; OpenRouter is
-instructed to route only to providers that accept the schema; Gemini and
-Ollama use their documented schema interfaces.
+missing or unexpected fields, and requires one to three items in each
+list and at most 500 generated words before rendering the Markdown
+locally. Groq uses strict constrained decoding on its GPT-OSS default;
+OpenRouter is instructed to route only to providers that accept the
+schema; Gemini and Ollama use their documented schema interfaces.
 
 Fixed causal, fairness, safety, and external-validation boundaries are
 inserted by AutoXplainR after parsing. They are never delegated to the
@@ -109,6 +115,14 @@ objects, case-level predictions, and API keys. The attached
 `narrative_provenance` attribute records the requested provider,
 provider used, resolved model, remote/local status, structured-output
 request and use, and fallback status.
+
+For a multi-model result, the aggregate context can also name retained
+families and backends, label behavior cards as prior knowledge about
+model capacity, and summarize computed held-out performance and
+prediction disagreement. It does not send the underlying row-level
+predictions. This separation is part of the prompt contract: a model
+family being capable of an interaction is not evidence that the fitted
+model used one.
 
 This minimization does not make a remote call private. Feature or target
 names can themselves be sensitive, and provider logging and training

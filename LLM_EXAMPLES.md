@@ -1,12 +1,14 @@
 # Verified narrative output examples
 
-This page shows what AutoXplainR narratives actually look like. These
-are complete output snapshots from the same reproducible tuned-model
-analysis, not marketing copy written to resemble model output.
+This page shows what AutoXplainR narratives actually look like. The
+local snapshot is regenerated from the current reproducible tuned-model
+analysis; the remote snapshot is a versioned live transport capture
+rather than marketing copy written to resemble model output.
 
 ## Reproduction record
 
-- **Generated:** 2026-07-16
+- **Local snapshot refreshed:** 2026-07-16
+- **Remote snapshot source:** commit `cb7ed50` on 2026-07-16
 - **Data:** the public `iris` data included with R
 - **Task:** multiclass prediction of `Species`
 - **Tuning:** eight configurations, three model families, five
@@ -26,6 +28,7 @@ fit <- autoxplain(
   iris,
   "Species",
   model_set = "tuned",
+  portfolio = "core",
   max_models = 8,
   nfolds = 5,
   test_fraction = 0.25,
@@ -52,14 +55,14 @@ wording for the same computed context.
 This is a descriptive summary of a multiclass task for `Species`, covering 4 model(s) and 4 feature(s).
 
 ## Did the model improve on a simple baseline?
-The tuned neural network was evaluated on 36 held-out test rows. Its **log_loss** was 0.0821.
-That is a 92.5% improvement over the intercept-only baseline (1.0986).
+The tuned neural network was evaluated on 36 held-out test rows. Its **log_loss** was 0.0844.
+That is a 92.3% improvement over the intercept-only baseline (1.0986).
 
 ## What the main metric means
 **log_loss:** Probability error that penalizes confident wrong answers; lower is better.
 
 ## Can the probabilities be taken literally?
-The descriptive binned calibration gap was 2.3% across 3 groups. Mean reported probability was 98.0% and observed frequency was 97.2%.
+The descriptive binned calibration gap was 2.4% across 3 groups. Mean reported probability was 98.3% and observed frequency was 97.2%.
 This depends on the held-out sample and grouping; it is not a population guarantee. Read it beside log loss and Brier score.
 
 ## Score cautions
@@ -67,11 +70,23 @@ This depends on the held-out sample and grouping; it is not a population guarant
 
 ## How automatic tuning selected the model
 8 configurations across 3 model families were compared with 5 training-only folds. The selection metric was log_loss.
-The one-standard-error (prefer the simpler near-best configuration) rule selected the neural network with hidden units = 2, weight decay = 0.03. Its resampled log_loss was 0.09566.
+The one-standard-error (prefer the reviewed family priority, then the least-flexible near-best setting within that family) rule selected the neural network with hidden units = 2, weight decay = 0.03. Its resampled log_loss was 0.09475.
+The resampling-selected configuration was `neural_02`; the actual final fitted configuration was `neural_02` (neural network). A recorded refit fallback was not needed.
 That resampled score selected a configuration; it is not the final performance estimate. The held-out score above evaluated the selected, refitted model on different rows.
 
-## Feature evidence
-The leading descriptive permutation-importance features are Petal.Length, Petal.Width, Sepal.Width. They describe model reliance on the evaluation data and should not be read as causal effects.
+## What kinds of models were retained?
+The family descriptions below are prior/model-capacity knowledge. They describe what a family can represent, not patterns proven to have been used by these fitted models.
+- `main_model`: neural via nnet; can represent smooth and flexible; interaction capacity: automatic through hidden units.
+- `linear_model`: linear via nnet; can represent none unless encoded in features; interaction capacity: none unless specified in features.
+- `tree_model`: tree via rpart; can represent stepwise; interaction capacity: automatic along tree paths.
+
+## What did the retained models do differently?
+This section is computed evidence from common evaluation rows, not a claim inferred from model-family names.
+The largest average paired prediction difference was between `tree_model` and `linear_model`: 0.0887 using total-variation distance between class-probability vectors.
+Descriptive comparison of supplied fitted models on common evaluation rows; not causal inference, uncertainty coverage, or a deployment rule.
+
+## Computed feature evidence
+The leading descriptive permutation-importance features are Petal.Length, Petal.Width, Sepal.Width. They are computed evidence of model reliance on the evaluation data, not family-capacity claims, and should not be read as causal effects.
 
 ## What to do next
 Inspect the held-out errors and explanation evidence, check whether the data represent the intended use, and validate the result on new data before relying on it.
@@ -84,7 +99,15 @@ Use held-out data, domain review, and external validation.
 Data disclosure: Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included.
 ```
 
-## Live Gemini narrative
+## Archived live Gemini narrative
+
+The live text below was captured on 2026-07-16 against source commit
+`cb7ed50`. It verifies authentication, stateless transport, structured
+parsing, and locally appended boundaries. Later tuning and reporting
+changes altered the exact computed numbers, so this archived wording
+must not be used as a current numerical regression fixture. Run the
+reproduction code above and generate a new memo when current values
+matter.
 
 This request used the explicit Gemini adapter:
 
