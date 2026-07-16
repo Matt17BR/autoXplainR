@@ -61,5 +61,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Matteo Mazzarelli \email{matteo.mazzarelli@gmail.com}
 
+Authors:
+\itemize{
+  \item Matteo Mazzarelli \email{matteo.mazzarelli@gmail.com}
+}
+
 }
 \keyword{internal}

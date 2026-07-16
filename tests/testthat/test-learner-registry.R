@@ -62,7 +62,7 @@ test_that("portfolio dependency checks are explicit and reproducible", {
   if (length(dry_run)) {
     expect_error(
       AutoXplainR:::resolve_tuning_learners("recommended", NULL, "regression"),
-      "install.packages"
+      "requested model portfolio is unavailable"
     )
   } else {
     expect_setequal(
