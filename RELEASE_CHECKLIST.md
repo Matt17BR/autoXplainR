@@ -39,8 +39,11 @@ substitute for that review.
   with current R-patched or R-release. This builds once, checks that
   exact archive with `--as-cran` including the PDF and HTML manuals, and
   verifies that its SHA-256 digest did not change during checking.
-- Check that same source archive with current R-devel and explain every
-  remaining note in `cran-comments.md`.
+- Check that same source archive with current R-devel. The release
+  workflow omits only the already-validated manuals in this second
+  check, so the exact R-release-built archive still exercises R-devel
+  code, examples, tests, and vignettes. Explain every remaining note in
+  `cran-comments.md`.
 - Run the isolated real-H2O test with `AUTOXPLAIN_RUN_H2O=true`.
 
 ## Validate remotely
