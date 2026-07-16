@@ -19,6 +19,7 @@ preprocess_data(
   enable_id_removal = FALSE,
   missing_value_strategy = "keep",
   missing_column_threshold = 0.5,
+  novel_level_strategy = c("error", "mode"),
   verbose = FALSE,
   handle_missing = NULL,
   convert_characters = NULL,
@@ -67,6 +68,12 @@ preprocess_data(
 - missing_column_threshold:
 
   Fraction missing above which `drop_columns` removes a predictor.
+
+- novel_level_strategy:
+
+  How evaluation-time predictor categories absent from training are
+  handled. `"error"` stops; `"mode"` maps them to the most frequent
+  observed training category and records the mapping count.
 
 - verbose:
 

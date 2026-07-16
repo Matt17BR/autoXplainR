@@ -11,13 +11,29 @@
 - Added local linear, logistic, and multinomial logistic workflows for
   regression, binary classification, and multiclass classification. H2O
   remains available explicitly through `engine = "h2o"`.
-- Added `model_set = "tuned"` and
-  [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md).
-  The dependency-light search compares statistical, decision-tree, and
-  scaled neural-network configurations using fold-specific preprocessing
-  inside the outer training set. The default one-standard-error rule is
-  inspectable, and the final holdout is untouched until the selected
-  configuration is refitted and scored.
+- Added `model_set = "tuned"`,
+  [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md),
+  and a ten-family learner registry. The recommended portfolio compares
+  linear, regularized, additive, tree, forest, and boosting models;
+  extended mode adds neural, radial-kernel, nearest-neighbor, and MARS
+  models. Every backend shares one serializable prediction contract and
+  is tuned with fold-specific preprocessing inside the outer training
+  set.
+- Added portfolio-aware automatic search budgets, space-filling
+  low-budget grids, stable per-configuration seeds, explicit
+  dependency/version status, retained family winners, paired out-of-fold
+  predictions, and deterministic fallback when a full-data refit fails.
+  Explicit model budgets are not silently capped.
+- The one-standard-error rule now uses a reviewed family priority
+  followed by a family-specific flexibility proxy; raw proxy values are
+  never compared across unrelated model families. The final holdout
+  remains untouched until selection and full-training refit are
+  complete.
+- Added
+  [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
+  to separate reviewed model-capacity cards from computed same-row
+  prediction disagreement and optional permutation- importance evidence
+  across retained families.
 - Added
   [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md),
   a standalone beginner-first report that leads with the modeling
@@ -108,6 +124,18 @@
 
 ### Architecture and reliability
 
+- Replaced the hard-coded three-column tuning dispatcher with a
+  learner-family registry and generic list-column search plan.
+  [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md)
+  now exposes the distinction between a model family, its backend,
+  supported tasks, and a reviewed plain-language behavior card.
+- Tuning seeds are now derived per configuration, so adding or
+  reordering a learner cannot silently change the random initialization
+  of another one.
+- Held-out and fold-validation rows are never moved into training to
+  repair categorical levels. Training recipes instead learn a modal
+  fallback for novel predictor levels, record mapping counts, and retain
+  a strict `novel_level_strategy = "error"` option.
 - H2O AutoML is now an optional fitting adapter; core audits use a
   lightweight runtime dependency set.
 - Test data remain held out from H2O validation by default.

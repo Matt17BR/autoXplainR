@@ -50,15 +50,15 @@ predictions.
 ``` r
 
 result$leaderboard
-#>   rank        model_id                   model     role     rmse      mae
-#> 1    1      main_model       linear regression  primary 3.552918 2.797996
-#> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
-#>    r_squared training_time_ms model_size_kb complexity fit_warning
-#> 1 -0.1281933                2      44.43750         11            
-#> 2 -1.3212249                2      19.82812          1            
-#>   prediction_time_ms
-#> 1                  1
-#> 2                  0
+#>   rank        model_id                   model     role   family backend
+#> 1    1      main_model       linear regression  primary   linear   stats
+#> 2    2 simple_baseline intercept-only baseline baseline baseline   stats
+#>       rmse      mae  r_squared training_time_ms model_size_kb complexity
+#> 1 3.552918 2.797996 -0.1281933                1      44.43750         11
+#> 2 5.096266 3.907692 -1.3212249                2      19.82812          1
+#>   fit_warning prediction_time_ms
+#> 1                              1
+#> 2                              1
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -113,6 +113,7 @@ tuned <- autoxplain(
   iris,
   target_column = "Species",
   model_set = "tuned",
+  portfolio = "core",
   max_models = 6,
   nfolds = 3,
   seed = 2026
@@ -130,8 +131,8 @@ tuning$candidates[, c(
 #> 5                   decision tree
 #> 6                   decision tree
 #>                                         hyperparameters   cv_score      cv_se
-#> 1                 hidden units = 2, weight decay = 0.03 0.09545069 0.03513163
-#> 2                  hidden units = 1, weight decay = 0.1 0.29456933 0.01064361
+#> 1                 hidden units = 2, weight decay = 0.03 0.09446072 0.03629471
+#> 2                  hidden units = 1, weight decay = 0.1 0.29339319 0.01038619
 #> 3                               default statistical fit 0.37178519 0.20404352
 #> 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.39532699
 #> 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.39241141
@@ -145,17 +146,45 @@ tuning$candidates[, c(
 #> 6    FALSE
 ```
 
-This is ordinary supervised hyperparameter tuning made visible.
-AutoXplainR compares a statistical reference, decision-tree
-pruning/depth settings, and scaled neural-network
-hidden-unit/weight-decay settings. It learns preprocessing separately
-inside each training fold.
+This executable vignette uses the dependency-light `core` portfolio: a
+statistical reference, decision-tree pruning/depth settings, and scaled
+neural-network hidden-unit/weight-decay settings. It learns
+preprocessing separately inside each training fold.
 
-The default one-standard-error rule chooses the simplest configuration
-whose resampled error is within one standard error of the best observed
-configuration. Use `tuning_rule = "best"` when the explicitly desired
-rule is minimum resampled error instead. Both rules and every fold score
-remain in the result.
+For a real model search, the default `recommended` portfolio is broader.
+It compares linear, regularized, additive (where supported),
+decision-tree, random-forest, and gradient-boosted-tree behavior.
+Installation is explicit so the tournament never changes silently with
+the packages present on one machine:
+
+``` r
+
+install_model_engines("recommended")
+
+recommended <- autoxplain(
+  my_data,
+  target_column = "outcome",
+  model_set = "tuned",
+  portfolio = "recommended", # the default for tuned fits
+  nfolds = 5,
+  seed = 2026
+)
+
+learner_catalog()
+compare_model_behavior(recommended)
+```
+
+The `extended` portfolio additionally covers neural, radial-kernel,
+nearest-neighbor, and multivariate adaptive regression spline behavior
+when the task supports them. Advanced users can supply an explicit
+`learners` vector and change `max_models`, `nfolds`, and `tuning_rule`.
+
+The default one-standard-error rule first uses the documented family
+priority, then chooses the least-flexible eligible setting inside that
+family. Its family-specific flexibility proxies are never compared as if
+they shared one unit. Use `tuning_rule = "best"` when the explicitly
+desired rule is minimum resampled error instead. Both rules and every
+fold score remain in the result.
 
 The resampled score answers *which configuration should be refitted?*
 The held-out score answers *how did that selected, refitted model

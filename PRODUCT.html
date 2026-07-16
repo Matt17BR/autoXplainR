@@ -46,7 +46,7 @@
 
 <div class="section level2">
 <h2 id="north-star">North star<a class="anchor" aria-label="anchor" href="#north-star"></a></h2>
-<p>AutoXplainR helps a person fitting one of their first tabular models answer four questions without needing to assemble a modeling stack:</p>
+<p>AutoXplainR helps a person fitting one of their first tabular models answer five questions without needing to assemble a modeling stack:</p>
 <ol style="list-style-type: decimal"><li>What kind of prediction problem do I have?</li>
 <li>Should I fit an understandable reference or automatically tune alternatives?</li>
 <li>How well does the selected model work on data it did not train on?</li>
@@ -64,22 +64,23 @@
 <li>compute global importance and feature effects with limitations attached;</li>
 <li>produce one self-contained, accessible report;</li>
 <li>optionally add an LLM narrative that is subordinate to computed results.</li>
-</ul><p>Two next steps remain one explicit argument away. <code>model_set = "tuned"</code> uses training-only resampling to choose among statistical, decision-tree, and scaled neural-network configurations before opening the outer holdout. <code>model_set = "comparison"</code> adds a small, pre-specified local candidate set and displays performance-versus-complexity trade-offs without silently changing the primary model. Advanced users may supply their own split, model, prediction function, H2O AutoML run, explanation configuration, or narrative provider.</p>
+</ul><p>Two next steps remain one explicit argument away. <code>model_set = "tuned"</code> uses training-only resampling to compare a named portfolio spanning linear, regularized, additive, tree, forest, boosting, neural, kernel, neighbor, and MARS families before opening the outer holdout. <code>model_set = "comparison"</code> adds a small, pre-specified local candidate set and displays performance-versus-complexity trade-offs without silently changing the primary model. Advanced users may supply their own split, model, prediction function, H2O AutoML run, explanation configuration, or narrative provider.</p>
 </div>
 <div class="section level2">
 <h2 id="tuning-contract">Tuning contract<a class="anchor" aria-label="anchor" href="#tuning-contract"></a></h2>
 <p>Local automatic tuning must remain comprehensible enough for a first model:</p>
 <ul><li>the final evaluation set cannot rank configurations, tune thresholds, learn preprocessing, or trigger another search;</li>
 <li>preprocessing is refitted within every training resample;</li>
-<li>the search covers at least a statistical reference, decision trees, and a scaled neural network for regression, binary, and multiclass outcomes;</li>
+<li>the recommended search covers linear, regularized, additive where supported, decision-tree, random-forest, and gradient-boosted-tree families; an extended portfolio adds neural, kernel, neighbor, and MARS alternatives;</li>
+<li>a requested portfolio is fixed before resampling and never changes according to which optional packages happen to be installed;</li>
 <li>the candidate settings, fold scores, failures, timing, selection rule, and selected hyperparameters remain inspectable;</li>
-<li>the default one-standard-error rule prefers the simpler near-best configuration, while an explicit <code>"best"</code> rule remains available; and</li>
+<li>the default one-standard-error rule uses a reviewed family priority and then a family-specific flexibility proxy; it never compares unlike raw complexity units, while an explicit <code>"best"</code> rule remains available; and</li>
 <li>reports distinguish the training-resampled selection score from the final held-out evaluation score in adjacent plain language.</li>
 </ul><p>H2O remains an optional broader AutoML engine. Its availability does not excuse the dependency-light workflow from providing meaningful supervised tuning.</p>
 </div>
 <div class="section level2">
 <h2 id="progressive-disclosure">Progressive disclosure<a class="anchor" aria-label="anchor" href="#progressive-disclosure"></a></h2>
-<p>The same result should support three levels of detail:</p>
+<p>The same result should support five levels of detail:</p>
 <ol style="list-style-type: decimal"><li>
 <strong>Guided:</strong> what was fitted, whether it beats a simple baseline, the most important patterns, probability calibration, binary decision-threshold trade-offs, missingness context, and concrete cautions.</li>
 <li>

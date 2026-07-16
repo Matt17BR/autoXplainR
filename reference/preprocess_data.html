@@ -71,6 +71,7 @@ question.</p>
 <span>  enable_id_removal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  missing_value_strategy <span class="op">=</span> <span class="st">"keep"</span>,</span>
 <span>  missing_column_threshold <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  novel_level_strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"mode"</span><span class="op">)</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  handle_missing <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  convert_characters <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -122,6 +123,12 @@ to <code>FALSE</code>; unique values alone never trigger removal.</p></dd>
 <dt id="arg-missing-column-threshold">missing_column_threshold<a class="anchor" aria-label="anchor" href="#arg-missing-column-threshold"></a></dt>
 <dd><p>Fraction missing above which <code>drop_columns</code>
 removes a predictor.</p></dd>
+
+
+<dt id="arg-novel-level-strategy">novel_level_strategy<a class="anchor" aria-label="anchor" href="#arg-novel-level-strategy"></a></dt>
+<dd><p>How evaluation-time predictor categories absent
+from training are handled. <code>"error"</code> stops; <code>"mode"</code> maps them to the
+most frequent observed training category and records the mapping count.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

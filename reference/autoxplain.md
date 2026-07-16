@@ -12,13 +12,15 @@ uses R and does not require Java or a cloud account.
 autoxplain(
   data,
   target_column,
-  max_models = 10L,
+  max_models = NULL,
   max_runtime_secs = 300L,
   seed = 123L,
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
   model_set = c("quick", "tuned", "comparison"),
+  portfolio = c("recommended", "core", "extended"),
+  learners = NULL,
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
@@ -48,8 +50,10 @@ autoxplain(
 - max_models:
 
   Maximum number of configurations in local tuning or H2O base models.
-  Local tuning requires at least three and counts the statistical
-  reference alongside tree and neural-network configurations.
+  The local budget is shared across requested learner families. `NULL`
+  chooses a portfolio-aware tuning budget (15 for core, 30 for
+  recommended, and 40 for extended) or 24 for H2O. Explicit values are
+  honored without a hidden cap.
 
 - max_runtime_secs:
 
@@ -80,9 +84,25 @@ autoxplain(
   Guided base-engine workflow. `"quick"` fits the pre-specified
   understandable model and baseline. `"comparison"` also fits two
   pre-specified trees for a descriptive Pareto view. `"tuned"` compares
-  statistical, decision-tree, and scaled neural-network configurations
-  using training-only resampling, then evaluates the selected
-  configuration once on the untouched holdout.
+  the requested behaviorally diverse learner portfolio using
+  training-only resampling, retains its family winners for comparison,
+  then evaluates the selected configuration once on the untouched
+  holdout.
+
+- portfolio:
+
+  Local tuned-model portfolio. `"recommended"` compares linear,
+  regularized, additive (when supported), tree, forest, and boosting
+  families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
+  families. `"core"` retains the dependency-light linear/tree/neural
+  tournament. Missing optional backends produce one installation command
+  rather than silently changing the tournament.
+
+- learners:
+
+  Optional explicit learner-family vector overriding `portfolio`.
+  Inspect valid names with
+  [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
 
 - enable_preprocessing:
 
@@ -106,10 +126,14 @@ autoxplain(
 
 - tuning_rule:
 
-  Local tuning selection rule. `"one_se"` chooses the simplest
-  configuration whose resampled error is within one standard error of
-  the best; `"best"` chooses the lowest resampled error. Ignored by
-  other workflows.
+  Local tuning selection rule. `"one_se"` chooses the most interpretable
+  eligible family, then its least-flexible configuration, among
+  candidates whose resampled error is within one standard error of the
+  best. The reviewed family priority and family-specific flexibility
+  proxies are shown by
+  [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
+  `"best"` chooses the lowest resampled error. Ignored by other
+  workflows.
 
 - sort_metric:
 

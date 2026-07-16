@@ -17,11 +17,12 @@ baseline, defines every metric, investigates fitted patterns, and tells
 the user what the evidence does and does not support.
 
 The default path is local and needs no Java, cloud account, or LLM. One
-explicit mode automatically tunes statistical, tree, and neural-network
-models without peeking at the final holdout; another compares
-approachable candidates and Pareto trade-offs. Advanced users can bring
-any fitted model, use H2O AutoML, or opt into local or hosted language
-models.
+explicit mode runs a leak-safe tournament across genuinely different
+model families—from regularized and additive models to forests,
+boosting, kernels, neighbors, and neural networks—without peeking at the
+final holdout. Advanced users can choose families and search budgets,
+bring any fitted model, use H2O AutoML, or opt into local or hosted
+language models.
 
 **[Get
 started](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html)**
@@ -72,11 +73,13 @@ hatch:
 
 ``` r
 
+# One-time installation of the recommended native engines
+install_model_engines("recommended")
+
 tuned <- autoxplain(
   iris,
   target_column = "Species",
   model_set = "tuned",
-  max_models = 10,
   nfolds = 5,
   seed = 2026
 )
@@ -85,12 +88,23 @@ tuning_results(tuned)
 render_model_report(tuned, "tuned-model-report.html")
 ```
 
-AutoXplainR searches across a statistical reference, decision-tree depth
-and pruning settings, and scaled neural-network size and weight decay.
-Preprocessing is relearned inside each resampling fold. The default
-one-standard-error rule chooses a simpler configuration when its
-training-resampled error is hard to distinguish from the best observed
-error.
+The recommended portfolio compares linear, regularized, additive (for
+regression and binary outcomes), tree, random-forest, and
+gradient-boosted-tree families. `portfolio = "extended"` adds neural
+networks, radial SVMs, weighted nearest neighbors, and MARS.
+`portfolio = "core"` is the dependency-light linear/tree/neural
+tournament. Missing engines produce one explicit installation
+instruction; AutoXplainR never changes the tournament according to
+whatever happens to be installed.
+
+Preprocessing is relearned inside each resampling fold. Automatic
+budgets are large enough to vary the important controls in each family
+(15 core, 30 recommended, or 40 extended), while an explicit
+`max_models` is honored without a hidden cap. The default
+one-standard-error rule first uses a documented, reviewed family
+priority and then the least-flexible setting *within that family*. It
+never compares arbitrary “complexity” numbers between unlike model
+families.
 
 Only the outer training rows take part in that search. The chosen
 configuration is refitted on all training rows and then scored once on
@@ -98,10 +112,26 @@ the held-out rows. The report keeps these two numbers separate: the
 resampled score selects the model; the held-out score evaluates the
 selected model.
 
-The complete candidate grid, fold-level scores, warnings, failures,
-elapsed times, selected hyperparameters, and data boundary remain
-available in `tuning_results(tuned)`. H2O AutoML is still supported when
-a much broader, Java-backed search is appropriate.
+The complete candidate grid, fold-level scores, paired out-of-fold
+predictions, omitted-row accounting, warnings, failures, elapsed times,
+selected hyperparameters, and data boundary remain available in
+`tuning_results(tuned)`. Each family’s best fitted model is retained so
+disagreement can be inspected, not merely reported as a leaderboard
+number:
+
+``` r
+
+behavior <- compare_model_behavior(tuned)
+behavior
+```
+
+Behavior cards describe known representational capacity; held-out
+performance, same-row prediction gaps, and optional
+permutation-importance differences are computed evidence. Keeping those
+labels separate prevents “this model *can* learn interactions” from
+becoming the false claim that it *did* use an interaction in this fit.
+H2O AutoML remains optional when a Java-backed search or stacked
+ensemble is appropriate.
 
 ## Compare models without hiding the trade-off
 
@@ -419,6 +449,8 @@ Matteo Mazzarelli.
   : List supported narrative providers
 - [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
   : Find held-out rows where supplied models disagree
+- [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
+  : Compare what retained models do differently
 
 ## Model-agnostic evidence workflow
 
@@ -448,6 +480,10 @@ Matteo Mazzarelli.
 
 ## Fitting and preprocessing
 
+- [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md)
+  : Inspect AutoXplainR learner families
+- [`install_model_engines()`](https://matt17br.github.io/autoXplainR/reference/install_model_engines.md)
+  : Install optional model backends
 - [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md)
   : Prepare modeling data with an auditable recipe
 - [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)

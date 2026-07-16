@@ -28,6 +28,8 @@
   : List supported narrative providers
 - [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
   : Find held-out rows where supplied models disagree
+- [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
+  : Compare what retained models do differently
 
 ## Model-agnostic evidence workflow
 
@@ -57,6 +59,10 @@
 
 ## Fitting and preprocessing
 
+- [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md)
+  : Inspect AutoXplainR learner families
+- [`install_model_engines()`](https://matt17br.github.io/autoXplainR/reference/install_model_engines.md)
+  : Install optional model backends
 - [`preprocess_data()`](https://matt17br.github.io/autoXplainR/reference/preprocess_data.md)
   : Prepare modeling data with an auditable recipe
 - [`preprocess_for_h2o()`](https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.md)

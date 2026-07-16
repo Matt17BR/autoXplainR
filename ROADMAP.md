@@ -21,9 +21,15 @@ Optional local comparison set with multiple understandable model
 complexities, measured resource dimensions, and a labeled Pareto
 frontier.
 
-Training-only local hyperparameter tuning across statistical, tree, and
-scaled neural-network families, with fold-specific preprocessing, an
-inspectable one-standard-error rule, and untouched final evaluation.
+Training-only local hyperparameter tuning through a ten-family registry:
+linear, regularized, additive, tree, forest, boosting, neural, kernel,
+nearest-neighbor, and MARS, with fold-specific preprocessing,
+inspectable one-standard-error selection, and untouched final
+evaluation.
+
+Unified serializable prediction adapters, retained family winners,
+paired out-of-fold evidence, and cross-model prediction/importance
+comparison.
 
 Model-agnostic prediction contract and H2O boundary.
 
@@ -105,7 +111,7 @@ with DALEX, ingredients, iml, xplainfi, and reference implementations.
 - Zero errors, warnings, or unexplained notes across CRAN reference
   platforms.
 - Independent review of estimands, simulations, and reporting language.
-- At least two non-H2O production adapters validated in integration
-  tests.
+- Every advertised non-H2O adapter validated across its supported tasks
+  in an isolated native-engine integration workflow.
 - Published methods/validation manuscript and archived benchmark
   artifacts.

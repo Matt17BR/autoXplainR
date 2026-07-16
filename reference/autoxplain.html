@@ -64,13 +64,15 @@ does not require Java or a cloud account.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">autoxplain</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">target_column</span>,</span>
-<span>  max_models <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>  max_models <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_runtime_secs <span class="op">=</span> <span class="fl">300L</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123L</span>,</span>
 <span>  test_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  test_fraction <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"base"</span>, <span class="st">"h2o"</span><span class="op">)</span>,</span>
 <span>  model_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quick"</span>, <span class="st">"tuned"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
+<span>  portfolio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"recommended"</span>, <span class="st">"core"</span>, <span class="st">"extended"</span><span class="op">)</span>,</span>
+<span>  learners <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  enable_preprocessing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  task <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"regression"</span>, <span class="st">"binary"</span>, <span class="st">"multiclass"</span><span class="op">)</span>,</span>
@@ -101,8 +103,10 @@ does not require Java or a cloud account.</p>
 
 <dt id="arg-max-models">max_models<a class="anchor" aria-label="anchor" href="#arg-max-models"></a></dt>
 <dd><p>Maximum number of configurations in local tuning or H2O
-base models. Local tuning requires at least three and counts the statistical
-reference alongside tree and neural-network configurations.</p></dd>
+base models. The local budget is shared across requested learner families.
+<code>NULL</code> chooses a portfolio-aware tuning budget (15 for core, 30 for
+recommended, and 40 for extended) or 24 for H2O. Explicit values are
+honored without a hidden cap.</p></dd>
 
 
 <dt id="arg-max-runtime-secs">max_runtime_secs<a class="anchor" aria-label="anchor" href="#arg-max-runtime-secs"></a></dt>
@@ -133,9 +137,23 @@ resolves to the dependency-free <code>"base"</code> workflow.</p></dd>
 <dd><p>Guided base-engine workflow. <code>"quick"</code> fits the
 pre-specified understandable model and baseline. <code>"comparison"</code> also fits
 two pre-specified trees for a descriptive Pareto view. <code>"tuned"</code> compares
-statistical, decision-tree, and scaled neural-network configurations using
-training-only resampling, then evaluates the selected configuration once on
-the untouched holdout.</p></dd>
+the requested behaviorally diverse learner portfolio using training-only
+resampling, retains its family winners for comparison, then evaluates the
+selected configuration once on the untouched holdout.</p></dd>
+
+
+<dt id="arg-portfolio">portfolio<a class="anchor" aria-label="anchor" href="#arg-portfolio"></a></dt>
+<dd><p>Local tuned-model portfolio. <code>"recommended"</code> compares
+linear, regularized, additive (when supported), tree, forest, and boosting
+families. <code>"extended"</code> adds neural, kernel, nearest-neighbor, and MARS
+families. <code>"core"</code> retains the dependency-light linear/tree/neural
+tournament. Missing optional backends produce one installation command
+rather than silently changing the tournament.</p></dd>
+
+
+<dt id="arg-learners">learners<a class="anchor" aria-label="anchor" href="#arg-learners"></a></dt>
+<dd><p>Optional explicit learner-family vector overriding
+<code>portfolio</code>. Inspect valid names with <code><a href="learner_catalog.html">learner_catalog()</a></code>.</p></dd>
 
 
 <dt id="arg-enable-preprocessing">enable_preprocessing<a class="anchor" aria-label="anchor" href="#arg-enable-preprocessing"></a></dt>
@@ -160,9 +178,11 @@ class contains fewer rows.</p></dd>
 
 <dt id="arg-tuning-rule">tuning_rule<a class="anchor" aria-label="anchor" href="#arg-tuning-rule"></a></dt>
 <dd><p>Local tuning selection rule. <code>"one_se"</code> chooses the
-simplest configuration whose resampled error is within one standard error
-of the best; <code>"best"</code> chooses the lowest resampled error. Ignored by other
-workflows.</p></dd>
+most interpretable eligible family, then its least-flexible configuration,
+among candidates whose resampled error is within one standard error of the
+best. The reviewed family priority and family-specific flexibility proxies
+are shown by <code><a href="learner_catalog.html">learner_catalog()</a></code>. <code>"best"</code> chooses the lowest resampled
+error. Ignored by other workflows.</p></dd>
 
 
 <dt id="arg-sort-metric">sort_metric<a class="anchor" aria-label="anchor" href="#arg-sort-metric"></a></dt>
