@@ -17,16 +17,21 @@ install_model_engines(
 \item{task}{Task used to omit inapplicable learner backends. Defaults to
 regression, whose recommended portfolio also covers binary classification.}
 
-\item{dry_run}{Return missing package names without installing them.}
+\item{dry_run}{Print and visibly return the missing package plan without
+installing anything.}
 
 \item{...}{Additional arguments passed to \code{\link[utils:install.packages]{utils::install.packages()}}.}
 }
 \value{
-The missing package names, invisibly. With \code{dry_run = FALSE}, these
-are the packages whose installation was requested.
+With \code{dry_run = TRUE}, the missing package names visibly. With
+\code{dry_run = FALSE}, the package names whose installation was requested,
+invisibly.
 }
 \description{
 Installs the CRAN packages required by an AutoXplainR model portfolio. This
 helper only changes the user's library when called explicitly; use
 \code{dry_run = TRUE} to inspect the missing packages without installing them.
+}
+\examples{
+install_model_engines("recommended", task = "regression", dry_run = TRUE)
 }

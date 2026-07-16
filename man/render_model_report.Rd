@@ -33,7 +33,7 @@ render_model_report(
 \code{\link[=generate_natural_language_report]{generate_natural_language_report()}}.}
 
 \item{subgroup}{Optional name of one categorical or low-cardinality column.
-When supplied, the report includes an explicit held-out subgroup
+When supplied, the report includes an explicit evaluation-set subgroup
 performance check. See \code{\link[=subgroup_performance]{subgroup_performance()}}.}
 
 \item{open}{Open the report in a browser after writing it.}
@@ -50,7 +50,7 @@ The normalized output path, invisibly.
 }
 \description{
 Creates a standalone HTML report from an \code{\link[=autoxplain]{autoxplain()}} result. The report
-leads with the prediction question, held-out evaluation, simple-baseline
+leads with the prediction question, evaluation role, simple-baseline
 comparison, and plain metric definitions. Feature reliance, fitted effects,
 and an explanation evidence audit follow with progressively more detail.
 }

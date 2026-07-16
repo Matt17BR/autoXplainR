@@ -219,7 +219,7 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
     plotly::config(displayModeBar = FALSE, responsive = TRUE)
 }
 
-#' Plot model performance and complexity trade-offs
+#' Plot model performance and resource trade-offs
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param performance_metric Leaderboard metric; automatically selected when
@@ -242,6 +242,8 @@ plot_model_comparison <- function(autoxplain_result,
   )
   performance_metric <- attr(tradeoffs, "performance_metric")
   complexity_metric <- attr(tradeoffs, "complexity_metric")
+  performance_label <- pretty_metric(performance_metric)
+  resource_label <- pretty_complexity(complexity_metric)
   tradeoffs$pareto_status <- ifelse(tradeoffs$pareto_optimal, "Pareto-efficient", "Dominated")
   plot <- plotly::plot_ly(
     tradeoffs,
@@ -254,8 +256,8 @@ plot_model_comparison <- function(autoxplain_result,
     mode = "markers",
     marker = list(size = 12, line = list(width = 1, color = "#ffffff")),
     hovertemplate = paste0(
-      "<b>%{text}</b><br>", complexity_metric, ": %{x}<br>",
-      performance_metric, ": %{y:.5f}<br>%{customdata}<extra></extra>"
+      "<b>%{text}</b><br>", resource_label, ": %{x}<br>",
+      performance_label, ": %{y:.5f}<br>%{customdata}<extra></extra>"
     ),
     customdata = ~pareto_status
   )
@@ -276,8 +278,8 @@ plot_model_comparison <- function(autoxplain_result,
   plot |>
     plotly::layout(
       title = title,
-      xaxis = list(title = complexity_metric),
-      yaxis = list(title = performance_metric),
+      xaxis = list(title = resource_label),
+      yaxis = list(title = performance_label),
       margin = list(l = 70, r = 25, t = 55, b = 65),
       legend = list(orientation = "h", x = 0, y = -0.2)
     ) |>

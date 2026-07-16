@@ -10,12 +10,23 @@
 #' Use a genuinely held-out evaluation set and a formal inference method when
 #' population claims are required.
 #'
+#' For binary classification, `"brier"` is the mean squared error of the
+#' positive-class probability and lies from 0 (best) to 1 (worst). For
+#' multiclass classification, it is the unscaled mean row sum of squared errors
+#' across all class probabilities and lies from 0 to 2. Multiclass values can
+#' depend on the class set and should not be compared directly with binary
+#' Brier scores or scores from a different outcome definition.
+#'
 #' @param model An `autoxplain_explainer` or a fitted model.
 #' @param data Evaluation data. Required for a fitted model; ignored when
 #'   `model` is an explainer unless supplied to replace its evaluation data.
 #' @param target_column Outcome column name when `model` is a fitted model.
 #' @param metric One of `"auto"`, `"rmse"`, `"mae"`, `"logloss"`,
-#'   `"accuracy"`, or `"auc"`.
+#'   `"brier"`, `"accuracy"`, or `"auc"`. The result-style names
+#'   `"log_loss"` and `"brier_score"` are accepted as aliases. With `"auto"`,
+#'   an explainer made from an `autoxplain_result` uses that result's primary
+#'   evaluation metric; otherwise regression defaults to RMSE and
+#'   classification to log loss.
 #' @param n_repeats Number of independent permutations.
 #' @param seed Random seed. The caller's random-number state is restored.
 #' @param features Character vector of features to evaluate. Defaults to all.
@@ -66,20 +77,21 @@ calculate_permutation_importance <- function(model,
   explainer <- coerce_to_explainer(
     model, data, target_column, predict_function, task, positive
   )
-  x <- if (is.null(data) || !inherits(model, "autoxplain_explainer")) {
-    explainer$data
+  replacement <- if (is.null(data) || !inherits(model, "autoxplain_explainer")) {
+    list(data = explainer$data, y = explainer$y)
   } else {
-    replacement_explainer_data(explainer, data, target_column)$data
+    replacement_explainer_data(explainer, data, target_column)
   }
-  y <- if (is.null(data) || !inherits(model, "autoxplain_explainer")) {
-    explainer$y
-  } else {
-    replacement_explainer_data(explainer, data, target_column)$y
-  }
+  x <- replacement$data
+  y <- replacement$y
 
   groups <- normalize_feature_groups(features, feature_groups, names(x))
   strata <- normalize_strata(within, x)
-  metric <- resolve_metric(metric, explainer$task)
+  metric <- resolve_metric(
+    metric,
+    explainer$task,
+    primary_metric = explainer$metadata$primary_metric %||% NULL
+  )
   baseline_prediction <- predict(explainer, x)
   baseline <- metric_score(y, baseline_prediction, metric, explainer)
 
@@ -189,6 +201,20 @@ replacement_explainer_data <- function(explainer, data, target_column = NULL) {
   if (!is.null(target) && target %in% names(data)) {
     y <- data[[target]]
     x <- data[setdiff(names(data), target)]
+    y <- coerce_outcome_for_task(
+      y,
+      explainer$task,
+      target_levels = explainer$class_levels
+    )
+    if (anyNA(y)) {
+      stop(
+        "Replacement outcomes contain missing values or classes absent from the explainer contract.",
+        call. = FALSE
+      )
+    }
+    if (identical(explainer$task, "regression") && any(!is.finite(y))) {
+      stop("Replacement regression outcomes must be finite numeric values.", call. = FALSE)
+    }
   } else {
     if (nrow(data) != length(explainer$y)) {
       stop("Replacement `data` without an outcome must have the same number of rows as the explainer.",
@@ -261,22 +287,50 @@ stratified_permutation <- function(n, strata = NULL) {
   permutation
 }
 
-resolve_metric <- function(metric, task) {
-  choices <- c("auto", "rmse", "mae", "logloss", "accuracy", "auc")
+resolve_metric <- function(metric, task, primary_metric = NULL) {
+  choices <- c(
+    "auto", "rmse", "mae", "logloss", "log_loss", "brier", "brier_score",
+    "accuracy", "auc"
+  )
   if (!is.character(metric) || length(metric) != 1L || !metric %in% choices) {
     stop("`metric` must be one of: ", paste(choices, collapse = ", "), ".",
          call. = FALSE)
   }
   if (metric == "auto") {
-    return(switch(task, regression = "rmse", binary = "logloss", multiclass = "logloss"))
+    metric <- importance_metric_from_primary(primary_metric) %||%
+      switch(task, regression = "rmse", binary = "logloss", multiclass = "logloss")
   }
+  metric <- importance_metric_from_primary(metric) %||% metric
   if (task == "regression" && !metric %in% c("rmse", "mae")) {
     stop("Regression supports `rmse` and `mae`.", call. = FALSE)
+  }
+  if (task %in% c("binary", "multiclass") && metric %in% c("rmse", "mae")) {
+    stop(
+      "Classification supports `logloss`, `brier`, `accuracy`, and binary `auc`.",
+      call. = FALSE
+    )
   }
   if (task == "multiclass" && metric == "auc") {
     stop("`auc` is only available for binary classification.", call. = FALSE)
   }
   metric
+}
+
+importance_metric_from_primary <- function(metric) {
+  if (is.null(metric)) return(NULL)
+  if (!is.character(metric) || length(metric) != 1L || is.na(metric)) return(NULL)
+  mapped <- unname(c(
+    rmse = "rmse",
+    mae = "mae",
+    log_loss = "logloss",
+    logloss = "logloss",
+    brier_score = "brier",
+    brier = "brier",
+    accuracy = "accuracy",
+    roc_auc = "auc",
+    auc = "auc"
+  )[metric])
+  if (!length(mapped) || is.na(mapped)) NULL else mapped
 }
 
 metric_score <- function(y, prediction, metric, explainer) {
@@ -297,6 +351,26 @@ metric_score <- function(y, prediction, metric, explainer) {
   if (metric == "auc") {
     observed <- as.character(y) == explainer$positive
     return(binary_auc(observed, prediction))
+  }
+  if (metric == "brier") {
+    if (explainer$task == "binary") {
+      observed <- as.numeric(as.character(y) == explainer$positive)
+      return(mean((as.numeric(prediction) - observed)^2))
+    }
+    if (!is.matrix(prediction)) {
+      stop("Multiclass Brier score requires class-probability predictions.",
+           call. = FALSE)
+    }
+    classes <- explainer$class_levels
+    indices <- match(as.character(y), classes)
+    if (anyNA(indices) || !all(classes %in% colnames(prediction))) {
+      stop("Multiclass prediction columns must be named with every outcome class.",
+           call. = FALSE)
+    }
+    probability <- prediction[, classes, drop = FALSE]
+    one_hot <- matrix(0, nrow(probability), ncol(probability))
+    one_hot[cbind(seq_along(indices), indices)] <- 1
+    return(mean(rowSums((probability - one_hot)^2)))
   }
   epsilon <- 1e-15
   if (explainer$task == "binary") {

@@ -18,7 +18,9 @@
 #'   preliminary comparison. Smaller groups remain visible and are flagged.
 #'
 #' @return An `autoxplain_subgroups` object containing overall metrics and a
-#'   group-level `performance` data frame.
+#'   group-level `performance` data frame. Its primary metric matches the
+#'   result's evaluation metric (including MAE or Brier score), and
+#'   `secondary_metric` names a different supporting metric.
 #' @export
 #'
 #' @examples
@@ -62,7 +64,8 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
   explainer <- as_explainers(result, models = model_id)[[1L]]
   predicted <- predict(explainer, explainer$data)
   overall <- evaluate_predictions(explainer$y, predicted, explainer)
-  primary_metric <- if (identical(result$task, "regression")) "rmse" else "log_loss"
+  primary_metric <- subgroup_primary_metric(result, names(overall))
+  secondary_metric <- subgroup_secondary_metric(result$task, primary_metric, names(overall))
   rows <- lapply(group_levels, function(group) {
     index <- which(groups == group)
     group_prediction <- subset_task_predictions(predicted, index, result$task)
@@ -81,9 +84,11 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
   rownames(performance) <- NULL
   performance$gap_from_overall <- performance[[primary_metric]] - overall[[primary_metric]]
   performance <- performance[c(
-    "group", "rows", "share", primary_metric, "gap_from_overall", "enough_rows",
+    "group", "rows", "share", primary_metric, secondary_metric,
+    "gap_from_overall", "enough_rows",
     setdiff(names(performance), c(
-      "group", "rows", "share", primary_metric, "gap_from_overall", "enough_rows"
+      "group", "rows", "share", primary_metric, secondary_metric,
+      "gap_from_overall", "enough_rows"
     ))
   )]
   role <- result$provenance$evaluation_role %||% "unspecified evaluation"
@@ -96,6 +101,7 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
       n_groups = length(group_levels),
       min_rows = min_rows,
       primary_metric = primary_metric,
+      secondary_metric = secondary_metric,
       overall_metrics = overall,
       largest_observed_gap = diff(range(performance[[primary_metric]], na.rm = TRUE)),
       performance = performance,
@@ -107,6 +113,29 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
     ),
     class = c("autoxplain_subgroups", "list")
   )
+}
+
+subgroup_primary_metric <- function(result, available) {
+  fallback <- if (identical(result$task, "regression")) "rmse" else "log_loss"
+  primary <- result$evaluation$primary_metric %||% fallback
+  if (!is.character(primary) || length(primary) != 1L || is.na(primary) ||
+        !primary %in% available) {
+    stop(
+      "The result's primary evaluation metric is unavailable for subgroup scoring.",
+      call. = FALSE
+    )
+  }
+  primary
+}
+
+subgroup_secondary_metric <- function(task, primary, available) {
+  preferred <- if (identical(task, "regression")) {
+    c("mae", "rmse", "r_squared")
+  } else {
+    c("accuracy", "log_loss", "brier_score")
+  }
+  candidates <- setdiff(intersect(preferred, available), primary)
+  if (length(candidates)) candidates[[1L]] else NULL
 }
 
 #' @export

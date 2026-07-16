@@ -10,7 +10,7 @@ test_that("tuning retains paired regression out-of-fold evidence", {
     x^2 + as.numeric(group) + 0.2 * noise + rnorm(72, sd = 0.2)
   )
   rownames(training) <- paste0("training-case-", seq_len(nrow(training)))
-  evaluation <- training[1:18, , drop = FALSE]
+  evaluation <- make_disjoint_evaluation(training, "y", 1:18)
 
   result <- autoxplain(
     training,
@@ -26,7 +26,7 @@ test_that("tuning retains paired regression out-of-fold evidence", {
   evidence <- result$tuning$out_of_fold_predictions
   valid <- result$tuning$candidates[result$tuning$candidates$status == "ok", ]
 
-  expect_equal(result$tuning$schema_version, 3L)
+  expect_equal(result$tuning$schema_version, 4L)
   expect_equal(nrow(evidence), nrow(training) * nrow(valid))
   expect_named(evidence, c(
     "configuration_id", "family", "backend", "fold", "training_row",
@@ -72,7 +72,7 @@ test_that("classification tuning evidence preserves complete probability vectors
     ifelse(runif(nrow(training)) < probability, "yes", "no"),
     levels = c("no", "yes")
   )
-  evaluation <- training[1:20, , drop = FALSE]
+  evaluation <- make_disjoint_evaluation(training, "event", 1:20)
   result <- autoxplain(
     training,
     "event",
@@ -109,7 +109,9 @@ test_that("drop_rows preserves regression evidence identity and reports omission
   omitted <- seq(4L, nrow(training), by = 4L)
   training$x[omitted] <- NA_real_
   rownames(training) <- paste0("regression-source-", seq_len(nrow(training)))
-  evaluation <- training[stats::complete.cases(training), , drop = FALSE][1:15, ]
+  evaluation <- make_disjoint_evaluation(
+    training, "y", which(stats::complete.cases(training))[1:15]
+  )
   result <- autoxplain(
     training,
     "y",
@@ -163,7 +165,9 @@ test_that("drop_rows preserves classification evidence identity and probabilitie
   omitted <- seq(4L, nrow(training), by = 4L)
   training$z[omitted] <- NA_real_
   rownames(training) <- paste0("classification-source-", seq_len(nrow(training)))
-  evaluation <- training[stats::complete.cases(training), , drop = FALSE][1:18, ]
+  evaluation <- make_disjoint_evaluation(
+    training, "event", which(stats::complete.cases(training))[1:18]
+  )
   result <- autoxplain(
     training,
     "event",
@@ -345,7 +349,7 @@ test_that("all-configuration resampling failure is surfaced end to end", {
   result <- autoxplain(
     training,
     "y",
-    test_data = training[1:18, , drop = FALSE],
+    test_data = make_disjoint_evaluation(training, "y", 1:18),
     model_set = "tuned",
     learners = c("linear", "additive"),
     max_models = 4,

@@ -42,8 +42,9 @@ common, model-agnostic comparison. It keeps two kinds of evidence separate:
 \item learner behavior cards describe what each model family can represent;
 they are reviewed prior knowledge, not findings from the supplied data;
 \item performance and paired prediction differences are computed from the
-result's common evaluation rows; serialized size or runtime, when shown,
-is an operational resource proxy rather than structural model complexity.
+result's common evaluation rows; approximate R object size or runtime,
+when shown, is an operational resource proxy rather than structural model
+complexity.
 }
 
 Optionally, pass an audit created with

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting_functions.R
 \name{plot_model_comparison}
 \alias{plot_model_comparison}
-\title{Plot model performance and complexity trade-offs}
+\title{Plot model performance and resource trade-offs}
 \usage{
 plot_model_comparison(
   autoxplain_result,
@@ -26,5 +26,5 @@ column. Model size is preferred when \code{NULL}.}
 A Plotly scatter plot.
 }
 \description{
-Plot model performance and complexity trade-offs
+Plot model performance and resource trade-offs
 }

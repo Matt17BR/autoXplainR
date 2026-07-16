@@ -27,6 +27,7 @@ BugReports: https://github.com/Matt17BR/autoXplainR/issues
 Depends:
     R (>= 4.1.0)
 Imports:
+    graphics,
     nnet,
     rpart,
     stats,

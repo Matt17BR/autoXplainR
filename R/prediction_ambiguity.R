@@ -137,8 +137,13 @@ validate_ambiguity_tolerance <- function(value) {
 
 ambiguity_model_performance <- function(result, model_ids, tolerance) {
   leaderboard <- enrich_tradeoff_leaderboard(result)
+  primary <- result$evaluation$primary_metric %||% NULL
+  if (!is.character(primary) || length(primary) != 1L || is.na(primary) ||
+        !primary %in% names(leaderboard)) {
+    primary <- NULL
+  }
   performance_metric <- resolve_tradeoff_metric(
-    leaderboard, NULL, result$task, kind = "performance"
+    leaderboard, primary, result$task, kind = "performance"
   )
   index <- match(model_ids, leaderboard$model_id)
   if (anyNA(index)) {

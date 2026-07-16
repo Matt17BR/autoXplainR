@@ -17,18 +17,18 @@ reference:
     contents:
       - autoxplain
       - tuning_results
+      - tuning_control
       - as_explainers
       - calibration_diagnostics
       - threshold_diagnostics
       - missingness_shift
       - subgroup_performance
       - render_model_report
-      - generate_dashboard
-      - create_simple_dashboard
       - generate_natural_language_report
       - narrative_providers
       - prediction_ambiguity
       - compare_model_behavior
+      - compare_model_effects
   - title: Model-agnostic evidence workflow
     contents:
       - explain_model
@@ -48,14 +48,20 @@ reference:
       - learner_catalog
       - install_model_engines
       - preprocess_data
-      - preprocess_for_h2o
   - title: Visualization and metadata
     contents:
       - starts_with("plot_")
+      - plot.autoxplain_model_effects
       - model_tradeoffs
       - extract_model_characteristics
+  - title: Compatibility helpers
+    desc: Legacy entry points retained for existing code; new analyses should use the guided evidence workflow above.
+    contents:
+      - generate_dashboard
+      - create_simple_dashboard
       - create_model_comparison_report
       - calculate_weighted_efficiency
+      - preprocess_for_h2o
 articles:
   - title: Get started
     navbar: ~

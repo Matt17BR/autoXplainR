@@ -33,6 +33,19 @@ require credentials. H2O tests are isolated and opt-in:
 AUTOXPLAIN_RUN_H2O=true Rscript -e 'devtools::test(filter = "h2o")'
 ```
 
+Changes to learner adapters or the common explanation contract must also run
+the optional native-engine matrix. Install the printed extended engine set once,
+then exercise every advertised family/task combination:
+
+```r
+devtools::load_all()
+install_model_engines("extended", dry_run = TRUE)
+devtools::test(
+  filter = "native-engines|kernel-geometry|matrix-blueprint",
+  stop_on_failure = TRUE
+)
+```
+
 ## Pull request checklist
 
 - Add unit tests for happy paths, invalid inputs, and statistical edge cases.

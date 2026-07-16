@@ -19,6 +19,10 @@
   retained family winners, paired out-of-fold predictions, and deterministic
   fallback when a full-data refit fails. Explicit model budgets are not silently
   capped.
+- Added the optional `tuning_control()` escape hatch with validated custom
+  family grids and exact budgets, RMSE/MAE or log-loss/Brier selection,
+  ordinary supplied V-fold IDs, out-of-fold retention control, and configurable
+  failure handling. Beginner portfolio defaults remain unchanged.
 - The one-standard-error rule now uses a reviewed family priority followed by a
   family-specific flexibility proxy; raw proxy values are never compared across
   unrelated model families. The final holdout remains untouched until selection
@@ -26,6 +30,10 @@
 - Added `compare_model_behavior()` to separate reviewed model-capacity cards
   from computed same-row prediction disagreement and optional permutation-
   importance evidence across retained families.
+- Added `compare_model_effects()` and its base-R plot method for aligned,
+  support-aware ALE/PDP comparisons of one named feature across retained
+  families. Curves retain their prediction target and are explicitly scoped as
+  fitted-function descriptions rather than causal effects.
 - Added `render_model_report()`, a standalone beginner-first report that leads
   with the modeling question, held-out baseline comparison, and metric
   definitions before revealing feature patterns and a collapsed evidence audit.
@@ -69,7 +77,9 @@
 - Repositioned the model-agnostic explanation evidence audit as an advanced
   reliability layer behind the beginner workflow.
 - Added `explain_model()` with a validated prediction contract for regression,
-  binary classification, and multiclass classification.
+  binary classification, and multiclass classification. Explicit tasks now
+  reject incompatible outcomes; multi-column probabilities must identify their
+  class semantics rather than relying on column position.
 - Added `audit_explanations()` to combine repeated-importance stability,
   feature dependence, near-optimal-model importance ranges, prediction
   agreement, prioritized findings, and explicit permitted-claim labels.
@@ -95,15 +105,41 @@
   registry and generic list-column search plan. `learner_catalog()` now exposes
   the distinction between a model family, its backend, supported tasks, and a
   reviewed plain-language behavior card.
-- Tuning seeds are now derived per configuration, so adding or reordering a
-  learner cannot silently change the random initialization of another one.
+- Tuning records both requested and fold-effective hyperparameters. Seeds are
+  derived from the effective configuration, so adding or reordering a learner
+  cannot silently change another initialization and configurations collapsed by
+  fold-specific bounds truly fit identically.
+- Supplying new rows to `as_explainers()` now always reapplies the fitted
+  outcome-level and schema contract, even when predictor preprocessing was
+  disabled; reversed factor levels cannot silently invert binary probability
+  semantics.
+- Balanced accuracy and macro recall are now unavailable when the evaluation
+  rows omit a trained class, rather than averaging only over classes that happen
+  to be present.
 - Held-out and fold-validation rows are never moved into training to repair
   categorical levels. Training recipes instead learn a modal fallback for
   novel predictor levels, record mapping counts, and retain a strict
   `novel_level_strategy = "error"` option.
 - H2O AutoML is now an optional fitting adapter; core audits use a lightweight
   runtime dependency set.
-- Test data remain held out from H2O validation by default.
+- The H2O adapter now creates its automatic outer holdout before preprocessing,
+  learns its recipe on training rows only, and never reuses that holdout as an
+  AutoML validation frame. `nfolds = 0` is rejected unless an explicit
+  validation data set is supplied, preventing ranking by training error alone.
+- H2O's engine leaderboard is now retained separately from an engine-neutral
+  outer-evaluation leaderboard. The model selected by H2O cross-validation, or
+  by an explicitly supplied validation frame when `nfolds = 0`, remains primary;
+  common-row ranks are descriptive and include an intercept-only baseline.
+- Explicit evaluation data remain outside H2O validation by default. Exact
+  duplicate-valued records across supplied training and evaluation data trigger
+  a configurable possible-leakage diagnostic rather than being treated as proof
+  that the observational units overlap.
+- H2O provenance now distinguishes time-limited best-effort seeded searches
+  from the more reproducible fixed-model-budget mode and records the Deep
+  Learning caveat.
+- Live H2O smoke tests now cover regression, binary, and multiclass contracts.
+  They also guard the probability-column normalization that keeps hard labels
+  from coercing valid multiclass probabilities to character data.
 - Preprocessing is conservative, returns a reusable recipe, and applies fitted
   levels/imputation values to evaluation data. Identifier removal and guessed
   ordinal conversion are opt-in.
@@ -123,6 +159,8 @@
   that AutoXplainR renders locally with fixed causal, fairness, safety, and
   external-validation boundaries. Invalid JSON falls back transparently and
   structured-output use is retained in provenance.
+- Narrative list fields and total length are bounded, and non-loopback custom
+  endpoints must use HTTPS so credentials are not sent over plaintext networks.
 - Migrated Gemini to its current Interactions API with `store = false` and its
   provider-recommended default temperature. OpenRouter schema requests require
   a compatible routed provider; unsupported adapters remain explicitly
@@ -139,9 +177,18 @@
 - Added CRAN-oriented metadata, automated checks, coverage, pkgdown deployment,
   issue forms, contribution and security policies, citation metadata, and a
   release checklist.
-- Enforced an 80% statement-coverage floor while exercising Plotly and H2O
-  integration paths; the full local suite currently measures above that floor.
-- Split fast model-agnostic unit tests from opt-in H2O integration tests.
+- Enforced an 80% statement-coverage floor for the ordinary package suite;
+  Plotly/native-engine and live H2O paths run in separate integration jobs.
+- Added an optional-engine matrix covering every advertised supported task for
+  glmnet, mgcv, ranger, XGBoost, e1071, kknn, and earth. Every case exercises
+  fitting, permutation importance, ALE, explanation audit, and aligned
+  cross-model effects.
+- Split fast model-agnostic unit tests from opt-in H2O integration tests and
+  made version-tag releases wait for native, coverage, lint, spelling, H2O,
+  source-package, and permanent-link gates.
+- Responsive browser QA now guards long diagnostic codes from widening the
+  standalone report beyond a mobile viewport while retaining table-local
+  horizontal scrolling.
 - Rebuilt examples and the vignette around held-out evaluation and explicit
   interpretation boundaries.
 

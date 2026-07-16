@@ -13,7 +13,9 @@
 #' @param features Features shared by every explainer. Defaults to their
 #'   intersection.
 #' @param metric Performance metric passed to
-#'   [calculate_permutation_importance()].
+#'   [calculate_permutation_importance()]. With `"auto"`, explainers carrying
+#'   an `autoxplain_result` primary metric use that same metric for both
+#'   performance screening and permutation importance.
 #' @param n_repeats Number of permutations per model and feature.
 #' @param seed Reproducible seed.
 #' @param confidence Monte Carlo interval level.
@@ -69,11 +71,27 @@ audit_explanations <- function(explainers,
          call. = FALSE)
   }
 
+  resolved_metrics <- vapply(explainers, function(explainer) {
+    resolve_metric(
+      metric,
+      explainer$task,
+      primary_metric = explainer$metadata$primary_metric %||% NULL
+    )
+  }, character(1))
+  if (length(unique(resolved_metrics)) != 1L) {
+    stop(
+      "All explainers in an audit must resolve to the same performance metric. ",
+      "Supply `metric` explicitly when their primary metrics differ.",
+      call. = FALSE
+    )
+  }
+  resolved_metric <- resolved_metrics[[1L]]
+
   importance_objects <- vector("list", length(explainers))
   for (index in seq_along(explainers)) {
     importance_objects[[index]] <- calculate_permutation_importance(
       explainers[[index]],
-      metric = metric,
+      metric = resolved_metric,
       n_repeats = n_repeats,
       seed = seed + index - 1L,
       features = features,
@@ -81,7 +99,6 @@ audit_explanations <- function(explainers,
     )
   }
   names(importance_objects) <- names(explainers)
-  resolved_metric <- attr(importance_objects[[1L]], "metric")
 
   performance <- data.frame(
     model = names(explainers),
@@ -311,10 +328,12 @@ explanation_agreement <- function(objects, near_optimal, features) {
     values <- object$importance[match(features, object$feature)]
     setNames(values, features)
   }, numeric(length(features)))
-  if (is.null(dim(matrix_values))) {
-    matrix_values <- matrix(matrix_values, ncol = 1L,
-                            dimnames = list(features, names(selected)))
-  }
+  matrix_values <- matrix(
+    matrix_values,
+    nrow = length(features),
+    ncol = length(selected),
+    dimnames = list(features, names(selected))
+  )
   correlation <- if (ncol(matrix_values) > 1L) {
     suppressWarnings(stats::cor(matrix_values, method = "spearman", use = "pairwise.complete.obs"))
   } else {

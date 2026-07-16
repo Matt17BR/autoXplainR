@@ -30,7 +30,11 @@ calculate_permutation_importance(
 \item{target_column}{Outcome column name when \code{model} is a fitted model.}
 
 \item{metric}{One of \code{"auto"}, \code{"rmse"}, \code{"mae"}, \code{"logloss"},
-\code{"accuracy"}, or \code{"auc"}.}
+\code{"brier"}, \code{"accuracy"}, or \code{"auc"}. The result-style names
+\code{"log_loss"} and \code{"brier_score"} are accepted as aliases. With \code{"auto"},
+an explainer made from an \code{autoxplain_result} uses that result's primary
+evaluation metric; otherwise regression defaults to RMSE and
+classification to log loss.}
 
 \item{n_repeats}{Number of independent permutations.}
 
@@ -72,6 +76,13 @@ The confidence limits quantify Monte Carlo variation across permutations.
 They are not confidence intervals for population-level variable importance.
 Use a genuinely held-out evaluation set and a formal inference method when
 population claims are required.
+
+For binary classification, \code{"brier"} is the mean squared error of the
+positive-class probability and lies from 0 (best) to 1 (worst). For
+multiclass classification, it is the unscaled mean row sum of squared errors
+across all class probabilities and lies from 0 to 2. Multiclass values can
+depend on the class set and should not be compared directly with binary
+Brier scores or scores from a different outcome definition.
 }
 \examples{
 train <- mtcars[1:24, ]

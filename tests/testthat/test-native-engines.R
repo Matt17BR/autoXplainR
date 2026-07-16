@@ -73,6 +73,143 @@ expect_engine_prediction_contract <- function(family, package) {
   }
 }
 
+native_explanation_matrix <- data.frame(
+  family = c(
+    rep("regularized", 3L),
+    rep("additive", 2L),
+    rep("forest", 3L),
+    rep("boosting", 3L),
+    rep("kernel", 3L),
+    rep("neighbors", 3L),
+    rep("mars", 2L)
+  ),
+  package = c(
+    rep("glmnet", 3L),
+    rep("mgcv", 2L),
+    rep("ranger", 3L),
+    rep("xgboost", 3L),
+    rep("e1071", 3L),
+    rep("kknn", 3L),
+    rep("earth", 2L)
+  ),
+  task = c(
+    "regression", "binary", "multiclass",
+    "regression", "binary",
+    "regression", "binary", "multiclass",
+    "regression", "binary", "multiclass",
+    "regression", "binary", "multiclass",
+    "regression", "binary", "multiclass",
+    "regression", "binary"
+  ),
+  stringsAsFactors = FALSE
+)
+
+native_explanation_fixture <- function(task) {
+  data <- engine_test_data()[[task]]
+  if (identical(task, "multiclass")) {
+    rows <- unlist(lapply(split(seq_len(nrow(data)), data$Species), head, 30L))
+    data <- data[rows, , drop = FALSE]
+    return(list(
+      data = data,
+      target = "Species",
+      features = c("Petal.Length", "Petal.Width"),
+      effect_feature = "Petal.Length",
+      class = "versicolor"
+    ))
+  }
+  list(
+    data = data[seq_len(72L), , drop = FALSE],
+    target = "y",
+    features = c("curved value", "noise"),
+    effect_feature = "curved value",
+    class = NULL
+  )
+}
+
+expect_native_explanation_contract <- function(family, package, task, seed) {
+  skip_if_not_installed(package)
+  fixture <- native_explanation_fixture(task)
+  result <- autoxplain(
+    fixture$data,
+    fixture$target,
+    model_set = "tuned",
+    learners = c("linear", family),
+    max_models = 2L,
+    nfolds = 2L,
+    tuning_rule = "best",
+    test_fraction = 0.3,
+    task = task,
+    seed = seed
+  )
+  model_rows <- result$leaderboard[
+    result$leaderboard$family %in% c("linear", family),
+    ,
+    drop = FALSE
+  ]
+  expect_setequal(model_rows$family, c("linear", family))
+  expect_equal(nrow(model_rows), 2L)
+  model_ids <- model_rows$model_id
+  explainers <- as_explainers(result, models = model_ids)
+  native_id <- model_rows$model_id[model_rows$family == family]
+  native_explainer <- explainers[[native_id]]
+
+  importance <- calculate_permutation_importance(
+    native_explainer,
+    features = fixture$features,
+    n_repeats = 2L,
+    seed = seed + 1L
+  )
+  expect_s3_class(importance, "autoxplain_importance")
+  expect_setequal(importance$feature, fixture$features)
+  expect_true(all(is.finite(importance$importance)))
+  expect_true(is.finite(attr(importance, "baseline_score")))
+
+  effect <- explain_effect(
+    native_explainer,
+    feature = fixture$effect_feature,
+    method = "ale",
+    n_points = 4L,
+    class = fixture$class
+  )
+  expect_s3_class(effect, "autoxplain_effect")
+  expect_identical(attr(effect, "method"), "ale")
+  expect_true(all(is.finite(effect$accumulated_effect)))
+  expect_identical(attr(effect, "task"), task)
+
+  audit <- audit_explanations(
+    explainers,
+    features = fixture$features,
+    n_repeats = 2L,
+    seed = seed + 2L
+  )
+  expect_s3_class(audit, "autoxplain_audit")
+  expect_identical(audit$summary$n_models, 2L)
+  expect_setequal(audit$performance$model, model_ids)
+  expect_setequal(unique(audit$importance$model), model_ids)
+
+  comparison <- compare_model_effects(
+    result,
+    feature = fixture$effect_feature,
+    models = model_ids,
+    method = "ale",
+    class = fixture$class,
+    n_points = 4L,
+    sample_size = NULL,
+    seed = seed + 3L,
+    min_support = 0
+  )
+  expect_s3_class(comparison, "autoxplain_model_effects")
+  expect_identical(comparison$task, task)
+  expect_setequal(comparison$model_ids, model_ids)
+  expect_setequal(comparison$curves$model_id, model_ids)
+  expect_true(all(comparison$curves$supported))
+  expect_true(all(is.finite(comparison$curves$effect_value)))
+  grids <- split(comparison$curves$feature_value, comparison$curves$model_id)
+  expect_true(all(vapply(grids[-1L], identical, logical(1), grids[[1L]])))
+  expect_identical(comparison$n_effect_rows, comparison$n_evaluation_rows)
+  expect_equal(nrow(comparison$comparisons), 1L)
+}
+
 test_that("linear multiclass models keep one-row probability dimensions", {
   model <- fit_engine_configuration("linear", iris, "Species", "multiclass")
   explainer <- explain_model(model, iris, "Species", task = "multiclass")
@@ -144,6 +281,42 @@ test_that("earth adapter satisfies regression and binary contracts", {
 test_that("kknn adapter satisfies every task prediction contract", {
   expect_engine_prediction_contract("neighbors", "kknn")
 })
+
+test_that("native explanation matrix covers every advertised optional task", {
+  families <- unique(native_explanation_matrix$family)
+  advertised <- unlist(lapply(families, function(family) {
+    definition <- AutoXplainR:::learner_definition(family)
+    expect_identical(
+      definition$backend,
+      unique(native_explanation_matrix$package[
+        native_explanation_matrix$family == family
+      ])
+    )
+    paste(family, definition$tasks, sep = "/")
+  }))
+  exercised <- paste(
+    native_explanation_matrix$family,
+    native_explanation_matrix$task,
+    sep = "/"
+  )
+
+  expect_setequal(exercised, advertised)
+})
+
+for (row in seq_len(nrow(native_explanation_matrix))) {
+  local({
+    family <- native_explanation_matrix$family[[row]]
+    package <- native_explanation_matrix$package[[row]]
+    task <- native_explanation_matrix$task[[row]]
+    seed <- 700L + row
+    test_that(
+      paste(family, task, "supports the public explanation workflow"),
+      {
+        expect_native_explanation_contract(family, package, task, seed)
+      }
+    )
+  })
+}
 
 test_that("kknn caps neighbor counts to small resampling training sets", {
   skip_if_not_installed("kknn")

@@ -33,9 +33,15 @@ training-only resampling to compare a named portfolio spanning linear,
 regularized, additive, tree, forest, boosting, neural, kernel, neighbor, and
 MARS families before opening the outer holdout. `model_set = "comparison"`
 adds a small, pre-specified local candidate set and displays
-performance-versus-complexity trade-offs without silently changing the primary
+performance-versus-resource trade-offs without silently changing the primary
 model. Advanced users may supply their own split, model, prediction function,
 H2O AutoML run, explanation configuration, or narrative provider.
+
+User-supplied evaluation rows are neutral by default. A caller may assert a
+test or validation role when the study design supports it; the package must not
+infer independence from an argument name. Exact duplicate-valued records across
+training and evaluation data are a possible-leakage diagnostic, not proof that
+the observational units overlap.
 
 ## Tuning contract
 
@@ -57,8 +63,48 @@ Local automatic tuning must remain comprehensible enough for a first model:
 - reports distinguish the training-resampled selection score from the final
   held-out evaluation score in adjacent plain language.
 
-H2O remains an optional broader AutoML engine. Its availability does not excuse
-the dependency-light workflow from providing meaningful supervised tuning.
+The beginner presets have fixed meanings: `core` is the dependency-light
+linear/tree/neural tournament; `recommended` compares linear, regularized,
+additive where supported, tree, forest, and boosting families; and `extended`
+adds neural, kernel, neighbor, and MARS families. Task-incompatible families
+may be excluded before tuning, but installed-package state must never redefine a
+requested portfolio.
+
+`tuning_control()` is the advanced escape hatch, not part of the first screen.
+It may validate custom per-family grids and exact budgets, an alternate
+supported loss, ordinary supplied V-fold IDs, out-of-fold retention, and a
+failure policy. Supplied folds require an explicit outer test set and must be
+described honestly: ordinary V-fold IDs are not grouped resampling,
+forward-chaining, or rolling-origin validation unless the user constructs a
+design with the required scientific meaning outside the package.
+
+H2O remains an optional Java-backed AutoML engine for broader searches and
+stacked ensembles. It shares the result and explanation contracts, but it is
+not required for the local portfolio. Its engine leaderboard remains separate
+from the common outer-evaluation leaderboard: H2O cross-validation, or an
+explicitly supplied validation frame when `nfolds = 0`, selects the primary
+model. The latter compares that fixed choice, alternative fitted models, and a
+simple baseline on aligned rows without re-selecting from the outer scores. By
+default, external evaluation rows remain outside H2O validation as well as
+fitting. Seeded H2O runs must disclose that
+wall-clock limits and eligible Deep Learning models weaken reproducibility.
+
+## Cross-model explanation contract
+
+Every retained family must be comparable through the same prediction and
+evaluation interfaces. The package must keep three statements distinct:
+
+1. a behavior card is reviewed prior knowledge about what a family can
+   represent;
+2. held-out scores, same-row prediction gaps, and permutation reliance are
+   computed from the supplied analysis; and
+3. aligned ALE or PDP curves describe how fitted prediction functions differ
+   for one named input over common supported values.
+
+`compare_model_behavior()` serves the portfolio-level question;
+`compare_model_effects()` serves the feature-level question. Neither family
+capacity nor a fitted curve establishes that an interaction was used, that an
+input caused an outcome, or that the result transfers to another population.
 
 ## Progressive disclosure
 
@@ -69,8 +115,9 @@ The same result should support five levels of detail:
    trade-offs, missingness context, and concrete cautions.
 2. **Tune:** model families, hyperparameter settings, training-only fold scores,
    selection rule, and the boundary between tuning and final evaluation.
-3. **Compare:** visible candidate performance, complexity, Pareto status, and
-   case-level prediction disagreement, with the warning that held-out ranks are
+3. **Compare:** visible candidate performance, explicitly labeled resource or
+   structural proxies, Pareto status, case-level prediction disagreement, and
+   optional aligned feature curves, with the warning that held-out ranks are
    descriptive rather than a free tuning loop.
 4. **Evidence:** permutation variability, dependence, supplied-model
    multiplicity, ALE/PDP support, and provenance.

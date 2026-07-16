@@ -75,6 +75,7 @@ explain_model <- function(model,
   }
 
   resolved_task <- if (identical(task, "auto")) detect_task(outcome) else task
+  validate_guided_target(outcome, resolved_task)
   outcome_levels <- if (resolved_task %in% c("binary", "multiclass")) {
     if (is.factor(outcome)) levels(outcome) else sort(unique(as.character(outcome)))
   } else {
@@ -236,7 +237,17 @@ normalize_predictions <- function(x,
                                   n = NULL) {
   if (task == "regression") {
     if (is.data.frame(x) || is.matrix(x)) {
-      if ("predict" %in% colnames(x)) x <- x[, "predict"] else x <- x[, 1L]
+      if ("predict" %in% colnames(x)) {
+        x <- x[, "predict"]
+      } else if (ncol(x) == 1L) {
+        x <- x[, 1L]
+      } else {
+        stop(
+          "Regression prediction output with multiple columns must include a ",
+          "column named `predict`.",
+          call. = FALSE
+        )
+      }
     }
     return(as.numeric(x))
   }
@@ -255,9 +266,13 @@ normalize_predictions <- function(x,
         paste0("prob_", positive)
       ))
       selected <- intersect(candidates, probability_names)
-      if (length(selected)) return(as.numeric(x[[selected[[1L]]]]))
+      if (length(selected) == 1L) return(as.numeric(x[[selected]]))
       if (length(probability_names) >= 2L) {
-        return(as.numeric(x[[probability_names[[2L]]]]))
+        stop(
+          "Binary probability output with multiple columns must identify the ",
+          "configured positive class `", positive, "` by one column name.",
+          call. = FALSE
+        )
       }
       if (length(probability_names) == 1L) {
         return(as.numeric(x[[probability_names[[1L]]]]))
@@ -266,24 +281,68 @@ normalize_predictions <- function(x,
     return(as.numeric(x))
   }
 
-  if (is.numeric(x) && is.vector(x) && !is.null(n) && n == 1L &&
+  if (is.numeric(x) && is.null(dim(x)) && !is.null(n) && n == 1L &&
         length(x) == length(class_levels)) {
     columns <- names(x)
-    if (is.null(columns) || !setequal(columns, class_levels)) columns <- class_levels
-    return(matrix(
+    if (is.null(columns) || anyNA(columns) || anyDuplicated(columns)) {
+      stop(
+        "One-row multiclass probability vectors must name every outcome class.",
+        call. = FALSE
+      )
+    }
+    probability <- matrix(
       as.numeric(x),
       nrow = 1L,
       dimnames = list(NULL, columns)
-    ))
+    )
+    probability <- align_multiclass_probability_columns(probability, class_levels)
+    if (!identical(colnames(probability), class_levels)) {
+      stop(
+        "One-row multiclass probability vectors must name every outcome class.",
+        call. = FALSE
+      )
+    }
+    return(probability)
   }
   if (is.vector(x) && !is.list(x)) {
     # Hard multiclass predictions remain usable for accuracy, but probability
     # metrics will reject them with a targeted message.
     return(factor(x, levels = class_levels))
   }
-  out <- as.matrix(x)
-  if ("predict" %in% colnames(out)) out <- out[, colnames(out) != "predict", drop = FALSE]
-  out
+  if (is.data.frame(x)) {
+    # H2O classification output includes a factor hard-label column named
+    # `predict`. Remove it before matrix conversion so it cannot coerce valid
+    # numeric probability columns to character.
+    probability_names <- setdiff(names(x), "predict")
+    out <- as.matrix(x[probability_names])
+  } else {
+    out <- as.matrix(x)
+    if ("predict" %in% colnames(out)) {
+      out <- out[, colnames(out) != "predict", drop = FALSE]
+    }
+  }
+  align_multiclass_probability_columns(out, class_levels)
+}
+
+align_multiclass_probability_columns <- function(probability, class_levels) {
+  columns <- colnames(probability)
+  if (is.null(columns) || is.null(class_levels)) return(probability)
+  matched <- vapply(class_levels, function(class_level) {
+    candidates <- unique(c(
+      class_level,
+      make.names(class_level),
+      paste0("p", class_level),
+      make.names(paste0("p", class_level)),
+      paste0("prob_", class_level),
+      make.names(paste0("prob_", class_level))
+    ))
+    hits <- intersect(candidates, columns)
+    if (length(hits) == 1L) hits else NA_character_
+  }, character(1))
+  if (anyNA(matched) || anyDuplicated(matched)) return(probability)
+  probability <- probability[, matched, drop = FALSE]
+  colnames(probability) <- class_levels
+  probability
 }
 
 validate_predictions <- function(x, n, task, class_levels = NULL) {

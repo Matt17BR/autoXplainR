@@ -20,6 +20,11 @@ learner_catalog <- function(task = NULL) {
     task <- match.arg(task, c("regression", "binary", "multiclass"))
   }
   registry <- autoxplain_learner_registry()
+  if (!is.null(task)) {
+    registry <- registry[vapply(registry, function(item) {
+      task %in% item$tasks
+    }, logical(1))]
+  }
   rows <- lapply(registry, function(item) {
     dependency <- learner_dependency_status(item)
     data.frame(
@@ -45,9 +50,6 @@ learner_catalog <- function(task = NULL) {
     )
   })
   output <- do.call(rbind, rows)
-  if (!is.null(task)) {
-    output <- output[vapply(registry, function(x) task %in% x$tasks, logical(1)), , drop = FALSE]
-  }
   rownames(output) <- NULL
   structure(output, class = c("autoxplain_learner_catalog", "data.frame"))
 }
@@ -56,9 +58,15 @@ learner_catalog <- function(task = NULL) {
 print.autoxplain_learner_catalog <- function(x, ...) {
   cat("<AutoXplainR learner catalog>\n")
   cat("  families:  ", nrow(x), "\n", sep = "")
-  cat("  available: ", sum(x$available), "\n", sep = "")
+  if ("available" %in% names(x)) {
+    cat("  available: ", sum(x$available), "\n", sep = "")
+  }
+  columns <- intersect(
+    c("family", "backend", "supported_tasks", "available", "nonlinearity", "interactions"),
+    names(x)
+  )
   print.data.frame(
-    x[c("family", "backend", "supported_tasks", "available", "nonlinearity", "interactions")],
+    as.data.frame(x)[columns],
     row.names = FALSE,
     ...
   )
@@ -399,7 +407,8 @@ learner_dependency_status <- function(definition) {
 }
 
 learner_model_label <- function(definition, task) {
-  unname(definition$labels[[task]] %||% definition$family)
+  label <- unname(definition$labels[task])
+  if (length(label) != 1L || is.na(label) || !nzchar(label)) definition$family else label
 }
 
 portfolio_learner_families <- function(portfolio, task) {
@@ -483,12 +492,17 @@ resolve_tuning_learners <- function(portfolio, learners, task) {
 #' @param portfolio One of `"recommended"` or `"extended"`.
 #' @param task Task used to omit inapplicable learner backends. Defaults to
 #'   regression, whose recommended portfolio also covers binary classification.
-#' @param dry_run Return missing package names without installing them.
+#' @param dry_run Print and visibly return the missing package plan without
+#'   installing anything.
 #' @param ... Additional arguments passed to [utils::install.packages()].
 #'
-#' @return The missing package names, invisibly. With `dry_run = FALSE`, these
-#'   are the packages whose installation was requested.
+#' @return With `dry_run = TRUE`, the missing package names visibly. With
+#'   `dry_run = FALSE`, the package names whose installation was requested,
+#'   invisibly.
 #' @export
+#'
+#' @examples
+#' install_model_engines("recommended", task = "regression", dry_run = TRUE)
 install_model_engines <- function(portfolio = c("recommended", "extended"),
                                   task = c("regression", "binary", "multiclass"),
                                   dry_run = FALSE,
@@ -510,6 +524,21 @@ install_model_engines <- function(portfolio = c("recommended", "extended"),
   }, character(1)))
   missing <- missing[nzchar(missing)]
   blocked <- unavailable[vapply(statuses[unavailable], `[[`, logical(1), "current_r_blocked")]
+  if (dry_run) {
+    if (length(missing)) {
+      message(
+        "Dry run only; no packages were installed. Missing backends: ",
+        paste(missing, collapse = ", "), ".\nWould run: install.packages(c(",
+        paste(sprintf("\"%s\"", missing), collapse = ", "), "))"
+      )
+    } else {
+      message(
+        "Dry run only; no packages were installed. All `", portfolio,
+        "` portfolio backends for `", task, "` are available."
+      )
+    }
+    return(missing)
+  }
   if (!dry_run && length(blocked)) {
     requirements <- unique(vapply(blocked, function(family) {
       registry[[family]]$current_cran_r_minimum

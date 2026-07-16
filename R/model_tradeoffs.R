@@ -1,9 +1,12 @@
 #' Compare supplied models without hiding trade-offs
 #'
 #' Builds a two-objective comparison from an [autoxplain()] result. Predictive
-#' performance is taken from the evaluation leaderboard and complexity defaults
-#' to serialized model size. A model is Pareto-efficient when no other supplied
-#' model is at least as good on both dimensions and strictly better on one.
+#' performance is taken from the evaluation leaderboard and the secondary axis
+#' defaults to approximate model-object size. For local models this is R's
+#' in-memory `object.size()` estimate; H2O uses an engine-reported size when
+#' available. Size and runtime are operational resource proxies, not structural
+#' model complexity. A model is Pareto-efficient when no other supplied model
+#' is at least as good on both dimensions and strictly better on one.
 #'
 #' Pareto status is descriptive and candidate-set-relative. It is not a tuning
 #' rule, evidence that every useful model was considered, or permission to use
@@ -12,8 +15,10 @@
 #' @param result An `autoxplain_result`.
 #' @param performance_metric Numeric leaderboard metric. `NULL` selects the
 #'   task-appropriate primary metric.
-#' @param complexity_metric Numeric leaderboard or model-metadata column.
-#'   `NULL` prefers model size, then training or prediction time.
+#' @param complexity_metric Numeric leaderboard or model-metadata column. The
+#'   argument name is retained for compatibility; `NULL` prefers model size,
+#'   then training or prediction time, and the returned object labels the exact
+#'   metric as a resource or structural-complexity proxy.
 #' @param include_baseline Include models labeled with the baseline role.
 #'
 #' @return A data frame of class `autoxplain_model_tradeoffs` with Pareto status
@@ -38,6 +43,13 @@ model_tradeoffs <- function(result,
   if (!"role" %in% names(leaderboard)) leaderboard$role <- "candidate"
   if (!include_baseline) {
     leaderboard <- leaderboard[leaderboard$role != "baseline", , drop = FALSE]
+  }
+  if (is.null(performance_metric)) {
+    primary <- result$evaluation$primary_metric %||% NULL
+    if (is.character(primary) && length(primary) == 1L && !is.na(primary) &&
+          primary %in% names(leaderboard)) {
+      performance_metric <- primary
+    }
   }
   performance_metric <- resolve_tradeoff_metric(
     leaderboard,
@@ -74,10 +86,13 @@ model_tradeoffs <- function(result,
   rownames(output) <- NULL
   attr(output, "performance_metric") <- performance_metric
   attr(output, "complexity_metric") <- complexity_metric
+  attr(output, "secondary_metric") <- complexity_metric
+  attr(output, "secondary_metric_kind") <- behavior_tradeoff_kind(complexity_metric)
   attr(output, "higher_is_better") <- higher_is_better
   attr(output, "scope_note") <- paste(
-    "Pareto status compares only the supplied models on the supplied evaluation data;",
-    "it is not a final model-selection rule."
+    "Pareto status compares only the supplied models on the supplied evaluation data",
+    "and exact displayed axes. Resource proxies are not structural complexity;",
+    "this is not a final model-selection rule."
   )
   class(output) <- c("autoxplain_model_tradeoffs", "data.frame")
   output
@@ -89,7 +104,8 @@ print.autoxplain_model_tradeoffs <- function(x, ...) {
   cat("  performance: ", attr(x, "performance_metric"), " (",
       if (isTRUE(attr(x, "higher_is_better"))) "higher" else "lower",
       " is better)\n", sep = "")
-  cat("  complexity:  ", attr(x, "complexity_metric"), " (lower is better)\n", sep = "")
+  cat("  secondary:   ", attr(x, "secondary_metric"), " (",
+      attr(x, "secondary_metric_kind"), "; lower is better)\n", sep = "")
   cat("  Pareto set:  ", sum(x$pareto_optimal), " / ", nrow(x), " supplied models\n", sep = "")
   print.data.frame(x, row.names = FALSE, ...)
   cat("  note: ", attr(x, "scope_note"), "\n", sep = "")

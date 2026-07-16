@@ -16,6 +16,10 @@ test_that("learner catalog separates families, backends, and behavior", {
 
   regression <- learner_catalog("regression")
   expect_true(all(grepl("regression", regression$supported_tasks, fixed = TRUE)))
+  multiclass <- learner_catalog("multiclass")
+  expect_false(any(multiclass$family %in% c("additive", "mars")))
+  expect_true(all(grepl("multiclass", multiclass$supported_tasks, fixed = TRUE)))
+  expect_output(print(multiclass[c("family", "backend")]), "families")
   expect_error(learner_catalog("survival"), "arg")
 })
 
@@ -48,7 +52,10 @@ test_that("portfolio dependency checks are explicit and reproducible", {
   catalog <- learner_catalog("regression")
   missing <- catalog$dependency[!catalog$available & grepl("recommended", catalog$portfolios)]
   missing <- setdiff(unique(missing), "AutoXplainR core")
-  dry_run <- install_model_engines("recommended", dry_run = TRUE)
+  expect_message(
+    dry_run <- install_model_engines("recommended", dry_run = TRUE),
+    "Dry run only; no packages were installed"
+  )
   expect_setequal(dry_run, intersect(missing, c("glmnet", "mgcv", "ranger", "xgboost")))
   expect_error(install_model_engines(dry_run = NA), "TRUE or FALSE")
 

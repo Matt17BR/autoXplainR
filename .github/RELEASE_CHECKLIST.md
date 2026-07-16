@@ -13,7 +13,10 @@ review; automation is supporting evidence, not a substitute for that review.
 - Review user-facing metrics, warnings, and narrative prompts for unsupported
   causal, fairness, or certainty claims.
 - Run `devtools::document()` and ensure the generated files are committed.
-- Run `spelling::spell_check_package()` and `urlchecker::url_check()`.
+- Run `spelling::spell_check_package()` and `urlchecker::url_check()`. Review
+  every response manually; automated release gating treats canonical-form
+  failures and permanent 404/410 responses as blocking because DOI publishers
+  commonly return bot-specific 202/403/503 responses.
 - Run `lintr::lint_package()`, `testthat::test_local()`, and
   `covr::package_coverage()`; statement coverage must remain at least 80%.
 - Run `devtools::check(args = "--as-cran")` and explain every remaining note in

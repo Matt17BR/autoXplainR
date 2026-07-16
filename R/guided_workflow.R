@@ -10,9 +10,12 @@ fit_guided_base <- function(data,
                             max_models,
                             nfolds,
                             tuning_rule,
+                            tuning_control,
                             enable_preprocessing,
                             preprocessing_config,
-                            verbosity) {
+                            verbosity,
+                            evaluation_role,
+                            overlap_action) {
   seed <- assert_count(seed, "seed", minimum = 0L)
   if (!is.list(preprocessing_config) ||
         length(preprocessing_config) && is.null(names(preprocessing_config))) {
@@ -27,15 +30,20 @@ fit_guided_base <- function(data,
   validate_guided_predictors(data, target_column)
   resolved_task <- if (task == "auto") detect_task(data[[target_column]]) else task
   validate_guided_target(data[[target_column]], resolved_task)
+  resolved_evaluation_role <- resolve_evaluation_role(
+    test_data_supplied = !is.null(test_data),
+    evaluation_role = evaluation_role
+  )
 
   split <- if (is.null(test_data)) {
     make_evaluation_split(data, target_column, resolved_task, test_fraction, seed)
   } else {
+    check_evaluation_row_overlap(data, test_data, overlap_action)
     validate_guided_predictors(test_data, target_column)
     list(
       training = data,
       evaluation = test_data,
-      method = "user-supplied test data",
+      method = "user-supplied evaluation data",
       moved_for_unseen_levels = 0L
     )
   }
@@ -105,6 +113,7 @@ fit_guided_base <- function(data,
     max_models = max_models,
     nfolds = nfolds,
     tuning_rule = tuning_rule,
+    tuning_control = tuning_control,
     seed = seed,
     learners = learners %||% c("linear", "tree", "neural")
   ))
@@ -115,7 +124,8 @@ fit_guided_base <- function(data,
     resolved_task,
     fit$labels,
     fit$roles,
-    fit$diagnostics
+    fit$diagnostics,
+    primary_metric = if (identical(model_set, "tuned")) fit$tuning$metric else NULL
   )
   evaluated$summary$notes <- guided_evaluation_notes(
     train,
@@ -124,7 +134,8 @@ fit_guided_base <- function(data,
     resolved_task,
     evaluated$summary,
     constant_result$removed,
-    stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id)
+    stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id),
+    evaluation_role = resolved_evaluation_role
   )
   if (identical(model_set, "tuned")) {
     evaluated$summary$notes <- rbind(
@@ -160,7 +171,8 @@ fit_guided_base <- function(data,
         model_set = model_set,
         portfolio = if (identical(model_set, "tuned")) portfolio else NA_character_,
         learners = if (identical(model_set, "tuned")) fit$tuning$learners else character(),
-        evaluation_role = "held-out test",
+        tuning_control = if (identical(model_set, "tuned")) fit$tuning$control else NULL,
+        evaluation_role = resolved_evaluation_role,
         split_method = split$method,
         test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_,
         training_rows = nrow(train),
@@ -171,14 +183,16 @@ fit_guided_base <- function(data,
         ),
         constant_features_removed = constant_result$removed,
         baseline = "intercept-only model",
-        primary_model = fit$labels[["main_model"]],
+        primary_model_id = evaluated$summary$primary_model_id,
+        primary_model_label = unname(fit$labels[[evaluated$summary$primary_model_id]]),
         candidate_selection = if (identical(model_set, "tuned")) {
           paste0(
             paste(
               "The main model was selected by", fit$tuning$folds_used,
-              "fold training-only resampling using the",
+              "fold training-only resampling minimizing",
+              paste0("`", fit$tuning$metric, "`"), "using the",
               tuning_rule_label(fit$tuning$selection_rule),
-              "rule; held-out evaluation rows were untouched until final scoring."
+              "rule; evaluation rows did not participate in selection or fitting."
             ),
             if (isTRUE(fit$tuning$refit$fallback_used)) {
               paste0(
@@ -192,8 +206,8 @@ fit_guided_base <- function(data,
           )
         } else {
           paste(
-            "The main model was pre-specified; held-out candidate ranks are descriptive",
-            "and were not used to replace it."
+            "The main model was pre-specified; candidate ranks on the evaluation rows",
+            "are descriptive and were not used to replace it."
           )
         }
       )
@@ -228,6 +242,68 @@ fit_guided_base <- function(data,
     include_varimp = FALSE
   )
   result
+}
+
+resolve_evaluation_role <- function(test_data_supplied,
+                                    evaluation_role = c(
+                                      "auto", "test", "validation", "evaluation"
+                                    )) {
+  evaluation_role <- match.arg(evaluation_role)
+  if (!identical(evaluation_role, "auto")) return(evaluation_role)
+  if (isTRUE(test_data_supplied)) "evaluation" else "test"
+}
+
+check_evaluation_row_overlap <- function(training,
+                                         evaluation,
+                                         action = c("warn", "error", "ignore")) {
+  action <- match.arg(action)
+  if (identical(action, "ignore")) return(invisible(TRUE))
+  if (is.null(evaluation)) return(invisible(TRUE))
+  required <- names(training)
+  if (!all(required %in% names(evaluation))) {
+    # The schema validator supplies the more useful missing-column diagnosis.
+    return(invisible(TRUE))
+  }
+  training_keys <- split_row_keys(training[required])
+  evaluation_keys <- split_row_keys(evaluation[required])
+  overlapping <- which(evaluation_keys %in% training_keys)
+  if (length(overlapping)) {
+    preview <- paste(utils::head(overlapping, 5L), collapse = ", ")
+    message <- paste0(
+      "Found ", length(overlapping), " row",
+      if (length(overlapping) == 1L) "" else "s",
+      " in `test_data` whose values exactly match a row in `data` (evaluation row",
+      if (length(overlapping) == 1L) " " else "s ", preview,
+      if (length(overlapping) > 5L) ", ..." else "", "). ",
+      "This may indicate training/evaluation leakage, but coincident records can ",
+      "occur naturally; exact matches alone do not prove that the samples are ",
+      "non-independent. Check row provenance before interpreting the scores."
+    )
+    if (identical(action, "error")) stop(message, call. = FALSE)
+    warning(message, call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+split_row_keys <- function(data) {
+  normalized <- lapply(data, normalize_split_column)
+  vapply(seq_len(nrow(data)), function(index) {
+    raw <- serialize(lapply(normalized, `[[`, index), NULL, version = 2L)
+    paste(format(raw), collapse = "")
+  }, character(1))
+}
+
+normalize_split_column <- function(value) {
+  if (is.factor(value) || is.character(value)) {
+    return(structure(as.character(value), split_type = "text"))
+  }
+  if (is.integer(value) || is.numeric(value)) {
+    return(structure(as.numeric(value), split_type = "numeric"))
+  }
+  if (is.logical(value)) {
+    return(structure(value, split_type = "logical"))
+  }
+  value
 }
 
 make_evaluation_split <- function(data, target, task, fraction, seed) {
@@ -440,6 +516,7 @@ fit_base_candidates <- function(data,
                                 max_models = 10L,
                                 nfolds = 5L,
                                 tuning_rule = "one_se",
+                                tuning_control = NULL,
                                 seed = 123L,
                                 learners = c("linear", "tree", "neural")) {
   primary_formula <- safe_reformulate(features, response = target)
@@ -482,6 +559,7 @@ fit_base_candidates <- function(data,
       max_models = max_models,
       nfolds = nfolds,
       selection_rule = tuning_rule,
+      control = tuning_control,
       seed = seed,
       learners = learners
     )
@@ -572,7 +650,7 @@ refit_tuned_candidates <- function(tuning,
 
   attempts <- list()
   attempted_ids <- character()
-  record_attempt <- function(row, role, model_id, result) {
+  record_attempt <- function(row, role, model_id, result, fit_spec) {
     id <- row$configuration_id[[1L]]
     candidate_index <- match(id, tuning$candidates$configuration_id)
     tuning$candidates$refit_status[[candidate_index]] <<- if (result$ok) "ok" else "failed"
@@ -584,17 +662,24 @@ refit_tuned_candidates <- function(tuning,
     if (result$ok) {
       tuning$candidates$retained_model_id[[candidate_index]] <<- model_id
     }
-    attempts[[length(attempts) + 1L]] <<- data.frame(
+    attempt <- data.frame(
       configuration_id = id,
       family = row$family[[1L]],
       role = role,
       model_id = model_id,
+      requested_parameter_key = fit_spec$requested_parameter_key,
+      effective_parameter_key = fit_spec$effective_parameter_key,
+      requested_configuration_seed = fit_spec$requested_configuration_seed,
+      fit_seed = fit_spec$fit_seed,
       status = if (result$ok) "ok" else "failed",
       elapsed_ms = result$elapsed_ms,
       warning = paste(unique(result$warnings), collapse = " | "),
       error = result$error,
       stringsAsFactors = FALSE
     )
+    attempt$requested_parameters <- I(list(fit_spec$requested_parameters))
+    attempt$effective_parameters <- I(list(fit_spec$effective_parameters))
+    attempts[[length(attempts) + 1L]] <<- attempt
     attempted_ids <<- c(attempted_ids, id)
   }
   fit_row <- function(row, role, model_id) {
@@ -602,10 +687,20 @@ refit_tuned_candidates <- function(tuning,
       tuning$plan$configuration_id == row$configuration_id[[1L]],
       , drop = FALSE
     ]
+    fit_spec <- tuning_configuration_fit_spec(configuration, data, target)
     result <- safely_timed_model_fit(function() {
       fitter(configuration, data, target, task)
     })
-    record_attempt(row, role, model_id, result)
+    record_attempt(row, role, model_id, result, fit_spec)
+    failure_policy <- tuning$control$failure_policy %||% "continue"
+    if (!result$ok && identical(failure_policy, "stop")) {
+      stop(
+        "Configuration `", row$configuration_id[[1L]], "` (family `",
+        row$family[[1L]], "`) failed during full-training refit under ",
+        "`failure_policy = \"stop\"`: ", result$error,
+        call. = FALSE
+      )
+    }
     result
   }
 
@@ -790,7 +885,13 @@ evaluate_candidates <- function(models,
                                 task,
                                 labels,
                                 roles,
-                                diagnostics = NULL) {
+                                diagnostics = NULL,
+                                primary_metric = NULL,
+                                primary_model_id = "main_model") {
+  if (!is.character(primary_model_id) || length(primary_model_id) != 1L ||
+        is.na(primary_model_id) || !primary_model_id %in% names(models)) {
+    stop("`primary_model_id` must identify one supplied model.", call. = FALSE)
+  }
   evaluated <- lapply(names(models), function(id) {
     explainer <- explain_model(models[[id]], data, target, task = task, label = labels[[id]])
     started <- proc.time()[["elapsed"]]
@@ -815,13 +916,18 @@ evaluate_candidates <- function(models,
   })
   names(evaluated) <- names(models)
   metrics <- lapply(evaluated, `[[`, "metrics")
-  primary_metric <- if (task == "regression") "rmse" else "log_loss"
+  primary_metric <- primary_metric %||% if (task == "regression") "rmse" else "log_loss"
+  if (!is.character(primary_metric) || length(primary_metric) != 1L ||
+        !all(vapply(metrics, function(x) primary_metric %in% names(x), logical(1)))) {
+    stop("The requested held-out primary metric is unavailable.", call. = FALSE)
+  }
   scores <- vapply(metrics, function(x) x[[primary_metric]], numeric(1))
   winner <- names(which.min(scores))[[1L]]
   baseline_score <- scores[["simple_baseline"]]
-  main_score <- scores[["main_model"]]
-  improvement <- if (is.finite(baseline_score) && baseline_score > 0) {
-    (baseline_score - main_score) / baseline_score
+  primary_score <- scores[[primary_model_id]]
+  improvement <- if (is.finite(baseline_score) && baseline_score > 0 &&
+                       is.finite(primary_score)) {
+    (baseline_score - primary_score) / baseline_score
   } else {
     NA_real_
   }
@@ -869,20 +975,27 @@ evaluate_candidates <- function(models,
     )],
     summary = list(
       primary_metric = primary_metric,
+      primary_model_id = primary_model_id,
       winner = winner,
       metrics = metrics,
       improvement_over_baseline = improvement,
       beats_baseline = is.finite(improvement) && improvement > 0,
       metric_definitions = metric_definitions(task),
       evaluated_rows = nrow(data),
-      predictions = guided_prediction_table(evaluated, task),
-      diagnostics = guided_prediction_diagnostics(evaluated, task)
+      predictions = guided_prediction_table(evaluated, task, primary_model_id),
+      diagnostics = guided_prediction_diagnostics(evaluated, task, primary_model_id)
     )
   )
 }
 
 model_family_name <- function(model) {
   if (inherits(model, "autoxplain_fitted_model")) return(model$family)
+  if (inherits(model, "H2OModel")) {
+    return(tolower(tryCatch(
+      as.character(model@algorithm),
+      error = function(error) "h2o"
+    )))
+  }
   if (inherits(model, "rpart")) return("tree")
   if (inherits(model, "autoxplain_tuned_nnet")) return("neural")
   if (inherits(model, c("lm", "glm", "multinom"))) return("linear")
@@ -891,6 +1004,7 @@ model_family_name <- function(model) {
 
 model_backend_name <- function(model) {
   if (inherits(model, "autoxplain_fitted_model")) return(model$backend)
+  if (inherits(model, "H2OModel")) return("h2o")
   if (inherits(model, "rpart")) return("rpart")
   if (inherits(model, "autoxplain_tuned_nnet")) return("nnet")
   if (inherits(model, "multinom")) return("nnet")
@@ -918,7 +1032,11 @@ evaluate_predictions <- function(observed, predicted, explainer) {
       log_loss = -mean(ifelse(truth, log(probability), log1p(-probability))),
       brier_score = mean((probability - as.numeric(truth))^2),
       accuracy = mean(hard == truth),
-      balanced_accuracy = mean(c(sensitivity, specificity), na.rm = TRUE),
+      balanced_accuracy = if (all(is.finite(c(sensitivity, specificity)))) {
+        mean(c(sensitivity, specificity))
+      } else {
+        NA_real_
+      },
       roc_auc = guided_binary_auc(truth, probability)
     ))
   }
@@ -936,12 +1054,16 @@ evaluate_predictions <- function(observed, predicted, explainer) {
     log_loss = -mean(log(pmax(selected, 1e-15))),
     brier_score = mean(rowSums((probability - one_hot)^2)),
     accuracy = mean(predicted_class == truth),
-    macro_recall = mean(recalls, na.rm = TRUE)
+    macro_recall = if (all(is.finite(recalls))) mean(recalls) else NA_real_
   )
 }
 
-guided_prediction_table <- function(evaluated, task) {
-  reference_id <- if ("main_model" %in% names(evaluated)) "main_model" else names(evaluated)[[1L]]
+guided_prediction_table <- function(evaluated, task, primary_model_id = "main_model") {
+  reference_id <- if (primary_model_id %in% names(evaluated)) {
+    primary_model_id
+  } else {
+    names(evaluated)[[1L]]
+  }
   reference <- evaluated[[reference_id]]
   baseline <- evaluated[["simple_baseline"]]
   observed <- reference$explainer$y
@@ -986,8 +1108,10 @@ guided_prediction_table <- function(evaluated, task) {
   output
 }
 
-guided_prediction_diagnostics <- function(evaluated, task) {
-  predictions <- guided_prediction_table(evaluated, task)
+guided_prediction_diagnostics <- function(evaluated,
+                                          task,
+                                          primary_model_id = "main_model") {
+  predictions <- guided_prediction_table(evaluated, task, primary_model_id)
   if (task == "regression") {
     return(list(
       mean_error = mean(predictions$error),
@@ -1004,8 +1128,8 @@ guided_prediction_diagnostics <- function(evaluated, task) {
     stringsAsFactors = FALSE
   )
   names(confusion)[[3L]] <- "rows"
-  reference_id <- if ("main_model" %in% names(evaluated)) {
-    "main_model"
+  reference_id <- if (primary_model_id %in% names(evaluated)) {
+    primary_model_id
   } else {
     names(evaluated)[[1L]]
   }
@@ -1084,7 +1208,8 @@ guided_evaluation_notes <- function(training,
                                     task,
                                     summary,
                                     constant_features = character(),
-                                    fit_warnings = character()) {
+                                    fit_warnings = character(),
+                                    evaluation_role = "evaluation") {
   notes <- list()
   add <- function(severity, code, message, recommendation) {
     notes[[length(notes) + 1L]] <<- data.frame(
@@ -1099,8 +1224,11 @@ guided_evaluation_notes <- function(training,
     add(
       "caution",
       "small_evaluation_set",
-      paste0("Only ", nrow(evaluation), " rows were available for held-out evaluation."),
-      "Treat the scores as preliminary and validate on more representative unseen rows."
+      paste0(
+        "Only ", nrow(evaluation), " rows were available for ",
+        evaluation_role, " scoring."
+      ),
+      "Treat the scores as preliminary and validate on more representative rows."
     )
   }
   if (length(constant_features)) {
@@ -1141,7 +1269,7 @@ guided_evaluation_notes <- function(training,
         "caution",
         "few_rows_in_class",
         paste0("Fewer than five evaluation rows were observed for: ", scarce, "."),
-        "Collect more held-out examples for each class before trusting class-specific metrics."
+        "Collect more evaluation examples for each class before trusting class-specific metrics."
       )
     }
   }
@@ -1158,7 +1286,7 @@ guided_evaluation_notes <- function(training,
     add(
       "warning",
       "negative_heldout_r_squared",
-      "Held-out R-squared is negative, so squared error exceeded a held-out-mean reference.",
+      "Evaluation R-squared is negative, so squared error exceeded an evaluation-mean reference.",
       "Do not rely on this model for prediction without substantially better validation performance."
     )
   }
@@ -1184,27 +1312,48 @@ metric_definitions <- function(task) {
     return(c(
       rmse = "Typical prediction error, with larger mistakes weighted more heavily; lower is better.",
       mae = "Average absolute prediction error in the target's units; lower is better.",
-      r_squared = "Share of held-out variation explained relative to predicting the held-out mean; higher is better."
+      r_squared = paste(
+        "Share of evaluation-set variation explained relative to predicting the",
+        "evaluation-set mean; higher is better."
+      )
     ))
   }
   definitions <- c(
     log_loss = "Probability error that penalizes confident wrong answers; lower is better.",
-    brier_score = "Average squared probability error; lower is better.",
+    brier_score = if (task == "binary") {
+      paste(
+        "Mean squared error of the positive-class probability, from 0 (best)",
+        "to 1 (worst); lower is better."
+      )
+    } else {
+      paste(
+        "Unscaled mean sum of squared errors across all class probabilities,",
+        "from 0 (best) to 2 (worst); lower is better. Its scale depends on the",
+        "class set, so do not compare it directly with binary Brier scores or",
+        "scores for a differently defined outcome."
+      )
+    },
     calibration_error = paste(
       "Average absolute gap between grouped probabilities and observed frequencies;",
       "lower is better, but the value depends on the evaluation sample and grouping."
     ),
-    accuracy = "Share of held-out rows assigned to the correct class; higher is better."
+    accuracy = "Share of evaluation rows assigned to the correct class; higher is better."
   )
   if (task == "binary") {
     return(c(
       definitions,
-      balanced_accuracy = "Average recall across the positive and negative classes; higher is better.",
+      balanced_accuracy = paste(
+        "Average recall across the positive and negative classes; higher is better.",
+        "Unavailable when either class is absent from the evaluation rows."
+      ),
       roc_auc = "Chance that a random positive receives a higher score than a random negative; higher is better."
     ))
   }
   c(
     definitions,
-    macro_recall = "Recall calculated for each class and then averaged equally; higher is better."
+    macro_recall = paste(
+      "Recall calculated for each class and then averaged equally; higher is better.",
+      "Unavailable when any trained class is absent from the evaluation rows."
+    )
   )
 }

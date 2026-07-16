@@ -17,8 +17,10 @@ model_tradeoffs(
 \item{performance_metric}{Numeric leaderboard metric. \code{NULL} selects the
 task-appropriate primary metric.}
 
-\item{complexity_metric}{Numeric leaderboard or model-metadata column.
-\code{NULL} prefers model size, then training or prediction time.}
+\item{complexity_metric}{Numeric leaderboard or model-metadata column. The
+argument name is retained for compatibility; \code{NULL} prefers model size,
+then training or prediction time, and the returned object labels the exact
+metric as a resource or structural-complexity proxy.}
 
 \item{include_baseline}{Include models labeled with the baseline role.}
 }
@@ -28,9 +30,12 @@ and metric-direction metadata.
 }
 \description{
 Builds a two-objective comparison from an \code{\link[=autoxplain]{autoxplain()}} result. Predictive
-performance is taken from the evaluation leaderboard and complexity defaults
-to serialized model size. A model is Pareto-efficient when no other supplied
-model is at least as good on both dimensions and strictly better on one.
+performance is taken from the evaluation leaderboard and the secondary axis
+defaults to approximate model-object size. For local models this is R's
+in-memory \code{object.size()} estimate; H2O uses an engine-reported size when
+available. Size and runtime are operational resource proxies, not structural
+model complexity. A model is Pareto-efficient when no other supplied model
+is at least as good on both dimensions and strictly better on one.
 }
 \details{
 Pareto status is descriptive and candidate-set-relative. It is not a tuning

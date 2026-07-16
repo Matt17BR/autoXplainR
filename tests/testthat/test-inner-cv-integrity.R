@@ -8,7 +8,7 @@ test_that("tuning receives raw predictors before full-training screening", {
   )
   training$y <- 1 + 2 * training$x + rnorm(36, sd = 0.1)
   rownames(training) <- paste0("outer-row-", seq_len(nrow(training)))
-  evaluation <- training[25:36, , drop = FALSE]
+  evaluation <- make_disjoint_evaluation(training, "y", 25:36)
 
   result <- autoxplain(
     training,

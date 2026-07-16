@@ -19,7 +19,9 @@ preliminary comparison. Smaller groups remain visible and are flagged.}
 }
 \value{
 An \code{autoxplain_subgroups} object containing overall metrics and a
-group-level \code{performance} data frame.
+group-level \code{performance} data frame. Its primary metric matches the
+result's evaluation metric (including MAE or Brier score), and
+\code{secondary_metric} names a different supporting metric.
 }
 \description{
 \code{subgroup_performance()} calculates the same prediction metrics separately

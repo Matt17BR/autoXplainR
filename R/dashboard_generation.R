@@ -99,9 +99,11 @@ prepare_model_report_data <- function(autoxplain_result,
                                       max_models = 5L) {
   selected <- seq_len(min(max_models, length(autoxplain_result$models)))
   explainers <- as_explainers(autoxplain_result, models = selected)
+  importance_metric <- result_importance_metric(autoxplain_result)
   screen_repeats <- min(5L, n_repeats)
   screening <- calculate_permutation_importance(
     explainers[[1L]],
+    metric = importance_metric,
     n_repeats = screen_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L
   )
@@ -112,6 +114,7 @@ prepare_model_report_data <- function(autoxplain_result,
   audit <- audit_explanations(
     explainers,
     features = features,
+    metric = importance_metric,
     n_repeats = n_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L
   )
@@ -183,9 +186,10 @@ prepare_dashboard_data <- function(autoxplain_result,
   selected <- seq_len(min(assert_count(max_models, "max_models"),
                           length(autoxplain_result$models)))
   explainers <- as_explainers(autoxplain_result, models = selected)
+  importance_metric <- result_importance_metric(autoxplain_result)
   importance_list <- lapply(seq_along(explainers), function(index) {
     calculate_permutation_importance(
-      explainers[[index]], n_repeats = n_repeats,
+      explainers[[index]], metric = importance_metric, n_repeats = n_repeats,
       seed = (autoxplain_result$provenance$seed %||% 123L) + index - 1L
     )
   })
@@ -204,7 +208,8 @@ prepare_dashboard_data <- function(autoxplain_result,
     character(1)
   )
   audit <- audit_explanations(
-    explainers, features = features, n_repeats = n_repeats,
+    explainers, features = features, metric = importance_metric,
+    n_repeats = n_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L
   )
   list(
@@ -263,6 +268,14 @@ create_simple_html <- function(imp_plot = NULL,
   if (!inherits(autoxplain_result, "autoxplain_result")) {
     stop("`autoxplain_result` must be returned by `autoxplain()`.", call. = FALSE)
   }
-  audit <- audit_explanations(as_explainers(autoxplain_result), n_repeats = 5L)
+  audit <- audit_explanations(
+    as_explainers(autoxplain_result),
+    metric = result_importance_metric(autoxplain_result),
+    n_repeats = 5L
+  )
   explanation_report_html(audit, "AutoXplainR Explanation Evidence Report")
+}
+
+result_importance_metric <- function(result) {
+  importance_metric_from_primary(result$evaluation$primary_metric %||% NULL) %||% "auto"
 }

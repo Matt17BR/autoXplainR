@@ -56,7 +56,13 @@ should make separate class-specific explainers; \code{TRUE} is not supported by
 ALE.}
 }
 \value{
-A data frame of class \code{autoxplain_effect}.
+A data frame of class \code{autoxplain_effect}. Both methods return the
+effect estimate, relative empirical support, a descriptive standard error,
+and normal-approximation limits. PDP limits summarize across-row variation
+in fixed-model predictions at each grid value. ALE limits propagate
+within-bin variation in fixed-model local prediction differences and are
+unavailable when any bin has fewer than two rows. Neither is a
+model-fitting or population confidence interval.
 }
 \description{
 Computes either accumulated local effects (ALE) or partial dependence (PDP).

@@ -23,12 +23,20 @@ used to rank configurations.
 \code{out_of_fold_predictions} stores one row per outer-training case and
 configuration. \code{training_row} is the stable position used for paired model
 comparisons, \code{source_row} preserves the input row name, and \code{case_loss}
-stores squared error or negative log likelihood. Classification probability
-vectors are stored compactly as the matrix-column \code{probabilities}. If
+stores the per-row contribution to the configured tuning metric.
+Classification probability vectors are stored compactly as the matrix-column
+\code{probabilities}. \code{out_of_fold_predictions} is \code{NULL} when
+\code{tuning_control(retain_oof = FALSE)} was used; \code{prediction_schema} remains as
+an explicit \code{retained = FALSE} sentinel. If
 fold-specific preprocessing removes rows (for example with
 \code{missing_value_strategy = "drop_rows"}), \code{omitted_rows} records their identity
 and fold, while \code{rows_evaluated} and candidate \code{evaluated_rows} count only
 cases that actually received out-of-fold predictions.
+Each row of \code{fold_scores} preserves the requested parameter list and also
+records the fold-specific effective parameter list, its canonical key, and
+the seed used for fitting. This makes data-dependent clamps such as \code{mtry}
+or neighbor count visible and prevents two requests that become the same
+fold fit from being compared only through different random seeds.
 
 \code{refit} records every full-training refit attempt. If the resampling-selected
 configuration cannot be refitted, AutoXplainR tries the remaining valid
@@ -37,6 +45,8 @@ configurations in resampled-score order, records the first successful one in
 refits are diagnosed but do not discard a usable primary model. Families for
 which every configuration failed resampling remain visible in
 \code{families_resampling_failed} and are excluded from paired prediction evidence.
+Each refit attempt repeats the requested/effective parameter and seed record
+for the complete outer-training data.
 }
 \examples{
 tuned <- autoxplain(iris, "Sepal.Length", model_set = "tuned",

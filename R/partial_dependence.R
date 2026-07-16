@@ -26,7 +26,13 @@
 #'   should make separate class-specific explainers; `TRUE` is not supported by
 #'   ALE.
 #'
-#' @return A data frame of class `autoxplain_effect`.
+#' @return A data frame of class `autoxplain_effect`. Both methods return the
+#'   effect estimate, relative empirical support, a descriptive standard error,
+#'   and normal-approximation limits. PDP limits summarize across-row variation
+#'   in fixed-model predictions at each grid value. ALE limits propagate
+#'   within-bin variation in fixed-model local prediction differences and are
+#'   unavailable when any bin has fewer than two rows. Neither is a
+#'   model-fitting or population confidence interval.
 #' @export
 #'
 #' @examples
@@ -63,7 +69,7 @@ explain_effect <- function(model,
     stop("ALE supports one prediction target at a time; set `class` explicitly.",
          call. = FALSE)
   }
-  if (method == "ale") {
+  effect <- if (method == "ale") {
     calculate_ale_impl(input$predict, input$data, input$feature, n_points)
   } else {
     calculate_pdp_impl(
@@ -71,6 +77,10 @@ explain_effect <- function(model,
       sample_size, seed
     )
   }
+  attr(effect, "task") <- input$task
+  attr(effect, "prediction_target") <- input$prediction_target
+  attr(effect, "prediction_class") <- input$prediction_class
+  effect
 }
 
 #' Calculate partial dependence data
@@ -192,8 +202,14 @@ print.autoxplain_effect <- function(x, ...) {
   cat("  feature: ", attr(x, "feature"), " | rows: ", attr(x, "n_reference"),
       " | max association: ", format(attr(x, "max_association"), digits = 3), "\n",
       sep = "")
+  if (!is.null(attr(x, "prediction_target"))) {
+    cat("  target:  ", attr(x, "prediction_target"), "\n", sep = "")
+  }
   if (isTRUE(attr(x, "dependence_warning"))) {
     cat("  caution: strong feature dependence can make a marginal PDP misleading\n")
+  }
+  if (!is.null(attr(x, "interval_note"))) {
+    cat("  bands:   ", attr(x, "interval_note"), "\n", sep = "")
   }
   print.data.frame(x, row.names = FALSE, ...)
   invisible(x)
@@ -217,24 +233,152 @@ effect_input <- function(model,
     if (length(missing)) stop("`data` is missing: ", paste(missing, collapse = ", "),
                               call. = FALSE)
     prediction_function <- function(newdata) predict(model, newdata)
+    resolved_task <- model$task
+    prediction_class <- if (identical(resolved_task, "multiclass")) {
+      class %||% model$class_levels[[1L]]
+    } else if (identical(resolved_task, "binary")) {
+      model$positive
+    } else {
+      NA_character_
+    }
   } else {
     assert_data_frame(data, "data")
     reference <- data
     resolved_task <- if (task == "auto") infer_task_from_model(model) else task
-    adapter <- make_prediction_adapter(model, resolved_task, positive, NULL, predict_function)
+    class_levels <- infer_model_class_levels(model, resolved_task)
+    if (identical(resolved_task, "binary")) {
+      positive <- resolve_effect_class(
+        positive,
+        class_levels,
+        argument = "positive",
+        task = resolved_task,
+        default_index = 2L
+      )
+    }
+    selected_class <- if (identical(resolved_task, "multiclass")) {
+      resolve_effect_class(
+        class,
+        class_levels,
+        argument = "class",
+        task = resolved_task,
+        default_index = 1L
+      )
+    } else {
+      NULL
+    }
+    adapter <- make_prediction_adapter(
+      model,
+      resolved_task,
+      positive,
+      class_levels,
+      predict_function
+    )
     prediction_function <- adapter
+    prediction_class <- if (identical(resolved_task, "multiclass")) {
+      selected_class %||% "first probability column (class name unavailable)"
+    } else if (identical(resolved_task, "binary")) {
+      positive %||% "positive class (name unavailable)"
+    } else {
+      NA_character_
+    }
   }
   if (!is.character(feature) || length(feature) != 1L || is.na(feature) ||
         !feature %in% names(reference)) {
     stop("`feature` must name one column in the reference data.", call. = FALSE)
   }
-  prediction_function <- select_prediction_target(prediction_function, class)
-  list(data = reference, feature = feature, predict = prediction_function)
+  selected_target <- if (identical(resolved_task, "multiclass")) {
+    prediction_class
+  } else {
+    NULL
+  }
+  prediction_function <- select_prediction_target(prediction_function, selected_target)
+  prediction_target <- switch(
+    resolved_task,
+    regression = "predicted value",
+    binary = paste0("probability for positive class `", prediction_class, "`"),
+    multiclass = paste0("probability for class `", prediction_class, "`")
+  )
+  list(
+    data = reference,
+    feature = feature,
+    predict = prediction_function,
+    task = resolved_task,
+    prediction_target = prediction_target,
+    prediction_class = prediction_class
+  )
+}
+
+infer_model_class_levels <- function(model, task = infer_task_from_model(model)) {
+  if (!task %in% c("binary", "multiclass")) return(NULL)
+  levels <- if (inherits(model, "autoxplain_fitted_model") ||
+                  inherits(model, "autoxplain_tuned_nnet")) {
+    model$class_levels
+  } else if (inherits(model, "multinom")) {
+    model$lev
+  } else if (inherits(model, "rpart")) {
+    attr(model, "ylevels")
+  } else if (inherits(model, "glm") && !is.null(model$family) &&
+               identical(model$family$family, "binomial")) {
+    response <- tryCatch(
+      stats::model.response(stats::model.frame(model)),
+      error = function(error) NULL
+    )
+    if (is.factor(response)) {
+      levels(response)
+    } else if (is.atomic(response) && is.null(dim(response)) &&
+                 length(unique(response)) == 2L) {
+      sort(unique(as.character(response)))
+    } else {
+      NULL
+    }
+  } else {
+    NULL
+  }
+  levels <- as.character(levels %||% character())
+  levels <- levels[!is.na(levels) & nzchar(levels)]
+  valid_length <- if (identical(task, "binary")) {
+    length(levels) == 2L
+  } else {
+    length(levels) >= 2L
+  }
+  if (!valid_length || anyDuplicated(levels)) NULL else levels
+}
+
+resolve_effect_class <- function(value,
+                                 class_levels,
+                                 argument,
+                                 task,
+                                 default_index) {
+  if (!is.null(value) && (!is.character(value) || length(value) != 1L ||
+                            is.na(value) || !nzchar(value))) {
+    stop("`", argument, "` must be one non-empty class name.", call. = FALSE)
+  }
+  if (!length(class_levels)) return(value)
+  value <- value %||% class_levels[[default_index]]
+  if (!value %in% class_levels) {
+    stop(
+      "`", argument, "` must name one ", task, " outcome level: ",
+      paste(class_levels, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
+  value
 }
 
 infer_task_from_model <- function(model) {
+  if (inherits(model, "autoxplain_fitted_model") ||
+        inherits(model, "autoxplain_tuned_nnet")) {
+    return(model$task)
+  }
   if (inherits(model, "glm") && !is.null(model$family) && model$family$family == "binomial") {
     return("binary")
+  }
+  if (inherits(model, "multinom")) {
+    return(if (length(model$lev) == 2L) "binary" else "multiclass")
+  }
+  if (inherits(model, "rpart") && identical(model$method, "class")) {
+    levels <- attr(model, "ylevels")
+    return(if (length(levels) == 2L) "binary" else "multiclass")
   }
   if (inherits(model, "H2OBinomialModel")) return("binary")
   if (inherits(model, "H2OMultinomialModel")) return("multiclass")
@@ -274,9 +418,11 @@ calculate_pdp_impl <- function(predict_function,
                                seed) {
   grid <- get_feature_grid(data[[feature]], n_points, quantile_range)
   reference <- data
+  reference_rows <- seq_len(nrow(data))
   if (!is.null(sample_size) && nrow(reference) > sample_size) {
     indices <- with_preserved_seed(seed, sample.int(nrow(reference), sample_size))
     reference <- reference[indices, , drop = FALSE]
+    reference_rows <- reference_rows[indices]
   }
 
   values <- numeric(length(grid))
@@ -300,11 +446,18 @@ calculate_pdp_impl <- function(predict_function,
     check.names = FALSE
   )
   names(result)[[1L]] <- feature
-  finalize_effect(result, data, feature, "pdp", nrow(reference))
+  out <- finalize_effect(result, data, feature, "pdp", nrow(reference))
+  attr(out, "interval_note") <- paste(
+    "Descriptive fixed-model bands from across-row prediction variation at each",
+    "grid value; not model-fitting uncertainty, population confidence, or causal intervals."
+  )
+  attr(out, "reference_rows") <- reference_rows
+  out
 }
 
 calculate_ale_impl <- function(predict_function, data, feature, n_points) {
   values <- data[[feature]]
+  reference_rows <- seq_len(nrow(data))
   if (!is.numeric(values)) {
     stop("ALE currently supports numeric features. Use `method = \"pdp\"` for categorical features.",
          call. = FALSE)
@@ -313,6 +466,7 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
     keep <- !is.na(values)
     data <- data[keep, , drop = FALSE]
     values <- values[keep]
+    reference_rows <- reference_rows[keep]
   }
   boundaries <- unique(as.numeric(stats::quantile(
     values, probs = seq(0, 1, length.out = n_points + 1L), na.rm = TRUE,
@@ -343,8 +497,7 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
   accumulated <- cumsum(bin_effect)
   weights <- bin_n / sum(bin_n)
   centered <- accumulated - sum(accumulated * weights)
-  cumulative_variance <- cumsum(ifelse(is.na(bin_se), 0, bin_se^2))
-  cumulative_se <- sqrt(cumulative_variance)
+  cumulative_se <- ale_centered_standard_error(bin_se, weights)
 
   result <- data.frame(
     feature_value = (boundaries[-1L] + boundaries[-length(boundaries)]) / 2,
@@ -360,10 +513,24 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
   names(result)[[1L]] <- feature
   out <- finalize_effect(result, data, feature, "ale", nrow(data))
   attr(out, "interval_note") <- paste(
-    "Descriptive propagation of within-bin Monte Carlo error;",
-    "not a population confidence interval."
+    "Descriptive fixed-model bands propagated from within-bin variation in local",
+    "prediction differences under an independent-bin approximation; unavailable if",
+    "a bin has fewer than two rows and not model-fitting uncertainty, population",
+    "confidence, or causal intervals."
   )
+  attr(out, "reference_rows") <- reference_rows
   out
+}
+
+ale_centered_standard_error <- function(bin_se, weights) {
+  n_bins <- length(bin_se)
+  if (!n_bins || length(weights) != n_bins || any(!is.finite(bin_se))) {
+    return(rep(NA_real_, n_bins))
+  }
+  accumulation <- lower.tri(matrix(0, n_bins, n_bins), diag = TRUE) * 1
+  centering <- diag(n_bins) - outer(rep(1, n_bins), weights)
+  coefficients <- centering %*% accumulation
+  sqrt(rowSums(sweep(coefficients, 2L, bin_se, "*")^2))
 }
 
 finalize_effect <- function(result, data, feature, method, n_reference) {

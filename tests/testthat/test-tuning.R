@@ -40,6 +40,7 @@ test_that("local tuning is reproducible and isolated from the outer holdout", {
     "linear_model", "tree_model", "neural_model"
   )), 2L)
   expect_output(print(first), "training-resampled configurations")
+  expect_output(print(first), "compare_model_behavior")
   expect_output(print(tuning_results(first)), "outer training rows")
   expect_equal(
     as_explainers(first, models = "main_model")$main_model$metadata$source,
@@ -183,7 +184,7 @@ test_that("tuning validation is actionable", {
     portfolio = "core",
     max_models = 3,
     nfolds = 5,
-    test_data = scarce[c(1L, 11L), ],
+    test_data = make_disjoint_evaluation(scarce, "y", c(1L, 11L)),
     seed = 2
   )
   expect_equal(result$tuning$folds_used, 2L)
@@ -204,7 +205,11 @@ test_that("guided report explains tuning separately from final evaluation", {
   expect_match(html, "How was the primary model selected", fixed = TRUE)
   expect_match(html, "Preprocessing was learned again inside every fold", fixed = TRUE)
   expect_match(html, "Do not quote the resampled tuning score", fixed = TRUE)
-  expect_match(html, "primary model was chosen before this holdout", fixed = TRUE)
+  expect_match(
+    html,
+    "primary model was chosen without using these evaluation rows",
+    fixed = TRUE
+  )
   expect_match(html, result$tuning$selected_configuration, fixed = TRUE)
 
   context <- AutoXplainR:::prepare_analysis_context(result)

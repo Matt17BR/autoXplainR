@@ -37,7 +37,7 @@ test_that("local is the default even when a hosted-provider key exists", {
   )
 
   expect_false(called)
-  expect_match(report, "held-out test")
+  expect_match(report, "test rows")
   expect_match(report, "What the main metric means")
   expect_equal(attr(report, "narrative_provenance")$provider_requested, "local")
 })
@@ -130,6 +130,38 @@ test_that("custom OpenAI-compatible endpoints and provenance are supported", {
   expect_false(attr(report, "narrative_provenance")$remote)
 })
 
+test_that("plain HTTP narrative endpoints are restricted to loopback hosts", {
+  loopback <- c(
+    "http://localhost",
+    "http://localhost:11434/v1/chat/completions",
+    "http://127.9.8.7:9000/v1/chat/completions",
+    "http://[::1]/v1/chat/completions"
+  )
+  for (endpoint in loopback) {
+    config <- AutoXplainR:::resolve_narrative_provider(
+      "custom", "local-model", endpoint, NULL
+    )
+    expect_false(config$remote, info = endpoint)
+  }
+  for (endpoint in c(
+    "http://example.com/v1/chat/completions",
+    "http://localhost.evil.test/v1/chat/completions",
+    "http://128.0.0.1/v1/chat/completions"
+  )) {
+    expect_error(
+      AutoXplainR:::resolve_narrative_provider(
+        "custom", "remote-model", endpoint, NULL
+      ),
+      "must use HTTPS",
+      info = endpoint
+    )
+  }
+  secure <- AutoXplainR:::resolve_narrative_provider(
+    "custom", "remote-model", "https://example.com/v1/chat/completions", NULL
+  )
+  expect_true(secure$remote)
+})
+
 test_that("provider failures fall back transparently or can be made strict", {
   result <- autoxplain(mtcars, "mpg", seed = 9)
   withr::local_envvar(GEMINI_API_KEY = NA)
@@ -218,6 +250,10 @@ test_that("supported providers request one validated narrative schema", {
       "headline", "performance", "patterns", "cautions", "next_steps"
     ), info = provider)
     expect_false(schema$additionalProperties, info = provider)
+    for (field in c("patterns", "cautions", "next_steps")) {
+      expect_identical(schema$properties[[field]]$minItems, 1L, info = provider)
+      expect_identical(schema$properties[[field]]$maxItems, 3L, info = provider)
+    }
     if (provider == "gemini") {
       expect_false(captured$body$store)
       expect_equal(captured$body$generation_config$temperature, 1)
@@ -236,6 +272,70 @@ test_that("supported providers request one validated narrative schema", {
     expect_true(provenance$structured_requested, info = provider)
     expect_true(provenance$structured_used, info = provider)
   }
+})
+
+test_that("structured narrative item and total-word bounds match the schema", {
+  too_many <- paste0(
+    '{"headline":"Result","performance":"Held-out result.",',
+    '"patterns":["one","two","three","four"],',
+    '"cautions":["one"],"next_steps":["one"]}'
+  )
+  expect_error(
+    AutoXplainR:::parse_structured_narrative(too_many),
+    "1 to 3 items"
+  )
+  expect_error(
+    AutoXplainR:::validate_narrative_word_budget(rep("word", 501L)),
+    "500-word"
+  )
+  expect_invisible(
+    AutoXplainR:::validate_narrative_word_budget(rep("word", 500L))
+  )
+})
+
+test_that("structured narratives require unique root fields and JSON arrays", {
+  duplicate_root <- paste0(
+    '{"headline":"First","headline":"Second",',
+    '"performance":"Held-out result.","patterns":["one"],',
+    '"cautions":["one"],"next_steps":["one"]}'
+  )
+  expect_error(
+    AutoXplainR:::parse_structured_narrative(duplicate_root),
+    "duplicate fields: headline",
+    fixed = TRUE
+  )
+
+  scalar_items <- paste0(
+    '{"headline":"Result","performance":"Held-out result.",',
+    '"patterns":"one","cautions":["one"],"next_steps":["one"]}'
+  )
+  expect_error(
+    AutoXplainR:::parse_structured_narrative(scalar_items),
+    "`patterns` must be an array of strings",
+    fixed = TRUE
+  )
+
+  object_items <- paste0(
+    '{"headline":"Result","performance":"Held-out result.",',
+    '"patterns":{"first":"one"},"cautions":["one"],',
+    '"next_steps":["one"]}'
+  )
+  expect_error(
+    AutoXplainR:::parse_structured_narrative(object_items),
+    "`patterns` must be an array of strings",
+    fixed = TRUE
+  )
+
+  expect_error(
+    AutoXplainR:::validate_narrative_items("one", "patterns"),
+    "array of strings",
+    fixed = TRUE
+  )
+  expect_error(
+    AutoXplainR:::validate_narrative_items(list(first = "one"), "patterns"),
+    "array of strings",
+    fixed = TRUE
+  )
 })
 
 test_that("unsupported schemas and invalid provider JSON are transparent", {

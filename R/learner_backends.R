@@ -101,24 +101,65 @@ additive_learner_grid <- function(n, p, task, n_classes) {
   )
 }
 
+effective_learner_parameters <- function(family, parameters, data, target) {
+  features <- setdiff(names(data), target)
+  switch(
+    family,
+    additive = {
+      smooth <- features[vapply(data[features], function(x) {
+        is.numeric(x) && !is.logical(x) && length(unique(x)) >= 4L
+      }, logical(1))]
+      smooth_k <- vapply(smooth, function(feature) {
+        unique_values <- length(unique(data[[feature]]))
+        max(3L, min(parameters$k, unique_values - 1L))
+      }, integer(1))
+      list(
+        smooth_k = smooth_k,
+        gamma = parameters$gamma,
+        select = parameters$select
+      )
+    },
+    forest = {
+      effective <- parameters
+      effective$mtry <- as.integer(min(parameters$mtry, length(features)))
+      effective
+    },
+    neighbors = {
+      effective <- parameters
+      effective$k <- as.integer(min(parameters$k, max(0L, nrow(data) - 1L)))
+      effective
+    },
+    mars = {
+      effective <- parameters
+      effective$nprune <- as.integer(min(
+        parameters$nprune,
+        max(3L, nrow(data) - 2L)
+      ))
+      effective
+    },
+    parameters
+  )
+}
+
 fit_additive_learner <- function(data, target, task, parameters, seed) {
   require_optional("mgcv", "fitting generalized additive models")
   features <- setdiff(names(data), target)
   safe_features <- paste0(".ax", seq_along(features))
   safe_data <- data[c(features, target)]
   names(safe_data) <- c(safe_features, ".outcome")
-  smooth <- safe_features[vapply(safe_data[safe_features], function(x) {
-    is.numeric(x) && !is.logical(x) && length(unique(x)) >= 4L
-  }, logical(1))]
+  effective <- effective_learner_parameters("additive", parameters, data, target)
+  smooth_features <- names(effective$smooth_k)
+  smooth <- safe_features[match(smooth_features, features)]
   if (!length(smooth)) {
     stop("The additive learner needs a numeric predictor with at least four values.",
          call. = FALSE)
   }
   parametric <- setdiff(safe_features, smooth)
-  smooth_terms <- vapply(smooth, function(feature) {
-    unique_values <- length(unique(safe_data[[feature]]))
-    basis <- max(3L, min(parameters$k, unique_values - 1L))
-    paste0("s(", feature, ", k = ", basis, ", bs = 'tp')")
+  smooth_terms <- vapply(seq_along(smooth), function(index) {
+    paste0(
+      "s(", smooth[[index]], ", k = ", effective$smooth_k[[index]],
+      ", bs = 'tp')"
+    )
   }, character(1))
   rhs <- c(smooth_terms, parametric)
   formula <- stats::as.formula(
@@ -142,7 +183,11 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
     features = features,
     parameters = parameters,
     class_levels = if (task == "regression") NULL else levels(data[[target]]),
-    fit_details = list(feature_map = stats::setNames(safe_features, features)),
+    fit_details = list(
+      feature_map = stats::setNames(safe_features, features),
+      requested_parameters = parameters,
+      effective_parameters = effective
+    ),
     seed = seed
   )
 }
@@ -207,7 +252,8 @@ forest_learner_grid <- function(n, p, task, n_classes) {
 fit_forest_learner <- function(data, target, task, parameters, seed) {
   require_optional("ranger", "fitting random forests")
   features <- setdiff(names(data), target)
-  effective_mtry <- min(parameters$mtry, length(features))
+  effective <- effective_learner_parameters("forest", parameters, data, target)
+  effective_mtry <- effective$mtry
   arguments <- list(
     x = data[features],
     y = data[[target]],
@@ -239,7 +285,9 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
     fit_details = list(
       requested_mtry = parameters$mtry,
       effective_mtry = effective_mtry,
-      training_predictors = length(features)
+      training_predictors = length(features),
+      requested_parameters = parameters,
+      effective_parameters = effective
     ),
     seed = seed
   )
@@ -358,6 +406,7 @@ kernel_learner_grid <- function(n, p, task, n_classes) {
     gamma_multiplier = c(1, 0.5, 2, 1, 0.5, 2, 2, 0.5, 1, 1, 2, 0.5),
     epsilon = c(0.1, 0.05, 0.2, 0.02, 0.2, 0.05, 0.1, 0.1, 0.05, 0.2, 0.05, 0.1)
   )
+  if (!identical(task, "regression")) template$epsilon <- 0.1
   lapply(seq_len(nrow(template)), function(index) {
     list(
       cost = template$cost[[index]],
@@ -457,12 +506,13 @@ fit_mars_learner <- function(data, target, task, parameters, seed) {
   } else {
     as.numeric(data[[target]] == levels(data[[target]])[[2L]])
   }
+  effective <- effective_learner_parameters("mars", parameters, data, target)
   arguments <- list(
     x = x,
     y = y,
     degree = parameters$degree,
-    nprune = min(parameters$nprune, max(3L, nrow(x) - 2L)),
-    nk = max(21L, 2L * parameters$nprune + 1L),
+    nprune = effective$nprune,
+    nk = max(21L, 2L * effective$nprune + 1L),
     pmethod = "backward",
     trace = 0
   )
@@ -477,6 +527,11 @@ fit_mars_learner <- function(data, target, task, parameters, seed) {
     parameters = parameters,
     class_levels = if (task == "regression") NULL else levels(data[[target]]),
     blueprint = blueprint,
+    fit_details = list(
+      requested_parameters = parameters,
+      effective_parameters = effective,
+      nk = arguments$nk
+    ),
     seed = seed
   )
 }
@@ -523,8 +578,9 @@ fit_neighbors_learner <- function(data, target, task, parameters, seed) {
   if (training_rows < 2L) {
     stop("The nearest-neighbor learner needs at least two training rows.", call. = FALSE)
   }
+  effective <- effective_learner_parameters("neighbors", parameters, data, target)
   requested_k <- as.integer(parameters$k)
-  effective_k <- min(requested_k, training_rows - 1L)
+  effective_k <- effective$k
   fitted_parameters <- parameters
   fitted_parameters$k <- effective_k
   blueprint <- fit_matrix_blueprint(
@@ -561,7 +617,9 @@ fit_neighbors_learner <- function(data, target, task, parameters, seed) {
       encoded_names = safe_names,
       training_rows = training_rows,
       requested_k = requested_k,
-      effective_k = effective_k
+      effective_k = effective_k,
+      requested_parameters = parameters,
+      effective_parameters = effective
     ),
     seed = seed
   )

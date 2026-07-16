@@ -10,14 +10,96 @@ permissions:
   contents: write
 
 jobs:
-  source-package:
+  quality-gates:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       AUTOXPLAIN_RUN_H2O: false
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: >-
+            any::covr,
+            any::devtools,
+            any::e1071,
+            any::earth,
+            any::glmnet,
+            any::kknn,
+            any::lintr,
+            any::mgcv,
+            any::plotly,
+            any::ranger,
+            any::roxygen2,
+            any::spelling,
+            any::testthat,
+            any::xgboost
+      - name: Verify generated documentation
+        run: |
+          roxygen2::roxygenise(".")
+          changed <- system2(
+            "git", c("status", "--porcelain", "--", "NAMESPACE", "man"),
+            stdout = TRUE
+          )
+          if (length(changed)) {
+            cat(changed, sep = "\n")
+            stop("Generated documentation is not synchronized.")
+          }
+        shell: Rscript {0}
+      - name: Lint and spell-check
+        run: |
+          lints <- lintr::lint_package()
+          print(lints)
+          if (length(lints)) stop("lintr found failures.")
+          misspellings <- spelling::spell_check_package()
+          print(misspellings)
+          if (nrow(misspellings)) stop("Spelling check found unrecognized words.")
+        shell: Rscript {0}
+      - name: Run the complete native-engine suite
+        run: devtools::test(stop_on_failure = TRUE)
+        shell: Rscript {0}
+      - name: Enforce statement coverage
+        run: |
+          coverage <- covr::package_coverage(quiet = FALSE)
+          percentage <- covr::percent_coverage(coverage)
+          print(coverage)
+          message(sprintf("Measured package coverage: %.2f%%", percentage))
+          if (percentage < 80) stop("Statement coverage is below 80%.")
+        shell: Rscript {0}
+
+  h2o-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      AUTOXPLAIN_RUN_H2O: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::devtools, any::h2o, any::testthat
+      - name: Run the live H2O integration
+        run: devtools::test(filter = "h2o", stop_on_failure = TRUE)
+        shell: Rscript {0}
+
+  source-package:
+    needs: [quality-gates, h2o-gate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      AUTOXPLAIN_RUN_H2O: false
+    steps:
+      - uses: actions/checkout@v6
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -25,7 +107,23 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rcmdcheck, any::knitr, any::rmarkdown, any::urlchecker
+          extra-packages: >-
+            any::e1071,
+            any::earth,
+            any::glmnet,
+            any::h2o,
+            any::httr,
+            any::jsonlite,
+            any::kknn,
+            any::knitr,
+            any::mgcv,
+            any::plotly,
+            any::ranger,
+            any::rcmdcheck,
+            any::rmarkdown,
+            any::testthat,
+            any::urlchecker,
+            any::xgboost
           needs: check
       - name: Match tag and package version
         if: github.ref_type == 'tag'
@@ -44,7 +142,15 @@ jobs:
         run: |
           problems <- urlchecker::url_check()
           print(problems)
-          if (nrow(problems)) stop("Documentation contains unreachable URLs.")
+          status <- suppressWarnings(as.integer(problems$Status))
+          blocking <- problems[
+            nzchar(problems$CRAN) | status %in% c(404L, 410L),
+            , drop = FALSE
+          ]
+          if (nrow(blocking)) {
+            print(blocking)
+            stop("Documentation contains a permanently broken or non-canonical URL.")
+          }
         shell: Rscript {0}
       - name: Build release artifact
         run: |

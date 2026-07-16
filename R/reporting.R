@@ -1,7 +1,7 @@
 #' Render a beginner-first model report
 #'
 #' Creates a standalone HTML report from an [autoxplain()] result. The report
-#' leads with the prediction question, held-out evaluation, simple-baseline
+#' leads with the prediction question, evaluation role, simple-baseline
 #' comparison, and plain metric definitions. Feature reliance, fitted effects,
 #' and an explanation evidence audit follow with progressively more detail.
 #'
@@ -13,7 +13,7 @@
 #' @param narrative Optional narrative returned by
 #'   [generate_natural_language_report()].
 #' @param subgroup Optional name of one categorical or low-cardinality column.
-#'   When supplied, the report includes an explicit held-out subgroup
+#'   When supplied, the report includes an explicit evaluation-set subgroup
 #'   performance check. See [subgroup_performance()].
 #' @param open Open the report in a browser after writing it.
 #' @param top_features Maximum number of features audited when `audit` is not
@@ -108,7 +108,7 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
     "<body><a class=\"skip\" href=\"#main\">Skip to report</a>",
     "<header><div class=\"shell\"><p class=\"eyebrow\">AutoXplainR / Guided model report</p>",
     "<h1>", html_escape(title), "</h1>",
-    "<p class=\"lede\">What was fitted, how it performed on data kept out of fitting, ",
+    "<p class=\"lede\">What was fitted, how it performed on the configured evaluation data, ",
     "what trade-offs appeared across candidates, which patterns it used, and how cautiously ",
     "those patterns should be communicated.</p>",
     "<nav aria-label=\"Report sections\"><a href=\"#overview\">Overview</a>",
@@ -124,7 +124,7 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
     narrative_html,
     "<section id=\"patterns\" aria-labelledby=\"patterns-title\"><p class=\"eyebrow\">How the model works</p>",
     "<h2 id=\"patterns-title\">Patterns used for prediction</h2>",
-    "<p>Permutation importance asks how much held-out performance worsens when one input is shuffled. ",
+    "<p>Permutation importance asks how much evaluation performance worsens when one input is shuffled. ",
     "It describes model reliance, not cause and effect.</p>",
     render_guided_importance(audit$importance),
     render_effects(effects, result), "</section>",
@@ -132,7 +132,7 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
     "<section id=\"limits\" aria-labelledby=\"limits-title\"><p class=\"eyebrow\">Interpretation boundaries</p>",
     "<h2 id=\"limits-title\">What this analysis does not establish</h2>",
     "<div class=\"columns\"><div><h3>Reasonable statements</h3><ul>",
-    "<li>How the fitted model performed on this held-out set</li>",
+    "<li>How the fitted model performed on this evaluation set</li>",
     "<li>Which inputs the model relied on under the configured shuffling test</li>",
     "<li>Which fitted prediction patterns appeared in the evaluation data</li>",
     "</ul></div><div><h3>Statements requiring other evidence</h3><ul>",
@@ -149,6 +149,31 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
 render_model_tuning <- function(result) {
   tuning <- result$tuning
   if (!inherits(tuning, "autoxplain_tuning")) return("")
+  evaluation_role <- normalize_report_evaluation_role(
+    result$provenance$evaluation_role %||% "evaluation"
+  )
+  evaluation_name <- switch(
+    evaluation_role,
+    test = "outer test set",
+    validation = "validation set",
+    "evaluation set"
+  )
+  score_interpretation <- if (identical(evaluation_role, "test")) {
+    paste(
+      "The test result above estimates performance on rows kept outside model",
+      "fitting and selection."
+    )
+  } else if (identical(evaluation_role, "validation")) {
+    paste(
+      "The validation result above is not a final test estimate; evaluate the",
+      "refitted model on a separate independent test set before generalization claims."
+    )
+  } else {
+    paste(
+      "The result above describes the supplied evaluation rows. Their independence",
+      "has not been asserted, so it is not by itself a generalization estimate."
+    )
+  }
   candidates <- tuning$candidates
   selected <- candidates[candidates$selected, , drop = FALSE]
   final_id <- tuning$final_configuration %||% selected$configuration_id[[1L]]
@@ -178,7 +203,8 @@ render_model_tuning <- function(result) {
     "<h2 id=\"tuning-title\">How was the primary model selected?</h2>",
     "<p>AutoXplainR divided only the training portion into ", tuning$folds_used,
     " folds. Each configuration repeatedly fitted on some training folds and scored on the ",
-    "remaining fold. Preprocessing was learned again inside every fold. The outer holdout ",
+    "remaining fold. Preprocessing was learned again inside every fold. The ",
+    html_escape(evaluation_name), " ",
     "shown in the evaluation section did not participate in this choice.</p>",
     "<div class=\"cards comparison-cards\">",
     metric_card("Configurations", as.character(nrow(candidates)),
@@ -216,8 +242,7 @@ render_model_tuning <- function(result) {
     ) else "",
     render_tuning_refit_status(tuning, selected$configuration_id[[1L]], final_id),
     "<p class=\"callout\"><strong>Do not quote the resampled tuning score as final performance.</strong> ",
-    "It guided model selection. The held-out result above is the separate estimate of how the ",
-    "selected, refitted model performed on unseen rows.</p>",
+    "It guided model selection. ", html_escape(score_interpretation), "</p>",
     "<p class=\"microcopy\">", html_escape(tuning$scope_note), "</p></section>"
   )
 }
@@ -260,7 +285,8 @@ render_tuning_refit_status <- function(tuning, selected_id, final_id) {
 render_subgroup_performance <- function(subgroups) {
   if (is.null(subgroups)) return("")
   table <- subgroups$performance
-  secondary <- if (identical(subgroups$task, "regression")) "mae" else "accuracy"
+  secondary <- subgroups$secondary_metric %||%
+    if (identical(subgroups$task, "regression")) "mae" else "accuracy"
   keep <- intersect(c(
     "group", "rows", "share", subgroups$primary_metric, secondary,
     "gap_from_overall", "enough_rows"
@@ -283,7 +309,7 @@ render_subgroup_performance <- function(subgroups) {
     "<h2 id=\"subgroups-title\">Did performance vary across groups?</h2>",
     "<p>These rows compare the primary model across values of <strong>",
     html_escape(subgroups$by), "</strong>. Positive gaps mean worse ",
-    html_escape(pretty_metric(subgroups$primary_metric)), " than the overall held-out result.</p>",
+    html_escape(pretty_metric(subgroups$primary_metric)), " than the overall evaluation result.</p>",
     "<div class=\"cards\">",
     metric_card("Compared by", subgroups$by, "Chosen explicitly for this report"),
     metric_card("Observed groups", as.character(subgroups$n_groups),
@@ -312,6 +338,15 @@ render_model_comparison <- function(result) {
   performance_metric <- attr(tradeoffs, "performance_metric")
   complexity_metric <- attr(tradeoffs, "complexity_metric")
   tradeoff_kind <- behavior_tradeoff_kind(complexity_metric)
+  evaluation_role <- normalize_report_evaluation_role(
+    result$provenance$evaluation_role %||% "evaluation"
+  )
+  evaluation_label <- switch(
+    evaluation_role,
+    test = "test-set",
+    validation = "validation",
+    "evaluation-set"
+  )
   higher_is_better <- isTRUE(attr(tradeoffs, "higher_is_better"))
   best_index <- if (higher_is_better) {
     which.max(tradeoffs[[performance_metric]])[[1L]]
@@ -330,14 +365,29 @@ render_model_comparison <- function(result) {
   display[["Pareto-efficient"]] <- tradeoffs$pareto_optimal
   selection_explanation <- if (inherits(result$tuning, "autoxplain_tuning")) {
     paste0(
-      "<p><strong>The primary model was chosen before this holdout was opened.</strong> ",
+      "<p><strong>The primary model was chosen without using these evaluation rows.</strong> ",
       "Training-only resampling selected and refitted it; the candidate ranks below describe ",
-      "their later performance on the same outer evaluation rows.</p>"
+      "their later performance on the same evaluation rows.</p>"
     )
+  } else if (identical(result$engine, "h2o")) {
+    if (isTRUE(result$provenance$test_used_for_validation)) {
+      paste0(
+        "<p><strong>H2O selected the primary model using these validation rows.</strong> ",
+        "The table is useful for diagnosis, but it is not a final ",
+        "test comparison; use a separate untouched test set.</p>"
+      )
+    } else {
+      paste0(
+        "<p><strong>H2O selected the primary model with training-only cross-validation.</strong> ",
+        "The configured evaluation rows did not determine its engine-leaderboard rank. ",
+        "The common-row ranks below ",
+        "are descriptive and did not replace that primary model.</p>"
+      )
+    }
   } else {
     paste0(
       "<p><strong>The primary model remains pre-specified.</strong> Candidate ranks are ",
-      "descriptive; selecting a winner on these same held-out rows and quoting its score as ",
+      "descriptive; selecting a winner on these same evaluation rows and quoting its score as ",
       "final performance would be optimistic.</p>"
     )
   }
@@ -347,7 +397,8 @@ render_model_comparison <- function(result) {
     "<h2 id=\"models-title\">What trade-offs did the candidates make?</h2>",
     "<p>AutoXplainR compares the supplied candidates on two visible dimensions rather than ",
     "hiding judgment inside one weighted score. A Pareto-efficient model is not beaten by ",
-    "another supplied model on both held-out performance and the displayed ",
+    "another supplied model on both ", evaluation_label,
+    " performance and the displayed ",
     html_escape(tradeoff_kind), ".</p>",
     "<div class=\"cards comparison-cards\">",
     metric_card("Compared models", as.character(nrow(tradeoffs)),
@@ -355,12 +406,12 @@ render_model_comparison <- function(result) {
     metric_card("Pareto-efficient", as.character(sum(tradeoffs$pareto_optimal)),
                 "Not dominated on both displayed dimensions"),
     metric_card("Best observed score", tradeoffs$model[[best_index]],
-                paste0(pretty_metric(performance_metric), " on this holdout")),
+                paste0(pretty_metric(performance_metric), " on this ", evaluation_label, " set")),
     metric_card("Lowest trade-off proxy", tradeoffs$model[[smallest_index]],
                 paste0(pretty_complexity(complexity_metric), "; ", tradeoff_kind)),
     "</div><div class=\"tradeoff-layout\"><div>", tradeoff_svg(tradeoffs),
     "</div><div class=\"tradeoff-explainer\"><h3>How to read this</h3><ol>",
-    "<li>Up means better held-out performance.</li>",
+    "<li>Up means better ", evaluation_label, " performance.</li>",
     "<li>Left means lower ", html_escape(pretty_complexity(complexity_metric)),
     ", used here as a ", html_escape(tradeoff_kind), ".</li>",
     "<li>Outlined points form the supplied Pareto frontier.</li>",
@@ -370,7 +421,13 @@ render_model_comparison <- function(result) {
     render_prediction_ambiguity(result),
     "<p class=\"microcopy\"><strong>Trade-off boundary:</strong> ",
     if (identical(tradeoff_kind, "resource proxy")) {
-      "Serialized model size or runtime measures operational resource use, not structural complexity. "
+      paste0(
+        paste(
+          "Approximate in-memory R object size (or engine-reported H2O size) and",
+          "runtime measure operational resource use, not structural complexity."
+        ),
+        " "
+      )
     } else {
       "The displayed proxy does not prove which available model capacity was used. "
     },
@@ -414,7 +471,7 @@ render_behavior_comparison <- function(result) {
     "columns are reviewed behavior cards. They say what each family can represent; they do ",
     "not show that this fitted model actually used those patterns.</p>",
     html_table(display, digits = 4L),
-    "<p><strong>Computed evidence from this analysis:</strong> held-out performance and ",
+    "<p><strong>Computed evidence from this analysis:</strong> evaluation performance and ",
     "paired prediction disagreement are calculated on common evaluation rows. Repeated ",
     "permutation feature importance in the Patterns section is also computed evidence of ",
     "model reliance, not a property guaranteed by the family card.</p>",
@@ -483,11 +540,11 @@ render_prediction_ambiguity <- function(result) {
   }
   paste0(
     "<div class=\"ambiguity\"><h3>Where did supplied model choices disagree?</h3>",
-    "<p>The same held-out rows were scored by every supplied non-baseline candidate. ",
+    "<p>The same evaluation rows were scored by every supplied non-baseline candidate. ",
     "A large gap means the answer depends on model specification, even when the data row ",
     "is unchanged.</p>", cards, html_table(top, digits = 4L),
     "<p class=\"callout\"><strong>Disagreement is a review signal, not an error bar.</strong> ",
-    "The compared candidates can have very different held-out performance; read this beside ",
+    "The compared candidates can have very different evaluation performance; read this beside ",
     "the score table above. It does not identify the correct prediction or provide uncertainty ",
     "coverage.</p></div>"
   )
@@ -569,9 +626,9 @@ scale_plot_values <- function(values, lower, upper) {
 
 pretty_complexity <- function(metric) {
   labels <- c(
-    model_size_kb = "model size (KB)",
-    size_mb = "model size (MB)",
-    model_size = "model size",
+    model_size_kb = "approximate model-object size (KB)",
+    size_mb = "approximate model-object size (MB)",
+    model_size = "approximate model-object size",
     training_time_ms = "training time (ms)",
     training_time_s = "training time (s)",
     prediction_time_ms = "prediction time (ms)",
@@ -582,10 +639,17 @@ pretty_complexity <- function(metric) {
 
 model_report_evaluation <- function(result, audit) {
   evaluation <- result$evaluation
-  if (!is.null(evaluation$primary_metric) && "main_model" %in% names(evaluation$metrics)) {
+  primary_id <- evaluation$primary_model_id %||%
+    if ("main_model" %in% names(evaluation$metrics)) "main_model" else NULL
+  if (!is.null(evaluation$primary_metric) && !is.null(primary_id) &&
+        primary_id %in% names(evaluation$metrics)) {
     metric <- evaluation$primary_metric
-    primary <- evaluation$metrics$main_model[[metric]]
-    baseline <- evaluation$metrics$simple_baseline[[metric]] %||% NA_real_
+    primary <- evaluation$metrics[[primary_id]][[metric]]
+    baseline <- if ("simple_baseline" %in% names(evaluation$metrics)) {
+      evaluation$metrics$simple_baseline[[metric]] %||% NA_real_
+    } else {
+      NA_real_
+    }
     definition <- evaluation$metric_definitions[[metric]] %||% "See the metric documentation."
     return(list(
       metric = metric,
@@ -597,12 +661,20 @@ model_report_evaluation <- function(result, audit) {
       rows = evaluation$evaluated_rows,
       table = guided_leaderboard_table(result),
       notes = evaluation$notes,
-      diagnostics = evaluation$diagnostics
+      diagnostics = evaluation$diagnostics,
+      role = normalize_report_evaluation_role(
+        result$provenance$evaluation_role %||% "evaluation"
+      )
     ))
   }
   best <- which.min(audit$performance$relative_gap)[[1L]]
   metric <- audit$config$metric
-  definition_key <- if (metric == "logloss") "log_loss" else metric
+  definition_key <- switch(
+    metric,
+    logloss = "log_loss",
+    brier = "brier_score",
+    metric
+  )
   definitions <- metric_definitions(result$task)
   list(
     metric = metric,
@@ -614,8 +686,17 @@ model_report_evaluation <- function(result, audit) {
     rows = nrow(result$test_data %||% result$training_data),
     table = guided_leaderboard_table(result),
     notes = NULL,
-    diagnostics = NULL
+    diagnostics = NULL,
+    role = normalize_report_evaluation_role(
+      result$provenance$evaluation_role %||% "evaluation"
+    )
   )
+}
+
+normalize_report_evaluation_role <- function(role) {
+  if (role %in% c("test", "held-out test")) return("test")
+  if (identical(role, "validation")) return("validation")
+  "evaluation"
 }
 
 guided_leaderboard_table <- function(result) {
@@ -652,15 +733,38 @@ render_model_overview <- function(result, evaluation) {
   } else {
     "not available"
   }
+  validation_role <- identical(evaluation$role, "validation")
+  test_role <- identical(evaluation$role, "test")
+  score_context <- if (validation_role) {
+    "on validation rows that may also have guided model or workflow decisions"
+  } else if (test_role) {
+    "on the independent test rows"
+  } else {
+    "on the configured evaluation rows"
+  }
+  row_label <- if (validation_role) {
+    "Validation rows"
+  } else if (test_role) {
+    "Test rows"
+  } else {
+    "Evaluation rows"
+  }
+  row_note <- if (validation_role) {
+    "Not a final independent test"
+  } else if (test_role) {
+    "Asserted as independent test data"
+  } else {
+    "No independent-test role has been asserted"
+  }
   conclusion <- if (isTRUE(evaluation$beats_baseline)) {
     paste0(
       "The primary model improved ", html_escape(pretty_metric(evaluation$metric)), " by ",
-      html_escape(improvement), " relative to the simple baseline on held-out rows."
+      html_escape(improvement), " relative to the simple baseline ", score_context, "."
     )
   } else if (identical(evaluation$beats_baseline, FALSE)) {
     paste0(
-      "The primary model did not beat the simple baseline on ",
-      html_escape(pretty_metric(evaluation$metric)),
+      "The primary model did not beat the simple baseline using ",
+      html_escape(pretty_metric(evaluation$metric)), " ", score_context,
       ". Treat its fitted patterns as exploratory rather than useful predictive evidence."
     )
   } else {
@@ -678,19 +782,58 @@ render_model_overview <- function(result, evaluation) {
                 "Predicts without using input features"),
     metric_card("Relative improvement", improvement,
                 "Positive means the primary error was lower"),
-    metric_card("Held-out rows", as.character(evaluation$rows),
-                "Not used to fit the primary model"),
+    metric_card(row_label, as.character(evaluation$rows), row_note),
     "</div>", render_guided_notes(evaluation$notes), "</section>"
   )
 }
 
 render_model_evaluation <- function(result, evaluation) {
+  validation_role <- identical(evaluation$role, "validation")
+  test_role <- identical(evaluation$role, "test")
+  eyebrow <- if (validation_role) {
+    "Model-selection validation"
+  } else if (test_role) {
+    "Independent-test check"
+  } else {
+    "Configured evaluation"
+  }
+  heading <- if (validation_role) {
+    "How did the model score on validation rows?"
+  } else if (test_role) {
+    "Did the model generalize?"
+  } else {
+    "How did the model score on the evaluation rows?"
+  }
+  caution <- if (validation_role) {
+    paste0(
+      "<p class=\"callout\"><strong>This is not a final test estimate.</strong> ",
+      "These rows may have influenced model or workflow decisions. Use a separate ",
+      "untouched test set for final generalization claims.</p>"
+    )
+  } else if (!test_role) {
+    paste0(
+      "<p class=\"callout\"><strong>This is a descriptive evaluation.</strong> ",
+      "The supplied rows have not been asserted as an independent test set. These ",
+      "scores describe these records and should not be presented as evidence of ",
+      "generalization.</p>"
+    )
+  } else {
+    ""
+  }
+  metric_context <- if (validation_role) {
+    "validation"
+  } else if (test_role) {
+    "test-set"
+  } else {
+    "evaluation-set"
+  }
   paste0(
-    "<section id=\"evaluation\" aria-labelledby=\"evaluation-title\"><p class=\"eyebrow\">Unseen-data check</p>",
-    "<h2 id=\"evaluation-title\">Did the model generalize?</h2>",
+    "<section id=\"evaluation\" aria-labelledby=\"evaluation-title\"><p class=\"eyebrow\">",
+    eyebrow, "</p><h2 id=\"evaluation-title\">", heading, "</h2>", caution,
     "<p class=\"callout\"><strong>", html_escape(pretty_metric(evaluation$metric)),
     ":</strong> ", html_escape(evaluation$definition), "</p>",
-    "<p>The table reports every computed held-out metric. Compare models using the metric definitions, ",
+    "<p>The table reports every computed ", metric_context,
+    " metric. Compare models using the metric definitions, ",
     "not the rank column alone.</p>", html_table(evaluation$table, digits = 4L),
     render_metric_definitions(result), render_prediction_diagnostics(result, evaluation$diagnostics),
     "</section>"
@@ -765,7 +908,7 @@ render_threshold_diagnostic <- function(result) {
     html_table(display, digits = 2L),
     "<p class=\"callout\"><strong>No cutoff is recommended here.</strong> The relative ",
     "consequences of false positives and false negatives belong to the application. If a cutoff ",
-    "is chosen using these held-out rows, evaluate it again on different representative data.</p>"
+    "is chosen using these evaluation rows, evaluate it again on different representative data.</p>"
   )
 }
 
@@ -796,7 +939,7 @@ render_missingness_shift <- function(shift) {
   verdict <- if (shift$n_flagged_model_features > 0L) {
     paste0(
       "<p class=\"callout\"><strong>Some model inputs crossed the practical flag.</strong> ",
-      "Check whether collection or pipeline behavior changed before treating the held-out ",
+      "Check whether collection or pipeline behavior changed before treating the evaluation ",
       "result as representative.</p>"
     )
   } else {
@@ -842,7 +985,7 @@ render_calibration_diagnostic <- function(result, calibration) {
   }
   paste0(
     "<h3>Can the reported probabilities be taken literally?</h3>",
-    "<p>Calibration compares ", event, " with how often that event occurred on held-out rows. ",
+    "<p>Calibration compares ", event, " with how often that event occurred on evaluation rows. ",
     "For example, predictions near 70% are well calibrated when the event happens about 70% ",
     "of the time in comparable evaluation groups.</p>",
     "<div class=\"cards diagnostic-cards\">",
@@ -854,14 +997,14 @@ render_calibration_diagnostic <- function(result, calibration) {
     metric_card(
       if (binary) "Observed positive rate" else "Observed accuracy",
       format_percent(calibration$observed_rate),
-      "What actually happened on held-out rows"
+      "What actually happened on evaluation rows"
     ),
     metric_card(
       "Binned calibration gap", format_percent(calibration$calibration_error),
       "Average absolute discrepancy; lower is better"
     ),
     "</div>", html_table(display, digits = 3L),
-    "<p class=\"microcopy\">This binned gap is descriptive and changes with the held-out ",
+    "<p class=\"microcopy\">This binned gap is descriptive and changes with the evaluation ",
     "sample and grouping. It is not an uncertainty interval or a guarantee for future data. ",
     "Use log loss and Brier score alongside it.</p>"
   )
@@ -879,7 +1022,7 @@ pretty_metric <- function(metric) {
   labels <- c(
     rmse = "RMSE", mae = "MAE", r_squared = "R-squared",
     log_loss = "log loss", logloss = "log loss", accuracy = "accuracy",
-    brier_score = "Brier score",
+    brier = "Brier score", brier_score = "Brier score",
     calibration_error = "binned calibration gap",
     balanced_accuracy = "balanced accuracy", roc_auc = "ROC AUC",
     macro_recall = "macro recall", auc = "ROC AUC"
@@ -997,16 +1140,11 @@ effect_plain_summary <- function(effect, result) {
   y_name <- if (method == "ale") "accumulated_effect" else "partial_dependence"
   y <- effect[[y_name]]
   x <- effect[[1L]]
-  multiclass_label <- if (result$task == "multiclass") {
-    levels(result$training_data[[result$target_column]])[[1L]]
-  } else {
-    NULL
-  }
-  target <- switch(
+  target <- attr(effect, "prediction_target") %||% switch(
     result$task,
     regression = "predicted value",
     binary = "positive-class probability",
-    multiclass = paste0("probability for class ", multiclass_label)
+    multiclass = "selected-class probability"
   )
   association <- if (is.numeric(x) && length(unique(x)) > 1L) {
     suppressWarnings(stats::cor(x, y, method = "spearman"))
@@ -1100,6 +1238,9 @@ render_model_provenance <- function(result, audit) {
       "Evaluation rows" = as.character(nrow(result$test_data %||% result$training_data)),
       "Evaluation role" = result$provenance$evaluation_role %||% "unspecified",
       "Split method" = result$provenance$split_method %||% "user configured",
+      "Primary model ID" = result$provenance$primary_model_id %||%
+        result$evaluation$primary_model_id %||% "unspecified",
+      "Primary model label" = result$provenance$primary_model_label %||% "unspecified",
       "Permutation repeats" = as.character(audit$config$n_repeats),
       "Seed" = as.character(audit$config$seed),
       "Explainer IDs" = paste(audit$provenance$explainer_fingerprints, collapse = ", ")
@@ -1362,7 +1503,7 @@ report_css <- function() {
     ".grade-b,.mini-grade.grade-b{background:#e7f0fc;color:var(--blue)}.grade-c,.mini-grade.grade-c{background:var(--amber-bg);color:var(--amber)}.grade-d,.mini-grade.grade-d{background:var(--red-bg);color:var(--red)}",
     ".callout{background:#eef3ee;border-left:4px solid #628071;padding:14px 16px;border-radius:7px}.verdict{font-size:1.18rem;font-weight:750;background:#e8f5ed;border-left:5px solid var(--green);padding:18px 20px;border-radius:9px}.microcopy{color:var(--muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.diagnostic-cards{grid-template-columns:repeat(3,1fr)}.comparison-cards .metric strong{font-size:1.2rem;line-height:1.2;min-height:2.9em}.guided-notes{margin-top:24px}.guided-note{border:1px solid #e3c783;border-left:5px solid #c77a0a;background:#fffaf0;border-radius:11px;padding:14px 18px;margin:10px 0}.guided-note h3{font-size:1rem;margin:0 0 6px}.guided-note p{margin:0;color:var(--muted)}.guided-note-warning{border-color:#e3a2a0;border-left-color:var(--red);background:#fff8f7}",
     ".metric{background:#f5f7f3;border:1px solid var(--line);border-radius:13px;padding:17px}.metric p{margin:0;color:var(--muted);font-weight:700;font-size:.83rem}.metric strong{display:block;font-size:1.8rem;margin:5px 0}.metric small{color:var(--muted)}",
-    ".findings{display:grid;gap:12px}.finding{border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:18px}.finding h3{margin:9px 0}.finding p{margin:7px 0}.finding-critical{border-left-color:var(--red);background:#fff9f8}.finding-warning{border-left-color:#d18718;background:#fffdf6}.finding-note{border-left-color:#5283b7;background:#f9fcff}",
+    ".findings{display:grid;gap:12px;min-width:0}.finding{min-width:0;overflow-wrap:anywhere;border:1px solid var(--line);border-left-width:5px;border-radius:12px;padding:18px}.finding h3{margin:9px 0}.finding p{margin:7px 0}.finding-critical{border-left-color:var(--red);background:#fff9f8}.finding-warning{border-left-color:#d18718;background:#fffdf6}.finding-note{border-left-color:#5283b7;background:#f9fcff}",
     ".severity{text-transform:uppercase;font-size:.72rem;font-weight:900;letter-spacing:.08em;margin-right:9px}code{background:#edf1ec;border-radius:5px;padding:2px 6px;color:#415149}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:11px}table{border-collapse:collapse;width:100%;font-size:.9rem;background:#fff}th,td{text-align:left;padding:11px 12px;border-bottom:1px solid #e7ebe6;vertical-align:middle}thead th{background:#edf2ed;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}",
     ".model-panel{margin:28px 0}.bar-cell{min-width:150px}.bar{display:block;height:9px;border-radius:999px;min-width:2px}.bar-positive{background:#2f8c65}.bar-negative{background:#c6534f}.mini-grade{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;font-weight:900}",
     ".columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.columns>div{background:#f5f7f3;padding:18px 22px;border-radius:12px}.columns h3{margin-top:0}.narrative{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7f3;border:1px solid var(--line);border-radius:12px;padding:18px;font:inherit}.learn-more,.advanced{margin-top:24px;border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:#fbfcfa}.learn-more summary,.advanced summary{cursor:pointer;font-weight:850;color:var(--green);padding:5px}.advanced>h3:first-of-type{margin-top:24px}.tradeoff-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,.8fr);gap:20px;align-items:center;margin:24px 0}.tradeoff-plot{width:100%;height:auto;background:linear-gradient(145deg,#f7faf7,#eef5f0);border:1px solid var(--line);border-radius:14px}.tradeoff-explainer{background:#f5f7f3;border-radius:14px;padding:18px 22px}.tradeoff-explainer h3{margin-top:0}.tradeoff-explainer ol{padding-left:1.25rem}.chart-axis{stroke:#86968f;stroke-width:1.2}.pareto-line{fill:none;stroke:#176b4d;stroke-width:3;stroke-dasharray:7 6}.tradeoff-point{stroke:#fff;stroke-width:2;fill:#6d7c76}.tradeoff-primary{fill:#176b4d}.tradeoff-candidate{fill:#315c9b}.tradeoff-baseline{fill:#b46a22}.tradeoff-pareto{stroke:#102a23;stroke-width:4}.point-label{font-size:12px;font-weight:750;fill:#25352f}.axis-label{font-size:12px;font-weight:800;fill:#53635d;text-anchor:middle}.effect-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.effect-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fbfcfa}.effect-card h3{font-size:1.35rem;margin:5px 0}.effect-plot{width:100%;height:auto;background:#f2f6f2;border-radius:9px}.axis{stroke:#9aa9a2;stroke-width:1}.effect-line{fill:none;stroke:#176b4d;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}dl{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:8px 18px}dt{font-weight:800}dd{margin:0;color:var(--muted);overflow-wrap:anywhere}",

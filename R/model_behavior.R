@@ -6,8 +6,9 @@
 #' * learner behavior cards describe what each model family can represent;
 #'   they are reviewed prior knowledge, not findings from the supplied data;
 #' * performance and paired prediction differences are computed from the
-#'   result's common evaluation rows; serialized size or runtime, when shown,
-#'   is an operational resource proxy rather than structural model complexity.
+#'   result's common evaluation rows; approximate R object size or runtime,
+#'   when shown, is an operational resource proxy rather than structural model
+#'   complexity.
 #'
 #' Optionally, pass an audit created with
 #' `audit_explanations(as_explainers(result, models = ...))`. The comparison
@@ -102,8 +103,8 @@ compare_model_behavior <- function(result,
       "they do not prove that a fitted model used every available pattern."
     ),
     tradeoff = paste(
-      "The secondary Pareto axis is labeled in `tradeoff_kind`. Serialized",
-      "model size and runtime are resource proxies, not structural complexity",
+      "The secondary Pareto axis is labeled in `tradeoff_kind`. Approximate",
+      "model-object size and runtime are resource proxies, not structural complexity",
       "or evidence that a model used its available capacity."
     ),
     feature_evidence = if (is.null(feature_evidence)) {
@@ -116,7 +117,8 @@ compare_model_behavior <- function(result,
     },
     shape_evidence = paste(
       "No automatic effect-shape claims are made. Use explain_effect() for a",
-      "named feature after checking dependence and evaluation scope."
+      "single model, or compare_model_effects() for aligned curves across",
+      "retained models after checking dependence and evaluation scope."
     )
   )
   summary <- behavior_summary(

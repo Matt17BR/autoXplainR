@@ -187,6 +187,7 @@ generate_natural_language_report <- function(autoxplain_result,
           parse_structured_narrative(text), context$disclosure
         )
       } else {
+        validate_narrative_word_budget(text)
         append_required_narrative_limits(text, context$disclosure)
       }
       annotate_narrative(
@@ -242,9 +243,17 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key, accou
   }
   endpoint <- base_url %||% default_endpoint
   if (!is.character(endpoint) || length(endpoint) != 1L || is.na(endpoint) ||
-        !grepl("^https?://", endpoint)) {
+        !grepl("^https?://[^[:space:]]+$", endpoint, ignore.case = TRUE)) {
     stop("`base_url` must be a complete HTTP(S) endpoint for provider `", provider, "`.",
          call. = FALSE)
+  }
+  if (grepl("^http://", endpoint, ignore.case = TRUE) &&
+        !is_loopback_narrative_endpoint(endpoint)) {
+    stop(
+      "Narrative endpoints outside this machine must use HTTPS. Plain HTTP is ",
+      "allowed only for localhost, 127.0.0.0/8, or [::1].",
+      call. = FALSE
+    )
   }
   environment_name <- row$key_environment_variable[[1L]]
   resolved_key <- api_key
@@ -269,12 +278,23 @@ resolve_narrative_provider <- function(provider, model, base_url, api_key, accou
     endpoint = endpoint,
     api_key = resolved_key %||% "",
     structured_output = isTRUE(row$structured_output[[1L]]),
-    remote = !grepl(
-      "^https?://(localhost|127[.]0[.]0[.]1|\\[::1\\])(?=[:/])",
-      endpoint,
-      perl = TRUE
-    )
+    remote = !is_loopback_narrative_endpoint(endpoint)
   )
+}
+
+is_loopback_narrative_endpoint <- function(endpoint) {
+  authority <- sub("^https?://", "", endpoint, ignore.case = TRUE)
+  authority <- sub("[/?#].*$", "", authority)
+  if (!nzchar(authority) || grepl("@", authority, fixed = TRUE)) return(FALSE)
+  authority <- tolower(authority)
+  if (grepl("^localhost(?::[0-9]+)?$", authority, perl = TRUE)) return(TRUE)
+  if (grepl("^\\[::1\\](?::[0-9]+)?$", authority, perl = TRUE)) return(TRUE)
+  if (!grepl("^127(?:[.][0-9]{1,3}){3}(?::[0-9]+)?$", authority, perl = TRUE)) {
+    return(FALSE)
+  }
+  host <- sub(":[0-9]+$", "", authority)
+  octets <- as.integer(strsplit(host, ".", fixed = TRUE)[[1L]])
+  length(octets) == 4L && all(!is.na(octets)) && all(octets >= 0L & octets <= 255L)
 }
 
 build_narrative_request <- function(prompt,
@@ -375,6 +395,8 @@ narrative_output_schema <- function() {
           "One to three descriptive model-pattern statements, with no causal",
           "language. State when pattern evidence was not supplied."
         ),
+        minItems = 1L,
+        maxItems = 3L,
         items = list(type = "string")
       ),
       cautions = list(
@@ -383,6 +405,8 @@ narrative_output_schema <- function() {
           "One to three evidence-specific cautions drawn from the supplied",
           "evaluation or explanation diagnostics."
         ),
+        minItems = 1L,
+        maxItems = 3L,
         items = list(type = "string")
       ),
       next_steps = list(
@@ -391,6 +415,8 @@ narrative_output_schema <- function() {
           "One to three practical validation or review steps supported by the",
           "supplied evidence."
         ),
+        minItems = 1L,
+        maxItems = 3L,
         items = list(type = "string")
       )
     ),
@@ -415,6 +441,14 @@ parse_structured_narrative <- function(text) {
   if (!is.list(parsed) || is.null(names(parsed))) {
     stop("The structured narrative must be one JSON object.", call. = FALSE)
   }
+  duplicate_fields <- unique(names(parsed)[duplicated(names(parsed))])
+  if (length(duplicate_fields)) {
+    stop(
+      "The structured narrative contains duplicate fields: ",
+      paste(duplicate_fields, collapse = ", "), ".",
+      call. = FALSE
+    )
+  }
   missing_fields <- setdiff(required, names(parsed))
   extra_fields <- setdiff(names(parsed), required)
   if (length(missing_fields)) {
@@ -431,13 +465,15 @@ parse_structured_narrative <- function(text) {
       call. = FALSE
     )
   }
-  list(
+  narrative <- list(
     headline = validate_narrative_scalar(parsed$headline, "headline"),
     performance = validate_narrative_scalar(parsed$performance, "performance"),
     patterns = validate_narrative_items(parsed$patterns, "patterns"),
     cautions = validate_narrative_items(parsed$cautions, "cautions"),
     next_steps = validate_narrative_items(parsed$next_steps, "next_steps")
   )
+  validate_narrative_word_budget(unlist(narrative, use.names = FALSE))
+  narrative
 }
 
 validate_narrative_scalar <- function(value, field) {
@@ -456,22 +492,31 @@ validate_narrative_scalar <- function(value, field) {
 }
 
 validate_narrative_items <- function(value, field) {
-  if (!is.list(value) && !is.character(value)) {
+  if (!is.list(value) || !is.null(names(value))) {
     stop("Structured narrative field `", field, "` must be an array of strings.",
          call. = FALSE)
   }
-  values <- if (is.list(value)) {
-    vapply(value, function(item) {
-      validate_narrative_scalar(item, field)
-    }, character(1))
-  } else {
-    vapply(value, validate_narrative_scalar, character(1), field = field)
-  }
-  if (length(values) < 1L || length(values) > 8L) {
-    stop("Structured narrative field `", field, "` must contain 1 to 8 items.",
+  values <- vapply(value, function(item) {
+    validate_narrative_scalar(item, field)
+  }, character(1))
+  if (length(values) < 1L || length(values) > 3L) {
+    stop("Structured narrative field `", field, "` must contain 1 to 3 items.",
          call. = FALSE)
   }
   unname(values)
+}
+
+validate_narrative_word_budget <- function(text, maximum = 500L) {
+  compact <- trimws(gsub("[^[:alnum:]']+", " ", paste(text, collapse = " ")))
+  words <- if (nzchar(compact)) strsplit(compact, "[[:space:]]+")[[1L]] else character()
+  if (length(words) > maximum) {
+    stop(
+      "The generated narrative exceeds the ", maximum,
+      "-word evidence-summary limit.",
+      call. = FALSE
+    )
+  }
+  invisible(length(words))
 }
 
 render_structured_narrative <- function(narrative, disclosure) {

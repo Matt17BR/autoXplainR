@@ -16,6 +16,13 @@ test_that("guided regression uses a reproducible untouched holdout", {
   expect_equal(nrow(first$training_data) + nrow(first$test_data), nrow(data))
   expect_setequal(names(first$models), c("main_model", "simple_baseline"))
   expect_true(first$evaluation$beats_baseline)
+  expect_identical(first$provenance$evaluation_role, "test")
+  expect_identical(first$provenance$primary_model_id, "main_model")
+  expect_identical(first$provenance$primary_model_label, "linear regression")
+  expect_identical(
+    first$evaluation$primary_model_id,
+    first$provenance$primary_model_id
+  )
   expect_lt(first$evaluation$metrics$main_model[["rmse"]], 0.5)
   expect_match(first$evaluation$metric_definitions[["rmse"]], "lower is better")
   expect_true(all(c("observed", "primary_prediction", "error", "absolute_error") %in%
@@ -23,6 +30,8 @@ test_that("guided regression uses a reproducible untouched holdout", {
   expect_true(all(c("mean_error", "median_absolute_error", "p90_absolute_error") %in%
                     names(first$evaluation$diagnostics)))
   expect_output(print(first), "improvement")
+  expect_output(print(first), 'model_set = "tuned"', fixed = TRUE)
+  expect_output(print(first), "render_model_report")
   expect_named(summary(first), c(
     "task", "target", "n_models", "n_features", "leaderboard", "evaluation", "provenance"
   ))
@@ -50,7 +59,7 @@ test_that("guided binary evaluation is stratified and probability-aware", {
   expect_equal(result$provenance$split_method, "reproducible stratified holdout")
   explainers <- as_explainers(result, models = "main_model")
   expect_s3_class(explainers$main_model, "autoxplain_explainer")
-  expect_equal(explainers$main_model$metadata$evaluation_role, "held-out test")
+  expect_equal(explainers$main_model$metadata$evaluation_role, "test")
   expect_equal(explainers$main_model$metadata$source, "guided base workflow")
 })
 
@@ -159,8 +168,17 @@ test_that("preprocessing learns imputations only from training data", {
   expected <- stats::median(train$x, na.rm = TRUE)
   expect_equal(result$test_data$x[[1]], expected)
   expect_equal(result$preprocessing_metadata$training_data$recipe$imputations$x, expected)
-  expect_equal(result$provenance$split_method, "user-supplied test data")
+  expect_equal(result$provenance$split_method, "user-supplied evaluation data")
+  expect_identical(result$provenance$evaluation_role, "evaluation")
   expect_equal(result$provenance$evaluation_rows, 2L)
+
+  asserted_test <- autoxplain(
+    train,
+    "y",
+    test_data = test,
+    evaluation_role = "test"
+  )
+  expect_identical(asserted_test$provenance$evaluation_role, "test")
 })
 
 test_that("automatic splitting never moves holdout rows and maps novel predictor levels", {
@@ -213,6 +231,63 @@ test_that("guided workflow reports actionable input errors", {
 test_that("binary AUC handles ties and single-class evaluation", {
   expect_equal(AutoXplainR:::guided_binary_auc(c(FALSE, TRUE), c(0.5, 0.5)), 0.5)
   expect_true(is.na(AutoXplainR:::guided_binary_auc(c(TRUE, TRUE), c(0.2, 0.8))))
+
+  binary_data <- data.frame(
+    x = seq_len(4),
+    y = factor(c("no", "yes", "no", "yes"), levels = c("no", "yes"))
+  )
+  binary <- explain_model(
+    list(),
+    binary_data,
+    "y",
+    task = "binary",
+    predict_function = function(newdata) rep(0.1, nrow(newdata))
+  )
+  binary_metrics <- AutoXplainR:::evaluate_predictions(
+    factor(rep("no", 2), levels = c("no", "yes")),
+    c(0.1, 0.1),
+    binary
+  )
+  expect_true(is.na(binary_metrics[["balanced_accuracy"]]))
+
+  multiclass_data <- data.frame(
+    x = seq_len(6),
+    y = factor(rep(c("a", "b", "c"), 2), levels = c("a", "b", "c"))
+  )
+  multiclass <- explain_model(
+    list(),
+    multiclass_data,
+    "y",
+    task = "multiclass",
+    predict_function = function(newdata) {
+      probability <- matrix(
+        rep(c(0.8, 0.1, 0.1), nrow(newdata)),
+        nrow = nrow(newdata),
+        byrow = TRUE,
+        dimnames = list(NULL, c("a", "b", "c"))
+      )
+      probability
+    }
+  )
+  multiclass_metrics <- AutoXplainR:::evaluate_predictions(
+    factor(c("a", "b"), levels = c("a", "b", "c")),
+    matrix(
+      c(0.8, 0.1, 0.1, 0.1, 0.8, 0.1),
+      nrow = 2L,
+      byrow = TRUE,
+      dimnames = list(NULL, c("a", "b", "c"))
+    ),
+    multiclass
+  )
+  expect_true(is.na(multiclass_metrics[["macro_recall"]]))
+  expect_match(
+    AutoXplainR:::metric_definitions("binary")[["balanced_accuracy"]],
+    "Unavailable when either class is absent"
+  )
+  expect_match(
+    AutoXplainR:::metric_definitions("multiclass")[["macro_recall"]],
+    "Unavailable when any trained class is absent"
+  )
 })
 
 test_that("guided evaluation flags fragile score contexts", {
@@ -290,4 +365,138 @@ test_that("evaluation outcomes must match the training outcome contract", {
 
   expect_error(autoxplain(train, "y", test_data = unseen), "classes absent")
   expect_error(autoxplain(train, "y", test_data = missing), "missing values")
+})
+
+test_that("custom explainer data inherits the fitted outcome contract", {
+  training <- data.frame(
+    x = seq_len(40),
+    y = factor(rep(c("no", "yes"), 20), levels = c("no", "yes"))
+  )
+  evaluation <- data.frame(
+    x = 101:110,
+    y = factor(rep(c("no", "yes"), 5), levels = c("no", "yes"))
+  )
+  result <- autoxplain(
+    training,
+    "y",
+    test_data = evaluation,
+    enable_preprocessing = FALSE,
+    overlap_action = "error"
+  )
+
+  reversed <- evaluation
+  reversed$y <- factor(as.character(reversed$y), levels = c("yes", "no"))
+  explainer <- as_explainers(
+    result,
+    data = reversed,
+    models = "main_model"
+  )$main_model
+
+  expect_identical(explainer$class_levels, c("no", "yes"))
+  expect_identical(explainer$positive, "yes")
+  expect_identical(levels(explainer$y), c("no", "yes"))
+
+  unseen <- evaluation
+  unseen$y <- as.character(unseen$y)
+  unseen$y[[1L]] <- "maybe"
+  expect_error(
+    as_explainers(result, data = unseen, models = "main_model"),
+    "classes absent from the training data"
+  )
+
+  missing <- evaluation
+  missing$y[[1L]] <- NA
+  expect_error(
+    as_explainers(result, data = missing, models = "main_model"),
+    "missing values"
+  )
+})
+
+test_that("model selection requires unique unambiguous IDs and indices", {
+  models <- list(first = 1, second = 2, third = 3)
+
+  expect_identical(
+    names(AutoXplainR:::select_models(models, c(3, 1))),
+    c("third", "first")
+  )
+  expect_identical(
+    names(AutoXplainR:::select_models(models, c("second", "first"))),
+    c("second", "first")
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, 1.5),
+    "finite whole numbers"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, Inf),
+    "finite whole numbers"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, NA_real_),
+    "finite whole numbers"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, c(1, 1)),
+    "indices must be unique"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, 4),
+    "out of range"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, c("first", "first")),
+    "IDs must be unique"
+  )
+  expect_error(
+    AutoXplainR:::select_models(models, "unknown"),
+    "Unknown model IDs"
+  )
+})
+
+test_that("exactly matching evaluation rows have configurable leakage checks", {
+  training <- mtcars[1:24, , drop = FALSE]
+  evaluation <- mtcars[25:32, , drop = FALSE]
+  expect_invisible(check_evaluation_row_overlap(training, evaluation))
+
+  overlapping <- rbind(evaluation, training[3, , drop = FALSE])
+  expect_warning(
+    warned <- autoxplain(training, "mpg", test_data = overlapping),
+    "may indicate training/evaluation leakage.*coincident records.*do not prove"
+  )
+  expect_identical(warned$provenance$evaluation_role, "evaluation")
+  expect_error(
+    autoxplain(
+      training,
+      "mpg",
+      test_data = overlapping,
+      overlap_action = "error"
+    ),
+    "values exactly match.*evaluation row 9.*do not prove"
+  )
+  expect_silent(
+    ignored <- autoxplain(
+      training,
+      "mpg",
+      test_data = overlapping,
+      overlap_action = "ignore"
+    )
+  )
+  expect_s3_class(ignored, "autoxplain_result")
+
+  factor_training <- data.frame(
+    x = factor(c("a", "b"), levels = c("a", "b")),
+    y = c(0, 1)
+  )
+  factor_evaluation <- data.frame(
+    x = factor("a", levels = c("b", "a")),
+    y = 0
+  )
+  expect_warning(
+    check_evaluation_row_overlap(factor_training, factor_evaluation),
+    "coincident records"
+  )
+  expect_error(
+    autoxplain(training, "mpg", overlap_action = "stop"),
+    "arg.*overlap_action|one of"
+  )
 })

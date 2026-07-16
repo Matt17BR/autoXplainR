@@ -108,6 +108,27 @@ statistical reference, decision-tree pruning/depth settings, and scaled
 neural-network hidden-unit/weight-decay settings. It learns preprocessing
 separately inside each training fold.
 
+The full registry is inspectable without installing any optional engine:
+
+```{r learner-catalog}
+catalog <- as.data.frame(learner_catalog())
+catalog[, c(
+  "family", "backend", "supported_tasks", "portfolios", "available"
+)]
+```
+
+The presets are deliberately easy to explain:
+
+| Portfolio | Families | Intended first use |
+|---|---|---|
+| `core` | linear, tree, neural | dependency-light examples and a fast first tournament |
+| `recommended` | linear, regularized, additive, tree, forest, boosting | the default serious tabular comparison after explicit engine installation |
+| `extended` | all ten, adding neural, radial-kernel, neighbor, and MARS families | broader model-specification sensitivity when extra runtime is acceptable |
+
+Additive and MARS fits currently support regression and binary outcomes, not
+multiclass outcomes. That task contract is why the exact number of participating
+families can differ by problem.
+
 For a real model search, the default `recommended` portfolio is broader. It
 compares linear, regularized, additive (where supported), decision-tree,
 random-forest, and gradient-boosted-tree behavior. Installation is explicit so
@@ -133,18 +154,68 @@ compare_model_behavior(recommended)
 The `extended` portfolio additionally covers neural, radial-kernel,
 nearest-neighbor, and multivariate adaptive regression spline behavior when
 the task supports them. Advanced users can supply an explicit `learners`
-vector and change `max_models`, `nfolds`, and `tuning_rule`.
+vector, but most users should keep a named preset.
 
 The default one-standard-error rule first uses the documented family priority,
 then chooses the least-flexible eligible setting inside that family. Its
 family-specific flexibility proxies are never compared as if they shared one
 unit. Use `tuning_rule = "best"` when the explicitly desired rule is minimum
 resampled error instead. Both rules and every fold score remain in the result.
+The within-family parsimony heuristic follows the classic one-standard-error
+rule of Breiman, Friedman, Olshen, and Stone (1984); the reviewed cross-family
+priority is an explicit AutoXplainR policy choice, not a statistical ordering of
+unlike model families.
 
 The resampled score answers *which configuration should be refitted?* The
 held-out score answers *how did that selected, refitted model perform on unseen
 rows?* AutoXplainR keeps the outer evaluation rows out of tuning and labels the
 two numbers separately in the report.
+
+When you supply `test_data` yourself, AutoXplainR uses the neutral role
+`evaluation` unless you explicitly set `evaluation_role = "test"` or
+`"validation"`. Set a role from the study design, not from the argument name.
+Exact duplicate-valued records across training and evaluation rows trigger a
+possible-leakage warning; choose `overlap_action = "error"` for strict pipeline
+enforcement or `"ignore"` only after confirming that coincident records are
+legitimate.
+
+### Advanced tuning is an escape hatch
+
+When a study has a pre-specified search design, `tuning_control()` validates it
+without expanding the beginner call. This small example stays dependency-light:
+
+```{r advanced-tuning}
+control <- tuning_control(
+  grids = list(tree = data.frame(
+    maxdepth = c(2L, 5L),
+    cp = c(0.02, 0.002),
+    minsplit = c(10L, 5L)
+  )),
+  family_budgets = c(linear = 1L, tree = 2L),
+  metric = "mae",
+  retain_oof = FALSE
+)
+
+advanced <- autoxplain(
+  mtcars,
+  target_column = "mpg",
+  model_set = "tuned",
+  learners = c("linear", "tree"),
+  nfolds = 3,
+  tuning_control = control,
+  seed = 2026
+)
+
+tuning_results(advanced)$control[c(
+  "family_budgets", "metric", "retain_oof", "failure_policy"
+)]
+```
+
+The same object can carry `fold_ids`, a supported task-specific loss, and
+`failure_policy = "stop"`. Supplied fold IDs require explicit `test_data` so
+they stay aligned with unchanged training rows. They define ordinary V-fold
+resampling; they are not automatically a grouped, rolling-origin, or
+forward-chaining design.
 
 ## Compare a small candidate set
 
@@ -166,7 +237,9 @@ model_tradeoffs(comparison)
 This adds a shallow tree and a more flexible tree to the pre-specified
 statistical model and intercept-only baseline. Pareto status asks whether
 another supplied model is at least as good on both held-out performance and
-model size, with a strict improvement on one.
+approximate model-object size, with a strict improvement on one. For local
+models, the size axis is R's in-memory `object.size()` estimate; it is a
+resource proxy rather than structural model complexity.
 
 The comparison is descriptive. AutoXplainR does not silently promote the
 holdout winner to primary, because selecting on the holdout and reporting the
@@ -185,6 +258,35 @@ Regression rows report the range of supplied candidate predictions. Binary and
 multiclass rows report hard-class disagreement and probability distance. This
 is not uncertainty coverage: the supplied models can perform very differently,
 and their held-out scores must remain beside the disagreement summary.
+
+`compare_model_behavior()` gives the portfolio-level view. Its behavior cards
+are reviewed prior knowledge about what each family can represent; its scores
+and prediction gaps are computed from common held-out rows:
+
+```{r behavior-comparison}
+behavior <- compare_model_behavior(comparison)
+behavior
+```
+
+`compare_model_effects()` answers the narrower feature-level question by
+evaluating one named input on aligned rows and a common grid:
+
+```{r effect-comparison, fig.width=7, fig.height=4}
+petal_effects <- compare_model_effects(
+  comparison,
+  feature = "Petal.Length",
+  method = "ale",
+  n_points = 8,
+  seed = 2026
+)
+petal_effects$comparisons
+plot(petal_effects)
+```
+
+Curve differences describe the supplied fitted prediction functions over the
+displayed support. They are not confidence intervals, intervention effects, or
+proof that a family used every nonlinear or interaction capacity available to
+it.
 
 An interactive view is available when Plotly is installed:
 
@@ -396,8 +498,43 @@ existing <- explain_model(
 )
 ```
 
-Other frameworks can supply a `predict_function`. H2O AutoML remains an
-explicit optional fitting engine through `autoxplain(..., engine = "h2o")`.
+Other frameworks can supply a `predict_function`.
+
+## Where optional H2O AutoML fits
+
+The native ten-family portfolio is the main local tuning path. H2O remains a
+separate, optional Java-backed engine when a broader AutoML search or stacked
+ensemble is appropriate:
+
+```{r h2o, eval=FALSE}
+holdout_rows <- seq(5L, nrow(iris), by = 5L)
+
+h2o_result <- autoxplain(
+  iris[-holdout_rows, ],
+  target_column = "Species",
+  test_data = iris[holdout_rows, ],
+  engine = "h2o",
+  max_models = 10,
+  max_runtime_secs = 0,
+  exclude_algos = "DeepLearning",
+  use_test_as_validation = FALSE,
+  evaluation_role = "test",
+  seed = 2026
+)
+
+render_model_report(h2o_result, "h2o-report.html")
+```
+
+This requires the suggested `h2o` package, Java, and an H2O process. The
+default keeps the explicit test rows out of H2O validation so they retain their
+final-evaluation role. `engine_leaderboard` keeps H2O's selection evidence;
+the ordinary `leaderboard` scores the fixed H2O primary, alternatives, and a
+simple baseline on common outer rows without re-selecting from those scores.
+Setting a fixed model budget, disabling the wall-clock limit, and excluding
+Deep Learning follows H2O's documented route to a more reproducible AutoML
+search. The result records remaining caveats. H2O results still enter the same
+explainer, audit, and report contracts; H2O is not required to obtain a
+complete AutoXplainR report.
 
 ## What to say—and not say
 
@@ -413,3 +550,49 @@ The following requires a different design and evidence:
 
 AutoXplainR makes the first statement easier to compute and preserve. It does
 not turn it into the second.
+
+## Primary method literature
+
+The portfolio is a common evaluation and explanation layer over established
+methods, not a claim that the learners themselves are new. Primary references
+for the implemented family ideas include:
+
+- Nelder and Wedderburn (1972), [generalized linear models](https://doi.org/10.2307/2344614),
+  and Friedman, Hastie, and Tibshirani (2010), [regularization paths for GLMs](https://doi.org/10.18637/jss.v033.i01);
+- Hastie and Tibshirani (1986), [generalized additive models](https://doi.org/10.1214/ss/1177013604),
+  and Breiman et al. (1984), [classification and regression trees](https://doi.org/10.1201/9781315139470);
+- Breiman (2001), [random forests](https://doi.org/10.1023/A:1010933404324),
+  and Chen and Guestrin (2016), [XGBoost](https://doi.org/10.1145/2939672.2939785);
+- Hornik, Stinchcombe, and White (1989), [single-hidden-layer approximation capacity](https://doi.org/10.1016/0893-6080(89)90020-8),
+  Cortes and Vapnik (1995), [support-vector classification](https://doi.org/10.1007/BF00994018),
+  and Drucker et al. (1997), [epsilon-insensitive support-vector regression](https://proceedings.neurips.cc/paper/1996/hash/d38901788c533e8286cb6400b40b386d-Abstract.html);
+- Cover and Hart (1967), [nearest-neighbor classification](https://doi.org/10.1109/TIT.1967.1053964),
+  and Stone (1977), [weighted nearest-neighbor regression consistency](https://doi.org/10.1214/aos/1176343886);
+- Friedman (1991), [multivariate adaptive regression splines](https://doi.org/10.1214/aos/1176347963);
+  and
+- Fisher, Rudin, and Dominici (2019), [model-class reliance](https://www.jmlr.org/papers/v20/18-760.html),
+  and Apley and Zhu (2020), [accumulated local effects](https://doi.org/10.1111/rssb.12377),
+  for the explanation scope used here.
+
+The package-level evaluation features have their own methodological basis;
+they are not consequences of whichever learner backend is installed:
+
+| AutoXplainR feature | Methodological anchor | Scope in this package |
+|---|---|---|
+| training-only selection plus an outer evaluation split | Stone (1974), [cross-validatory model choice](https://doi.org/10.1111/j.2517-6161.1974.tb00994.x), and Varma and Simon (2006), [bias from non-nested error estimation](https://doi.org/10.1186/1471-2105-7-91) | separates configuration choice from final descriptive evaluation |
+| one-standard-error eligibility | Breiman, Friedman, Olshen, and Stone (1984), [Classification and Regression Trees](https://doi.org/10.1201/9781315139470) | adapts a parsimony heuristic within each family; the package's cross-family priority remains a disclosed policy choice |
+| log loss and Brier score | Brier (1950), [probability forecast verification](https://doi.org/10.1175/1520-0493(1950)078%3C0001:VOFEIT%3E2.0.CO;2), and Gneiting and Raftery (2007), [strictly proper scoring rules](https://doi.org/10.1198/016214506000001437) | scores probabilities without reducing them immediately to classes |
+| binned calibration check | Murphy (1973), [probability-score decomposition](https://doi.org/10.1175/1520-0450%281973%29012%3C0595%3AANVPOT%3E2.0.CO%3B2) | descriptive grouping diagnostic, not a population calibration interval |
+| decision-threshold sensitivity | Fawcett (2006), [ROC analysis](https://doi.org/10.1016/j.patrec.2005.10.010) | displays false-positive/false-negative trade-offs without optimizing on the holdout |
+| candidate-relative Pareto status | Miettinen (1999), [nonlinear multiobjective optimization](https://doi.org/10.1007/978-1-4615-5563-6) | dominance only over supplied models and displayed objectives |
+
+Implementation-specific behavior is also versioned in `learner_catalog()`.
+For example, the forest adapter follows Wright and Ziegler's
+[ranger implementation](https://doi.org/10.18637/jss.v077.i01), while the SVM
+adapter inherits probability-estimation behavior from Chang and Lin's
+[LIBSVM](https://doi.org/10.1145/1961189.1961199). Backend citations describe
+software and algorithms; they do not change the evaluation estimand above.
+
+These references motivate family capacity and model-agnostic explanation
+estimands. They do not make a fitted AutoXplainR result causal or externally
+valid; those claims still require an appropriate study design and new evidence.

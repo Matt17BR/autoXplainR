@@ -21,10 +21,16 @@
 #'   recommended, and 40 for extended) or 24 for H2O. Explicit values are
 #'   honored without a hidden cap.
 #' @param max_runtime_secs H2O training time budget in seconds; ignored by the
-#'   guided base engine.
-#' @param seed Reproducible split, fitting, and H2O seed.
-#' @param test_data Optional held-out evaluation data. It is not used as an H2O
-#'   validation frame unless `use_test_as_validation = TRUE`.
+#'   guided base engine. Use zero to disable the wall-clock limit and let the
+#'   fixed `max_models` budget govern the search.
+#' @param seed Reproducible split and local-fitting seed. For H2O, the seed
+#'   controls supported stochastic components but cannot guarantee an identical
+#'   time-limited search; see the returned reproducibility provenance.
+#' @param test_data Optional evaluation data. Supplied rows are labeled as a
+#'   neutral evaluation by default; use `evaluation_role = "test"` only when
+#'   their provenance supports an independent-test interpretation. H2O uses
+#'   them as validation rows only when `use_test_as_validation = TRUE` and
+#'   `nfolds = 0`.
 #' @param test_fraction Fraction of `data` reserved for evaluation when
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
@@ -34,7 +40,7 @@
 #'   two pre-specified trees for a descriptive Pareto view. `"tuned"` compares
 #'   the requested behaviorally diverse learner portfolio using training-only
 #'   resampling, retains its family winners for comparison, then evaluates the
-#'   selected configuration once on the untouched holdout.
+#'   selected configuration once on the configured evaluation rows.
 #' @param portfolio Local tuned-model portfolio. `"recommended"` compares
 #'   linear, regularized, additive (when supported), tree, forest, and boosting
 #'   families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
@@ -50,22 +56,39 @@
 #'   `"multiclass"`.
 #' @param nfolds Number of training-only folds for local tuning or H2O
 #'   cross-validation. Local tuning automatically reduces this when an outcome
-#'   class contains fewer rows.
+#'   class contains fewer rows. For H2O, zero is accepted only with explicit
+#'   `test_data` and `use_test_as_validation = TRUE`; this prevents model ranking
+#'   by training error alone.
 #' @param tuning_rule Local tuning selection rule. `"one_se"` chooses the
-#'   most interpretable eligible family, then its least-flexible configuration,
-#'   among candidates whose resampled error is within one standard error of the
-#'   best. The reviewed family priority and family-specific flexibility proxies
+#'   first eligible family in the documented reviewed priority, then its
+#'   least-flexible configuration, among candidates whose resampled error is
+#'   within one standard error of the best. The family priority and
+#'   family-specific flexibility proxies
 #'   are shown by [learner_catalog()]. `"best"` chooses the lowest resampled
 #'   error. Ignored by other workflows.
+#' @param tuning_control Optional advanced local-tuning settings returned by
+#'   [tuning_control()]. Leave `NULL` for the beginner defaults. This argument
+#'   is available only with `engine = "base"` and `model_set = "tuned"`.
 #' @param sort_metric H2O AutoML leaderboard metric.
 #' @param include_algos,exclude_algos Optional H2O algorithm filters. Supply at
 #'   most one.
 #' @param use_test_as_validation Whether to pass `test_data` to H2O as a
-#'   validation frame. The default keeps held-out explanation data independent.
+#'   validation frame when `nfolds = 0`. With H2O cross-validation (`nfolds >=
+#'   2`), the supplied frame is not passed because H2O ranks models using
+#'   cross-validation metrics.
 #' @param init_h2o Start a local H2O cluster when no connection is available.
 #' @param h2o_nthreads Threads used when starting H2O.
 #' @param h2o_max_mem_size Memory used when starting H2O.
 #' @param verbosity One of `"quiet"` or `"info"`.
+#' @param evaluation_role How to describe the evaluation rows. `"auto"` labels
+#'   package-generated outer splits as `"test"`, supplied data as the neutral
+#'   `"evaluation"`, and data actually used for H2O selection as
+#'   `"validation"`. Use an explicit value to record a role established by the
+#'   study design.
+#' @param overlap_action What to do when supplied evaluation rows have exactly
+#'   the same values as training rows: warn (the default), error, or ignore.
+#'   Exact equality can indicate leakage but can also occur naturally, so this
+#'   check cannot establish whether the samples are independent.
 #'
 #' @return An `autoxplain_result` containing models, a data-frame leaderboard,
 #'   task metadata, preprocessing provenance, and evaluation data.
@@ -96,6 +119,7 @@ autoxplain <- function(data,
                        task = c("auto", "regression", "binary", "multiclass"),
                        nfolds = 5L,
                        tuning_rule = c("one_se", "best"),
+                       tuning_control = NULL,
                        sort_metric = "AUTO",
                        include_algos = NULL,
                        exclude_algos = NULL,
@@ -103,7 +127,9 @@ autoxplain <- function(data,
                        init_h2o = TRUE,
                        h2o_nthreads = -1L,
                        h2o_max_mem_size = "2G",
-                       verbosity = c("quiet", "info")) {
+                       verbosity = c("quiet", "info"),
+                       evaluation_role = c("auto", "test", "validation", "evaluation"),
+                       overlap_action = c("warn", "error", "ignore")) {
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
@@ -111,6 +137,16 @@ autoxplain <- function(data,
   task <- match.arg(task)
   tuning_rule <- match.arg(tuning_rule)
   verbosity <- match.arg(verbosity)
+  evaluation_role <- match.arg(evaluation_role)
+  overlap_action <- match.arg(overlap_action)
+  if (!is.null(tuning_control) &&
+        (!identical(resolved_engine, "base") || !identical(model_set, "tuned"))) {
+    stop(
+      "`tuning_control` is available only with `engine = \"base\"` and ",
+      "`model_set = \"tuned\"`.",
+      call. = FALSE
+    )
+  }
   validate_automl_inputs(data, target_column, test_data)
   assert_probability(test_fraction, "test_fraction")
   if (test_fraction <= 0 || test_fraction >= 1) {
@@ -121,19 +157,22 @@ autoxplain <- function(data,
     resolved_learners <- NULL
     if (identical(model_set, "tuned")) {
       resolved_learners <- resolve_tuning_learners(portfolio, learners, resolved_task)
-      if (is.null(max_models)) {
-        max_models <- default_local_tuning_budget(portfolio, learners)
+      tuning_control <- resolve_tuning_control(
+        control = tuning_control,
+        learners = resolved_learners,
+        task = resolved_task,
+        outcome = coerce_outcome_for_task(data[[target_column]], resolved_task),
+        nfolds = nfolds,
+        max_models = max_models,
+        automatic_max_models = default_local_tuning_budget(portfolio, learners),
+        test_data_supplied = !is.null(test_data)
+      )
+      max_models <- tuning_control$max_models
+      nfolds <- if (identical(tuning_control$fold_source, "supplied_vfold")) {
+        length(tuning_control$fold_labels)
+      } else {
+        nfolds
       }
-      max_models <- assert_count(max_models, "max_models")
-      if (max_models < length(resolved_learners)) {
-        stop(
-          "`max_models` must be at least the number of requested learner families (",
-          length(resolved_learners), ").",
-          call. = FALSE
-        )
-      }
-      nfolds <- assert_count(nfolds, "nfolds")
-      if (nfolds < 2L) stop("`nfolds` must be at least 2 for local tuning.", call. = FALSE)
     } else if (is.null(max_models)) {
       # Kept for a stable result/provenance shape; quick workflows do not use
       # this budget to search models.
@@ -152,16 +191,18 @@ autoxplain <- function(data,
       max_models = max_models,
       nfolds = nfolds,
       tuning_rule = tuning_rule,
+      tuning_control = tuning_control,
       enable_preprocessing = enable_preprocessing,
       preprocessing_config = preprocessing_config,
-      verbosity = verbosity
+      verbosity = verbosity,
+      evaluation_role = evaluation_role,
+      overlap_action = overlap_action
     ))
   }
 
-  require_optional("h2o", "fitting H2O AutoML models")
   if (is.null(max_models)) max_models <- 24L
   max_models <- assert_count(max_models, "max_models")
-  max_runtime_secs <- assert_count(max_runtime_secs, "max_runtime_secs")
+  max_runtime_secs <- assert_count(max_runtime_secs, "max_runtime_secs", minimum = 0L)
   seed <- assert_count(seed, "seed", minimum = 0L)
   nfolds <- assert_count(nfolds, "nfolds", minimum = 0L)
   if (nfolds == 1L) stop("`nfolds` must be zero or at least two.", call. = FALSE)
@@ -175,8 +216,32 @@ autoxplain <- function(data,
         is.na(use_test_as_validation)) {
     stop("`use_test_as_validation` must be TRUE or FALSE.", call. = FALSE)
   }
+  if (!is.null(test_data) && isTRUE(use_test_as_validation) &&
+        identical(evaluation_role, "test")) {
+    stop(
+      "`evaluation_role = \"test\"` contradicts `use_test_as_validation = TRUE`; ",
+      "use `evaluation_role = \"auto\"` or `\"validation\"`.",
+      call. = FALSE
+    )
+  }
+  if (nfolds == 0L && (is.null(test_data) || !isTRUE(use_test_as_validation))) {
+    stop(
+      "H2O `nfolds = 0` would rank models without cross-validation. Supply explicit ",
+      "`test_data` with `use_test_as_validation = TRUE`, or use at least two folds.",
+      call. = FALSE
+    )
+  }
 
   resolved_task <- if (task == "auto") detect_task(data[[target_column]]) else task
+  if (anyNA(data[[target_column]])) {
+    stop(
+      "The target contains missing values. Remove those rows or supply observed outcomes before fitting.",
+      call. = FALSE
+    )
+  }
+  validate_guided_predictors(data, target_column)
+  validate_guided_target(data[[target_column]], resolved_task)
+  if (!is.null(test_data)) validate_guided_predictors(test_data, target_column)
   config <- utils::modifyList(
     list(
       enable_target_handling = TRUE,
@@ -191,37 +256,32 @@ autoxplain <- function(data,
     preprocessing_config
   )
 
-  train_processed <- if (enable_preprocessing) {
-    do.call(preprocess_data, c(list(data = data, target_column = target_column), config))
-  } else {
-    list(data = data, preprocessing_log = list(), original_info = data_info(data),
-         final_info = data_info(data), recipe = list())
-  }
+  require_optional("h2o", "fitting H2O AutoML models")
+  prepared <- prepare_h2o_outer_split(
+    data = data,
+    test_data = test_data,
+    target = target_column,
+    task = resolved_task,
+    test_fraction = test_fraction,
+    seed = seed,
+    enable_preprocessing = enable_preprocessing,
+    preprocessing_config = config,
+    overlap_action = overlap_action
+  )
+  train_processed <- prepared$training
+  test_processed <- prepared$evaluation
   train <- train_processed$data
-  train[[target_column]] <- coerce_outcome_for_task(train[[target_column]], resolved_task)
-
-  test_processed <- NULL
-  evaluation <- test_data
-  if (!is.null(test_data)) {
-    test_processed <- if (enable_preprocessing) {
-      apply_preprocessing_recipe(test_data, train_processed$recipe, target_column,
-                                 missing_value_strategy = config$missing_value_strategy,
-                                 novel_level_strategy = config$novel_level_strategy)
-    } else {
-      list(data = test_data, preprocessing_log = list(), original_info = data_info(test_data),
-           final_info = data_info(test_data), recipe = list())
-    }
-    evaluation <- test_processed$data
-    evaluation[[target_column]] <- coerce_outcome_for_task(
-      evaluation[[target_column]], resolved_task,
-      target_levels = if (is.factor(train[[target_column]])) levels(train[[target_column]]) else NULL
-    )
-    evaluation <- validate_train_test_schema(train, evaluation, target_column)
-  }
+  evaluation <- test_processed$data
+  evaluation_provenance <- resolve_h2o_evaluation_role(
+    test_data_supplied = prepared$test_data_supplied,
+    use_test_as_validation = use_test_as_validation,
+    nfolds = nfolds,
+    evaluation_role = evaluation_role
+  )
 
   ensure_h2o_connection(init_h2o, h2o_nthreads, h2o_max_mem_size, verbosity)
   h2o_training <- h2o::as.h2o(train)
-  h2o_validation <- if (use_test_as_validation && !is.null(evaluation)) {
+  h2o_validation <- if (evaluation_provenance$test_used_for_validation) {
     h2o::as.h2o(evaluation)
   } else {
     NULL
@@ -244,17 +304,57 @@ autoxplain <- function(data,
   arguments <- arguments[!vapply(arguments, is.null, logical(1))]
 
   automl <- do.call(h2o::h2o.automl, arguments)
-  leaderboard <- as.data.frame(automl@leaderboard)
-  model_ids <- head(as.character(leaderboard$model_id), max_models)
-  models <- lapply(model_ids, h2o::h2o.getModel)
-  names(models) <- model_ids
-  if (!length(models)) stop("H2O AutoML returned no retrievable models.", call. = FALSE)
+  engine_leaderboard <- as.data.frame(automl@leaderboard)
+  model_ids <- as.character(engine_leaderboard$model_id)
+  h2o_models <- lapply(model_ids, h2o::h2o.getModel)
+  names(h2o_models) <- model_ids
+  if (!length(h2o_models)) stop("H2O AutoML returned no retrievable models.", call. = FALSE)
+
+  primary_model_id <- model_ids[[1L]]
+  baseline <- fit_h2o_baseline(train, target_column, resolved_task)
+  models <- c(h2o_models, list(simple_baseline = baseline$model))
+  labels <- c(
+    stats::setNames(
+      vapply(seq_along(h2o_models), function(index) {
+        h2o_model_label(h2o_models[[index]], index)
+      }, character(1)),
+      model_ids
+    ),
+    simple_baseline = "intercept-only baseline"
+  )
+  roles <- stats::setNames(rep("candidate", length(models)), names(models))
+  roles[[primary_model_id]] <- "primary"
+  roles[["simple_baseline"]] <- "baseline"
+  evaluated <- evaluate_candidates(
+    models = models,
+    data = evaluation,
+    target = target_column,
+    task = resolved_task,
+    labels = labels,
+    roles = roles,
+    diagnostics = h2o_evaluation_diagnostics(h2o_models, baseline),
+    primary_metric = h2o_outer_primary_metric(resolved_task),
+    primary_model_id = primary_model_id
+  )
+  evaluated$summary$notes <- h2o_evaluation_notes(
+    evaluated$summary,
+    evaluation_provenance$evaluation_role,
+    primary_model_id,
+    used_for_selection = evaluation_provenance$test_used_for_validation
+  )
+  reproducibility <- h2o_reproducibility_provenance(
+    max_runtime_secs,
+    include_algos,
+    exclude_algos
+  )
 
   result <- structure(
     list(
       engine = "h2o",
       models = models,
-      leaderboard = leaderboard,
+      leaderboard = evaluated$leaderboard,
+      engine_leaderboard = engine_leaderboard,
+      evaluation = evaluated$summary,
       training_data = train,
       test_data = evaluation,
       target_column = target_column,
@@ -262,6 +362,7 @@ autoxplain <- function(data,
       task = resolved_task,
       automl_object = automl,
       model_characteristics = NULL,
+      model_diagnostics = evaluated$model_diagnostics,
       preprocessing_metadata = list(
         enabled = enable_preprocessing,
         training_data = train_processed,
@@ -272,14 +373,24 @@ autoxplain <- function(data,
         seed = seed,
         max_models = max_models,
         max_runtime_secs = max_runtime_secs,
+        reproducibility = reproducibility,
         nfolds = nfolds,
         sort_metric = sort_metric,
-        test_used_for_validation = use_test_as_validation,
-        evaluation_role = if (is.null(test_data)) "training" else if (use_test_as_validation) {
-          "validation"
-        } else {
-          "test"
-        }
+        primary_model_id = primary_model_id,
+        primary_model_label = unname(labels[[primary_model_id]]),
+        candidate_selection = h2o_candidate_selection_provenance(
+          nfolds = nfolds,
+          used_for_validation = evaluation_provenance$test_used_for_validation,
+          evaluation_role = evaluation_provenance$evaluation_role
+        ),
+        test_used_for_validation = evaluation_provenance$test_used_for_validation,
+        validation_requested_but_not_used =
+          evaluation_provenance$validation_requested_but_not_used,
+        evaluation_role = evaluation_provenance$evaluation_role,
+        split_method = prepared$split_method,
+        test_fraction_requested = prepared$test_fraction_requested,
+        training_rows = nrow(train),
+        evaluation_rows = nrow(evaluation)
       )
     ),
     class = "autoxplain_result"
@@ -306,7 +417,7 @@ default_local_tuning_budget <- function(portfolio, learners = NULL) {
 #'
 #' @param x An `autoxplain_result`.
 #' @param data Optional raw evaluation data. The fitted preprocessing recipe is
-#'   applied automatically. Defaults to held-out `test_data` when available,
+#'   applied automatically. Defaults to the configured `test_data` when available,
 #'   otherwise training data.
 #' @param models Model indices, IDs, or `NULL` for all retained models.
 #'
@@ -317,15 +428,22 @@ as_explainers <- function(x, data = NULL, models = NULL) {
     stop("`x` must be an `autoxplain_result`.", call. = FALSE)
   }
   evaluation <- data %||% x$test_data %||% x$training_data
-  if (!is.null(data) && isTRUE(x$preprocessing_metadata$enabled)) {
-    recipe <- x$preprocessing_metadata$training_data$recipe
-    strategy <- recipe$missing_value_strategy %||% "keep"
-    evaluation <- apply_preprocessing_recipe(
-      data,
-      recipe,
-      x$target_column,
-      missing_value_strategy = strategy
-    )$data
+  if (!is.null(data)) {
+    assert_data_frame(data, "data")
+    if (isTRUE(x$preprocessing_metadata$enabled)) {
+      recipe <- x$preprocessing_metadata$training_data$recipe
+      strategy <- recipe$missing_value_strategy %||% "keep"
+      evaluation <- apply_preprocessing_recipe(
+        data,
+        recipe,
+        x$target_column,
+        missing_value_strategy = strategy
+      )$data
+    }
+    if (!x$target_column %in% names(evaluation)) {
+      stop("Evaluation data must contain target column `", x$target_column, "`.",
+           call. = FALSE)
+    }
     target_levels <- if (is.factor(x$training_data[[x$target_column]])) {
       levels(x$training_data[[x$target_column]])
     } else {
@@ -336,6 +454,16 @@ as_explainers <- function(x, data = NULL, models = NULL) {
       x$task,
       target_levels
     )
+    if (anyNA(evaluation[[x$target_column]])) {
+      stop(
+        "Evaluation outcomes contain missing values or classes absent from the training data.",
+        call. = FALSE
+      )
+    }
+    if (identical(x$task, "regression") &&
+          any(!is.finite(evaluation[[x$target_column]]))) {
+      stop("Evaluation outcomes must be finite numeric values.", call. = FALSE)
+    }
     evaluation <- validate_train_test_schema(x$training_data, evaluation, x$target_column)
   }
   assert_data_frame(evaluation, "data")
@@ -350,6 +478,7 @@ as_explainers <- function(x, data = NULL, models = NULL) {
       selected[[id]], evaluation, y = x$target_column, task = x$task,
       label = id, metadata = list(
         evaluation_role = role,
+        primary_metric = x$evaluation$primary_metric %||% NULL,
         source = if (identical(x$engine, "h2o")) {
           "H2O AutoML"
         } else if (inherits(x$tuning, "autoxplain_tuning")) {
@@ -374,17 +503,16 @@ print.autoxplain_result <- function(x, ...) {
   cat("  models:     ", length(x$models), if (inherits(x$tuning, "autoxplain_tuning")) {
     paste0(" (selected from ", nrow(x$tuning$candidates),
            " training-resampled configurations)")
+  } else if (identical(x$engine, "h2o")) {
+    " (H2O-selected primary + alternatives + baseline)"
   } else if (length(x$models) > 2L) {
     " (comparison set; primary remains pre-specified)"
   } else {
     " (primary + baseline)"
   }, "\n", sep = "")
   if (!is.null(x$evaluation$primary_metric)) {
-    reference <- if ("main_model" %in% names(x$evaluation$metrics)) {
-      "main_model"
-    } else {
-      x$evaluation$winner
-    }
+    reference <- x$evaluation$primary_model_id %||%
+      if ("main_model" %in% names(x$evaluation$metrics)) "main_model" else x$evaluation$winner
     metric <- x$evaluation$primary_metric
     score <- x$evaluation$metrics[[reference]][[metric]]
     cat("  result:     primary model has ", metric, " = ",
@@ -399,8 +527,14 @@ print.autoxplain_result <- function(x, ...) {
       cat("  tuning:     ", selected$model[[1L]], " chosen by ",
           x$tuning$folds_used, "-fold ", tuning_rule_label(x$tuning$selection_rule),
           "\n", sep = "")
+      cat("  compare:    use compare_model_behavior() to see why retained families differ\n")
+    } else if (identical(x$engine, "h2o")) {
+      cat("  selection:  H2O engine leaderboard; outer ranks remain descriptive\n")
+      cat("  compare:    use compare_model_behavior() for aligned fitted-model differences\n")
+    } else if (identical(x$engine %||% "base", "base")) {
+      cat("  compare:    use model_set = \"tuned\" for automatic multi-family selection\n")
     }
-    cat("  next:       use as_explainers() to investigate the fitted patterns\n")
+    cat("  explain:    use render_model_report() or as_explainers() for fitted patterns\n")
   } else {
     cat("  models:     ", length(x$models), "\n", sep = "")
     cat("  evaluation: ", x$provenance$evaluation_role, "\n", sep = "")
@@ -410,7 +544,7 @@ print.autoxplain_result <- function(x, ...) {
 
 #' @export
 summary.autoxplain_result <- function(object, ...) {
-  list(
+  summary <- list(
     task = object$task,
     target = object$target_column,
     n_models = length(object$models),
@@ -419,6 +553,10 @@ summary.autoxplain_result <- function(object, ...) {
     evaluation = object$evaluation,
     provenance = object$provenance
   )
+  if (!is.null(object$engine_leaderboard)) {
+    summary$engine_leaderboard <- object$engine_leaderboard
+  }
+  summary
 }
 
 validate_automl_inputs <- function(data, target, test_data) {
@@ -495,13 +633,26 @@ ensure_h2o_connection <- function(init, nthreads, max_mem_size, verbosity) {
 select_models <- function(models, selection) {
   if (is.null(selection)) return(models)
   if (is.numeric(selection)) {
+    if (anyNA(selection) || any(!is.finite(selection)) ||
+          any(selection != floor(selection))) {
+      stop("Numeric `models` indices must be finite whole numbers.", call. = FALSE)
+    }
     indices <- as.integer(selection)
+    if (anyDuplicated(indices)) {
+      stop("Numeric `models` indices must be unique.", call. = FALSE)
+    }
     if (any(indices < 1L | indices > length(models))) {
       stop("Numeric `models` indices are out of range.", call. = FALSE)
     }
     return(models[indices])
   }
   if (is.character(selection)) {
+    if (anyNA(selection) || any(!nzchar(selection))) {
+      stop("Character `models` IDs must be non-missing and non-empty.", call. = FALSE)
+    }
+    if (anyDuplicated(selection)) {
+      stop("Character `models` IDs must be unique.", call. = FALSE)
+    }
     missing <- setdiff(selection, names(models))
     if (length(missing)) stop("Unknown model IDs: ", paste(missing, collapse = ", "),
                               call. = FALSE)

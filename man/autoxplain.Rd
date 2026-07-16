@@ -21,6 +21,7 @@ autoxplain(
   task = c("auto", "regression", "binary", "multiclass"),
   nfolds = 5L,
   tuning_rule = c("one_se", "best"),
+  tuning_control = NULL,
   sort_metric = "AUTO",
   include_algos = NULL,
   exclude_algos = NULL,
@@ -28,7 +29,9 @@ autoxplain(
   init_h2o = TRUE,
   h2o_nthreads = -1L,
   h2o_max_mem_size = "2G",
-  verbosity = c("quiet", "info")
+  verbosity = c("quiet", "info"),
+  evaluation_role = c("auto", "test", "validation", "evaluation"),
+  overlap_action = c("warn", "error", "ignore")
 )
 }
 \arguments{
@@ -43,12 +46,18 @@ recommended, and 40 for extended) or 24 for H2O. Explicit values are
 honored without a hidden cap.}
 
 \item{max_runtime_secs}{H2O training time budget in seconds; ignored by the
-guided base engine.}
+guided base engine. Use zero to disable the wall-clock limit and let the
+fixed \code{max_models} budget govern the search.}
 
-\item{seed}{Reproducible split, fitting, and H2O seed.}
+\item{seed}{Reproducible split and local-fitting seed. For H2O, the seed
+controls supported stochastic components but cannot guarantee an identical
+time-limited search; see the returned reproducibility provenance.}
 
-\item{test_data}{Optional held-out evaluation data. It is not used as an H2O
-validation frame unless \code{use_test_as_validation = TRUE}.}
+\item{test_data}{Optional evaluation data. Supplied rows are labeled as a
+neutral evaluation by default; use \code{evaluation_role = "test"} only when
+their provenance supports an independent-test interpretation. H2O uses
+them as validation rows only when \code{use_test_as_validation = TRUE} and
+\code{nfolds = 0}.}
 
 \item{test_fraction}{Fraction of \code{data} reserved for evaluation when
 \code{test_data} is not supplied. Classification splits are stratified.}
@@ -61,7 +70,7 @@ pre-specified understandable model and baseline. \code{"comparison"} also fits
 two pre-specified trees for a descriptive Pareto view. \code{"tuned"} compares
 the requested behaviorally diverse learner portfolio using training-only
 resampling, retains its family winners for comparison, then evaluates the
-selected configuration once on the untouched holdout.}
+selected configuration once on the configured evaluation rows.}
 
 \item{portfolio}{Local tuned-model portfolio. \code{"recommended"} compares
 linear, regularized, additive (when supported), tree, forest, and boosting
@@ -83,14 +92,21 @@ removal defaults to \code{FALSE}.}
 
 \item{nfolds}{Number of training-only folds for local tuning or H2O
 cross-validation. Local tuning automatically reduces this when an outcome
-class contains fewer rows.}
+class contains fewer rows. For H2O, zero is accepted only with explicit
+\code{test_data} and \code{use_test_as_validation = TRUE}; this prevents model ranking
+by training error alone.}
 
 \item{tuning_rule}{Local tuning selection rule. \code{"one_se"} chooses the
-most interpretable eligible family, then its least-flexible configuration,
-among candidates whose resampled error is within one standard error of the
-best. The reviewed family priority and family-specific flexibility proxies
+first eligible family in the documented reviewed priority, then its
+least-flexible configuration, among candidates whose resampled error is
+within one standard error of the best. The family priority and
+family-specific flexibility proxies
 are shown by \code{\link[=learner_catalog]{learner_catalog()}}. \code{"best"} chooses the lowest resampled
 error. Ignored by other workflows.}
+
+\item{tuning_control}{Optional advanced local-tuning settings returned by
+\code{\link[=tuning_control]{tuning_control()}}. Leave \code{NULL} for the beginner defaults. This argument
+is available only with \code{engine = "base"} and \code{model_set = "tuned"}.}
 
 \item{sort_metric}{H2O AutoML leaderboard metric.}
 
@@ -98,7 +114,8 @@ error. Ignored by other workflows.}
 most one.}
 
 \item{use_test_as_validation}{Whether to pass \code{test_data} to H2O as a
-validation frame. The default keeps held-out explanation data independent.}
+validation frame when \code{nfolds = 0}. With H2O cross-validation (\code{nfolds >= 2}), the supplied frame is not passed because H2O ranks models using
+cross-validation metrics.}
 
 \item{init_h2o}{Start a local H2O cluster when no connection is available.}
 
@@ -107,6 +124,17 @@ validation frame. The default keeps held-out explanation data independent.}
 \item{h2o_max_mem_size}{Memory used when starting H2O.}
 
 \item{verbosity}{One of \code{"quiet"} or \code{"info"}.}
+
+\item{evaluation_role}{How to describe the evaluation rows. \code{"auto"} labels
+package-generated outer splits as \code{"test"}, supplied data as the neutral
+\code{"evaluation"}, and data actually used for H2O selection as
+\code{"validation"}. Use an explicit value to record a role established by the
+study design.}
+
+\item{overlap_action}{What to do when supplied evaluation rows have exactly
+the same values as training rows: warn (the default), error, or ignore.
+Exact equality can indicate leakage but can also occur naturally, so this
+check cannot establish whether the samples are independent.}
 }
 \value{
 An \code{autoxplain_result} containing models, a data-frame leaderboard,

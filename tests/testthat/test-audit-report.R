@@ -77,6 +77,38 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
   expect_match(html, "<details class=\"advanced\">", fixed = TRUE)
   expect_false(grepl("<details class=\"advanced\" open", html, fixed = TRUE))
   expect_match(html, "Verify this prose against", fixed = TRUE)
+  expect_match(html, ".finding{min-width:0;overflow-wrap:anywhere", fixed = TRUE)
+})
+
+test_that("guided reports distinguish selection validation from held-out tests", {
+  result <- autoxplain(mtcars, "mpg", seed = 2026)
+  result$provenance$evaluation_role <- "validation"
+  path <- tempfile(fileext = ".html")
+  on.exit(unlink(path), add = TRUE)
+
+  render_model_report(result, path, top_features = 1, n_repeats = 2)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+
+  expect_match(html, "How did the model score on validation rows?", fixed = TRUE)
+  expect_match(html, "This is not a final test estimate", fixed = TRUE)
+  expect_false(grepl("Did the model generalize?", html, fixed = TRUE))
+})
+
+test_that("reports keep supplied evaluation data descriptively neutral by default", {
+  training <- mtcars[1:24, , drop = FALSE]
+  evaluation <- mtcars[25:32, , drop = FALSE]
+  result <- autoxplain(training, "mpg", test_data = evaluation, seed = 2026)
+  path <- tempfile(fileext = ".html")
+  on.exit(unlink(path), add = TRUE)
+
+  render_model_report(result, path, top_features = 1, n_repeats = 2)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+
+  expect_identical(result$provenance$evaluation_role, "evaluation")
+  expect_match(html, "How did the model score on the evaluation rows?", fixed = TRUE)
+  expect_match(html, "This is a descriptive evaluation", fixed = TRUE)
+  expect_match(html, "should not be presented as evidence of generalization", fixed = TRUE)
+  expect_false(grepl("Did the model generalize?", html, fixed = TRUE))
 })
 
 test_that("dashboard compatibility entry point produces the guided report", {
@@ -100,6 +132,33 @@ test_that("dashboard compatibility entry point produces the guided report", {
     generate_dashboard(result, tempfile(fileext = ".html"), narrative_args = list("bad")),
     "named list"
   )
+})
+
+test_that("report screening and audit use the result's primary metric", {
+  set.seed(124)
+  data <- data.frame(x = rnorm(90), z = rnorm(90))
+  data$y <- data$x + rnorm(90, sd = 0.4)
+  result <- autoxplain(data, "y", seed = 124)
+  result$evaluation$primary_metric <- "mae"
+  prepared <- AutoXplainR:::prepare_model_report_data(
+    result,
+    top_features = 1,
+    n_repeats = 2,
+    max_models = 2
+  )
+  explainer <- as_explainers(result, models = 1)[[1L]]
+  direct_audit <- audit_explanations(
+    explainer,
+    features = "x",
+    n_repeats = 2,
+    seed = 124
+  )
+
+  expect_identical(explainer$metadata$primary_metric, "mae")
+  expect_identical(direct_audit$config$metric, "mae")
+  expect_identical(attr(prepared$screening, "metric"), "mae")
+  expect_identical(prepared$audit$config$metric, "mae")
+  expect_true(all(prepared$audit$performance$metric == "mae"))
 })
 
 test_that("guided reports support classification effect targets", {

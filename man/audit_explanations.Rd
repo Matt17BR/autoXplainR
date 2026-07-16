@@ -22,7 +22,9 @@ audit_explanations(
 intersection.}
 
 \item{metric}{Performance metric passed to
-\code{\link[=calculate_permutation_importance]{calculate_permutation_importance()}}.}
+\code{\link[=calculate_permutation_importance]{calculate_permutation_importance()}}. With \code{"auto"}, explainers carrying
+an \code{autoxplain_result} primary metric use that same metric for both
+performance screening and permutation importance.}
 
 \item{n_repeats}{Number of permutations per model and feature.}
 

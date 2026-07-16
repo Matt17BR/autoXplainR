@@ -5,11 +5,13 @@ test_that("model trade-offs expose a candidate-set-relative Pareto frontier", {
   expect_s3_class(tradeoffs, "autoxplain_model_tradeoffs")
   expect_equal(attr(tradeoffs, "performance_metric"), "rmse")
   expect_equal(attr(tradeoffs, "complexity_metric"), "model_size_kb")
+  expect_equal(attr(tradeoffs, "secondary_metric"), "model_size_kb")
+  expect_equal(attr(tradeoffs, "secondary_metric_kind"), "resource proxy")
   expect_false(attr(tradeoffs, "higher_is_better"))
   expect_true(any(tradeoffs$pareto_optimal))
   expect_true(any(!tradeoffs$pareto_optimal))
   expect_match(attr(tradeoffs, "scope_note"), "supplied models")
-  expect_output(print(tradeoffs), "Pareto set")
+  expect_output(print(tradeoffs), "resource proxy")
 
   without_baseline <- model_tradeoffs(
     result,
