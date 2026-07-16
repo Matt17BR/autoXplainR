@@ -56,10 +56,10 @@ result$leaderboard
 #> 2    2 simple_baseline intercept-only baseline baseline baseline   stats
 #>       rmse      mae  r_squared training_time_ms model_size_kb complexity
 #> 1 3.552918 2.797996 -0.1281933                1      44.43750         11
-#> 2 5.096266 3.907692 -1.3212249                3      19.82812          1
+#> 2 5.096266 3.907692 -1.3212249                2      19.82812          1
 #>   fit_warning prediction_time_ms
 #> 1                              1
-#> 2                              1
+#> 2                              0
 result$evaluation$metric_definitions
 #>                                                                                                            rmse 
 #>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
