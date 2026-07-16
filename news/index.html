@@ -85,6 +85,7 @@
 <li>Added a dated provider decision guide covering current free access, privacy, reproducibility, setup, and structured-output capabilities. The Groq default now uses schema-capable <code>openai/gpt-oss-120b</code>.</li>
 <li>Schema-capable narrative providers now return a validated five-field object that AutoXplainR renders locally with fixed causal, fairness, safety, and external-validation boundaries. Invalid JSON falls back transparently and structured-output use is retained in provenance.</li>
 <li>Migrated Gemini to its current Interactions API with <code>store = false</code> and its provider-recommended default temperature. OpenRouter schema requests require a compatible routed provider; unsupported adapters remain explicitly unstructured.</li>
+<li>Added complete, reproducible local and live Gemini output snapshots. A live Gemini check exposed reasoning-token exhaustion at the previous response budget, so the default is now 4,000 tokens and incomplete interactions return targeted recovery guidance.</li>
 <li>Removed bundled third-party datasets whose provenance and redistribution terms were not documented.</li>
 </ul></div>
 <div class="section level3">

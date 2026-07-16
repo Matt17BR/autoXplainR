@@ -7,7 +7,7 @@ communication layer over aggregated evidence that AutoXplainR has
 already computed.
 
 The defaults below were checked against official provider documentation
-on 2026-07-15. Limits, models, prices, and data-use terms can change
+on 2026-07-16. Limits, models, prices, and data-use terms can change
 independently of this package, so inspect
 [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
 and the linked provider page before relying on a hosted service.
@@ -27,7 +27,11 @@ API](https://ai.google.dev/gemini-api/docs/interactions-overview) with
 stateless setting is important for a one-shot model summary. Gemini’s
 own model guidance recommends its default temperature of 1; AutoXplainR
 uses that value unless `temperature =` is supplied. Other providers
-default to 0.2.
+default to 0.2. A live integration check on 2026-07-16 authenticated,
+returned schema-valid output, used no fallback, and confirmed that the
+4,000-token default leaves enough room for Gemini reasoning plus the
+requested memo. See the [complete local and Gemini output
+snapshots](https://matt17br.github.io/autoXplainR/LLM_EXAMPLES.md).
 
 ## Setup
 

@@ -54,7 +54,7 @@ result$leaderboard
 #> 1    1      main_model       linear regression  primary 3.552918 2.797996
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
 #>    r_squared training_time_ms model_size_kb complexity fit_warning
-#> 1 -0.1281933                1      44.43750         11            
+#> 1 -0.1281933                2      44.43750         11            
 #> 2 -1.3212249                2      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1

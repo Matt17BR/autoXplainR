@@ -236,7 +236,17 @@
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"cloudflare"</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"ollama"</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"openrouter"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="what-does-the-generated-output-look-like">What does the generated output look like?<a class="anchor" aria-label="anchor" href="#what-does-the-generated-output-look-like"></a>
+</h3>
+<p>The repository includes <a href="LLM_EXAMPLES.html">complete verified narrative snapshots</a> from one reproducible tuned <code>iris</code> analysis: the deterministic local memo and a live <code>gemini-3.5-flash</code> response generated on 2026-07-16. The Gemini call used validated structured output, <code>store = false</code>, and no fallback.</p>
+<p>Here is a short excerpt from that Gemini response:</p>
+<blockquote>
+<p><strong>Held-out performance.</strong> On the held-out test set, the reference tuned neural network achieved a final log loss of 0.08206, a 92.5% relative improvement over the simple baseline. This final held-out performance is distinct from the training-resampled selection score of 0.09566, calculated with five training-only folds.</p>
+</blockquote>
+<p>The full page shows the exact reproduction code, complete outputs, provider provenance, what Gemini generated, and which interpretation boundaries the package appended locally. Generated wording can vary; the computed evidence is authoritative.</p>
 <p>The <a href="LLM_PROVIDERS.html">narrative provider guide</a> compares current free access, privacy, structured-output support, reproducibility, and setup for Gemini, Groq, Cloudflare Workers AI, Ollama, and OpenRouter. Provider, resolved model, fallback, and prompt provenance are retained. Schema-capable providers return five validated fields that AutoXplainR renders locally with fixed interpretation boundaries; a schema controls format, not factual correctness.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="classification-existing-models-and-h2o-use-the-same-contract">Classification, existing models, and H2O use the same contract<a class="anchor" aria-label="anchor" href="#classification-existing-models-and-h2o-use-the-same-contract"></a>

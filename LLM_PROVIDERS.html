@@ -45,7 +45,7 @@
 <div id="narrative-provider-guide" class="section level1">
 
 <p>AutoXplainR does not need a language model to fit, evaluate, explain, or report a model. The default <code>provider = "local"</code> is deterministic, private, and works offline. A generative provider is an optional communication layer over aggregated evidence that AutoXplainR has already computed.</p>
-<p>The defaults below were checked against official provider documentation on 2026-07-15. Limits, models, prices, and data-use terms can change independently of this package, so inspect <code><a href="reference/narrative_providers.html">narrative_providers()</a></code> and the linked provider page before relying on a hosted service.</p>
+<p>The defaults below were checked against official provider documentation on 2026-07-16. Limits, models, prices, and data-use terms can change independently of this package, so inspect <code><a href="reference/narrative_providers.html">narrative_providers()</a></code> and the linked provider page before relying on a hosted service.</p>
 <table class="table"><colgroup><col width="20%"><col width="20%"><col width="20%"><col width="20%"><col width="20%"></colgroup><thead><tr><th>Provider</th>
 <th>Default</th>
 <th>Free access</th>
@@ -81,7 +81,7 @@
 <td><a href="https://openrouter.ai/docs/faq" class="external-link">Limited free-model requests</a></td>
 <td><a href="https://openrouter.ai/docs/guides/features/structured-outputs" class="external-link">Provider-dependent schema</a></td>
 <td>Convenient experimentation; the selected free model and availability are not reproducible</td>
-</tr></tbody></table><p>The Gemini adapter uses the current <a href="https://ai.google.dev/gemini-api/docs/interactions-overview" class="external-link">Interactions API</a> with <code>store = false</code>. Interactions are stored by default, so this explicit stateless setting is important for a one-shot model summary. Gemini’s own model guidance recommends its default temperature of 1; AutoXplainR uses that value unless <code>temperature =</code> is supplied. Other providers default to 0.2.</p>
+</tr></tbody></table><p>The Gemini adapter uses the current <a href="https://ai.google.dev/gemini-api/docs/interactions-overview" class="external-link">Interactions API</a> with <code>store = false</code>. Interactions are stored by default, so this explicit stateless setting is important for a one-shot model summary. Gemini’s own model guidance recommends its default temperature of 1; AutoXplainR uses that value unless <code>temperature =</code> is supplied. Other providers default to 0.2. A live integration check on 2026-07-16 authenticated, returned schema-valid output, used no fallback, and confirmed that the 4,000-token default leaves enough room for Gemini reasoning plus the requested memo. See the <a href="LLM_EXAMPLES.html">complete local and Gemini output snapshots</a>.</p>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <p>Never put a key in a script, report, issue, or committed <code>.Renviron</code> file. Set it in the current session while experimenting, or in a user-level environment file outside the project.</p>

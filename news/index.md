@@ -138,6 +138,10 @@
   and its provider-recommended default temperature. OpenRouter schema
   requests require a compatible routed provider; unsupported adapters
   remain explicitly unstructured.
+- Added complete, reproducible local and live Gemini output snapshots. A
+  live Gemini check exposed reasoning-token exhaustion at the previous
+  response budget, so the default is now 4,000 tokens and incomplete
+  interactions return targeted recovery guidance.
 - Removed bundled third-party datasets whose provenance and
   redistribution terms were not documented.
 
