@@ -648,20 +648,24 @@ refit_tuned_candidates <- function(tuning,
   tuning$candidates$refit_warning <- ""
   tuning$candidates$refit_error <- ""
 
-  attempts <- list()
-  attempted_ids <- character()
+  refit_state <- new.env(parent = emptyenv())
+  refit_state$candidates <- tuning$candidates
+  refit_state$attempts <- list()
+  refit_state$attempted_ids <- character()
   record_attempt <- function(row, role, model_id, result, fit_spec) {
     id <- row$configuration_id[[1L]]
-    candidate_index <- match(id, tuning$candidates$configuration_id)
-    tuning$candidates$refit_status[[candidate_index]] <<- if (result$ok) "ok" else "failed"
-    tuning$candidates$refit_role[[candidate_index]] <<- role
-    tuning$candidates$refit_warning[[candidate_index]] <<- paste(
+    candidates <- refit_state$candidates
+    candidate_index <- match(id, candidates$configuration_id)
+    candidates$refit_status[[candidate_index]] <- if (result$ok) "ok" else "failed"
+    candidates$refit_role[[candidate_index]] <- role
+    candidates$refit_warning[[candidate_index]] <- paste(
       unique(result$warnings), collapse = " | "
     )
-    tuning$candidates$refit_error[[candidate_index]] <<- result$error
+    candidates$refit_error[[candidate_index]] <- result$error
     if (result$ok) {
-      tuning$candidates$retained_model_id[[candidate_index]] <<- model_id
+      candidates$retained_model_id[[candidate_index]] <- model_id
     }
+    refit_state$candidates <- candidates
     attempt <- data.frame(
       configuration_id = id,
       family = row$family[[1L]],
@@ -679,8 +683,10 @@ refit_tuned_candidates <- function(tuning,
     )
     attempt$requested_parameters <- I(list(fit_spec$requested_parameters))
     attempt$effective_parameters <- I(list(fit_spec$effective_parameters))
-    attempts[[length(attempts) + 1L]] <<- attempt
-    attempted_ids <<- c(attempted_ids, id)
+    attempts <- refit_state$attempts
+    attempts[[length(attempts) + 1L]] <- attempt
+    refit_state$attempts <- attempts
+    refit_state$attempted_ids <- c(refit_state$attempted_ids, id)
   }
   fit_row <- function(row, role, model_id) {
     configuration <- tuning$plan[
@@ -724,7 +730,7 @@ refit_tuned_candidates <- function(tuning,
     }
   }
   if (is.null(primary_fit)) {
-    attempt_table <- do.call(rbind, attempts)
+    attempt_table <- do.call(rbind, refit_state$attempts)
     details <- unique(attempt_table$error[nzchar(attempt_table$error)])
     stop(
       "No resampling-valid configuration could be refitted on the complete training data",
@@ -753,7 +759,7 @@ refit_tuned_candidates <- function(tuning,
   alternative_families <- setdiff(unique(valid$family), primary_row$family[[1L]])
   for (family in alternative_families) {
     family_rows <- valid[
-      valid$family == family & !valid$configuration_id %in% attempted_ids,
+      valid$family == family & !valid$configuration_id %in% refit_state$attempted_ids,
       , drop = FALSE
     ]
     family_rows <- family_rows[order(
@@ -783,7 +789,8 @@ refit_tuned_candidates <- function(tuning,
     }
   }
 
-  attempt_table <- do.call(rbind, attempts)
+  tuning$candidates <- refit_state$candidates
+  attempt_table <- do.call(rbind, refit_state$attempts)
   requested_families <- tuning$learners %||% unique(tuning$candidates$family)
   resampling_failed_families <- tuning$families_resampling_failed %||% setdiff(
     requested_families,
@@ -1210,15 +1217,18 @@ guided_evaluation_notes <- function(training,
                                     constant_features = character(),
                                     fit_warnings = character(),
                                     evaluation_role = "evaluation") {
-  notes <- list()
+  accumulator <- new.env(parent = emptyenv())
+  accumulator$notes <- list()
   add <- function(severity, code, message, recommendation) {
-    notes[[length(notes) + 1L]] <<- data.frame(
+    notes <- accumulator$notes
+    notes[[length(notes) + 1L]] <- data.frame(
       severity = severity,
       code = code,
       message = message,
       recommendation = recommendation,
       stringsAsFactors = FALSE
     )
+    accumulator$notes <- notes
   }
   if (nrow(evaluation) < 50L) {
     add(
@@ -1290,13 +1300,13 @@ guided_evaluation_notes <- function(training,
       "Do not rely on this model for prediction without substantially better validation performance."
     )
   }
-  if (!length(notes)) {
+  if (!length(accumulator$notes)) {
     return(data.frame(
       severity = character(), code = character(), message = character(),
       recommendation = character(), stringsAsFactors = FALSE
     ))
   }
-  do.call(rbind, notes)
+  do.call(rbind, accumulator$notes)
 }
 
 guided_binary_auc <- function(truth, score) {

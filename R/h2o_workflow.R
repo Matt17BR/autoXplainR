@@ -226,15 +226,18 @@ h2o_evaluation_notes <- function(evaluation,
                                  role,
                                  primary_model_id,
                                  used_for_selection = FALSE) {
-  notes <- list()
+  accumulator <- new.env(parent = emptyenv())
+  accumulator$notes <- list()
   add <- function(severity, code, message, recommendation) {
-    notes[[length(notes) + 1L]] <<- data.frame(
+    notes <- accumulator$notes
+    notes[[length(notes) + 1L]] <- data.frame(
       severity = severity,
       code = code,
       message = message,
       recommendation = recommendation,
       stringsAsFactors = FALSE
     )
+    accumulator$notes <- notes
   }
   if (evaluation$evaluated_rows < 50L) {
     add(
@@ -275,13 +278,13 @@ h2o_evaluation_notes <- function(evaluation,
       "Revisit data quality and validation design before interpreting fitted patterns as useful."
     )
   }
-  if (!length(notes)) {
+  if (!length(accumulator$notes)) {
     return(data.frame(
       severity = character(), code = character(), message = character(),
       recommendation = character(), stringsAsFactors = FALSE
     ))
   }
-  do.call(rbind, notes)
+  do.call(rbind, accumulator$notes)
 }
 
 h2o_reproducibility_provenance <- function(max_runtime_secs,

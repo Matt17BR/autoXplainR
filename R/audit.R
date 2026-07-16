@@ -398,12 +398,15 @@ audit_findings <- function(importance,
                            n_repeats,
                            threshold,
                            explainers) {
-  findings <- list()
+  accumulator <- new.env(parent = emptyenv())
+  accumulator$findings <- list()
   add <- function(severity, code, message, evidence, recommendation) {
-    findings[[length(findings) + 1L]] <<- data.frame(
+    findings <- accumulator$findings
+    findings[[length(findings) + 1L]] <- data.frame(
       severity = severity, code = code, message = message, evidence = evidence,
       recommendation = recommendation, stringsAsFactors = FALSE
     )
+    accumulator$findings <- findings
   }
   high <- dependence[dependence$high_dependence, , drop = FALSE]
   if (nrow(high)) {
@@ -473,7 +476,7 @@ audit_findings <- function(importance,
       "Use held-out data and record metadata = list(evaluation_role = 'test')."
     )
   }
-  if (!length(findings)) {
+  if (!length(accumulator$findings)) {
     add(
       "note", "no_automatic_red_flags",
       "No automatic reliability threshold was breached.",
@@ -481,7 +484,7 @@ audit_findings <- function(importance,
       "Continue with domain review, external validation, and explicit limitations."
     )
   }
-  do.call(rbind, findings)
+  do.call(rbind, accumulator$findings)
 }
 
 audit_summary <- function(importance,

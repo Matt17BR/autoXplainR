@@ -24,7 +24,7 @@ jobs:
           needs: lint
       - name: Lint package
         run: |
-          lints <- lintr::lint_package()
+          lints <- lintr::lint_package(cache = FALSE)
           print(lints)
           if (length(lints)) stop("lintr found style or static-analysis failures.")
         shell: Rscript {0}
