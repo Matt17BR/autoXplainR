@@ -51,7 +51,9 @@ jobs:
         run: |
           roxygen2::roxygenise(".")
           changed <- system2(
-            "git", c("status", "--porcelain", "--", "NAMESPACE", "man"),
+            "git", c(
+              "status", "--porcelain", "--", "DESCRIPTION", "NAMESPACE", "man"
+            ),
             stdout = TRUE
           )
           if (length(changed)) {
@@ -63,3 +65,44 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual")'
+
+  source-package:
+    name: Ubuntu release (exact source archive and manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      _R_CHECK_FORCE_SUGGESTS_: false
+      AUTOXPLAIN_RUN_H2O: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install CRAN document-checking tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes qpdf tidy
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          extra-packages: any::rcmdcheck
+          needs: check
+      - name: Build once and fully check the exact source archive
+        run: |
+          bash .github/scripts/build-check-source.sh \
+            "$RUNNER_TEMP/release" \
+            "$RUNNER_TEMP/check"
+      - name: Upload checked source and check log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: AutoXplainR-CRAN-source-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/release/
+            ${{ runner.temp }}/check/**/00check.log
+          if-no-files-found: warn
+          retention-days: 7

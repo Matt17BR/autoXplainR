@@ -43,7 +43,9 @@ jobs:
         run: |
           roxygen2::roxygenise(".")
           changed <- system2(
-            "git", c("status", "--porcelain", "--", "NAMESPACE", "man"),
+            "git", c(
+              "status", "--porcelain", "--", "DESCRIPTION", "NAMESPACE", "man"
+            ),
             stdout = TRUE
           )
           if (length(changed)) {
@@ -53,7 +55,7 @@ jobs:
         shell: Rscript {0}
       - name: Lint and spell-check
         run: |
-          lints <- lintr::lint_package()
+          lints <- lintr::lint_package(cache = FALSE)
           print(lints)
           if (length(lints)) stop("lintr found failures.")
           misspellings <- spelling::spell_check_package()
@@ -94,7 +96,7 @@ jobs:
   source-package:
     needs: [quality-gates, h2o-gate]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       AUTOXPLAIN_RUN_H2O: false
@@ -104,6 +106,11 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install CRAN document-checking tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes qpdf tidy
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
@@ -135,9 +142,11 @@ jobs:
             stop("Release tag ", actual, " does not match package version ", expected, ".")
           }
         shell: Rscript {0}
-      - name: Check source package
-        run: rcmdcheck::rcmdcheck(args = c("--as-cran", "--no-manual"), error_on = "warning")
-        shell: Rscript {0}
+      - name: Build once and fully check the exact release archive
+        run: |
+          bash .github/scripts/build-check-source.sh \
+            "$RUNNER_TEMP/release" \
+            "$RUNNER_TEMP/check"
       - name: Check documentation links
         run: |
           problems <- urlchecker::url_check()
@@ -152,13 +161,19 @@ jobs:
             stop("Documentation contains a permanently broken or non-canonical URL.")
           }
         shell: Rscript {0}
-      - name: Build release artifact
+      - name: Stage the checked release artifact
         run: |
           mkdir -p release
-          R CMD build .
-          mv AutoXplainR_*.tar.gz release/
-          cd release
-          sha256sum AutoXplainR_*.tar.gz > SHA256SUMS
+          cp "$RUNNER_TEMP"/release/AutoXplainR_*.tar.gz release/
+          cp "$RUNNER_TEMP"/release/SHA256SUMS release/
+          cd release && sha256sum --check SHA256SUMS
+      - name: Upload full check log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: AutoXplainR-release-check-${{ github.sha }}
+          path: ${{ runner.temp }}/check/**/00check.log
+          if-no-files-found: warn
       - name: Upload source package
         uses: actions/upload-artifact@v7
         with:
