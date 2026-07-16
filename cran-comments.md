@@ -1,16 +1,22 @@
+## Release
+
+- AutoXplainR 0.2.0, prepared 2026-07-16
+- Initial CRAN submission
+
 ## Test environments
 
-- local Ubuntu 26.04 LTS, R 4.5.2
+- local Ubuntu 26.04 LTS, R 4.5.2, with `qpdf` and HTML Tidy
 - GitHub Actions matrix: Ubuntu (R devel, release, oldrel-1), Windows
   (release), and macOS (release)
 
 ## R CMD check results
 
-- Package-owned results: 0 errors, 0 warnings, and 1 expected NOTE (new
-  submission).
-- The local check reports one environment WARNING because the external `qpdf`
-  executable is unavailable. This is a check-machine dependency rather than a
-  package warning; the source package contains no PDF artifacts.
+- The source archive is built once and that exact archive is checked with
+  `R CMD check --as-cran`; PDF and HTML manual checks are enabled and its
+  SHA-256 digest is verified before and after checking.
+- Local results: 0 errors, 0 warnings, and 2 NOTEs. The first NOTE is expected
+  for a new submission. The second says that the check machine was unable to
+  verify the current time; it is specific to the local environment.
 - Dependency-light suite: 1,391 passed expectations, 0 failed, and 30 deliberate
   skips for optional native engines and live-service integrations.
 - All-native-engine suite: 1,812 passed expectations, 0 failed, with only the

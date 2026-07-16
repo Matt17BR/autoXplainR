@@ -11,6 +11,7 @@
 ^LLM_PROVIDERS\.md$
 ^LLM_EXAMPLES\.md$
 ^PRODUCT\.md$
+^PROVENANCE\.md$
 ^ROADMAP\.md$
 ^SECURITY\.md$
 ^cran-comments\.md$

@@ -8,6 +8,7 @@ Authors@R:
       email = "matteo.mazzarelli@gmail.com",
       role = c("aut", "cre")
     )
+Copyright: 2025-2026 Matteo Mazzarelli
 Description: Guides first-time modelers through fitting, held-out evaluation,
     explanation, and communication for tabular prediction problems. Safe local
     defaults compare an understandable model with a simple baseline and define
@@ -19,7 +20,12 @@ Description: Guides first-time modelers through fitting, held-out evaluation,
     permutation importance, feature-dependence diagnostics, accumulated local
     effects, and provenance-rich evidence audits. Optional adapters support
     'H2O' AutoML, interactive 'Plotly' graphics, and evidence-constrained
-    narratives.
+    narratives. Accumulated local effects follow Apley and Zhu (2020)
+    <doi:10.1111/rssb.12377>. Fitted model reliance and near-optimal-model
+    comparisons draw on Fisher, Rudin, and Dominici (2019)
+    <https://jmlr.org/papers/v20/18-760.html>. The separation of tuning from
+    final holdout evaluation is motivated by Cawley and Talbot (2010)
+    <https://jmlr.org/papers/v11/cawley10a.html>.
 License: MIT + file LICENSE
 URL: https://github.com/Matt17BR/autoXplainR,
     https://matt17br.github.io/autoXplainR/

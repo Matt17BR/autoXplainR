@@ -59,5 +59,20 @@ devtools::test(
   new statistical branches should be covered substantially more deeply.
 - Keep optional packages behind `requireNamespace()` checks.
 
+## Licensing and provenance
+
+By contributing, you confirm that you have the right to submit the work under
+the project's MIT license. Identify code, data, images, generated assets, or
+documentation derived from another source in the pull request, preserve its
+copyright and license notices, and add the appropriate `Authors@R` role when
+authorship or copyright belongs to someone not already credited. Do not copy
+implementation code from papers or other packages merely because the method is
+published; implement from the stated method and cite the literature instead.
+
+Do not commit private, confidential, or license-restricted data. Test fixtures
+must be original, generated, or clearly redistributable, and their origin must
+be documented. The release owner reviews [PROVENANCE.md](PROVENANCE.md) before
+each CRAN submission.
+
 All contributions are licensed under the project MIT license. Participation is
 subject to the [Code of Conduct](CODE_OF_CONDUCT.md).
