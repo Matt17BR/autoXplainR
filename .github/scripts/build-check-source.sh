@@ -5,6 +5,15 @@ set -euo pipefail
 project_root="$(git rev-parse --show-toplevel)"
 artifact_dir="${1:-${project_root}/release}"
 check_dir="${2:-${project_root}/check}"
+if (( $# >= 2 )); then
+  shift 2
+else
+  set --
+fi
+check_arguments=("$@")
+if (( ${#check_arguments[@]} == 0 )); then
+  check_arguments=("--as-cran")
+fi
 
 mkdir -p "${artifact_dir}" "${check_dir}"
 artifact_dir="$(cd "${artifact_dir}" && pwd -P)"
@@ -44,7 +53,8 @@ mv "${archives[0]}" "${archive}"
 Rscript \
   "${project_root}/.github/scripts/check-source-package.R" \
   "${archive}" \
-  "${check_dir}"
+  "${check_dir}" \
+  "${check_arguments[@]}"
 
 (
   cd "${artifact_dir}"
