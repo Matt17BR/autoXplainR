@@ -16,4 +16,5 @@
 ^cran-comments\.md$
 ^CITATION\.cff$
 ^_pkgdown\.yml$
+^pkgdown$
 ^docs$
