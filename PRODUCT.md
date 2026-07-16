@@ -6,9 +6,10 @@ AutoXplainR helps a person fitting one of their first tabular models answer four
 questions without needing to assemble a modeling stack:
 
 1. What kind of prediction problem do I have?
-2. How well does the fitted model work on data it did not train on?
-3. What patterns does the model use, and how reliable are those explanations?
-4. How can I communicate the result without overstating it?
+2. Should I fit an understandable reference or automatically tune alternatives?
+3. How well does the selected model work on data it did not train on?
+4. What patterns does the model use, and how reliable are those explanations?
+5. How can I communicate the result without overstating it?
 
 The package should make the safe path the easy path. An explanation evidence
 audit is an internal quality layer and an advanced view; it is not the first
@@ -27,11 +28,32 @@ The primary workflow must accept a data frame and target name, then:
 - produce one self-contained, accessible report;
 - optionally add an LLM narrative that is subordinate to computed results.
 
-The next step remains one explicit argument away: `model_set = "comparison"`
-adds a small, local candidate set and displays performance-versus-complexity
-trade-offs without silently changing the pre-specified primary model. Advanced
-users may supply their own split, model, prediction function, H2O AutoML run,
-explanation configuration, or narrative provider.
+Two next steps remain one explicit argument away. `model_set = "tuned"` uses
+training-only resampling to choose among statistical, decision-tree, and scaled
+neural-network configurations before opening the outer holdout. `model_set =
+"comparison"` adds a small, pre-specified local candidate set and displays
+performance-versus-complexity trade-offs without silently changing the primary
+model. Advanced users may supply their own split, model, prediction function,
+H2O AutoML run, explanation configuration, or narrative provider.
+
+## Tuning contract
+
+Local automatic tuning must remain comprehensible enough for a first model:
+
+- the final evaluation set cannot rank configurations, tune thresholds, learn
+  preprocessing, or trigger another search;
+- preprocessing is refitted within every training resample;
+- the search covers at least a statistical reference, decision trees, and a
+  scaled neural network for regression, binary, and multiclass outcomes;
+- the candidate settings, fold scores, failures, timing, selection rule, and
+  selected hyperparameters remain inspectable;
+- the default one-standard-error rule prefers the simpler near-best
+  configuration, while an explicit `"best"` rule remains available; and
+- reports distinguish the training-resampled selection score from the final
+  held-out evaluation score in adjacent plain language.
+
+H2O remains an optional broader AutoML engine. Its availability does not excuse
+the dependency-light workflow from providing meaningful supervised tuning.
 
 ## Progressive disclosure
 
@@ -40,12 +62,14 @@ The same result should support three levels of detail:
 1. **Guided:** what was fitted, whether it beats a simple baseline, the most
    important patterns, probability calibration, binary decision-threshold
    trade-offs, missingness context, and concrete cautions.
-2. **Compare:** visible candidate performance, complexity, Pareto status, and
+2. **Tune:** model families, hyperparameter settings, training-only fold scores,
+   selection rule, and the boundary between tuning and final evaluation.
+3. **Compare:** visible candidate performance, complexity, Pareto status, and
    case-level prediction disagreement, with the warning that held-out ranks are
    descriptive rather than a free tuning loop.
-3. **Evidence:** permutation variability, dependence, supplied-model
+4. **Evidence:** permutation variability, dependence, supplied-model
    multiplicity, ALE/PDP support, and provenance.
-4. **Developer:** repeat-level values, prediction contracts, recipes, metrics,
+5. **Developer:** repeat-level values, prediction contracts, recipes, metrics,
    prompts, and machine-readable configuration.
 
 Every technical term in the guided report needs an adjacent definition. Grades

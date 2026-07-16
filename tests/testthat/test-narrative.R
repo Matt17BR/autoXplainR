@@ -103,7 +103,10 @@ test_that("hosted and local model adapters share one sanitized prompt contract",
                        fixed = TRUE))
     expect_equal(attr(report, "narrative_provenance")$provider_used, provider)
     expect_false(attr(report, "narrative_provenance")$fallback)
-    if (provider == "gemini") expect_false(captured$body$store)
+    if (provider == "gemini") {
+      expect_false(captured$body$store)
+      expect_equal(captured$body$generation_config$max_output_tokens, 4000L)
+    }
   }
 })
 
@@ -332,6 +335,6 @@ test_that("Gemini Interaction responses expose only completed model text", {
     AutoXplainR:::extract_narrative_text(
       interaction, "gemini_interactions", "gemini"
     ),
-    "incomplete"
+    "Increase `max_tokens`"
   )
 })

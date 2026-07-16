@@ -124,6 +124,7 @@ result_model_diagnostic <- function(result, model_id) {
 }
 
 friendly_model_type <- function(model) {
+  if (inherits(model, "autoxplain_tuned_nnet")) return("tuned neural network")
   if (inherits(model, "glm") && !is.null(model$family) && model$family$family == "binomial") {
     return("logistic regression")
   }
@@ -133,6 +134,13 @@ friendly_model_type <- function(model) {
 }
 
 base_model_hyperparameters <- function(model) {
+  if (inherits(model, "autoxplain_tuned_nnet")) {
+    return(list(
+      hidden_units = model$size,
+      weight_decay = model$decay,
+      numeric_scaling = "training mean and standard deviation"
+    ))
+  }
   formula <- tryCatch(paste(deparse(stats::formula(model)), collapse = " "),
                       error = function(error) NA_character_)
   output <- list(formula = formula)

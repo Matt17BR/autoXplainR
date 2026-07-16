@@ -48,7 +48,7 @@ prediction_ambiguity <- function(result,
   if (length(selected) < 2L) {
     stop(
       "Prediction ambiguity requires at least two selected non-baseline models. ",
-      "Use `model_set = \"comparison\"` or supply multiple fitted models.",
+      "Use `model_set = \"tuned\"` or `model_set = \"comparison\"`, or supply multiple fitted models.",
       call. = FALSE
     )
   }

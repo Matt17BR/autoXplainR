@@ -13,11 +13,12 @@ autoxplain(
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
-  model_set = c("quick", "comparison"),
+  model_set = c("quick", "tuned", "comparison"),
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
   task = c("auto", "regression", "binary", "multiclass"),
   nfolds = 5L,
+  tuning_rule = c("one_se", "best"),
   sort_metric = "AUTO",
   include_algos = NULL,
   exclude_algos = NULL,
@@ -33,8 +34,9 @@ autoxplain(
 
 \item{target_column}{Name of the outcome column.}
 
-\item{max_models}{Maximum number of H2O base models; ignored by the guided
-base engine, which fits one primary model and one simple baseline.}
+\item{max_models}{Maximum number of configurations in local tuning or H2O
+base models. Local tuning requires at least three and counts the statistical
+reference alongside tree and neural-network configurations.}
 
 \item{max_runtime_secs}{H2O training time budget in seconds; ignored by the
 guided base engine.}
@@ -50,11 +52,12 @@ validation frame unless \code{use_test_as_validation = TRUE}.}
 \item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
 resolves to the dependency-free \code{"base"} workflow.}
 
-\item{model_set}{Guided base-engine candidates. \code{"quick"} fits the
+\item{model_set}{Guided base-engine workflow. \code{"quick"} fits the
 pre-specified understandable model and baseline. \code{"comparison"} also fits
-shallow and flexible decision trees for a descriptive multi-model and
-Pareto trade-off view. Held-out ranks do not silently replace the
-pre-specified primary model.}
+two pre-specified trees for a descriptive Pareto view. \code{"tuned"} compares
+statistical, decision-tree, and scaled neural-network configurations using
+training-only resampling, then evaluates the selected configuration once on
+the untouched holdout.}
 
 \item{enable_preprocessing}{Apply \code{\link[=preprocess_data]{preprocess_data()}}.}
 
@@ -64,8 +67,14 @@ removal defaults to \code{FALSE}.}
 \item{task}{One of \code{"auto"}, \code{"regression"}, \code{"binary"}, or
 \code{"multiclass"}.}
 
-\item{nfolds}{Number of H2O cross-validation folds. At least two folds are
-required when stacked ensembles are desired.}
+\item{nfolds}{Number of training-only folds for local tuning or H2O
+cross-validation. Local tuning automatically reduces this when an outcome
+class contains fewer rows.}
+
+\item{tuning_rule}{Local tuning selection rule. \code{"one_se"} chooses the
+simplest configuration whose resampled error is within one standard error
+of the best; \code{"best"} chooses the lowest resampled error. Ignored by other
+workflows.}
 
 \item{sort_metric}{H2O AutoML leaderboard metric.}
 

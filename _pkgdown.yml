@@ -16,6 +16,7 @@ reference:
   - title: Guided workflow
     contents:
       - autoxplain
+      - tuning_results
       - as_explainers
       - calibration_diagnostics
       - threshold_diagnostics

@@ -82,6 +82,42 @@ The standalone report uses progressive disclosure:
 The report does not need an LLM, Plotly, H2O, or a browser runtime after it is
 written.
 
+## Tune supervised models without opening the final holdout
+
+When model selection is the goal, use the explicit tuned workflow:
+
+```{r tuned-fit}
+tuned <- autoxplain(
+  iris,
+  target_column = "Species",
+  model_set = "tuned",
+  max_models = 6,
+  nfolds = 3,
+  seed = 2026
+)
+
+tuning <- tuning_results(tuned)
+tuning$candidates[, c(
+  "model", "hyperparameters", "cv_score", "cv_se", "selected"
+)]
+```
+
+This is ordinary supervised hyperparameter tuning made visible. AutoXplainR
+compares a statistical reference, decision-tree pruning/depth settings, and
+scaled neural-network hidden-unit/weight-decay settings. It learns
+preprocessing separately inside each training fold.
+
+The default one-standard-error rule chooses the simplest configuration whose
+resampled error is within one standard error of the best observed
+configuration. Use `tuning_rule = "best"` when the explicitly desired rule is
+minimum resampled error instead. Both rules and every fold score remain in the
+result.
+
+The resampled score answers *which configuration should be refitted?* The
+held-out score answers *how did that selected, refitted model perform on unseen
+rows?* AutoXplainR keeps the outer evaluation rows out of tuning and labels the
+two numbers separately in the report.
+
 ## Compare a small candidate set
 
 The first call stays intentionally simple. When comparing a few approachable

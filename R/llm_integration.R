@@ -70,7 +70,9 @@ narrative_providers <- function() {
 #' @param base_url Optional endpoint override. A custom provider requires it.
 #' @param account_id Cloudflare account ID. When `NULL`,
 #'   `CLOUDFLARE_ACCOUNT_ID` is consulted for the Cloudflare provider.
-#' @param max_tokens Maximum response tokens.
+#' @param max_tokens Maximum response-token budget. The 4,000-token default
+#'   leaves room for reasoning tokens used by current Gemini models while the
+#'   prompt still limits the rendered memo to 500 words.
 #' @param temperature Sampling temperature. `NULL` uses 1 for Gemini, following
 #'   its current model guidance, and 0.2 for other providers.
 #' @param timeout Request timeout in seconds.
@@ -103,7 +105,7 @@ generate_natural_language_report <- function(autoxplain_result,
                                              model = NULL,
                                              base_url = NULL,
                                              account_id = NULL,
-                                             max_tokens = 1000L,
+                                             max_tokens = 4000L,
                                              temperature = NULL,
                                              timeout = 30,
                                              structured = TRUE,
@@ -542,6 +544,11 @@ extract_narrative_text <- function(parsed, response_format, provider) {
     stop(
       provider, " interaction ended with status `",
       parsed$status %||% "unknown", "`.",
+      if (identical(parsed$status, "incomplete")) {
+        " Increase `max_tokens`; Gemini reasoning and response text share this budget."
+      } else {
+        ""
+      },
       call. = FALSE
     )
   }
@@ -695,6 +702,24 @@ prepare_analysis_context <- function(autoxplain_result,
   } else {
     NULL
   }
+  tuning <- autoxplain_result$tuning
+  tuning_summary <- if (inherits(tuning, "autoxplain_tuning")) {
+    selected <- tuning$candidates[tuning$candidates$selected, , drop = FALSE]
+    list(
+      method = tuning$method,
+      folds = tuning$folds_used,
+      configurations = nrow(tuning$candidates),
+      families = length(unique(tuning$candidates$family)),
+      metric = tuning$metric,
+      selection_rule = tuning_rule_label(tuning$selection_rule),
+      selected_model = selected$model[[1L]],
+      selected_hyperparameters = selected$hyperparameters[[1L]],
+      selected_score = selected$cv_score[[1L]],
+      scope_note = tuning$scope_note
+    )
+  } else {
+    NULL
+  }
   list(
     context_type = "model_result",
     task_type = autoxplain_result$task %||%
@@ -715,6 +740,7 @@ prepare_analysis_context <- function(autoxplain_result,
     evaluation_notes = evaluation$notes,
     calibration_summary = calibration_summary,
     missingness_summary = missingness_summary,
+    tuning_summary = tuning_summary,
     candidate_selection = autoxplain_result$provenance$candidate_selection,
     importance_summary = importance_summary,
     pdp_summary = if (!is.null(pdp_data)) {
@@ -736,6 +762,10 @@ create_report_prompt <- function(context) {
     "Use only the facts below.\n",
     "Rules:\n",
     "- Start with held-out performance and comparison with the simple baseline.\n",
+    paste0(
+      "- If tuning evidence is supplied, distinguish its training-resampled ",
+      "selection score from final held-out performance.\n"
+    ),
     "- Define technical terms next to the result and use plain language.\n",
     "- Never imply causality, fairness, safety, or regulatory compliance.\n",
     "- Distinguish descriptive permutation variability from population inference.\n",
@@ -805,6 +835,24 @@ context_to_text <- function(context) {
         ))
       )
     }
+  }
+  if (!is.null(context$tuning_summary)) {
+    tuning <- context$tuning_summary
+    lines <- c(
+      lines,
+      paste0(
+        "Automatic tuning: ", tuning$configurations, " configurations across ",
+        tuning$families, " model families were compared with ", tuning$folds,
+        " training-only folds using ", tuning$metric, "."
+      ),
+      paste("Tuning selection rule:", tuning$selection_rule),
+      paste0(
+        "Tuning selection: ", tuning$selected_model, " with ",
+        tuning$selected_hyperparameters, "; resampled ", tuning$metric, " = ",
+        report_number(tuning$selected_score, 5L), "."
+      ),
+      paste("Tuning boundary:", tuning$scope_note)
+    )
   }
   if (!is.null(context$candidate_selection)) {
     lines <- c(lines, paste("Candidate-selection boundary:", context$candidate_selection))

@@ -7,7 +7,9 @@
 \title{AutoXplainR: guided model fitting, evaluation, and explanation}
 \description{
 AutoXplainR gives a first-time modeler one safe path from a data frame to a
-held-out evaluation and plain-language explanation. Its advanced evidence
+held-out evaluation and plain-language explanation. An explicit local mode
+tunes statistical, tree, and neural-network configurations using only the
+training portion before the final holdout is scored. Its advanced evidence
 layer stress-tests those explanations with repeated permutation importance,
 dependence diagnostics, comparisons across supplied models, accumulated
 local effects, and reproducible provenance. H2O AutoML, Plotly, and remote
@@ -18,6 +20,8 @@ narratives are optional integrations rather than startup requirements.
 \enumerate{
 \item Call \code{\link[=autoxplain]{autoxplain()}} with a data frame and target column.
 \item Read the baseline comparison and held-out metrics.
+\item Use \code{model_set = "tuned"} and \code{\link[=tuning_results]{tuning_results()}} when automatic model
+selection is needed without tuning on the final evaluation rows.
 \item Preserve the fitted patterns and limitations with
 \code{\link[=render_model_report]{render_model_report()}}.
 \item Convert the result with \code{\link[=as_explainers]{as_explainers()}} to investigate an effect

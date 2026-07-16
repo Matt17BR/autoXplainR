@@ -11,8 +11,10 @@ Authors@R:
 Description: Guides first-time modelers through fitting, held-out evaluation,
     explanation, and communication for tabular prediction problems. Safe local
     defaults compare an understandable model with a simple baseline and define
-    every reported metric. An optional local candidate set exposes Pareto
-    performance-complexity trade-offs. Model-agnostic tools add repeated permutation
+    every reported metric. Training-only resampling can tune statistical,
+    decision-tree, and neural-network candidates without opening the final
+    holdout; another local candidate set exposes Pareto performance-complexity
+    trade-offs. Model-agnostic tools add repeated permutation
     importance, feature-dependence diagnostics, accumulated local effects, and
     provenance-rich evidence audits. Optional adapters support 'H2O' AutoML,
     interactive 'Plotly' graphics, and evidence-constrained narratives.

@@ -5,6 +5,9 @@ fit_guided_base <- function(data,
                             seed,
                             task,
                             model_set,
+                            max_models,
+                            nfolds,
+                            tuning_rule,
                             enable_preprocessing,
                             preprocessing_config,
                             verbosity) {
@@ -77,10 +80,25 @@ fit_guided_base <- function(data,
     stop("At least one predictor must remain after preprocessing.", call. = FALSE)
   }
 
-  fit <- with_preserved_seed(
-    seed,
-    fit_base_candidates(train, target_column, features, resolved_task, model_set)
+  raw_tuning_data <- split$training[c(features, target_column)]
+  raw_tuning_data[[target_column]] <- coerce_outcome_for_task(
+    raw_tuning_data[[target_column]],
+    resolved_task,
+    target_levels = if (is.factor(train[[target_column]])) levels(train[[target_column]]) else NULL
   )
+  fit <- with_preserved_seed(seed, fit_base_candidates(
+    data = train,
+    target = target_column,
+    features = features,
+    task = resolved_task,
+    model_set = model_set,
+    tuning_data = raw_tuning_data,
+    enable_preprocessing = enable_preprocessing,
+    preprocessing_config = config,
+    max_models = max_models,
+    nfolds = nfolds,
+    tuning_rule = tuning_rule
+  ))
   evaluated <- evaluate_candidates(
     fit$models,
     evaluation_data,
@@ -112,6 +130,7 @@ fit_guided_base <- function(data,
       features = features,
       task = resolved_task,
       automl_object = NULL,
+      tuning = fit$tuning,
       model_characteristics = NULL,
       model_diagnostics = evaluated$model_diagnostics,
       preprocessing_metadata = list(
@@ -133,10 +152,19 @@ fit_guided_base <- function(data,
         constant_features_removed = constant_result$removed,
         baseline = "intercept-only model",
         primary_model = fit$labels[["main_model"]],
-        candidate_selection = paste(
-          "The main model was pre-specified; held-out candidate ranks are descriptive",
-          "and were not used to replace it."
-        )
+        candidate_selection = if (identical(model_set, "tuned")) {
+          paste(
+            "The main model was selected by", fit$tuning$folds_used,
+            "fold training-only resampling using the",
+            tuning_rule_label(fit$tuning$selection_rule),
+            "rule; held-out evaluation rows were untouched until final scoring."
+          )
+        } else {
+          paste(
+            "The main model was pre-specified; held-out candidate ranks are descriptive",
+            "and were not used to replace it."
+          )
+        }
       )
     ),
     class = "autoxplain_result"
@@ -402,7 +430,17 @@ validate_finite_guided_data <- function(data, target) {
   invisible(TRUE)
 }
 
-fit_base_candidates <- function(data, target, features, task, model_set = "quick") {
+fit_base_candidates <- function(data,
+                                target,
+                                features,
+                                task,
+                                model_set = "quick",
+                                tuning_data = NULL,
+                                enable_preprocessing = TRUE,
+                                preprocessing_config = list(),
+                                max_models = 10L,
+                                nfolds = 5L,
+                                tuning_rule = "one_se") {
   primary_formula <- stats::reformulate(features, response = target)
   baseline_formula <- stats::reformulate(character(), response = target)
   if (task == "regression") {
@@ -426,9 +464,72 @@ fit_base_candidates <- function(data, target, features, task, model_set = "quick
     })
     label <- "multinomial logistic regression"
   }
-  fits <- list(main_model = primary, simple_baseline = baseline)
-  labels <- c(main_model = label, simple_baseline = "intercept-only baseline")
-  roles <- c(main_model = "primary", simple_baseline = "baseline")
+  tuning <- NULL
+  if (identical(model_set, "tuned")) {
+    tuning <- tune_supervised_candidates(
+      raw_data = tuning_data,
+      target = target,
+      task = task,
+      enable_preprocessing = enable_preprocessing,
+      preprocessing_config = preprocessing_config,
+      max_models = max_models,
+      nfolds = nfolds,
+      selection_rule = tuning_rule
+    )
+    valid <- tuning$candidates[tuning$candidates$status == "ok", , drop = FALSE]
+    selected <- valid[valid$selected, , drop = FALSE]
+    retained <- selected
+    for (family in setdiff(unique(valid$family), selected$family[[1L]])) {
+      family_rows <- valid[valid$family == family, , drop = FALSE]
+      retained <- rbind(retained, family_rows[which.min(family_rows$cv_score), , drop = FALSE])
+    }
+    identifiers <- c(
+      statistical_reference = "reference_model",
+      decision_tree = "tuned_tree",
+      neural_network = "tuned_neural_network"
+    )
+    final_fits <- list()
+    final_labels <- character()
+    final_roles <- character()
+    tuning$candidates$retained_model_id <- NA_character_
+    for (index in seq_len(nrow(retained))) {
+      row <- retained[index, , drop = FALSE]
+      model_id <- if (isTRUE(row$selected[[1L]])) {
+        "main_model"
+      } else {
+        unname(identifiers[[row$family[[1L]]]])
+      }
+      configuration <- tuning$plan[
+        tuning$plan$configuration_id == row$configuration_id[[1L]],
+        , drop = FALSE
+      ]
+      final_fits[[model_id]] <- timed_model_fit(function() {
+        fit_tuning_configuration(configuration, data, target, task)
+      })
+      final_labels[[model_id]] <- if (model_id == "main_model") {
+        if (row$family[[1L]] == "statistical_reference") {
+          paste("resampling-selected", row$model[[1L]])
+        } else {
+          paste("tuned", row$model[[1L]])
+        }
+      } else if (row$family[[1L]] == "statistical_reference") {
+        paste(row$model[[1L]], "reference")
+      } else {
+        paste("tuned", row$model[[1L]], "alternative")
+      }
+      final_roles[[model_id]] <- if (model_id == "main_model") "primary" else "candidate"
+      tuning$candidates$retained_model_id[
+        tuning$candidates$configuration_id == row$configuration_id[[1L]]
+      ] <- model_id
+    }
+    fits <- c(final_fits, list(simple_baseline = baseline))
+    labels <- c(final_labels, simple_baseline = "intercept-only baseline")
+    roles <- c(final_roles, simple_baseline = "baseline")
+  } else {
+    fits <- list(main_model = primary, simple_baseline = baseline)
+    labels <- c(main_model = label, simple_baseline = "intercept-only baseline")
+    roles <- c(main_model = "primary", simple_baseline = "baseline")
+  }
   if (identical(model_set, "comparison")) {
     method <- if (task == "regression") "anova" else "class"
     small_minsplit <- max(4L, min(20L, as.integer(floor(nrow(data) * 0.10))))
@@ -481,7 +582,8 @@ fit_base_candidates <- function(data, target, features, task, model_set = "quick
     models = models,
     labels = labels,
     roles = roles,
-    diagnostics = diagnostics
+    diagnostics = diagnostics,
+    tuning = tuning
   )
 }
 
@@ -505,6 +607,9 @@ timed_model_fit <- function(callback) {
 model_complexity <- function(model) {
   if (inherits(model, "rpart")) {
     return(sum(as.character(model$frame$var) == "<leaf>"))
+  }
+  if (inherits(model, "autoxplain_tuned_nnet")) {
+    return(length(model$model$wts))
   }
   coefficients <- tryCatch(stats::coef(model), error = function(error) numeric())
   sum(is.finite(as.numeric(coefficients)))

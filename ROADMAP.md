@@ -13,6 +13,9 @@ ordered by user and scientific leverage, not novelty theatre.
   probability scores, sample-size cautions, and baseline-failure warnings.
 - [x] Optional local comparison set with multiple understandable model
   complexities, measured resource dimensions, and a labeled Pareto frontier.
+- [x] Training-only local hyperparameter tuning across statistical, tree, and
+  scaled neural-network families, with fold-specific preprocessing, an
+  inspectable one-standard-error rule, and untouched final evaluation.
 - [x] Model-agnostic prediction contract and H2O boundary.
 - [x] Repeated grouped permutation importance with retained draws.
 - [x] ALE, diagnosed PDP, feature association, and support outputs.

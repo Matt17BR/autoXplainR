@@ -15,8 +15,9 @@
 #'
 #' @param data Training data frame.
 #' @param target_column Name of the outcome column.
-#' @param max_models Maximum number of H2O base models; ignored by the guided
-#'   base engine, which fits one primary model and one simple baseline.
+#' @param max_models Maximum number of configurations in local tuning or H2O
+#'   base models. Local tuning requires at least three and counts the statistical
+#'   reference alongside tree and neural-network configurations.
 #' @param max_runtime_secs H2O training time budget in seconds; ignored by the
 #'   guided base engine.
 #' @param seed Reproducible split, fitting, and H2O seed.
@@ -26,18 +27,24 @@
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
 #'   resolves to the dependency-free `"base"` workflow.
-#' @param model_set Guided base-engine candidates. `"quick"` fits the
+#' @param model_set Guided base-engine workflow. `"quick"` fits the
 #'   pre-specified understandable model and baseline. `"comparison"` also fits
-#'   shallow and flexible decision trees for a descriptive multi-model and
-#'   Pareto trade-off view. Held-out ranks do not silently replace the
-#'   pre-specified primary model.
+#'   two pre-specified trees for a descriptive Pareto view. `"tuned"` compares
+#'   statistical, decision-tree, and scaled neural-network configurations using
+#'   training-only resampling, then evaluates the selected configuration once on
+#'   the untouched holdout.
 #' @param enable_preprocessing Apply [preprocess_data()].
 #' @param preprocessing_config Named overrides for preprocessing. Identifier
 #'   removal defaults to `FALSE`.
 #' @param task One of `"auto"`, `"regression"`, `"binary"`, or
 #'   `"multiclass"`.
-#' @param nfolds Number of H2O cross-validation folds. At least two folds are
-#'   required when stacked ensembles are desired.
+#' @param nfolds Number of training-only folds for local tuning or H2O
+#'   cross-validation. Local tuning automatically reduces this when an outcome
+#'   class contains fewer rows.
+#' @param tuning_rule Local tuning selection rule. `"one_se"` chooses the
+#'   simplest configuration whose resampled error is within one standard error
+#'   of the best; `"best"` chooses the lowest resampled error. Ignored by other
+#'   workflows.
 #' @param sort_metric H2O AutoML leaderboard metric.
 #' @param include_algos,exclude_algos Optional H2O algorithm filters. Supply at
 #'   most one.
@@ -69,11 +76,12 @@ autoxplain <- function(data,
                        test_data = NULL,
                        test_fraction = 0.2,
                        engine = c("auto", "base", "h2o"),
-                       model_set = c("quick", "comparison"),
+                       model_set = c("quick", "tuned", "comparison"),
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
                        task = c("auto", "regression", "binary", "multiclass"),
                        nfolds = 5L,
+                       tuning_rule = c("one_se", "best"),
                        sort_metric = "AUTO",
                        include_algos = NULL,
                        exclude_algos = NULL,
@@ -86,6 +94,7 @@ autoxplain <- function(data,
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
   task <- match.arg(task)
+  tuning_rule <- match.arg(tuning_rule)
   verbosity <- match.arg(verbosity)
   validate_automl_inputs(data, target_column, test_data)
   assert_probability(test_fraction, "test_fraction")
@@ -93,6 +102,14 @@ autoxplain <- function(data,
     stop("`test_fraction` must be greater than zero and less than one.", call. = FALSE)
   }
   if (resolved_engine == "base") {
+    if (identical(model_set, "tuned")) {
+      max_models <- assert_count(max_models, "max_models")
+      if (max_models < 3L) {
+        stop("`max_models` must be at least 3 for local tuning.", call. = FALSE)
+      }
+      nfolds <- assert_count(nfolds, "nfolds")
+      if (nfolds < 2L) stop("`nfolds` must be at least 2 for local tuning.", call. = FALSE)
+    }
     return(fit_guided_base(
       data = data,
       target_column = target_column,
@@ -101,6 +118,9 @@ autoxplain <- function(data,
       seed = seed,
       task = task,
       model_set = model_set,
+      max_models = max_models,
+      nfolds = nfolds,
+      tuning_rule = tuning_rule,
       enable_preprocessing = enable_preprocessing,
       preprocessing_config = preprocessing_config,
       verbosity = verbosity
@@ -285,7 +305,13 @@ as_explainers <- function(x, data = NULL, models = NULL) {
       selected[[id]], evaluation, y = x$target_column, task = x$task,
       label = id, metadata = list(
         evaluation_role = role,
-        source = if (identical(x$engine, "h2o")) "H2O AutoML" else "guided base workflow"
+        source = if (identical(x$engine, "h2o")) {
+          "H2O AutoML"
+        } else if (inherits(x$tuning, "autoxplain_tuning")) {
+          "guided local tuning workflow"
+        } else {
+          "guided base workflow"
+        }
       )
     )
   })
@@ -300,7 +326,10 @@ print.autoxplain_result <- function(x, ...) {
   cat("  engine:     ", x$engine %||% "h2o", "\n", sep = "")
   cat("  data:       ", nrow(x$training_data), " training + ",
       nrow(x$test_data %||% x$training_data), " evaluation rows\n", sep = "")
-  cat("  models:     ", length(x$models), if (length(x$models) > 2L) {
+  cat("  models:     ", length(x$models), if (inherits(x$tuning, "autoxplain_tuning")) {
+    paste0(" (selected from ", nrow(x$tuning$candidates),
+           " training-resampled configurations)")
+  } else if (length(x$models) > 2L) {
     " (comparison set; primary remains pre-specified)"
   } else {
     " (primary + baseline)"
@@ -319,6 +348,12 @@ print.autoxplain_result <- function(x, ...) {
     if (is.finite(improvement)) {
       cat("  baseline:   ", format(round(100 * improvement, 1L), trim = TRUE),
           "% improvement in ", metric, "\n", sep = "")
+    }
+    if (inherits(x$tuning, "autoxplain_tuning")) {
+      selected <- x$tuning$candidates[x$tuning$candidates$selected, , drop = FALSE]
+      cat("  tuning:     ", selected$model[[1L]], " chosen by ",
+          x$tuning$folds_used, "-fold ", tuning_rule_label(x$tuning$selection_rule),
+          "\n", sep = "")
     }
     cat("  next:       use as_explainers() to investigate the fitted patterns\n")
   } else {
