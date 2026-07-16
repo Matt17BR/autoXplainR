@@ -959,6 +959,28 @@ create_fallback_report <- function(context) {
       }
     }
   }
+  if (!is.null(context$tuning_summary)) {
+    tuning <- context$tuning_summary
+    lines <- c(
+      lines, "", "## How automatic tuning selected the model",
+      paste0(
+        tuning$configurations, " configurations across ", tuning$families,
+        " model families were compared with ", tuning$folds,
+        " training-only folds. The selection metric was ", tuning$metric, "."
+      ),
+      paste0(
+        "The ", tuning$selection_rule, " rule selected the ",
+        tuning$selected_model, " with ", tuning$selected_hyperparameters,
+        ". Its resampled ", tuning$metric, " was ",
+        report_number(tuning$selected_score, 5L), "."
+      ),
+      paste(
+        "That resampled score selected a configuration; it is not the final",
+        "performance estimate. The held-out score above evaluated the selected,",
+        "refitted model on different rows."
+      )
+    )
+  }
   if (!is.null(context$grade)) {
     lines <- c(
       lines, "", "## Reliability first",

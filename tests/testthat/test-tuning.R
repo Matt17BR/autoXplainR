@@ -158,4 +158,8 @@ test_that("guided report explains tuning separately from final evaluation", {
   expect_match(prompt, "Automatic tuning:", fixed = TRUE)
   expect_match(prompt, "training-only folds", fixed = TRUE)
   expect_match(prompt, "Tuning boundary:", fixed = TRUE)
+
+  memo <- generate_natural_language_report(result)
+  expect_match(memo, "How automatic tuning selected the model", fixed = TRUE)
+  expect_match(memo, "it is not the final performance estimate", fixed = TRUE)
 })

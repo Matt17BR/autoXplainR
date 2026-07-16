@@ -232,6 +232,26 @@ memo <- generate_natural_language_report(result, provider = "ollama")
 memo <- generate_natural_language_report(result, provider = "openrouter")
 ```
 
+### What does the generated output look like?
+
+The repository includes [complete verified narrative snapshots](LLM_EXAMPLES.md)
+from one reproducible tuned `iris` analysis: the deterministic local memo and a
+live `gemini-3.5-flash` response generated on 2026-07-16. The Gemini call used
+validated structured output, `store = false`, and no fallback.
+
+Here is a short excerpt from that Gemini response:
+
+> **Held-out performance.** On the held-out test set, the reference tuned neural
+> network achieved a final log loss of 0.08206, a 92.5% relative improvement
+> over the simple baseline. This final held-out performance is distinct from the
+> training-resampled selection score of 0.09566, calculated with five
+> training-only folds.
+
+The full page shows the exact reproduction code, complete outputs, provider
+provenance, what Gemini generated, and which interpretation boundaries the
+package appended locally. Generated wording can vary; the computed evidence is
+authoritative.
+
 The [narrative provider guide](LLM_PROVIDERS.md) compares current free access,
 privacy, structured-output support, reproducibility, and setup for Gemini,
 Groq, Cloudflare Workers AI, Ollama, and OpenRouter. Provider, resolved model,
