@@ -11,6 +11,13 @@
 - Added local linear, logistic, and multinomial logistic workflows for
   regression, binary classification, and multiclass classification. H2O
   remains available explicitly through `engine = "h2o"`.
+- Added `model_set = "tuned"` and
+  [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md).
+  The dependency-light search compares statistical, decision-tree, and
+  scaled neural-network configurations using fold-specific preprocessing
+  inside the outer training set. The default one-standard-error rule is
+  inspectable, and the final holdout is untouched until the selected
+  configuration is refitted and scored.
 - Added
   [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md),
   a standalone beginner-first report that leads with the modeling

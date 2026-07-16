@@ -16,10 +16,12 @@ held-out test set, compares an understandable model with a simple
 baseline, defines every metric, investigates fitted patterns, and tells
 the user what the evidence does and does not support.
 
-The default path is local and needs no Java, cloud account, or LLM. A
-comparison mode adds multiple approachable candidates and Pareto
-trade-offs. Advanced users can bring any fitted model, use H2O AutoML,
-or opt into local or hosted language models.
+The default path is local and needs no Java, cloud account, or LLM. One
+explicit mode automatically tunes statistical, tree, and neural-network
+models without peeking at the final holdout; another compares
+approachable candidates and Pareto trade-offs. Advanced users can bring
+any fitted model, use H2O AutoML, or opt into local or hosted language
+models.
 
 **[Get
 started](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html)**
@@ -62,6 +64,44 @@ guess?*—before the package asks anyone to interpret feature importance.
   result:     primary model has rmse = ...
   baseline:   ...% improvement in rmse
 ```
+
+## Tune supervised models without tuning on the test set
+
+Automatic tuning is a first-class local workflow, not an H2O-only escape
+hatch:
+
+``` r
+
+tuned <- autoxplain(
+  iris,
+  target_column = "Species",
+  model_set = "tuned",
+  max_models = 10,
+  nfolds = 5,
+  seed = 2026
+)
+
+tuning_results(tuned)
+render_model_report(tuned, "tuned-model-report.html")
+```
+
+AutoXplainR searches across a statistical reference, decision-tree depth
+and pruning settings, and scaled neural-network size and weight decay.
+Preprocessing is relearned inside each resampling fold. The default
+one-standard-error rule chooses a simpler configuration when its
+training-resampled error is hard to distinguish from the best observed
+error.
+
+Only the outer training rows take part in that search. The chosen
+configuration is refitted on all training rows and then scored once on
+the held-out rows. The report keeps these two numbers separate: the
+resampled score selects the model; the held-out score evaluates the
+selected model.
+
+The complete candidate grid, fold-level scores, warnings, failures,
+elapsed times, selected hyperparameters, and data boundary remain
+available in `tuning_results(tuned)`. H2O AutoML is still supported when
+a much broader, Java-backed search is appropriate.
 
 ## Compare models without hiding the trade-off
 
@@ -119,6 +159,7 @@ _(Performance versus model size, with the interpretation rule and full candidate
 |----|----|
 | What am I predicting? | detected task, target, split, preprocessing, and fitted family |
 | Does the model work? | held-out metrics, plain definitions, baseline comparison, probability calibration, missingness shift, optional subgroup checks, and failure warnings |
+| How was it tuned? | training-only folds, fold-specific preprocessing, candidate settings, one-standard-error selection, and an untouched final holdout |
 | Are other models competitive? | explicit candidates, prediction comparisons, and Pareto trade-offs |
 | What patterns does it use? | repeated permutation reliance plus ALE or diagnosed PDP effects |
 | How much should I trust the explanation? | dependence, repeat stability, supplied-model disagreement, and next actions |
@@ -333,6 +374,8 @@ Matteo Mazzarelli.
 
 - [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
   : Fit and evaluate a model through a guided workflow
+- [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
+  : Inspect automatic tuning evidence
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)

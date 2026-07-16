@@ -70,11 +70,12 @@ does not require Java or a cloud account.</p>
 <span>  test_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  test_fraction <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"base"</span>, <span class="st">"h2o"</span><span class="op">)</span>,</span>
-<span>  model_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quick"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
+<span>  model_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quick"</span>, <span class="st">"tuned"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
 <span>  enable_preprocessing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  task <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"regression"</span>, <span class="st">"binary"</span>, <span class="st">"multiclass"</span><span class="op">)</span>,</span>
 <span>  nfolds <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  tuning_rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"one_se"</span>, <span class="st">"best"</span><span class="op">)</span>,</span>
 <span>  sort_metric <span class="op">=</span> <span class="st">"AUTO"</span>,</span>
 <span>  include_algos <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  exclude_algos <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -99,8 +100,9 @@ does not require Java or a cloud account.</p>
 
 
 <dt id="arg-max-models">max_models<a class="anchor" aria-label="anchor" href="#arg-max-models"></a></dt>
-<dd><p>Maximum number of H2O base models; ignored by the guided
-base engine, which fits one primary model and one simple baseline.</p></dd>
+<dd><p>Maximum number of configurations in local tuning or H2O
+base models. Local tuning requires at least three and counts the statistical
+reference alongside tree and neural-network configurations.</p></dd>
 
 
 <dt id="arg-max-runtime-secs">max_runtime_secs<a class="anchor" aria-label="anchor" href="#arg-max-runtime-secs"></a></dt>
@@ -128,11 +130,12 @@ resolves to the dependency-free <code>"base"</code> workflow.</p></dd>
 
 
 <dt id="arg-model-set">model_set<a class="anchor" aria-label="anchor" href="#arg-model-set"></a></dt>
-<dd><p>Guided base-engine candidates. <code>"quick"</code> fits the
+<dd><p>Guided base-engine workflow. <code>"quick"</code> fits the
 pre-specified understandable model and baseline. <code>"comparison"</code> also fits
-shallow and flexible decision trees for a descriptive multi-model and
-Pareto trade-off view. Held-out ranks do not silently replace the
-pre-specified primary model.</p></dd>
+two pre-specified trees for a descriptive Pareto view. <code>"tuned"</code> compares
+statistical, decision-tree, and scaled neural-network configurations using
+training-only resampling, then evaluates the selected configuration once on
+the untouched holdout.</p></dd>
 
 
 <dt id="arg-enable-preprocessing">enable_preprocessing<a class="anchor" aria-label="anchor" href="#arg-enable-preprocessing"></a></dt>
@@ -150,8 +153,16 @@ removal defaults to <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-nfolds">nfolds<a class="anchor" aria-label="anchor" href="#arg-nfolds"></a></dt>
-<dd><p>Number of H2O cross-validation folds. At least two folds are
-required when stacked ensembles are desired.</p></dd>
+<dd><p>Number of training-only folds for local tuning or H2O
+cross-validation. Local tuning automatically reduces this when an outcome
+class contains fewer rows.</p></dd>
+
+
+<dt id="arg-tuning-rule">tuning_rule<a class="anchor" aria-label="anchor" href="#arg-tuning-rule"></a></dt>
+<dd><p>Local tuning selection rule. <code>"one_se"</code> chooses the
+simplest configuration whose resampled error is within one standard error
+of the best; <code>"best"</code> chooses the lowest resampled error. Ignored by other
+workflows.</p></dd>
 
 
 <dt id="arg-sort-metric">sort_metric<a class="anchor" aria-label="anchor" href="#arg-sort-metric"></a></dt>

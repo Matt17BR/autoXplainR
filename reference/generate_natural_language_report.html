@@ -72,7 +72,7 @@ evaluation and explanation evidence.</p>
 <span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  base_url <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  account_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  max_tokens <span class="op">=</span> <span class="fl">1000L</span>,</span>
+<span>  max_tokens <span class="op">=</span> <span class="fl">4000L</span>,</span>
 <span>  temperature <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  structured <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -133,7 +133,9 @@ is consulted when this is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-max-tokens">max_tokens<a class="anchor" aria-label="anchor" href="#arg-max-tokens"></a></dt>
-<dd><p>Maximum response tokens.</p></dd>
+<dd><p>Maximum response-token budget. The 4,000-token default
+leaves room for reasoning tokens used by current Gemini models while the
+prompt still limits the rendered memo to 500 words.</p></dd>
 
 
 <dt id="arg-temperature">temperature<a class="anchor" aria-label="anchor" href="#arg-temperature"></a></dt>

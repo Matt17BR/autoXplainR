@@ -55,10 +55,10 @@ result$leaderboard
 #> 2    2 simple_baseline intercept-only baseline baseline 5.096266 3.907692
 #>    r_squared training_time_ms model_size_kb complexity fit_warning
 #> 1 -0.1281933                1      44.43750         11            
-#> 2 -1.3212249                3      19.82812          1            
+#> 2 -1.3212249                2      19.82812          1            
 #>   prediction_time_ms
 #> 1                  1
-#> 2                  1
+#> 2                  0
 result$evaluation$metric_definitions
 #>                                                                                                rmse 
 #>            "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -102,6 +102,65 @@ The standalone report uses progressive disclosure:
 
 The report does not need an LLM, Plotly, H2O, or a browser runtime after
 it is written.
+
+## Tune supervised models without opening the final holdout
+
+When model selection is the goal, use the explicit tuned workflow:
+
+``` r
+
+tuned <- autoxplain(
+  iris,
+  target_column = "Species",
+  model_set = "tuned",
+  max_models = 6,
+  nfolds = 3,
+  seed = 2026
+)
+
+tuning <- tuning_results(tuned)
+tuning$candidates[, c(
+  "model", "hyperparameters", "cv_score", "cv_se", "selected"
+)]
+#>                             model
+#> 1                  neural network
+#> 2                  neural network
+#> 3 multinomial logistic regression
+#> 4                   decision tree
+#> 5                   decision tree
+#> 6                   decision tree
+#>                                         hyperparameters   cv_score      cv_se
+#> 1                 hidden units = 2, weight decay = 0.03 0.09545069 0.03513163
+#> 2                  hidden units = 1, weight decay = 0.1 0.29456933 0.01064361
+#> 3                               default statistical fit 0.37178519 0.20404352
+#> 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.39532699
+#> 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.39241141
+#> 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.39241141
+#>   selected
+#> 1     TRUE
+#> 2    FALSE
+#> 3    FALSE
+#> 4    FALSE
+#> 5    FALSE
+#> 6    FALSE
+```
+
+This is ordinary supervised hyperparameter tuning made visible.
+AutoXplainR compares a statistical reference, decision-tree
+pruning/depth settings, and scaled neural-network
+hidden-unit/weight-decay settings. It learns preprocessing separately
+inside each training fold.
+
+The default one-standard-error rule chooses the simplest configuration
+whose resampled error is within one standard error of the best observed
+configuration. Use `tuning_rule = "best"` when the explicitly desired
+rule is minimum resampled error instead. Both rules and every fold score
+remain in the result.
+
+The resampled score answers *which configuration should be refitted?*
+The held-out score answers *how did that selected, refitted model
+perform on unseen rows?* AutoXplainR keeps the outer evaluation rows out
+of tuning and labels the two numbers separately in the report.
 
 ## Compare a small candidate set
 

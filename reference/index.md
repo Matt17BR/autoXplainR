@@ -4,6 +4,8 @@
 
 - [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
   : Fit and evaluate a model through a guided workflow
+- [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
+  : Inspect automatic tuning evidence
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
   : Convert an AutoML result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)

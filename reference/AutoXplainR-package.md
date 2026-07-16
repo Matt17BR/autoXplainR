@@ -1,12 +1,14 @@
 # AutoXplainR: guided model fitting, evaluation, and explanation
 
 AutoXplainR gives a first-time modeler one safe path from a data frame
-to a held-out evaluation and plain-language explanation. Its advanced
-evidence layer stress-tests those explanations with repeated permutation
-importance, dependence diagnostics, comparisons across supplied models,
-accumulated local effects, and reproducible provenance. H2O AutoML,
-Plotly, and remote narratives are optional integrations rather than
-startup requirements.
+to a held-out evaluation and plain-language explanation. An explicit
+local mode tunes statistical, tree, and neural-network configurations
+using only the training portion before the final holdout is scored. Its
+advanced evidence layer stress-tests those explanations with repeated
+permutation importance, dependence diagnostics, comparisons across
+supplied models, accumulated local effects, and reproducible provenance.
+H2O AutoML, Plotly, and remote narratives are optional integrations
+rather than startup requirements.
 
 ## Primary workflow
 
@@ -16,10 +18,15 @@ startup requirements.
 
 2.  Read the baseline comparison and held-out metrics.
 
-3.  Preserve the fitted patterns and limitations with
+3.  Use `model_set = "tuned"` and
+    [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
+    when automatic model selection is needed without tuning on the final
+    evaluation rows.
+
+4.  Preserve the fitted patterns and limitations with
     [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md).
 
-4.  Convert the result with
+5.  Convert the result with
     [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
     to investigate an effect with
     [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)

@@ -21,6 +21,10 @@ Optional local comparison set with multiple understandable model
 complexities, measured resource dimensions, and a labeled Pareto
 frontier.
 
+Training-only local hyperparameter tuning across statistical, tree, and
+scaled neural-network families, with fold-specific preprocessing, an
+inspectable one-standard-error rule, and untouched final evaluation.
+
 Model-agnostic prediction contract and H2O boundary.
 
 Repeated grouped permutation importance with retained draws.
