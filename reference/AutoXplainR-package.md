@@ -68,3 +68,7 @@ Useful links:
 ## Author
 
 **Maintainer**: Matteo Mazzarelli <matteo.mazzarelli@gmail.com>
+
+Authors:
+
+- Matteo Mazzarelli <matteo.mazzarelli@gmail.com>
