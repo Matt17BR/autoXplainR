@@ -4,7 +4,7 @@
     {
       "name": "regression: fixture identity",
       "passed": true,
-      "evidence": "28b6d90e3353002b13f0a3d9f4e9a41e6dc6d3f96e605e220417014af09b64f3"
+      "evidence": "36d7698d3aa9ae9db61b1a797a920077be75decea1295a393d071d82cfd433b2"
     },
     {
       "name": "regression: unique IDs and valid navigation targets",
@@ -1392,6 +1392,26 @@
       "evidence": []
     },
     {
+      "name": "regression/main_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression: no-JavaScript retains every model",
       "passed": true,
       "evidence": null
@@ -1414,7 +1434,7 @@
     {
       "name": "binary: fixture identity",
       "passed": true,
-      "evidence": "69e420e0385a70dff171cfef98dc60569f53e99977b586a74bfe431dd71a5a7d"
+      "evidence": "6b138be88cc6a302b774b19291930cf4c00eef83bee6ee700cc3561d97c4ea2e"
     },
     {
       "name": "binary: unique IDs and valid navigation targets",
@@ -2637,6 +2657,26 @@
       "evidence": null
     },
     {
+      "name": "binary/main_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary: no-JavaScript retains every model",
       "passed": true,
       "evidence": null
@@ -2659,7 +2699,7 @@
     {
       "name": "multiclass: fixture identity",
       "passed": true,
-      "evidence": "112753144b16aae374e424e1ac8ac81da95a9d1eb220d1d3a75f2174a9a1d351"
+      "evidence": "430fcabcb977f0cdc8f3a42bce6b7abbd8eda5a0b4e3587a9f9c054fb085f76c"
     },
     {
       "name": "multiclass: unique IDs and valid navigation targets",
@@ -4667,6 +4707,26 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass: no-JavaScript retains every model",
       "passed": true,
       "evidence": null
@@ -4689,7 +4749,7 @@
     {
       "name": "quick: fixture identity",
       "passed": true,
-      "evidence": "bfd6dea158aaa1ed719d64412f76be4a639178fbb5af340659e9752b4220193e"
+      "evidence": "6607918f98caab881a801dff223edafa1801cae0016f466ddb4cb97970cd7d3a"
     },
     {
       "name": "quick: unique IDs and valid navigation targets",
@@ -5728,6 +5788,16 @@
     },
     {
       "name": "quick/1440/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: features fit with wider system font at 320px",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: features fit with wider system font at 320px",
       "passed": true,
       "evidence": null
     },

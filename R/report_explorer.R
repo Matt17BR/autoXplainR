@@ -47,7 +47,7 @@ explorer_measurement <- function(x, resource = FALSE) {
     return("Unavailable")
   }
   if (resource && x == 0) {
-    return("<1")
+    return("~0")
   }
   format(signif(x, 4), trim = TRUE, scientific = FALSE)
 }
@@ -139,7 +139,8 @@ explorer_tradeoffs <- function(result, models) {
     paste(plots, collapse = ""),
     "<details><summary>How costs were measured</summary><p>Times are measured on this machine. ",
     "Fit time covers the retained fit, not the entire cross-validation search; prediction time covers this ",
-    "evaluation batch. A displayed &lt;1 ms means below the recorded millisecond resolution. ",
+    "evaluation batch. A displayed ~0 means no elapsed time was recorded; timer resolution varies ",
+    "by platform. It does not mean the operation takes no time. ",
     if (identical(result$engine, "h2o")) {
       "H2O model size is reported by the engine when available; the native baseline uses R object size. "
     } else {

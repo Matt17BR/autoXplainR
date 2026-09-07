@@ -28,9 +28,10 @@ checks, not a recruited participant study.
   skips. The separate live H2O suite passed 95 assertions with no skips or failures.
 - Eleven numerical references: maximum absolute discrepancy 5.69e-14, covering
   PDP, ALE shapes, analytic boundaries, ties and empirical centering.
-- Browser tasks: all 1,150 assertions passed on four generated reports, including
+- Browser tasks: all 1,164 assertions passed on four generated reports, including
   320/390/768/1440px layouts and 24 regression-tab and 12 model-details axe scans. No JavaScript errors.
   Incomplete axe results are retained separately and are not counted as passes.
+  The wider-font 320px case that reproduced a CI overflow is included for every model.
 - Negative control: deliberately disconnecting model selection causes a failed
   model-switch assertion and exit status 1, without an execution error.
 - R lint and spelling, Python compilation, JavaScript syntax and whitespace checks

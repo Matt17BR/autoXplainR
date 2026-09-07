@@ -171,3 +171,12 @@ provides a concrete reason for the score difference. Phone inspection initially
 found the probability columns off-screen. They now sit below their class labels
 in a three-column table, and browser checks reject horizontal overflow. The
 active mobile tab is also brought into view on navigation and deep links.
+
+The final CI browser pass caught a further 320px overflow in the multiclass
+feature view. Repeating the task locally with DejaVu Sans reproduced it: the
+model selector's flex item sized itself to its longest option. Its containing
+label now respects the available width; the same wider-font case is checked for
+every model. Failed layout checks save the affected report, screenshot and
+element dimensions. Cost labels also no longer claim that a zero timer reading
+means less than one millisecond: R documents platform-dependent resolution, so
+the table shows `~0` with an explanation in the cost-measurement details.

@@ -36,6 +36,7 @@
   omits optional model-characteristic fields. Missing measurements stay missing.
 - Local elapsed times discard floating-point subtraction noise below a
   microsecond so that equal measured costs remain equal in Pareto comparisons.
+  A zero timer reading is shown as `~0`; its resolution depends on the platform.
 - Small probability effects retain distinct signed axis labels instead of
   rounding several different ticks to zero. Tiny table values use scientific notation.
 

@@ -110,6 +110,9 @@ test_that("clock subtraction noise cannot invent a Pareto cost advantage", {
   expect_identical(AutoXplainR:::pareto_nondominated(c(2, 7), c(first, second)), c(TRUE, FALSE))
   expect_equal(AutoXplainR:::elapsed_milliseconds(0, .000123), .123)
   expect_identical(AutoXplainR:::elapsed_milliseconds(1, 1), 0)
+  expect_identical(AutoXplainR:::explorer_measurement(0, resource = TRUE), "~0")
+  expect_identical(AutoXplainR:::explorer_measurement(0), "0")
+  expect_identical(AutoXplainR:::explorer_measurement(.125, resource = TRUE), "0.125")
 })
 
 test_that("small probability effects keep distinct signed axis labels", {

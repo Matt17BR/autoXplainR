@@ -1098,6 +1098,10 @@
 .feature-controls .model-control {
   margin: 0;
 }
+.feature-controls .control {
+  min-width: 0;
+  max-width: 100%;
+}
 @media (max-width: 760px) {
   .feature-controls {
     gap: 12px;

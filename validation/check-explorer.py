@@ -33,6 +33,22 @@ def active_model(page, section):
 def within_tolerance(actual, expected):
     return abs(actual - expected) <= max(1e-8, abs(expected) * .0006)
 
+def check_layout(page, name, artifact):
+    layout = page.evaluate('''() => ({
+      viewport: innerWidth, width: document.documentElement.scrollWidth,
+      pages: [...document.querySelectorAll('.workspace-page')].filter(el => !el.hidden).length,
+      elements: [...document.querySelectorAll('.workspace-page:not([hidden]) *')]
+        .filter(el => !el.closest('details:not([open]),.help,.table-wrap'))
+        .map(el => ({tag: el.tagName, id: el.id, class: el.className,
+          left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right}))
+        .filter(el => el.right > innerWidth || el.left < 0)
+    })''')
+    passed = layout['pages'] == 1 and layout['width'] <= layout['viewport']
+    check(name, passed, None if passed else layout)
+    if not passed:
+        page.screenshot(path=str(args.output_dir / f'{artifact}.png'), full_page=True)
+        (args.output_dir / f'{artifact}.html').write_text(page.content())
+
 with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
     for case in args.cases:
@@ -239,9 +255,8 @@ with sync_playwright() as playwright:
             page.set_viewport_size({'width': width, 'height': 1000})
             for tab in ('overview', 'patterns', 'relationships', 'evaluation', 'checks', 'provenance'):
                 page.locator(f'[data-page-link={tab}]').click()
-                check(f'{case}/{width}/{tab}: one tab, no page overflow',
-                      page.locator('.workspace-page:visible').count() == 1 and page.evaluate(
-                          'document.documentElement.scrollWidth <= innerWidth'))
+                check_layout(page, f'{case}/{width}/{tab}: one tab, no page overflow',
+                             f'{case}-{width}-{tab}-overflow')
                 check(f'{case}/{width}/{tab}: heading is not hidden by navigation', page.evaluate('''() => {
                   const h = document.querySelector('.workspace-header h1').getBoundingClientRect();
                   const n = document.querySelector('.sidebar').getBoundingClientRect();
@@ -273,6 +288,18 @@ with sync_playwright() as playwright:
                     accessibility.append(dict(width=width, tab=tab,
                                               incomplete=[entry['id'] for entry in axe['incomplete']]))
                     page.screenshot(path=str(args.output_dir / f'{tab}-{width}.png'), full_page=True)
+        # A wider system font exposed an intrinsic flex-width bug on CI. Keep
+        # every model reachable at 320px even when font metrics differ by OS.
+        page.set_viewport_size({'width': 320, 'height': 1000})
+        font = page.add_style_tag(content='''
+          .explorer, .explorer button, .explorer select {font-family: "DejaVu Sans", sans-serif}
+        ''')
+        page.locator('[data-page-link=patterns]').click()
+        for model_id in ids:
+            page.select_option('#feature-model-select', model_id)
+            check_layout(page, f'{case}/{model_id}: features fit with wider system font at 320px',
+                         f'{case}-{model_id}-wide-font-overflow')
+        font.evaluate('el => el.remove()')
         context.close()
         no_js = browser.new_context(java_script_enabled=False, viewport={'width': 390, 'height': 844})
         static = no_js.new_page()
