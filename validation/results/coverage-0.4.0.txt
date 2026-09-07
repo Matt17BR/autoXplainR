@@ -1,4 +1,4 @@
-AutoXplainR Coverage: 89.66%
+AutoXplainR Coverage: 89.67%
 R/h2o_workflow.R: 62.14%
 R/autoxplain.R: 63.21%
 R/tuning_control.R: 77.70%
@@ -17,7 +17,7 @@ R/partial_dependence.R: 90.54%
 R/model_effect_comparison.R: 92.20%
 R/tuning.R: 92.21%
 R/matrix_blueprint.R: 92.43%
-R/llm_integration.R: 92.64%
+R/llm_integration.R: 92.72%
 R/prediction_ambiguity.R: 94.15%
 R/validation_split.R: 94.38%
 R/audit.R: 95.66%

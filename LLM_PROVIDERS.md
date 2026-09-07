@@ -21,9 +21,17 @@ memo <- generate_natural_language_report(result, provider = "gemini")
 ```
 
 Use `?generate_natural_language_report` for model overrides, environment variables,
-endpoints, timeout and fallback behavior. Provider defaults are recorded in the
+endpoints, timeout and fallback behavior. The requested model and generation settings are recorded in the
 returned provenance. Availability, pricing and model names can change; consult
 the provider's own documentation when configuring an account.
+
+The shipped Gemini text model requests low thinking within the existing
+4,000-token generation budget. Reasoning and response text share that budget;
+larger inputs can still exhaust it. Unknown model overrides keep their provider
+defaults. Incomplete responses are rejected and use the configured local fallback.
+There is no automatic retry with a higher budget. See Google's
+[thinking controls](https://ai.google.dev/gemini-api/docs/thinking). The generated
+content is capped at 500 words before fixed interpretation notes are appended.
 
 The package constructs prompts from aggregate evidence. It excludes raw training
 rows, per-case predictions and fitted model objects. Feature names, aggregate

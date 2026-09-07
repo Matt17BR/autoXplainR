@@ -1,4 +1,4 @@
-test_that("Gemini returns a validated evidence narrative", {
+test_that("Gemini returns a schema-valid narrative", {
   skip_if_not(
     identical(tolower(Sys.getenv("AUTOXPLAIN_RUN_GEMINI")), "true"),
     "Set AUTOXPLAIN_RUN_GEMINI=true for the opt-in live API test."
@@ -35,5 +35,7 @@ test_that("Gemini returns a validated evidence narrative", {
   expect_false(provenance$fallback)
   expect_match(memo, "Held-out performance", fixed = TRUE)
   expect_match(memo, "Required interpretation boundaries", fixed = TRUE)
-  expect_match(memo, "No raw rows", fixed = TRUE)
+  expect_match(memo, "raw rows, fitted model objects and case-level predictions are omitted", fixed = TRUE)
+  expect_identical(provenance$generation_config$thinking_level, "low")
+  expect_equal(provenance$generation_config$max_output_tokens, 4000L)
 })

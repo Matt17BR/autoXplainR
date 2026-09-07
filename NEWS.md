@@ -57,6 +57,10 @@
 - Local narratives use the retained feature evidence, effects and failed checks.
   Hosted narratives remain drafts for review; a format check does not establish
   numerical grounding.
+- Gemini's shipped text model uses a tested low-thinking setting within the
+  existing token budget. Requested settings are retained on success and local
+  fallback; incomplete outputs remain rejected. Generated content is capped
+  before fixed interpretation notes are appended.
 - The README includes fresh screenshots of a reproducible synthetic delivery
   analysis. A shorter first-report tutorial covers real predictor choices,
   missingness, novel categories, chronological evaluation and saved recipes.

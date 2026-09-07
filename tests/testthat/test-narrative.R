@@ -436,6 +436,44 @@ test_that("Gemini Interaction responses expose only completed model text", {
     AutoXplainR:::extract_narrative_text(
       interaction, "gemini_interactions", "gemini"
     ),
-    "Increase `max_tokens`"
+    "Increasing `max_tokens`"
   )
+})
+
+test_that("Gemini settings are bounded, model-specific and recorded without credentials", {
+  result <- autoxplain(mtcars, "mpg", explain = FALSE)
+  captured <- NULL
+  for (model in c("gemini-3.5-flash", "an-unrecognized-model")) {
+    memo <- generate_natural_language_report(
+      result, provider = "gemini", model = model, api_key = "private-test-key",
+      structured = FALSE, fallback = FALSE,
+      transport = function(request) {
+        captured <<- request
+        "A short model summary."
+      }
+    )
+    settings <- captured$body$generation_config
+    if (model == "gemini-3.5-flash") {
+      expect_identical(settings$thinking_level, "low")
+    } else {
+      expect_null(settings$thinking_level)
+    }
+    provenance <- attr(memo, "narrative_provenance")
+    expect_identical(provenance$generation_config, settings)
+    expect_identical(provenance$model_requested, model)
+    expect_false(any(grepl("private-test-key", unlist(provenance), fixed = TRUE)))
+    expect_false(any(c("headers", "input", "api_key") %in% names(settings)))
+  }
+  expect_warning(
+    memo <- generate_natural_language_report(
+      result, provider = "gemini", api_key = "private-test-key", structured = FALSE,
+      transport = function(request) stop("deliberately incomplete")
+    ),
+    "returning the local evidence summary"
+  )
+  provenance <- attr(memo, "narrative_provenance")
+  expect_true(provenance$fallback)
+  expect_identical(provenance$model_requested, "gemini-3.5-flash")
+  expect_identical(provenance$generation_config$thinking_level, "low")
+  expect_equal(provenance$generation_config$max_output_tokens, 4000L)
 })

@@ -57,9 +57,10 @@ is consulted when this is \code{NULL}.}
 \item{account_id}{Cloudflare account ID. When \code{NULL},
 \code{CLOUDFLARE_ACCOUNT_ID} is consulted for the Cloudflare provider.}
 
-\item{max_tokens}{Maximum response-token budget. The 4,000-token default
-leaves room for reasoning tokens used by current Gemini models while the
-prompt still limits the rendered memo to 500 words.}
+\item{max_tokens}{Maximum provider generation-token budget. Gemini reasoning
+and response text share this budget, so completion is not guaranteed. The
+default Gemini model requests low thinking. Generated content is limited
+to 500 words; fixed interpretation notes are appended afterward.}
 
 \item{temperature}{Sampling temperature. \code{NULL} uses 1 for Gemini, following
 its current model guidance, and 0.2 for other providers.}

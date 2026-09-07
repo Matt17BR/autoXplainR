@@ -79,9 +79,10 @@ narrative_providers <- function() {
 #' @param base_url Optional endpoint override. A custom provider requires it.
 #' @param account_id Cloudflare account ID. When `NULL`,
 #'   `CLOUDFLARE_ACCOUNT_ID` is consulted for the Cloudflare provider.
-#' @param max_tokens Maximum response-token budget. The 4,000-token default
-#'   leaves room for reasoning tokens used by current Gemini models while the
-#'   prompt still limits the rendered memo to 500 words.
+#' @param max_tokens Maximum provider generation-token budget. Gemini reasoning
+#'   and response text share this budget, so completion is not guaranteed. The
+#'   default Gemini model requests low thinking. Generated content is limited
+#'   to 500 words; fixed interpretation notes are appended afterward.
 #' @param temperature Sampling temperature. `NULL` uses 1 for Gemini, following
 #'   its current model guidance, and 0.2 for other providers.
 #' @param timeout Request timeout in seconds.
@@ -170,11 +171,14 @@ generate_natural_language_report <- function(autoxplain_result,
     ))
   }
   prompt <- create_report_prompt(context)
+  generation_config <- NULL
+  model_requested <- NULL
   tryCatch(
     {
       provider_config <- resolve_narrative_provider(
         provider, model, base_url, api_key, account_id
       )
+      model_requested <- provider_config$model
       request <- build_narrative_request(
         prompt = prompt,
         config = provider_config,
@@ -183,6 +187,11 @@ generate_natural_language_report <- function(autoxplain_result,
         timeout = timeout,
         structured = structured
       )
+      generation_config <- if (provider == "gemini") {
+        request$body$generation_config
+      } else {
+        request$body[c("temperature", "max_tokens")]
+      }
       text <- if (is.null(transport)) perform_narrative_request(request) else transport(request)
       if (!is.character(text) || length(text) != 1L || is.na(text) || !nzchar(trimws(text))) {
         stop("The narrative provider returned no usable text.", call. = FALSE)
@@ -199,7 +208,8 @@ generate_natural_language_report <- function(autoxplain_result,
         text, provider, provider, provider_config$model,
         remote = provider_config$remote, fallback = FALSE, context$disclosure,
         structured_requested = structured,
-        structured_used = request$structured
+        structured_used = request$structured, generation_config = generation_config,
+        model_requested = model_requested
       )
     },
     error = function(error) {
@@ -209,7 +219,8 @@ generate_natural_language_report <- function(autoxplain_result,
       annotate_narrative(
         local_report, provider, "local", NULL, remote = FALSE,
         fallback = TRUE, context$disclosure, conditionMessage(error),
-        structured_requested = structured, structured_used = FALSE
+        structured_requested = structured, structured_used = FALSE,
+        generation_config = generation_config, model_requested = model_requested
       )
     }
   )
@@ -319,6 +330,11 @@ build_narrative_request <- function(prompt,
         max_output_tokens = max_tokens
       )
     )
+    # This setting is exercised by the live check for the shipped text model.
+    # Unknown model overrides retain their provider defaults.
+    if (identical(config$model, "gemini-3.5-flash")) {
+      body$generation_config$thinking_level <- "low"
+    }
     if (use_structure) {
       body$response_format <- list(
         type = "text",
@@ -595,7 +611,7 @@ extract_narrative_text <- function(parsed, response_format, provider) {
       provider, " interaction ended with status `",
       parsed$status %||% "unknown", "`.",
       if (identical(parsed$status, "incomplete")) {
-        " Increase `max_tokens`; Gemini reasoning and response text share this budget."
+        " Increasing `max_tokens` may help; Gemini reasoning and response text share this budget."
       } else {
         ""
       },
@@ -634,15 +650,19 @@ annotate_narrative <- function(text,
                                disclosure,
                                error = NULL,
                                structured_requested = FALSE,
-                               structured_used = FALSE) {
+                               structured_used = FALSE,
+                               generation_config = NULL,
+                               model_requested = NULL) {
   attr(text, "narrative_provenance") <- list(
     provider_requested = provider_requested,
     provider_used = provider_used,
     model = model,
+    model_requested = model_requested,
     remote = remote,
     fallback = fallback,
     structured_requested = structured_requested,
     structured_used = structured_used,
+    generation_config = generation_config,
     content_validation = if (identical(provider_used, "local")) {
       "deterministic rendering of retained evidence"
     } else {

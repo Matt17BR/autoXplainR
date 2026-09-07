@@ -9,9 +9,10 @@ checks and explicit remaining limits. This record does not claim CRAN acceptance
 | Check | Result |
 |---|---|
 | Runtime | R 4.5.2, Ubuntu 26.04.1, x86_64 |
-| Complete installed-engine suite | 2,717 passing assertions; no failures or warnings; two opt-in live skips |
+| Complete installed-engine suite | 2,732 passing assertions; no failures or warnings; two opt-in live skips |
+| Live Gemini integration | 12 passing assertions with gemini-3.5-flash, low thinking and a 4,000-token budget; no fallback |
 | Live H2O integration | 93 passing assertions on CRAN H2O 3.44.0.3 and Temurin 17; no failures, warnings or skips |
-| Statement coverage | 89.66%; [instrumented summary](results/coverage-0.4.0.txt) |
+| Statement coverage | 89.67%; [instrumented summary](results/coverage-0.4.0.txt) |
 | Minimum-version engine check | All eight declared engine versions match; 694 adapter/geometry/data-contract assertions pass |
 | Lint and spelling | Clean; roxygen2 8.1.0 documentation regenerated |
 | Documentation | All five vignette code paths execute; pkgdown site builds |
@@ -22,8 +23,13 @@ checks and explicit remaining limits. This record does not claim CRAN acceptance
 | Automated accessibility | No axe A/AA violations in the eight tested width/disclosure states; contrast incompletes retained |
 | Comparator workflow | Same fitted objects/data/split with DALEX and modelStudio; six metrics identical; four offline HTML smoke checks pass |
 
-The live Gemini test was not run. Its mocked transport tests do not establish
-current provider availability or generated-text accuracy. H2O was exercised
+The live Gemini test used aggregate evidence from the public iris example. Its
+initial default request exhausted the shared reasoning/response budget. The
+shipped model now requests low thinking, and the corrected live test passed in
+4.3 seconds. An outdated disclosure assertion was corrected too. This verifies
+one provider interaction and its format, not generated-text accuracy or future
+availability. Model overrides retain provider defaults; request settings are
+recorded on success and fallback. H2O was exercised
 separately on a local Java cluster. The full-suite version record retains the
 then-installed vendor H2O 3.46.0.9. The corrected CRAN minimum, 3.44.0.3, was
 installed and tested separately with Temurin 17. Native minimum-version evidence
