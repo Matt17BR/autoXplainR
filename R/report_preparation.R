@@ -67,12 +67,13 @@ report_effect_status <- function(result) {
   } else {
     NA_character_
   }
-  rows <- list()
+  collected <- new.env(parent = emptyenv())
+  collected$rows <- list()
   add <- function(values, id, prediction_class = first_class) {
     for (feature in names(values)) {
       effect <- values[[feature]]
       failed <- inherits(effect, "effect_failure")
-      rows[[length(rows) + 1L]] <<- data.frame(
+      collected$rows[[length(collected$rows) + 1L]] <- data.frame(
         model_id = id, feature = feature,
         prediction_class = attr(effect, "prediction_class") %||% prediction_class,
         method = attr(effect, "method") %||% NA_character_,
@@ -91,7 +92,7 @@ report_effect_status <- function(result) {
   add(evidence$effects, primary)
   if (!is.null(evidence$failures) && nrow(evidence$failures)) {
     for (i in seq_len(nrow(evidence$failures))) {
-      already_failed <- vapply(rows, function(row) {
+      already_failed <- vapply(collected$rows, function(row) {
         identical(row$model_id, primary) &&
           identical(row$feature, evidence$failures$feature[[i]]) &&
           identical(row$prediction_class, first_class) && identical(row$status, "failed")
@@ -101,10 +102,10 @@ report_effect_status <- function(result) {
       add(stats::setNames(list(failure), evidence$failures$feature[[i]]), primary)
     }
   }
-  if (!length(rows)) {
+  if (!length(collected$rows)) {
     return(empty_effect_status())
   }
-  output <- do.call(rbind, rows)
+  output <- do.call(rbind, collected$rows)
   # The legacy primary failure view remains authoritative for old saved objects.
   key <- output[c("model_id", "feature", "prediction_class")]
   output <- output[!duplicated(key, fromLast = TRUE), , drop = FALSE]

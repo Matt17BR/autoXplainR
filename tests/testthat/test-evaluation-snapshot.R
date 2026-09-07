@@ -285,8 +285,22 @@ test_that("native response links and separate offset expressions bind their exec
 
   training$y <- 2 * training$x + training$z
   state$slope <- 1
-  fitted <- lm(y ~ x + z, training, offset = state$slope * (x - z))
+  # Older predict.lm() resolves separate offsets outside the formula environment.
+  # Use state native prediction can resolve on every supported R version, while
+  # still changing only its off-grid behavior and requiring stale evidence to fail.
+  had_offset_state <- exists(".axr_offset_identity_test", envir = globalenv(), inherits = FALSE)
+  previous_offset_state <- get0(".axr_offset_identity_test", envir = globalenv(), inherits = FALSE)
+  withr::defer({
+    if (had_offset_state) {
+      assign(".axr_offset_identity_test", previous_offset_state, envir = globalenv())
+    } else {
+      rm(".axr_offset_identity_test", envir = globalenv())
+    }
+  })
+  assign(".axr_offset_identity_test", state, envir = globalenv())
+  fitted <- lm(y ~ x + z, training, offset = .axr_offset_identity_test$slope * (x - z))
   evaluation <- transform(training, z = x)
+  expect_equal(unname(stats::predict(fitted, evaluation)), 3 * evaluation$x)
   result <- evaluate_models(list(fit = fitted), evaluation, "y")
   explainer <- as_explainers(result)[[1L]]
   before <- predict(explainer, off_grid)

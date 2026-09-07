@@ -378,6 +378,7 @@ with sync_playwright() as playwright:
         page.set_viewport_size({'width': 320, 'height': 1000})
         font = page.add_style_tag(content='''
           .explorer, .explorer button, .explorer select {font-family: "DejaVu Sans", sans-serif}
+          .explorer .guided-note p {font-family: monospace; font-size: 16px}
         ''')
         page.locator('[data-page-link=patterns]').click()
         for model_id in ids:
@@ -385,6 +386,9 @@ with sync_playwright() as playwright:
             settled(page)
             check_layout(page, f'{case}/{model_id}: features fit with wider system font at 320px',
                          f'{case}-{model_id}-wide-font-overflow')
+        page.locator('[data-page-link=checks]').click()
+        check_layout(page, f'{case}: context notes fit with wider system font at 320px',
+                     f'{case}-context-wide-font-overflow')
         font.evaluate('el => el.remove()')
         context.close()
         no_js = browser.new_context(java_script_enabled=False, viewport={'width': 390, 'height': 844})

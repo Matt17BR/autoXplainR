@@ -30,7 +30,7 @@
       output.push(Math.abs(v) < step * 1e-9 ? 0 : Number(v.toPrecision(10)));
       if (output.length > 20) break;
     }
-    return output;
+    return output.length < 2 && count < 20 ? ticks(limits, count + 1) : output;
   }
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -61,6 +61,8 @@
   tooltip.setAttribute('role', 'tooltip'); tooltip.hidden = true; document.body.append(tooltip);
   function hideTooltip() { tooltip.hidden = true; }
   function inspectPoint(group, point, figure) {
+    figure.querySelectorAll('[data-label-model]').forEach(el =>
+      el.classList.toggle('axr-highlight', el.dataset.labelModel === group.dataset.modelId));
     tooltip.textContent = point.detail; tooltip.hidden = false;
     const box = group.getBoundingClientRect(), tip = tooltip.getBoundingClientRect();
     tooltip.style.left = `${Math.max(12, Math.min(box.x + 10, innerWidth - tip.width - 12))}px`;
@@ -100,8 +102,27 @@
   function directLabels(svg, points, px, py, box) {
     const placed = [];
     const ordered = points.map(point => ({point, x: px(point.x), y: py(point.y)})).sort((a, b) => a.y - b.y);
+    context.save(); context.font = '600 12px system-ui';
+    if (box.labelLeft !== undefined) {
+      const labels = ordered.map(item => ({...item, height: wrap(item.point.label, box.labelWidth).length * 15}));
+      let floor = box.top;
+      labels.forEach(item => { item.top = Math.max(floor, item.y - item.height / 2); floor = item.top + item.height + 10; });
+      let ceiling = box.bottom;
+      [...labels].reverse().forEach(item => {
+        item.top = Math.min(item.top, ceiling - item.height); ceiling = item.top - 10;
+      });
+      labels.forEach(({point, x, y, top, height}) => {
+        svg.append(node('line', {x1: x, y1: y, x2: box.labelLeft - 5, y2: top + height / 2,
+          class: 'axr-leader', stroke: point.color, 'data-label-model': point.model}));
+        const label = text(svg, point.label, box.labelLeft, top + 12,
+          {width: box.labelWidth, className: 'axr-model-label', lineHeight: 15}).el;
+        label.dataset.labelModel = point.model;
+      });
+      context.restore(); return true;
+    }
     const overlap = (a, b, pad = 5) => a.left < b.right + pad && a.right > b.left - pad &&
       a.top < b.bottom + pad && a.bottom > b.top - pad;
+    let fits = true;
     ordered.forEach(({point, x, y}) => {
       const maxWidth = Math.min(170, box.right - box.left - 16);
       const lines = wrap(point.label, maxWidth), height = lines.length * 15;
@@ -124,10 +145,14 @@
         if (chosen.score < 1000) break;
       }
       placed.push(chosen.rect);
-      svg.append(node('line', {x1: x, y1: y, x2: chosen.tx, y2: chosen.ty - 4, class: 'axr-leader', stroke: point.color}));
-      text(svg, point.label, chosen.tx, chosen.ty,
-        {anchor: chosen.anchor, width: maxWidth, className: 'axr-model-label', lineHeight: 15});
+      if (chosen.score >= 1000) fits = false;
+      svg.append(node('line', {x1: x, y1: y, x2: chosen.tx, y2: chosen.ty - 4,
+        class: 'axr-leader', stroke: point.color, 'data-label-model': point.model}));
+      const label = text(svg, point.label, chosen.tx, chosen.ty,
+        {anchor: chosen.anchor, width: maxWidth, className: 'axr-model-label', lineHeight: 15}).el;
+      label.dataset.labelModel = point.model;
     });
+    context.restore(); return fits;
   }
   function modelKey(figure, points) {
     figure.querySelector('.axr-chart-key')?.remove();
@@ -142,7 +167,7 @@
     figure.querySelector('.axr-chart-viewport').before(key);
   }
   let printing = false;
-  function render(figure) {
+  function render(figure, reserveLabels = false) {
     const viewport = figure.querySelector('.axr-chart-viewport');
     const measuredWidth = Math.floor(viewport.getBoundingClientRect().width);
     const width = printing ? 320 : measuredWidth;
@@ -173,22 +198,28 @@
     const top = 20 + labelLines.length * 16;
     const left = categorical ? Math.min(155, Math.max(105, width * .36)) :
       Math.max(width < 420 ? 48 : 58, ...ticks(ylimits, 5).map(value => context.measureText(number(value)).width + 12));
-    const right = width - (categorical && hasSupport ? 55 : 20);
+    const labelColumn = cost && (reserveLabels === true || points.length > 5);
+    const labelWidth = labelColumn ? Math.min(180, Math.max(116, width * .36)) : 0;
+    const right = width - (labelColumn ? labelWidth + 24 : categorical && hasSupport ? 55 : 20);
     const rowHeight = categorical ? Math.max(42, models.length * 18 + 20,
       ...categories.map(category => wrap(category, left - 18).length * 16 + 12)) : 0;
+    context.save(); context.font = '600 12px system-ui';
+    const labelHeight = labelColumn ? points.reduce((total, point) => total + wrap(point.label, labelWidth).length * 15 + 10, 0) - 10 : 0;
+    context.restore();
     const plotHeight = categorical ? Math.max(100, categories.length * rowHeight) :
-      cost ? Math.max(190, Math.min(360, points.length * 38)) : width < 420 ? 180 : 210;
+      cost ? Math.max(190, labelHeight, Math.min(360, points.length * 38)) : width < 420 ? 180 : 210;
     const bottom = top + plotHeight;
     const bottomLabel = wrap(categorical ? figure.dataset.yLabel : figure.dataset.xLabel, right - left);
     const supportHeight = hasSupport && !categorical ? 80 : 0;
     const height = bottom + 42 + bottomLabel.length * 16 + supportHeight;
     const svg = node('svg', {viewBox: `0 0 ${width} ${height}`, role: 'group',
       'aria-label': `${figure.dataset.yLabel} by ${figure.dataset.xLabel}. Arrow keys move between values. Values and support follow the chart.`,
-      'data-chart-layout': 'responsive', 'data-axis-type': categorical ? 'categorical' : 'numeric'});
+      'data-chart-layout': 'responsive', 'data-axis-type': categorical ? 'categorical' : 'numeric',
+      ...(cost ? {'data-label-layout': labelColumn ? 'column' : 'nearby'} : {})});
     text(svg, categorical ? figure.dataset.xLabel : figure.dataset.yLabel, 2, 15, {width: width - 4});
     const px = value => left + (value - xlimits[0]) / (xlimits[1] - xlimits[0]) * (right - left);
     const py = value => bottom - (value - ylimits[0]) / (ylimits[1] - ylimits[0]) * plotHeight;
-    ticks(xlimits, Math.max(3, Math.floor((right - left) / 70))).forEach(value => {
+    ticks(xlimits, Math.max(labelColumn ? 2 : 3, Math.floor((right - left) / 70))).forEach(value => {
       const x = px(value);
       if (categorical) svg.append(node('line', {x1: x, x2: x, y1: top, y2: bottom, class: 'axr-grid'}));
       text(svg, number(value), x, bottom + 20, {anchor: 'middle'});
@@ -238,7 +269,8 @@
       }
       glyph(svg, point, cx, cy, figure, index, points);
     });
-    if (cost) directLabels(svg, points, px, py, {top, bottom, left, right});
+    if (cost && !directLabels(svg, points, px, py, {top, bottom, left, right,
+      ...(labelColumn ? {labelLeft: right + 18, labelWidth} : {})})) return render(figure, true);
     if (hasSupport && !categorical) {
       const supportTop = bottom + 55 + bottomLabel.length * 16;
       const values = support.map(point => hasCounts ? point.n : point.support).filter(finite);

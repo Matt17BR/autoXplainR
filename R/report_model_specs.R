@@ -77,7 +77,18 @@ model_specification <- function(result, id) {
         `Selected lambda` = model$fit_details$lambda,
         `Nonzero coefficients` = fit$df[model$fit_details$lambda_index]
       ),
-      mgcv = c(learned, list(`Total effective degrees of freedom` = sum(fit$edf))),
+      mgcv = c(learned, list(
+        `Smooth basis dimensions` = stats::setNames(
+          vapply(fit$smooth, function(smooth) smooth$bs.dim, numeric(1)),
+          vapply(fit$smooth, function(smooth) {
+            feature <- names(model$fit_details$feature_map)[
+              match(smooth$term, model$fit_details$feature_map)
+            ]
+            if (length(feature) == 1L && !is.na(feature)) feature else smooth$label
+          }, character(1))
+        ),
+        `Total effective degrees of freedom` = sum(fit$edf)
+      )),
       e1071 = list(`Support vectors` = fit$tot.nSV),
       earth = list(`Retained terms` = length(fit$selected.terms)),
       kknn = list(`Training rows retained` = model$fit_details$training_rows),
@@ -174,6 +185,11 @@ model_spec_settings_help <- function(spec) {
     } else {
       "decay penalizes large coefficients. Coefficients describe log odds relative to the reference class."
     },
+    mgcv = paste(
+      "smooth_k records the basis dimension used for each numeric input; requested k can be reduced",
+      "when an input has few distinct values. These dimensions limit flexibility; effective degrees of freedom",
+      "describe the fitted smooths after penalization. gamma and select control smoothing and shrinkage."
+    ),
     stats = if (identical(spec$parameters$family, "binomial")) {
       "family defines the outcome distribution; link connects the linear predictor to probability."
     } else {

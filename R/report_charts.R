@@ -143,7 +143,8 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   direction <- if (isTRUE(attr(tradeoffs, "higher_is_better"))) "upper left" else "lower left"
   note <- paste0(
     "The ", direction, " combines a better score with less resource use. ",
-    "Outlines mark nondominated measurements, not a recommended model."
+    "Outlines mark nondominated measurements, not a recommended model. ",
+    "Connecting lines identify points when labels need more space."
   )
   if (grepl("time", resource)) {
     note <- paste(note, "Times describe this machine and batch; small differences may reflect timer resolution.")
@@ -265,7 +266,7 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
   )
 }
 
-report_chart_svg_text <- function(value, x, y, width = 300, anchor = "start", class = "") {
+report_chart_text_lines <- function(value, width) {
   columns <- max(5L, floor(width / 7.2))
   words <- strsplit(value, "[[:space:]]+")[[1L]]
   lines <- character()
@@ -283,6 +284,11 @@ report_chart_svg_text <- function(value, x, y, width = 300, anchor = "start", cl
   }
   if (nzchar(current)) lines <- c(lines, current)
   if (!length(lines)) lines <- ""
+  lines
+}
+
+report_chart_svg_text <- function(value, x, y, width = 300, anchor = "start", class = "") {
+  lines <- report_chart_text_lines(value, width)
   paste0(
     '<text x="', x, '" y="', y, '" text-anchor="', anchor, '" class="', class, '">',
     paste(vapply(seq_along(lines), function(i) {
@@ -296,16 +302,24 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   width <- 300
   categorical <- identical(kind, "category")
   histogram <- identical(kind, "histogram")
+  cost <- identical(kind, "cost")
   categories <- unique(vapply(points, function(point) point$category %||% "", character(1)))
   left <- if (categorical) 112 else 48
-  right <- width - 18
+  label_width <- 126
+  right <- if (cost) width - label_width - 24 else width - 18
   top <- 42
   row_height <- if (categorical) max(50, max(nchar(categories)) / 12 * 17 + 20) else 0
-  bottom <- if (categorical) top + length(categories) * row_height else 242
+  label_heights <- if (cost) vapply(points, function(point) {
+    length(report_chart_text_lines(point$label, label_width)) * 15
+  }, numeric(1)) else numeric()
+  bottom <- if (categorical) {
+    top + length(categories) * row_height
+  } else {
+    top + max(200, sum(label_heights + 10) - 10)
+  }
   support <- kind == "effect" && any(vapply(points, function(point) {
     is.finite(point$n %||% NA_real_) || is.finite(point$support %||% NA_real_)
   }, logical(1)))
-  height <- bottom + if (support) 126 else 70
   xs <- vapply(points, function(point) point$x, numeric(1))
   ys <- vapply(points, function(point) point$y, numeric(1))
   lower <- vapply(points, function(point) point$low %||% NA_real_, numeric(1))
@@ -322,9 +336,26 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   if (!categorical) {
     left <- max(left, max(nchar(vapply(pretty(ylim, 4), report_axis_number, character(1)))) * 7.2 + 10)
   }
+  height <- bottom + max(if (support) 126 else 70,
+    48 + 15 * length(report_chart_text_lines(if (categorical) y_label else x_label, right - left))
+  )
   px <- function(x) left + (x - limits[1]) / diff(limits) * (right - left)
   py <- function(y) bottom - (y - ylim[1]) / diff(ylim) * (bottom - top)
-  horizontal <- paste(vapply(pretty(limits, 3), function(value) {
+  label_tops <- numeric(length(points))
+  if (cost) {
+    label_order <- order(-ys)
+    floor <- top
+    for (i in label_order) {
+      label_tops[i] <- max(floor, py(ys[i]) - label_heights[i] / 2)
+      floor <- label_tops[i] + label_heights[i] + 10
+    }
+    ceiling <- bottom
+    for (i in rev(label_order)) {
+      label_tops[i] <- min(label_tops[i], ceiling - label_heights[i])
+      ceiling <- label_tops[i] - 10
+    }
+  }
+  horizontal <- paste(vapply(pretty(limits, if (cost) 2 else 3), function(value) {
     if (value < limits[1] || value > limits[2]) {
       return("")
     }
@@ -388,15 +419,18 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
       ""
     }
     paste0(
-      bar, band, '<g tabindex="0" role="img" aria-label="', html_escape(point$detail), '">',
+      bar, band, '<g tabindex="0" role="img" aria-label="', html_escape(point$detail), '"',
+      if (cost) paste0(' data-chart-point="" data-model-id="', html_escape(point$model), '"'), ">",
       '<circle class="axr-point" cx="', cx, '" cy="', cy, '" r="', radius, '" fill="', point$color,
+      if (cost && identical(point$frontier, "true")) '" style="stroke:#203b2b;stroke-width:2.5',
       '"><title>', html_escape(point$detail), "</title></circle>",
-      if (kind == "cost") {
-        report_chart_svg_text(point$label,
-          if (cx > width / 2) right else left + 4,
-          max(top + 12, cy - 10 - (i %% 2) * 24),
-          width = 160,
-          anchor = if (cx > width / 2) "end" else "start", class = "axr-model-label"
+      if (cost) {
+        paste0(
+          '<line class="axr-leader" x1="', cx, '" y1="', cy, '" x2="', right + 13,
+          '" y2="', label_tops[i] + label_heights[i] / 2, '" stroke="', point$color, '"/>',
+          report_chart_svg_text(point$label, right + 18, label_tops[i] + 12,
+            width = label_width, class = "axr-model-label"
+          )
         )
       },
       "</g>"
@@ -469,6 +503,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   paste0(
     '<svg viewBox="0 0 ', width, " ", height, '" role="group" aria-label="',
     html_escape(paste(y_label, "by", x_label)), '">', horizontal, vertical, reference_line,
+    '<line class="axr-axis" x1="', left, '" x2="', right, '" y1="', bottom, '" y2="', bottom, '"/>',
     lines, glyphs, category_labels, support_bars,
     report_chart_svg_text(if (categorical) x_label else y_label, 2, 15, width = width - 4),
     report_chart_svg_text(if (categorical) y_label else x_label, (left + right) / 2, bottom + 42,

@@ -77,14 +77,15 @@ benchmark_predictions <- function(result, models = NULL, batch_size = 256L,
     started <- benchmark_clock()
     deadline <- started + max_seconds
     iterations <- stats::setNames(rep(NA_integer_, length(ids)), ids)
-    failed <- stats::setNames(rep(FALSE, length(ids)), ids)
-    measurements <- list()
+    recorded <- new.env(parent = emptyenv())
+    recorded$failed <- stats::setNames(rep(FALSE, length(ids)), ids)
+    recorded$measurements <- list()
     record <- function(id, phase, count, repetition = NA_integer_) {
       value <- benchmark_measure(
         function() predict(explainers[[id]], data), count, id, phase, repetition, nrow(data)
       )
-      measurements[[length(measurements) + 1L]] <<- value
-      if (nzchar(value$error)) failed[[id]] <<- TRUE
+      recorded$measurements[[length(recorded$measurements) + 1L]] <- value
+      if (nzchar(value$error)) recorded$failed[[id]] <- TRUE
       value
     }
     expired <- function() benchmark_clock() >= deadline
@@ -94,12 +95,12 @@ benchmark_predictions <- function(result, models = NULL, batch_size = 256L,
     }
     for (id in orders[[2L]]) {
       if (expired()) break
-      if (failed[[id]]) next
+      if (recorded$failed[[id]]) next
       count <- 1L
       repeat {
         if (expired()) break
         value <- record(id, "calibration", count)
-        if (failed[[id]]) break
+        if (recorded$failed[[id]]) break
         iterations[[id]] <- count
         seconds <- value$elapsed_ms / 1000
         if (seconds >= target || count == max_iterations) break
@@ -111,12 +112,16 @@ benchmark_predictions <- function(result, models = NULL, batch_size = 256L,
       if (expired()) break
       for (id in orders[[repetition + 2L]]) {
         if (expired()) break
-        if (failed[[id]] || is.na(iterations[[id]])) next
+        if (recorded$failed[[id]] || is.na(iterations[[id]])) next
         record(id, "measurement", iterations[[id]], repetition)
       }
     }
     elapsed <- (benchmark_clock() - started) * 1000
-    measurements <- if (length(measurements)) do.call(rbind, measurements) else empty_benchmark_measurements()
+    measurements <- if (length(recorded$measurements)) {
+      do.call(rbind, recorded$measurements)
+    } else {
+      empty_benchmark_measurements()
+    }
     rownames(measurements) <- NULL
     summaries <- lapply(ids, function(id) {
       benchmark_model_summary(

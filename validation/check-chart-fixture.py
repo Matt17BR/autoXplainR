@@ -1,6 +1,6 @@
 from pathlib import Path
 import json, math, argparse, os
-from report_geometry import effect_geometry
+from report_geometry import effect_geometry, cost_geometry, label_collisions
 from playwright.sync_api import sync_playwright
 parser=argparse.ArgumentParser(description="Check independent hand-chart oracles, label geometry and no-JavaScript readability.")
 parser.add_argument('--case-dir',type=Path,default=Path('/tmp/autoxplain-explorer-cases'))
@@ -54,7 +54,52 @@ with sync_playwright() as p:
   check(f'noJS labels fit {width}',all(not x['clipped'] for x in result),result)
   page.screenshot(path=str(args.output_dir/f'nojs-{width}.png'),full_page=True)
   page.close()
- browser.close()
+ dense_source=json.loads((base/'dense-chart-source.json').read_text())
+ for width in [1440,390,320]:
+  for enabled in [True,False]:
+   page=browser.new_page(viewport={'width':width,'height':1050},java_script_enabled=enabled)
+   page.goto((base/'dense-chart-oracle.html').as_uri())
+   if enabled:settled(page)
+   for i,name in enumerate(['dense','near','timing']):
+    resource='prediction_time_ms' if name=='timing' else 'model_size_kb'
+    figure=page.locator('[data-kind=cost]').nth(i);svg=figure.locator('svg')
+    matched,evidence=cost_geometry(figure,dense_source[name],'rmse',resource,False)
+    check(f'{name} cost geometry and direct label separation width={width} JS={enabled}',matched,evidence)
+    bounds=svg.evaluate('''svg=>({font:Math.min(...[...svg.querySelectorAll('.axr-model-label')].map(t=>
+      parseFloat(getComputedStyle(t).fontSize)*svg.getBoundingClientRect().width/svg.viewBox.baseVal.width)),
+      clipped:[...svg.querySelectorAll('text')].filter(t=>{const a=t.getBoundingClientRect(),b=svg.getBoundingClientRect();
+      return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1}).map(t=>t.textContent)})''')
+    check(f'{name} readable unclipped labels width={width} JS={enabled}',bounds['font']>=11.5 and not bounds['clipped'],bounds)
+    if enabled:
+     for model in dense_source[name]:
+      group=figure.locator(f'[data-chart-point][data-model-id="{model["model_id"]}"]');group.focus()
+      detail=figure.locator('.axr-chart-detail').inner_text()
+      highlighted=figure.locator('.axr-model-label.axr-highlight').all_text_contents()
+      check(f'{name} keyboard connects exact measurement to label width={width} {model["model_id"]}',
+        model['model'] in detail and str(model[resource]) in detail and
+        [''.join(x.split()) for x in highlighted]==[''.join(model['model'].split())])
+   page.screenshot(path=str(args.output_dir/f'dense-{width}-js-{enabled}.png'),full_page=True)
+   if enabled and width==1440:
+    page.emulate_media(media='print');page.evaluate("window.dispatchEvent(new Event('beforeprint'))");settled(page)
+    for i,name in enumerate(['dense','near','timing']):
+     figure=page.locator('[data-kind=cost]').nth(i)
+     resource='prediction_time_ms' if name=='timing' else 'model_size_kb'
+     matched,evidence=cost_geometry(figure,dense_source[name],'rmse',resource,False)
+     check(f'{name} print preserves geometry and separated labels',matched,evidence)
+    page.pdf(path=str(args.output_dir/'dense-charts.pdf'),format='A4',print_background=True)
+   page.close()
+ # The collision oracle must reject the original failure, even when all numeric
+ # points and model identities remain correct.
+ page=browser.new_page();page.goto((base/'dense-chart-oracle.html').as_uri());settled(page)
+ figure=page.locator('[data-kind=cost]').first
+ figure.locator('.axr-model-label').evaluate_all('''labels=>labels.forEach(label=>{
+   label.setAttribute('x','160');label.setAttribute('y','150');
+   label.querySelectorAll('tspan').forEach(span=>span.setAttribute('x','160'));
+ })''')
+ rejected,evidence=cost_geometry(figure,dense_source['dense'],'rmse','model_size_kb',False)
+ check('deliberately overlapping labels are rejected independently of correct numeric geometry',
+       not rejected and isinstance(evidence,dict) and bool(evidence.get('overlapping_model_labels')),evidence)
+ page.close();browser.close()
 (args.output_dir/'chart-fixture-checks.json').write_text(json.dumps(checks,indent=2));print(json.dumps({'checks':len(checks),'failures':[x for x in checks if not x['pass_']]},indent=2))
 
 raise SystemExit(0 if all(x["pass_"] for x in checks) else 1)

@@ -36,6 +36,15 @@ def points(svg, model=None):
     return [dot for dot in dots if model is None or dot['model']==model]
 
 
+def label_collisions(svg):
+    return svg.locator('.axr-model-label').evaluate_all('''labels => {
+      const boxes=labels.map(label=>({text:label.textContent,box:label.getBoundingClientRect()}));
+      return boxes.flatMap((a,i)=>boxes.slice(i+1).filter(b=>a.box.left<b.box.right &&
+        a.box.right>b.box.left && a.box.top<b.box.bottom && a.box.bottom>b.box.top)
+        .map(b=>[a.text,b.text]));
+    }''')
+
+
 def cost_geometry(plot, rows, metric, resource, higher):
     try:
         svg=plot.locator('svg'); x_value,x_slope=calibration(svg,True); y_value,y_slope=calibration(svg)
@@ -48,6 +57,9 @@ def cost_geometry(plot, rows, metric, resource, higher):
         normalize=lambda text:''.join(text.split())
         if sorted(map(normalize,labels))!=sorted(normalize(row['model']) for row in available):
             return False,'Direct labels do not identify every plotted model'
+        collisions=label_collisions(svg)
+        if collisions:
+            return False,dict(overlapping_model_labels=collisions)
         for dot in dots:
             row=next(row for row in available if row['model_id']==dot['model'])
             if not on_axis(x_value(dot['x']),row[resource],x_slope) or not on_axis(y_value(dot['y']),row[metric],y_slope):

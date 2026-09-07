@@ -1,8 +1,9 @@
 # AutoXplainR 0.6.0 release evidence
 
-Status: final local product acceptance passed; release artifact and remote CI
-acceptance are pending. No 0.6.0 tag or release has been published. The source
-revision, archive checksum, remote checks and public-site verification will be
+Status: the initial local acceptance checkpoint passed. Follow-up repairs,
+the release artifact and remote CI still need final acceptance. No 0.6.0 tag or
+release has been published. The source revision, archive checksum, remote checks
+and public-site verification will be
 recorded here after they complete.
 
 ## What changed and why
@@ -118,6 +119,34 @@ Chromium 145.0.7632.6, with Playwright 1.58.0. The detailed local JSONs are unde
 `gallery-checks`. Full-suite results and coverage are in `full-suite-compact`
 and `coverage-summary.txt`. Browser counts overlap where one gate invokes
 another; they are not a total number of independent user tasks.
+
+## Follow-up after CI preflight and the wider-portfolio walkthrough
+
+The tables above describe the earlier local checkpoint, including its 397 tests
+and 3,845 passing assertions. Subsequent inspection found additional defects:
+
+- lintr 3.4 rejected compound assignment in an environment helper. Explicit
+  local-environment assignments preserve the intended state changes; the focused
+  suite passed 101 assertions.
+- An R 4.1 offset fixture used a native prediction expression outside its valid
+  environment. The corrected fixture supplies that context in the global
+  environment and restores it afterward. The focused suite passed 97 assertions
+  with all guards retained; a separate old-R method probe also passed. Remote
+  R 4.1 CI is pending.
+- At 320 pixels, an unbroken R call and font metrics made the multiclass Checks
+  context note overflow. Scoped text wrapping and a Checks font-variation gate
+  now cover that case.
+- The eleven-model [extended walkthrough](results/extended-walkthrough-0.6.0.md)
+  found a blank GAM basis parameter and overlapping cost-plot labels. The GAM
+  identity now uses effective per-input basis sizes, with native `bs.dim` values
+  in model details. Dense cost plots reserve a column for connected model names
+  while preserving linear scales; tick spacing also has a minimum separation.
+
+Intermediate checks passed 184 hand-chart assertions, 27 real extended-model
+plot combinations and 1,283 main browser assertions. These results precede the
+last tick-spacing repair. Refreshed reports, the complete final gates and the
+final installed-archive replay are pending; these intermediate counts do not
+replace the checkpoint or establish acceptance of the final release revision.
 
 ## Acceptance still pending
 
