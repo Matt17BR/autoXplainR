@@ -84,6 +84,9 @@ CLAUDE.md
 
 # Generated output files
 *.html
+!pkgdown/assets/model-report.html
+!pkgdown/assets/binary-report.html
+!pkgdown/assets/multiclass-report.html
 *.png
 *.jpg
 *.jpeg
@@ -121,3 +124,4 @@ run_all_datasets.R
 /release/
 /check/
 /figure/
+__pycache__/

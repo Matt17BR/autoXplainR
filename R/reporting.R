@@ -1,9 +1,10 @@
-#' Render a beginner-first model report
+#' Render an interactive model comparison
 #'
 #' Creates a standalone HTML report from an [autoxplain()] result. The report
-#' leads with the prediction question, evaluation role, simple-baseline
-#' comparison, and plain metric definitions. Feature reliance, fitted effects,
-#' and an explanation evidence audit follow with progressively more detail.
+#' opens with model scores, effective settings and measured costs. Focused tabs
+#' show feature importance, class-specific fitted effects, input relationships,
+#' prediction errors and checks. Model details expose the retained fit and its
+#' preprocessing; background explanations use optional help and expandable details.
 #'
 #' @param result An `autoxplain_result`.
 #' @param output_file Destination `.html` path.
@@ -20,8 +21,8 @@
 #' @param uncertainty Include [performance_uncertainty()] using its default paired
 #'   bootstrap. Off by default; temporal evaluation is not supported.
 #' @param open Open the report in a browser after writing it.
-#' @param top_features Maximum number of features audited when `audit` is not
-#'   supplied.
+#' @param top_features Maximum displayed features per model when `audit` is not
+#'   supplied. The audit uses their union; multiclass curves cover each outcome class.
 #' @param n_repeats Permutation repeats when `audit` is not supplied.
 #' @param max_models Maximum models audited when `audit` is not supplied.
 #'
@@ -147,53 +148,7 @@ validate_html_destination <- function(output_file, open) {
 
 model_report_html <- function(result, audit, effects, narrative, subgroup_check, title) {
   if (is.null(result$explanations$report_diagnostics)) result <- prepare_report_diagnostics(result)
-  view <- report_view_model(result, audit, effects)
-  evaluation <- model_report_evaluation(result, audit)
-  tuning_html <- render_model_tuning(result)
-  comparison_html <- render_model_comparison(result)
-  nav <- c(
-    overview = "Result", reliability = "Checks", evaluation = "Performance",
-    uncertainty = "Uncertainty", patterns = "Features"
-  )
-  if (nzchar(comparison_html)) nav <- c(nav, models = "Candidates")
-  if (nzchar(tuning_html)) nav <- c(nav, tuning = "Selection")
-  if (!is.null(subgroup_check)) nav <- c(nav, subgroups = "Groups")
-  nav <- c(nav, limits = "Scope", provenance = "Reproduce")
-  paste0(
-    "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">",
-    "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">",
-    "<title>", html_escape(title), "</title><style>", report_css(), "</style></head>",
-    "<body><a class=\"skip\" href=\"#main\">Skip to report</a>",
-    "<header><div class=\"shell\"><p class=\"eyebrow\">AutoXplainR / Analysis brief</p>",
-    "<h1>", html_escape(title), "</h1><p class=\"lede\">",
-    html_escape(view$identity$model_label), " \u00b7 ", html_escape(view$identity$task),
-    " \u00b7 ", html_escape(view$identity$evaluation_role), " evaluation</p></div></header>",
-    "<nav class=\"report-nav\" aria-label=\"Report sections\"><div class=\"shell\">",
-    paste0("<a href=\"#", names(nav), "\">", nav, "</a>", collapse = ""),
-    "</div></nav><main id=\"main\" class=\"shell\">",
-    render_model_overview(result, evaluation),
-    render_reliability_section(audit, result),
-    render_model_evaluation(result, evaluation),
-    render_validation_design(result),
-    render_performance_uncertainty(result$performance_uncertainty),
-    "<section id=\"patterns\" aria-labelledby=\"patterns-title\"><p class=\"eyebrow\">Fitted model evidence</p>",
-    "<h2 id=\"patterns-title\">Patterns used for prediction</h2>",
-    "<p>These checks describe <strong>", html_escape(view$identity$model_label),
-    "</strong> on the evaluation data. Shuffling an input measures the change in prediction loss.</p>",
-    render_guided_importance(audit$importance, view$identity$model_id, audit$config$metric),
-    render_effects(effects, result), render_effect_failures(result),
-    "<details class=\"advanced\"><summary>All model-feature evidence and shuffle intervals</summary>",
-    render_importance(audit$importance), "</details></section>",
-    comparison_html, tuning_html, render_subgroup_performance(subgroup_check),
-    render_guided_narrative(narrative),
-    "<section id=\"limits\" aria-labelledby=\"limits-title\"><h2 id=\"limits-title\">What this analysis does not establish</h2>",
-    "<p>Evaluation describes these rows under the recorded validation design. Feature effects describe the fitted model. ",
-    "Changing an input in the real world need not cause the plotted change. Performance in another population or future period ",
-    "requires separate evidence, as do fairness, safety and suitability for deployment.</p></section>",
-    render_model_provenance(result, audit),
-    "</main><footer><div class=\"shell\">AutoXplainR \u00b7 Preserve this report with the fitted result, data version and analysis code.",
-    "</div></footer>", report_interaction_script(), "</body></html>"
-  )
+  model_explorer_html(result, audit, effects, narrative, subgroup_check, title)
 }
 
 render_model_tuning <- function(result) {
@@ -609,7 +564,7 @@ tradeoff_svg <- function(tradeoffs) {
         ""
       } else {
         paste0(
-          '<text x="', px(v), '" y="', height - bottom + 23, '" class="tick" text-anchor="middle">', report_number(v, 2), "</text>"
+          '<text x="', px(v), '" y="', height - bottom + 23, '" class="tick" text-anchor="middle">', report_axis_number(v), "</text>"
         )
       }
     }, character(1)),
@@ -621,7 +576,7 @@ tradeoff_svg <- function(tradeoffs) {
     } else {
       paste0(
         '<line x1="', left, '" x2="', width - right, '" y1="', py(v), '" y2="', py(v), '" class="grid-line"/>',
-        '<text x="', left - 9, '" y="', py(v) + 5, '" class="tick" text-anchor="end">', report_number(v, 2), "</text>"
+        '<text x="', left - 9, '" y="', py(v) + 5, '" class="tick" text-anchor="end">', report_axis_number(v), "</text>"
       )
     }
   }, character(1)), collapse = ""))
@@ -676,7 +631,7 @@ scale_plot_values <- function(values, lower, upper) {
 
 pretty_complexity <- function(metric) {
   labels <- c(
-    model_size_kb = "approximate model-object size (KB)",
+    model_size_kb = "approximate model-object size (KiB)",
     size_mb = "approximate model-object size (MB)",
     model_size = "approximate model-object size",
     training_time_ms = "training time (ms)",
@@ -1256,7 +1211,7 @@ effect_svg <- function(effect, feature, result = NULL) {
   xval <- effect[[1L]]
   numeric_x <- is.numeric(xval)
   width <- if (numeric_x) 600 else max(600, length(values) * max(105, max(nchar(as.character(xval))) * 8) + 100)
-  height <- 350
+  height <- 390
   left <- 70
   right <- 28
   top <- 30
@@ -1271,7 +1226,7 @@ effect_svg <- function(effect, feature, result = NULL) {
   ticks <- paste(vapply(ticks_x, function(v) {
     paste0(
       '<text x="', px(v), '" y="', baseline + 22,
-      '" class="tick" text-anchor="middle">', html_escape(if (numeric_x) report_number(v, 2L) else as.character(xval[v])),
+      '" class="tick" text-anchor="middle">', html_escape(if (numeric_x) report_axis_number(v) else as.character(xval[v])),
       "</text>"
     )
   }, character(1)), collapse = "")
@@ -1281,7 +1236,7 @@ effect_svg <- function(effect, feature, result = NULL) {
     } else {
       paste0(
         '<line class="grid-line" x1="', left, '" x2="', width - right, '" y1="', py(v), '" y2="', py(v), '"/>',
-        '<text x="', left - 10, '" y="', py(v) + 5, '" text-anchor="end" class="tick">', report_number(v, 2L), "</text>"
+        '<text x="', left - 10, '" y="', py(v) + 5, '" text-anchor="end" class="tick">', report_axis_number(v), "</text>"
       )
     }
   }, character(1)), collapse = ""))
@@ -1310,17 +1265,18 @@ effect_svg <- function(effect, feature, result = NULL) {
       ""
     } else {
       paste0(
-        '<line class="support-bar" x1="', px(xv[i]), '" x2="', px(xv[i]), '" y1="310" y2="', 310 - 20 * support[i], '"/>'
+        '<line class="support-bar" x1="', px(xv[i]), '" x2="', px(xv[i]), '" y1="342" y2="', 342 - 20 * support[i], '"/>'
       )
     }
   }, character(1)), collapse = "")
   paste0(
     '<div class="chart-scroll" role="region" tabindex="0" aria-label="Effect chart for ', html_escape(feature), '">',
-    '<svg class="effect-plot" style="min-width:', width, 'px" viewBox="0 0 ', width, " ", height,
+    '<svg class="effect-plot" data-axis-type="', if (numeric_x) "numeric" else "categorical",
+    '" style="min-width:', width, 'px" viewBox="0 0 ', width, " ", height,
     '" role="img" aria-label="', html_escape(paste(toupper(method), "for", feature, ": input values, fitted effect, zero reference for ALE, and relative support. Full values in the following table.")), '">',
     '<text x="', left, '" y="18" class="axis-label">', if (method == "ale") "Centered fitted effect" else "Average prediction", "</text>",
-    bands, ticks, zero, line, points, '<text x="', width / 2, '" y="280" class="axis-label" text-anchor="middle">', html_escape(feature), "</text>",
-    bars, '<text x="', left, '" y="338" class="tick">Relative support 0\u20131</text></svg></div>'
+    bands, ticks, zero, line, points, '<text x="', width / 2, '" y="298" class="axis-label" text-anchor="middle">', html_escape(feature), "</text>",
+    bars, '<text x="', left, '" y="378" class="tick">Relative support 0\u20131</text></svg></div>'
   )
 }
 
@@ -1640,9 +1596,18 @@ html_escape <- function(x) {
   x
 }
 
+report_axis_number <- function(x) {
+  if (!is.finite(x)) return("n/a")
+  scientific <- x != 0 && (abs(x) < .001 || abs(x) >= 1e6)
+  format(signif(x, 4L), trim = TRUE, scientific = scientific)
+}
+
 report_number <- function(x, digits = 3L) {
   if (length(x) != 1L || !is.finite(x)) {
     return("n/a")
+  }
+  if (x != 0 && round(x, digits) == 0) {
+    return(format(signif(x, max(1L, digits)), trim = TRUE, scientific = TRUE))
   }
   format(round(x, digits), nsmall = min(2L, digits), trim = TRUE, scientific = FALSE)
 }

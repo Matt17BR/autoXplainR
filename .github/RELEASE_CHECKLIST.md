@@ -18,13 +18,19 @@ and the tested commit/archive. A CI run does not stand in for a manual review.
   publisher failures separately.
 - Run the complete test suite, optional-engine matrix, numerical references and
   coverage. Record skipped integrations and known numerical limitations.
+- Review test quality for changed behavior. Require the browser and imputation
+  mutation checks to reject their deliberate faults for the intended reasons;
+  an execution error is not a successful negative control.
 - Build once with `.github/scripts/build-check-source.sh`, check that exact
   archive under release R including manuals, and preserve its checksum.
 - Check the same archive under R-devel. Explain remaining check notes.
 - Require the configured Windows, macOS and Linux CI gates and the live H2O
   integration to pass. A hosted narrative live test is optional and must be
   identified as run or skipped.
-- Open generated report examples on desktop and a narrow viewport. Review
+- Complete both user journeys in `validation/product-walkthrough.md` on the
+  installed package and actual regression, binary and multiclass reports.
+  Record answers, friction, repairs and repeated tasks in the release record.
+  Open generated report examples on desktop and a narrow viewport. Review
   numerical labels, unavailable diagnostics, keyboard navigation and print output.
 - Verify that logs, fixtures and shared reports contain no credentials or
   unintended private data.

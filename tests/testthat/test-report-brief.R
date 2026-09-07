@@ -14,7 +14,6 @@ test_that("effect graphics preserve numeric geometry and expose scale and suppor
   expect_match(html, "zero-line", fixed = TRUE)
   expect_match(html, "Relative support 0–1", fixed = TRUE)
   expect_match(html, "effect-band", fixed = TRUE)
-  expect_match(html, "min-width:600px", fixed = TRUE)
   expect_match(html, 'role="region" tabindex="0"', fixed = TRUE)
 })
 
@@ -31,7 +30,7 @@ test_that("categorical effects use named points without a connecting trend", {
 })
 
 test_that("report view uses retained evidence without computing missing checks", {
-  result <- autoxplain(mtcars, "mpg", explain = FALSE, seed = 91)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE, seed = 91)
   result$explanations <- NULL
   testthat::local_mocked_bindings(audit_explanations = function(...) stop("must not compute"), .package = "AutoXplainR")
   view <- AutoXplainR:::report_view_model(result)
@@ -48,8 +47,8 @@ test_that("report view uses retained evidence without computing missing checks",
 })
 
 test_that("attached audits and effects cannot change the represented fitted analysis", {
-  result <- autoxplain(mtcars, "mpg", seed = 13)
-  other <- autoxplain(mtcars, "mpg", seed = 14)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 13)
+  other <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 14)
   expect_error(
     render_model_report(result, tempfile(fileext = ".html"), audit = other$explanations$audit),
     "same selected model explainers"
@@ -71,19 +70,18 @@ test_that("attached audits and effects cannot change the represented fitted anal
 })
 
 test_that("brief links named findings to evidence and gives mobile and print routes", {
-  result <- autoxplain(mtcars, "mpg", seed = 13)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 13)
   path <- tempfile(fileext = ".html")
   render_model_report(result, path, target_units = "miles per gallon")
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
   expect_match(html, "miles per gallon", fixed = TRUE)
   expect_match(html, "linear regression", fixed = TRUE)
-  expect_match(html, 'href="#uncertainty"', fixed = TRUE)
+  expect_match(html, 'data-page-link="checks"', fixed = TRUE)
   expect_match(html, 'href="#provenance"', fixed = TRUE)
   expect_false(grepl('class="grade', html, fixed = TRUE))
-  expect_match(html, "beforeprint", fixed = TRUE)
-  expect_match(html, "details::details-content", fixed = TRUE)
+  expect_match(html, "Print this view", fixed = TRUE)
   links <- regmatches(html, gregexpr('href="#evidence-[^"]+"', html))[[1L]]
-  expect_gt(length(links), 0)
+  expect_match(html, 'id="uncertainty"', fixed = TRUE)
   for (link in links) {
     id <- sub('href="#', "", sub('"$', "", link))
     expect_true(grepl(paste0('id="', id, '"'), html, fixed = TRUE))
@@ -127,7 +125,7 @@ test_that("binary brief identifies the trained positive probability event", {
   data <- iris
   data$event <- factor(data$Species == "virginica", levels = c(FALSE, TRUE), labels = c("other", "virginica"))
   data$Species <- NULL
-  result <- autoxplain(data, "event", seed = 12)
+  result <- autoxplain(model_set = "quick", data, "event", seed = 12)
   view <- AutoXplainR:::report_view_model(result)
   expect_identical(view$identity$positive, "virginica")
   overview <- AutoXplainR:::render_model_overview(

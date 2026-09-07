@@ -141,7 +141,7 @@ test_that("formula source references are not statistical model state", {
 test_that("console identifies scoped evidence findings and retained failures", {
   d <- data.frame(x = seq_len(100), proxy = seq_len(100) * 2 + sin(seq_len(100)),
                   y = cos(seq_len(100)))
-  result <- autoxplain(d, "y")
+  result <- autoxplain(model_set = "quick", d, "y")
   output <- paste(capture.output(print(result)), collapse = "\n")
   expect_match(output, "reproducible random holdout", fixed = TRUE)
   expect_match(output, "did not improve on the intercept-only baseline", fixed = TRUE)
@@ -149,7 +149,7 @@ test_that("console identifies scoped evidence findings and retained failures", {
   expect_match(output, "x|proxy")
   result$explanations$failures <- data.frame(feature = "x", reason = "test adapter unavailable")
   expect_output(print(result), "effect:x", fixed = TRUE)
-  fitting_only <- autoxplain(d, "y", explain = FALSE)
+  fitting_only <- autoxplain(model_set = "quick", d, "y", explain = FALSE)
   expect_false(any(grepl("incomplete:", capture.output(print(fitting_only)), fixed = TRUE)))
 })
 

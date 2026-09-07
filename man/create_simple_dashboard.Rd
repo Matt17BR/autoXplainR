@@ -19,9 +19,8 @@ create_simple_dashboard(
 
 \item{output_file}{Destination HTML file.}
 
-\item{top_features}{Maximum number of features included in the audit. The
-initial ranking is obtained from repeated permutation importance on the
-leading model, never from impurity importance.}
+\item{top_features}{Maximum displayed inputs per model. The audit uses the
+union of their leading inputs, ranked by repeated permutation importance.}
 
 \item{sample_instances}{Retained for backward compatibility; no longer used.}
 

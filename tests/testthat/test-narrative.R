@@ -27,7 +27,7 @@ test_that("evidence prompt constrains unsupported claims", {
 
 test_that("local is the default even when a hosted-provider key exists", {
   withr::local_envvar(GEMINI_API_KEY = "must-not-trigger-a-request")
-  result <- autoxplain(mtcars, "mpg", seed = 2)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2)
   called <- FALSE
   report <- generate_natural_language_report(
     result,
@@ -68,7 +68,7 @@ test_that("provider registry makes current trade-offs inspectable", {
 })
 
 test_that("hosted and local model adapters share one sanitized prompt contract", {
-  result <- autoxplain(mtcars, "mpg", seed = 6)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 6)
   result$training_data$mpg[[1L]] <- 987654321
   cases <- list(
     gemini = list(key = "gemini-secret", model = "gemini-test", url = "interactions"),
@@ -112,7 +112,7 @@ test_that("hosted and local model adapters share one sanitized prompt contract",
 })
 
 test_that("custom OpenAI-compatible endpoints and provenance are supported", {
-  result <- autoxplain(mtcars, "mpg", seed = 7)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 7)
   captured <- NULL
   report <- generate_natural_language_report(
     result,
@@ -164,7 +164,7 @@ test_that("plain HTTP narrative endpoints are restricted to loopback hosts", {
 })
 
 test_that("provider failures fall back transparently or can be made strict", {
-  result <- autoxplain(mtcars, "mpg", seed = 9)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 9)
   withr::local_envvar(GEMINI_API_KEY = NA)
   expect_warning(
     report <- generate_natural_language_report(result, provider = "gemini"),
@@ -192,7 +192,7 @@ test_that("provider failures fall back transparently or can be made strict", {
 })
 
 test_that("Cloudflare requires both scoped credentials", {
-  result <- autoxplain(mtcars, "mpg", seed = 11)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 11)
   withr::local_envvar(c(
     CLOUDFLARE_API_TOKEN = NA,
     CLOUDFLARE_ACCOUNT_ID = NA
@@ -213,7 +213,7 @@ test_that("Cloudflare requires both scoped credentials", {
 })
 
 test_that("supported providers request one validated narrative schema", {
-  result <- autoxplain(mtcars, "mpg", seed = 13)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 13)
   response <- paste0(
     '{"headline":"A useful held-out result",',
     '"performance":"RMSE is the typical prediction error on held-out rows.",',
@@ -340,7 +340,7 @@ test_that("structured narratives require unique root fields and JSON arrays", {
 })
 
 test_that("unsupported schemas and invalid provider JSON are transparent", {
-  result <- autoxplain(mtcars, "mpg", seed = 14)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 14)
   captured <- NULL
   report <- generate_natural_language_report(
     result,
@@ -399,7 +399,7 @@ test_that("classification and missingness evidence reach the sanitized prompt", 
   ), levels = levels(training$accepted))
   training$x[seq_len(6)] <- NA
   evaluation$x[seq_len(30)] <- NA
-  result <- autoxplain(training, "accepted", test_data = evaluation, seed = 15)
+  result <- autoxplain(model_set = "quick", training, "accepted", test_data = evaluation, seed = 15)
   context <- AutoXplainR:::prepare_analysis_context(result)
   prompt <- AutoXplainR:::context_to_text(context)
 
@@ -441,7 +441,7 @@ test_that("Gemini Interaction responses expose only completed model text", {
 })
 
 test_that("Gemini settings are bounded, model-specific and recorded without credentials", {
-  result <- autoxplain(mtcars, "mpg", explain = FALSE)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE)
   captured <- NULL
   for (model in c("gemini-3.5-flash", "an-unrecognized-model")) {
     memo <- generate_natural_language_report(

@@ -9,7 +9,7 @@ test_that("weighted efficiency validates and warns about subjectivity", {
 })
 
 test_that("guided models expose useful engine-neutral metadata", {
-  result <- autoxplain(mtcars, "mpg", seed = 11)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 11)
   metadata <- result$model_characteristics
 
   expect_s3_class(metadata, "autoxplainr_model_characteristics")
@@ -34,7 +34,7 @@ test_that("guided models expose useful engine-neutral metadata", {
 })
 
 test_that("metadata reports are escaped and validated", {
-  result <- autoxplain(mtcars, "mpg", seed = 12)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 12)
   metadata <- result$model_characteristics
   names(metadata)[[1L]] <- "<unsafe>"
   metadata[[1L]]$model_id <- "<unsafe>"

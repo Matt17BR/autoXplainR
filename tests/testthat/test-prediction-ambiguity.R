@@ -79,7 +79,7 @@ test_that("ambiguity selection exposes performance filtering boundaries", {
     "performance_tolerance"
   )
 
-  quick <- autoxplain(mtcars, "mpg", seed = 2026)
+  quick <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2026)
   expect_error(prediction_ambiguity(quick), "model_set")
   expect_error(prediction_ambiguity(list()), "returned by")
 })
@@ -94,7 +94,7 @@ test_that("comparison reports show ambiguity beside candidate performance", {
   expect_match(html, "Disagreement is a review signal, not an error bar", fixed = TRUE)
   expect_match(html, "Largest prediction range", fixed = TRUE)
 
-  quick <- autoxplain(mtcars, "mpg", seed = 2026)
+  quick <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2026)
   quick_path <- tempfile(fileext = ".html")
   render_model_report(quick, quick_path, top_features = 1, n_repeats = 2)
   quick_html <- paste(readLines(quick_path, warn = FALSE), collapse = "\n")

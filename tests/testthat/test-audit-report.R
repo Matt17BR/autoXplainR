@@ -57,7 +57,7 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
   set.seed(120)
   data <- data.frame(x = rnorm(120), z = rnorm(120))
   data$y <- 3 * data$x + rnorm(120, sd = 0.4)
-  result <- autoxplain(data, "y", seed = 31)
+  result <- autoxplain(model_set = "quick", data, "y", seed = 31)
   narrative <- generate_natural_language_report(result)
   path <- tempfile(fileext = ".html")
   output <- render_model_report(
@@ -70,12 +70,12 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
   )
   html <- paste(readLines(output, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "Analysis brief", fixed = TRUE)
-  expect_match(html, "Prediction and evidence", fixed = TRUE)
-  expect_match(html, "Prediction performance on test rows", fixed = TRUE)
-  expect_match(html, "How large were individual errors?", fixed = TRUE)
-  expect_match(html, "Patterns used for prediction", fixed = TRUE)
-  expect_match(html, "What this analysis does not establish", fixed = TRUE)
+  expect_match(html, "Model comparison", fixed = TRUE)
+  expect_match(html, "Compare the models", fixed = TRUE)
+  expect_match(html, "test evaluation", fixed = TRUE)
+  expect_match(html, "Where do predictions go wrong?", fixed = TRUE)
+  expect_match(html, "Feature importance &amp; effects", fixed = TRUE)
+  expect_match(html, "Reading this analysis", fixed = TRUE)
   expect_match(html, "Understanding &lt;y&gt;", fixed = TRUE)
   expect_false(grepl("<script>unsafe</script>", html, fixed = TRUE))
   expect_match(html, "&lt;script&gt;unsafe&lt;/script&gt;", fixed = TRUE)
@@ -87,7 +87,7 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
 })
 
 test_that("guided reports distinguish selection validation from held-out tests", {
-  result <- autoxplain(mtcars, "mpg", seed = 2026)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2026)
   result$provenance$evaluation_role <- "validation"
   path <- tempfile(fileext = ".html")
   on.exit(unlink(path), add = TRUE)
@@ -95,15 +95,15 @@ test_that("guided reports distinguish selection validation from held-out tests",
   render_model_report(result, path, top_features = 1, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "How did the model score on validation rows?", fixed = TRUE)
-  expect_match(html, "This is not a final test estimate", fixed = TRUE)
+  expect_match(html, "validation evaluation", fixed = TRUE)
+  expect_match(html, "Validation scores: these rows may have influenced model selection", fixed = TRUE)
   expect_false(grepl("Did the model generalize?", html, fixed = TRUE))
 })
 
 test_that("reports keep supplied evaluation data descriptively neutral by default", {
   training <- mtcars[1:24, , drop = FALSE]
   evaluation <- mtcars[25:32, , drop = FALSE]
-  result <- autoxplain(training, "mpg", test_data = evaluation, seed = 2026)
+  result <- autoxplain(model_set = "quick", training, "mpg", test_data = evaluation, seed = 2026)
   path <- tempfile(fileext = ".html")
   on.exit(unlink(path), add = TRUE)
 
@@ -111,14 +111,14 @@ test_that("reports keep supplied evaluation data descriptively neutral by defaul
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
   expect_identical(result$provenance$evaluation_role, "evaluation")
-  expect_match(html, "How did the model score on the evaluation rows?", fixed = TRUE)
-  expect_match(html, "This is a descriptive evaluation", fixed = TRUE)
-  expect_match(html, "should not be presented as evidence of generalization", fixed = TRUE)
+  expect_match(html, "evaluation evaluation", fixed = TRUE)
+  expect_match(html, "Supplied evaluation rows", fixed = TRUE)
+  expect_match(html, "independence from model selection is not asserted", fixed = TRUE)
   expect_false(grepl("Did the model generalize?", html, fixed = TRUE))
 })
 
 test_that("dashboard compatibility entry point produces the guided report", {
-  result <- autoxplain(mtcars, "mpg", seed = 18)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 18)
   path <- tempfile(fileext = ".html")
   expect_warning(output <- generate_dashboard(
     result,
@@ -144,7 +144,7 @@ test_that("report screening and audit use the result's primary metric", {
   set.seed(124)
   data <- data.frame(x = rnorm(90), z = rnorm(90))
   data$y <- data$x + rnorm(90, sd = 0.4)
-  result <- autoxplain(data, "y", seed = 124)
+  result <- autoxplain(model_set = "quick", data, "y", seed = 124)
   result$evaluation$primary_metric <- "mae"
   prepared <- AutoXplainR:::prepare_model_report_data(
     result,
@@ -168,15 +168,15 @@ test_that("report screening and audit use the result's primary metric", {
 })
 
 test_that("guided reports support classification effect targets", {
-  result <- autoxplain(iris, "Species", seed = 21)
+  result <- autoxplain(model_set = "quick", iris, "Species", seed = 21)
   path <- tempfile(fileext = ".html")
   render_model_report(result, path, top_features = 1, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
   expect_match(html, "multiclass", fixed = TRUE)
   expect_match(html, "probability for class", fixed = TRUE)
-  expect_match(html, "Which classes were confused?", fixed = TRUE)
-  expect_match(html, "Can the reported probabilities be taken literally?", fixed = TRUE)
+  expect_match(html, "Observed classes (rows) and predicted classes (columns)", fixed = TRUE)
+  expect_match(html, "Probability calibration", fixed = TRUE)
   expect_match(html, "Binned calibration gap", fixed = TRUE)
   expect_error(render_model_report(result, tempfile(fileext = ".txt")), "html")
 })
@@ -187,18 +187,18 @@ test_that("comparison reports explain Pareto trade-offs without selecting on hol
   render_model_report(result, path, top_features = 2, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "Candidate scores and prediction differences", fixed = TRUE)
+  expect_match(html, "Compare the models", fixed = TRUE)
   expect_match(html, "<svg class=\"tradeoff-plot\"", fixed = TRUE)
-  expect_match(html, "Pareto-efficient", fixed = TRUE)
-  expect_match(html, "Pre-specified model", ignore.case = TRUE)
-  expect_match(html, "#models", fixed = TRUE)
+  expect_match(html, "not beaten on both displayed measures", fixed = TRUE)
+  expect_match(html, "pre-specified default", ignore.case = TRUE)
+  expect_match(html, "id=\"models\"", fixed = TRUE)
 })
 
 test_that("legacy dashboard helpers remain functional compatibility layers", {
   set.seed(33)
   data <- data.frame(x = rnorm(100), z = rnorm(100))
   data$y <- 2 * data$x + rnorm(100, sd = 0.5)
-  result <- autoxplain(data, "y", seed = 33)
+  result <- autoxplain(model_set = "quick", data, "y", seed = 33)
   prepared <- AutoXplainR:::prepare_dashboard_data(
     result,
     top_features = 2,
@@ -209,7 +209,7 @@ test_that("legacy dashboard helpers remain functional compatibility layers", {
   expect_s3_class(prepared$audit, "autoxplain_audit")
   expect_length(prepared$importance_list, 2L)
   expect_length(prepared$pdp_data, 2L)
-  expect_match(prepared$correlation_insights_html, "supplied models only")
+  expect_match(prepared$correlation_insights_html, "unavailable.*constant")
 
   one_model <- result
   one_model$models <- one_model$models["main_model"]

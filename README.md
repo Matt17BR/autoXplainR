@@ -1,13 +1,17 @@
 # AutoXplainR
 
-Fit a tabular prediction model, check it against a simple baseline, and inspect
-what it learned—with one R command.
+Fit several models, compare their predictions and costs, and explore what each
+one learned—with one R command.
 
-[![AutoXplainR report showing the modeling question, prediction error against a baseline, and evaluation sample size](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
+[![AutoXplainR model comparison tab showing held-out scores and measured training costs](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
 
-*Start with the result: how well did the model predict, and did it improve on a
-simple baseline? Preview uses synthetic data.
+*Start with the models: how well do they predict, and what do they cost?
+Preview uses synthetic data.
 [Open the example report](https://matt17br.github.io/autoXplainR/model-report.html).*
+
+Also explore [customer churn](https://matt17br.github.io/autoXplainR/binary-report.html)
+or [three-class flower predictions](https://matt17br.github.io/autoXplainR/multiclass-report.html).
+The churn data are synthetic; the flower example uses R's `iris` data.
 
 ## Try it
 
@@ -20,12 +24,15 @@ result <- autoxplain(mtcars, "mpg", report = "model-report.html")
 result
 ```
 
-This fits a linear regression and an intercept-only baseline, evaluates them on
-a reproducible 20% holdout, computes feature importance and fitted effects, and
-writes a standalone HTML report.
-[View a generated example](https://matt17br.github.io/autoXplainR/model-report.html). Classification uses logistic or multinomial
-regression instead. The default runs locally without Java, an API key, or a
-language model. AutoXplainR is distributed on GitHub; it is not yet on CRAN.
+This searches 15 settings across linear, tree and neural models using five
+training-only cross-validation folds. It keeps one fitted representative per
+successful family plus a baseline, evaluates them on a reproducible 20% holdout,
+and writes a standalone report with importance and fitted effects. Regression,
+binary classification and multiclass classification use the same command.
+
+The default runs locally without Java, an API key or a language model. For a
+fast reference model and baseline, set `model_set = "quick"`. AutoXplainR is
+available on GitHub; it is not yet on CRAN.
 
 `mtcars` is a small teaching example, not evidence that a model is ready for use.
 For your own analysis, choose predictors that are available when a prediction
@@ -39,55 +46,74 @@ they are probabilities of `"yes"`. Set and inspect levels before fitting.
 
 ## A look inside the report
 
-These screenshots show a reproducible synthetic parcel-delivery demonstration,
-using `model_set = "comparison"`. It adds two decision trees to the default
-model and baseline and includes a redundant planned-route predictor to illustrate
-association findings. This is not production validation; its numbers differ
-from the `mtcars` quick start. Click any screenshot to open that part of the full report.
+The report has six focused tabs. Scores, plots and controls stay visible;
+background explanations sit behind **?** buttons and expandable details. Help
+works on hover, keyboard focus and tap. Each screenshot below comes from the
+same reproducible synthetic delivery example using the default model search.
 
-### Compare the candidates
+### Compare models
 
-Compare held-out prediction errors and see where candidates disagree on the
-same parcels. The best score on these rows is not a new model-selection rule.
-Resource comparisons are available in a later optional section.
+Read scores beside training time, prediction time and model size. Change either
+axis to explore the tradeoff. The **CV choice** label records training selection;
+the best score on the held-out rows can belong to another model.
 
-[![Four candidates with held-out prediction errors and paired prediction disagreement](man/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#models)
+[![Model comparison with scores, measured costs and a performance versus training time plot](man/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
 
-### See which inputs mattered, and how
+### Explore inputs and fitted patterns
 
-Feature importance measures the loss change after shuffling an input. The
-effect plot shows a fitted pattern on quantitative axes, with its scope and
-support stated beside it.
+Switch models, then click an importance bar to select its fitted curve. The
+report keeps the model, feature and prediction target explicit.
 
-[![Feature importance and one fitted effect plot with quantitative axes and an interpretation](man/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
+[![Feature tab with model selection, ranked importance bars and a selected fitted curve](man/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
 
-### Find the caveats and next steps
+### See exactly what was fitted
 
-The diagnostic section separates completed checks from unavailable results and
-identifies affected features and models. Each finding suggests a next step.
+Each model shows its effective settings beside its name. **Model details** opens
+the formula, coefficients or tree rules, fitted size, exact R controls, training
+selection and preprocessing. The same settings follow the model into Features
+and Predictions. In R, use `extract_model_characteristics(result)` or inspect
+`result$models[["model_id"]]` directly.
 
-[![Explanation diagnostics showing scoped findings and suggested next actions](man/figures/explanation-reliability.png)](https://matt17br.github.io/autoXplainR/model-report.html#reliability)
+[![Decision-tree details with fitted leaves, depth, formula and exact training controls](man/figures/model-details.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
 
-The report is a standalone HTML file you can open offline or share with someone
-who does not use R. See the [example-generation and screenshot instructions](https://github.com/Matt17BR/autoXplainR/blob/main/validation/README.md#report-screenshots)
-to reproduce these views.
+### Find related inputs
+
+Select a matrix cell to read the association method and sample count. Numeric
+pairs retain the direction of correlation. Associations involving categories
+are labeled as unsigned.
+
+[![Input relationships matrix with signed correlations and pair inspection](man/figures/input-relationships.png)](https://matt17br.github.io/autoXplainR/model-report.html#relationships)
+
+### Inspect predictions
+
+Check observed errors or classification mistakes for the selected model.
+Mistakes include class probabilities, so confident errors are visible. Copy
+the matching R prediction command. Checks, uncertainty and methods each have a
+separate home in the remaining tabs.
+
+[![Prediction tab with observed versus predicted values, errors and the selected model's R command](man/figures/model-predictions.png)](https://matt17br.github.io/autoXplainR/model-report.html#evaluation)
+
+The HTML works offline and can be shared with someone who does not use R.
+**Print this view** exports the active tab with the current model and feature;
+expand any details you want included first. Without JavaScript, the file exposes
+all evidence as a static document. See the
+[reproduction instructions](https://github.com/Matt17BR/autoXplainR/blob/main/validation/README.md#report-screenshots).
 
 ## What you get in R
 
 | Result | Where to find it |
 |---|---|
-| Fitted primary model and baseline | `result$models` |
+| Fitted family representatives and baseline | `result$models` |
 | Evaluation metrics and their definitions | `result$leaderboard`, `result$evaluation` |
 | Predictions and errors on evaluation rows | `result$evaluation$predictions` |
 | Repeated permutation importance and diagnostic findings | `result$explanations$audit` |
-| Up to three fitted ALE/PDP curves | `result$explanations$effects` |
+| Primary-model ALE/PDP curves | `result$explanations$effects` |
+| Curves for every audited model | `result$explanations$effects_by_model` |
 | Effects that could not be computed, with reasons | `result$explanations$failures` |
 | Training recipe, model selection and split details | `result$preprocessing_metadata`, `result$provenance` |
 | Compact aggregate evidence for review or export | `evidence_summary(result)` |
 
-The report leads with performance against the baseline, then explains fitted
-patterns and the limits of the evidence. It works offline in a browser and has
-a print stylesheet. The numerical objects remain available in R. Version 0.4.0 uses result and
+All numerical objects remain available in R. The package uses result and
 aggregate-evidence schema 2.0; old grade fields are removed. Recompute affected
 0.3.0 analyses rather than assuming old serialized results use the new contracts.
 
@@ -116,7 +142,7 @@ result <- autoxplain(
 # Train on earlier times; reserve the latest times and exclude two time values
 # immediately before the test period. Tied times stay together.
 result <- autoxplain(
-  observations, "outcome",
+  observations, "outcome", model_set = "comparison",
   validation = validation_split(time = "recorded_at", gap = 2)
 )
 ```
@@ -134,8 +160,8 @@ across supplied training and evaluation sets trigger a possible-leakage warning.
 
 ## Compare or tune models
 
-Start with the simple default. To search across model families without selecting
-on the final holdout:
+The default already searches across the core model families. Inspect its
+training selection and retained candidates in R:
 
 ```r
 tuned <- autoxplain(
@@ -147,11 +173,11 @@ compare_model_behavior(tuned)
 
 | Mode | What it fits | How the primary model is chosen |
 |---|---|---|
-| `quick` (default) | Linear/logistic/multinomial model and baseline | Pre-specified |
+| `quick` | Linear/logistic/multinomial model and baseline | Pre-specified |
 | `comparison` | The same models plus two trees | Primary remains pre-specified; ranks are descriptive |
-| `tuned` | Requested model families and baseline | Training-only cross-validation; one-standard-error rule by default |
+| `tuned` (default) | Core or explicitly requested model families and baseline | Training-only cross-validation; one-standard-error rule by default |
 
-Choose the requested families and install their engines explicitly. The
+For a wider search, choose a portfolio and install its optional engines explicitly. The
 [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
 explains portfolio support, selection rules and recorded failures:
 
@@ -185,8 +211,10 @@ include grouped permutation importance, ALE, PDP, subgroup performance,
 missingness shift and binary threshold diagnostics.
 
 For fitting without explanations, set `explain = FALSE`. The default explanation
-budget screens all features, audits the eight highest-ranked inputs across up
-to five models with 20 permutations, and computes up to three effects. Large
+budget screens all inputs for up to five models, audits the union of their top
+eight inputs with 20 permutations, and computes up to eight fitted curves per
+model and outcome class. In multiclass reports, use **Curve for class** to switch
+probability curves; importance continues to summarize loss across all classes. Large
 feature sets or expensive prediction functions can take time. A report request
 computes explanations even if `explain = FALSE`. Explicit report budgets such as
 `n_repeats = 50` recompute evidence; otherwise the report reuses retained results.

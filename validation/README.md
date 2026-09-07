@@ -1,10 +1,15 @@
 # Validation evidence
 
+The [product review of the 0.4.0 report](product-review-0.4.0.md) records the
+maintainer’s feedback, the regressions from 0.1 and current task acceptance criteria.
 The [critical 0.3.0 audit](audit-0.3.0.md) records reproduced correctness bugs,
 report-design findings and repair acceptance criteria. Its counterexamples
 complement the passing release checks below; test totals alone did not cover
 these cases. The [0.4.0 repair disposition](resolution-0.4.0.md) tracks every
 finding, its acceptance checks and the remaining limits.
+
+The [0.5.0 test-quality review](test-quality-0.5.0.md) records tests that passed
+despite wrong behavior, their replacements and the required negative controls.
 
 Run these commands from the repository root. They write small reviewable
 artifacts under `validation/results/`. They do not send data to a service.
@@ -29,9 +34,10 @@ is preferable.
 
 The [executed workflow comparison](workflow-comparison.md) applies AutoXplainR
 and DALEX + modelStudio to identical fitted models and held-out rows, records
-numerical agreement, and checks selected HTML controls offline. Its
-[human-study protocol](user-study-protocol.md) has not been executed; there is
-no measured usability or superiority result.
+numerical agreement, and checks selected HTML controls offline. Immediate
+report walkthroughs and task checks are part of release acceptance now. The
+separate [participant-study protocol](user-study-protocol.md) has not been
+executed; no comparative participant result or superiority is claimed.
 
 The simulation records every replicate of a fixed-model percentile bootstrap
 coverage diagnostic. The data-generating distribution gives an analytic
@@ -46,7 +52,7 @@ not a passed integration. Hosted Gemini requires a separate explicit live test;
 its mocked transport tests do not prove current endpoint availability. H2O tests
 start an isolated local Java cluster and shut it down after testing.
 
-Current release evidence belongs in `release-0.4.0.md`; record the tested commit, runtime,
+Current release evidence belongs in `release-0.5.0.md`; record the tested commit, runtime,
 package versions, check status and skipped tests. Do not reuse an older release's
 CRAN or Win-builder evidence for a new archive. Checksums identify an artifact;
 they do not make it CRAN-approved.
@@ -55,7 +61,7 @@ they do not make it CRAN-approved.
 
 The README images are browser captures of `pkgdown/assets/model-report.html`,
 generated from public synthetic data by the current R implementation. Refresh
-the report and all four images together when the report changes:
+the report and all gallery images together when the report changes:
 
 ```sh
 Rscript validation/render-example.R
@@ -66,9 +72,12 @@ python3 -m venv /tmp/autoxplain-screenshots
 ```
 
 Alternatively, set `CHROME_PATH` to an installed Chrome executable and omit the
-browser download. The capture script uses a 1100px desktop viewport at 1.5x
-resolution and checks for page overflow at 390px. It saves the overview, model
-comparison, fitted patterns and diagnostic sections to `man/figures/`.
+browser download. The capture script uses a 1440px desktop viewport at 1.5x
+resolution and checks for page overflow at 390px. It saves the model comparison, fitted patterns, relationships, predictions
+and checks tabs to `man/figures/`.
+It also captures the fitted-model details view. Run
+`Rscript validation/render-explorer-cases.R` to refresh the public binary and
+multiclass demonstrations together with the regression example.
 Review the images visually before committing; the script does not replace
 checking text legibility and framing. These Python dependencies are only needed
 to refresh screenshots, not to install or use the R package.
@@ -76,19 +85,22 @@ to refresh screenshots, not to install or use the R package.
 
 ## Browser regression gate
 
-`report-browser` generates the synthetic report and checks it at 320, 390, 768
-and 1440 CSS pixels with Playwright 1.58.0 and axe-core 4.13.0. It checks page
-overflow, evidence links, keyboard disclosures, quantitative-label size, offline
-JavaScript-free rendering, and complete PDF evidence with disclosures open or
-closed. Browser artifacts are uploaded by CI. Run it locally with:
+The [product walkthrough](product-walkthrough.md) is the release acceptance
+process. Browser assertions support it; they do not replace working through the
+novice and experienced-user journeys and recording useful answers.
+
+`report-browser` generates four actual reports and compares their controls and
+displayed answers with R results. It checks model, metric and feature switching;
+relationship inspection; prediction commands; keyboard and tooltip interaction;
+narrow layouts; offline rendering; and printing the selected view.
 
 ```sh
-python validation/check-report-browser.py pkgdown/assets/model-report.html \
+Rscript validation/render-explorer-cases.R
+python validation/check-explorer.py \
   --axe-path /path/to/axe-core/axe.min.js --output-dir /tmp/report-browser
 ```
 
-Use `--chrome-path` to select an installed Chrome executable. Otherwise install
-Playwright's Chromium. PDF checks additionally require `pdftotext` from Poppler.
-This is an automated regression gate, not a human usability study or a complete
-accessibility conformance audit. The release workflow requires this gate as well
-as the R and exact engine-minimum checks.
+See [the check specification](report-browser.md) for dependencies and scope.
+The release workflow requires this gate, numerical tests and exact engine-minimum
+checks. Passing automation is only part of acceptance: inspect the actual views
+and complete the tasks in the product review before publication.

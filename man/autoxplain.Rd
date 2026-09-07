@@ -13,8 +13,8 @@ autoxplain(
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
-  model_set = c("quick", "tuned", "comparison"),
-  portfolio = c("recommended", "core", "extended"),
+  model_set = c("tuned", "quick", "comparison"),
+  portfolio = c("core", "recommended", "extended"),
   learners = NULL,
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
@@ -68,14 +68,14 @@ them as validation rows only when \code{use_test_as_validation = TRUE} and
 \item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
 resolves to the dependency-free \code{"base"} workflow.}
 
-\item{model_set}{Guided base-engine workflow. \code{"quick"} fits the
+\item{model_set}{Guided base-engine workflow. \code{"tuned"} is the default. \code{"quick"} fits the
 pre-specified understandable model and baseline. \code{"comparison"} also fits
 two pre-specified trees for a descriptive Pareto view. \code{"tuned"} compares
 the requested behaviorally diverse learner portfolio using training-only
 resampling, retains its family winners for comparison, then evaluates the
 selected configuration once on the configured evaluation rows.}
 
-\item{portfolio}{Local tuned-model portfolio. \code{"recommended"} compares
+\item{portfolio}{Local tuned-model portfolio. \code{"core"} is the default. \code{"recommended"} compares
 linear, regularized, additive (when supported), tree, forest, and boosting
 families. \code{"extended"} adds neural, kernel, nearest-neighbor, and MARS
 families. \code{"core"} retains the dependency-light linear/tree/neural
@@ -143,9 +143,10 @@ check cannot establish whether the samples are independent.}
 chronological evaluation. Split columns are excluded from model inputs.}
 
 \item{explain}{Compute and retain permutation screening, an explanation audit,
-and up to three fitted effects. Defaults to \code{TRUE}; use \code{FALSE} for fitting
-only. Screening covers all inputs; the audit covers up to eight inputs and
-five models with 20 permutations. These are descriptive, selected summaries.}
+and up to eight fitted effects per audited model. Defaults to \code{TRUE}; use
+\code{FALSE} for fitting only. Screening covers all inputs for up to five models;
+the audit covers the union of their top eight inputs with 20 permutations.
+These are descriptive, selected summaries.}
 
 \item{report}{Optional \code{.html} destination, written from the retained evidence.
 Supplying a path also computes explanations when \code{explain = FALSE}.}
@@ -158,10 +159,12 @@ evaluation predictions, preprocessing provenance, and (by default)
 }
 \description{
 \code{autoxplain()} is the beginner-first entry point. By default it creates a
-reproducible held-out split, fits an intercept-only baseline and an
-understandable statistical model, evaluates both on unseen rows, and stores
-everything needed for explanation and reporting. This path only uses R and
-does not require Java or a cloud account.
+reproducible held-out split, compares linear, tree and neural model families
+using training-only cross-validation, then evaluates the retained models and
+an intercept-only baseline on held-out rows. It stores predictions and
+explanations for an interactive offline report. No optional model engines,
+Java or cloud account are needed. Use \code{model_set = "quick"} for a fast
+pre-specified reference model and baseline.
 }
 \details{
 Set \code{engine = "h2o"} to use the optional H2O AutoML adapter. The lower-level

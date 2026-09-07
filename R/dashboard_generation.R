@@ -7,9 +7,8 @@
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param output_file Destination HTML file.
-#' @param top_features Maximum number of features included in the audit. The
-#'   initial ranking is obtained from repeated permutation importance on the
-#'   leading model, never from impurity importance.
+#' @param top_features Maximum displayed inputs per model. The audit uses the
+#'   union of their leading inputs, ranked by repeated permutation importance.
 #' @param sample_instances Retained for backward compatibility; no longer used.
 #' @param include_llm_report Whether to request an optional narrative. The
 #'   evidence report remains complete without it.
@@ -112,16 +111,18 @@ prepare_model_report_data <- function(autoxplain_result,
   explainers <- as_explainers(autoxplain_result, models = selected)
   importance_metric <- result_importance_metric(autoxplain_result)
   screen_repeats <- min(5L, n_repeats)
-  screening <- calculate_permutation_importance(
-    explainers[[1L]],
-    metric = importance_metric,
-    n_repeats = screen_repeats,
-    seed = autoxplain_result$provenance$seed %||% 123L
-  )
-  features <- head(
-    screening$feature[order(screening$importance, decreasing = TRUE)],
-    min(top_features, nrow(screening))
-  )
+  screening_by_model <- lapply(explainers, function(explainer) {
+    calculate_permutation_importance(
+      explainer,
+      metric = importance_metric, n_repeats = screen_repeats,
+      seed = autoxplain_result$provenance$seed %||% 123L
+    )
+  })
+  screening <- screening_by_model[[1L]]
+  # Compare the union of each model's leading inputs, not only the primary's.
+  features <- unique(unlist(lapply(screening_by_model, function(item) {
+    head(item$feature[order(item$importance, decreasing = TRUE)], top_features)
+  }), use.names = FALSE))
   audit <- audit_explanations(
     explainers,
     features = features,
@@ -132,7 +133,8 @@ prepare_model_report_data <- function(autoxplain_result,
   audit$provenance$automl_created_at <- autoxplain_result$provenance$created_at
   audit$provenance$automl_target <- autoxplain_result$target_column
   audit$provenance$automl_task <- autoxplain_result$task
-  effect_features <- head(features, min(3L, length(features)))
+  primary_rows <- audit$importance[audit$importance$model == primary, , drop = FALSE]
+  effect_features <- head(primary_rows$feature[order(-primary_rows$importance)], top_features)
   effects <- lapply(effect_features, function(feature) {
     method <- if (is.numeric(explainers[[1L]]$data[[feature]])) "ale" else "pdp"
     tryCatch(
@@ -153,12 +155,23 @@ prepare_model_report_data <- function(autoxplain_result,
   })
   names(effects) <- effect_features
   failed <- vapply(effects, inherits, logical(1), "effect_failure")
-  failures <- data.frame(feature = names(effects)[failed],
-                         reason = vapply(effects[failed], as.character, character(1)),
-                         stringsAsFactors = FALSE)
+  failures <- data.frame(
+    feature = names(effects)[failed],
+    reason = vapply(effects[failed], as.character, character(1)),
+    stringsAsFactors = FALSE
+  )
   effects <- effects[!failed]
-  list(screening = screening, audit = audit, effects = effects, failures = failures,
-       config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models))
+  output <- list(
+    screening = screening, screening_by_model = screening_by_model,
+    audit = audit, effects = effects, failures = failures,
+    config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models)
+  )
+  prepared <- autoxplain_result
+  prepared$explanations <- output
+  output$effects_by_model <- explorer_model_effects(prepared, audit, effects)
+  prepared$explanations <- output
+  output$effects_by_class <- explorer_class_effects(prepared, audit, effects)
+  output
 }
 
 #' Deprecated simple-dashboard compatibility wrapper
@@ -200,13 +213,16 @@ prepare_dashboard_data <- function(autoxplain_result,
   }
   top_features <- assert_count(top_features, "top_features")
   assert_count(sample_instances, "sample_instances")
-  selected <- seq_len(min(assert_count(max_models, "max_models"),
-                          length(autoxplain_result$models)))
+  selected <- seq_len(min(
+    assert_count(max_models, "max_models"),
+    length(autoxplain_result$models)
+  ))
   explainers <- as_explainers(autoxplain_result, models = selected)
   importance_metric <- result_importance_metric(autoxplain_result)
   importance_list <- lapply(seq_along(explainers), function(index) {
     calculate_permutation_importance(
-      explainers[[index]], metric = importance_metric, n_repeats = n_repeats,
+      explainers[[index]],
+      metric = importance_metric, n_repeats = n_repeats,
       seed = (autoxplain_result$provenance$seed %||% 123L) + index - 1L
     )
   })
@@ -215,7 +231,8 @@ prepare_dashboard_data <- function(autoxplain_result,
   features <- head(importance$feature, min(top_features, nrow(importance)))
   pdp_list <- lapply(explainers, function(explainer) {
     calculate_partial_dependence_multi(
-      explainer, features = features, n_points = 20L,
+      explainer,
+      features = features, n_points = 20L,
       seed = autoxplain_result$provenance$seed %||% 123L
     )
   })
@@ -225,7 +242,8 @@ prepare_dashboard_data <- function(autoxplain_result,
     character(1)
   )
   audit <- audit_explanations(
-    explainers, features = features, metric = importance_metric,
+    explainers,
+    features = features, metric = importance_metric,
     n_repeats = n_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L
   )
@@ -248,13 +266,34 @@ prepare_dashboard_data <- function(autoxplain_result,
 
 calculate_correlation_insights <- function(autoxplain_result, model_names = NULL) {
   explainers <- as_explainers(autoxplain_result, models = model_names)
-  if (length(explainers) < 2L) return("One model supplied; model-agreement diagnostics are not available.")
+  if (length(explainers) < 2L) {
+    return("One model supplied; model-agreement diagnostics are not available.")
+  }
   predictions <- do.call(cbind, lapply(explainers, function(x) {
     prediction <- predict(x, x$data)
-    if (is.matrix(prediction)) max.col(prediction, ties.method = "first") else prediction
+    if (x$task == "regression") {
+      return(prediction)
+    }
+    if (is.matrix(prediction)) {
+      colnames(prediction)[max.col(prediction, ties.method = "first")]
+    } else {
+      ifelse(prediction >= .5, x$class_levels[2], x$class_levels[1])
+    }
   }))
+  if (autoxplain_result$task != "regression") {
+    pairs <- utils::combn(seq_len(ncol(predictions)), 2)
+    agreement <- apply(pairs, 2, function(pair) mean(predictions[, pair[1]] == predictions[, pair[2]]))
+    return(paste0(
+      "Mean pairwise predicted-class agreement is ", format(mean(agreement), digits = 3),
+      ". This describes the supplied models on the same evaluation rows."
+    ))
+  }
   correlation <- suppressWarnings(stats::cor(predictions, method = "spearman"))
-  mean_correlation <- mean(correlation[lower.tri(correlation)], na.rm = TRUE)
+  values <- correlation[lower.tri(correlation)]
+  if (!any(is.finite(values))) {
+    return("Prediction rank correlation is unavailable because the supplied predictions are constant.")
+  }
+  mean_correlation <- mean(values[is.finite(values)])
   paste0(
     "Mean pairwise prediction rank correlation is ",
     format(mean_correlation, digits = 3),
@@ -299,8 +338,10 @@ result_importance_metric <- function(result) {
 
 warn_legacy_report <- function(name, replacement = "render_model_report(result, output_file)") {
   warning(structure(list(
-    message = paste0("`", name, "()` is deprecated in AutoXplainR 0.4.0; use `",
-                     replacement, "`. Removal will occur no earlier than 0.6.0."),
+    message = paste0(
+      "`", name, "()` is deprecated in AutoXplainR 0.4.0; use `",
+      replacement, "`. Removal will occur no earlier than 0.6.0."
+    ),
     call = NULL
   ), class = c("autoxplain_deprecated", "warning", "condition")))
 }

@@ -182,6 +182,9 @@ backend_package_version <- function(backend) {
     e1071 = "e1071",
     earth = "earth",
     kknn = "kknn",
+    stats = "stats",
+    rpart = "rpart",
+    nnet = "nnet",
     NA_character_
   )
   if (is.na(package) || !requireNamespace(package, quietly = TRUE)) return(NA_character_)

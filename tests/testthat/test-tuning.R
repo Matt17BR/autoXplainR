@@ -116,23 +116,41 @@ test_that("tuned classification models retain valid probability contracts", {
   expect_equal(unname(rowSums(probability)), rep(1, nrow(probability)), tolerance = 1e-6)
 })
 
-test_that("tuning refits preprocessing inside folds and records novel-level mappings", {
-  set.seed(9)
-  data <- data.frame(
-    x = rnorm(80),
-    group = c(rep("common", 76), rep("rare", 4))
-  )
-  data$y <- 2 * data$x + rnorm(80, sd = 0.2)
+test_that("out-of-fold predictions use medians learned from each training partition", {
+  x <- c(1:20, 101:120, 1001:1020)
+  data <- data.frame(x = x, y = 2 * x + sin(seq_along(x)))
+  data$x[seq(1, 60, by = 4)] <- NA_real_
+  ids <- rep(c("low", "middle", "high"), each = 20)
   result <- autoxplain(
-    data, "y", model_set = "tuned", portfolio = "core",
-    max_models = 3, nfolds = 4, seed = 7
+    data, "y", test_data = data.frame(x = -4:-1, y = -8:-5),
+    learners = "linear", max_models = 1, explain = FALSE,
+    tuning_control = tuning_control(fold_ids = ids), seed = 7
   )
-  expect_true(all(result$tuning$fold_scores$validation_rows >= 2L))
-  expect_true(all(result$tuning$fold_scores$novel_levels_mapped >= 0L))
-  expect_equal(
-    length(unique(result$tuning$fold_scores$fold)),
-    result$tuning$folds_used
-  )
+  # This reference uses only base R and explicit partitions. Neither the
+  # package's recipe helper nor its fold-scoring code computes the answer.
+  expected <- leaked <- numeric(nrow(data))
+  for (fold in unique(ids)) {
+    held_out <- ids == fold
+    for (learn_globally in c(FALSE, TRUE)) {
+      training <- data[!held_out, ]
+      validation <- data[held_out, ]
+      median <- stats::median(if (learn_globally) data$x else training$x, na.rm = TRUE)
+      training$x[is.na(training$x)] <- median
+      validation$x[is.na(validation$x)] <- median
+      prediction <- predict(lm(y ~ x, data = training), validation)
+      if (learn_globally) leaked[held_out] <- prediction else expected[held_out] <- prediction
+    }
+  }
+  # Ensure this fixture can distinguish fold-local from leaked imputation.
+  expect_gt(max(abs(expected - leaked)), 100)
+  oof <- result$tuning$out_of_fold_predictions
+  expect_equal(oof$estimate[order(oof$training_row)], expected, tolerance = 1e-10)
+  fold <- result$tuning$fold_scores
+  expected_rmse <- vapply(fold$fold, function(index) {
+    rows <- result$tuning$fold_assignment$training_row[result$tuning$fold_assignment$fold == index]
+    sqrt(mean((data$y[rows] - expected[rows])^2))
+  }, numeric(1))
+  expect_equal(fold$score, unname(expected_rmse), tolerance = 1e-10)
 })
 
 test_that("outer evaluation values cannot change training-only tuning", {
@@ -171,7 +189,7 @@ test_that("tuning validation is actionable", {
     autoxplain(mtcars, "mpg", model_set = "tuned", portfolio = "core", nfolds = 1),
     "at least 2"
   )
-  expect_error(tuning_results(autoxplain(mtcars, "mpg")), "No local tuning")
+  expect_error(tuning_results(autoxplain(model_set = "quick", mtcars, "mpg")), "No local tuning")
 
   scarce <- data.frame(
     x = 1:12,

@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(AutoXplainR)
 ```
 
-AutoXplainR fits a tabular prediction model, evaluates it against a simple
+AutoXplainR compares tabular prediction models, evaluates them against a simple
 baseline, and retains fitted explanations and an optional HTML report. The
 ordinary workflow runs locally. This example predicts a parcel's delivery time
 using information available at dispatch. All data below are synthetic.
@@ -45,7 +45,7 @@ delivery time. Repeated customers or sites would need a grouped validation plan.
 
 ```{r fit}
 result <- autoxplain(
-  inputs, "delivery_hours",
+  inputs, "delivery_hours", model_set = "comparison",
   validation = validation_split(time = "dispatched"),
   preprocessing_config = list(novel_level_strategy = "error"),
   seed = 2026
@@ -59,8 +59,11 @@ recipe$factor_levels
 recipe$novel_level_strategy
 ```
 
-This fits a linear regression and an intercept-only baseline on the earlier
-rows. The latest 20% of distinct dispatch dates are reserved for evaluation.
+This fits a linear regression, two trees and an intercept-only baseline on the
+earlier rows. The latest 20% of distinct dispatch dates are reserved for evaluation.
+We explicitly use comparison mode because chronological tuning is not yet
+implemented. For independently sampled rows, the ordinary default compares
+linear, tree and neural models using training-only cross-validation.
 `dispatched` determines the split and is excluded from predictors. Missing
 predictor values are imputed using values learned on training rows; character
 predictors are converted to factors using their training levels.
@@ -119,7 +122,12 @@ unlink(path)
 ```
 
 Use a persistent path such as `"delivery-report.html"` to keep the report. It
-opens offline in a browser. Review feature names and diagnostics before sharing.
+opens offline in a browser. Start in **Compare models** to read the scores and
+costs, then click a model to see its important inputs and fitted curves.
+**Input relationships** shows which predictors move together; **Inspect
+predictions** shows errors and the R command for the selected model. Help buttons
+work on hover, keyboard focus and tap. **Print this view** exports the active tab
+and selections. Review feature names and diagnostics before sharing.
 `saveRDS(result, "analysis.rds")` retains models **and training/evaluation data**.
 
 For classification, set outcome factor levels deliberately: binary probabilities

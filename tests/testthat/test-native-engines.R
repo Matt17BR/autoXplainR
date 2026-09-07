@@ -473,6 +473,16 @@ test_that("extended portfolio adds neural, kernel, neighbors, and MARS behavior"
       "neural", "kernel", "neighbors", "mars", "baseline"
     )
   )
+  for (id in names(result$models)) {
+    spec <- AutoXplainR:::model_specification(result, id)
+    expect_true(nzchar(spec$summary))
+    expect_gt(length(spec$parameters), 0L)
+    expect_no_error(AutoXplainR:::explorer_model_spec_details(result, id))
+    if (inherits(result$models[[id]], "autoxplain_fitted_model")) {
+      effective <- result$models[[id]]$fit_details$effective_parameters
+      if (length(effective)) expect_equal(spec$parameters[names(effective)], effective)
+    }
+  }
   expect_setequal(result$tuning$learner_manifest$family, result$tuning$learners)
   expect_true(all(nzchar(result$tuning$learner_manifest$strengths)))
   expect_true(all(nzchar(result$tuning$learner_manifest$cautions)))

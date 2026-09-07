@@ -121,17 +121,14 @@ enrich_tradeoff_leaderboard <- function(result) {
   }
   ids <- vapply(characteristics, `[[`, character(1), "model_id")
   index <- match(leaderboard$model_id, ids)
-  additions <- list(
-    model_size_kb = vapply(characteristics, function(x) x$size_bytes / 1024, numeric(1)),
-    training_time_ms = 1000 * vapply(
-      characteristics,
-      `[[`,
-      numeric(1),
-      "training_time_s"
-    )
-  )
-  for (column in names(additions)) {
-    if (!column %in% names(leaderboard)) leaderboard[[column]] <- additions[[column]][index]
+  fields <- c(model_size_kb = "size_bytes", training_time_ms = "training_time_s")
+  scales <- c(model_size_kb = 1 / 1024, training_time_ms = 1000)
+  for (column in setdiff(names(fields), names(leaderboard))) {
+    values <- vapply(characteristics, function(x) {
+      value <- x[[fields[[column]]]]
+      if (is.numeric(value) && length(value) == 1L && is.finite(value)) value else NA_real_
+    }, numeric(1))
+    leaderboard[[column]] <- values[index] * scales[[column]]
   }
   leaderboard
 }

@@ -8,7 +8,7 @@ test_that("subgroups retain raw categories and context excluded from model input
     patient_id = rep(c("site-1", "site-2"), 4), y = cos(61:68),
     context_only = rep(c("east", "west"), 4)
   )
-  result <- autoxplain(training, "y", test_data = evaluation, explain = FALSE,
+  result <- autoxplain(model_set = "quick", training, "y", test_data = evaluation, explain = FALSE,
                        preprocessing_config = list(enable_id_removal = TRUE))
   expect_false("patient_id" %in% result$features)
   expect_false("context_only" %in% names(result$test_data))
@@ -33,7 +33,7 @@ test_that("row filtering aligns raw subgroup values without filtering on extra c
   training <- data.frame(x = 1:60, y = sin(1:60))
   evaluation <- data.frame(x = c(61, NA, 63, 64, 65, 66), y = cos(61:66),
                            site = c("a", "discarded", "b", NA, "a", "b"))
-  result <- autoxplain(training, "y", test_data = evaluation, explain = FALSE,
+  result <- autoxplain(model_set = "quick", training, "y", test_data = evaluation, explain = FALSE,
                        preprocessing_config = list(missing_value_strategy = "drop_rows"))
   expect_identical(result$evaluation_row_indices, c(1L, 3L, 4L, 5L, 6L))
   expect_identical(result$evaluation_context$site, evaluation$site[c(1, 3, 4, 5, 6)])
@@ -67,7 +67,7 @@ test_that("structured split context remains aligned after dropping model-input r
   data <- data.frame(site = rep(paste0("site-", 1:8), each = 10),
                      x = rnorm(80), y = rnorm(80))
   data$x[seq(1, 80, by = 10)] <- NA_real_
-  result <- autoxplain(data, "y", validation = validation_split(group = "site"),
+  result <- autoxplain(model_set = "quick", data, "y", validation = validation_split(group = "site"),
                        test_fraction = 0.25, explain = FALSE,
                        preprocessing_config = list(missing_value_strategy = "drop_rows"))
   expect_false("site" %in% result$features)
@@ -148,7 +148,7 @@ test_that("exported formula models retain no fitting environment or sibling mode
   data <- as.data.frame(matrix(rnorm(300 * 10), nrow = 300))
   data$patient_id <- paste0("private-", seq_len(300))
   data$y <- data$V1 + rnorm(300)
-  result <- autoxplain(data, "y", explain = FALSE,
+  result <- autoxplain(model_set = "quick", data, "y", explain = FALSE,
                        preprocessing_config = list(enable_id_removal = TRUE))
   model <- result$models$simple_baseline
   expect_identical(environment(stats::formula(model)), baseenv())

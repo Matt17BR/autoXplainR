@@ -143,7 +143,8 @@ friendly_model_type <- function(model) {
 
 base_model_hyperparameters <- function(model) {
   if (inherits(model, "autoxplain_fitted_model")) {
-    output <- model$parameters
+    output <- model$fit_details$effective_parameters %||%
+      attr(model, "autoxplain_tuning_fit")$effective_parameters %||% model$parameters
     if (identical(model$backend, "glmnet")) {
       output$selected_lambda <- model$fit_details$lambda
     }
@@ -152,16 +153,29 @@ base_model_hyperparameters <- function(model) {
     return(output)
   }
   if (inherits(model, "autoxplain_tuned_nnet")) {
-    return(list(
-      hidden_units = model$size,
-      weight_decay = model$decay,
-      numeric_scaling = "training mean and standard deviation"
+    call <- as.list(model$model$call)
+    controls <- call[intersect(names(call), c("maxit", "rang", "MaxNWts", "linout", "entropy", "softmax"))]
+    controls <- Filter(function(x) is.atomic(x) && length(x) == 1L, controls)
+    return(c(
+      list(size = model$model$n[2], decay = model$model$decay), controls,
+      list(
+        numeric_scaling = "training mean and standard deviation",
+        hidden_units = model$model$n[2], weight_decay = model$model$decay
+      )
     ))
   }
   formula <- tryCatch(paste(deparse(stats::formula(model)), collapse = " "),
-                      error = function(error) NA_character_)
+    error = function(error) NA_character_
+  )
   output <- list(formula = formula)
-  if (inherits(model, "glm")) output$family <- model$family$family
+  if (inherits(model, "rpart")) {
+    output <- c(output, list(method = model$method), model$control, model$parms)
+  }
+  if (inherits(model, "glm")) {
+    output$family <- model$family$family
+    output$link <- model$family$link
+    output <- c(output, model$control)
+  }
   if (inherits(model, "multinom")) output$decay <- model$decay %||% 0
   output
 }
