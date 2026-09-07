@@ -1,0 +1,11 @@
+Package	Version
+glmnet	5.0
+mgcv	1.9-4
+ranger	0.18.0
+xgboost	3.2.1.1
+e1071	1.7-17
+earth	5.3.6
+kknn	1.4.1
+h2o	3.46.0.9
+rpart	4.1.27
+nnet	7.3-20

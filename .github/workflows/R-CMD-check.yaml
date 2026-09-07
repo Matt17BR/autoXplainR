@@ -44,7 +44,7 @@ jobs:
             any::testthat,
             any::knitr,
             any::rmarkdown,
-            any::roxygen2
+            any::roxygen2@8.1.0
           needs: check
       - name: Verify generated documentation is committed
         if: matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release'
@@ -85,7 +85,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, any::testthat, any::knitr, any::rmarkdown
           needs: check
       - name: Build once and fully check the exact source archive
         run: |

@@ -71,6 +71,8 @@ export(threshold_diagnostics)
 export(tuning_control)
 export(tuning_results)
 export(validation_split)
-importFrom(stats,predict)
-importFrom(stats,setNames)
+importFrom(stats,
+  predict,
+  setNames
+)
 importFrom(utils,head)

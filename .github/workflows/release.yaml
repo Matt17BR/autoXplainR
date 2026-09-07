@@ -36,7 +36,7 @@ jobs:
             any::mgcv,
             any::plotly,
             any::ranger,
-            any::roxygen2,
+            any::roxygen2@8.1.0,
             any::spelling,
             any::testthat,
             any::xgboost
@@ -211,7 +211,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, any::testthat, any::knitr, any::rmarkdown
           needs: check
       - name: Fully check the release archive with R-devel
         run: |

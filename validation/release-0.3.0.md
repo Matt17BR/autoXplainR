@@ -42,3 +42,15 @@ under release R and R-devel.
 Local archive check details and remote run links are appended below when available.
 Older Win-builder results are deliberately not reused. CRAN submission is a
 separate maintainer action and is not performed by the GitHub release workflow.
+
+The first local full source check completed with zero errors and warnings and
+two notes: new submission and inability to verify the local clock. A subsequent
+check started before the new website pages deployed and also listed their
+then-missing URLs; the deployed report was subsequently opened and verified.
+
+The first GitHub pass exposed two infrastructure defects: documentation generation
+used roxygen2 8.1.0 while local output used 8.0.0, and the standalone source-build
+job lacked knitr. Documentation was regenerated with 8.1.0 and that tool version
+was pinned in the synchronization gates. Both standalone source-check paths now
+explicitly install testthat, knitr and rmarkdown so tests and vignette rebuilding
+cannot disappear behind optional-dependency skips.
