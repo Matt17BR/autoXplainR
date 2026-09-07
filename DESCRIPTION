@@ -1,6 +1,6 @@
 Package: AutoXplainR
 Title: Guided Model Fitting, Evaluation, and Explanation
-Version: 0.4.0
+Version: 0.5.0
 Authors@R:
     person(
       given = "Matteo",
@@ -11,8 +11,10 @@ Authors@R:
 Copyright: 2025-2026 Matteo Mazzarelli
 Description: Guides first-time modelers through fitting, held-out evaluation,
     explanation, and communication for tabular prediction problems. Local
-    defaults compare an understandable model with a simple baseline and define
-    every reported metric. Training-only resampling can tune behaviorally
+    defaults compare linear, tree and neural model families with training-only
+    cross-validation and a held-out evaluation. Offline tabbed reports connect
+    model scores, measured costs, feature effects and input relationships.
+    Training-only resampling can tune behaviorally
     diverse linear, regularized, additive, tree, forest, boosting, neural,
     kernel, nearest-neighbor, and multivariate adaptive regression spline families
     without opening the final holdout. Model-agnostic tools compare predictive

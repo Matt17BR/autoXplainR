@@ -171,7 +171,7 @@ test_that("tuning validation is actionable", {
     autoxplain(mtcars, "mpg", model_set = "tuned", portfolio = "core", nfolds = 1),
     "at least 2"
   )
-  expect_error(tuning_results(autoxplain(mtcars, "mpg")), "No local tuning")
+  expect_error(tuning_results(autoxplain(model_set = "quick", mtcars, "mpg")), "No local tuning")
 
   scarce <- data.frame(
     x = 1:12,

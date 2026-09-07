@@ -1,6 +1,6 @@
 # Synthetic delivery times: no private observations or trained service model.
 # Every predictor is available when a parcel is dispatched. The primary model
-# is pre-specified; held-out candidate scores do not choose a new primary.
+# is selected by training-only cross-validation; test scores remain separate.
 if (dir.exists("R")) pkgload::load_all(quiet = TRUE) else library(AutoXplainR)
 set.seed(82)
 parcels <- data.frame(
@@ -14,7 +14,7 @@ parcels$planned_route_hours <- parcels$distance_km / 40 + runif(360, 1, 3)
 parcels$delivery_hours <- 9 + 0.034 * parcels$distance_km +
   1.4 * log1p(parcels$parcel_kg) + 0.3 * parcels$dispatch_backlog -
   5 * (parcels$service == "priority") + rnorm(360, sd = 3)
-result <- autoxplain(parcels, "delivery_hours", model_set = "comparison", seed = 2026)
+result <- autoxplain(parcels, "delivery_hours", seed = 2026)
 dir.create("pkgdown/assets", recursive = TRUE, showWarnings = FALSE)
 render_model_report(
   result, "pkgdown/assets/model-report.html", uncertainty = TRUE,

@@ -7,7 +7,7 @@ test_that("missingness shift preserves and compares pre-imputation rates", {
   training$x[seq_len(6)] <- NA
   evaluation$x[seq_len(30)] <- NA
 
-  result <- autoxplain(training, "y", test_data = evaluation, seed = 5)
+  result <- autoxplain(model_set = "quick", training, "y", test_data = evaluation, seed = 5)
   diagnostic <- missingness_shift(result)
   x_row <- diagnostic$features[diagnostic$features$feature == "x", ]
 
@@ -29,7 +29,7 @@ test_that("missingness shift preserves and compares pre-imputation rates", {
 })
 
 test_that("missingness threshold is explicit and no-missing reports stay concise", {
-  result <- autoxplain(mtcars, "mpg", seed = 19)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 19)
   diagnostic <- missingness_shift(result)
 
   expect_equal(diagnostic$n_with_missing, 0L)
@@ -51,7 +51,7 @@ test_that("guided report explains missingness shift without calling it drift pro
   evaluation$y <- evaluation$x + rnorm(50)
   training$x[1:10] <- NA
   evaluation$x[1:20] <- NA
-  result <- autoxplain(training, "y", test_data = evaluation, seed = 20)
+  result <- autoxplain(model_set = "quick", training, "y", test_data = evaluation, seed = 20)
   path <- tempfile(fileext = ".html")
   render_model_report(result, path, top_features = 1, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
@@ -63,7 +63,7 @@ test_that("guided report explains missingness shift without calling it drift pro
 })
 
 test_that("missingness shift requests retained per-column metadata", {
-  result <- autoxplain(mtcars, "mpg", seed = 4)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 4)
   old_result <- result
   old_result$preprocessing_metadata$training_data$original_info$
     missing_fraction_by_column <- NULL

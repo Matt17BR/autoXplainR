@@ -1,3 +1,31 @@
+# AutoXplainR 0.5.0
+
+## Model exploration is the main workflow again
+
+- `autoxplain()` now searches 15 settings across the core linear, tree and neural
+  families using five training-only folds. One representative per successful
+  family and a baseline are retained. Use `model_set = "quick"` for the previous
+  reference-model default. Temporal splits require explicit quick/comparison
+  mode until rolling-origin tuning is implemented.
+- Reports use focused tabs for model comparison, features, input relationships,
+  prediction errors, checks and methods. Scores and measured costs share the
+  opening view. Short help is available on hover, focus and tap.
+- Model and feature controls select the corresponding importance, fitted curve,
+  prediction diagnostics and R command. The training-CV choice remains distinct
+  from held-out score ordering. Metric and cost controls use retained R values.
+- Feature screening now covers each audited model. The audit uses the union of
+  their leading inputs, and up to eight curves per model are retained in
+  `result$explanations$effects_by_model`. Primary-model curves remain available
+  at `result$explanations$effects`.
+- Input relationships show signed numeric correlations and explicitly named
+  unsigned associations for categories. Classification prediction agreement
+  compares class labels, including through the legacy dashboard helper.
+- Print exports the selected view; no-JavaScript output exposes all evidence.
+  Keyboard, phone layouts and actual report screenshots are covered by task
+  checks against R-generated answer data. The README shows the working tabs.
+- Cost enrichment preserves available leaderboard measurements when an engine
+  omits optional model-characteristic fields. Missing measurements stay missing.
+
 # AutoXplainR 0.4.0
 
 ## Correct calculations and evidence identity

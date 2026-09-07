@@ -1,0 +1,4005 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "regression: fixture identity",
+      "passed": true,
+      "evidence": "b5304f77281c1342e640173fcb6db06516b8cd06abe1482da3a6edbaa721e735"
+    },
+    {
+      "name": "regression: unique IDs and valid navigation targets",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: starts on one comparison tab",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/distance_km: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/distance_km: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/distance_km: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/distance_km: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/service: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/service: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/service: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/service: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/dispatch_backlog: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/dispatch_backlog: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/dispatch_backlog: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/dispatch_backlog: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/planned_route_hours: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/planned_route_hours: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/planned_route_hours: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/planned_route_hours: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/distance_km: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/distance_km: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/distance_km: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/distance_km: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/dispatch_backlog: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/dispatch_backlog: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/dispatch_backlog: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/dispatch_backlog: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/distance_km: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/distance_km: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/distance_km: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/distance_km: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/planned_route_hours: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/planned_route_hours: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/planned_route_hours: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/planned_route_hours: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/dispatch_backlog: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/dispatch_backlog: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/dispatch_backlog: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/dispatch_backlog: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/distance_km: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/distance_km: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/distance_km: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/distance_km: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/service: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/service: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/service: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/service: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/dispatch_backlog: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/dispatch_backlog: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/dispatch_backlog: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/dispatch_backlog: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: relationship method and count readable",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: help on hover",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: help on keyboard focus",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: escape dismisses help",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: help on tap",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: keyboard tab navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: print includes selected feature view",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: print retains report and model identity",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/overview: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/320/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/patterns: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/320/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/relationships: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/320/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/evaluation: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/320/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/checks: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/320/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "320/provenance: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/overview: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/patterns: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/relationships: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/evaluation: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/checks: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "390/provenance: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/overview: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/patterns: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/relationships: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/evaluation: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/checks: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/768/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/768/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "768/provenance: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/overview: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/patterns: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/relationships: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/evaluation: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/checks: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "1440/provenance: automated accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression: no-JavaScript retains every model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: no-JavaScript exposes all tabs",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression: no-JavaScript has no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: fixture identity",
+      "passed": true,
+      "evidence": "c2a0b18e66abc12d213d0fe201233ffd83668b6c2ec9bb8b0d74e3caf33d3571"
+    },
+    {
+      "name": "binary: unique IDs and valid navigation targets",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: starts on one comparison tab",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/neural_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/support_calls: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/support_calls: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/support_calls: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/support_calls: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/months: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/months: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/months: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/months: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/support_calls: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/support_calls: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/support_calls: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/support_calls: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/plan: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/plan: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/plan: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/plan: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/support_calls: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/support_calls: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/support_calls: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/support_calls: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/plan: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/plan: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/plan: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/plan: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/support_calls: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/support_calls: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/support_calls: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/support_calls: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/plan: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/plan: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/plan: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/plan: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: relationship method and count readable",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: help on hover",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: help on keyboard focus",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: escape dismisses help",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: help on tap",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: keyboard tab navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: print includes selected feature view",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: print retains report and model identity",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: no-JavaScript retains every model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: no-JavaScript exposes all tabs",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary: no-JavaScript has no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: fixture identity",
+      "passed": true,
+      "evidence": "c38e21a55e063816b52cd2cacc341ee93ed5574b9e633cd2361f6c106957c5e1"
+    },
+    {
+      "name": "multiclass: unique IDs and valid navigation targets",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: starts on one comparison tab",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/linear_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/linear_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/linear_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/linear_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/linear_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/tree_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: relationship method and count readable",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: help on hover",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: help on keyboard focus",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: escape dismisses help",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: help on tap",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: keyboard tab navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: print includes selected feature view",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: print retains report and model identity",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: no-JavaScript retains every model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: no-JavaScript exposes all tabs",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass: no-JavaScript has no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: fixture identity",
+      "passed": true,
+      "evidence": "b643e969d85617d0f5f19f5c1b722e428486f17077dbab4aed05e173250b00d4"
+    },
+    {
+      "name": "quick: unique IDs and valid navigation targets",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: starts on one comparison tab",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/main_model: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/simple_baseline: score matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared: correct score direction",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/training_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/prediction_time_ms: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/wt: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/wt: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/wt: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/wt: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/am: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/am: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/am: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/am: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/disp: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/disp: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/disp: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/disp: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/hp: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/hp: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/hp: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/hp: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/wt: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/wt: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/wt: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/wt: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/am: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/am: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/am: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/am: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/vs: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/vs: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/vs: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/vs: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/gear: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/gear: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/gear: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/gear: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb: importance matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb: selected feature evidence",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: prediction panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: usable R prediction command",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: error matches R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: relationship method and count readable",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: help on hover",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: help on keyboard focus",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: escape dismisses help",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: help on tap",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: keyboard tab navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: print includes selected feature view",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: print retains report and model identity",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/overview: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/patterns: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/relationships: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/evaluation: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/checks: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/provenance: numeric plots fit their visible region",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/768/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/overview: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/patterns: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/patterns: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/relationships: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/evaluation: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/checks: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/provenance: one tab, no page overflow",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: no-JavaScript retains every model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: no-JavaScript exposes all tabs",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: no-JavaScript has no page overflow",
+      "passed": true,
+      "evidence": null
+    }
+  ],
+  "errors": [],
+  "accessibility_incomplete": [
+    {
+      "width": 320,
+      "tab": "overview",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 320,
+      "tab": "patterns",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 320,
+      "tab": "relationships",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 320,
+      "tab": "evaluation",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 320,
+      "tab": "checks",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 320,
+      "tab": "provenance",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "overview",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "patterns",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "relationships",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "evaluation",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "checks",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 390,
+      "tab": "provenance",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 768,
+      "tab": "overview",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 768,
+      "tab": "patterns",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 768,
+      "tab": "relationships",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 768,
+      "tab": "evaluation",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 768,
+      "tab": "checks",
+      "incomplete": []
+    },
+    {
+      "width": 768,
+      "tab": "provenance",
+      "incomplete": []
+    },
+    {
+      "width": 1440,
+      "tab": "overview",
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 1440,
+      "tab": "patterns",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 1440,
+      "tab": "relationships",
+      "incomplete": []
+    },
+    {
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "width": 1440,
+      "tab": "checks",
+      "incomplete": []
+    },
+    {
+      "width": 1440,
+      "tab": "provenance",
+      "incomplete": []
+    }
+  ],
+  "scope": "R-oracle task checks and implementer browser review; no recruited participants"
+}

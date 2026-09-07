@@ -11,8 +11,8 @@ test_that("beginner report separates capacity cards from computed evidence", {
   expect_match(html, "Computed evidence from this analysis", fixed = TRUE)
   expect_match(html, "Family", fixed = TRUE)
   expect_match(html, "Backend", fixed = TRUE)
-  expect_match(html, "Resource measurements and Pareto comparison", fixed = TRUE)
-  expect_match(html, "not structural complexity", fixed = TRUE)
+  expect_match(html, "Performance vs cost", fixed = TRUE)
+  expect_match(html, "not a count of learned rules", fixed = TRUE)
 })
 
 test_that("aggregate narrative context records retained engines and refit truth", {

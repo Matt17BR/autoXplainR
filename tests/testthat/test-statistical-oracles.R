@@ -39,7 +39,7 @@ test_that("binary AUC handles ties and agrees with pairwise concordance", {
 test_that("imputation learns from complete training columns before evaluation missingness", {
   train <- data.frame(x = 1:20, group = rep(c("a", "b"), 10), y = sin(1:20))
   test <- data.frame(x = c(NA, 3, 1000), group = c(NA, "a", "b"), y = c(2, 4, 1))
-  result <- autoxplain(train, "y", test_data = test, explain = FALSE)
+  result <- autoxplain(model_set = "quick", train, "y", test_data = test, explain = FALSE)
   expect_equal(result$test_data$x[1], median(train$x))
   expect_false(anyNA(result$test_data))
   expect_equal(result$preprocessing_metadata$training_data$preprocessing_log$missing_values$imputed_columns,
@@ -48,7 +48,7 @@ test_that("imputation learns from complete training columns before evaluation mi
 
 test_that("evidence export excludes case values and model objects", {
   data <- transform(mtcars, case_id = paste0("private-case-", seq_len(nrow(mtcars))))
-  result <- autoxplain(data, "mpg", validation = validation_split(group = "case_id"))
+  result <- autoxplain(model_set = "quick", data, "mpg", validation = validation_split(group = "case_id"))
   summary <- evidence_summary(result)
   text <- paste(capture.output(str(summary, max.level = 10)), collapse = "\n")
   expect_identical(summary$schema_version, "2.0")

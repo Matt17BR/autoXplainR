@@ -26,7 +26,9 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::pkgload
+          extra-packages: |
+            any::pkgload
+            any::jsonlite
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -39,11 +41,11 @@ jobs:
           python -m playwright install --with-deps chromium
           npm install --prefix "$RUNNER_TEMP/report-browser-tools" --no-audit --no-fund axe-core@4.13.0
           sudo apt-get install --yes poppler-utils
-      - name: Generate the actual synthetic report
-        run: Rscript validation/render-example.R
-      - name: Check mobile, keyboard, WCAG and printed report contracts
+      - name: Generate regression and classification reports with R answer data
+        run: Rscript validation/render-explorer-cases.R
+      - name: Exercise model exploration, mobile, keyboard and print tasks
         run: >-
-          python validation/check-report-browser.py pkgdown/assets/model-report.html
+          python validation/check-explorer.py
           --output-dir "$RUNNER_TEMP/report-browser-results"
           --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
       - name: Upload compact browser evidence

@@ -162,7 +162,7 @@ test_that("multiclass comparison retains a non-first probability target", {
 })
 
 test_that("effect comparison validates model and feature scope", {
-  quick <- autoxplain(mtcars, "mpg", seed = 12)
+  quick <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 12)
   expect_error(compare_model_effects(quick, "wt"), "at least two")
   comparison <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 12)
   expect_error(compare_model_effects(comparison, "missing"), "unavailable")

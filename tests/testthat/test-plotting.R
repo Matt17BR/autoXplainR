@@ -20,7 +20,7 @@ test_that("optional plotting methods return widgets", {
   no_support <- effect[setdiff(names(effect), c("support", "conf_low", "conf_high"))]
   expect_s3_class(plot_partial_dependence(no_support), "plotly")
 
-  result <- autoxplain(fixture$train, "y", test_data = fixture$test)
+  result <- autoxplain(model_set = "quick", fixture$train, "y", test_data = fixture$test)
   expect_s3_class(plot_model_correlations(result), "plotly")
   expect_s3_class(plot_model_comparison(result), "plotly")
   expect_s3_class(plot_model_comparison(result, performance_metric = "mae"), "plotly")

@@ -6,7 +6,7 @@ test_that("binary calibration compares positive-class probability with frequency
     "yes",
     "no"
   ))
-  result <- autoxplain(data, "accepted", test_fraction = 0.4, seed = 17)
+  result <- autoxplain(model_set = "quick", data, "accepted", test_fraction = 0.4, seed = 17)
   diagnostic <- calibration_diagnostics(result, bins = 5)
 
   expect_s3_class(diagnostic, "autoxplain_calibration")
@@ -28,7 +28,7 @@ test_that("binary calibration compares positive-class probability with frequency
 })
 
 test_that("multiclass calibration checks predicted-class confidence", {
-  result <- autoxplain(iris, "Species", test_fraction = 0.5, seed = 91)
+  result <- autoxplain(model_set = "quick", iris, "Species", test_fraction = 0.5, seed = 91)
   diagnostic <- calibration_diagnostics(result, bins = 4)
 
   expect_equal(diagnostic$task, "multiclass")
@@ -50,9 +50,9 @@ test_that("calibration handles ties and rejects unsupported requests", {
   expect_equal(nrow(grouped), 1L)
   expect_equal(grouped$calibration_gap, 0)
 
-  regression <- autoxplain(mtcars, "mpg", seed = 7)
+  regression <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 7)
   expect_error(calibration_diagnostics(regression), "classification probabilities")
-  classification <- autoxplain(iris, "Species", seed = 7)
+  classification <- autoxplain(model_set = "quick", iris, "Species", seed = 7)
   expect_error(calibration_diagnostics(classification, bins = 0), "bins")
   expect_error(calibration_diagnostics(classification, model = c(1, 2)), "exactly one")
   expect_error(

@@ -39,8 +39,10 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   on.exit(unlink(report), add = TRUE)
   render_model_report(result, report, audit = audit, effects = list())
   html <- paste(readLines(report, warn = FALSE), collapse = "\n")
-  expect_match(html, "Prediction performance on test rows", fixed = TRUE)
-  expect_match(html, "intercept-only baseline", fixed = TRUE)
+  expect_match(html, "Compare the models", fixed = TRUE)
+  expect_match(html, "Intercept-only baseline", fixed = TRUE)
+  expect_match(html, "H2O choice", fixed = TRUE)
+  expect_false(grepl("is the pre-specified default for predict()", html, fixed = TRUE))
 
   set.seed(202)
   regression_data <- data.frame(x1 = rnorm(90), x2 = runif(90, -1, 1))

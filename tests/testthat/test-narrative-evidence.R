@@ -1,5 +1,5 @@
 test_that("documented narrative merges retained evaluation and fitted explanations without recomputation", {
-  result <- autoxplain(iris, "Species", seed = 2026)
+  result <- autoxplain(model_set = "quick", iris, "Species", seed = 2026)
   original <- result$explanations
   local_mocked_bindings(
     prepare_model_report_data = function(...) stop("must not recompute explanations"),
@@ -20,7 +20,7 @@ test_that("documented narrative merges retained evaluation and fitted explanatio
 })
 
 test_that("audit and importance overrides preserve evaluation and other retained components", {
-  result <- autoxplain(mtcars, "mpg")
+  result <- autoxplain(model_set = "quick", mtcars, "mpg")
   audit <- result$explanations$audit
   audit$findings <- data.frame(severity = "note", code = "custom_check", message = "Review the instrument.",
                                recommendation = "Check its calibration.")
@@ -41,8 +41,8 @@ test_that("audit and importance overrides preserve evaluation and other retained
 })
 
 test_that("narrative attachments reject foreign identities and retain valid serialized overrides", {
-  result <- autoxplain(mtcars, "mpg", seed = 13)
-  other <- autoxplain(mtcars, "mpg", seed = 14)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 13)
+  other <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 14)
   expect_error(generate_natural_language_report(result, audit = other$explanations$audit),
                "same selected model explainers")
   expect_error(generate_natural_language_report(result, pdp_data = other$explanations$effects),
@@ -56,12 +56,12 @@ test_that("narrative attachments reject foreign identities and retain valid seri
 })
 
 test_that("unavailable evidence retains a visible reason", {
-  fitted_only <- autoxplain(mtcars, "mpg", explain = FALSE)
+  fitted_only <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE)
   memo <- generate_natural_language_report(fitted_only)
   expect_match(memo, "Feature importance was not supplied", fixed = TRUE)
   expect_match(memo, "Fitted effect curves were not supplied", fixed = TRUE)
 
-  result <- autoxplain(mtcars, "mpg")
+  result <- autoxplain(model_set = "quick", mtcars, "mpg")
   result$explanations$failures <- data.frame(feature = "sensor", reason = "No usable observations.")
   memo <- generate_natural_language_report(result)
   expect_match(memo, "Effect unavailable for sensor: No usable observations.", fixed = TRUE)
@@ -72,7 +72,7 @@ test_that("unavailable evidence retains a visible reason", {
 })
 
 test_that("hosted validation is disclosed as format-only rather than numerical verification", {
-  result <- autoxplain(mtcars, "mpg")
+  result <- autoxplain(model_set = "quick", mtcars, "mpg")
   memo <- generate_natural_language_report(
     result, provider = "custom", model = "mock-model", base_url = "https://example.com/v1/chat/completions",
     structured = FALSE, transport = function(request) "RMSE was 999999 on these rows."
@@ -84,7 +84,7 @@ test_that("hosted validation is disclosed as format-only rather than numerical v
 })
 
 test_that("narratives preserve optional diagnostic status without running checks", {
-  result <- autoxplain(mtcars, "mpg", explain = FALSE)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE)
   original <- result
   context <- AutoXplainR:::prepare_narrative_context(result)
   expect_identical(context$diagnostic_status$prediction_disagreement$status, "not_run")
@@ -104,7 +104,7 @@ test_that("narratives preserve optional diagnostic status without running checks
 })
 
 test_that("dashboard aliases emit one lifecycle warning and preserve their result", {
-  result <- autoxplain(mtcars, "mpg", explain = FALSE)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE)
   for (fun in list(generate_dashboard, create_simple_dashboard)) {
     warnings <- list()
     path <- tempfile(fileext = ".html")

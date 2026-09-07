@@ -25,7 +25,7 @@ test_that("public threshold diagnostics preserve the held-out model contract", {
   data$accepted <- factor(ifelse(
     stats::plogis(1.5 * data$x - data$z) > runif(240), "yes", "no"
   ))
-  result <- autoxplain(data, "accepted", test_fraction = 0.4, seed = 22)
+  result <- autoxplain(model_set = "quick", data, "accepted", test_fraction = 0.4, seed = 22)
   diagnostic <- threshold_diagnostics(
     result,
     thresholds = c(0.8, 0.2, 0.5, 0.5),
@@ -49,7 +49,7 @@ test_that("public threshold diagnostics preserve the held-out model contract", {
 })
 
 test_that("threshold diagnostics reject unsupported or ambiguous requests", {
-  regression <- autoxplain(mtcars, "mpg", seed = 3)
+  regression <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 3)
   binary_data <- transform(mtcars, am = factor(am, labels = c("auto", "manual")))
   binary <- autoxplain(binary_data, "am", model_set = "comparison", seed = 3)
 
@@ -76,7 +76,7 @@ test_that("guided binary reports explain cutoff sensitivity without optimizing i
   set.seed(88)
   data <- data.frame(x = rnorm(160), z = rnorm(160))
   data$event <- factor(ifelse(data$x + rnorm(160) > 0, "yes", "no"))
-  binary <- autoxplain(data, "event", seed = 17)
+  binary <- autoxplain(model_set = "quick", data, "event", seed = 17)
   binary_path <- tempfile(fileext = ".html")
   render_model_report(binary, binary_path, top_features = 1, n_repeats = 2)
   binary_html <- paste(readLines(binary_path, warn = FALSE), collapse = "\n")
@@ -89,7 +89,7 @@ test_that("guided binary reports explain cutoff sensitivity without optimizing i
   expect_match(binary_html, "No cutoff is recommended here", fixed = TRUE)
   expect_match(binary_html, "False positives", fixed = TRUE)
 
-  regression <- autoxplain(mtcars, "mpg", seed = 17)
+  regression <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 17)
   regression_path <- tempfile(fileext = ".html")
   render_model_report(regression, regression_path, top_features = 1, n_repeats = 2)
   regression_html <- paste(readLines(regression_path, warn = FALSE), collapse = "\n")

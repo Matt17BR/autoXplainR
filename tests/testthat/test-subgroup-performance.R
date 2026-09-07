@@ -7,7 +7,7 @@ test_that("subgroup performance exposes held-out regression gaps", {
   )
   noise <- c(north = 0.2, south = 0.7, west = 1.5)
   data$y <- 2 * data$x + rnorm(n, sd = noise[as.character(data$region)])
-  result <- autoxplain(data, "y", test_fraction = 0.5, seed = 42)
+  result <- autoxplain(model_set = "quick", data, "y", test_fraction = 0.5, seed = 42)
   diagnostic <- subgroup_performance(result, by = "region", min_rows = 20)
 
   expect_s3_class(diagnostic, "autoxplain_subgroups")
@@ -33,7 +33,7 @@ test_that("subgroup performance supports classification probability metrics", {
   )
   probability <- stats::plogis(data$x + ifelse(data$channel == "app", 0.5, -0.3))
   data$converted <- factor(ifelse(runif(n) < probability, "yes", "no"))
-  result <- autoxplain(data, "converted", test_fraction = 0.4, seed = 12)
+  result <- autoxplain(model_set = "quick", data, "converted", test_fraction = 0.4, seed = 12)
   result$evaluation$primary_metric <- "brier_score"
   diagnostic <- subgroup_performance(result, "channel")
 
@@ -59,7 +59,7 @@ test_that("subgroup performance honors MAE without duplicating its supporting me
     segment = factor(rep(c("one", "two", "three"), each = n / 3))
   )
   data$y <- 1.5 * data$x + rnorm(n, sd = rep(c(0.2, 0.5, 1), each = n / 3))
-  result <- autoxplain(data, "y", test_fraction = 0.5, seed = 92)
+  result <- autoxplain(model_set = "quick", data, "y", test_fraction = 0.5, seed = 92)
   result$evaluation$primary_metric <- "mae"
   diagnostic <- subgroup_performance(result, "segment", min_rows = 10)
 
@@ -93,7 +93,7 @@ test_that("subgroup performance validates the requested comparison", {
     y = seq_len(50) + rnorm(50)
   )
   evaluation <- transform(training, x = x + 50, y = y + 50)
-  result <- autoxplain(training, "y", test_data = evaluation, seed = 8)
+  result <- autoxplain(model_set = "quick", training, "y", test_data = evaluation, seed = 8)
   result$evaluation_context$one_group <- "same"
   result$evaluation_context$two_groups <- rep(c("a", "b"), 25)
   result$evaluation_context$many_groups <- rep(sprintf("group-%02d", seq_len(25)), each = 2)
@@ -113,7 +113,7 @@ test_that("guided report includes subgroup context only when requested", {
     cohort = factor(rep(c("first", "second"), each = 90))
   )
   data$y <- data$x + rnorm(180, sd = ifelse(data$cohort == "first", 0.3, 1))
-  result <- autoxplain(data, "y", test_fraction = 0.5, seed = 14)
+  result <- autoxplain(model_set = "quick", data, "y", test_fraction = 0.5, seed = 14)
   plain_path <- tempfile(fileext = ".html")
   group_path <- tempfile(fileext = ".html")
   render_model_report(result, plain_path, top_features = 1, n_repeats = 2)

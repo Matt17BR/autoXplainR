@@ -179,7 +179,7 @@ test_that("optional explanation audit adds compact rank evidence", {
 })
 
 test_that("model behavior comparison rejects mismatched inputs", {
-  quick <- autoxplain(mtcars, "mpg", seed = 2)
+  quick <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2)
   expect_error(compare_model_behavior(quick), "at least two")
   expect_error(compare_model_behavior(list()), "returned by")
 

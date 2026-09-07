@@ -5,10 +5,16 @@ evaluation against a baseline, explanation diagnostics and an optional HTML
 report. `autoxplain()` is the entry point. The default requires R and the
 package's ordinary dependencies, with no account or service setup.
 
-A first-time modeler should be able to answer four questions from the result:
-what was predicted, whether the primary model beat the baseline, which fitted
-patterns were inspected, and what limits the evidence. Every metric needs a
-plain definition. Every diagnostic failure needs a visible reason.
+A first-time modeler should be able to compare the fitted models, see which
+inputs they use, inspect related inputs and find prediction errors. Scores and
+plots belong beside the controls that change them. Short help belongs on hover,
+focus or tap; full method details belong in their own tab or disclosure.
+A control earns its place by changing useful evidence. Decorative grades,
+repeated generic conclusions and dead controls do not belong in the report.
+
+The default compares linear, tree and neural families using training-only
+cross-validation, then evaluates the retained fits and baseline on held-out
+rows. Quick mode provides the previous fast reference workflow explicitly.
 
 An experienced user should be able to inspect the models, evaluation rows,
 training recipe, tuning folds, losses and explanation draws. Presets are a

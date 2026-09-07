@@ -5,8 +5,8 @@ test_that("guided regression uses a reproducible untouched holdout", {
   set.seed(77)
   state <- .Random.seed
 
-  first <- autoxplain(data, "y", seed = 902)
-  second <- autoxplain(data, "y", seed = 902)
+  first <- autoxplain(model_set = "quick", data, "y", seed = 902)
+  second <- autoxplain(model_set = "quick", data, "y", seed = 902)
 
   expect_identical(.Random.seed, state)
   expect_s3_class(first, "autoxplain_result")
@@ -42,7 +42,7 @@ test_that("guided binary evaluation is stratified and probability-aware", {
   set.seed(41)
   data <- data.frame(x = rnorm(180), group = sample(c("a", "b"), 180, TRUE))
   data$clicked <- factor(ifelse(data$x + rnorm(180, sd = 0.5) > 0, "yes", "no"))
-  result <- autoxplain(data, "clicked", seed = 8)
+  result <- autoxplain(model_set = "quick", data, "clicked", seed = 8)
 
   expect_equal(result$task, "binary")
   expect_setequal(unique(result$test_data$clicked), levels(result$training_data$clicked))
@@ -65,7 +65,7 @@ test_that("guided binary evaluation is stratified and probability-aware", {
 })
 
 test_that("guided multiclass evaluation returns normalized class probabilities", {
-  result <- autoxplain(iris, "Species", seed = 15)
+  result <- autoxplain(model_set = "quick", iris, "Species", seed = 15)
   explainer <- as_explainers(result, models = 1)$main_model
   probability <- predict(explainer, explainer$data)
   one_probability <- predict(explainer, explainer$data[1L, , drop = FALSE])
@@ -89,7 +89,7 @@ test_that("unused outcome levels do not become phantom classes", {
     ifelse(binary$x + stats::rnorm(80, sd = 0.4) > 0, "yes", "no"),
     levels = c("no", "unused", "yes")
   )
-  quick_binary <- autoxplain(binary, "y", seed = 18)
+  quick_binary <- autoxplain(model_set = "quick", binary, "y", seed = 18)
   tuned_binary <- autoxplain(
     binary,
     "y",
@@ -107,7 +107,7 @@ test_that("unused outcome levels do not become phantom classes", {
     as.character(multiclass$Species),
     levels = c(levels(iris$Species), "unused")
   )
-  quick_multiclass <- autoxplain(multiclass, "Species", seed = 19)
+  quick_multiclass <- autoxplain(model_set = "quick", multiclass, "Species", seed = 19)
   tuned_multiclass <- autoxplain(
     multiclass,
     "Species",
@@ -164,7 +164,7 @@ test_that("preprocessing learns imputations only from training data", {
     y = 1:10
   )
   test <- data.frame(x = c(NA, 100), category = c("a", "b"), y = c(11, 12))
-  result <- autoxplain(train, "y", test_data = test)
+  result <- autoxplain(model_set = "quick", train, "y", test_data = test)
 
   expected <- stats::median(train$x, na.rm = TRUE)
   expect_equal(result$test_data$x[[1]], expected)
@@ -173,7 +173,7 @@ test_that("preprocessing learns imputations only from training data", {
   expect_identical(result$provenance$evaluation_role, "evaluation")
   expect_equal(result$provenance$evaluation_rows, 2L)
 
-  asserted_test <- autoxplain(
+  asserted_test <- autoxplain(model_set = "quick",
     train,
     "y",
     test_data = test,
@@ -190,7 +190,7 @@ test_that("automatic splitting never moves holdout rows and maps novel predictor
   )
   found <- NULL
   for (seed in seq_len(100)) {
-    candidate <- autoxplain(data, "y", seed = seed, test_fraction = 0.4)
+    candidate <- autoxplain(model_set = "quick", data, "y", seed = seed, test_fraction = 0.4)
     if (candidate$provenance$novel_levels_mapped > 0L) {
       found <- candidate
       break
@@ -207,26 +207,26 @@ test_that("guided workflow reports actionable input errors", {
   data <- data.frame(x = 1:10, y = 1:10)
   missing_target <- data
   missing_target$y[[1]] <- NA
-  expect_error(autoxplain(missing_target, "y"), "target contains missing")
-  expect_error(autoxplain(data, "y", test_fraction = 1), "greater than zero")
+  expect_error(autoxplain(model_set = "quick", missing_target, "y"), "target contains missing")
+  expect_error(autoxplain(model_set = "quick", data, "y", test_fraction = 1), "greater than zero")
   expect_error(
-    autoxplain(transform(data, x = replace(x, 1, NA)), "y", enable_preprocessing = FALSE),
+    autoxplain(model_set = "quick", transform(data, x = replace(x, 1, NA)), "y", enable_preprocessing = FALSE),
     "Missing predictor values require preprocessing"
   )
   expect_error(
-    autoxplain(data.frame(x = I(replicate(10, list(1))), y = 1:10), "y"),
+    autoxplain(model_set = "quick", data.frame(x = I(replicate(10, list(1))), y = 1:10), "y"),
     "supports numeric"
   )
   expect_error(
-    autoxplain(data.frame(when = as.Date("2020-01-01") + 0:9, y = 1:10), "y"),
+    autoxplain(model_set = "quick", data.frame(when = as.Date("2020-01-01") + 0:9, y = 1:10), "y"),
     "unsupported columns"
   )
   infinite_target <- data
   infinite_target$y[[1L]] <- Inf
-  expect_error(autoxplain(infinite_target, "y"), "finite numeric target")
-  expect_error(autoxplain(data, "y", task = "binary"), "exactly two")
+  expect_error(autoxplain(model_set = "quick", infinite_target, "y"), "finite numeric target")
+  expect_error(autoxplain(model_set = "quick", data, "y", task = "binary"), "exactly two")
   rare <- data.frame(x = 1:10, y = factor(c("rare", rep("common", 9))))
-  expect_error(autoxplain(rare, "y"), "at least two rows")
+  expect_error(autoxplain(model_set = "quick", rare, "y"), "at least two rows")
 })
 
 test_that("binary AUC handles ties and single-class evaluation", {
@@ -292,13 +292,13 @@ test_that("binary AUC handles ties and single-class evaluation", {
 })
 
 test_that("guided evaluation flags fragile score contexts", {
-  result <- autoxplain(mtcars, "mpg", seed = 10)
+  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 10)
   expect_true(all(c("small_evaluation_set", "few_rows_per_feature") %in%
                     result$evaluation$notes$code))
 
   set.seed(4)
   data <- data.frame(x = rnorm(100), y = factor(c(rep("rare", 5), rep("common", 95))))
-  classification <- autoxplain(data, "y", test_fraction = 0.2, seed = 4)
+  classification <- autoxplain(model_set = "quick", data, "y", test_fraction = 0.2, seed = 4)
   expect_true("few_rows_in_class" %in% classification$evaluation$notes$code)
 
   training <- data.frame(x = seq_len(500), y = seq_len(500))
@@ -330,7 +330,7 @@ test_that("constant inputs are removed, recorded, and reused in new evaluations"
     constant_group = factor("same"),
     y = seq_len(30) + rnorm(30, sd = 0.1)
   )
-  result <- autoxplain(data, "y", seed = 13)
+  result <- autoxplain(model_set = "quick", data, "y", seed = 13)
 
   expect_false(any(c("constant_number", "constant_group") %in% result$features))
   expect_true("constant_inputs_removed" %in% result$evaluation$notes$code)
@@ -353,7 +353,7 @@ test_that("constant inputs are removed, recorded, and reused in new evaluations"
     constant_group = factor("different"),
     y = c(40, 50)
   )
-  supplied <- autoxplain(data, "y", test_data = holdout, seed = 13)
+  supplied <- autoxplain(model_set = "quick", data, "y", test_data = holdout, seed = 13)
   expect_equal(supplied$features, "x")
   expect_true(all(c("constant_number", "constant_group") %in%
                     supplied$provenance$constant_features_removed))
@@ -364,8 +364,8 @@ test_that("evaluation outcomes must match the training outcome contract", {
   unseen <- data.frame(x = 21:22, y = c(0, 2))
   missing <- data.frame(x = 21:22, y = c(0, NA))
 
-  expect_error(autoxplain(train, "y", test_data = unseen), "classes absent")
-  expect_error(autoxplain(train, "y", test_data = missing), "missing values")
+  expect_error(autoxplain(model_set = "quick", train, "y", test_data = unseen), "classes absent")
+  expect_error(autoxplain(model_set = "quick", train, "y", test_data = missing), "missing values")
 })
 
 test_that("custom explainer data inherits the fitted outcome contract", {
@@ -377,7 +377,7 @@ test_that("custom explainer data inherits the fitted outcome contract", {
     x = 101:110,
     y = factor(rep(c("no", "yes"), 5), levels = c("no", "yes"))
   )
-  result <- autoxplain(
+  result <- autoxplain(model_set = "quick",
     training,
     "y",
     test_data = evaluation,
@@ -461,12 +461,12 @@ test_that("exactly matching evaluation rows have configurable leakage checks", {
 
   overlapping <- rbind(evaluation, training[3, , drop = FALSE])
   expect_warning(
-    warned <- autoxplain(training, "mpg", test_data = overlapping),
+    warned <- autoxplain(model_set = "quick", training, "mpg", test_data = overlapping),
     "may indicate training/evaluation leakage.*coincident records.*do not prove"
   )
   expect_identical(warned$provenance$evaluation_role, "evaluation")
   expect_error(
-    autoxplain(
+    autoxplain(model_set = "quick",
       training,
       "mpg",
       test_data = overlapping,
@@ -475,7 +475,7 @@ test_that("exactly matching evaluation rows have configurable leakage checks", {
     "values exactly match.*evaluation row 9.*do not prove"
   )
   expect_silent(
-    ignored <- autoxplain(
+    ignored <- autoxplain(model_set = "quick",
       training,
       "mpg",
       test_data = overlapping,
@@ -497,7 +497,7 @@ test_that("exactly matching evaluation rows have configurable leakage checks", {
     "coincident records"
   )
   expect_error(
-    autoxplain(training, "mpg", overlap_action = "stop"),
+    autoxplain(model_set = "quick", training, "mpg", overlap_action = "stop"),
     "arg.*overlap_action|one of"
   )
 })

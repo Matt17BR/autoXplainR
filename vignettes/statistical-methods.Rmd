@@ -18,8 +18,7 @@ AutoXplainR fits supervised prediction models for tabular data. It evaluates
 predictions against observed outcomes and describes the fitted prediction
 function. It does not estimate causal effects or identify an intervention.
 
-The default primary model is specified before looking at the holdout. Tuned
-mode selects a configuration using training-only cross-validation, learns
+The default selects a configuration using training-only cross-validation, learns
 preprocessing again within each fold, refits on all outer training rows, and
 evaluates on the outer holdout. This separation addresses selection bias
 [Cawley and Talbot, 2010](https://jmlr.org/papers/v11/cawley10a.html).
@@ -123,8 +122,9 @@ variation across reference predictions under that calculation; they are not
 refit uncertainty bands. Neither curve is causal. Association screening uses limited pairwise summaries;
 a low value does not exclude nonlinear or joint dependence.
 
-The default workflow first screens all features by importance, then audits the
-eight highest-ranked features and plots up to three. This is data-dependent
+The default workflow screens all features for up to five models, audits the
+union of their eight highest-ranked inputs, and computes up to eight fitted
+curves per model. This is data-dependent
 selection. The resulting intervals and diagnostics should be read descriptively;
 selection-adjusted inference is not supplied. Multiclass default effects refer
 to the first outcome class, which is labeled in the output. Request a particular

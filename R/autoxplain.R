@@ -1,10 +1,12 @@
 #' Fit and evaluate a model through a guided workflow
 #'
 #' `autoxplain()` is the beginner-first entry point. By default it creates a
-#' reproducible held-out split, fits an intercept-only baseline and an
-#' understandable statistical model, evaluates both on unseen rows, and stores
-#' everything needed for explanation and reporting. This path only uses R and
-#' does not require Java or a cloud account.
+#' reproducible held-out split, compares linear, tree and neural model families
+#' using training-only cross-validation, then evaluates the retained models and
+#' an intercept-only baseline on held-out rows. It stores predictions and
+#' explanations for an interactive offline report. No optional model engines,
+#' Java or cloud account are needed. Use `model_set = "quick"` for a fast
+#' pre-specified reference model and baseline.
 #'
 #' Set `engine = "h2o"` to use the optional H2O AutoML adapter. The lower-level
 #' [explain_model()] interface accepts models fitted by any framework.
@@ -35,13 +37,13 @@
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
 #'   resolves to the dependency-free `"base"` workflow.
-#' @param model_set Guided base-engine workflow. `"quick"` fits the
+#' @param model_set Guided base-engine workflow. `"tuned"` is the default. `"quick"` fits the
 #'   pre-specified understandable model and baseline. `"comparison"` also fits
 #'   two pre-specified trees for a descriptive Pareto view. `"tuned"` compares
 #'   the requested behaviorally diverse learner portfolio using training-only
 #'   resampling, retains its family winners for comparison, then evaluates the
 #'   selected configuration once on the configured evaluation rows.
-#' @param portfolio Local tuned-model portfolio. `"recommended"` compares
+#' @param portfolio Local tuned-model portfolio. `"core"` is the default. `"recommended"` compares
 #'   linear, regularized, additive (when supported), tree, forest, and boosting
 #'   families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
 #'   families. `"core"` retains the dependency-light linear/tree/neural
@@ -93,9 +95,10 @@
 #' @param validation Optional [validation_split()] specifying whole-group or
 #'   chronological evaluation. Split columns are excluded from model inputs.
 #' @param explain Compute and retain permutation screening, an explanation audit,
-#'   and up to three fitted effects. Defaults to `TRUE`; use `FALSE` for fitting
-#'   only. Screening covers all inputs; the audit covers up to eight inputs and
-#'   five models with 20 permutations. These are descriptive, selected summaries.
+#'   and up to eight fitted effects per audited model. Defaults to `TRUE`; use
+#'   `FALSE` for fitting only. Screening covers all inputs for up to five models;
+#'   the audit covers the union of their top eight inputs with 20 permutations.
+#'   These are descriptive, selected summaries.
 #' @param report Optional `.html` destination, written from the retained evidence.
 #'   Supplying a path also computes explanations when `explain = FALSE`.
 #'
@@ -124,8 +127,8 @@ autoxplain <- function(data,
                        test_data = NULL,
                        test_fraction = 0.2,
                        engine = c("auto", "base", "h2o"),
-                       model_set = c("quick", "tuned", "comparison"),
-                       portfolio = c("recommended", "core", "extended"),
+                       model_set = c("tuned", "quick", "comparison"),
+                       portfolio = c("core", "recommended", "extended"),
                        learners = NULL,
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
@@ -441,9 +444,10 @@ autoxplain <- function(data,
 }
 
 default_local_tuning_budget <- function(portfolio, learners = NULL) {
-  if (!is.null(learners)) return(as.integer(5L * length(learners)))
-  switch(
-    portfolio,
+  if (!is.null(learners)) {
+    return(as.integer(5L * length(learners)))
+  }
+  switch(portfolio,
     core = 15L,
     recommended = 30L,
     extended = 40L,
@@ -480,7 +484,8 @@ as_explainers <- function(x, data = NULL, models = NULL) {
     }
     if (!x$target_column %in% names(evaluation)) {
       stop("Evaluation data must contain target column `", x$target_column, "`.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     target_levels <- if (is.factor(x$training_data[[x$target_column]])) {
       levels(x$training_data[[x$target_column]])
@@ -507,13 +512,15 @@ as_explainers <- function(x, data = NULL, models = NULL) {
   assert_data_frame(evaluation, "data")
   if (!x$target_column %in% names(evaluation)) {
     stop("Evaluation data must contain target column `", x$target_column, "`.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   selected <- select_models(x$models, models)
   role <- if (!is.null(data)) "user-supplied" else x$provenance$evaluation_role
   out <- lapply(names(selected), function(id) {
     explain_model(
-      selected[[id]], evaluation, y = x$target_column, task = x$task,
+      selected[[id]], evaluation,
+      y = x$target_column, task = x$task,
       label = id, metadata = list(
         evaluation_role = role,
         primary_metric = x$evaluation$primary_metric %||% NULL,
@@ -543,12 +550,16 @@ print.autoxplain_result <- function(x, ...) {
     cat("  event:      probabilities of `", identity$positive, "`\n", sep = "")
   }
   cat("  data:       ", identity$training_rows, " training + ",
-      identity$evaluation_rows, " ", identity$evaluation_role, " rows\n", sep = "")
+    identity$evaluation_rows, " ", identity$evaluation_role, " rows\n",
+    sep = ""
+  )
   cat("  design:     ", identity$split_method, "\n", sep = "")
   cat("  selection:  ", identity$selection_note, "\n", sep = "")
   cat("  models:     ", length(x$models), if (inherits(x$tuning, "autoxplain_tuning")) {
-    paste0(" (selected from ", nrow(x$tuning$candidates),
-           " training-resampled configurations)")
+    paste0(
+      " (selected from ", nrow(x$tuning$candidates),
+      " training-resampled configurations)"
+    )
   } else if (length(x$models) > 2L) {
     " (retained comparison set)"
   } else {
@@ -558,12 +569,16 @@ print.autoxplain_result <- function(x, ...) {
     metric <- x$evaluation$primary_metric
     score <- x$evaluation$metrics[[identity$model_id]][[metric]]
     cat("  score:      ", metric, " = ",
-        format(round(score, 4L), trim = TRUE), " on ",
-        identity$evaluation_role, " rows\n", sep = "")
+      format(round(score, 4L), trim = TRUE), " on ",
+      identity$evaluation_role, " rows\n",
+      sep = ""
+    )
     improvement <- x$evaluation$improvement_over_baseline
     if (is.finite(improvement)) {
       cat("  baseline:   ", format(round(100 * abs(improvement), 1L), trim = TRUE),
-          if (improvement >= 0) "% improvement in " else "% worse in ", metric, "\n", sep = "")
+        if (improvement >= 0) "% improvement in " else "% worse in ", metric, "\n",
+        sep = ""
+      )
     }
   }
   notes <- x$evaluation$notes
@@ -583,12 +598,16 @@ print.autoxplain_result <- function(x, ...) {
   }
   if (!is.null(view$audit)) {
     cat("  evidence:   ", nrow(view$audit$importance), " model-feature shuffle summaries; ",
-        length(view$effects), " fitted effects\n", sep = "")
+      length(view$effects), " fitted effects\n",
+      sep = ""
+    )
   }
   failed <- Filter(function(diagnostic) identical(diagnostic$status, "failed"), view$diagnostics)
   if (length(failed)) {
     cat("  incomplete: ", paste(names(failed), collapse = ", "),
-        "; inspect result$explanations and the report diagnostics\n", sep = "")
+      "; inspect result$explanations and the report diagnostics\n",
+      sep = ""
+    )
   }
   if (!is.null(x$report_file)) cat("  report:     ", x$report_file, "\n", sep = "")
   cat("  inspect:    render_model_report(result, \"report.html\"), evidence_summary(result)\n")
@@ -628,8 +647,11 @@ validate_automl_inputs <- function(data, target, test_data) {
   }
   if (!is.null(test_data)) {
     assert_data_frame(test_data, "test_data")
-    if (!target %in% names(test_data)) stop("`test_data` is missing the target column.",
-                                            call. = FALSE)
+    if (!target %in% names(test_data)) {
+      stop("`test_data` is missing the target column.",
+        call. = FALSE
+      )
+    }
   }
   invisible(TRUE)
 }
@@ -653,17 +675,24 @@ coerce_outcome_for_task <- function(y, task, target_levels = NULL) {
 
 validate_train_test_schema <- function(train, test, target) {
   missing <- setdiff(names(train), names(test))
-  if (length(missing)) stop("Processed test data is missing: ", paste(missing, collapse = ", "),
-                            call. = FALSE)
+  if (length(missing)) {
+    stop("Processed test data is missing: ", paste(missing, collapse = ", "),
+      call. = FALSE
+    )
+  }
   for (feature in setdiff(names(train), target)) {
     if (is.factor(train[[feature]]) && is.factor(test[[feature]])) {
       unseen <- setdiff(levels(droplevels(test[[feature]])), levels(train[[feature]]))
       if (length(unseen)) {
         stop("Test feature `", feature, "` contains unseen levels: ",
-             paste(unseen, collapse = ", "), call. = FALSE)
+          paste(unseen, collapse = ", "),
+          call. = FALSE
+        )
       }
-      test[[feature]] <- factor(test[[feature]], levels = levels(train[[feature]]),
-                                ordered = is.ordered(train[[feature]]))
+      test[[feature]] <- factor(test[[feature]],
+        levels = levels(train[[feature]]),
+        ordered = is.ordered(train[[feature]])
+      )
     }
   }
   test[names(train)]
@@ -671,7 +700,9 @@ validate_train_test_schema <- function(train, test, target) {
 
 ensure_h2o_connection <- function(init, nthreads, max_mem_size, verbosity) {
   connected <- tryCatch(h2o::h2o.clusterIsUp(), error = function(error) FALSE)
-  if (isTRUE(connected)) return(invisible(TRUE))
+  if (isTRUE(connected)) {
+    return(invisible(TRUE))
+  }
   if (!isTRUE(init)) {
     stop("No H2O cluster is available and `init_h2o = FALSE`.", call. = FALSE)
   }
@@ -689,7 +720,9 @@ ensure_h2o_connection <- function(init, nthreads, max_mem_size, verbosity) {
 }
 
 select_models <- function(models, selection) {
-  if (is.null(selection)) return(models)
+  if (is.null(selection)) {
+    return(models)
+  }
   if (is.numeric(selection)) {
     if (anyNA(selection) || any(!is.finite(selection)) ||
           any(selection != floor(selection))) {
@@ -712,8 +745,11 @@ select_models <- function(models, selection) {
       stop("Character `models` IDs must be unique.", call. = FALSE)
     }
     missing <- setdiff(selection, names(models))
-    if (length(missing)) stop("Unknown model IDs: ", paste(missing, collapse = ", "),
-                              call. = FALSE)
+    if (length(missing)) {
+      stop("Unknown model IDs: ", paste(missing, collapse = ", "),
+        call. = FALSE
+      )
+    }
     return(models[selection])
   }
   stop("`models` must be NULL, numeric indices, or model IDs.", call. = FALSE)
