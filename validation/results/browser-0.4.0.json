@@ -465,27 +465,753 @@
       "passed": true,
       "evidence": {
         "pdf": "print-closed.pdf",
-        "text_characters": 15561,
-        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+        "text_characters": 15532,
+        "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+        "page_bounds": [
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 41.270398,
+            "xMax": 557.251786,
+            "yMax": 794.308887,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 39.089638,
+            "xMax": 554.991727,
+            "yMax": 778.136968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 555.503672,
+            "yMax": 765.457288,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 558.822363,
+            "yMax": 766.429236,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 42.997798,
+            "xMax": 554.996682,
+            "yMax": 781.886967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 557.294206,
+            "yMax": 767.918248,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 43.954798,
+            "xMax": 554.996682,
+            "yMax": 660.67924,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 36.417295,
+            "xMax": 554.996682,
+            "yMax": 787.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 38.615878,
+            "xMax": 553.934936,
+            "yMax": 757.886968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.158879,
+            "xMax": 559.682884,
+            "yMax": 799.207287,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 40.372439,
+            "xMax": 557.241971,
+            "yMax": 796.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 558.0934,
+            "yMax": 791.179235,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 45.861806,
+            "xMax": 558.368512,
+            "yMax": 579.164376,
+            "within_margins": true
+          }
+        ]
       }
+    },
+    {
+      "name": "print/closed: text stays within page margins",
+      "passed": true,
+      "evidence": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     },
     {
       "name": "print/open: nonempty report",
       "passed": true,
       "evidence": {
         "pdf": "print-open.pdf",
-        "text_characters": 15561,
-        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+        "text_characters": 15532,
+        "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+        "page_bounds": [
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 41.270398,
+            "xMax": 557.251786,
+            "yMax": 794.308887,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 39.089638,
+            "xMax": 554.991727,
+            "yMax": 778.136968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 555.503672,
+            "yMax": 765.457288,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 558.822363,
+            "yMax": 766.429236,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 42.997798,
+            "xMax": 554.996682,
+            "yMax": 781.886967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 557.294206,
+            "yMax": 767.918248,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 43.954798,
+            "xMax": 554.996682,
+            "yMax": 660.67924,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 36.417295,
+            "xMax": 554.996682,
+            "yMax": 787.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 38.615878,
+            "xMax": 553.934936,
+            "yMax": 757.886968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.158879,
+            "xMax": 559.682884,
+            "yMax": 799.207287,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 40.372439,
+            "xMax": 557.241971,
+            "yMax": 796.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 558.0934,
+            "yMax": 791.179235,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 45.861806,
+            "xMax": 558.368512,
+            "yMax": 579.164376,
+            "within_margins": true
+          }
+        ]
       }
+    },
+    {
+      "name": "print/open: text stays within page margins",
+      "passed": true,
+      "evidence": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     },
     {
       "name": "print/no-javascript: nonempty report",
       "passed": true,
       "evidence": {
         "pdf": "print-no-javascript.pdf",
-        "text_characters": 15561,
-        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+        "text_characters": 15532,
+        "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+        "page_bounds": [
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 41.270398,
+            "xMax": 557.251786,
+            "yMax": 794.308887,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 39.089638,
+            "xMax": 554.991727,
+            "yMax": 778.136968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 555.503672,
+            "yMax": 765.457288,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.602759,
+            "xMax": 558.822363,
+            "yMax": 766.429236,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 42.997798,
+            "xMax": 554.996682,
+            "yMax": 781.886967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 557.294206,
+            "yMax": 767.918248,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 43.954798,
+            "xMax": 554.996682,
+            "yMax": 660.67924,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 36.417295,
+            "xMax": 554.996682,
+            "yMax": 787.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.999999,
+            "yMin": 38.615878,
+            "xMax": 553.934936,
+            "yMax": 757.886968,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 33.158879,
+            "xMax": 559.682884,
+            "yMax": 799.207287,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 40.372439,
+            "xMax": 557.241971,
+            "yMax": 796.136967,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 33.749999,
+            "yMin": 38.615878,
+            "xMax": 558.0934,
+            "yMax": 791.179235,
+            "within_margins": true
+          },
+          {
+            "width": 595.91998,
+            "height": 842.88,
+            "xMin": 35.249999,
+            "yMin": 45.861806,
+            "xMax": 558.368512,
+            "yMax": 579.164376,
+            "within_margins": true
+          }
+        ]
       }
+    },
+    {
+      "name": "print/no-javascript: text stays within page margins",
+      "passed": true,
+      "evidence": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     },
     {
       "name": "print: closed equals open",
@@ -518,7 +1244,7 @@
     "print_comparison": "pdftotext -layout output with whitespace removed"
   },
   "report": "pkgdown/assets/model-report.html",
-  "report_sha256": "81cb1e1754aae4ef6df3efb60f761cd367281a8615cf8e91151bc0b9961fb147",
+  "report_sha256": "697c1454c314e6d0e5b219bf997a71dd71143c42943101572e25776fe289bc54",
   "playwright": "1.58.0",
   "widths": [
     {
@@ -1201,18 +1927,375 @@
   "print": {
     "closed": {
       "pdf": "print-closed.pdf",
-      "text_characters": 15561,
-      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      "text_characters": 15532,
+      "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+      "page_bounds": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     },
     "open": {
       "pdf": "print-open.pdf",
-      "text_characters": 15561,
-      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      "text_characters": 15532,
+      "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+      "page_bounds": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     },
     "no-javascript": {
       "pdf": "print-no-javascript.pdf",
-      "text_characters": 15561,
-      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      "text_characters": 15532,
+      "normalized_text_sha256": "427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6",
+      "page_bounds": [
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 41.270398,
+          "xMax": 557.251786,
+          "yMax": 794.308887,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 39.089638,
+          "xMax": 554.991727,
+          "yMax": 778.136968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 555.503672,
+          "yMax": 765.457288,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.602759,
+          "xMax": 558.822363,
+          "yMax": 766.429236,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 42.997798,
+          "xMax": 554.996682,
+          "yMax": 781.886967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 557.294206,
+          "yMax": 767.918248,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 43.954798,
+          "xMax": 554.996682,
+          "yMax": 660.67924,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 36.417295,
+          "xMax": 554.996682,
+          "yMax": 787.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.999999,
+          "yMin": 38.615878,
+          "xMax": 553.934936,
+          "yMax": 757.886968,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 33.158879,
+          "xMax": 559.682884,
+          "yMax": 799.207287,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 40.372439,
+          "xMax": 557.241971,
+          "yMax": 796.136967,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 33.749999,
+          "yMin": 38.615878,
+          "xMax": 558.0934,
+          "yMax": 791.179235,
+          "within_margins": true
+        },
+        {
+          "width": 595.91998,
+          "height": 842.88,
+          "xMin": 35.249999,
+          "yMin": 45.861806,
+          "xMax": 558.368512,
+          "yMax": 579.164376,
+          "within_margins": true
+        }
+      ]
     }
   },
   "chromium": "145.0.7632.6",

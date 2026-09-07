@@ -10,23 +10,29 @@ checks and explicit remaining limits. This record does not claim CRAN acceptance
 |---|---|
 | Runtime | R 4.5.2, Ubuntu 26.04.1, x86_64 |
 | Complete installed-engine suite | 2,710 passing assertions; no failures or warnings; two opt-in live skips |
-| Live H2O integration | 93 passing assertions; no failures, warnings or skips |
+| Live H2O integration | 93 passing assertions on CRAN H2O 3.44.0.3 and Temurin 17; no failures, warnings or skips |
 | Statement coverage | 89.66%; [instrumented summary](results/coverage-0.4.0.txt) |
 | Minimum-version engine check | All eight declared engine versions match; 694 adapter/geometry/data-contract assertions pass |
 | Lint and spelling | Clean; roxygen2 8.1.0 documentation regenerated |
 | Documentation | All five vignette code paths execute; pkgdown site builds |
 | Numerical references | Eleven PDP/ALE/analytic checks; maximum absolute error below 5.69e-14 |
 | Bootstrap experiment | 90% coverage at n=20 and 96% at n=100, for nominal 95%, with 100 replicates per setting |
-| Browser gate | 48/48 checks; 320, 390, 768 and 1440px; keyboard disclosures and no page overflow |
-| Printed report | Closed/open/no-JavaScript PDFs contain identical 15,561-character normalized text |
+| Browser gate | 51/51 checks; 320, 390, 768 and 1440px; keyboard disclosures and no page overflow |
+| Printed report | Closed/open/no-JavaScript PDFs contain identical 15,532-character normalized text |
 | Automated accessibility | No axe A/AA violations in the eight tested width/disclosure states; contrast incompletes retained |
 | Comparator workflow | Same fitted objects/data/split with DALEX and modelStudio; six metrics identical; four offline HTML smoke checks pass |
 
 The live Gemini test was not run. Its mocked transport tests do not establish
 current provider availability or generated-text accuracy. H2O was exercised
-separately on a local Java cluster. Native minimum-version evidence is described
-in [engine-support.md](engine-support.md); the isolated installer is exercised
-by CI, not by replacing packages in the shared local library.
+separately on a local Java cluster. The full-suite version record retains the
+then-installed vendor H2O 3.46.0.9. The corrected CRAN minimum, 3.44.0.3, was
+installed and tested separately with Temurin 17. Native minimum-version evidence
+is described in [engine-support.md](engine-support.md); both the selected-engine
+installer and live integration entry point use an isolated library.
+
+The first remote checks rejected the vendor-only H2O minimum because CRAN could
+not resolve it. The declared minimum and Java runtime were corrected only after
+the published CRAN version passed the integration checks.
 
 Coverage measures instrumented execution, not the fraction of statistical
 behaviors proven correct. The simulation's small-sample undercoverage remains a
@@ -37,7 +43,7 @@ comparison, not evidence of usability or general superiority. The
 ## Report and source checks
 
 The [browser record](report-browser.md) names the exact fixture hash and tool
-versions. It also records a deliberately broken fixture that failed 35 checks,
+versions. It also records a deliberately broken fixture that failed 38 checks,
 showing that the gate rejects injected regressions. Four README screenshots were
 recaptured from the actual delivery-time report. Automated contrast checks left
 manual review cases; Safari, Firefox and screen-reader behavior are unverified.

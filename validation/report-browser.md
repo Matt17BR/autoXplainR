@@ -28,7 +28,7 @@ nonzero on a failed check or an execution error.
 
 ## Contracts and limits
 
-The 48 checks cover:
+The 51 checks cover:
 
 - 320, 390, 768 and 1440 CSS-pixel viewports, with all disclosures closed and
   open: no page overflow; displayed quantitative SVG text at least 12 CSS pixels;
@@ -39,6 +39,8 @@ The 48 checks cover:
   by Enter and Space, with renderer JavaScript both enabled and disabled.
 - Closed, open and JavaScript-disabled printed reports containing identical
   `pdftotext -layout` text after whitespace removal.
+- All PDF text boxes staying within a 24-point page inset in each of those
+  three print states; the report declares 12mm page margins.
 - The report file remaining unchanged throughout the check.
 
 Axe's incomplete results are recorded separately, with node counts and up to ten
@@ -53,10 +55,10 @@ run and its uploaded artifacts.
 
 ## Executed local result
 
-On 2026-09-07, the freshly regenerated public fixture passed all 48 checks with
+On 2026-09-07, the freshly regenerated public fixture passed all 51 checks with
 no execution errors using Playwright 1.58.0, its Chromium 145.0.7632.6, and
 axe-core 4.13.0. Its HTML SHA-256 was
-`81cb1e1754aae4ef6df3efb60f761cd367281a8615cf8e91151bc0b9961fb147`.
+`697c1454c314e6d0e5b219bf997a71dd71143c42943101572e25776fe289bc54`.
 
 All ten disclosures passed the keyboard checks with JavaScript enabled and
 disabled. Displayed quantitative SVG labels were at least 14 CSS pixels at every
@@ -64,10 +66,11 @@ tested width. Axe found zero A/AA violations in all eight width/disclosure
 combinations; its unresolved `color-contrast` checks covered 29–50 nodes per
 state and remain subject to human review.
 
-All three PDFs contained the same 15,561 non-whitespace characters and normalized
+The 13-page PDF was also visually inspected for table wrapping and page margins.
+All three PDFs contained the same 15,532 non-whitespace characters and normalized
 text SHA-256
-`af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a`.
-The local evidence is `/tmp/axr-report-browser-final/report-browser.json`, with nine
+`427ba1a6a0b9f06bc230031eabdf48e05f57956b432dc86d22ec8ad66f4ee8e6`.
+The local evidence is `/tmp/axr-report-browser-release/report-browser.json`, with nine
 screenshots and three PDFs alongside it. A portable copy of the
 [JSON record](results/browser-0.4.0.json) is retained in the repository. Python compilation with warnings
 treated as errors, YAML lint for the browser/release/native-engine workflows,
@@ -79,10 +82,11 @@ separate required gate.
 On 2026-09-07, a copy outside the repository was altered with a duplicate ID, a
 missing fragment target, 500px minimum body width, 6px SVG labels, summaries
 removed from keyboard traversal, a nameless button, and print CSS that hides
-closed disclosure content without JavaScript. The checker exited 1 with 35
+closed disclosure content without JavaScript. This older fixture also lacks the
+new page margins. The checker exited 1 with 38
 failed checks and no execution errors. Its failures included every injected
 contract category; axe reported `button-name` and `target-size` violations.
 
-The local negative artifacts are `/tmp/axr-report-browser-negative/`, including
+The local negative artifacts are `/tmp/axr-report-browser-negative-release/`, including
 `report-browser.json`. Corrupted HTML and generated PDF/image artifacts are not
 stored in the repository.

@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import xml.etree.ElementTree as ET
 
 from playwright.sync_api import sync_playwright
 
@@ -174,6 +175,24 @@ def load_page(context, report):
     return page
 
 
+def print_content_bounds(destination):
+    """Check actual PDF word boxes, allowing 8.5mm inside a declared 12mm margin."""
+    xml = subprocess.check_output(["pdftotext", "-bbox", str(destination), "-"], text=True)
+    document = ET.fromstring(xml)
+    pages = []
+    for page in document.iter("{http://www.w3.org/1999/xhtml}page"):
+        words = list(page.iter("{http://www.w3.org/1999/xhtml}word"))
+        width, height = float(page.attrib["width"]), float(page.attrib["height"])
+        if not words:
+            continue
+        bounds = {key: operation(float(word.attrib[key]) for word in words)
+                  for key, operation in (("xMin", min), ("yMin", min), ("xMax", max), ("yMax", max))}
+        pages.append({"width": width, "height": height, **bounds,
+                      "within_margins": bounds["xMin"] >= 24 and bounds["yMin"] >= 24 and
+                      bounds["xMax"] <= width - 24 and bounds["yMax"] <= height - 24})
+    return pages
+
+
 def print_pdf(page, destination):
     page.pdf(path=str(destination), format="A4", print_background=True,
              display_header_footer=False, prefer_css_page_size=True)
@@ -184,6 +203,7 @@ def print_pdf(page, destination):
     return normalized, {
         "pdf": destination.name, "text_characters": len(normalized),
         "normalized_text_sha256": hashlib.sha256(normalized.encode()).hexdigest(),
+        "page_bounds": print_content_bounds(destination),
     }
 
 
@@ -273,6 +293,9 @@ def run_checks(args, result):
             printed[label], result["print"][label] = print_pdf(page, args.output_dir / f"print-{label}.pdf")
             check(result, f"print/{label}: nonempty report", len(printed[label]) > 200 and
                   args.target in printed[label], result["print"][label])
+            bounds = result["print"][label]["page_bounds"]
+            check(result, f"print/{label}: text stays within page margins",
+                  bool(bounds) and all(page["within_margins"] for page in bounds), bounds)
             context.close()
         for label in ("open", "no-javascript"):
             equal = printed["closed"] == printed[label]

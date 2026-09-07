@@ -1,8 +1,9 @@
 arguments <- commandArgs(trailingOnly = TRUE)
-known <- arguments %in% c("--install", "--tests") |
-  grepl("^--(library|report)=.+$", arguments)
+known <- arguments %in% c("--install", "--tests", "--live-h2o") |
+  grepl("^--(library|report|engines)=.+$", arguments)
 if (any(!known) || anyDuplicated(sub("=.*$", "", arguments))) {
-  stop("Usage: check-engine-support.R [--install] [--tests] [--library=PATH] [--report=PATH]",
+  stop(paste("Usage: check-engine-support.R [--install] [--tests] [--live-h2o]",
+             "[--engines=h2o,...] [--library=PATH] [--report=PATH]"),
        call. = FALSE)
 }
 option_value <- function(name) {
@@ -12,6 +13,7 @@ option_value <- function(name) {
 }
 install <- "--install" %in% arguments
 run_tests <- "--tests" %in% arguments
+run_live_h2o <- "--live-h2o" %in% arguments
 library_path <- option_value("library")
 report_path <- option_value("report")
 original_libraries <- normalizePath(.libPaths(), mustWork = TRUE)
@@ -31,8 +33,19 @@ if (!is.null(library_path)) {
 # DESCRIPTION is the single source for pins. Versions never enter shell code.
 description <- read.dcf("DESCRIPTION")
 entries <- trimws(strsplit(description[1L, "Suggests"], ",", fixed = TRUE)[[1L]])
-engines <- c("e1071", "earth", "glmnet", "h2o", "kknn", "mgcv", "ranger", "xgboost")
-pins <- vapply(engines, function(package) {
+all_engines <- c("e1071", "earth", "glmnet", "h2o", "kknn", "mgcv", "ranger", "xgboost")
+selected <- option_value("engines")
+engines <- if (is.null(selected)) all_engines else strsplit(selected, ",", fixed = TRUE)[[1L]]
+if (!length(engines) || anyDuplicated(engines) || any(!engines %in% all_engines)) {
+  stop("--engines must name unique supported engines separated by commas.", call. = FALSE)
+}
+if (run_tests && !setequal(engines, all_engines)) {
+  stop("--tests requires all eight engines; use --live-h2o for the H2O-only gate.", call. = FALSE)
+}
+if (run_live_h2o && !"h2o" %in% engines) {
+  stop("--live-h2o requires h2o in the selected engines.", call. = FALSE)
+}
+pins <- vapply(all_engines, function(package) {
   entry <- entries[grepl(paste0("^", package, "[[:space:]]*\\("), entries)]
   if (length(entry) != 1L) stop("Expected one engine minimum in DESCRIPTION for ", package, ".")
   matched <- regmatches(entry, regexec(
@@ -67,7 +80,7 @@ versions <- do.call(rbind, lapply(engines, function(package) {
 }))
 print(versions[c("package", "declared_minimum", "installed", "exact_minimum")], row.names = FALSE)
 if (!all(versions$exact_minimum)) {
-  stop("The exact minimum-version gate requires every engine to match its DESCRIPTION pin.", call. = FALSE)
+  stop("Every selected engine must match its exact DESCRIPTION minimum.", call. = FALSE)
 }
 if (!is.null(library_path) && any(versions$library != library_path)) {
   stop("Every pinned engine must resolve from the dedicated library.", call. = FALSE)
@@ -85,7 +98,18 @@ for (definition in registry) {
   }
 }
 
-scope <- "Exact engine versions and registry declarations checked; no fitting tests requested."
+scope <- "Selected engine versions and all registry declarations checked; fitting tests not yet run."
+write_engine_report <- function(scope) {
+  if (is.null(report_path)) return(invisible(NULL))
+  dir.create(report_path, recursive = TRUE, showWarnings = FALSE)
+  utils::write.csv(versions, file.path(report_path, "engine-versions.csv"), row.names = FALSE)
+  writeLines(c(scope, "", capture.output(utils::sessionInfo())),
+             file.path(report_path, "session-info.txt"))
+  saveRDS(utils::installed.packages()[, c("Package", "Version", "LibPath", "Built"), drop = FALSE],
+          file.path(report_path, "installed-packages.rds"))
+}
+# Retain successful version provenance even when a following fitting test fails.
+write_engine_report(scope)
 if (run_tests) {
   testthat::test_local(
     ".", filter = "native-engines|kernel-geometry|matrix-blueprint|audit-data-contracts",
@@ -96,12 +120,30 @@ if (run_tests) {
     "H2O package loading/version verified; no Java cluster or live H2O fit was requested."
   )
 }
-message(scope)
-if (!is.null(report_path)) {
-  dir.create(report_path, recursive = TRUE, showWarnings = FALSE)
-  utils::write.csv(versions, file.path(report_path, "engine-versions.csv"), row.names = FALSE)
-  writeLines(c(scope, "", capture.output(utils::sessionInfo())),
-             file.path(report_path, "session-info.txt"))
-  saveRDS(utils::installed.packages()[, c("Package", "Version", "LibPath", "Built"), drop = FALSE],
-          file.path(report_path, "installed-packages.rds"))
+if (run_live_h2o) {
+  Sys.setenv(AUTOXPLAIN_RUN_H2O = "true")
+  java <- if (nzchar(Sys.getenv("JAVA_HOME"))) {
+    file.path(Sys.getenv("JAVA_HOME"), "bin", "java")
+  } else {
+    Sys.which("java")
+  }
+  if (!nzchar(java) || !file.exists(java)) stop("A supported Java runtime is required for --live-h2o.")
+  java_version <- system2(java, "-version", stdout = TRUE, stderr = TRUE)
+  if (!is.null(report_path)) writeLines(java_version, file.path(report_path, "java-version.txt"))
+  h2o::h2o.init(nthreads = 2, max_mem_size = "2G")
+  if (!is.null(report_path)) {
+    writeLines(capture.output(h2o::h2o.clusterInfo()), file.path(report_path, "h2o-cluster-info.txt"))
+  }
+  results <- tryCatch(
+    testthat::test_local(".", filter = "h2o", stop_on_failure = TRUE),
+    finally = try(h2o::h2o.shutdown(prompt = FALSE), silent = TRUE)
+  )
+  if (!is.null(report_path)) saveRDS(results, file.path(report_path, "h2o-test-results.rds"))
+  scope <- paste("Exact selected engine versions and registry declarations checked.",
+                 "H2O preparation and live binary, regression, and multiclass integration passed.")
 }
+if (!run_tests && !run_live_h2o) {
+  scope <- "Exact selected engine versions and registry declarations checked; no fitting tests requested."
+}
+message(scope)
+write_engine_report(scope)
