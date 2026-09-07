@@ -1,7 +1,8 @@
-## Release candidate
+## GitHub release and CRAN preparation
 
-AutoXplainR 0.4.0, prepared 2026-09-07. The package is distributed on GitHub.
-This is a preparation record, not evidence of CRAN submission or acceptance.
+AutoXplainR 0.4.0 was published on GitHub on 2026-09-07 from commit
+bc941b63bd308df24f1950579a01b1d1af428c50. This is a post-publication validation
+record and CRAN preparation note, not evidence of CRAN submission or acceptance.
 The next CRAN submission requires maintainer review of the exact archive.
 
 ## Scope of this release
@@ -29,6 +30,16 @@ The release pipeline builds once, fully checks that archive with R CMD check
 verifies its SHA-256 and publishes that checked archive. Native engines and live
 H2O have separate gates. An isolated job installs and tests the exact optional
 engine minimum versions declared in DESCRIPTION; current-version jobs remain.
+
+That release pipeline passed. The published archive passed on R 4.6.1 with
+0 errors, 0 warnings and 1 NOTE ("New submission"), including both manuals.
+The same archive passed on R-devel 2026-09-06 r90498 with `--no-manual`, again
+with 0 errors, 0 warnings and 1 NOTE ("New submission"). Nine suggested packages
+were unavailable in that smaller R-devel environment; their coverage is recorded
+in the separate engine and integration jobs. All documentation URLs passed.
+The public download matched the checked archive byte for byte and passed the
+fresh-library installed-artifact smoke script. Complete logs, checksum and
+runtime scopes are retained in `validation/release-0.4.0.md`.
 
 ## Interpretation and compatibility
 

@@ -79,8 +79,8 @@ about the age of the CRAN release. The live server reported 3.44.0.3 with two
 allowed cores and a 2 GB heap. The all-eight version checker also confirmed that
 every installed engine matched its corrected DESCRIPTION minimum. A
 version-only invocation establishes version/registry agreement, not model
-correctness. Successful pinned CI and live H2O jobs on the exact release source
-still need review before publication.
+correctness. The later tagged CI results below establish support on the exact
+published source.
 
 With isolated CRAN H2O first on the library path, the all-eight `--tests` gate
 also passed all 694 assertions in 17.3 seconds with no failures, warnings or
@@ -111,6 +111,18 @@ existing active library. It never downgrades the shared default R library.
 Support evidence for a release requires successful jobs on the release commit;
 the presence of this workflow alone is not evidence that its tests passed.
 The release workflow also calls the exact-minimum job as a publication gate.
+
+For v0.4.0, the [tagged release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34119029839)
+passed both gates on commit `bc941b63bd308df24f1950579a01b1d1af428c50`.
+The isolated minimum-engine job installed all eight exact versions on R 4.6.1
+and passed 694 assertions with no failures, warnings or skips. The separate
+live H2O job used CRAN H2O 3.44.0.3, R 4.6.1 and Temurin 17.0.20.1+1 and passed
+all 93 assertions with no failures, warnings or skips. Downloaded artifacts
+confirmed the versions and dedicated library paths. The
+[retained release summary](results/release-0.4.0.json) records that evidence;
+the [release record](release-0.4.0.md) also identifies the checked and published
+archive. Current-version Ubuntu and Windows engine jobs passed separately on
+the same commit before tagging.
 
 For an isolated H2O-only reproduction, use a supported Java runtime and run:
 

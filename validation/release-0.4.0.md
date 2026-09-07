@@ -1,8 +1,48 @@
 # AutoXplainR 0.4.0 release evidence
 
-Prepared 2026-09-07. This release repairs the [independent 0.3.0 audit](audit-0.3.0.md).
+Published [v0.4.0](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.4.0)
+on 2026-09-07 at 12:12:31 UTC from commit
+[`bc941b63bd308df24f1950579a01b1d1af428c50`](https://github.com/Matt17BR/autoXplainR/commit/bc941b63bd308df24f1950579a01b1d1af428c50).
+This release repairs the [independent 0.3.0 audit](audit-0.3.0.md).
 [Every finding has a disposition](resolution-0.4.0.md), with executable acceptance
-checks and explicit remaining limits. This record does not claim CRAN acceptance.
+checks and explicit remaining limits. This post-publication record does not
+change the tagged package and does not claim CRAN submission or acceptance.
+
+## Published archive
+
+The [release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34119029839)
+passed every required gate. It built one archive, checked that archive under
+release R and R-devel, and published it with its checksum and release notes.
+The downloaded public asset matched the checked artifact byte for byte:
+
+```text
+d159edd52a892c506237faaf5935f4b9c61db4d007b764e52876815bcd3f0cbd  AutoXplainR_0.4.0.tar.gz
+```
+
+| Archive check | Result |
+|---|---|
+| R 4.6.1, Ubuntu 24.04.4, `--as-cran` | 0 errors, 0 warnings, 1 NOTE: “New submission”; [complete log](results/release-0.4.0-r-check.txt) |
+| R-devel 2026-09-06 r90498, same archive, `--as-cran --no-manual` | 0 errors, 0 warnings, 1 NOTE: “New submission”; [complete log](results/release-0.4.0-r-devel-check.txt) |
+| Examples, tests and vignette rebuilding | Passed in both archive checks |
+| PDF and HTML manuals | Passed in the release-R check |
+| Documentation links | URL checker reported all URLs correct |
+| Downloaded publication | SHA256SUMS verified; fresh installation and all [installed-artifact smoke cases](results/release-0.4.0-installed-smoke.txt) passed on local R 4.5.2 |
+
+The R-devel job intentionally used a smaller dependency set. It reported nine
+unavailable suggested packages; optional native and live H2O coverage comes
+from the separate successful engine gates, not from that job. The
+[machine-readable record](results/release-0.4.0.json) retains versions, job links,
+checksum, dependency scope and the browser summary.
+
+Before tagging, the same commit passed [all seven package-check jobs](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057785),
+including Windows, macOS and Linux release R, Linux R 4.1, oldrel and R-devel.
+[Current Ubuntu/Windows engines and exact minima](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057771),
+[coverage](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057782),
+[reference methods](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057765),
+[browser checks](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057816),
+[lint](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057730) and
+[the documentation site](https://github.com/Matt17BR/autoXplainR/actions/runs/34118057750)
+also passed. The tag workflow then repeated its publication gates.
 
 ## Executed local checks
 
@@ -58,9 +98,8 @@ The first local source check identified non-ASCII punctuation in R strings and
 a generated top-level `figure` directory. The punctuation now uses R Unicode
 escapes, and the generated directory is excluded from source builds. Both PDF
 and HTML manuals built, and tests/examples/vignette rebuilding passed. New article
-URLs were not yet deployed at that first check. Final archive and publication
-results are recorded below when the release gates finish; the earlier warning
-is not counted as a successful release check.
+URLs were not yet deployed at that first check. The published archive's clean
+manual and URL checks supersede that preliminary result.
 
 A later remote package build exposed a false evidence mismatch when R retained
 source references. Source-file timestamps and caches were entering the model
@@ -75,20 +114,28 @@ DESCRIPTION and skip unavailable or unsupported dependencies. Supported versions
 remain mandatory in the separate exact-minimum and current-engine jobs.
 
 The [installed-artifact smoke check](check-installed-artifact.R) passed against
-the locally built archive in a fresh package library. It exercises regression,
-binary and multiclass fits, raw prediction, RDS reuse, narratives, HTML and JSON
-export, plus missing-value and novel-category preprocessing. The same script is
-required against the downloaded publication artifact below.
+the downloaded publication in a fresh package library, with execution outside
+the checkout and an assertion on the loaded package path. It exercised
+regression, binary and multiclass fits, raw prediction, RDS reuse, narratives,
+HTML and JSON export, plus missing-value and novel-category preprocessing.
 
-## Publication gates
+## Tagged browser evidence
 
-Main-branch checks precede the version tag. The tag workflow blocks publication
-on native tests, lint/spelling, documentation synchronization, reference methods,
-coverage, live H2O, the exact minimum-engine installer/tests, and the browser gate.
-It builds one archive, fully checks it under release R including manuals, then
-checks that same archive under R-devel and verifies SHA-256 throughout.
+The tag workflow generated a fresh report and passed all 51 checks under
+Chromium 145.0.7632.6, Playwright 1.58.0 and axe 4.13.0. Its HTML SHA-256 is
+`2b48d99d944e3d3e9eff717aa98b536ca28fcf6b6561badbcd4b0f61c4112444`.
+Its closed/open/no-JavaScript PDFs each contain the same 15,703 normalized
+characters across 14 pages, with extracted text inside the tested margins.
+The first two printed pages were visually inspected for margins and wrapping.
+That inspection does not establish complete print legibility or accessibility.
 
-The final tag/commit, workflow links, check notes and published archive checksum
-will be added after the gates succeed. No 0.3.0 or older Win-builder result is
-reused as evidence for this release. CRAN submission remains a separate
-maintainer action.
+The committed/public example has SHA-256
+`697c1454c314e6d0e5b219bf997a71dd71143c42943101572e25776fe289bc54`.
+It has its own [local browser record](results/browser-0.4.0.json). Runtime and
+measured provenance differ between those executions, so their hashes and print
+counts must not be conflated. The tagged browser summary retains unresolved axe
+contrast cases for human review. No WCAG conformance or human-usability claim
+follows from passing the automated checks.
+
+No 0.3.0 or older Win-builder result is reused as evidence for this release.
+Human usability testing and a CRAN submission remain separate future work.

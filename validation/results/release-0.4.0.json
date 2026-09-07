@@ -1,0 +1,397 @@
+{
+  "tag": "v0.4.0",
+  "source_commit": "bc941b63bd308df24f1950579a01b1d1af428c50",
+  "release_run": "https://github.com/Matt17BR/autoXplainR/actions/runs/34119029839",
+  "main_workflows": [
+    {
+      "conclusion": "success",
+      "databaseId": 34118057765,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057765",
+      "workflowName": "statistical-validation"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057816,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057816",
+      "workflowName": "report-browser"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057782,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057782",
+      "workflowName": "test-coverage"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057785,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057785",
+      "workflowName": "R-CMD-check"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057771,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057771",
+      "workflowName": "native-model-engines"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057730,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057730",
+      "workflowName": "lint"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34118057750,
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34118057750",
+      "workflowName": "pkgdown"
+    }
+  ],
+  "native_suite": {
+    "passed_assertions": 2732,
+    "failures": 0,
+    "warnings": 0,
+    "live_skips": 2,
+    "statement_coverage_percent": 89.67
+  },
+  "minimum_engines": {
+    "passed_assertions": 694,
+    "failures": 0,
+    "warnings": 0,
+    "skips": 0,
+    "engines": [
+      {
+        "package": "e1071",
+        "declared_minimum": "1.7-17",
+        "installed": "1.7-17",
+        "direct_depends": ""
+      },
+      {
+        "package": "earth",
+        "declared_minimum": "5.3.6",
+        "installed": "5.3.6",
+        "direct_depends": "R (>= 3.4.0), Formula (>= 1.2-3), plotmo (>= 3.6.0),"
+      },
+      {
+        "package": "glmnet",
+        "declared_minimum": "5.0",
+        "installed": "5.0",
+        "direct_depends": "R (>= 3.6.0), Matrix (>= 1.0-6)"
+      },
+      {
+        "package": "h2o",
+        "declared_minimum": "3.44.0.3",
+        "installed": "3.44.0.3",
+        "direct_depends": "R (>= 2.13.0), methods, stats"
+      },
+      {
+        "package": "kknn",
+        "declared_minimum": "1.4.1",
+        "installed": "1.4.1",
+        "direct_depends": "R (>= 3.5)"
+      },
+      {
+        "package": "mgcv",
+        "declared_minimum": "1.9-4",
+        "installed": "1.9-4",
+        "direct_depends": "R (>= 4.4.0), nlme (>= 3.1-64)"
+      },
+      {
+        "package": "ranger",
+        "declared_minimum": "0.18.0",
+        "installed": "0.18.0",
+        "direct_depends": "R (>= 3.1)"
+      },
+      {
+        "package": "xgboost",
+        "declared_minimum": "3.2.1.1",
+        "installed": "3.2.1.1",
+        "direct_depends": "R (>= 4.3.0)"
+      }
+    ],
+    "R": "4.6.1",
+    "installation": "isolated dedicated library, exact versions and library paths checked"
+  },
+  "live_h2o": {
+    "version": "3.44.0.3",
+    "Java": "Temurin 17.0.20.1+1",
+    "R": "4.6.1",
+    "passed_assertions": 93,
+    "failures": 0,
+    "warnings": 0,
+    "skips": 0
+  },
+  "live_gemini_local": {
+    "model": "gemini-3.5-flash",
+    "thinking_level": "low",
+    "max_tokens": 4000,
+    "passed_assertions": 12,
+    "fallback": false,
+    "data": "aggregate evidence from public iris example",
+    "scope": "Functional interaction and format; generated numerical accuracy and future availability unverified"
+  },
+  "browser": {
+    "source": "fresh tag-workflow fixture; differs from committed/public fixture by measured run provenance",
+    "artifact_id": 10017473660,
+    "report_sha256": "2b48d99d944e3d3e9eff717aa98b536ca28fcf6b6561badbcd4b0f61c4112444",
+    "passed": true,
+    "check_count": 51,
+    "failed_checks": [],
+    "errors": [],
+    "chromium": "145.0.7632.6",
+    "playwright": "1.58.0",
+    "axe_core": "4.13.0",
+    "print": {
+      "closed": {
+        "page_count": 14,
+        "text_characters": 15703,
+        "normalized_text_sha256": "9996329ee16be492139ab5e47f0d392397726f23bdc3bbd6464461a6df5982bd",
+        "all_text_within_tested_margins": true
+      },
+      "open": {
+        "page_count": 14,
+        "text_characters": 15703,
+        "normalized_text_sha256": "9996329ee16be492139ab5e47f0d392397726f23bdc3bbd6464461a6df5982bd",
+        "all_text_within_tested_margins": true
+      },
+      "no-javascript": {
+        "page_count": 14,
+        "text_characters": 15703,
+        "normalized_text_sha256": "9996329ee16be492139ab5e47f0d392397726f23bdc3bbd6464461a6df5982bd",
+        "all_text_within_tested_margins": true
+      }
+    },
+    "states": [
+      {
+        "width": 320,
+        "state": "closed",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 34
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "state": "open",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 50
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "state": "closed",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 33
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "state": "open",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 49
+          }
+        ]
+      },
+      {
+        "width": 768,
+        "state": "closed",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 29
+          }
+        ]
+      },
+      {
+        "width": 768,
+        "state": "open",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 45
+          }
+        ]
+      },
+      {
+        "width": 1440,
+        "state": "closed",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 29
+          }
+        ]
+      },
+      {
+        "width": 1440,
+        "state": "open",
+        "violations": 0,
+        "incomplete": [
+          {
+            "id": "color-contrast",
+            "node_count": 45
+          }
+        ]
+      }
+    ],
+    "manual_review": "Overview screenshot and first two tagged closed-disclosure PDF pages visually inspected; not a full accessibility or human usability assessment"
+  },
+  "public_fixture": {
+    "path": "pkgdown/assets/model-report.html",
+    "url": "https://matt17br.github.io/autoXplainR/model-report.html",
+    "sha256": "697c1454c314e6d0e5b219bf997a71dd71143c42943101572e25776fe289bc54"
+  },
+  "remaining_external_validation": [
+    "Human usability study unexecuted",
+    "Firefox, Safari and screen-reader behavior untested",
+    "CRAN submission and acceptance not claimed"
+  ],
+  "source_archive": {
+    "name": "AutoXplainR_0.4.0.tar.gz",
+    "sha256": "d159edd52a892c506237faaf5935f4b9c61db4d007b764e52876815bcd3f0cbd",
+    "built_once": true,
+    "release_R_check": {
+      "R": "4.6.1 (2026-06-24)",
+      "os": "Ubuntu 24.04.4 LTS",
+      "arguments": [
+        "--as-cran"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "notes": [
+        "New submission"
+      ],
+      "PDF_manual": "OK",
+      "HTML_manual": "OK",
+      "documentation_urls": "All URLs are correct"
+    },
+    "R_devel_check": {
+      "R": "Under development (2026-09-06 r90498)",
+      "os": "Ubuntu 24.04.4 LTS",
+      "arguments": [
+        "--as-cran",
+        "--no-manual"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "notes": [
+        "New submission"
+      ],
+      "unavailable_suggested_packages": [
+        "e1071",
+        "earth",
+        "glmnet",
+        "h2o",
+        "httr",
+        "kknn",
+        "plotly",
+        "ranger",
+        "xgboost"
+      ]
+    }
+  },
+  "publication": {
+    "tagName": "v0.4.0",
+    "publishedAt": "2026-09-07T12:12:31Z",
+    "isDraft": false,
+    "isPrerelease": false,
+    "url": "https://github.com/Matt17BR/autoXplainR/releases/tag/v0.4.0",
+    "assets": [
+      "AutoXplainR_0.4.0.tar.gz",
+      "release-notes.md",
+      "SHA256SUMS"
+    ]
+  },
+  "release_jobs": [
+    {
+      "name": "quality-gates",
+      "conclusion": "success",
+      "job_id": 101732515571
+    },
+    {
+      "name": "browser-gate / generated-report",
+      "conclusion": "success",
+      "job_id": 101732515897
+    },
+    {
+      "name": "h2o-gate / h2o",
+      "conclusion": "success",
+      "job_id": 101732516044
+    },
+    {
+      "name": "engine-minimum-gate / Declared engine minima (Ubuntu, R release)",
+      "conclusion": "success",
+      "job_id": 101732516056
+    },
+    {
+      "name": "engine-minimum-gate / ${{ matrix.os }} (R release)",
+      "conclusion": "skipped",
+      "job_id": 101732517164
+    },
+    {
+      "name": "source-package",
+      "conclusion": "success",
+      "job_id": 101735163428
+    },
+    {
+      "name": "r-devel-source-check",
+      "conclusion": "success",
+      "job_id": 101736457225
+    },
+    {
+      "name": "github-release",
+      "conclusion": "success",
+      "job_id": 101737540561
+    }
+  ],
+  "release_jobs_note": "The current-engine matrix is intentionally skipped in this reusable minimum-only invocation; all current Ubuntu/Windows jobs passed on the tagged commit before tagging.",
+  "installed_publication_check": {
+    "passed": true,
+    "archive_matches_tag_artifact_byte_for_byte": true,
+    "SHA256SUMS_verified": true,
+    "fresh_library": true,
+    "execution": "Rscript validation/check-installed-artifact.R <fresh-library> <output-directory> 0.4.0, outside source checkout",
+    "R": "4.5.2",
+    "os": "Ubuntu 26.04.1",
+    "workflows": [
+      "regression",
+      "binary",
+      "multiclass"
+    ],
+    "checks": [
+      "autoxplain fit",
+      "finite raw predictions",
+      "binary event/class contract",
+      "multiclass probability contract",
+      "standalone HTML",
+      "RDS prediction identity",
+      "retained audit",
+      "local narrative attachment",
+      "aggregate JSON schema 2.0",
+      "saved recipe handles missing values and novel categories"
+    ]
+  }
+}

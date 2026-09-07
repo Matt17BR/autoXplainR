@@ -1,0 +1,5 @@
+regression : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+binary : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+multiclass : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+Missing values and novel categories: saved recipe prediction passed
+Installed artifact smoke passed from /tmp/axr-published-040-library/AutoXplainR 

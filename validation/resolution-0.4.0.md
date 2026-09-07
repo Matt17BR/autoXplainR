@@ -1,12 +1,12 @@
 # Disposition of the 0.3.0 audit for 0.4.0
 
 This document maps the [25 audit findings](audit-0.3.0.md) to the current repair
-and its acceptance evidence. **Implemented** means the change exists in the
-source tree; it does not mean every release, browser or human-study gate has
-passed. Test links identify executable acceptance checks. The version-specific
-release record will identify the final commit/archive, executed suites, CI runs
-and any remaining failures. Historical audit and 0.3.0 release records remain
-unchanged.
+and its acceptance evidence. **Implemented** describes the source change;
+test links identify executable acceptance checks. The
+[published 0.4.0 release record](release-0.4.0.md) identifies the tagged commit,
+successful CI and archive checks, and a fresh installation of the downloaded
+release. Human usability testing remains unexecuted. Historical audit and
+0.3.0 release records remain unchanged.
 
 The changes alter outputs that were wrong or misleading in 0.3.0, including
 binary-event probabilities, blocked permutations, ALE coordinates, diagnostic
@@ -40,7 +40,7 @@ migration of old serialized results.
 | **14. Captured formula environments** | **Implemented.** Internally generated column-only formulas and terms use minimal environments in [matrix construction](../R/matrix_blueprint.R) and [native fitting](../R/guided_workflow.R). | [Formula export tests](../tests/testthat/test-audit-data-contracts.R): model exports do not retain sibling models/fitting frames and predictions remain equivalent after serialization. | Fitted models may intentionally retain their own training information. `object.size()` is an approximate in-memory proxy, not serialized size or complete process memory; arbitrary external models may retain additional environments. |
 | **15. Custom function ellipsis** | **Implemented.** [Adapter dispatch](../R/explainer.R) counts explicit inputs separately from `...` and validates supported arity. | [Custom-dispatch tests](../tests/testthat/test-evidence-contract.R): one/two inputs with ellipsis, invalid signatures and preservation of the adapter's own error. | Supported call signatures are explicit; arbitrary argument-name inference is not attempted. |
 | **16. Disappearing failed diagnostics** | **Implemented with an explicit preparation boundary.** [Shared records](../R/report_view_model.R) distinguish available/computed, not-run, not-applicable, insufficient and failed checks. Optional report preparation returns a local result with computed/failed records and reasons; [HTML](../R/reporting.R) uses those records, and the returned path carries compact `diagnostic_status` metadata. Narratives read the shared records without computing checks. | [Missing/failed view and preparation tests](../tests/testthat/test-report-brief.R) inject optional-check failure, verify reasons and original-result immutability; [narrative status tests](../tests/testthat/test-narrative-evidence.R) preserve not-run and retained failure states without recomputation. | Rendering does not mutate the caller's result. Its console/narrative correctly continues to say not-run for render-only checks unless the returned status records are retained. This boundary is intentional; a general public diagnostic-collection API remains possible follow-up work. |
-| **17. Contract-intersection coverage and minima** | **Implemented tests and narrowed support.** The new numerical, identity, preprocessing, report and narrative tests exercise the original failures. [Engine support](engine-support.md) narrows direct engine minima and adds an isolated pinned-version CI job. | [Statistical repairs](../tests/testthat/test-audit-statistical-repairs.R), [evidence contracts](../tests/testthat/test-evidence-contract.R), [data contracts](../tests/testthat/test-audit-data-contracts.R), and [engine checker](../.github/scripts/check-engine-support.R). The bounded local minimum-version test run passed. | A new test file or workflow is not a successful release gate. Exact-release CI/live-H2O results must be recorded separately. Direct engine pins do not test every transitive dependency or R/OS combination. |
+| **17. Contract-intersection coverage and minima** | **Implemented tests and narrowed support.** The new numerical, identity, preprocessing, report and narrative tests exercise the original failures. [Engine support](engine-support.md) narrows direct engine minima and adds an isolated pinned-version CI job. | [Statistical repairs](../tests/testthat/test-audit-statistical-repairs.R), [evidence contracts](../tests/testthat/test-evidence-contract.R), [data contracts](../tests/testthat/test-audit-data-contracts.R), and [engine checker](../.github/scripts/check-engine-support.R). The tagged minimum-engine gate passed 694 assertions; the separate live H2O gate passed 93. [Release evidence](release-0.4.0.md) records both. | Direct engine pins do not test every transitive dependency or R/OS combination. Current engine jobs remain necessary as dependencies change. |
 
 ## Report design and user experience
 
