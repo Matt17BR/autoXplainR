@@ -14,9 +14,12 @@ with sync_playwright() as p:
     page.goto((root/'extended.html').as_uri())
     page.locator('[data-page-link="selection"]').click()
     page.select_option('#selection-family-filter','additive')
-    precision = page.locator('.selection-precision')
-    if precision.count() and not precision.evaluate('element=>element.open'):
-        precision.locator('summary').click()
+    if page.locator('.selection-precision').count():
+        precision = page.locator('.selection-precision:visible')
+        if precision.count() != 1:
+            raise RuntimeError('The selected family must have exactly one visible exact-settings disclosure.')
+        if not precision.evaluate('element=>element.open'):
+            precision.locator('summary').click()
     links=page.locator('.selection-candidate-table:visible a').evaluate_all('nodes=>nodes.map(n=>({text:n.innerText,href:n.getAttribute("href")}))')
     if len(links) < 2:
         raise RuntimeError('The additive comparison must expose at least two recorded configurations.')

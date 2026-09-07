@@ -33,6 +33,17 @@ def accessible_description_is(control, text):
         return False
 
 
+def svg_labels(svg):
+    # Wrapped SVG lines are sibling tspans; textContent concatenates them
+    # without the visual line break between words such as "log" and "scale".
+    return svg.locator("text").evaluate_all("""nodes=>nodes.filter(node=>{
+      const box=node.getBoundingClientRect(), style=getComputedStyle(node);
+      return box.width>0 && box.height>0 && style.visibility==='visible' &&
+        style.display!=='none' && Number(style.opacity)>0;
+    }).map(node=>
+      [...node.childNodes].map(child=>child.textContent).join(' ').replace(/\\s+/g,' ').trim())""")
+
+
 def geometry(figure, log=False, higher=False):
     svg = figure.locator("svg")
     labels = svg.evaluate("""svg=>{
@@ -94,7 +105,28 @@ with sync_playwright() as p:
         check(f"keyboard chooses log {width}", control.input_value() == "log")
         valid, evidence = geometry(figure, log=True)
         check(f"equal cost ratios and frontier steps {width}", valid, evidence)
-        check(f"log axis is explicitly labelled {width}", "log scale" in figure.locator("svg").text_content())
+        check(f"log axis is explicitly labelled {width}",
+              "R object size (KiB) · log scale" in svg_labels(figure.locator("svg")))
+        # Keep the plotted measurements unchanged while challenging the label
+        # observation; geometry alone cannot tell readers which scale is used.
+        original_title = figure.locator("svg").evaluate("""svg=>{
+          const bottom=+svg.querySelector('.axr-axis').getAttribute('y1');
+          const title=[...svg.querySelectorAll('text')].find(text=>
+            text.getAttribute('text-anchor')==='middle' && +text.getAttribute('y')>bottom+30);
+          title.dataset.axisTitleProbe='true';
+          return title.innerHTML;
+        }""")
+        title = figure.locator('[data-axis-title-probe]')
+        for label, replacement in [("missing", ""), ("incorrect", "R object size (KiB) · linear scale")]:
+            title.evaluate("(node,text)=>node.textContent=text", replacement)
+            valid, evidence = geometry(figure, log=True)
+            check(f"{label} cost scale label is rejected with correct geometry {width}",
+                  valid and "R object size (KiB) · log scale" not in svg_labels(figure.locator("svg")), evidence)
+        title.evaluate("(node,html)=>{node.innerHTML=html;node.style.display='none'}", original_title)
+        valid, evidence = geometry(figure, log=True)
+        check(f"hidden cost scale label is rejected with correct geometry {width}",
+              valid and "R object size (KiB) · log scale" not in svg_labels(figure.locator("svg")), evidence)
+        title.evaluate("node=>{node.style.removeProperty('display');node.removeAttribute('data-axis-title-probe')}")
         check(f"original table unchanged {width}", figure.locator("tbody").inner_text() == table)
         for model, value in [("compact", "1"), ("middle", "10"), ("large", "100")]:
             figure.locator(f'[data-model-id="{model}"]').focus()

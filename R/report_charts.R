@@ -400,7 +400,9 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   if (!is.null(x_limits)) limits <- x_limits
   if (!is.null(y_limits)) ylim <- y_limits
   if (!categorical) {
-    left <- max(left, max(nchar(vapply(report_chart_ticks(ylim, 4), axis_number, character(1)))) * 7.2 + 10)
+    # Static charts use 14 px text. Reserve enough space for wider fallback
+    # fonts so a leading digit or minus sign is not clipped without JavaScript.
+    left <- max(left, max(nchar(vapply(report_chart_ticks(ylim, 4), axis_number, character(1)))) * 9.5 + 10)
   }
   height <- bottom + max(if (support) 126 else 70,
     48 + 15 * length(report_chart_text_lines(if (categorical) y_label else x_label, right - left))

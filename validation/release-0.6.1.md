@@ -100,3 +100,18 @@ files with source references disabled produced identical R expressions, and all
 R source files contain only ASCII bytes. The reviewed HTML and PNG hashes did
 not change; the gallery manifest records the corrected source hashes. This
 failed candidate will not be published.
+
+The next local candidate, SHA-256
+`698a7ab3c5329a0d72a4cd96553c292ca37e24a9234366c09ebb3d4cf6294d15`,
+passed the full source check with no errors or warnings and one "New submission"
+note. Its 3,934 assertions, manuals, vignettes, installed workflows and saved
+11-model replay passed. It was nevertheless superseded after GitHub's wider
+font exposed clipped near-tie tick labels in the no-JavaScript chart.
+
+The independent reproduction rejected that layout at 1440, 390 and 320px.
+Static charts now reserve more width for numeric labels; the clipping tolerance,
+axis values and frontier coordinates were not relaxed. A separate log-axis
+assertion incorrectly concatenated wrapped SVG lines; it now reads the displayed
+lines and requires the complete axis title. The saved-workflow inspection also
+now scopes exact settings to the visible family, retaining compatibility with
+historical reports and the requirement to inspect both additive configurations.

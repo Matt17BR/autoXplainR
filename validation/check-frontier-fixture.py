@@ -24,6 +24,11 @@ def check(label, passed, evidence=None):
     checks.append(dict(check=label, passed=bool(passed), evidence=evidence))
 def settled(page):
     page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+def clipped_labels(svg):
+    return svg.evaluate('''svg=>[...svg.querySelectorAll('text')].filter(text=>{
+        const a=text.getBoundingClientRect(), b=svg.getBoundingClientRect();
+        return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1;
+    }).map(text=>text.textContent)''')
 def path_matches(figure, expected):
     line = figure.locator('.axr-frontier')
     if len(expected) < 2:
@@ -61,10 +66,7 @@ with sync_playwright() as p:
                 expected = case['path']
                 valid, evidence = path_matches(fig, expected)
                 check(f'{name} independently specified frontier vertices {width} JS={enabled}', valid, evidence)
-                clipping = fig.locator('svg').evaluate('''svg=>[...svg.querySelectorAll('text')].filter(text=>{
-                    const a=text.getBoundingClientRect(), b=svg.getBoundingClientRect();
-                    return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1;
-                }).map(text=>text.textContent)''')
+                clipping = clipped_labels(fig.locator('svg'))
                 check(f'{name} tick and model labels fit {width} JS={enabled}', not clipping, clipping)
                 if name == 'near_tie':
                     labels = fig.locator('[data-chart-point]').evaluate_all('nodes=>nodes.map(node=>({id:node.dataset.modelId,label:node.getAttribute("aria-label")}))')
@@ -81,6 +83,38 @@ with sync_playwright() as p:
                               fig.locator('.axr-chart-detail').inner_text().startswith(expected_label + ';'))
                 if name in ['loss_ties', 'r2_negative'] and width in [1440, 390]:
                     fig.screenshot(path=str(out / f'{name}-{width}-js-{enabled}.png'))
+            if not enabled:
+                # The R fallback cannot measure the reader's installed font.
+                # Stress ordinary numeric ticks, not only model-name labels,
+                # without moving coordinates, rounding values, or enlarging SVGs.
+                page.locator('.axr-chart svg text').evaluate_all('''nodes=>nodes.forEach(text=>{
+                  if(text.textContent.trim() && Number.isFinite(Number(text.textContent))){
+                    text.dataset.wideTick='true';
+                    text.style.fontFamily='"Liberation Mono", monospace';text.style.fontSize='14px';
+                  }
+                })''')
+                check(f'wide fallback numeric font is exercised {width}',
+                      page.locator('[data-wide-tick]').evaluate_all('''nodes=>nodes.length>0 && nodes.every(text=>
+                        getComputedStyle(text).fontFamily.includes('monospace') && getComputedStyle(text).fontSize==='14px')'''))
+                for name, case in cases.items():
+                    fig = page.locator(f'[data-review-case="{name}"] .axr-chart')
+                    clipping = clipped_labels(fig.locator('svg'))
+                    check(f'{name} wide fallback tick and model labels fit {width}', not clipping, clipping)
+                    valid, evidence = cost_geometry(fig, case['rows'], case['metric'], case['resource'], case['higher'])
+                    check(f'{name} wide fallback preserves literal numeric geometry {width}', valid, evidence)
+                fig = page.locator('[data-review-case="near_tie"] .axr-chart')
+                fig.screenshot(path=str(out / f'near-tie-wide-ticks-{width}.png'))
+                # A clipped tick must fail the same unchanged one-pixel bounds
+                # check even while the raw score and every frontier mark remain.
+                tick = fig.locator('text[data-wide-tick][text-anchor="end"]').filter(has_text=re.compile(r'^1$'))
+                tick_value = tick.text_content()
+                initially_clipped = clipped_labels(fig.locator('svg'))
+                original_x = tick.evaluate('text=>[text,...text.querySelectorAll("tspan[x]")].map(node=>node.getAttribute("x"))')
+                tick.evaluate('text=>[text,...text.querySelectorAll("tspan[x]")].forEach(node=>node.setAttribute("x","0"))')
+                clipping = clipped_labels(fig.locator('svg'))
+                check(f'deliberately clipped wide numeric tick is rejected {width}',
+                      tick_value not in initially_clipped and tick_value in clipping, clipping)
+                tick.evaluate('(text,values)=>[text,...text.querySelectorAll("tspan[x]")].forEach((node,i)=>node.setAttribute("x",values[i]))', original_x)
             check(f'no browser errors {width} JS={enabled}', not errors, errors)
             page.close()
     page = browser.new_page()
