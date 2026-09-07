@@ -91,3 +91,12 @@ fitted objects reproduced all three public HTML files byte for byte.
 Pending local package/archive checks, remote release gates and verification of
 the actual download and website. Existing 0.6.0 release tags and artifacts remain
 unchanged.
+
+The first local archive, SHA-256
+`b1238f29e2fdad91416436f9caac005491c230c7443f8dcbbb251dcc323d1d88`,
+was rejected by `R CMD check --as-cran`: two new R string literals used a literal
+middle dot. They now use the portable `\u00b7` escape. Parsing the old and new
+files with source references disabled produced identical R expressions, and all
+R source files contain only ASCII bytes. The reviewed HTML and PNG hashes did
+not change; the gallery manifest records the corrected source hashes. This
+failed candidate will not be published.

@@ -878,7 +878,7 @@ render_performance_uncertainty <- function(uncertainty, record = NULL, result = 
   paste0(
     "<section id=\"uncertainty\" aria-labelledby=\"uncertainty-title\"><h2 id=\"uncertainty-title\">How variable is this score?</h2>",
     html_table(table, caption = paste0(
-      metric_label, " · ", uncertainty$units, " evaluation ",
+      metric_label, " \u00b7 ", uncertainty$units, " evaluation ",
       uncertainty$unit, if (uncertainty$units != 1L) "s"
     )),
     '<p class="microcopy">Negative differences favor ', html_escape(primary), ".</p>",

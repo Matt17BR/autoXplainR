@@ -518,7 +518,7 @@ explorer_checks <- function(result, audit) {
     '<section id="checks" class="workspace-page" data-page="checks" aria-labelledby="checks-title">',
     '<p class="section-number">Checks</p><h2 id="checks-title">What needs a closer look?</h2>',
     '<p class="check-links">',
-    if (!identical(result$.report_export$mode, "none")) '<a href="#data" data-navigate>Explore data</a> · ',
+    if (!identical(result$.report_export$mode, "none")) '<a href="#data" data-navigate>Explore data</a> \u00b7 ',
     '<a href="#evaluation" data-navigate>Inspect prediction errors</a></p>',
     render_guided_notes(result$evaluation$notes, result), render_reliability_section(concise, result),
     render_effect_failures(result),
