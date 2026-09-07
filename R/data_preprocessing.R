@@ -71,6 +71,7 @@ preprocess_data <- function(data,
   log <- list()
   recipe <- list(
     target_column = target_column,
+    input_classes = vapply(data, class1, character(1)),
     removed_columns = character(),
     character_levels = list(),
     ordered_columns = list(),
@@ -182,6 +183,15 @@ apply_preprocessing_recipe <- function(data,
                                        novel_level_strategy = recipe$novel_level_strategy %||% "error") {
   assert_data_frame(data, "data")
   novel_level_strategy <- match.arg(novel_level_strategy, c("error", "mode"))
+  numeric_inputs <- names(recipe$input_classes)[recipe$input_classes %in% c("numeric", "integer")]
+  numeric_inputs <- intersect(setdiff(numeric_inputs, c(recipe$removed_columns, target_column)), names(data))
+  invalid <- numeric_inputs[!vapply(data[numeric_inputs], function(x) {
+    (is.numeric(x) && !is.complex(x) && is.null(dim(x))) || all(is.na(x))
+  }, logical(1))]
+  if (length(invalid)) {
+    stop("Numeric training inputs require numeric evaluation values: ", paste(invalid, collapse = ", "),
+         ".", call. = FALSE)
+  }
   original <- data_info(data)
   novel_level_mappings <- integer()
   if (length(recipe$removed_columns)) {
@@ -192,6 +202,7 @@ apply_preprocessing_recipe <- function(data,
   }
   if (identical(missing_value_strategy, "impute")) {
     for (column in intersect(names(recipe$imputations), names(data))) {
+      if (is.factor(data[[column]])) data[[column]] <- as.character(data[[column]])
       data[[column]][is.na(data[[column]])] <- recipe$imputations[[column]]
     }
   }
@@ -290,7 +301,6 @@ handle_missing_values <- function(data,
       stop("Target values cannot be imputed; remove or supply them explicitly.", call. = FALSE)
     }
     for (column in setdiff(names(data), target_column)) {
-      if (!anyNA(data[[column]])) next
       value <- if (is.numeric(data[[column]])) {
         stats::median(data[[column]], na.rm = TRUE)
       } else {
@@ -310,7 +320,7 @@ handle_missing_values <- function(data,
       original_missing = missing[missing > 0L],
       rows_removed = original_rows - nrow(data),
       columns_removed = removed_columns,
-      imputed_columns = names(imputations)
+      imputed_columns = intersect(names(imputations), names(missing)[missing > 0L])
     )
   )
 }

@@ -68,7 +68,7 @@ test_that("explicit explainer tasks must match the observed outcome", {
         )
       }
     ),
-    "at least three observed outcome classes"
+    "at least three declared outcome levels"
   )
 
   non_finite <- data.frame(x = seq_len(4), y = c(1, 2, 3, Inf))

@@ -1,3 +1,51 @@
+# AutoXplainR 0.3.0
+
+## One call, inspectable evidence
+
+- `autoxplain()` now computes and retains explanation screening, a repeated
+  permutation audit and up to three fitted effects. `explain = FALSE` keeps the
+  fitting-only path. `report = "report.html"` writes HTML in the same call.
+- `predict()` on a result applies its saved training recipe to raw rows and uses
+  the primary model unless another model is explicitly requested. Regression,
+  binary probabilities, multiclass probability matrices and class labels are
+  supported. Dropped incomplete rows retain their positions as missing predictions.
+- Reports reuse retained evidence unless explicit calculation budgets are passed.
+  Failed effect calculations are recorded and displayed with their reasons.
+- `evidence_summary()` exports aggregate evidence under schema 1.0 without raw
+  rows, per-case predictions, group identifiers or fitted model objects.
+
+## Validation and uncertainty
+
+- `validation_split(group = ...)` keeps whole units out of fitting and inner
+  tuning folds. `validation_split(time = ..., gap = ...)` reserves later times
+  with tied-time and gap accounting. Split columns are excluded from predictors.
+  Temporal tuning and structured H2O validation are explicitly unsupported.
+- `performance_uncertainty()` provides a paired percentile bootstrap of primary
+  and baseline losses, conditional on the fitted models. Grouped designs sample
+  whole evaluation groups. Temporal IID bootstrapping is rejected.
+- Reports can include these intervals with `uncertainty = TRUE` and now describe
+  structured validation designs. Keyboard focus and print styles were added.
+
+## Correctness and documentation
+
+- Imputation learns values for all training predictors, including columns that
+  become missing only in evaluation. Missing factor values can use a training
+  level absent from the raw evaluation factor vocabulary.
+- Evaluation accepts samples missing one or more declared training classes;
+  undefined AUC, balanced accuracy and macro recall remain unavailable.
+- Numeric inputs with incompatible evaluation types fail explicitly.
+- Added independent statistical oracles, iml PDP comparisons, a reproducible
+  bootstrap coverage experiment and an installed statistical-methods vignette.
+- Rewrote the README, product description, provider guide and development plan
+  around implemented behavior and explicit limitations.
+
+### Compatibility
+
+Existing fitting calls still return an `autoxplain_result`, with additional
+components. Default calls now spend time computing explanations; use
+`explain = FALSE` to retain the previous fitting-only workload. The package does
+not claim stable cross-version RDS compatibility or CRAN acceptance.
+
 # AutoXplainR 0.2.0 (2026-07-16)
 
 ## Beginner-first workflow

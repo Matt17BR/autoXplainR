@@ -1,0 +1,5 @@
+"scenario","method","reference","rows","grid_points","max_absolute_error"
+"additive","PDP","iml",300,20,2.22044604925031e-14
+"interaction","PDP","iml",300,20,1.4432899320127e-15
+"nonlinear","PDP","iml",300,20,5.32907051820075e-15
+"correlated","PDP","iml",300,20,8.43769498715119e-15

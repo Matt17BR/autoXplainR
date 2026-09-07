@@ -9,8 +9,8 @@ authors:
 repository-code: "https://github.com/Matt17BR/autoXplainR"
 url: "https://matt17br.github.io/autoXplainR/"
 license: MIT
-version: 0.2.0
-date-released: 2026-07-16
+version: 0.3.0
+date-released: 2026-09-07
 keywords:
   - beginner model fitting
   - held-out evaluation

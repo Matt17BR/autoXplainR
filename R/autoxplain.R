@@ -90,8 +90,19 @@
 #'   Exact equality can indicate leakage but can also occur naturally, so this
 #'   check cannot establish whether the samples are independent.
 #'
-#' @return An `autoxplain_result` containing models, a data-frame leaderboard,
-#'   task metadata, preprocessing provenance, and evaluation data.
+#' @param validation Optional [validation_split()] specifying whole-group or
+#'   chronological evaluation. Split columns are excluded from model inputs.
+#' @param explain Compute and retain permutation screening, an explanation audit,
+#'   and up to three fitted effects. Defaults to `TRUE`; use `FALSE` for fitting
+#'   only. Screening covers all inputs; the audit covers up to eight inputs and
+#'   five models with 20 permutations. These are descriptive, selected summaries.
+#' @param report Optional `.html` destination, written from the retained evidence.
+#'   Supplying a path also computes explanations when `explain = FALSE`.
+#'
+#' @return An `autoxplain_result` containing fitted models, a leaderboard,
+#'   evaluation predictions, preprocessing provenance, and (by default)
+#'   `explanations`. Use `predict(result, newdata)` on raw predictor rows.
+#'   `report_file` records the HTML path when requested.
 #' @export
 #'
 #' @examples
@@ -129,7 +140,10 @@ autoxplain <- function(data,
                        h2o_max_mem_size = "2G",
                        verbosity = c("quiet", "info"),
                        evaluation_role = c("auto", "test", "validation", "evaluation"),
-                       overlap_action = c("warn", "error", "ignore")) {
+                       overlap_action = c("warn", "error", "ignore"),
+                       validation = NULL,
+                       explain = TRUE,
+                       report = NULL) {
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
@@ -147,10 +161,23 @@ autoxplain <- function(data,
       call. = FALSE
     )
   }
+  assert_flag(explain, "explain")
+  assert_flag(enable_preprocessing, "enable_preprocessing")
+  if (!is.null(report)) validate_html_destination(report, FALSE)
   validate_automl_inputs(data, target_column, test_data)
   assert_probability(test_fraction, "test_fraction")
   if (test_fraction <= 0 || test_fraction >= 1) {
     stop("`test_fraction` must be greater than zero and less than one.", call. = FALSE)
+  }
+  design <- prepare_validation_design(
+    data, target_column, test_data, validation, test_fraction, seed,
+    resolved_engine, model_set, task, nfolds, tuning_control
+  )
+  if (!is.null(design)) {
+    data <- design$training
+    test_data <- design$evaluation
+    tuning_control <- design$tuning_control
+    if (evaluation_role == "auto") evaluation_role <- "test"
   }
   if (resolved_engine == "base") {
     resolved_task <- if (task == "auto") detect_task(data[[target_column]]) else task
@@ -178,7 +205,7 @@ autoxplain <- function(data,
       # this budget to search models.
       max_models <- 24L
     }
-    return(fit_guided_base(
+    result <- fit_guided_base(
       data = data,
       target_column = target_column,
       test_data = test_data,
@@ -197,7 +224,8 @@ autoxplain <- function(data,
       verbosity = verbosity,
       evaluation_role = evaluation_role,
       overlap_action = overlap_action
-    ))
+    )
+    return(finalize_autoxplain(result, design, explain, report))
   }
 
   if (is.null(max_models)) max_models <- 24L
@@ -241,7 +269,9 @@ autoxplain <- function(data,
   }
   validate_guided_predictors(data, target_column)
   validate_guided_target(data[[target_column]], resolved_task)
-  if (!is.null(test_data)) validate_guided_predictors(test_data, target_column)
+  if (!is.null(test_data)) {
+    validate_guided_predictors(test_data, target_column, allow_all_missing = enable_preprocessing)
+  }
   config <- utils::modifyList(
     list(
       enable_target_handling = TRUE,
@@ -399,7 +429,7 @@ autoxplain <- function(data,
     extract_model_characteristics(result),
     error = function(error) structure(list(), class = "autoxplainr_model_characteristics")
   )
-  result
+  finalize_autoxplain(result, design, explain, report)
 }
 
 default_local_tuning_budget <- function(portfolio, learners = NULL) {
@@ -534,7 +564,12 @@ print.autoxplain_result <- function(x, ...) {
     } else if (identical(x$engine %||% "base", "base")) {
       cat("  compare:    use model_set = \"tuned\" for automatic multi-family selection\n")
     }
-    cat("  explain:    use render_model_report() or as_explainers() for fitted patterns\n")
+    if (!is.null(x$explanations)) {
+      cat("  evidence:   ", nrow(x$explanations$audit$importance), " model-feature summaries; ",
+          length(x$explanations$effects), " fitted effects\n", sep = "")
+    }
+    if (!is.null(x$report_file)) cat("  report:     ", x$report_file, "\n", sep = "")
+    cat("  next:       predict(result, newdata), render_model_report(result, \"report.html\")\n")
   } else {
     cat("  models:     ", length(x$models), "\n", sep = "")
     cat("  evaluation: ", x$provenance$evaluation_role, "\n", sep = "")

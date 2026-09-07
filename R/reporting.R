@@ -15,6 +15,8 @@
 #' @param subgroup Optional name of one categorical or low-cardinality column.
 #'   When supplied, the report includes an explicit evaluation-set subgroup
 #'   performance check. See [subgroup_performance()].
+#' @param uncertainty Include [performance_uncertainty()] using its default paired
+#'   bootstrap. Off by default; temporal evaluation is not supported.
 #' @param open Open the report in a browser after writing it.
 #' @param top_features Maximum number of features audited when `audit` is not
 #'   supplied.
@@ -39,10 +41,14 @@ render_model_report <- function(result,
                                 open = FALSE,
                                 top_features = 8L,
                                 n_repeats = 20L,
-                                max_models = 5L) {
+                                max_models = 5L,
+                                uncertainty = FALSE) {
   if (!inherits(result, "autoxplain_result")) {
     stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
   }
+  use_retained <- missing(top_features) && missing(n_repeats) && missing(max_models)
+  assert_flag(uncertainty, "uncertainty")
+  if (uncertainty) result$performance_uncertainty <- performance_uncertainty(result)
   top_features <- assert_count(top_features, "top_features")
   n_repeats <- assert_count(n_repeats, "n_repeats")
   max_models <- assert_count(max_models, "max_models")
@@ -52,7 +58,12 @@ render_model_report <- function(result,
     stop("`title` must be a single non-empty string or NULL.", call. = FALSE)
   }
   if (is.null(audit)) {
-    prepared <- prepare_model_report_data(result, top_features, n_repeats, max_models)
+    prepared <- if (!is.null(result$explanations) && use_retained) {
+      result$explanations
+    } else {
+      prepare_model_report_data(result, top_features, n_repeats, max_models)
+    }
+    result$explanations <- prepared
     audit <- prepared$audit
     effects <- effects %||% prepared$effects
   }
@@ -118,6 +129,8 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
     "</div></header><main id=\"main\" class=\"shell\">",
     render_model_overview(result, evaluation),
     render_model_evaluation(result, evaluation),
+    render_validation_design(result),
+    render_performance_uncertainty(result$performance_uncertainty),
     tuning_html,
     comparison_html,
     render_subgroup_performance(subgroup_check),
@@ -127,7 +140,7 @@ model_report_html <- function(result, audit, effects, narrative, subgroup_check,
     "<p>Permutation importance asks how much evaluation performance worsens when one input is shuffled. ",
     "It describes model reliance, not cause and effect.</p>",
     render_guided_importance(audit$importance),
-    render_effects(effects, result), "</section>",
+    render_effects(effects, result), render_effect_failures(result), "</section>",
     render_reliability_section(audit),
     "<section id=\"limits\" aria-labelledby=\"limits-title\"><p class=\"eyebrow\">Interpretation boundaries</p>",
     "<h2 id=\"limits-title\">What this analysis does not establish</h2>",
@@ -406,7 +419,7 @@ render_model_comparison <- function(result) {
     metric_card("Pareto-efficient", as.character(sum(tradeoffs$pareto_optimal)),
                 "Not dominated on both displayed dimensions"),
     metric_card("Best observed score", tradeoffs$model[[best_index]],
-                paste0(pretty_metric(performance_metric), " on this ", evaluation_label, " set")),
+                paste0(pretty_metric(performance_metric), " on these ", evaluation_label, " rows")),
     metric_card("Lowest trade-off proxy", tradeoffs$model[[smallest_index]],
                 paste0(pretty_complexity(complexity_metric), "; ", tradeoff_kind)),
     "</div><div class=\"tradeoff-layout\"><div>", tradeoff_svg(tradeoffs),
@@ -1508,6 +1521,50 @@ report_css <- function() {
     ".model-panel{margin:28px 0}.bar-cell{min-width:150px}.bar{display:block;height:9px;border-radius:999px;min-width:2px}.bar-positive{background:#2f8c65}.bar-negative{background:#c6534f}.mini-grade{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;font-weight:900}",
     ".columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.columns>div{background:#f5f7f3;padding:18px 22px;border-radius:12px}.columns h3{margin-top:0}.narrative{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7f3;border:1px solid var(--line);border-radius:12px;padding:18px;font:inherit}.learn-more,.advanced{margin-top:24px;border:1px solid var(--line);border-radius:12px;padding:14px 18px;background:#fbfcfa}.learn-more summary,.advanced summary{cursor:pointer;font-weight:850;color:var(--green);padding:5px}.advanced>h3:first-of-type{margin-top:24px}.tradeoff-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,.8fr);gap:20px;align-items:center;margin:24px 0}.tradeoff-plot{width:100%;height:auto;background:linear-gradient(145deg,#f7faf7,#eef5f0);border:1px solid var(--line);border-radius:14px}.tradeoff-explainer{background:#f5f7f3;border-radius:14px;padding:18px 22px}.tradeoff-explainer h3{margin-top:0}.tradeoff-explainer ol{padding-left:1.25rem}.chart-axis{stroke:#86968f;stroke-width:1.2}.pareto-line{fill:none;stroke:#176b4d;stroke-width:3;stroke-dasharray:7 6}.tradeoff-point{stroke:#fff;stroke-width:2;fill:#6d7c76}.tradeoff-primary{fill:#176b4d}.tradeoff-candidate{fill:#315c9b}.tradeoff-baseline{fill:#b46a22}.tradeoff-pareto{stroke:#102a23;stroke-width:4}.point-label{font-size:12px;font-weight:750;fill:#25352f}.axis-label{font-size:12px;font-weight:800;fill:#53635d;text-anchor:middle}.effect-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.effect-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fbfcfa}.effect-card h3{font-size:1.35rem;margin:5px 0}.effect-plot{width:100%;height:auto;background:#f2f6f2;border-radius:9px}.axis{stroke:#9aa9a2;stroke-width:1}.effect-line{fill:none;stroke:#176b4d;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}dl{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:8px 18px}dt{font-weight:800}dd{margin:0;color:var(--muted);overflow-wrap:anywhere}",
     "footer{background:#102a23;color:#cbe0d7;padding:28px 0}@media(max-width:820px){.cards{grid-template-columns:1fr 1fr}.columns,.effect-grid,.tradeoff-layout{grid-template-columns:1fr}}@media(max-width:520px){.shell{width:min(100% - 24px,1120px)}header{padding-top:42px}.cards{grid-template-columns:1fr}.section-head{align-items:flex-start}.grade{width:62px;height:62px;font-size:1.7rem}section{border-radius:12px}.point-label{font-size:10px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:10px}}",
+    "a:focus-visible,summary:focus-visible{outline:3px solid #244d8f;outline-offset:4px}",
+    "section .eyebrow{color:#176b4d}caption{text-align:left;font-weight:700;padding:10px}",
+    "@media print{body{background:white;color:black;font-size:10pt}header{background:white;color:black;padding:12px 0}",
+    ".lede,header .eyebrow{color:#333}nav,.skip,footer{display:none}.shell{width:100%}section{box-shadow:none;border-radius:0;padding:12px;break-inside:auto}",
+    "h1{font-size:24pt}h2{font-size:18pt;break-after:avoid}h3{break-after:avoid}tr,.metric,figure{break-inside:avoid}",
+    ".table-wrap{overflow:visible}thead{display:table-header-group}.cards{grid-template-columns:repeat(2,1fr)}a{color:inherit}}",
     "@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}"
+  )
+}
+
+render_validation_design <- function(result) {
+  design <- result$validation
+  if (is.null(design)) return("")
+  paste0(
+    "<section aria-labelledby=\"design-title\"><h2 id=\"design-title\">Validation design</h2><p>",
+    if (design$method == "group") {
+      "Whole groups were kept out of training. The evaluation describes prediction for new groups."
+    } else {
+      "The latest times were kept out of training. The evaluation describes prediction later in time."
+    },
+    "</p><p>Split column: <code>", html_escape(design$column),
+    "</code> (excluded from predictors). Gap rows excluded: ", length(design$excluded_rows),
+    ".</p><p class=\"microcopy\">The design preserves this boundary; it does not establish ",
+    "that the data represent every future population or prevent leakage in upstream feature construction.</p></section>"
+  )
+}
+
+render_effect_failures <- function(result) {
+  failures <- result$explanations$failures
+  if (is.null(failures) || !nrow(failures)) return("")
+  paste0("<div class=\"callout\"><h3>Effects that could not be estimated</h3><ul>",
+         paste0("<li><code>", html_escape(failures$feature), "</code>: ",
+                html_escape(failures$reason), "</li>", collapse = ""),
+         "</ul><p>Inspect support and the fitted model before interpreting these inputs.</p></div>")
+}
+
+render_performance_uncertainty <- function(uncertainty) {
+  if (is.null(uncertainty)) return("")
+  paste0(
+    "<section aria-labelledby=\"uncertainty-title\"><h2 id=\"uncertainty-title\">How variable is this score?</h2>",
+    "<p>Paired ", format_percent(uncertainty$confidence), " percentile intervals from ",
+    uncertainty$n_boot, " bootstrap draws over ", uncertainty$units, " ", uncertainty$unit,
+    "s. Negative differences favor the primary model.</p>",
+    html_table(uncertainty$estimates),
+    "<p class=\"microcopy\">", html_escape(paste(uncertainty$notes, collapse = " ")), "</p></section>"
   )
 }

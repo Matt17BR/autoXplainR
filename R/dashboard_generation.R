@@ -97,7 +97,8 @@ prepare_model_report_data <- function(autoxplain_result,
                                       top_features = 8L,
                                       n_repeats = 20L,
                                       max_models = 5L) {
-  selected <- seq_len(min(max_models, length(autoxplain_result$models)))
+  primary <- autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
+  selected <- head(c(primary, setdiff(names(autoxplain_result$models), primary)), max_models)
   explainers <- as_explainers(autoxplain_result, models = selected)
   importance_metric <- result_importance_metric(autoxplain_result)
   screen_repeats <- min(5L, n_repeats)
@@ -137,12 +138,17 @@ prepare_model_report_data <- function(autoxplain_result,
           NULL
         }
       ),
-      error = function(error) NULL
+      error = function(error) structure(conditionMessage(error), class = "effect_failure")
     )
   })
   names(effects) <- effect_features
-  effects <- effects[!vapply(effects, is.null, logical(1))]
-  list(screening = screening, audit = audit, effects = effects)
+  failed <- vapply(effects, inherits, logical(1), "effect_failure")
+  failures <- data.frame(feature = names(effects)[failed],
+                         reason = vapply(effects[failed], as.character, character(1)),
+                         stringsAsFactors = FALSE)
+  effects <- effects[!failed]
+  list(screening = screening, audit = audit, effects = effects, failures = failures,
+       config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models))
 }
 
 #' Create a lightweight AutoXplainR dashboard

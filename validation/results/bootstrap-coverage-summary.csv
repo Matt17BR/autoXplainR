@@ -1,0 +1,3 @@
+"n_test","repetitions","nominal","empirical_coverage","monte_carlo_se","mean_width"
+20,100,0.95,0.9,0.03,0.569693204017047
+100,100,0.95,0.96,0.0195959179422654,0.26775255300109

@@ -1,12 +1,12 @@
 # Source and intellectual-property provenance
 
-This record covers the source tree prepared for AutoXplainR 0.2.0. It is kept
+This record covers the source tree prepared for AutoXplainR 0.3.0. It is kept
 outside the CRAN source archive because it documents repository governance
 rather than installed package behavior.
 
 ## Repository audit
 
-- The Git history through 2026-07-16 attributes the project source,
+- The Git history through 2026-09-07 attributes the project source,
   documentation, tests, and generated website inputs to Matteo Mazzarelli, the
   author and maintainer named in `DESCRIPTION`.
 - The package contains no vendored third-party source tree, compiled binary,

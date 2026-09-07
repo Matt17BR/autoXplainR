@@ -15,7 +15,8 @@ render_model_report(
   open = FALSE,
   top_features = 8L,
   n_repeats = 20L,
-  max_models = 5L
+  max_models = 5L,
+  uncertainty = FALSE
 )
 }
 \arguments{
@@ -44,6 +45,9 @@ supplied.}
 \item{n_repeats}{Permutation repeats when \code{audit} is not supplied.}
 
 \item{max_models}{Maximum models audited when \code{audit} is not supplied.}
+
+\item{uncertainty}{Include \code{\link[=performance_uncertainty]{performance_uncertainty()}} using its default paired
+bootstrap. Off by default; temporal evaluation is not supported.}
 }
 \value{
 The normalized output path, invisibly.

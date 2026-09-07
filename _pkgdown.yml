@@ -16,6 +16,10 @@ reference:
   - title: Guided workflow
     contents:
       - autoxplain
+      - predict.autoxplain_result
+      - validation_split
+      - performance_uncertainty
+      - evidence_summary
       - tuning_results
       - tuning_control
       - as_explainers
@@ -67,3 +71,4 @@ articles:
     navbar: ~
     contents:
       - autoxplainr-introduction
+      - statistical-methods

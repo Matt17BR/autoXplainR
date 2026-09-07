@@ -31,7 +31,10 @@ autoxplain(
   h2o_max_mem_size = "2G",
   verbosity = c("quiet", "info"),
   evaluation_role = c("auto", "test", "validation", "evaluation"),
-  overlap_action = c("warn", "error", "ignore")
+  overlap_action = c("warn", "error", "ignore"),
+  validation = NULL,
+  explain = TRUE,
+  report = NULL
 )
 }
 \arguments{
@@ -135,10 +138,23 @@ study design.}
 the same values as training rows: warn (the default), error, or ignore.
 Exact equality can indicate leakage but can also occur naturally, so this
 check cannot establish whether the samples are independent.}
+
+\item{validation}{Optional \code{\link[=validation_split]{validation_split()}} specifying whole-group or
+chronological evaluation. Split columns are excluded from model inputs.}
+
+\item{explain}{Compute and retain permutation screening, an explanation audit,
+and up to three fitted effects. Defaults to \code{TRUE}; use \code{FALSE} for fitting
+only. Screening covers all inputs; the audit covers up to eight inputs and
+five models with 20 permutations. These are descriptive, selected summaries.}
+
+\item{report}{Optional \code{.html} destination, written from the retained evidence.
+Supplying a path also computes explanations when \code{explain = FALSE}.}
 }
 \value{
-An \code{autoxplain_result} containing models, a data-frame leaderboard,
-task metadata, preprocessing provenance, and evaluation data.
+An \code{autoxplain_result} containing fitted models, a leaderboard,
+evaluation predictions, preprocessing provenance, and (by default)
+\code{explanations}. Use \code{predict(result, newdata)} on raw predictor rows.
+\code{report_file} records the HTML path when requested.
 }
 \description{
 \code{autoxplain()} is the beginner-first entry point. By default it creates a

@@ -23,7 +23,7 @@ AutoXplainR puts those questions in one workflow. Its safe default is local and
 requires neither Java nor an API account. This vignette uses the small built-in
 `mtcars` data only so every step is reproducible.
 
-## Fit and evaluate in one call
+## Fit, evaluate and explain in one call
 
 ```{r guided-fit}
 result <- autoxplain(
@@ -44,6 +44,19 @@ preprocessing from the remaining rows, and fits two models:
 
 The baseline matters. It answers whether the fitted relationships improve on a
 very simple reference rather than merely producing predictions.
+
+The result also retains an explanation audit and up to three fitted effects.
+Add `report = "model-report.html"` to write a standalone report in the same call.
+Use `explain = FALSE` when only fitting and evaluation are needed.
+
+```{r predictions}
+predict(result, mtcars[1:3, ])
+head(result$explanations$audit$importance)
+```
+
+New raw rows are processed using the saved training recipe. No model is refitted,
+and an outcome column is not required. Binary predictions refer to the second
+training outcome factor level; multiclass predictions have named columns.
 
 ## Read the held-out metrics
 
@@ -79,8 +92,7 @@ The standalone report uses progressive disclosure:
 4. warnings and concrete next actions; and
 5. a collapsed technical evidence audit and complete provenance.
 
-The report does not need an LLM, Plotly, H2O, or a browser runtime after it is
-written.
+The report needs only a browser after it is written; it works offline.
 
 ## Tune supervised models without opening the final holdout
 

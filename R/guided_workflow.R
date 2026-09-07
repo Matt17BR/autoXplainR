@@ -39,7 +39,7 @@ fit_guided_base <- function(data,
     make_evaluation_split(data, target_column, resolved_task, test_fraction, seed)
   } else {
     check_evaluation_row_overlap(data, test_data, overlap_action)
-    validate_guided_predictors(test_data, target_column)
+    validate_guided_predictors(test_data, target_column, allow_all_missing = enable_preprocessing)
     list(
       training = data,
       evaluation = test_data,
@@ -401,7 +401,7 @@ unprocessed_metadata <- function(data) {
   )
 }
 
-validate_guided_predictors <- function(data, target) {
+validate_guided_predictors <- function(data, target, allow_all_missing = FALSE) {
   predictors <- setdiff(names(data), target)
   if (!length(predictors)) stop("`data` must contain at least one predictor.", call. = FALSE)
   unsupported <- predictors[!vapply(data[predictors], supported_guided_predictor, logical(1))]
@@ -414,7 +414,7 @@ validate_guided_predictors <- function(data, target) {
     )
   }
   all_missing <- predictors[vapply(data[predictors], function(x) all(is.na(x)), logical(1))]
-  if (length(all_missing)) {
+  if (length(all_missing) && !allow_all_missing) {
     stop("Predictors cannot be entirely missing: ", paste(all_missing, collapse = ", "), ".",
          call. = FALSE)
   }

@@ -22,6 +22,8 @@ review; automation is supporting evidence, not a substitute for that review.
   every response manually; automated release gating treats canonical-form
   failures and permanent 404/410 responses as blocking because DOI publishers
   commonly return bot-specific 202/403/503 responses.
+- Run `validation/run-reference.R` and `validation/run-simulation.R`; inspect
+  agreement and coverage results, including undercoverage.
 - Run `lintr::lint_package(cache = FALSE)`, `testthat::test_local()`, and
   `covr::package_coverage()`; statement coverage must remain at least 80%.
 - Run `.github/scripts/build-check-source.sh <artifact-dir> <check-dir>` with
@@ -52,7 +54,9 @@ review; automation is supporting evidence, not a substitute for that review.
   only when the maintainer already has a verified signing key; signing is not a
   substitute for the recorded commit and source-archive SHA-256 digests.
 - Inspect the workflow-built source package and its SHA-256 checksum.
-- Review and publish the draft GitHub release created by the release workflow.
+- The version tag authorizes publication. The release workflow publishes only
+  after its quality, H2O, source-archive and R-devel gates succeed. Verify the
+  published notes and attached checksum against the checked archive.
 - Submit the exact checked source archive to CRAN and record any reviewer
   feedback in `cran-comments.md`.
 - After acceptance, verify CRAN installation, the pkgdown site, citations, and

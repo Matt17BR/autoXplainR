@@ -1,6 +1,6 @@
 Package: AutoXplainR
 Title: Guided Model Fitting, Evaluation, and Explanation
-Version: 0.2.0
+Version: 0.3.0
 Authors@R:
     person(
       given = "Matteo",
@@ -20,7 +20,9 @@ Description: Guides first-time modelers through fitting, held-out evaluation,
     permutation importance, feature-dependence diagnostics, accumulated local
     effects, and provenance-rich evidence audits. Optional adapters support
     'H2O' AutoML, interactive 'Plotly' graphics, and evidence-constrained
-    narratives. Accumulated local effects follow Apley and Zhu (2020)
+    narratives. Whole-group and chronological holdouts preserve study
+    boundaries; paired evaluation bootstraps quantify fixed-model sampling
+    uncertainty. Accumulated local effects follow Apley and Zhu (2020)
     <doi:10.1111/rssb.12377>. Fitted model reliance and near-optimal-model
     comparisons draw on Fisher, Rudin, and Dominici (2019)
     <https://jmlr.org/papers/v20/18-760.html>. The separation of tuning from

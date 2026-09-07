@@ -75,11 +75,18 @@ explain_model <- function(model,
   }
 
   resolved_task <- if (identical(task, "auto")) detect_task(outcome) else task
-  validate_guided_target(outcome, resolved_task)
+  if (resolved_task == "regression") {
+    validate_guided_target(outcome, resolved_task)
+  } else if (!is.factor(outcome)) {
+    validate_guided_target(outcome, resolved_task)
+  }
   outcome_levels <- if (resolved_task %in% c("binary", "multiclass")) {
     if (is.factor(outcome)) levels(outcome) else sort(unique(as.character(outcome)))
   } else {
     NULL
+  }
+  if (identical(resolved_task, "multiclass") && length(outcome_levels) < 3L) {
+    stop("Multiclass evaluation requires at least three declared outcome levels.", call. = FALSE)
   }
   if (identical(resolved_task, "binary")) {
     if (length(outcome_levels) != 2L) {
