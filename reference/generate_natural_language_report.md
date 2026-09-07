@@ -90,9 +90,11 @@ generate_natural_language_report(
 
 - max_tokens:
 
-  Maximum response-token budget. The 4,000-token default leaves room for
-  reasoning tokens used by current Gemini models while the prompt still
-  limits the rendered memo to 500 words.
+  Maximum provider generation-token budget. Gemini reasoning and
+  response text share this budget, so completion is not guaranteed. The
+  default Gemini model requests low thinking. Generated content is
+  limited to 500 words; fixed interpretation notes are appended
+  afterward.
 
 - temperature:
 
