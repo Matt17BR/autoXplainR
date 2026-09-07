@@ -56,6 +56,13 @@ URLs were not yet deployed at that first check. Final archive and publication
 results are recorded below when the release gates finish; the earlier warning
 is not counted as a successful release check.
 
+A later remote package build exposed a false evidence mismatch when R retained
+source references. Source-file timestamps and caches were entering the model
+fingerprint. Those nonstatistical references are now removed while prediction
+code and model/evaluation content remain checked. Regressions cover source
+metadata changes, compilation and RDS reuse; the exact previously failing
+`R_KEEP_PKG_SOURCE=yes NOT_CRAN=true R CMD build --no-manual` command passes.
+
 ## Publication gates
 
 Main-branch checks precede the version tag. The tag workflow blocks publication

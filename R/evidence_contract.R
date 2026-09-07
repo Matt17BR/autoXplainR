@@ -9,6 +9,10 @@ model_identity_payload <- function(value) {
   # state is in the fitted object; formula code is retained without that session.
   if (is.environment(value)) return(list(environment = environmentName(value)))
   if (is.function(value)) {
+    # Source references include mutable srcfile environments (line caches,
+    # timestamps and paths). Loading source during a traceback or vignette
+    # build must not change the identity of otherwise identical executable code.
+    value <- utils::removeSource(value)
     return(list(formals = formals(value), body = body(value),
                 environment = environmentName(environment(value))))
   }
@@ -23,6 +27,7 @@ model_identity_payload <- function(value) {
     attributes(output) <- lapply(attributes(value), model_identity_payload)
     return(output)
   }
+  if (is.language(value)) value <- utils::removeSource(value)
   if (is.language(value) || is.pairlist(value)) {
     attr(value, ".Environment") <- NULL
   }

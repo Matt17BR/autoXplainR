@@ -101,6 +101,42 @@ test_that("changing adapter code invalidates evidence even at identical observed
                "same selected model explainers")
 })
 
+test_that("source metadata and compilation do not invalidate unchanged prediction evidence", {
+  predictor <- eval(parse(text = "function(newdata) { 2 * newdata$x }", keep.source = TRUE))
+  source_file <- attr(body(predictor), "srcfile")
+  d <- data.frame(x = seq_len(20), y = 2 * seq_len(20))
+  explainer <- explain_model(NULL, d, "y", label = "source", predict_function = predictor)
+  audit <- audit_explanations(explainer, n_repeats = 2)
+  fingerprint <- AutoXplainR:::current_explainer_fingerprint(explainer)
+  predictions <- predict(explainer, d)
+
+  # R's source retrieval can populate or modify this environment after fitting.
+  # Neither its timestamp nor its cached source text changes the parsed function.
+  source_file$timestamp <- source_file$timestamp + 1
+  source_file$lines <- c("# relocated source file", source_file$lines)
+  expect_identical(predict(explainer, d), predictions)
+  expect_identical(AutoXplainR:::current_explainer_fingerprint(explainer), fingerprint)
+  expect_silent(AutoXplainR:::validate_attached_audit(audit, list(source = explainer)))
+
+  explainer$predict_function <- compiler::cmpfun(explainer$predict_function)
+  expect_identical(predict(explainer, d), predictions)
+  expect_silent(AutoXplainR:::validate_attached_audit(audit, list(source = explainer)))
+  copy <- unserialize(serialize(explainer, NULL))
+  expect_silent(AutoXplainR:::validate_attached_audit(audit, list(source = copy)))
+})
+
+test_that("formula source references are not statistical model state", {
+  source_formula <- eval(parse(text = "mpg ~ wt", keep.source = TRUE))
+  fit <- lm(source_formula, data = mtcars)
+  source_ref <- attr(parse(text = "mpg ~ wt", keep.source = TRUE), "srcref")[[1L]]
+  attr(fit$terms, "srcref") <- source_ref
+  explainer <- explain_model(fit, mtcars, "mpg", label = "formula")
+  audit <- audit_explanations(explainer, n_repeats = 2)
+  source_file <- attr(source_ref, "srcfile")
+  source_file$timestamp <- source_file$timestamp + 1
+  expect_silent(AutoXplainR:::validate_attached_audit(audit, list(formula = explainer)))
+})
+
 
 test_that("console identifies scoped evidence findings and retained failures", {
   d <- data.frame(x = seq_len(100), proxy = seq_len(100) * 2 + sin(seq_len(100)),
