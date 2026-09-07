@@ -87,3 +87,27 @@ CI configuration on main now explicitly installs bit64 for H2O runs; this is an
 environment correction and does not change the tagged package code. These
 warnings concern data conversion speed, not failed predictions or statistical
 assertions.
+
+The [corrected remote H2O environment](https://github.com/Matt17BR/autoXplainR/actions/runs/34109406259)
+passed all 93 expectations with zero failures, warnings or skips. All seven
+workflows on main at `cda94e4` also completed successfully.
+
+## Published artifact verification
+
+Version 0.3.0 was published on 2026-09-07 at 10:09 UTC. Every release gate
+completed successfully. The exact release archive passed release R with both
+PDF and HTML manuals, and R-devel with `--no-manual --as-cran`. Both checks
+reported zero errors, zero warnings and one new-submission note.
+
+The published archive was downloaded again and passed `sha256sum --check`:
+
+```text
+66e2acd3711153eaea2234912bf1531116bde95f4dccee81b50f557324d0f273  AutoXplainR_0.3.0.tar.gz
+```
+
+It was byte-identical to the release artifact installed in a fresh local R
+library. A clean R session loaded version 0.3.0 from that library, generated an
+HTML report with one `autoxplain()` call, predicted three raw rows without the
+outcome column, and serialized `evidence_summary()` to valid JSON. Package code
+on main remains identical to the version tag; subsequent changes record these
+checks and correct the optional CI helper dependency.
