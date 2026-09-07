@@ -3,7 +3,7 @@
 Fit several models, compare their predictions and costs, and explore the data
 behind their behavior with one R command.
 
-[![AutoXplainR model comparison tab showing held-out scores and measured costs](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
+[![AutoXplainR model comparison with fitted settings, held-out scores and a cost-performance Pareto frontier](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
 
 *Start with the models: how well do they predict, and what do they cost?
 Preview uses synthetic data.
@@ -53,13 +53,18 @@ effects, predictions, checks and methods. Controls sit beside the values they
 change; supporting explanations use **?** buttons and expandable details. Help
 works on hover, keyboard focus and tap. Each screenshot below comes from the
 same reproducible synthetic delivery example using the default model search.
+The images show a focused working view; click one to explore its report tab.
 
 ### Compare models
 
 Read scores beside measured costs. The primary model is compared with the
 baseline, including a paired evaluation-sample interval when supported. Change
-the score or resource axis to inspect the tradeoff; points carry model names. The **CV choice** label records training selection;
-the best score on the held-out rows can belong to another model.
+the score or resource axis to inspect the tradeoff; points carry model names.
+The dashed **Pareto frontier** shows the best observed score available within
+each resource budget. Outlined points have no alternative that is at least as
+good on both displayed axes and better on one. The **CV choice** label records
+training selection; the best score on the held-out rows can belong to another
+model.
 
 For a more useful timing comparison, run a repeated benchmark on a common batch:
 
@@ -72,14 +77,12 @@ The report shows median prediction cost and repeat variation, with batch size,
 timer resolution and measurement scope. It keeps the original fit and prediction
 readings separate. Batch cost per row is not the latency of a single-row request.
 
-[![Model comparison with scores, measured costs and a performance versus model size plot](man/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
-
 ### Explore inputs and fitted patterns
 
 Switch models, then click an importance bar to select its fitted curve. The
 report keeps the model, feature and prediction target explicit.
 
-[![Feature tab with model selection, ranked importance bars and a selected fitted curve](man/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
+[![Feature importance beside linear and neural model curves on shared axes, with data support](man/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
 
 ### See exactly what was fitted
 
@@ -100,7 +103,7 @@ threshold, parameter meanings, searched ranges and settings that failed.
 The preset grid is a practical starting search, not an optimal configuration
 claimed from the literature.
 
-[![Model selection with searched settings, cross-validation scores and retained-fit provenance](man/figures/model-selection.png)](https://matt17br.github.io/autoXplainR/model-report.html#selection)
+[![Decision-tree search rationale, seven parameter settings and their cross-validation fold losses](man/figures/model-selection.png)](https://matt17br.github.io/autoXplainR/model-report.html#selection)
 
 ### Explore the underlying data
 
@@ -109,7 +112,7 @@ patterns across training and evaluation. Switch between supplied values and the
 values used by models to see what preprocessing changed. Aggregate profiles use
 the full available data.
 
-[![Data explorer comparing distributions and missing values before and after preprocessing](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
+[![Parcel-weight distributions and missing values in the training and evaluation data](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
 
 Individual records require an explicit export:
 

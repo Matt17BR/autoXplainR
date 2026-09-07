@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, math, argparse, os
+import json, math, argparse, os, subprocess
 from report_geometry import effect_geometry, cost_geometry, label_collisions
 from playwright.sync_api import sync_playwright
 parser=argparse.ArgumentParser(description="Check independent hand-chart oracles, label geometry and no-JavaScript readability.")
@@ -124,6 +124,14 @@ with sync_playwright() as p:
  check('deliberately overlapping labels are rejected independently of correct numeric geometry',
        not rejected and isinstance(evidence,dict) and bool(evidence.get('overlapping_model_labels')),evidence)
  page.close();browser.close()
+frontier = subprocess.run([os.sys.executable, str(Path(__file__).with_name('check-frontier-fixture.py')),
+    '--case-dir', str(base), '--output-dir', str(args.output_dir/'frontier')], capture_output=True, text=True)
+check('independent frontier membership, budget steps, numeric axes and incorrect-path mutations',
+      frontier.returncode == 0, frontier.stdout + frontier.stderr if frontier.returncode else None)
+scale = subprocess.run([os.sys.executable, str(Path(__file__).with_name('check-cost-scale.py')),
+    '--case-dir', str(base), '--output-dir', str(args.output_dir/'cost-scale')], capture_output=True, text=True)
+check('linear and log cost axes preserve measurements, frontier, controls and print state',
+      scale.returncode == 0, scale.stdout + scale.stderr if scale.returncode else None)
 (args.output_dir/'chart-fixture-checks.json').write_text(json.dumps(checks,indent=2));print(json.dumps({'checks':len(checks),'failures':[x for x in checks if not x['pass_']]},indent=2))
 
 raise SystemExit(0 if all(x["pass_"] for x in checks) else 1)

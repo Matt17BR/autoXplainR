@@ -86,14 +86,14 @@ explorer_baseline_comparison <- function(result, models) {
     report_number(difference), "</strong><span>",
     if (metric %in% higher_is_better_metrics()) "Positive favors the model" else "Negative favors the model",
     "</span></dd></div></dl>",
-    '<p class="baseline-interval">', html_escape(interval), "</p>",
+    '<p class="baseline-interval print-help">', html_escape(interval),
     if (!is.null(value)) {
-      paste0(
-        '<p class="baseline-scope">Evaluation-sample uncertainty for these fixed models; ',
-        "fitting and selection uncertainty are excluded. ",
-        "The interval compares the retained primary model with the reference; it does not rank alternatives.</p>"
-      )
+      explorer_help("Scope of the paired interval", paste(
+        "Evaluation-sample uncertainty for these fixed models; fitting and selection uncertainty are excluded.",
+        "The interval compares the retained primary model with the reference; it does not rank alternatives."
+      ))
     },
+    "</p>",
     if (length(important)) {
       paste0(
         '<p class="baseline-caution">',

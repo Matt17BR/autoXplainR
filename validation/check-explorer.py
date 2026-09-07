@@ -185,6 +185,16 @@ with sync_playwright() as playwright:
                           curve_panel.locator('svg').count() == 1 or curve_panel.locator('.empty-state,.diagnostic-state').count() > 0)
                     curve = curves.get(model_id, {}).get(row['feature'])
                     if curve:
+                        figure = curve_panel.get_by_role('figure')
+                        caption = figure.locator('figcaption').text_content() if figure.count() == 1 else ''
+                        method = 'ALE' if 'accumulated_effect' in curve else 'PDP'
+                        target = class_name or (oracle['prediction_source'][model_id]['positive']
+                                                if oracle['task'] == 'binary' else None)
+                        caption_identifies_curve = (method in caption and row['feature'] in caption
+                                                    and (target is None or f'`{target}`' in caption))
+                        check(f'{case}/{model_id}/{row["feature"]}/{class_name}: visible figure identifies method, input and prediction class',
+                              caption_identifies_curve and curve_panel.get_by_role('figure', name=caption, exact=True).count() == 1,
+                              caption)
                         shown = curve_panel.locator('table tbody tr').evaluate_all(
                             'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))')
                         label=next(item['model'] for item in oracle['table'] if item['model_id']==model_id)

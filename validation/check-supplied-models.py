@@ -117,7 +117,44 @@ with sync_playwright() as p:
             check('benchmark accessibility '+str(width),not violations,violations)
         page.screenshot(path=str(args.output_dir/f'benchmark-{width}.png'),full_page=True)
         if width==1440:
+            page.evaluate("""()=>{
+              window.AutoXplainRReport.selectModel('challenger');
+              window.printScreenState=window.AutoXplainRReport.getState();
+              window.printScreenLinks=[...document.querySelectorAll('a[href^="#"]')]
+                .map(link=>({link,href:link.getAttribute('href')}));
+              window.printExternalLinks=[...document.querySelectorAll('a[href^="https:"]')]
+                .map(link=>({link,href:link.getAttribute('href')}));
+              // Registered after production handlers: simulate a print redraw
+              // introducing an SVG link after the shared print handler ran.
+              addEventListener('beforeprint',()=>{
+                const probe=document.createElement('div');probe.id='print-link-probe';
+                probe.innerHTML='<svg width="300" height="25"><a href="#absent-print-target">'+
+                  '<text x="0" y="18">Printed model shortcut</text></a></svg>'+
+                  '<p><a href="https://doi.org/10.1214/aos/1176344136">External statistical reference</a></p>';
+                document.body.append(probe);
+                queueMicrotask(()=>{window.printLinkObserved={
+                  fragments:document.querySelectorAll('a[href^="#"]').length,
+                  lateText:probe.querySelector('svg').textContent,
+                  citation:probe.querySelector('p a').getAttribute('href'),
+                  state:window.AutoXplainRReport.getState()
+                };});
+              },{once:true});
+            }""")
             page.pdf(path=str(args.output_dir/'benchmark.pdf'),format='A4',print_background=True)
+            settled(page)
+            printed=page.evaluate('window.printLinkObserved')
+            check('print removes fragment destinations including later SVG redraws',
+                  printed['fragments']==0 and printed['lateText']=='Printed model shortcut',printed)
+            check('print preserves selected model and views',page.evaluate('''()=>
+              JSON.stringify(window.printScreenState)===JSON.stringify(window.printLinkObserved.state) &&
+              JSON.stringify(window.printScreenState)===JSON.stringify(window.AutoXplainRReport.getState())'''))
+            check('print restores original fragment links and later SVG links',page.evaluate('''()=>
+              window.printScreenLinks.length>0 && window.printScreenLinks.every(({link,href})=>link.getAttribute('href')===href) &&
+              document.querySelector('#print-link-probe svg a').getAttribute('href')==='#absent-print-target' '''))
+            check('external citations keep their destinations during and after print',page.evaluate('''()=>
+              window.printLinkObserved.citation==='https://doi.org/10.1214/aos/1176344136' &&
+              window.printExternalLinks.every(({link,href})=>link.getAttribute('href')===href)'''))
+            page.locator('#print-link-probe').evaluate('node=>node.remove()')
         page.close()
     for mode in ['none','summary']:
         page=browser.new_page();page.goto((args.case_dir/f'supplied-binary-{mode}.html').resolve().as_uri());settled(page)
@@ -133,8 +170,12 @@ with sync_playwright() as p:
     slider.fill('56');slider.dispatch_event('input');slider.focus();page.keyboard.press('ArrowRight')
     check('keyboard reaches exact0.57 boundary',slider.input_value()=='57' and page.locator('[data-cutoff-metric="fp"]').text_content()=='1')
     page.close();browser.close()
-pdf_xml=subprocess.check_output(['pdftohtml','-xml','-stdout','-zoom','1',str(args.output_dir/'benchmark.pdf')],text=True)
-root=ET.fromstring(pdf_xml)
+pdf_result=subprocess.run(['pdftohtml','-xml','-stdout','-zoom','1',str(args.output_dir/'benchmark.pdf')],
+                          text=True,capture_output=True,check=True)
+check('printed report has no broken named destinations','Bad named destination' not in pdf_result.stderr,pdf_result.stderr)
+root=ET.fromstring(pdf_result.stdout)
+check('printed PDF preserves a usable external citation',
+      any(node.attrib.get('href')=='https://doi.org/10.1214/aos/1176344136' for node in root.iter('a')))
 fonts={node.attrib['id']:float(node.attrib['size']) for node in root.iter('fontspec')}
 printed=[(''.join(node.itertext()),fonts[node.attrib['font']]) for node in root.iter('text')
          if 'Repeated prediction' in ''.join(node.itertext()) or 'Median ms' in ''.join(node.itertext())]

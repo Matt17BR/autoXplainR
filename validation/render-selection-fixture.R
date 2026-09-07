@@ -54,20 +54,38 @@ result <- structure(list(task = "regression", tuning = tuning, provenance = list
   class = "autoxplain_result"
 )
 asset <- function(path) paste(readLines(path, warn = FALSE), collapse = "\n")
-html <- paste0(
+fixture_html <- function(result) paste0(
   '<!doctype html><html lang="en"><meta charset="utf-8">',
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
   "<title>Selection arithmetic fixture</title><style>",
-  report_css(), asset("inst/report/selection.css"),
-  "body{padding:14px}#selection{max-width:1100px;margin:auto}</style><body>",
+  report_css(), asset("inst/report/explorer.css"), asset("inst/report/selection.css"),
+  'body{padding:14px}#selection{max-width:1100px;margin:auto}</style><body class="explorer">',
   "<p>Synthetic acceptance fixture: these are hand-specified losses, not fitted-model performance claims.</p>",
-  render_model_selection(result), "<script>", asset("inst/report/selection.js"), "</script></body></html>"
+  render_model_selection(result),
+  '<section class="workspace-page" id="validation"><h2>Checks</h2>',
+  '<a id="failed-cv-link" href="#selection-detail-6e657572616c5f3032" data-navigate>',
+  'Neural network neural_02: inspect failed CV folds</a></section>',
+  "<script>", asset("inst/report/explorer.js"),
+  "</script><script>", asset("inst/report/selection.js"), "</script></body></html>"
 )
-writeLines(html, file.path(output, "selection-oracle.html"))
+writeLines(fixture_html(result), file.path(output, "selection-oracle.html"))
 writeLines(
   as.character(jsonlite::toJSON(list(candidates = candidates, folds = folds),
     dataframe = "rows", auto_unbox = TRUE, na = "null", digits = 16
   )),
   file.path(output, "selection-source.json")
 )
+# A second declared decision uses the known lowest-loss neural configuration for
+# both policy and final fit. It exercises the compact exact-agreement case; the
+# original fixture must continue to show its three genuinely different choices.
+agreed <- result
+agreed$tuning$candidates$selected <- agreed$tuning$candidates$configuration_id == "neural_01"
+agreed$tuning$selection <- tuning_selection_record(agreed$tuning$candidates, "neural_01", "min", "rmse")
+agreed$tuning$selected_configuration <- "neural_01"
+agreed$tuning$final_configuration <- "neural_01"
+agreed$tuning$selection_rule <- "min"
+agreed$tuning$refit <- list(fallback_used = FALSE, status = "ok", attempts = data.frame(
+  configuration_id = "neural_01", status = "ok", optimization_status = "converged", error = ""
+))
+writeLines(fixture_html(agreed), file.path(output, "selection-agreement.html"))
 cat(file.path(output, "selection-oracle.html"), "\n")

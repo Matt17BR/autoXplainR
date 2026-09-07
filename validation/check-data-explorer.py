@@ -181,7 +181,7 @@ def chart_layout(page):
     )
     return page.evaluate(
         """() => {
-      const visible = node => node.getBoundingClientRect().width > 0 && !node.closest('details:not([open])');
+      const visible = node => node.getBoundingClientRect().width > 0 && node.checkVisibility({checkVisibilityCSS:true});
       const svgs = [...document.querySelectorAll('#data svg')].filter(visible).filter(n=>!n.closest('.data-plot-scroll'));
       const overflow = svgs.filter(n=>{let r=n.getBoundingClientRect();return r.left < -1 || r.right > innerWidth+1}).map(n=>n.getAttribute('aria-label'));
       const clipped=[],small=[];
@@ -197,6 +197,49 @@ def chart_layout(page):
       return {overflow,clipped,small,elementOverflow,pageOverflow:document.documentElement.scrollWidth>innerWidth};
     }"""
     )
+
+
+def mobile_column_tasks(browser, path, prefix):
+    page = browser.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
+    page.goto(path.as_uri() + "#data")
+    selector = page.locator("#data-column-select")
+    initial = selector.input_value()
+    values = selector.locator("option").evaluate_all("nodes=>nodes.map(n=>n.value)")
+    alternate = next(value for value in values if value != initial)
+    check(prefix + ": compact mobile column control is available",
+          selector.is_visible() and not page.locator(".data-column-list").is_visible())
+    selector.select_option(alternate)
+    check(prefix + ": mobile column choice updates heading and distribution",
+          page.locator("#data-variable-title").inner_text() == alternate
+          and page.locator("#data-distribution svg").get_attribute("aria-label") == "Distribution of " + alternate)
+    selector.select_option(initial)
+    check(prefix + ": mobile column choice can return to the outcome",
+          page.locator("#data-variable-title").inner_text() == initial)
+    for width in (390, 320):
+        page.set_viewport_size({"width": width, "height": 844})
+        help_button = page.locator('[aria-controls="data-distribution-note"]')
+        help_button.focus()
+        check(prefix + f": histogram help is readable by keyboard at {width}px",
+              page.locator("#data-distribution-note").is_visible()
+              and "Percentages use all rows in each split" in page.locator("#data-distribution-note").inner_text()
+              and not chart_layout(page)["elementOverflow"])
+        page.keyboard.press("Escape")
+        check(prefix + f": histogram help can be dismissed at {width}px",
+              not page.locator("#data-distribution-note").is_visible())
+        selector.focus()
+    page.set_viewport_size({"width": 1440, "height": 1000})
+    page.locator('[data-column-name=' + json.dumps(alternate) + ']').click()
+    check(prefix + ": desktop selection synchronizes the mobile control",
+          selector.input_value() == alternate)
+    page.set_viewport_size({"width": 390, "height": 844})
+    check(prefix + ": selected column survives a viewport change",
+          selector.is_visible() and selector.input_value() == alternate
+          and page.locator("#data-variable-title").inner_text() == alternate)
+    help_button.focus()
+    page.locator("#data-distribution-note").evaluate("node=>{node.style.left='-400px'}")
+    check(prefix + ": negative control rejects a visibly clipped tooltip",
+          "SPAN:data-distribution-note" in chart_layout(page)["elementOverflow"])
+    page.close()
 
 
 def mutation_checks(browser):
@@ -649,6 +692,7 @@ with sync_playwright() as p:
                 )
             check(prefix + ": browser errors", not errors, errors)
             page.close()
+            mobile_column_tasks(b, folder / (kind + "-" + mode + ".html"), prefix)
     if "messy-regression" in args.cases:
         mutation_checks(b)
     version = b.version

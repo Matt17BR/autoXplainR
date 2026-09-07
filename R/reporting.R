@@ -240,15 +240,53 @@ pretty_complexity <- function(metric) {
   if (metric %in% names(labels)) unname(labels[[metric]]) else gsub("_", " ", metric)
 }
 
-render_guided_notes <- function(notes) {
+render_guided_notes <- function(notes, result = NULL) {
   if (is.null(notes) || !nrow(notes)) {
     return("")
   }
+  selection <- if (!is.null(result) && any(notes$code == "tuning_family_resampling_failed")) {
+    tuning_evidence(result)
+  } else {
+    NULL
+  }
   items <- vapply(seq_len(nrow(notes)), function(index) {
+    message <- html_escape(notes$message[[index]])
+    recommendation <- html_escape(notes$recommendation[[index]])
+    command <- ""
+    if (identical(notes$code[[index]], "tuning_family_resampling_failed") &&
+          identical(selection$status, "computed") && length(selection$family_failures$resampling)) {
+      families <- selection$family_failures$resampling
+      candidates <- selection$candidates
+      failed <- candidates[candidates$family %in% families & candidates$status != "ok", , drop = FALSE]
+      families <- intersect(families, failed$family)
+      if (length(families)) {
+        labels <- vapply(families, selection_family_label, character(1), task = result$task)
+        message <- paste0(
+          "Every configuration failed in at least one training-only fold for: ",
+          html_escape(paste(labels, collapse = ", ")), "."
+        )
+        links <- vapply(seq_along(families), function(i) {
+          rows <- failed[failed$family == families[[i]], , drop = FALSE]
+          paste0(
+            '<a href="#selection-detail-', report_anchor(rows$configuration_id[[1L]]),
+            '" data-navigate>Inspect ', html_escape(labels[[i]]), " fold failures</a>",
+            if (nrow(rows) > 1L) paste0(" (first of ", nrow(rows), " configurations)")
+          )
+        }, character(1))
+        recommendation <- paste0(
+          paste(links, collapse = "; "),
+          ". These families were excluded from selection because their cross-validation evidence is incomplete."
+        )
+        command <- paste0(
+          '<details class="guided-note-command"><summary>Inspect in R</summary>',
+          "<pre><code>tuning_results(result)$fold_scores$error</code></pre></details>"
+        )
+      }
+    }
     paste0(
       "<article class=\"guided-note guided-note-", html_escape(notes$severity[[index]]), "\">",
-      "<h3>", html_escape(notes$message[[index]]), "</h3><p><strong>Next step:</strong> ",
-      html_escape(notes$recommendation[[index]]), "</p></article>"
+      "<h3>", message, "</h3><p><strong>Next step:</strong> ",
+      recommendation, "</p>", command, "</article>"
     )
   }, character(1))
   paste0(
@@ -280,11 +318,11 @@ render_missingness_shift <- function(shift) {
     display$evaluation_missing_rate, format_percent, character(1)
   )
   display$rate_change <- vapply(display$rate_change, function(value) {
-    paste0(if (value > 0) "+" else "", format_percent(value))
+    paste0(if (value > 0) "+" else "", sub("%", "", format_percent(value), fixed = TRUE))
   }, character(1))
   names(display) <- c(
     "Input", "Used by model?", "Training missing", "Evaluation missing",
-    "Change", "Flagged?"
+    "Change (pp)", "Flagged?"
   )
   verdict <- if (shift$n_flagged_model_features > 0L) {
     paste0(
@@ -309,13 +347,16 @@ render_missingness_shift <- function(shift) {
     ),
     metric_card(
       "Flagged model inputs", as.character(shift$n_flagged_model_features),
-      paste0("At least ", format_percent(shift$threshold), " absolute change")
+      paste0("At least ", sub("%", "", format_percent(shift$threshold), fixed = TRUE), " percentage points")
     ),
     metric_card(
-      "Largest observed shift", format_percent(shift$largest_shift),
-      "Absolute training-versus-evaluation difference"
+      "Largest observed shift", sub("%", " pp", format_percent(shift$largest_shift), fixed = TRUE),
+      "Absolute difference in percentage points"
     ),
-    "</div>", verdict, html_table(display, digits = 3L),
+    "</div>", verdict, html_table(
+      display, digits = 3L,
+      caption = "Raw missing-value rates before preprocessing; change is in percentage points (pp)"
+    ),
     "<p class=\"microcopy\">", html_escape(shift$scope_note), "</p>"
   )
 }
@@ -431,9 +472,33 @@ render_reliability_section <- function(audit, result = NULL) {
     render_findings(attention, audit, result),
     '<details class="advanced"><summary>Diagnostic coverage and association evidence</summary>', status_html, model_summary,
     "<p>", html_escape(audit$summary$scope_note %||% "Each check has its own scope. No overall model-quality grade is assigned."), "</p>",
+    render_candidate_importance_ranges(audit, result),
     "<h3>Feature association diagnostics</h3>", html_table(audit$dependence, 3L, caption = "Feature association screen"),
     '<p class="microcopy">', html_escape(audit$summary$association_scope %||% "A limited association screen does not establish independence."),
     "</p></details></section>"
+  )
+}
+
+render_candidate_importance_ranges <- function(audit, result = NULL) {
+  ranges <- audit$explanation_agreement$importance_ranges
+  if (is.null(ranges) || !nrow(ranges)) return("")
+  candidates <- audit$performance$model[audit$performance$near_optimal %in% TRUE]
+  if (length(candidates) < 2L) return("")
+  labels <- if (is.null(result)) {
+    candidates
+  } else {
+    vapply(candidates, function(id) explorer_label(result, id), character(1))
+  }
+  table <- ranges[c("feature", "min_importance", "max_importance", "mean_importance")]
+  names(table) <- c("Input", "Lowest", "Highest", "Mean")
+  metric_id <- audit$config$metric %||% result$evaluation$primary_metric %||% "loss"
+  metric <- pretty_metric(metric_id)
+  direction <- if (metric_id %in% c("accuracy", "auc")) "Decrease in" else "Increase in"
+  paste0(
+    '<div id="candidate-importance-ranges"><h3>How feature importance varies across candidates</h3>',
+    "<p>", html_escape(paste(labels, collapse = "; ")), ".</p>",
+    html_table(table, digits = 4L, caption = paste(direction, metric, "when each input is shuffled")),
+    '<p class="microcopy">Ranges cover the supplied near-optimal candidates. They are not confidence intervals or bounds over all possible models.</p></div>'
   )
 }
 
@@ -585,8 +650,13 @@ render_findings <- function(findings, audit = NULL, result = NULL) {
   if (is.null(findings) || !nrow(findings)) {
     return("<p>No diagnostic findings were recorded. Review the coverage below; an absent finding is not a guarantee.</p>")
   }
+  has_candidate_ranges <- !is.null(result) && nzchar(render_candidate_importance_ranges(audit, result))
   cards <- vapply(seq_len(nrow(findings)), function(i) {
     links <- ""
+    action <- html_escape(findings$recommendation[[i]])
+    if (identical(findings$code[[i]], "rashomon_disagreement") && has_candidate_ranges) {
+      action <- '<a href="#candidate-importance-ranges" data-navigate>Compare feature-importance ranges across the supplied candidates.</a>'
+    }
     model <- if ("model" %in% names(findings)) findings$model[[i]] else NA_character_
     feature <- if ("feature" %in% names(findings)) findings$feature[[i]] else NA_character_
     if (!is.na(model) && !is.na(feature) && nzchar(model) && nzchar(feature)) {
@@ -619,7 +689,7 @@ render_findings <- function(findings, audit = NULL, result = NULL) {
     paste0(
       '<article class="finding finding-', html_escape(findings$severity[[i]]), '">',
       "<h3>", html_escape(findings$message[[i]]), "</h3>", if (nzchar(links)) paste0('<p class="affected">Affected evidence: ', links, "</p>") else "",
-      "<p>", html_escape(findings$evidence[[i]]), "</p><p><strong>Next:</strong> ", html_escape(findings$recommendation[[i]]),
+      "<p>", html_escape(findings$evidence[[i]]), "</p><p><strong>Next:</strong> ", action,
       "</p></article>"
     )
   }, character(1))
@@ -774,7 +844,7 @@ render_effect_failures <- function(result) {
   )
 }
 
-render_performance_uncertainty <- function(uncertainty, record = NULL) {
+render_performance_uncertainty <- function(uncertainty, record = NULL, result = NULL) {
   if (is.null(uncertainty)) {
     return(paste0(
       '<section id="uncertainty"><h2>Evaluation-sample uncertainty</h2>',
@@ -787,12 +857,34 @@ render_performance_uncertainty <- function(uncertainty, record = NULL) {
       }, "</section>"
     ))
   }
+  metric <- uncertainty$metric %||% result$evaluation$primary_metric %||% "score"
+  units <- if (metric %in% c("rmse", "mae")) result$provenance$target_units else NULL
+  metric_label <- paste0(pretty_metric(metric), if (length(units) && nzchar(units)) paste0(" (", units, ")"))
+  primary <- explorer_label(result, uncertainty$primary_model_id %||% "primary")
+  reference <- explorer_label(result, uncertainty$reference_model_id %||% "reference")
+  estimates <- uncertainty$estimates
+  labels <- c(primary = paste0(primary, " (primary)"), baseline = paste0(reference, " (reference)"),
+              difference = "Primary minus reference")
+  table <- data.frame(
+    comparison = unname(labels[estimates$quantity]), estimate = estimates$estimate,
+    interval = vapply(seq_len(nrow(estimates)), function(i) {
+      paste(report_number(estimates$lower[[i]]), "to", report_number(estimates$upper[[i]]))
+    }, character(1)), check.names = FALSE
+  )
+  names(table) <- c("Model or comparison", "Estimate", paste(format_percent(uncertainty$confidence), "interval"))
+  notes <- uncertainty$notes
+  important <- grepl("Fewer than|degenerate|reused", notes)
+  assumptions <- notes[!important & !startsWith(notes, "Paired percentile intervals conditional on the fitted models;")]
   paste0(
     "<section id=\"uncertainty\" aria-labelledby=\"uncertainty-title\"><h2 id=\"uncertainty-title\">How variable is this score?</h2>",
-    "<p>Paired ", format_percent(uncertainty$confidence), " percentile intervals from ",
-    uncertainty$n_boot, " bootstrap draws over ", uncertainty$units, " ", uncertainty$unit,
-    "s. Negative differences favor the primary model.</p>",
-    html_table(uncertainty$estimates),
-    "<p class=\"microcopy\">", html_escape(paste(uncertainty$notes, collapse = " ")), "</p></section>"
+    html_table(table, caption = paste0(
+      metric_label, " \u00b7 ", uncertainty$units, " evaluation ",
+      uncertainty$unit, if (uncertainty$units != 1L) "s"
+    )),
+    '<p class="microcopy">Negative differences favor ', html_escape(primary), ".</p>",
+    if (any(important)) paste0('<p class="baseline-caution">', html_escape(paste(notes[important], collapse = " ")), "</p>"),
+    '<details class="uncertainty-method"><summary>Interval method and assumptions</summary>',
+    "<p>Paired percentile intervals conditional on the fitted models, from ", uncertainty$n_boot,
+    " bootstrap draws. ", html_escape(paste(assumptions, collapse = " ")), "</p></details></section>"
   )
 }

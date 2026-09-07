@@ -7,6 +7,7 @@ library(xgboost)
 source <- readRDS(file.path(output,'source-and-result.rds'))
 result <- source$result
 observed <- jsonlite::read_json(file.path(output,'detail-observations-before-oracles.json'))
+stopifnot(setequal(names(observed$predictions), c('main_model', 'boosting_model', 'forest_model')))
 row_map <- result$data_context$row_map
 rows <- row_map[row_map$partition=='evaluation' & row_map$retained, ]
 rows <- rows[order(rows$processed_position), ]
@@ -63,11 +64,12 @@ stopifnot(abs(threshold-result$tuning$selection$threshold)<1e-12,cv$cv_rmse[1]<=
 # GAM is additive: differences along its reported load grid must equal direct
 # native predictions at those coordinates, independent of ALE centering.
 curve <- read.csv(file.path(output,'observed-gam-curve.csv'))
+stopifnot(nrow(curve) >= 3L, all(is.finite(curve$load_tonnes)), all(is.finite(curve$effect)))
 new_data <- raw_evaluation[rep(1L,nrow(curve)), ]
 new_data$load_tonnes <- curve$load_tonnes
 prediction <- native('main_model',new_data)
 curve_error <- max(abs((curve$effect-curve$effect[1])-(prediction-prediction[1])))
-stopifnot(curve_error < 1e-5)
+stopifnot(is.finite(curve_error), curve_error < 1e-5)
 answers$gam_curve <- list(max_difference_error=curve_error,peak_load=curve$load_tonnes[which.max(curve$effect)],
   trough_load=curve$load_tonnes[which.min(curve$effect)],interpretation='A rise, fall and partial recovery; no monotone trend was inferred.')
 answers$selection <- list(cv=cv,threshold=threshold,selected=result$tuning$selected_configuration,final=result$tuning$final_configuration)

@@ -30,14 +30,28 @@ render_model_selection <- function(result) {
       )
     )
   }
-  cards <- paste0(
-    '<div class="cards selection-decision">', card("Lowest CV loss", best),
-    card("Policy choice", picked), card(
-      "Final primary fit", final,
-      if (identical(final$configuration_id, picked$configuration_id)) "(same configuration)" else "(refit fallback)"
-    ),
-    "</div>"
-  )
+  agreed <- identical(best$configuration_id, picked$configuration_id) &&
+    identical(picked$configuration_id, final$configuration_id)
+  cards <- if (agreed) {
+    settings <- paste(selection_family_label(final$family, evidence$task), "\u00b7",
+      selection_short_parameters(final, evidence)
+    )
+    paste0(
+      '<div class="selection-agreed"><strong>',
+      html_escape(paste(report_number(final$cv_score, 4), pretty_metric(evidence$metric))), "</strong><span>",
+      html_escape(settings), "</span>",
+      "<small>Lowest CV loss, policy choice and final fit are the same configuration.</small></div>"
+    )
+  } else {
+    paste0(
+      '<div class="cards selection-decision">', card("Lowest CV loss", best),
+      card("Policy choice", picked), card(
+        "Final primary fit", final,
+        if (identical(final$configuration_id, picked$configuration_id)) "(same configuration)" else "(refit fallback)"
+      ),
+      "</div>"
+    )
+  }
   threshold <- if (identical(decision$rule, "one_se")) {
     paste0(
       "Eligible loss \u2264 ", report_number(decision$best_score, 6), " + ",
@@ -76,7 +90,9 @@ render_model_selection <- function(result) {
     paste0(
       '<div class="selection-family" data-selection-family="', html_escape(family), '">',
       selection_family_rationale(family, evidence), selection_candidate_plot(rows, evidence),
-      selection_candidate_table(rows, evidence), "</div>"
+      '<details class="selection-precision"><summary>Exact settings and CV scores \u00b7 ',
+      nrow(rows), if (nrow(rows) == 1L) " configuration" else " configurations", "</summary>",
+      selection_candidate_table(rows, evidence), "</details></div>"
     )
   }, character(1))
   details <- vapply(seq_len(nrow(candidates)), function(index) {
@@ -92,8 +108,8 @@ render_model_selection <- function(result) {
     '<select id="selection-family-filter">', options, '<option value="all">All families</option></select>',
     ' <span id="selection-visible-count" role="status" aria-live="polite"></span></div>',
     "<noscript><style>@media(max-width:650px){.selection-chart-wrap,.selection-chart-help{display:none}}</style>",
-    "<p>On a small display, JavaScript enables the chart. All candidate and fold numbers ",
-    "are available in the tables and expandable details below.</p></noscript>",
+    "<p>All candidate and fold numbers are available under Exact settings and CV scores ",
+    "and in the expandable fold details below.</p></noscript>",
     paste(family_views, collapse = ""),
     '<div class="selection-fold-details">', paste(details, collapse = ""), "</div>",
     '<details class="advanced"><summary>Exact selection arithmetic and preference order</summary>',
@@ -344,7 +360,7 @@ selection_candidate_plot <- function(candidates, evidence) {
   left <- 285
   right <- 710
   x <- function(value) left + (value - limits[1L]) / diff(limits) * (right - left)
-  height <- 72 + 34 * nrow(candidates)
+  height <- 72 + 38 * nrow(candidates)
   ticks <- pretty(limits, n = 4)
   ticks <- ticks[ticks >= limits[1L] & ticks <= limits[2L]]
   grid <- paste(vapply(ticks, function(tick) {
@@ -357,7 +373,7 @@ selection_candidate_plot <- function(candidates, evidence) {
   }, character(1)), collapse = "")
   rows <- vapply(seq_len(nrow(candidates)), function(index) {
     candidate <- candidates[index, , drop = FALSE]
-    y <- 31 + (index - 1L) * 34
+    y <- 31 + (index - 1L) * 38
     id <- candidate$configuration_id
     fold_scores <- folds$score[folds$configuration_id == id]
     fold_scores <- fold_scores[is.finite(fold_scores)]
@@ -373,6 +389,21 @@ selection_candidate_plot <- function(candidates, evidence) {
       if (isTRUE(candidate$lowest_cv)) "lowest CV",
       if (isTRUE(candidate$selected)) "policy", if (isTRUE(candidate$final_fit)) "final"
     )
+    status <- if (candidate$status != "ok") {
+      "failed"
+    } else {
+      paste(c(
+        if (isTRUE(candidate$final_fit)) "primary" else if (isTRUE(candidate$selected)) "policy choice" else
+          if (isTRUE(candidate$lowest_cv)) "lowest CV" else
+            if (!is.na(candidate$retained_model_id %||% NA_character_)) "retained",
+        if (isTRUE(candidate$within_threshold)) "eligible" else "outside limit"
+      ), collapse = " \u00b7 ")
+    }
+    target <- paste0("selection-detail-", report_anchor(id))
+    description <- paste(
+      candidate$hyperparameters, "; pooled CV loss", report_number(candidate$cv_score, 6),
+      ";", paste(labels, collapse = ", "), status, "; open fold details"
+    )
     score <- if (is.finite(candidate$cv_score)) {
       paste0(
         '<circle class="selection-score-point', if (isTRUE(candidate$selected)) " selection-picked",
@@ -383,21 +414,33 @@ selection_candidate_plot <- function(candidates, evidence) {
       ""
     }
     paste0(
+      '<a class="selection-plot-link" href="#', target, '" data-selection-inspect="', target,
+      '" aria-label="', html_escape(description), '">',
       '<g class="selection-plot-row" data-row="', index - 1L,
-      '"><text class="tick selection-row-label" x="8" y="', y + 4,
+      '"><rect class="selection-row-hit" x="0" y="', y - 17, '" width="920" height="36"/>',
+      '<text class="tick selection-row-label" x="8" y="', y + 4,
       '"><title>', html_escape(candidate$hyperparameters), "</title>",
       "<tspan>", html_escape(selection_short_parameters(candidate, evidence)), "</tspan></text>", points, score,
-      '<text class="selection-role" x="725" y="', y + 4, '">',
-      html_escape(if (candidate$status != "ok") "failed" else paste(labels, collapse = " / ")), "</text></g>"
+      '<text class="selection-role" x="725" y="', y - 3, '">',
+      '<tspan class="selection-score-label">', report_number(candidate$cv_score, 4), "</tspan>",
+      '<tspan class="selection-status-label" x="725" dy="15">', html_escape(status),
+      "</tspan></text></g></a>"
     )
   }, character(1))
   threshold <- x(evidence$selection$threshold)
   paste0(
-    '<p class="selection-chart-help">Filled dots: pooled CV loss. Open dots: fold losses. Dashed line: allowed loss. ',
-    "Fold scores show variability, not confidence intervals. Each family has its own numeric scale.</p>",
+    '<p class="selection-chart-help"><span>',
+    '<span aria-hidden="true" class="selection-key-pooled">\u25cf</span> pooled CV</span>',
+    '<span><span aria-hidden="true" class="selection-key-fold">\u25cb</span> fold</span>',
+    '<span><span aria-hidden="true" class="selection-key-limit">\u2506</span> loss limit</span>',
+    explorer_help("Reading the candidate comparison", paste(
+      "Filled dots show pooled CV loss; open dots show each fold. The dashed line marks the allowed loss.",
+      "Fold scores show variability, not confidence intervals. Each family has its own numeric scale.",
+      "Choose a row to inspect its fold scores, requested and effective settings, seeds and optimizer status."
+    ), id = paste0("selection-chart-help-", report_anchor(candidates$family[[1L]]))), "</p>",
     '<div class="selection-chart-wrap"><svg class="selection-plot" data-min="', limits[[1L]],
     '" data-max="', limits[[2L]], '" data-rows="', nrow(candidates), '" viewBox="0 0 920 ', height,
-    '" role="img" aria-label="', html_escape(paste(
+    '" role="group" aria-label="', html_escape(paste(
       candidates$family[[1L]],
       "candidate and fold", evidence$metric, "scores; numeric values are in candidate details below."
     )), '">', grid,

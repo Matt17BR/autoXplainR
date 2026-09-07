@@ -8,6 +8,14 @@
 .selection-section .selection-picked{fill:#17654e;stroke:#173d31;stroke-width:2}
 .selection-section .selection-cutoff{stroke:#916321;stroke-width:1.5;stroke-dasharray:5 4}
 .selection-section .selection-role{font:12px ui-sans-serif,system-ui,sans-serif;fill:#435d50}
+.selection-section .selection-score-label{font-weight:700}
+.selection-section .selection-status-label{font-size:12px}
+.selection-section .selection-row-hit{fill:transparent;pointer-events:all}
+.selection-section .selection-plot-link:hover .selection-row-hit,.selection-section .selection-plot-link:focus-visible .selection-row-hit{fill:#e5eee7;stroke:#8ea89a;stroke-width:1}
+.selection-section .selection-plot-link:focus-visible{outline:none}
+.selection-section .selection-plot-link .selection-row-label{fill:#195b89;text-decoration:underline;cursor:pointer}
+.selection-section .selection-row-label,.selection-section .selection-role{paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round}
+.selection-section .selection-precision{margin-top:8px}
 .selection-section .selection-settings{font-size:.82rem;overflow-wrap:anywhere}
 .selection-section .selection-candidate>summary{font-variant-numeric:tabular-nums}
 .selection-section [hidden]{display:none!important}
@@ -25,15 +33,25 @@
 .selection-section .selection-rationale p{margin:5px 0}
 .selection-section .selection-boundary{color:#705522}
 .selection-section .selection-tested{font-variant-numeric:tabular-nums}
-.selection-section .selection-chart-help{font-size:12px;color:var(--muted);margin:10px 0 3px}
+.selection-section .selection-chart-help{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin:10px 0 3px}
+.selection-section .selection-chart-help>span:not(.help){white-space:nowrap}
+.selection-section .selection-key-pooled{color:#295d83}
+.selection-section .selection-key-fold{color:#78908b}
+.selection-section .selection-key-limit{color:#916321;font-weight:700}
+@media print{.selection-section .selection-plot-link .selection-row-label{text-decoration:none;fill:var(--ink)}}
 .selection-section .selection-candidate-table td,.selection-section .selection-candidate-table th{padding:6px 10px;font-size:12px}
 .selection-section .selection-candidate-table td:first-child{width:72%}
 .selection-section .selection-candidate-table small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
 .selection-section .selection-decision{gap:14px;margin:12px 0}
 .selection-section .selection-decision .metric strong{font-size:1.15rem}
+.selection-section .selection-agreed{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:baseline;gap:3px 14px;border-left:2px solid var(--green);padding:4px 0 4px 12px;margin:10px 0;font-size:13px}
+.selection-section .selection-agreed>strong{font-size:17px;font-variant-numeric:tabular-nums}
+.selection-section .selection-agreed>small{grid-column:1/-1;color:var(--muted);font-size:12px}
+@media print{.selection-section .selection-row-label,.selection-section .selection-role{stroke:white}}
 @media(max-width:700px){.selection-section .selection-decision{grid-template-columns:1fr}.selection-section .selection-decision .metric{display:grid;grid-template-columns:120px 1fr;gap:0 8px}.selection-section .selection-decision .metric strong{font-size:16px;margin:0}.selection-section .selection-decision .metric small{grid-column:2}.selection-section .selection-rationale,.selection-section .selection-reason{font-size:12px}.selection-section .selection-family-overview th,.selection-section .selection-family-overview td{padding:6px;font-size:11px}}
 
 .selection-section .selection-chart-wrap{width:100%;overflow:visible}
 .selection-section .selection-plot text{font-size:14px}
 .selection-section .selection-plot .selection-role{font-size:12px}
+@media screen{.selection-candidate .table-wrap table{min-width:760px;table-layout:auto}.selection-candidate .table-wrap td:not(.number){min-width:180px;max-width:320px;white-space:normal;overflow-wrap:anywhere}.selection-candidate .table-wrap td:last-child:not(.number){min-width:min(320px,calc(100vw - 32px))}}
 @media(max-width:650px){.selection-section .selection-candidate-table table,.selection-section .selection-family-overview table{table-layout:fixed}.selection-section .selection-candidate-table th,.selection-section .selection-candidate-table td{white-space:normal;overflow-wrap:anywhere;padding:6px}.selection-section .selection-candidate-table th:first-child,.selection-section .selection-candidate-table td:first-child{width:55%}.selection-section .selection-candidate-table th:nth-child(2){width:20%}.selection-section .selection-candidate-table th:nth-child(3){width:25%}.selection-section .selection-family-overview th,.selection-section .selection-family-overview td{white-space:normal;overflow-wrap:anywhere}.selection-section .selection-family-overview th:first-child{width:31%}.selection-section .selection-family-overview th:nth-child(2){width:22%}.selection-section .selection-family-overview th:nth-child(3){width:29%}.selection-section .selection-family-overview th:nth-child(4){width:18%}}

@@ -13,8 +13,8 @@ explorer_label <- function(result, id) {
   paste0(toupper(substr(label, 1, 1)), substring(label, 2))
 }
 
-explorer_help <- function(label, text) {
-  id <- paste0("help-", report_anchor(label))
+explorer_help <- function(label, text, id = paste0("help-", report_anchor(label))) {
+  id <- html_escape(id)
   paste0(
     '<span class="help"><button type="button" class="help-button" aria-expanded="false" aria-controls="',
     id, '" aria-describedby="', id, '"><span aria-hidden="true">?</span><span class="sr-only">',
@@ -148,7 +148,17 @@ explorer_tradeoffs <- function(result, models) {
       "Single-fit millisecond timings are descriptive readings, not reliable speed rankings."
     )), "</h3>",
     '<label class="control">Compare cost <select id="resource-select">',
-    explorer_options(models$resources, resources[models$resources]), "</select></label></div>",
+    explorer_options(models$resources, resources[models$resources]), "</select></label>",
+    '<div class="cost-scale-control"><label class="control">Cost scale ',
+    '<select id="cost-scale-select" disabled aria-describedby="cost-scale-note">',
+    '<option value="linear">Linear</option><option value="log">Log</option></select></label>',
+    explorer_help("Choosing a cost scale", paste(
+      "Linear spacing compares absolute cost differences. Log spacing compares ratios:",
+      "1 to 10 uses the same space as 10 to 100. It can separate inexpensive models when one model",
+      "is much larger or slower. All plotted costs must be positive; scores and the Pareto frontier do not change."
+    )), "</div></div>",
+    '<p id="cost-scale-note" class="microcopy" role="status">',
+    "Linear cost axis. Scale switching requires JavaScript.</p>",
     paste(plots, collapse = ""),
     "<details><summary>How costs were measured</summary><p>Times are measured on this machine. ",
     "Fit time covers the retained fit, not the entire cross-validation search; prediction time covers this ",
@@ -385,6 +395,7 @@ explorer_features <- function(result, audit, effects, models) {
         effect <- if (is.null(class)) values[[feature]] else class_effects[[class]][[id]][[feature]]
         content <- if (is.null(effect) || inherits(effect, "effect_failure")) {
           paste0(
+            "<h4>", html_escape(feature), "</h4>",
             '<p class="empty-state">', if (inherits(effect, "effect_failure")) {
               html_escape(as.character(effect))
             } else {
@@ -396,17 +407,11 @@ explorer_features <- function(result, audit, effects, models) {
             )), "</code></pre>"
           )
         } else {
-          paste0(
-            '<p class="effect-context">', html_escape(paste(toupper(attr(effect, "method")),
-              attr(effect, "prediction_target") %||% result$target_column,
-              sep = " \u00b7 "
-            )), "</p>",
-            effect_chart(effect, feature, result, model_id = id, comparison = {
-              pool <- if (is.null(class)) all_effects else class_effects[[class]]
-              comparison <- lapply(pool[setdiff(names(pool), id)], `[[`, feature)
-              comparison[!vapply(comparison, function(x) is.null(x) || inherits(x, "effect_failure"), logical(1))]
-            })
-          )
+          effect_chart(effect, feature, result, model_id = id, comparison = {
+            pool <- if (is.null(class)) all_effects else class_effects[[class]]
+            comparison <- lapply(pool[setdiff(names(pool), id)], `[[`, feature)
+            comparison[!vapply(comparison, function(x) is.null(x) || inherits(x, "effect_failure"), logical(1))]
+          })
         }
         if (is.null(class)) {
           content
@@ -423,7 +428,7 @@ explorer_features <- function(result, audit, effects, models) {
       }
       paste0(
         '<article class="effect-card" data-feature-panel="', html_escape(feature), '">',
-        "<h4>", html_escape(feature), "</h4>", content, "</article>"
+        content, "</article>"
       )
     }, character(1))
     paste0(
@@ -512,12 +517,12 @@ explorer_checks <- function(result, audit) {
   paste0(
     '<section id="checks" class="workspace-page" data-page="checks" aria-labelledby="checks-title">',
     '<p class="section-number">Checks</p><h2 id="checks-title">What needs a closer look?</h2>',
-    "<p>Findings identify their affected model or input. ",
-    if (!identical(result$.report_export$mode, "none")) '<a href="#data" data-navigate>Data distributions</a> and ',
-    '<a href="#evaluation" data-navigate>prediction diagnostics</a> have their own views.</p>',
-    render_guided_notes(result$evaluation$notes), render_reliability_section(concise, result),
+    '<p class="check-links">',
+    if (!identical(result$.report_export$mode, "none")) '<a href="#data" data-navigate>Explore data</a> \u00b7 ',
+    '<a href="#evaluation" data-navigate>Inspect prediction errors</a></p>',
+    render_guided_notes(result$evaluation$notes, result), render_reliability_section(concise, result),
     render_effect_failures(result),
-    render_performance_uncertainty(result$performance_uncertainty, result$.report_uncertainty),
+    render_performance_uncertainty(result$performance_uncertainty, result$.report_uncertainty, result),
     render_missingness_shift(result$evaluation$diagnostics$missingness_shift),
     "</section>"
   )
@@ -599,7 +604,10 @@ model_explorer_html <- function(result, audit, effects, narrative, subgroup_chec
     identity$evaluation_rows, " evaluation rows",
     if (!is.null(identity$target_units)) paste0(" \u00b7 ", html_escape(identity$target_units)) else "",
     if (!is.null(identity$positive)) paste0(" \u00b7 Probability event: ", html_escape(identity$positive)) else "",
-    '</p></div><button type="button" id="print-report" class="quiet-button">Print this view</button></header>',
+    '</p></div><button type="button" id="print-report" class="quiet-button" title="Print this view">',
+    '<svg class="print-icon" viewBox="0 0 24 24" aria-hidden="true">',
+    '<path d="M6 8V3h12v5M6 17H3V9h18v8h-3M6 14h12v7H6zM17 11h1"/></svg>',
+    '<span class="print-label">Print this view</span></button></header>',
     '<main id="main">', pages, "</main><footer>AutoXplainR ", html_escape(result$provenance$package_version),
     " \u00b7 ", html_escape(identity$split_method), "</footer></div>",
     "<script>", report_asset("explorer.js"), "</script><script>", report_asset("charts.js"),

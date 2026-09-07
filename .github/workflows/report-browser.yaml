@@ -45,6 +45,10 @@ jobs:
         run: >-
           python validation/check-gallery.py --browser
           --output-dir "$RUNNER_TEMP/report-browser-results/gallery"
+      - name: Exercise the committed report layout and printed views
+        run: >-
+          python validation/check-layout-tasks.py
+          --output-dir "$RUNNER_TEMP/report-browser-results/layout-tasks"
       - name: Generate regression and classification reports with R answer data
         run: Rscript validation/render-explorer-cases.R
       - name: Generate raw and processed data exploration cases

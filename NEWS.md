@@ -1,3 +1,27 @@
+# AutoXplainR 0.6.1
+
+- Cost charts draw the Pareto frontier: the best observed score available at
+  each measured cost budget. The line does not imply intermediate fits. An explicit logarithmic
+  cost axis separates positive costs spanning several orders of magnitude.
+- Small cost ranges retain readable ticks. Almost equal scores no longer fill
+  a chart with floating-point noise or lose their differences in point inspection.
+- Data exploration reaches the plot sooner, uses a compact column selector on
+  phones, and keeps binning explanations in keyboard- and touch-accessible help.
+  Supporting details take less space and remain available in print.
+- Model selection keeps parameters, scores and fold variation in one comparison.
+  Select a configuration to inspect its folds, or expand the exact settings table.
+  Fitting warnings open the failed configuration and its recorded errors.
+- Regression reports place the three prediction diagnostics together. Feature
+  charts remove repeated labels while retaining the prediction target and class.
+- Evaluation intervals name their models, metric and units. A disagreement
+  finding links to the recorded feature-importance ranges. Missingness changes
+  explicitly use percentage points.
+- GitHub screenshots show complete, focused report tasks instead of full-page
+  posters. Browser checks now challenge vertical layout, print composition and
+  the numeric geometry of the frontier, as well as the underlying values.
+- Printed views keep model summaries, assumptions and importance values readable.
+  Screen links and the selected view are restored after printing.
+
 # AutoXplainR 0.6.0
 
 - Reports add model-selection evidence: the exact selection threshold, searched

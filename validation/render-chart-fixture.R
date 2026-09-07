@@ -56,3 +56,6 @@ writeLines(paste0(fragments[1L],
 jsonlite::write_json(list(dense = dense, near = near, timing = timing),
   file.path(chart_output, "dense-chart-source.json"), auto_unbox = TRUE, pretty = TRUE, digits = NA
 )
+
+source("validation/render-frontier-fixture.R", local = TRUE)
+source("validation/render-cost-scale-fixture.R", local = TRUE)

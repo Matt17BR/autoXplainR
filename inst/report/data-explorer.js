@@ -137,9 +137,8 @@
     return state.filters.length ? sampleDistribution(name, split) : stage().columns[name][split];
   }
   function population() {
-    const totals = splits().map(split => `${number(distribution(state.column, split).n_total)} ${split}`);
     const basis = state.filters.length ? 'Filtered exported sample' : 'Full data';
-    $('data-population').textContent = `${basis} · ${stage().population} · ${totals.join(' + ')} rows`;
+    $('data-population').textContent = `${basis} · ${stage().population}`;
   }
   function renderDistribution() {
     const axis = axisFor(state.column), selected = splits();
@@ -598,6 +597,7 @@
     if (state.selected) selectRow(state.selected, false);
   }
   function render() {
+    $('data-column-select').value = state.column;
     root.querySelectorAll('[data-column-name]').forEach(button => {
       const name = button.dataset.columnName, column = columnsByName.get(name);
       const count = splits().reduce((total, split) => total + (distribution(name, split).n_missing || 0), 0);
@@ -630,6 +630,7 @@
   }
   root.querySelectorAll('[data-data-view]').forEach(button => button.addEventListener('click', () => chooseView(button.dataset.dataView)));
   root.querySelectorAll('[data-column-name]').forEach(button => button.addEventListener('click', () => chooseColumn(button.dataset.columnName)));
+  $('data-column-select').addEventListener('change', event => chooseColumn(event.target.value));
   $('data-search').addEventListener('input', event => {
     const query = event.target.value.toLowerCase();
     root.querySelectorAll('[data-column-name]').forEach(button => { button.hidden = !button.dataset.columnName.toLowerCase().includes(query); });

@@ -34,7 +34,7 @@ report_chart_label <- function(result, model_id, fallback = model_id) {
   as.character(fallback)
 }
 
-report_chart_range <- function(values, zero = FALSE) {
+report_chart_range <- function(values, zero = FALSE, relative_span = 0) {
   finite <- values[is.finite(values)]
   if (zero) finite <- c(0, finite)
   if (!length(finite)) {
@@ -42,8 +42,40 @@ report_chart_range <- function(values, zero = FALSE) {
   }
   limits <- range(finite)
   span <- diff(limits)
-  if (span == 0) span <- max(abs(limits[1]) * .2, .1)
+  if (span == 0) {
+    span <- max(abs(limits[1]) * .2, .1)
+  } else if (span < max(abs(limits)) * relative_span) {
+    # A tiny numerical difference should not occupy the entire score axis.
+    # Widen the display range only; scores and Pareto membership stay exact.
+    span <- max(abs(limits)) * relative_span
+    limits <- mean(limits) + c(-.5, .5) * span
+  }
   limits + c(-1, 1) * span * .09
+}
+
+report_chart_ticks <- function(limits, count) {
+  ticks <- pretty(limits, count)
+  ticks <- ticks[ticks >= limits[1] & ticks <= limits[2]]
+  if (length(ticks) < 2L && count < 20L) return(report_chart_ticks(limits, count + 1L))
+  ticks
+}
+
+report_chart_axis_number <- function(x) {
+  scientific <- x != 0 && (abs(x) < .001 || abs(x) >= 1e6)
+  format(signif(x, 6L), trim = TRUE, scientific = scientific)
+}
+
+report_chart_measurement_labels <- function(values) {
+  # Usually four significant digits suffice. Preserve an inspectable distinction
+  # between nearly equal measurements without filling every tooltip with digits.
+  for (digits in 4:17) {
+    labels <- vapply(values, function(x) {
+      scientific <- x != 0 && (abs(x) < .001 || abs(x) >= 1e6)
+      format(x, digits = digits, trim = TRUE, scientific = scientific)
+    }, character(1))
+    if (length(unique(labels)) == length(unique(values))) break
+  }
+  labels
 }
 
 report_chart_source <- function(point) {
@@ -123,14 +155,16 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   )
   unit <- if (metric %in% c("rmse", "mae")) result$provenance$target_units else NULL
   y_label <- paste0(pretty_metric(metric), if (!is.null(unit)) paste0(" (", unit, ")"))
+  score_labels <- report_chart_measurement_labels(tradeoffs[[metric]])
+  resource_labels <- report_chart_measurement_labels(tradeoffs[[resource]])
   points <- lapply(seq_len(nrow(tradeoffs)), function(i) {
     list(
       x = tradeoffs[[resource]][i], y = tradeoffs[[metric]][i], model = tradeoffs$model_id[i],
       label = labels[i], color = report_model_color(tradeoffs$model_id[i], result),
       frontier = if (isTRUE(tradeoffs$pareto_optimal[i])) "true" else "false",
       detail = paste0(
-        labels[i], "; ", y_label, ": ", report_axis_number(tradeoffs[[metric]][i]),
-        "; ", x_label, ": ", report_axis_number(tradeoffs[[resource]][i]),
+        labels[i], "; ", y_label, ": ", score_labels[i],
+        "; ", x_label, ": ", resource_labels[i],
         if (isTRUE(tradeoffs$pareto_optimal[i])) "; not dominated on these two measurements" else ""
       )
     )
@@ -143,8 +177,13 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   direction <- if (isTRUE(attr(tradeoffs, "higher_is_better"))) "upper left" else "lower left"
   note <- paste0(
     "The ", direction, " combines a better score with less resource use. ",
-    "Outlines mark nondominated measurements, not a recommended model. ",
-    "Connecting lines identify points when labels need more space."
+    "Outlined points form the observed Pareto frontier: no other displayed model is at least as good ",
+    "on both axes and strictly better on one. Dashed steps show the best observed score available ",
+    "within each resource budget, between the first and last frontier measurements. ",
+    "The corners between points are budget boundaries, not fitted models or interpolated scores. ",
+    "Thin colored lines connect names to points. This comparison does not account for measurement ",
+    "uncertainty and does not select a model. Nearly equal measurements share a display range of ",
+    "at least 0.1% of their magnitude; exact values and frontier membership are unchanged."
   )
   if (grepl("time", resource)) {
     note <- paste(note, "Times describe this machine and batch; small differences may reflect timer resolution.")
@@ -152,17 +191,39 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   report_chart_frame(
     "cost", points, x_label, y_label, "Predictive score and measured resource use",
     report_chart_table(rows, "Retained model scores and resource measurements"), note,
-    short_note = if (isTRUE(attr(tradeoffs, "higher_is_better"))) {
-      "The upper left combines a higher score with less resource use."
+    short_note = if (nrow(report_chart_frontier_points(points)) > 1L) {
+      "Pareto frontier (dashed): best observed score within each resource budget."
     } else {
-      "The lower left combines a lower loss with less resource use."
+      "Pareto frontier: one distinct score/cost pair, marked by an outline."
     }
   )
 }
 
+report_chart_frontier_points <- function(points) {
+  frontier <- Filter(function(point) {
+    identical(point$frontier, "true") && is.finite(point$x) && is.finite(point$y)
+  }, points)
+  coordinates <- unique(data.frame(
+    x = vapply(frontier, `[[`, numeric(1), "x"),
+    y = vapply(frontier, `[[`, numeric(1), "y")
+  ))
+  coordinates <- coordinates[order(coordinates$x), , drop = FALSE]
+  rownames(coordinates) <- NULL
+  if (nrow(coordinates) < 2L) return(coordinates)
+  # Keep the previous score until the next model's cost is affordable. A
+  # diagonal, or a vertical step first, would imply an unmeasured improvement.
+  previous <- coordinates[-nrow(coordinates), , drop = FALSE]
+  next_point <- coordinates[-1L, , drop = FALSE]
+  steps <- data.frame(
+    x = c(coordinates$x[1L], rep(next_point$x, each = 2L)),
+    y = c(coordinates$y[1L], as.vector(rbind(previous$y, next_point$y)))
+  )
+  steps
+}
+
 effect_chart <- function(effect, feature, result = NULL, model_id = NULL, comparison = NULL) {
   if (!is.data.frame(effect) || !nrow(effect)) {
-    return(render_diagnostic_state("Fitted effect", "not_run", "No effect values were retained."))
+    return(render_diagnostic_state(paste("Fitted effect for", feature), "not_run", "No effect values were retained."))
   }
   model_id <- model_id %||% result$provenance$primary_model_id %||% "model"
   effects <- c(stats::setNames(list(effect), model_id), comparison %||% list())
@@ -171,10 +232,15 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
   method <- attr(effect, "method") %||% "pdp"
   primary_y <- effect[[if (method == "ale") "accumulated_effect" else "partial_dependence"]]
   if (!length(primary_y) || any(!is.finite(primary_y))) {
-    return(render_diagnostic_state("Fitted effect", "failed", "No finite primary curve was retained."))
+    return(render_diagnostic_state(
+      paste("Fitted effect for", feature), "failed", "No finite primary curve was retained."
+    ))
   }
   numeric_x <- is.numeric(effect[[1]])
   target <- attr(effect, "prediction_target") %||% result$target_column %||% "fitted prediction"
+  if (identical(target, "predicted value") && !is.null(result$target_column)) {
+    target <- paste("predicted", result$target_column)
+  }
   units <- result$provenance$target_units %||%
     if (identical(result$task, "regression")) "target units" else if (!is.null(result$task)) "probability" else NULL
   y_label <- paste0(
@@ -221,13 +287,13 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
   })
   points <- unlist(series, recursive = FALSE)
   if (!length(points)) {
-    return(render_diagnostic_state("Fitted effect", "failed", "No finite curve was retained."))
+    return(render_diagnostic_state(paste("Fitted effect for", feature), "failed", "No finite curve was retained."))
   }
   rows <- do.call(rbind, lapply(names(effects), function(id) {
     item <- as.data.frame(effects[[id]])
     data.frame(Model = report_chart_label(result, id), item, check.names = FALSE)
   }))
-  note <- paste0(toupper(method), " describes ", target, ". Fitted associations do not establish intervention effects.")
+  note <- "Fitted associations do not establish intervention effects."
   population <- if (is.null(result)) "reference" else "evaluation reference"
   if (method == "ale" && any(vapply(points, function(point) is.finite(point$n), logical(1)))) {
     note <- paste(note, paste0(
@@ -244,20 +310,10 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
     })
   }
   report_chart_frame(if (numeric_x) "effect" else "category", points, feature, y_label,
-    paste(toupper(method), "for", feature),
+    paste(toupper(method), "for", feature, "\u00b7", target),
     report_chart_table(rows, paste("Fitted", feature, "values by model"), attr(effect, "interval_note")),
     note,
     primary_model = model_id, zero = method == "ale",
-    short_note = paste0(
-      toupper(method), " for ", target, ". Support: ",
-      if (method == "ale") {
-        paste(population, "rows per interval.")
-      } else if (numeric_x) {
-        paste("relative neighborhoods on", population, "rows.")
-      } else {
-        paste("relative category frequency on", population, "rows.")
-      }
-    ),
     interval_note = if (!is.null(attr(effect, "interval_note"))) {
       "Intervals describe this fixed model; they exclude model-fitting and population uncertainty."
     } else {
@@ -310,6 +366,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   categorical <- identical(kind, "category")
   histogram <- identical(kind, "histogram")
   cost <- identical(kind, "cost")
+  axis_number <- if (cost) report_chart_axis_number else report_axis_number
   categories <- unique(vapply(points, function(point) point$category %||% "", character(1)))
   left <- if (categorical) 112 else 48
   label_width <- 126
@@ -332,8 +389,10 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   lower <- vapply(points, function(point) point$low %||% NA_real_, numeric(1))
   upper <- vapply(points, function(point) point$high %||% NA_real_, numeric(1))
   boundaries <- unlist(lapply(points, function(point) c(point$left, point$right)), use.names = FALSE)
-  limits <- report_chart_range(if (categorical) c(ys, lower, upper) else c(xs, boundaries), zero = categorical && zero)
-  ylim <- report_chart_range(c(ys, lower, upper), zero = zero)
+  limits <- report_chart_range(if (categorical) c(ys, lower, upper) else c(xs, boundaries),
+    zero = categorical && zero, relative_span = if (cost) .001 else 0
+  )
+  ylim <- report_chart_range(c(ys, lower, upper), zero = zero, relative_span = if (cost) .001 else 0)
   if (identical(reference, "identity")) limits <- ylim <- report_chart_range(c(xs, ys))
   if (histogram && all(ys >= 0)) ylim[1] <- 0
   if (kind == "cost" && all(xs >= 0)) limits[1] <- max(0, limits[1])
@@ -341,7 +400,9 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   if (!is.null(x_limits)) limits <- x_limits
   if (!is.null(y_limits)) ylim <- y_limits
   if (!categorical) {
-    left <- max(left, max(nchar(vapply(pretty(ylim, 4), report_axis_number, character(1)))) * 7.2 + 10)
+    # Static charts use 14 px text. Reserve enough space for wider fallback
+    # fonts so a leading digit or minus sign is not clipped without JavaScript.
+    left <- max(left, max(nchar(vapply(report_chart_ticks(ylim, 4), axis_number, character(1)))) * 9.5 + 10)
   }
   height <- bottom + max(if (support) 126 else 70,
     48 + 15 * length(report_chart_text_lines(if (categorical) y_label else x_label, right - left))
@@ -362,7 +423,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
       ceiling <- label_tops[i] - 10
     }
   }
-  horizontal <- paste(vapply(pretty(limits, if (cost) 2 else 3), function(value) {
+  horizontal <- paste(vapply(report_chart_ticks(limits, if (cost) 2 else 3), function(value) {
     if (value < limits[1] || value > limits[2]) {
       return("")
     }
@@ -373,17 +434,17 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
           '" y1="', top, '" y2="', bottom, '"/>'
         )
       },
-      report_chart_svg_text(report_axis_number(value), px(value), bottom + 20, anchor = "middle")
+      report_chart_svg_text(axis_number(value), px(value), bottom + 20, anchor = "middle")
     )
   }, character(1)), collapse = "")
   vertical <- if (!categorical) {
-    paste(vapply(pretty(ylim, 4), function(value) {
+    paste(vapply(report_chart_ticks(ylim, 4), function(value) {
       if (value < ylim[1] || value > ylim[2]) {
         return("")
       }
       paste0(
         '<line class="axr-grid" x1="', left, '" x2="', right, '" y1="', py(value), '" y2="', py(value), '"/>',
-        report_chart_svg_text(report_axis_number(value), left - 7, py(value) + 4, anchor = "end")
+        report_chart_svg_text(axis_number(value), left - 7, py(value) + 4, anchor = "end")
       )
     }, character(1)), collapse = "")
   } else {
@@ -398,6 +459,16 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
     paste0('<line class="axr-zero" x1="', left, '" x2="', right, '" y1="', py(0), '" y2="', py(0), '"/>')
   } else if (zero) {
     paste0('<line class="axr-zero" x1="', px(0), '" x2="', px(0), '" y1="', top, '" y2="', bottom, '"/>')
+  } else {
+    ""
+  }
+  frontier <- if (cost) report_chart_frontier_points(points) else data.frame()
+  frontier_line <- if (nrow(frontier) > 1L) {
+    paste0(
+      '<polyline class="axr-frontier" fill="none" stroke="#203b2b" stroke-width="2" ',
+      'stroke-dasharray="6 4" stroke-linejoin="round" aria-hidden="true" pointer-events="none" points="',
+      paste(paste(px(frontier$x), py(frontier$y), sep = ","), collapse = " "), '"/>'
+    )
   } else {
     ""
   }
@@ -511,7 +582,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
     '<svg viewBox="0 0 ', width, " ", height, '" role="group" aria-label="',
     html_escape(paste(y_label, "by", x_label)), '">', horizontal, vertical, reference_line,
     '<line class="axr-axis" x1="', left, '" x2="', right, '" y1="', bottom, '" y2="', bottom, '"/>',
-    lines, glyphs, category_labels, support_bars,
+    lines, frontier_line, glyphs, category_labels, support_bars,
     report_chart_svg_text(if (categorical) x_label else y_label, 2, 15, width = width - 4),
     report_chart_svg_text(if (categorical) y_label else x_label, (left + right) / 2, bottom + 42,
       width = right - left, anchor = "middle"

@@ -6,6 +6,7 @@
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start;
 }
 .prediction-chart-grid .axr-chart {min-width: 0; margin: 0;}
+.prediction-chart-grid {grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px;}
 .classification-outcomes, .classification-calibration {min-width: 0;}
 .classification-calibration {padding: 12px; background: white; border: 1px solid #d3ddd6; border-radius: 3px;}
 .classification-calibration .axr-chart {margin: 0;}
@@ -48,5 +49,6 @@
   .prediction-cutoff input {display: none;}
   .prediction-chart-grid, .classification-grid {grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: none;}
   .prediction-records {break-inside: auto;}
+  .prediction-chart-grid > .axr-chart {break-inside: avoid;}
   .classification-calibration {border-color: #aaa;}
 }

@@ -5,6 +5,8 @@
   const modelControls = all('.model-select');
   const metricControl = document.querySelector('#metric-select');
   const resourceControl = document.querySelector('#resource-select');
+  const costScaleControl = document.querySelector('#cost-scale-select');
+  const costScaleNote = document.querySelector('#cost-scale-note');
   const classControl = document.querySelector('#effect-class-select');
   const comparisonControl = document.querySelector('#comparison-model-select');
   const comparisonIdentity = document.createElement('div');
@@ -12,12 +14,13 @@
   comparisonIdentity.hidden = true;
   const higher = new Set(['accuracy', 'auc', 'roc_auc', 'balanced_accuracy', 'r_squared', 'macro_recall']);
   const state = {modelId: modelControls[0]?.value, feature: null, page: pages[0]?.id,
-    metric: metricControl?.value, resource: resourceControl?.value, className: classControl?.value, comparisonModelId: comparisonControl?.value || ''};
+    metric: metricControl?.value, resource: resourceControl?.value, costScale: costScaleControl?.value || 'linear',
+    className: classControl?.value, comparisonModelId: comparisonControl?.value || ''};
   const emit = (name, detail) => document.dispatchEvent(new CustomEvent(`axr:${name}`, {detail, bubbles: true}));
   const options = control => control ? Array.from(control.options, option => option.value) : [];
   function saveState(replace = true) {
     const query = new URLSearchParams();
-    for (const key of ['modelId', 'feature', 'metric', 'resource', 'className', 'comparisonModelId']) {
+    for (const key of ['modelId', 'feature', 'metric', 'resource', 'costScale', 'className', 'comparisonModelId']) {
       if (state[key] != null && state[key] !== '') query.set(key, state[key]);
     }
     const hash = `#${state.page}${query.size ? `?${query}` : ''}`;
@@ -101,6 +104,22 @@
     all('[data-cost-plot]').forEach(el => {
       el.hidden = el.dataset.costPlot !== state.metric || el.dataset.resource !== state.resource;
     });
+    if (costScaleControl) {
+      const plot = all('[data-cost-plot]').find(el => !el.hidden);
+      const costs = plot ? all('[data-chart-source]', plot).map(el => Number(el.dataset.x)) : [];
+      const positive = costs.length > 0 && costs.every(value => Number.isFinite(value) && value > 0);
+      costScaleControl.disabled = !costs.length;
+      costScaleControl.querySelector('option[value="log"]').disabled = !positive;
+      if (!positive) costScaleControl.value = 'linear';
+      state.costScale = costScaleControl.value;
+      if (costScaleNote) {
+        costScaleNote.hidden = positive;
+        costScaleNote.textContent = positive ? '' : !costs.length ? 'Cost scale is unavailable: no finite comparison.' :
+          costs.some(value => value === 0) && /time|prediction/.test(state.resource) ?
+            'Log scale needs positive costs. A zero timing may be below timer resolution.' :
+          'Log scale needs positive costs; this comparison contains a nonpositive measurement.';
+      }
+    }
     if (persist) saveState();
     emit('chart-change', {...state});
   }
@@ -144,12 +163,15 @@
       if (selected && innerWidth <= 760) link.scrollIntoView({block: 'nearest', inline: 'nearest'});
     });
     if (target && target !== page) {
+      target.dispatchEvent(new CustomEvent('axr:inspect', {bubbles: true}));
+      if (target.tagName === 'DETAILS') target.open = true;
       for (let parent = target.parentElement; parent; parent = parent.parentElement) {
         if (parent.tagName === 'DETAILS') parent.open = true;
       }
     }
     if (focus) {
-      const destination = target && target !== page ? target : page.querySelector('h2');
+      const destination = target && target !== page ?
+        (target.tagName === 'DETAILS' ? target.querySelector('summary') : target) : page.querySelector('h2');
       if (destination) {
         if (!destination.matches('a,button,input,select,summary,[tabindex]')) destination.tabIndex = -1;
         destination.focus({preventScroll: true});
@@ -161,7 +183,8 @@
   }
   function navigate(hash, {focus = true, persist = true} = {}) {
     const {id, params} = parseHash(hash);
-    for (const [key, control] of [['metric', metricControl], ['resource', resourceControl], ['className', classControl], ['comparisonModelId', comparisonControl]]) {
+    for (const [key, control] of [['metric', metricControl], ['resource', resourceControl], ['costScale', costScaleControl],
+      ['className', classControl], ['comparisonModelId', comparisonControl]]) {
       if (params.has(key) && options(control).includes(params.get(key))) control.value = params.get(key);
     }
     if (params.has('feature')) state.feature = params.get('feature');
@@ -216,6 +239,7 @@
     sortTable(button.dataset.sort, button.parentElement.getAttribute('aria-sort') === 'ascending' ? -1 : 1)));
   metricControl?.addEventListener('change', () => chooseMetric());
   resourceControl?.addEventListener('change', () => chooseResource());
+  costScaleControl?.addEventListener('change', () => chooseResource());
   classControl?.addEventListener('change', () => chooseClass());
   comparisonControl?.addEventListener('change', () => {
     state.comparisonModelId = comparisonControl.value === state.modelId ? '' : comparisonControl.value;
@@ -248,9 +272,27 @@
     const label = document.createElement('span'); label.className = 'print-selection'; control.after(label);
     return {control, label};
   });
+  // A PDF contains the selected views; links into hidden tabs or closed details
+  // can otherwise become invalid named destinations. Keep external citations.
+  const printLinks = new Map();
+  function suspendFragmentLinks() {
+    all('a[href^="#"]').forEach(link => {
+      if (!printLinks.has(link)) printLinks.set(link, link.getAttribute('href'));
+      link.removeAttribute('href');
+    });
+  }
+  // Later beforeprint handlers may redraw an SVG. Observe those new links too.
+  const printLinkObserver = new MutationObserver(suspendFragmentLinks);
   addEventListener('beforeprint', () => {
     printControls.forEach(({control, label}) => { label.textContent = control.selectedOptions[0]?.textContent || ''; });
     document.activeElement?.blur();
+    suspendFragmentLinks();
+    printLinkObserver.observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['href']});
+  });
+  addEventListener('afterprint', () => {
+    printLinkObserver.disconnect();
+    printLinks.forEach((href, link) => { if (link.isConnected) link.setAttribute('href', href); });
+    printLinks.clear();
   });
   document.querySelector('#print-report')?.addEventListener('click', () => window.print());
   addEventListener('hashchange', () => navigate(location.hash, {persist: false}));
