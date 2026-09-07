@@ -4,7 +4,7 @@
     {
       "name": "regression: fixture identity",
       "passed": true,
-      "evidence": "36d7698d3aa9ae9db61b1a797a920077be75decea1295a393d071d82cfd433b2"
+      "evidence": "b7fd12f378be7ab02b01e893bac46c1fe2f6de464b5bd221c9024ea8a0fdef42"
     },
     {
       "name": "regression: unique IDs and valid navigation targets",
@@ -1434,7 +1434,7 @@
     {
       "name": "binary: fixture identity",
       "passed": true,
-      "evidence": "6b138be88cc6a302b774b19291930cf4c00eef83bee6ee700cc3561d97c4ea2e"
+      "evidence": "593453703392f816e7fc8fe67cc54c0010918492587b1a057a8578d514801d3d"
     },
     {
       "name": "binary: unique IDs and valid navigation targets",
@@ -2699,7 +2699,7 @@
     {
       "name": "multiclass: fixture identity",
       "passed": true,
-      "evidence": "430fcabcb977f0cdc8f3a42bce6b7abbd8eda5a0b4e3587a9f9c054fb085f76c"
+      "evidence": "b69946746b4fdb97ecaeb7c59265421992c8f1f1176a606aa2352e2e1fcfa72d"
     },
     {
       "name": "multiclass: unique IDs and valid navigation targets",
@@ -4749,7 +4749,7 @@
     {
       "name": "quick: fixture identity",
       "passed": true,
-      "evidence": "6607918f98caab881a801dff223edafa1801cae0016f466ddb4cb97970cd7d3a"
+      "evidence": "c57733f1bb4467ba99ef6b25d672e18511b4e5848b6b8ee7f08722511b8211d0"
     },
     {
       "name": "quick: unique IDs and valid navigation targets",

@@ -87,7 +87,8 @@ model_specification <- function(result, id) {
     )
   } else if (neural) {
     paste0(
-      parameters$size, " hidden units \u00b7 decay ", model_spec_value(parameters$decay),
+      parameters$size, if (parameters$size == 1) " hidden unit" else " hidden units",
+      " \u00b7 decay ", model_spec_value(parameters$decay),
       " \u00b7 ", length(fit$wts), " weights"
     )
   } else if (wrapped) {

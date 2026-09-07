@@ -24,7 +24,7 @@ checks, not a recruited participant study.
 
 ## Local validation
 
-- Full R suite: 2,883 passed, zero failures/errors/warnings; two opt-in integration
+- Full R suite: 2,886 passed, zero failures/errors/warnings; two opt-in integration
   skips. The separate live H2O suite passed 95 assertions with no skips or failures.
 - Eleven numerical references: maximum absolute discrepancy 5.69e-14, covering
   PDP, ALE shapes, analytic boundaries, ties and empirical centering.
