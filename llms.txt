@@ -3,6 +3,17 @@
 Fit a tabular prediction model, check it against a simple baseline, and
 inspect what it learned—with one R command.
 
+[![AutoXplainR report showing the modeling question, prediction error
+against a baseline, and evaluation sample
+size](reference/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
+
+*Start with the result: how well did the model predict, and did it
+improve on a simple baseline? Preview uses synthetic data. [Open the
+example
+report](https://matt17br.github.io/autoXplainR/model-report.html).*
+
+## Try it
+
 ``` r
 
 # install.packages("pak")
@@ -28,7 +39,49 @@ binary classification; use `task = "regression"` to override that
 choice. Binary probabilities refer to the **second outcome factor
 level**; set your factor levels deliberately.
 
-## What you get
+## A look inside the report
+
+These screenshots come from the current package’s report on reproducible
+synthetic data, using `model_set = "comparison"`. The example adds two
+decision trees to the default model and baseline. Its numbers differ
+from the `mtcars` quick start above. Click any screenshot to open that
+part of the full report.
+
+### Compare the candidates
+
+See prediction error alongside approximate model size. The chart helps
+you inspect trade-offs; the best score on these rows is not a new
+model-selection rule.
+
+[![Model comparison showing four candidates, their prediction error, and
+approximate model-object
+size](reference/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#models)
+
+### See which inputs mattered, and how
+
+Feature importance shows which inputs the model relied on. The curves
+show the direction of its fitted patterns, with a short explanation
+beside each one.
+
+[![Feature reliance table and two fitted effect curves with
+plain-language
+descriptions](reference/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
+
+### Find the caveats and next steps
+
+The reliability section flags weak evidence and suggests what to inspect
+next. Its grade is a diagnostic aid, not a certification of the model.
+
+[![Explanation reliability section showing diagnostic summaries, a
+warning, and a suggested next
+action](reference/figures/explanation-reliability.png)](https://matt17br.github.io/autoXplainR/model-report.html#reliability)
+
+The report is a standalone HTML file you can open offline or share with
+someone who does not use R. See the [example-generation and screenshot
+instructions](https://github.com/Matt17BR/autoXplainR/blob/main/validation/README.md#report-screenshots)
+to reproduce these views.
+
+## What you get in R
 
 | Result | Where to find it |
 |----|----|
