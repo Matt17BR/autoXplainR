@@ -21,6 +21,7 @@ reference:
       - performance_uncertainty
       - evidence_summary
       - tuning_results
+      - tuning_evidence
       - tuning_control
       - as_explainers
       - calibration_diagnostics
@@ -28,6 +29,7 @@ reference:
       - missingness_shift
       - subgroup_performance
       - render_model_report
+      - report_data_control
       - generate_natural_language_report
       - narrative_providers
       - prediction_ambiguity
@@ -35,6 +37,8 @@ reference:
       - compare_model_effects
   - title: Model-agnostic evidence workflow
     contents:
+      - evaluate_models
+      - benchmark_predictions
       - explain_model
       - predict.autoxplain_explainer
       - audit_explanations

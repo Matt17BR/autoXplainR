@@ -1,27 +1,27 @@
 name: Method or feature proposal
-description: Propose a statistical method, adapter, or evidence diagnostic
+description: Propose a workflow improvement, statistical method, or adapter
 title: "[Proposal]: "
 labels: [enhancement, design]
 body:
   - type: textarea
     id: claim
     attributes:
-      label: User claim supported
-      description: What should a user be justified in saying after using this feature?
+      label: User task and expected result
+      description: What concrete question or task is difficult now? What would the user be able to do?
     validations:
       required: true
   - type: textarea
     id: estimand
     attributes:
-      label: Estimand and assumptions
-      description: Define the target quantity, assumptions, and known failure modes.
+      label: Assumptions and limits
+      description: For statistical changes, define the target quantity and assumptions. For workflow changes, describe the data, users and failure cases that matter.
     validations:
       required: true
   - type: textarea
     id: validation
     attributes:
       label: Validation plan
-      description: Literature, simulations, reference implementations, and edge cases.
+      description: Describe a task or independent calculation that would verify the result, and a wrong result it should reject. Add method references or simulations when applicable.
     validations:
       required: true
   - type: textarea

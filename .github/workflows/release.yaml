@@ -10,13 +10,14 @@ permissions:
   contents: read
 
 jobs:
+  platform-gate:
+    uses: ./.github/workflows/R-CMD-check.yaml
+
   browser-gate:
     uses: ./.github/workflows/report-browser.yaml
 
-  engine-minimum-gate:
+  engine-gate:
     uses: ./.github/workflows/native-model-engines.yaml
-    with:
-      minimum_only: true
 
   quality-gates:
     runs-on: ubuntu-latest
@@ -92,7 +93,7 @@ jobs:
     uses: ./.github/workflows/h2o-integration.yaml
 
   source-package:
-    needs: [quality-gates, h2o-gate, browser-gate, engine-minimum-gate]
+    needs: [quality-gates, h2o-gate, browser-gate, engine-gate, platform-gate]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -145,6 +146,25 @@ jobs:
           bash .github/scripts/build-check-source.sh \
             "$RUNNER_TEMP/release" \
             "$RUNNER_TEMP/check"
+      - name: Exercise workflows from the exact installed release archive
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          archives=("$RUNNER_TEMP"/release/AutoXplainR_*.tar.gz)
+          if (( ${#archives[@]} != 1 )); then
+            echo "Expected exactly one checked release archive." >&2
+            exit 1
+          fi
+          (cd "$RUNNER_TEMP/release" && sha256sum --check SHA256SUMS)
+          smoke_library="$(mktemp -d "$RUNNER_TEMP/installed-release-library.XXXXXX")"
+          smoke_output="$RUNNER_TEMP/installed-release-smoke"
+          mkdir -p "$smoke_output"
+          expected_version="$(Rscript -e 'cat(read.dcf("DESCRIPTION", fields = "Version")[[1L]])')"
+          R CMD INSTALL --library="$smoke_library" "${archives[0]}"
+          Rscript validation/check-installed-artifact.R \
+            "$smoke_library" "$smoke_output" "$expected_version" \
+            2>&1 | tee "$smoke_output/installed-smoke.log"
+          (cd "$RUNNER_TEMP/release" && sha256sum --check SHA256SUMS)
       - name: Check documentation links
         run: |
           problems <- urlchecker::url_check()
@@ -174,6 +194,14 @@ jobs:
           name: AutoXplainR-release-check-${{ github.sha }}
           path: ${{ runner.temp }}/check/**/00check.log
           if-no-files-found: warn
+      - name: Upload installed release workflow evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: AutoXplainR-installed-release-${{ github.sha }}
+          path: ${{ runner.temp }}/installed-release-smoke/
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload source package
         uses: actions/upload-artifact@v7
         with:
@@ -239,7 +267,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME" release/*
-          --title "AutoXplainR $GITHUB_REF_NAME"
-          --notes-file release/release-notes.md --verify-tag
+        run: |
+          set -euo pipefail
+          (cd release && sha256sum --check SHA256SUMS)
+          gh release create "$GITHUB_REF_NAME" release/* \
+            --title "AutoXplainR $GITHUB_REF_NAME" \
+            --notes-file release/release-notes.md --verify-tag

@@ -29,7 +29,8 @@ A data frame of class \code{autoxplain_model_tradeoffs} with Pareto status
 and metric-direction metadata.
 }
 \description{
-Builds a two-objective comparison from an \code{\link[=autoxplain]{autoxplain()}} result. Predictive
+Builds a two-objective comparison from an \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}}
+result. Predictive
 performance is taken from the evaluation leaderboard and the secondary axis
 defaults to approximate model-object size. For local models this is R's
 in-memory \code{object.size()} estimate; H2O uses an engine-reported size when

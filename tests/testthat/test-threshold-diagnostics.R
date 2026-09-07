@@ -81,17 +81,15 @@ test_that("guided binary reports explain cutoff sensitivity without optimizing i
   render_model_report(binary, binary_path, top_features = 1, n_repeats = 2)
   binary_html <- paste(readLines(binary_path, warn = FALSE), collapse = "\n")
 
-  expect_match(
-    binary_html,
-    "What changes when the decision cutoff moves?",
-    fixed = TRUE
-  )
-  expect_match(binary_html, "No cutoff is recommended here", fixed = TRUE)
-  expect_match(binary_html, "False positives", fixed = TRUE)
+  controls <- gregexpr('data-prediction-cutoff type="range"', binary_html, fixed = TRUE)[[1L]]
+  expect_length(controls, length(binary$models))
+  expect_true(all(controls > 0L))
+  expect_true(grepl('data-cutoff-metric="fp"', binary_html, fixed = TRUE))
+  expect_true(grepl('data-cutoff-metric="fn"', binary_html, fixed = TRUE))
 
   regression <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 17)
   regression_path <- tempfile(fileext = ".html")
   render_model_report(regression, regression_path, top_features = 1, n_repeats = 2)
   regression_html <- paste(readLines(regression_path, warn = FALSE), collapse = "\n")
-  expect_false(grepl("decision cutoff moves", regression_html, fixed = TRUE))
+  expect_false(grepl('data-prediction-cutoff type="range"', regression_html, fixed = TRUE))
 })

@@ -49,16 +49,15 @@ compare_model_behavior <- function(result,
   if (!inherits(result, "autoxplain_result")) {
     stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
   }
+  if (is.null(result$.report_context)) result$.report_context <- prepare_report_context(result)
   ambiguity <- prediction_ambiguity(
     result,
     models = models,
     performance_tolerance = performance_tolerance
   )
   model_ids <- ambiguity$model_ids
-  explainers <- as_explainers(result, models = model_ids)
-  predictions <- lapply(explainers, function(explainer) {
-    predict(explainer, explainer$data)
-  })
+  explainers <- report_explainers(result, models = model_ids)
+  predictions <- report_predictions(result, models = model_ids, explainers = explainers)
   model_table <- behavior_model_table(result, model_ids, ambiguity)
   prediction_pairs <- behavior_prediction_pairs(
     predictions,

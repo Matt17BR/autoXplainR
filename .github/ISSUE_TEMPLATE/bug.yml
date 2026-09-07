@@ -34,12 +34,19 @@ body:
       label: Optional integration
       options:
         - None / guided base workflow
+        - Existing fitted models / custom prediction function
         - H2O
         - Plotly
         - Gemini
         - Groq
         - Ollama
         - OpenRouter
+        - Cloudflare
         - Custom narrative endpoint
     validations:
       required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Report context, if applicable
+      description: Which tab, model and control failed? Include your browser, approximate window width and report_data mode. Review reports for private data before attaching them.

@@ -21,6 +21,15 @@ and the tested commit/archive. A CI run does not stand in for a manual review.
 - Review test quality for changed behavior. Require the browser and imputation
   mutation checks to reject their deliberate faults for the intended reasons;
   an execution error is not a successful negative control.
+- Check candidate/fold values, selection thresholds and failed-refit explanations.
+  Check distributions, associations and source-record links against original
+  supplied tables, including imputation, novel categories and row removal.
+- Verify every binary cutoff and calibration group against independent source
+  predictions. Exercise explicit event-class order and existing-model adapters.
+- Attempt to reuse scores and explanations after changing model state, adapter
+  context, outcomes or row order. Require a clear rejection of stale evidence.
+- Test summary, sampled-row and no-data exports, including hidden payloads.
+  Verify benchmark units, common batches, incomplete runs and resolution limits.
 - Build once with `.github/scripts/build-check-source.sh`, check that exact
   archive under release R including manuals, and preserve its checksum.
 - Check the same archive under R-devel. Explain remaining check notes.
@@ -32,6 +41,7 @@ and the tested commit/archive. A CI run does not stand in for a manual review.
   Record answers, friction, repairs and repeated tasks in the release record.
   Open generated report examples on desktop and a narrow viewport. Review
   numerical labels, unavailable diagnostics, keyboard navigation and print output.
+  Inspect actual PDF pages and font sizes; text extraction alone is insufficient.
 - Verify that logs, fixtures and shared reports contain no credentials or
   unintended private data.
 

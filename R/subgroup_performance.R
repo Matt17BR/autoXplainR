@@ -12,14 +12,17 @@
 #'
 #' @param result An `autoxplain_result`.
 #' @param by Name of one categorical or low-cardinality evaluation column.
-#' @param model One model ID or index. `NULL` uses `main_model` when available,
-#'   otherwise the first retained model.
+#' @param model One model ID or index. `NULL` uses the recorded primary model.
 #' @param min_rows Minimum rows used to label a group as large enough for a
 #'   preliminary comparison. Smaller groups remain visible and are flagged.
+#' @param metric Optional loss metric for this descriptive comparison: `rmse`
+#'   or `mae` for regression; `log_loss` or `brier_score` for classification.
+#'   `NULL` uses the recorded evaluation metric. This does not change the
+#'   official leaderboard, selected model, or stored evaluation evidence.
 #'
 #' @return An `autoxplain_subgroups` object containing overall metrics and a
 #'   group-level `performance` data frame. Its primary metric matches the
-#'   result's evaluation metric (including MAE or Brier score), and
+#'   requested metric or, by default, the result's evaluation metric, and
 #'   `secondary_metric` names a different supporting metric.
 #' @export
 #'
@@ -27,9 +30,9 @@
 #' cars <- transform(mtcars, transmission = factor(am, labels = c("auto", "manual")))
 #' fit <- autoxplain(cars, "mpg", seed = 2026)
 #' subgroup_performance(fit, by = "transmission", min_rows = 3)
-subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
+subgroup_performance <- function(result, by, model = NULL, min_rows = 10L, metric = NULL) {
   if (!inherits(result, "autoxplain_result")) {
-    stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
+    stop("`result` must be returned by `autoxplain()` or `evaluate_models()`.", call. = FALSE)
   }
   if (!is.character(by) || length(by) != 1L || is.na(by) || !nzchar(by)) {
     stop("`by` must be one non-empty evaluation-column name.", call. = FALSE)
@@ -68,16 +71,26 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
     )
   }
   available <- names(result$models)
-  model <- model %||% if ("main_model" %in% available) "main_model" else available[[1L]]
+  model <- model %||% result$provenance$primary_model_id %||% available[[1L]]
   selected <- select_models(result$models, model)
   if (length(selected) != 1L) {
     stop("`model` must select exactly one retained model.", call. = FALSE)
   }
   model_id <- names(selected)[[1L]]
-  explainer <- as_explainers(result, models = model_id)[[1L]]
-  predicted <- predict(explainer, explainer$data)
+  explainer <- report_explainers(result, models = model_id)[[1L]]
+  predicted <- explainer$reference_predictions
   overall <- evaluate_predictions(explainer$y, predicted, explainer)
-  primary_metric <- subgroup_primary_metric(result, names(overall))
+  primary_metric <- if (is.null(metric)) {
+    subgroup_primary_metric(result, names(overall))
+  } else {
+    supported <- if (result$task == "regression") c("rmse", "mae") else c("log_loss", "brier_score")
+    if (!is.character(metric) || length(metric) != 1L || is.na(metric) || !metric %in% supported) {
+      stop("`metric` must be one supported loss metric for the result's task: ",
+        paste(supported, collapse = ", "), ".", call. = FALSE
+      )
+    }
+    metric
+  }
   secondary_metric <- subgroup_secondary_metric(result$task, primary_metric, names(overall))
   rows <- lapply(group_levels, function(group) {
     index <- which(groups == group)

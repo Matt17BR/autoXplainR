@@ -818,7 +818,12 @@ prepare_analysis_context <- function(autoxplain_result,
     reference_model <- evaluation$primary_model_id %||%
       autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
     performance <- evaluation$metrics[[reference_model]][[metric]]
-    baseline_performance <- evaluation$metrics[["simple_baseline"]][[metric]] %||% NA_real_
+    baseline_id <- result_reference_id(autoxplain_result)
+    baseline_performance <- if (is.null(baseline_id)) {
+      NA_real_
+    } else {
+      evaluation$metrics[[baseline_id]][[metric]] %||% NA_real_
+    }
     metric_definition <- evaluation$metric_definitions[[metric]] %||% "See the metric documentation."
   } else {
     numeric_columns <- setdiff(
@@ -926,7 +931,7 @@ prepare_analysis_context <- function(autoxplain_result,
       detect_task(autoxplain_result$training_data[[autoxplain_result$target_column]]),
     target_column = autoxplain_result$target_column,
     positive_class = if (identical(autoxplain_result$task, "binary")) {
-      levels(autoxplain_result$training_data[[autoxplain_result$target_column]])[[2L]]
+      result_positive_class(autoxplain_result)
     } else {
       NULL
     },
@@ -937,6 +942,11 @@ prepare_analysis_context <- function(autoxplain_result,
     best_performance = performance,
     best_metric = metric,
     baseline_performance = baseline_performance,
+    baseline_label = if (is.null(result_reference_id(autoxplain_result))) {
+      "No reference supplied"
+    } else {
+      report_model_label(autoxplain_result, result_reference_id(autoxplain_result))
+    },
     improvement_over_baseline = evaluation$improvement_over_baseline %||% NA_real_,
     beats_baseline = evaluation$beats_baseline %||% NA,
     metric_definition = metric_definition,
@@ -1037,7 +1047,7 @@ create_report_prompt <- function(context) {
     "You are writing a short model fit, evaluation, and explanation memo for a first-time modeler. ",
     "Use only the facts below.\n",
     "Rules:\n",
-    "- Start with held-out performance and comparison with the simple baseline.\n",
+    "- Start with evaluation performance and its recorded data role. Compare a reference only when supplied.\n",
     paste0(
       "- If tuning evidence is supplied, distinguish its training-resampled ",
       "selection score from final held-out performance.\n"
@@ -1178,7 +1188,7 @@ context_to_text <- function(context) {
   if (is.finite(context$baseline_performance %||% NA_real_)) {
     lines <- c(
       lines,
-      paste("Simple baseline score:", context$baseline_performance),
+      paste(context$baseline_label %||% "Reference model", "score:", context$baseline_performance),
       paste("Relative improvement over baseline:",
             format_percent(context$improvement_over_baseline))
     )
@@ -1320,7 +1330,7 @@ create_fallback_report <- function(context) {
   )
   if (!is.null(context$evaluation_role)) {
     lines <- c(
-      lines, "", "## Did the model improve on a simple baseline?",
+      lines, "", "## How did the primary model perform?",
       paste0(
         "The ", context$best_model_type, " was evaluated on ",
         context$evaluation_rows, " ", context$evaluation_role, " rows. Its **",
@@ -1331,12 +1341,12 @@ create_fallback_report <- function(context) {
       comparison <- if (isTRUE(context$beats_baseline)) {
         paste0(
           "That is a ", format_percent(context$improvement_over_baseline),
-          " improvement over the intercept-only baseline (",
+          " improvement over ", context$baseline_label %||% "the reference model", " (",
           report_number(context$baseline_performance, 4L), ")."
         )
       } else {
         paste0(
-          "It did not improve on the intercept-only baseline (",
+          "It did not improve on ", context$baseline_label %||% "the reference model", " (",
           report_number(context$baseline_performance, 4L),
           "). Treat the fitted relationships as exploratory."
         )
@@ -1349,7 +1359,7 @@ create_fallback_report <- function(context) {
     )
     if (!is.null(context$positive_class)) {
       lines <- c(lines, paste0("Binary probabilities refer to `", context$positive_class,
-                               "`, the second training outcome level."))
+                               "`, the recorded event class."))
     }
     if (!is.null(context$calibration_summary)) {
       calibration <- context$calibration_summary

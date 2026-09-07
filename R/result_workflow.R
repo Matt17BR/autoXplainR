@@ -5,11 +5,20 @@ assert_flag <- function(value, name) {
   invisible(value)
 }
 
-finalize_autoxplain <- function(result, design, explain, report) {
+finalize_autoxplain <- function(result, design, explain, report, report_data = "summary") {
   result$schema_version <- "2.0"
   result$provenance$package_version <- package_version_or_development()
   result$provenance$r_version <- paste(R.version$major, R.version$minor, sep = ".")
   if (!is.null(design)) {
+    result$data_context <- capture_data_context(
+      design$raw_training, design$raw_evaluation, result$target_column, result$features,
+      result$preprocessing_metadata$training_data, result$preprocessing_metadata$test_data,
+      training_source_rows = design$provenance$training_rows,
+      evaluation_source_rows = design$provenance$evaluation_rows,
+      evaluation_source = "data", split_method = design$provenance$method,
+      split_column = design$provenance$column,
+      excluded = design$raw_excluded, excluded_source_rows = design$provenance$excluded_rows
+    )
     indices <- result$evaluation_row_indices %||% seq_len(nrow(result$test_data))
     result$evaluation_context <- design$evaluation_context[indices, , drop = FALSE]
     result$validation <- design$provenance
@@ -26,11 +35,12 @@ finalize_autoxplain <- function(result, design, explain, report) {
       result$tuning$method <- "whole-group training-only cross-validation"
     }
   }
+  result <- seal_evaluation_result(result)
   if (isTRUE(explain) || !is.null(report)) {
     result$explanations <- prepare_model_report_data(result)
   }
   if (!is.null(report)) {
-    result$report_file <- render_model_report(result, report)
+    result$report_file <- render_model_report(result, report, report_data = report_data)
   }
   result
 }
@@ -38,11 +48,13 @@ finalize_autoxplain <- function(result, design, explain, report) {
 #' Predict from an AutoXplainR result
 #'
 #' Applies the stored training recipe to raw predictor rows, then predicts with
-#' the pre-specified or training-selected primary model. No model is refitted.
+#' the pre-specified or training-selected primary model. Existing models brought
+#' through [evaluate_models()] use their recorded prediction contracts, including
+#' any preprocessing inside the supplied predictor. No model is refitted.
 #' The target column is optional and ignored. Row order and row count are kept;
 #' recipes that drop incomplete rows return `NA` at those positions.
 #'
-#' @param object An [autoxplain()] result.
+#' @param object An [autoxplain()] or [evaluate_models()] result.
 #' @param newdata Data frame of raw predictor rows.
 #' @param model One model ID or index. `NULL` uses the primary model.
 #' @param type `"response"` returns numeric predictions for regression, positive-
@@ -51,8 +63,10 @@ finalize_autoxplain <- function(result, design, explain, report) {
 #' @param ... Reserved for future use; additional arguments are rejected.
 #'
 #' @return A vector or matrix with one prediction per input row. Classification
-#'   levels follow the training outcome; binary probabilities refer to its second
-#'   level. Novel categorical levels follow the recorded recipe strategy.
+#'   levels follow the recorded class contract. Binary probabilities refer to
+#'   the recorded positive class: the second outcome level for [autoxplain()],
+#'   or the explicitly chosen event for [evaluate_models()]. Novel categorical
+#'   levels follow the stored recipe or supplied prediction contract.
 #' @export
 #' @examples
 #' result <- autoxplain(mtcars, "mpg", explain = FALSE)
@@ -62,6 +76,9 @@ predict.autoxplain_result <- function(object, newdata, model = NULL,
                                       type = c("response", "class"), ...) {
   if (length(list(...))) stop("Unused prediction arguments in `...`.", call. = FALSE)
   type <- match.arg(type)
+  if (identical(object$provenance$workflow, "supplied-model evaluation")) {
+    return(predict_supplied_result(object, newdata, model, type))
+  }
   assert_data_frame(newdata, "newdata")
   if (anyDuplicated(names(newdata))) stop("`newdata` must have unique column names.", call. = FALSE)
   if (type == "class" && object$task == "regression") {

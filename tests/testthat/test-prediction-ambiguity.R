@@ -90,13 +90,14 @@ test_that("comparison reports show ambiguity beside candidate performance", {
   render_model_report(result, path, top_features = 1, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "Where did supplied model choices disagree?", fixed = TRUE)
-  expect_match(html, "Disagreement is a review signal, not an error bar", fixed = TRUE)
-  expect_match(html, "Largest prediction range", fixed = TRUE)
+  expect_true(grepl('<details class="prediction-disagreement">', html, fixed = TRUE))
+  expect_true(grepl("Evaluation scores of the models being compared", html, fixed = TRUE))
+  # Summary mode retains the aggregate comparison without individual source rows.
+  expect_false(grepl('class="disagreement-records"', html, fixed = TRUE))
 
   quick <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 2026)
   quick_path <- tempfile(fileext = ".html")
   render_model_report(quick, quick_path, top_features = 1, n_repeats = 2)
   quick_html <- paste(readLines(quick_path, warn = FALSE), collapse = "\n")
-  expect_false(grepl("model choices disagree", quick_html, fixed = TRUE))
+  expect_false(grepl('class="prediction-disagreement"', quick_html, fixed = TRUE))
 })

@@ -29,9 +29,10 @@
 #' rolling-origin or forward-chaining specification. To avoid ambiguity after
 #' AutoXplainR's automatic holdout split, fold IDs are accepted only when
 #' `test_data` is supplied explicitly to [autoxplain()]. Candidate losses and
-#' their one-standard-error uncertainty are weighted by the number of validation
+#' their selection standard-error heuristic are weighted by the number of validation
 #' rows in each fold; RMSE uses pooled squared loss with a delta-method standard
-#' error on the RMSE scale.
+#' error on the RMSE scale. Overlapping training folds mean that this heuristic
+#' is not a confidence interval or a test of equivalent model performance.
 #'
 #' @param grids Optional named per-family custom grids.
 #' @param family_budgets Optional named positive integer counts, one for every
@@ -44,6 +45,13 @@
 #' @param retain_oof Retain row-level out-of-fold predictions and case losses.
 #' @param failure_policy `"continue"` records a failed configuration and keeps
 #'   searching; `"stop"` aborts on the first resampling or refit failure.
+#' @param optimization_policy `"exclude"` excludes an explicit unsuccessful
+#'   optimizer termination from selection and refitting. `"warn"` retains it
+#'   with a recorded warning. An unavailable convergence diagnostic is recorded
+#'   as unknown, not treated as proof of convergence.
+#' @param family_priority Optional character vector ordering every requested
+#'   family for the one-standard-error policy, from most to least preferred.
+#'   This is a user preference, not a statistical ordering of algorithms.
 #'
 #' @return An `autoxplain_tuning_control` object for the `tuning_control`
 #'   argument of [autoxplain()].
@@ -63,9 +71,17 @@ tuning_control <- function(grids = NULL,
                            fold_ids = NULL,
                            metric = c("auto", "rmse", "mae", "log_loss", "brier"),
                            retain_oof = TRUE,
-                           failure_policy = c("continue", "stop")) {
+                           failure_policy = c("continue", "stop"),
+                           optimization_policy = c("exclude", "warn"),
+                           family_priority = NULL) {
   metric <- match.arg(metric)
   failure_policy <- match.arg(failure_policy)
+  optimization_policy <- match.arg(optimization_policy)
+  invalid_priority <- !is.character(family_priority) || !length(family_priority) ||
+    anyNA(family_priority) || any(!nzchar(family_priority)) || anyDuplicated(family_priority)
+  if (!is.null(family_priority) && invalid_priority) {
+    stop("`family_priority` must be a unique, non-empty character vector or NULL.", call. = FALSE)
+  }
   assert_tuning_flag(retain_oof, "retain_oof")
   normalized_grids <- normalize_tuning_grids(grids)
   normalized_budgets <- normalize_family_budgets(family_budgets)
@@ -77,7 +93,9 @@ tuning_control <- function(grids = NULL,
       fold_ids = normalized_fold_ids,
       metric = metric,
       retain_oof = retain_oof,
-      failure_policy = failure_policy
+      failure_policy = failure_policy,
+      optimization_policy = optimization_policy,
+      family_priority = family_priority
     ),
     class = "autoxplain_tuning_control"
   )
@@ -89,6 +107,7 @@ print.autoxplain_tuning_control <- function(x, ...) {
   cat("  metric:     ", x$metric, "\n", sep = "")
   cat("  OOF rows:   ", if (x$retain_oof) "retained" else "not retained", "\n", sep = "")
   cat("  failures:   ", x$failure_policy, "\n", sep = "")
+  cat("  optimizer:  ", x$optimization_policy %||% "exclude", "\n", sep = "")
   cat("  grids:      ", tuning_control_names(x$grids), "\n", sep = "")
   cat("  budgets:    ", tuning_control_names(x$family_budgets), "\n", sep = "")
   fold_text <- if (is.null(x$fold_ids)) {
@@ -112,7 +131,9 @@ assert_tuning_flag <- function(x, name) {
 }
 
 normalize_family_budgets <- function(budgets) {
-  if (is.null(budgets)) return(NULL)
+  if (is.null(budgets)) {
+    return(NULL)
+  }
   if (!is.atomic(budgets) || is.factor(budgets) || is.null(names(budgets)) ||
         !length(budgets) || anyNA(names(budgets)) || any(!nzchar(names(budgets))) ||
         anyDuplicated(names(budgets))) {
@@ -138,7 +159,9 @@ normalize_family_budgets <- function(budgets) {
 }
 
 normalize_fold_id_vector <- function(fold_ids) {
-  if (is.null(fold_ids)) return(NULL)
+  if (is.null(fold_ids)) {
+    return(NULL)
+  }
   valid_type <- is.factor(fold_ids) || is.character(fold_ids) ||
     (is.numeric(fold_ids) && !is.complex(fold_ids))
   if (!valid_type || !is.null(dim(fold_ids)) || length(fold_ids) < 4L || anyNA(fold_ids)) {
@@ -158,7 +181,9 @@ normalize_fold_id_vector <- function(fold_ids) {
 }
 
 normalize_tuning_grids <- function(grids) {
-  if (is.null(grids)) return(NULL)
+  if (is.null(grids)) {
+    return(NULL)
+  }
   if (!is.list(grids) || !length(grids) || is.null(names(grids)) ||
         anyNA(names(grids)) || any(!nzchar(names(grids))) || anyDuplicated(names(grids))) {
     stop("`grids` must be a non-empty, uniquely named list of family grids.", call. = FALSE)
@@ -310,8 +335,10 @@ tuning_numeric <- function(lower, upper, lower_open = FALSE, upper_open = FALSE)
       valid <- valid && if (upper_open) value < upper else value <= upper
     }
     if (!valid) {
-      interval <- paste0(if (lower_open) "(" else "[", lower, ", ", upper,
-                         if (upper_open) ")" else "]")
+      interval <- paste0(
+        if (lower_open) "(" else "[", lower, ", ", upper,
+        if (upper_open) ")" else "]"
+      )
       stop(
         "Parameter `", parameter, "` in configuration ", index, " of grid `", family,
         "` must be one finite number in ", interval, ".",
@@ -422,6 +449,10 @@ resolve_tuning_control <- function(control,
   }
 
   metric <- resolve_tuning_metric(control$metric, task)
+  family_priority <- control$family_priority
+  if (!is.null(family_priority) && !setequal(family_priority, learners)) {
+    stop("`family_priority` must order exactly the requested learner families.", call. = FALSE)
+  }
   supplied <- NULL
   if (!is.null(control$fold_ids)) {
     if (!isTRUE(test_data_supplied)) {
@@ -448,6 +479,8 @@ resolve_tuning_control <- function(control,
       metric = metric,
       retain_oof = control$retain_oof,
       failure_policy = control$failure_policy,
+      optimization_policy = control$optimization_policy %||% "exclude",
+      family_priority = family_priority,
       max_models = max_models
     ),
     class = "autoxplain_resolved_tuning_control"
@@ -489,6 +522,8 @@ default_resolved_tuning_control <- function(task, max_models, nfolds) {
       metric = resolve_tuning_metric("auto", task),
       retain_oof = TRUE,
       failure_policy = "continue",
+      optimization_policy = "exclude",
+      family_priority = NULL,
       max_models = max_models
     ),
     class = "autoxplain_resolved_tuning_control"
@@ -507,6 +542,8 @@ tuning_control_provenance <- function(control) {
     metric = control$metric,
     retain_oof = control$retain_oof,
     failure_policy = control$failure_policy,
+    optimization_policy = control$optimization_policy %||% "exclude",
+    family_priority = control$family_priority,
     max_models = control$max_models
   )
 }

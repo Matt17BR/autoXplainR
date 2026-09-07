@@ -1,7 +1,8 @@
 #' Extract comparable model metadata
 #'
-#' Extracts stable, compact metadata from guided base models or retained H2O
-#' models and joins it to the leaderboard. Native H2O variable importance is
+#' Extracts compact metadata from guided models, supplied existing fits or
+#' retained H2O models and joins it to the leaderboard. Unsupported model details
+#' remain unavailable. Native H2O variable importance is
 #' labeled as such; it is not substituted for model-agnostic permutation
 #' importance.
 #'
@@ -93,14 +94,16 @@ extract_model_characteristics <- function(autoxplain_result,
     info
   })
   names(output) <- names(models)
-  total_time <- sum(vapply(output, function(x) x$training_time_s, numeric(1)), na.rm = TRUE)
+  recorded_times <- vapply(output, function(x) x$training_time_s, numeric(1))
+  total_time <- if (all(is.finite(recorded_times))) sum(recorded_times) else NA_real_
   attr(output, "summary") <- list(
     total_models = length(output),
     algorithms_used = unique(vapply(output, `[[`, character(1), "algorithm")),
     total_final_refit_time_s = total_time,
+    measured_final_refits = sum(is.finite(recorded_times)),
     dataset_info = list(
       target_column = autoxplain_result$target_column,
-      n_rows = nrow(autoxplain_result$training_data),
+      n_rows = result_training_rows(autoxplain_result),
       n_features = length(autoxplain_result$features),
       evaluation_role = autoxplain_result$provenance$evaluation_role %||% "unspecified"
     )

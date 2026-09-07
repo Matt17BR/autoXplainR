@@ -108,7 +108,10 @@ prepare_model_report_data <- function(autoxplain_result,
                                       max_models = 5L) {
   primary <- autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
   selected <- head(c(primary, setdiff(names(autoxplain_result$models), primary)), max_models)
-  explainers <- as_explainers(autoxplain_result, models = selected)
+  if (is.null(autoxplain_result$.report_context)) {
+    autoxplain_result$.report_context <- prepare_report_context(autoxplain_result, models = selected)
+  }
+  explainers <- report_explainers(autoxplain_result, models = selected)
   importance_metric <- result_importance_metric(autoxplain_result)
   screen_repeats <- min(5L, n_repeats)
   screening_by_model <- lapply(explainers, function(explainer) {
@@ -150,10 +153,11 @@ prepare_model_report_data <- function(autoxplain_result,
           NULL
         }
       ),
-      error = function(error) structure(conditionMessage(error), class = "effect_failure")
+      error = function(error) structure(conditionMessage(error), class = "effect_failure", method = method)
     )
   })
   names(effects) <- effect_features
+  all_primary_effects <- effects
   failed <- vapply(effects, inherits, logical(1), "effect_failure")
   failures <- data.frame(
     feature = names(effects)[failed],
@@ -164,14 +168,13 @@ prepare_model_report_data <- function(autoxplain_result,
   output <- list(
     screening = screening, screening_by_model = screening_by_model,
     audit = audit, effects = effects, failures = failures,
+    effects_by_model = stats::setNames(list(all_primary_effects), primary),
     config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models)
   )
   prepared <- autoxplain_result
   prepared$explanations <- output
-  output$effects_by_model <- explorer_model_effects(prepared, audit, effects)
-  prepared$explanations <- output
-  output$effects_by_class <- explorer_class_effects(prepared, audit, effects)
-  output
+  prepared <- prepare_report_effects(prepared, audit, effects)
+  prepared$explanations
 }
 
 #' Deprecated simple-dashboard compatibility wrapper

@@ -44,7 +44,9 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
   effects <- effects %||% result$explanations$effects %||% list()
   primary <- result$evaluation$primary_model_id %||%
     result$provenance$primary_model_id %||% names(result$models)[[1L]]
-  selection <- if (inherits(result$tuning, "autoxplain_tuning")) {
+  selection <- if (identical(result$provenance$workflow, "supplied-model evaluation")) {
+    "The primary model was chosen by the user; fitting and selection history were not observed."
+  } else if (inherits(result$tuning, "autoxplain_tuning")) {
     paste0(
       "Selected using ", result$tuning$folds_used,
       " training folds; evaluation rows did not select this model."
@@ -61,14 +63,14 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
   identity <- list(
     target = result$target_column, task = result$task, model_id = primary,
     positive = if (identical(result$task, "binary")) {
-      levels(result$training_data[[result$target_column]])[[2L]]
+      result_positive_class(result)
     } else {
       NULL
     },
     model_label = report_model_label(result, primary), engine = result$engine %||% "h2o",
     evaluation_role = result$provenance$evaluation_role %||% "evaluation",
     split_method = result$provenance$split_method %||% "user configured",
-    training_rows = nrow(result$training_data),
+    training_rows = result_training_rows(result),
     evaluation_rows = nrow(result$test_data %||% result$training_data),
     target_units = result$provenance$target_units %||% NULL,
     analysis_label = result$provenance$analysis_label %||% NULL,
@@ -96,8 +98,10 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
     ),
     performance_uncertainty = report_diagnostic_record(
       "performance_uncertainty",
-      if (is.null(result$performance_uncertainty)) "not_run" else "available",
-      "evaluation sample conditional on fitted models", entity(), result$performance_uncertainty
+      result$.report_uncertainty$status %||%
+        if (is.null(result$performance_uncertainty)) "not_run" else "available",
+      "evaluation sample conditional on fitted models", entity(), result$performance_uncertainty,
+      reason = result$.report_uncertainty$reason
     )
   )
   optional <- c("resources", "model_behavior", "prediction_disagreement", "decision_cutoffs")
@@ -113,8 +117,10 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
     )
   }
   retained_status <- result$diagnostic_status %||% list()
-  retained_status <- c(retained_status, result$explanations$report_diagnostics %||%
-                         attr(result$report_file, "diagnostic_status") %||% list())
+  retained_status <- c(
+    retained_status, result$explanations$report_diagnostics %||%
+      attr(result$report_file, "diagnostic_status") %||% list()
+  )
   for (id in names(retained_status)) diagnostics[[id]] <- retained_status[[id]]
   if (!is.null(audit$diagnostic_status)) {
     status <- audit$diagnostic_status
@@ -130,22 +136,43 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
       }
     }
   }
-  for (feature in names(effects)) {
-    diagnostics[[paste0("effect:", feature)]] <-
-      report_diagnostic_record(
-        paste0("effect:", feature), "available", "fixed fitted model",
-        entity(feature = feature), effects[[feature]]
-      )
-  }
   failures <- if (effects_override) NULL else result$explanations$failures
-  if (!is.null(failures) && nrow(failures)) {
-    for (i in seq_len(nrow(failures))) {
-      feature <- failures$feature[[i]]
-      diagnostics[[paste0("effect:", feature)]] <- report_diagnostic_record(
-        paste0("effect:", feature), "failed", "fixed fitted model", entity(feature = feature),
-        reason = failures$reason[[i]]
+  status_result <- result
+  if (effects_override) {
+    status_result$explanations$effects <- effects
+    status_result$explanations$failures <- NULL
+    status_result$explanations$effects_by_model[[primary]] <- NULL
+    for (class in names(status_result$explanations$effects_by_class)) {
+      status_result$explanations$effects_by_class[[class]][[primary]] <- NULL
+    }
+  }
+  effect_status <- report_effect_status(status_result)
+  first_class <- if (identical(result$task, "multiclass")) {
+    result_class_levels(result)[[1L]]
+  } else {
+    NA_character_
+  }
+  for (i in seq_len(nrow(effect_status))) {
+    row <- effect_status[i, , drop = FALSE]
+    primary_default <- identical(row$model_id, primary) &&
+      (!identical(result$task, "multiclass") || identical(row$prediction_class, first_class))
+    id <- if (primary_default) {
+      paste0("effect:", row$feature)
+    } else {
+      paste0(
+        "effect:",
+        paste(vapply(c(row$model_id, row$prediction_class %||% "", row$feature), function(value) {
+          utils::URLencode(if (is.na(value)) "" else value, reserved = TRUE)
+        }, character(1)), collapse = ":")
       )
     }
+    entities <- entity(row$model_id, row$feature)
+    entities$prediction_class <- row$prediction_class
+    entities$method <- row$method
+    diagnostics[[id]] <- report_diagnostic_record(id, row$status, "fixed fitted model",
+      entities,
+      evidence = row, reason = if (is.na(row$reason)) NULL else row$reason
+    )
   }
   findings <- list()
   raw <- audit$findings
@@ -171,7 +198,7 @@ report_view_model <- function(result, audit = NULL, effects = NULL) {
   }
   structure(list(
     identity = identity, evaluation = result$evaluation, audit = audit,
-    effects = effects, effect_failures = failures, findings = findings,
+    effects = effects, effect_failures = failures, effect_status = effect_status, findings = findings,
     diagnostics = diagnostics
   ), class = "autoxplain_report_view")
 }
@@ -195,20 +222,26 @@ report_optional_diagnostic <- function(id, result, compute, applicable = TRUE, r
 }
 
 prepare_report_diagnostics <- function(result) {
-  multiple <- length(result$models) > 2L
+  resources_applicable <- length(result$models) >= 2L
+  reference <- result_reference_id(result)
+  candidates <- setdiff(names(result$models), reference)
+  comparisons_applicable <- length(candidates) >= 2L
   binary <- identical(result$task, "binary")
   records <- list(
     resources = report_optional_diagnostic(
       "resources", result,
-      function() model_tradeoffs(result), multiple, "No additional candidate models were supplied."
+      function() model_tradeoffs(result), resources_applicable,
+      "Resource comparison requires at least two supplied models."
     ),
     model_behavior = report_optional_diagnostic(
       "model_behavior", result,
-      function() compare_model_behavior(result), multiple, "No additional candidate models were supplied."
+      function() compare_model_behavior(result), comparisons_applicable,
+      "Behavior comparison requires at least two supplied models excluding the declared reference."
     ),
     prediction_disagreement = report_optional_diagnostic(
       "prediction_disagreement", result,
-      function() prediction_ambiguity(result), multiple, "No additional candidate models were supplied."
+      function() prediction_ambiguity(result), comparisons_applicable,
+      "Prediction disagreement requires at least two supplied models excluding the declared reference."
     ),
     decision_cutoffs = report_optional_diagnostic(
       "decision_cutoffs", result,

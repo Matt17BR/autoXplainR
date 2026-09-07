@@ -193,8 +193,19 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
 }
 
 describe_additive_parameters <- function(parameters) {
+  basis <- if (length(parameters$smooth_k)) {
+    sizes <- range(parameters$smooth_k)
+    paste0(
+      "smooth basis k = ", sizes[[1L]],
+      if (sizes[[1L]] != sizes[[2L]]) paste0("\u2013", sizes[[2L]], " (varies by input)")
+    )
+  } else if (length(parameters$k)) {
+    paste0("smooth basis limit = ", parameters$k)
+  } else {
+    "smooth basis k not recorded"
+  }
   paste0(
-    "smooth basis limit = ", parameters$k,
+    basis,
     ", gamma = ", format(parameters$gamma, trim = TRUE),
     ", shrinkage selection = ", if (parameters$select) "on" else "off"
   )

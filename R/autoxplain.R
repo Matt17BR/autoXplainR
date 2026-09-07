@@ -63,10 +63,12 @@
 #'   by training error alone.
 #' @param tuning_rule Local tuning selection rule. `"one_se"` chooses the
 #'   first eligible family in the documented priority, then its
-#'   least-flexible configuration, among candidates whose resampled error is
+#'   smallest recorded flexibility proxy, among candidates whose resampled error is
 #'   within one standard error of the best. The family priority and
 #'   family-specific flexibility proxies
-#'   are shown by [learner_catalog()]. `"best"` chooses the lowest resampled
+#'   are shown by [learner_catalog()]. This heuristic does not establish that
+#'   eligible models are equivalent or that every tuning dimension is ordered.
+#'   `"best"` chooses the lowest resampled
 #'   error. Ignored by other workflows.
 #' @param tuning_control Optional advanced local-tuning settings returned by
 #'   [tuning_control()]. Leave `NULL` for the beginner defaults. This argument
@@ -101,6 +103,11 @@
 #'   These are descriptive, selected summaries.
 #' @param report Optional `.html` destination, written from the retained evidence.
 #'   Supplying a path also computes explanations when `explain = FALSE`.
+#' @param report_data Data included in the HTML: `"summary"` (default) exports
+#'   aggregate exploration, `"rows"` also exports individual observations and
+#'   predictions, and `"none"` omits data exploration and individual records.
+#'   Use [report_data_control()] to choose columns and limit exported rows.
+#'   These settings govern HTML, not the raw data retained in the R result.
 #'
 #' @return An `autoxplain_result` containing fitted models, a leaderboard,
 #'   evaluation predictions, preprocessing provenance, and (by default)
@@ -148,7 +155,8 @@ autoxplain <- function(data,
                        overlap_action = c("warn", "error", "ignore"),
                        validation = NULL,
                        explain = TRUE,
-                       report = NULL) {
+                       report = NULL,
+                       report_data = "summary") {
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
@@ -168,6 +176,7 @@ autoxplain <- function(data,
   }
   assert_flag(explain, "explain")
   assert_flag(enable_preprocessing, "enable_preprocessing")
+  report_data <- normalize_report_data_control(report_data)
   if (!is.null(report)) validate_html_destination(report, FALSE)
   validate_automl_inputs(data, target_column, test_data)
   assert_probability(test_fraction, "test_fraction")
@@ -230,7 +239,7 @@ autoxplain <- function(data,
       evaluation_role = evaluation_role,
       overlap_action = overlap_action
     )
-    return(finalize_autoxplain(result, design, explain, report))
+    return(finalize_autoxplain(result, design, explain, report, report_data))
   }
 
   if (is.null(max_models)) max_models <- 24L
@@ -397,6 +406,14 @@ autoxplain <- function(data,
       test_data = evaluation,
       evaluation_context = prepared$evaluation_context,
       evaluation_row_indices = prepared$evaluation_row_indices,
+      data_context = capture_data_context(
+        prepared$raw_training, prepared$raw_evaluation, target_column, features,
+        train_processed, test_processed,
+        training_source_rows = prepared$training_source_rows,
+        evaluation_source_rows = prepared$evaluation_source_rows,
+        evaluation_source = prepared$evaluation_source,
+        split_method = prepared$split_method
+      ),
       target_column = target_column,
       features = features,
       task = resolved_task,
@@ -440,7 +457,7 @@ autoxplain <- function(data,
     extract_model_characteristics(result),
     error = function(error) structure(list(), class = "autoxplainr_model_characteristics")
   )
-  finalize_autoxplain(result, design, explain, report)
+  finalize_autoxplain(result, design, explain, report, report_data)
 }
 
 default_local_tuning_budget <- function(portfolio, learners = NULL) {
@@ -455,9 +472,9 @@ default_local_tuning_budget <- function(portfolio, learners = NULL) {
   )
 }
 
-#' Convert an AutoML result to model-agnostic explainers
+#' Convert a fitted-model result to model-agnostic explainers
 #'
-#' @param x An `autoxplain_result`.
+#' @param x A result from [autoxplain()] or [evaluate_models()].
 #' @param data Optional raw evaluation data. The fitted preprocessing recipe is
 #'   applied automatically. Defaults to the configured `test_data` when available,
 #'   otherwise training data.
@@ -468,6 +485,20 @@ default_local_tuning_budget <- function(portfolio, learners = NULL) {
 as_explainers <- function(x, data = NULL, models = NULL) {
   if (!inherits(x, "autoxplain_result")) {
     stop("`x` must be an `autoxplain_result`.", call. = FALSE)
+  }
+  validate_evaluation_snapshot(x)
+  output <- result_explainers(x, data = data, models = models)
+  validate_evaluation_snapshot(x)
+  if (is.null(data)) validate_recorded_evaluation(x, output)
+  output
+}
+
+result_explainers <- function(x, data = NULL, models = NULL) {
+  if (!inherits(x, "autoxplain_result")) {
+    stop("`x` must be an `autoxplain_result`.", call. = FALSE)
+  }
+  if (identical(x$provenance$workflow, "supplied-model evaluation")) {
+    return(supplied_explainers(x, data = data, models = models))
   }
   evaluation <- data %||% x$test_data %||% x$training_data
   if (!is.null(data)) {
@@ -540,16 +571,22 @@ as_explainers <- function(x, data = NULL, models = NULL) {
 
 #' @export
 print.autoxplain_result <- function(x, ...) {
+  validate_evaluation_snapshot(x)
   view <- report_view_model(x)
   identity <- view$identity
-  cat("<AutoXplainR guided result>\n")
+  cat("<AutoXplainR result>\n")
   cat("  question:   predict `", identity$target, "` (", identity$task, ")\n", sep = "")
   cat("  primary:    ", identity$model_label, " [", identity$model_id, "]\n", sep = "")
   cat("  engine:     ", identity$engine, "\n", sep = "")
   if (!is.null(identity$positive)) {
     cat("  event:      probabilities of `", identity$positive, "`\n", sep = "")
   }
-  cat("  data:       ", identity$training_rows, " training + ",
+  cat("  data:       ",
+    if (length(identity$training_rows) && !is.na(identity$training_rows)) {
+      paste0(identity$training_rows, " training + ")
+    } else {
+      "training unavailable; "
+    },
     identity$evaluation_rows, " ", identity$evaluation_role, " rows\n",
     sep = ""
   )
@@ -560,6 +597,8 @@ print.autoxplain_result <- function(x, ...) {
       " (selected from ", nrow(x$tuning$candidates),
       " training-resampled configurations)"
     )
+  } else if (identical(x$provenance$workflow, "supplied-model evaluation")) {
+    " (supplied fitted models)"
   } else if (length(x$models) > 2L) {
     " (retained comparison set)"
   } else {
@@ -611,7 +650,15 @@ print.autoxplain_result <- function(x, ...) {
   }
   if (!is.null(x$report_file)) cat("  report:     ", x$report_file, "\n", sep = "")
   cat("  inspect:    render_model_report(result, \"report.html\"), evidence_summary(result)\n")
-  cat("  predict:    predict(result, newdata) uses the saved training recipe\n")
+  cat(
+    "  predict:    predict(result, newdata) uses ",
+    if (identical(x$provenance$workflow, "supplied-model evaluation")) {
+      "the supplied prediction adapter"
+    } else {
+      "the saved training recipe"
+    }, "\n",
+    sep = ""
+  )
   if (length(x$models) > 2L) {
     cat("  compare:    compare_model_behavior(result) examines the retained models\n")
   }
@@ -620,6 +667,7 @@ print.autoxplain_result <- function(x, ...) {
 
 #' @export
 summary.autoxplain_result <- function(object, ...) {
+  validate_evaluation_snapshot(object)
   summary <- list(
     task = object$task,
     target = object$target_column,

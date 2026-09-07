@@ -34,8 +34,10 @@ test_that("subgroup performance supports classification probability metrics", {
   probability <- stats::plogis(data$x + ifelse(data$channel == "app", 0.5, -0.3))
   data$converted <- factor(ifelse(runif(n) < probability, "yes", "no"))
   result <- autoxplain(model_set = "quick", data, "converted", test_fraction = 0.4, seed = 12)
-  result$evaluation$primary_metric <- "brier_score"
-  diagnostic <- subgroup_performance(result, "channel")
+  original <- result
+  diagnostic <- subgroup_performance(result, "channel", metric = "brier_score")
+  expect_identical(result, original)
+  expect_identical(result$evaluation$primary_metric, "log_loss")
 
   expect_equal(diagnostic$task, "binary")
   expect_identical(diagnostic$primary_metric, "brier_score")
@@ -60,8 +62,11 @@ test_that("subgroup performance honors MAE without duplicating its supporting me
   )
   data$y <- 1.5 * data$x + rnorm(n, sd = rep(c(0.2, 0.5, 1), each = n / 3))
   result <- autoxplain(model_set = "quick", data, "y", test_fraction = 0.5, seed = 92)
-  result$evaluation$primary_metric <- "mae"
-  diagnostic <- subgroup_performance(result, "segment", min_rows = 10)
+  original <- result
+  diagnostic <- subgroup_performance(result, "segment", min_rows = 10, metric = "mae")
+  expect_identical(result, original)
+  expect_identical(result$evaluation$primary_metric, "rmse")
+  expect_error(subgroup_performance(result, "segment", metric = "brier_score"), "supported loss metric")
 
   expect_identical(diagnostic$primary_metric, "mae")
   expect_identical(diagnostic$secondary_metric, "rmse")

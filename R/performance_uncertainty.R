@@ -1,12 +1,13 @@
 #' Estimate evaluation-sample uncertainty with a paired bootstrap
 #'
 #' Resamples evaluation observations, using the same sampled rows for the primary
-#' model and intercept-only baseline. The models stay fixed. The difference is
-#' primary loss minus baseline loss, so negative values favor the primary model.
+#' model and designated reference model (the intercept-only baseline in guided
+#' workflows). The models stay fixed. The difference is primary loss minus
+#' reference loss, so negative values favor the primary model.
 #' This estimates evaluation-sample variability conditional on the fitted models;
 #' it does not include fitting, tuning, or feature-selection uncertainty.
 #'
-#' @param result An [autoxplain()] result.
+#' @param result An [autoxplain()] or [evaluate_models()] result.
 #' @param n_boot Number of bootstrap draws (at least 20). Use at least 1000 for
 #'   analysis; smaller values are useful for examples and software tests.
 #' @param confidence Percentile interval level, strictly between zero and one.
@@ -44,14 +45,18 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
   if (identical(result$validation$method, "temporal")) {
     stop("Temporal evaluation requires a dependence-aware uncertainty method, not an IID bootstrap.", call. = FALSE)
   }
-  ids <- c(result$provenance$primary_model_id, "simple_baseline")
-  explainers <- as_explainers(result, models = ids)
+  reference_id <- result_reference_id(result)
+  ids <- c(result$provenance$primary_model_id, reference_id)
+  if (length(ids) != 2L || anyNA(ids) || anyDuplicated(ids) || !all(ids %in% names(result$models))) {
+    stop("Paired uncertainty requires distinct retained primary and reference models.", call. = FALSE)
+  }
+  explainers <- report_explainers(result, models = ids)
   reference <- explainers[[1L]]
   metric <- resolve_metric(result$evaluation$primary_metric, result$task)
   if (!metric %in% c("rmse", "mae", "logloss", "brier")) {
     stop("Bootstrap uncertainty supports RMSE, MAE, log loss, or Brier loss.", call. = FALSE)
   }
-  predictions <- lapply(explainers, function(x) predict(x, x$data))
+  predictions <- report_predictions(result, models = ids, explainers = explainers)
   n <- length(reference$y)
   units <- seq_len(n)
   unit <- "observation"
@@ -87,6 +92,7 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
   structure(list(
     estimates = estimates, draws = as.data.frame(draws), metric = result$evaluation$primary_metric,
     confidence = confidence, n_boot = n_boot, seed = seed, unit = unit, units = length(members),
+    primary_model_id = ids[[1L]], reference_model_id = ids[[2L]],
     evaluation_role = result$provenance$evaluation_role,
     notes = c(
       "Paired percentile intervals conditional on the fitted models; negative differences favor the primary model.",

@@ -1,7 +1,8 @@
 # Validation evidence
 
 The [product review of the 0.4.0 report](product-review-0.4.0.md) records the
-maintainer’s feedback, the regressions from 0.1 and current task acceptance criteria.
+maintainer’s feedback and the regressions from 0.1. Current acceptance tasks are
+in the [product walkthrough](product-walkthrough.md) and the 0.6.0 work record.
 The [critical 0.3.0 audit](audit-0.3.0.md) records reproduced correctness bugs,
 report-design findings and repair acceptance criteria. Its counterexamples
 complement the passing release checks below; test totals alone did not cover
@@ -10,6 +11,10 @@ finding, its acceptance checks and the remaining limits.
 
 The [0.5.0 test-quality review](test-quality-0.5.0.md) records tests that passed
 despite wrong behavior, their replacements and the required negative controls.
+
+The [0.6.0 overhaul record](product-overhaul-0.6.0.md) tracks component audits,
+rejected report designs and new data, selection, prediction and existing-model
+workflows. Its acceptance remains tied to the tested files and source revision.
 
 Run these commands from the repository root. They write small reviewable
 artifacts under `validation/results/`. They do not send data to a service.
@@ -52,7 +57,7 @@ not a passed integration. Hosted Gemini requires a separate explicit live test;
 its mocked transport tests do not prove current endpoint availability. H2O tests
 start an isolated local Java cluster and shut it down after testing.
 
-Current release evidence belongs in `release-0.5.0.md`; record the tested commit, runtime,
+Published 0.5.0 evidence is in `release-0.5.0.md`. New release evidence must record the tested commit, runtime,
 package versions, check status and skipped tests. Do not reuse an older release's
 CRAN or Win-builder evidence for a new archive. Checksums identify an artifact;
 they do not make it CRAN-approved.
@@ -64,20 +69,32 @@ generated from public synthetic data by the current R implementation. Refresh
 the report and all gallery images together when the report changes:
 
 ```sh
-Rscript validation/render-example.R
+Rscript validation/render-explorer-cases.R
 python3 -m venv /tmp/autoxplain-screenshots
 /tmp/autoxplain-screenshots/bin/pip install playwright==1.58.0
 /tmp/autoxplain-screenshots/bin/playwright install chromium
 /tmp/autoxplain-screenshots/bin/python validation/capture-screenshots.py
 ```
 
+After reviewing all three public reports and the refreshed images, explicitly run
+`python validation/check-gallery.py --record` to update `gallery-manifest.json`.
+Normal mode checks the exact source and asset hashes; `--browser` also opens the
+committed reports and tests tabs, model selection and exported-record links.
+CI runs this guard before regenerating reports, so fresh temporary output cannot
+conceal a stale published gallery. Never record the manifest automatically in CI.
+
 Alternatively, set `CHROME_PATH` to an installed Chrome executable and omit the
 browser download. The capture script uses a 1440px desktop viewport at 1.5x
-resolution and checks for page overflow at 390px. It saves the model comparison, fitted patterns, relationships, predictions
-and checks tabs to `man/figures/`.
+resolution and checks for page overflow at 390px. It saves the model comparison,
+selection, data, fitted patterns, predictions and checks tabs to `man/figures/`.
 It also captures the fitted-model details view. Run
 `Rscript validation/render-explorer-cases.R` to refresh the public binary and
 multiclass demonstrations together with the regression example.
+
+The report browser workflow also generates messy-data and supplied-model cases.
+The data, prediction and selection gates use independent source tables or hand
+calculations. Their deliberately corrupted counts, record keys, controls and
+plot values must fail the intended assertions without relying on runtime errors.
 Review the images visually before committing; the script does not replace
 checking text legibility and framing. These Python dependencies are only needed
 to refresh screenshots, not to install or use the R package.
@@ -89,15 +106,33 @@ The [product walkthrough](product-walkthrough.md) is the release acceptance
 process. Browser assertions support it; they do not replace working through the
 novice and experienced-user journeys and recording useful answers.
 
-`report-browser` generates four actual reports and compares their controls and
-displayed answers with R results. It checks model, metric and feature switching;
-relationship inspection; prediction commands; keyboard and tooltip interaction;
-narrow layouts; offline rendering; and printing the selected view.
+`report-browser` generates regression, binary, multiclass, quick, messy-data and
+supplied-model reports, plus a deliberately constructed selection fixture. It
+checks controls and displayed answers against original data or independent
+calculations, including source rows, missingness, cutoff decisions and plotted
+coordinates. Keyboard, narrow-layout, offline and selected-view print checks
+cover the tested states.
 
 ```sh
 Rscript validation/render-explorer-cases.R
+Rscript validation/render-exploration-fixtures.R
+Rscript validation/render-supplied-models.R
+Rscript validation/render-selection-fixture.R
+Rscript validation/render-cutoff-fixture.R
+Rscript validation/render-cutoff-cases.R
 python validation/check-explorer.py \
   --axe-path /path/to/axe-core/axe.min.js --output-dir /tmp/report-browser
+python validation/check-data-explorer.py \
+  --case-dir /tmp/autoxplain-explorer-cases --output-dir /tmp/report-browser/data \
+  --axe-path /path/to/axe-core/axe.min.js
+python validation/check-predictions.py \
+  --case-dir /tmp/autoxplain-explorer-cases --output-dir /tmp/report-browser/predictions \
+  --axe-path /path/to/axe-core/axe.min.js
+python validation/check-selection.py --output-dir /tmp/report-browser/selection
+python validation/check-supplied-models.py \
+  --case-dir /tmp/autoxplain-explorer-cases --output-dir /tmp/report-browser/supplied-models
+python validation/check-cutoff-cases.py \
+  --case-dir /tmp/autoxplain-explorer-cases --output-dir /tmp/report-browser/cutoff-cases
 ```
 
 See [the check specification](report-browser.md) for dependencies and scope.

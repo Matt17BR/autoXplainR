@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(AutoXplainR)
 ```
 
-The default, `model_set = "tuned", portfolio = "core"`, searches 15 settings
+The default, `model_set = "tuned", portfolio = "core"`, schedules 15 settings
 across linear, tree and neural families using five training-only folds. It
 retains a representative from each successful family and a baseline for the
 report. The selected model is evaluated on rows kept outside that search.
@@ -48,10 +48,33 @@ tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected
 
 Every fold learns its preprocessing from that fold's training rows. The default
 one-standard-error rule favors the first eligible family in the documented
-priority, then its least-flexible eligible configuration. Cross-family priority
+priority, then its smallest recorded within-family capacity proxy. Some tuning
+dimensions are not ordered by that proxy; for example, a neural weight-count
+proxy does not order weight decay. Cross-family priority
 is a package policy, not a statistical ordering of model families. Fold-score
 standard errors are a selection heuristic, not independent-test confidence intervals.
 Use `tuning_rule = "best"` for the lowest resampled error instead.
+
+```{r search-evidence}
+evidence <- tuning_evidence(tuned)
+evidence$selection[c("best_configuration", "selected_configuration", "threshold")]
+```
+
+The report's **Model selection** view connects those decisions to the parameter
+values, effective fold settings and retained fit. The default grid is a small,
+versioned set of contrasting controls. It does not follow a theorem that makes
+those numbers optimal for your data. A winning setting on the edge of a searched
+range is a reason to investigate that range, not evidence that it should always
+be extended. The range includes failed attempts: being inside it does not imply
+that neighboring settings produced usable fits. Inspect the successful count
+and failure reasons. Candidate comparisons stay inside training data.
+
+Explicit optimizer nonconvergence excludes a configuration by default. Fold and
+refit records retain the status and reason. `optimization_policy = "warn"` in
+`tuning_control()` deliberately keeps such fits with a warning; an unreported
+optimizer status remains unknown. Successful family representatives use their
+lowest valid within-family CV loss, while the primary follows the configured
+global selection rule. These are different choices.
 
 ```{r optional-install, eval=FALSE}
 install_model_engines("recommended")
@@ -89,6 +112,20 @@ outcomes, request a named class with `class = "virginica"`.
 size axis measures approximate R object storage, not structural complexity.
 Use it when storage or runtime is relevant to a concrete constraint; a favorable
 Pareto position is not a model-selection rule.
+
+For repeated prediction measurements on the same rows:
+
+```{r prediction-cost, eval=FALSE}
+bench <- benchmark_predictions(comparison)
+render_model_report(comparison, "report.html", benchmark = bench)
+```
+
+The benchmark records a common batch, warmup, repeated blocks, warnings and
+timing limits. A per-row batch cost is not single-request latency;
+quartiles describe the repeated measurements, not a confidence interval. The
+benchmark excludes fitting and the guided workflow's raw-data preprocessing.
+Transformations performed inside a custom prediction function are timed with
+that function.
 
 ## Optional H2O search
 

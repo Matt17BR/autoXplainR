@@ -19,6 +19,14 @@ engine_test_data <- function() {
   list(regression = regression, binary = binary, multiclass = multiclass)
 }
 
+overlapping_multiclass_fixture <- function() {
+  # Every class spans the same predictor ranges. Prediction-shape contracts do
+  # not require an unpenalized optimizer to converge on separable iris labels.
+  data <- iris
+  data$Species <- factor(rep(levels(iris$Species), length.out = nrow(data)), levels = levels(iris$Species))
+  data
+}
+
 fit_engine_configuration <- function(family, data, target, task) {
   plan <- AutoXplainR:::local_tuning_plan(
     max_models = 1L,
@@ -129,11 +137,12 @@ native_explanation_fixture <- function(task) {
 expect_native_explanation_contract <- function(family, package, task, seed) {
   skip_if_package_unavailable(package)
   fixture <- native_explanation_fixture(task)
+  comparator <- if (task == "multiclass") "tree" else "linear"
   result <- autoxplain(
     fixture$data,
     fixture$target,
     model_set = "tuned",
-    learners = c("linear", family),
+    learners = c(comparator, family),
     max_models = 2L,
     nfolds = 2L,
     tuning_rule = "best",
@@ -142,11 +151,11 @@ expect_native_explanation_contract <- function(family, package, task, seed) {
     seed = seed
   )
   model_rows <- result$leaderboard[
-    result$leaderboard$family %in% c("linear", family),
+    result$leaderboard$family %in% c(comparator, family),
     ,
     drop = FALSE
   ]
-  expect_setequal(model_rows$family, c("linear", family))
+  expect_setequal(model_rows$family, c(comparator, family))
   expect_equal(nrow(model_rows), 2L)
   model_ids <- model_rows$model_id
   explainers <- as_explainers(result, models = model_ids)
@@ -211,8 +220,10 @@ expect_native_explanation_contract <- function(family, package, task, seed) {
 }
 
 test_that("linear multiclass models keep one-row probability dimensions", {
-  model <- fit_engine_configuration("linear", iris, "Species", "multiclass")
-  explainer <- explain_model(model, iris, "Species", task = "multiclass")
+  data <- overlapping_multiclass_fixture()
+  model <- fit_engine_configuration("linear", data, "Species", "multiclass")
+  expect_identical(AutoXplainR:::model_optimization_record(model)$status, "converged")
+  explainer <- explain_model(model, data, "Species", task = "multiclass")
   probability <- predict(explainer, explainer$data[1L, , drop = FALSE])
 
   expect_equal(dim(probability), c(1L, 3L))
@@ -441,7 +452,7 @@ test_that("recommended portfolio is integrated for binary and multiclass tasks",
   }, logical(1))))
 
   multiclass <- autoxplain(
-    data$multiclass, "Species", model_set = "tuned", portfolio = "recommended",
+    overlapping_multiclass_fixture(), "Species", model_set = "tuned", portfolio = "recommended",
     max_models = 5, nfolds = 2, tuning_rule = "best", seed = 72
   )
   expect_setequal(

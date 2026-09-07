@@ -11,7 +11,7 @@
 #' not a population guarantee or a replacement for log loss and Brier score.
 #'
 #' @param result An `autoxplain_result`.
-#' @param model One model ID or index. `NULL` uses `main_model` when available,
+#' @param model One model ID or index. `NULL` uses the recorded primary model,
 #'   otherwise the first retained model.
 #' @param bins Maximum number of approximately equal-sized probability groups.
 #'   Small evaluation sets automatically use fewer groups so that each group
@@ -36,7 +36,7 @@ calibration_diagnostics <- function(result, model = NULL, bins = 5L) {
   }
   bins <- assert_count(bins, "bins")
   available <- names(result$models)
-  model <- model %||% if ("main_model" %in% available) "main_model" else available[[1L]]
+  model <- model %||% result$provenance$primary_model_id %||% available[[1L]]
   selected <- select_models(result$models, model)
   if (length(selected) != 1L) {
     stop("`model` must select exactly one retained model.", call. = FALSE)

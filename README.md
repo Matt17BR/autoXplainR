@@ -1,9 +1,9 @@
 # AutoXplainR
 
-Fit several models, compare their predictions and costs, and explore what each
-one learned—with one R command.
+Fit several models, compare their predictions and costs, and explore the data
+behind their behavior with one R command.
 
-[![AutoXplainR model comparison tab showing held-out scores and measured training costs](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
+[![AutoXplainR model comparison tab showing held-out scores and measured costs](man/figures/guided-overview.png)](https://matt17br.github.io/autoXplainR/model-report.html)
 
 *Start with the models: how well do they predict, and what do they cost?
 Preview uses synthetic data.
@@ -12,6 +12,8 @@ Preview uses synthetic data.
 Also explore [customer churn](https://matt17br.github.io/autoXplainR/binary-report.html)
 or [three-class flower predictions](https://matt17br.github.io/autoXplainR/multiclass-report.html).
 The churn data are synthetic; the flower example uses R's `iris` data.
+These public previews deliberately include records, so you can try filters and
+follow prediction mistakes back to the data. Reports you create default to aggregates.
 
 ## Try it
 
@@ -24,7 +26,7 @@ result <- autoxplain(mtcars, "mpg", report = "model-report.html")
 result
 ```
 
-This searches 15 settings across linear, tree and neural models using five
+This schedules 15 settings across linear, tree and neural models using five
 training-only cross-validation folds. It keeps one fitted representative per
 successful family plus a baseline, evaluates them on a reproducible 20% holdout,
 and writes a standalone report with importance and fitted effects. Regression,
@@ -46,18 +48,31 @@ they are probabilities of `"yes"`. Set and inspect levels before fitting.
 
 ## A look inside the report
 
-The report has six focused tabs. Scores, plots and controls stay visible;
-background explanations sit behind **?** buttons and expandable details. Help
+The report has focused tabs for comparison, model selection, data, feature
+effects, predictions, checks and methods. Controls sit beside the values they
+change; supporting explanations use **?** buttons and expandable details. Help
 works on hover, keyboard focus and tap. Each screenshot below comes from the
 same reproducible synthetic delivery example using the default model search.
 
 ### Compare models
 
-Read scores beside training time, prediction time and model size. Change either
-axis to explore the tradeoff. The **CV choice** label records training selection;
+Read scores beside measured costs. The primary model is compared with the
+baseline, including a paired evaluation-sample interval when supported. Change
+the score or resource axis to inspect the tradeoff; points carry model names. The **CV choice** label records training selection;
 the best score on the held-out rows can belong to another model.
 
-[![Model comparison with scores, measured costs and a performance versus training time plot](man/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
+For a more useful timing comparison, run a repeated benchmark on a common batch:
+
+```r
+bench <- benchmark_predictions(result)
+render_model_report(result, "report.html", benchmark = bench)
+```
+
+The report shows median prediction cost and repeat variation, with batch size,
+timer resolution and measurement scope. It keeps the original fit and prediction
+readings separate. Batch cost per row is not the latency of a single-row request.
+
+[![Model comparison with scores, measured costs and a performance versus model size plot](man/figures/model-comparison.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
 
 ### Explore inputs and fitted patterns
 
@@ -76,27 +91,63 @@ and Predictions. In R, use `extract_model_characteristics(result)` or inspect
 
 [![Decision-tree details with fitted leaves, depth, formula and exact training controls](man/figures/model-details.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
 
-### Find related inputs
+### Understand the search
 
-Select a matrix cell to read the association method and sample count. Numeric
-pairs retain the direction of correlation. Associations involving categories
-are labeled as unsigned.
+**Model selection** connects the retained model to its candidate settings and
+fold scores. It separates the lowest cross-validation loss, the policy choice
+and the model that successfully refitted. Inspect the numerical selection
+threshold, parameter meanings, searched ranges and settings that failed.
+The preset grid is a practical starting search, not an optimal configuration
+claimed from the literature.
 
-[![Input relationships matrix with signed correlations and pair inspection](man/figures/input-relationships.png)](https://matt17br.github.io/autoXplainR/model-report.html#relationships)
+[![Model selection with searched settings, cross-validation scores and retained-fit provenance](man/figures/model-selection.png)](https://matt17br.github.io/autoXplainR/model-report.html#selection)
+
+### Explore the underlying data
+
+**Explore data** shows outcome and input distributions, missing values and joint
+patterns across training and evaluation. Switch between supplied values and the
+values used by models to see what preprocessing changed. Aggregate profiles use
+the full available data.
+
+[![Data explorer comparing distributions and missing values before and after preprocessing](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
+
+Individual records require an explicit export:
+
+```r
+render_model_report(result, "report-with-rows.html", report_data = "rows")
+```
+
+That adds row filters, linked scatter points and source-record inspection.
+A record keeps its original input-table position after splitting and row removal.
+Use `report_data_control()` to select explorer columns and bound the exported
+row sample. Profiles describe all available rows until a row filter is applied;
+filtered views describe only the exported sample. Model scores stay unchanged.
+Anyone receiving the HTML receives every embedded record, including hidden rows.
+The default `"summary"` mode embeds aggregates; aggregates are not an anonymity
+guarantee. `"none"` omits data exploration and per-record predictions. These
+options do not remove feature names, fitted-model details or explanation results
+from the rest of the report.
 
 ### Inspect predictions
 
-Check observed errors or classification mistakes for the selected model.
-Mistakes include class probabilities, so confident errors are visible. Copy
-the matching R prediction command. Checks, uncertainty and methods each have a
-separate home in the remaining tabs.
+Inspect residual distributions, confusion counts and calibration for the selected
+model. For binary outcomes, move the decision cutoff to see false positives and
+false negatives change. Official model scores stay unchanged. With row export
+enabled, inspect confident classification mistakes and jump to their source
+records. Copy the matching R prediction command. Checks and methods have their
+own tabs; score uncertainty appears beside the comparison it describes.
 
-[![Prediction tab with observed versus predicted values, errors and the selected model's R command](man/figures/model-predictions.png)](https://matt17br.github.io/autoXplainR/model-report.html#evaluation)
+**Do the models disagree?** compares their predictions on the same rows, beside
+their scores. A difference involving a weak model is not evidence of prediction
+uncertainty. Exported records with large differences link back to the Data view.
+
+[![Prediction tab with observed versus predicted values, error distributions and residual patterns](man/figures/model-predictions.png)](https://matt17br.github.io/autoXplainR/model-report.html#evaluation)
 
 The HTML works offline and can be shared with someone who does not use R.
 **Print this view** exports the active tab with the current model and feature;
-expand any details you want included first. Without JavaScript, the file exposes
-all evidence as a static document. See the
+expand any details you want included first. Without JavaScript, static tables
+and model panels remain available; filtering, linked records and interactive
+chart updates require JavaScript. See the
 [reproduction instructions](https://github.com/Matt17BR/autoXplainR/blob/main/validation/README.md#report-screenshots).
 
 ## What you get in R
@@ -109,23 +160,40 @@ all evidence as a static document. See the
 | Repeated permutation importance and diagnostic findings | `result$explanations$audit` |
 | Primary-model ALE/PDP curves | `result$explanations$effects` |
 | Curves for every audited model | `result$explanations$effects_by_model` |
-| Effects that could not be computed, with reasons | `result$explanations$failures` |
+| Effect availability by model, class and input, with failure reasons | `result$explanations$effect_status` |
+| Original partitions and source-row mapping | `result$data_context` |
+| Candidate grid rationale and recorded selection decisions | `tuning_evidence(result)` |
 | Training recipe, model selection and split details | `result$preprocessing_metadata`, `result$provenance` |
 | Compact aggregate evidence for review or export | `evidence_summary(result)` |
+| Repeated prediction measurements on a common batch | `benchmark_predictions(result)` |
 
-All numerical objects remain available in R. The package uses result and
-aggregate-evidence schema 2.0; old grade fields are removed. Recompute affected
-0.3.0 analyses rather than assuming old serialized results use the new contracts.
+The result and aggregate-evidence objects use schema 2.0. Other components carry
+their own schema versions. Older saved results may lack source rows or current
+identity checks; the report identifies unavailable context or requests that you
+recompute incompatible evidence. Saved 0.5.0 results can require new explanations:
+
+```r
+older <- readRDS("analysis-0.5.0.rds")
+render_model_report(older, "updated-report.html", top_features = 2, n_repeats = 3)
+```
+
+This explicit small budget recomputes explanations without refitting. Retained
+0.5.0 audits fail the newer identity check. The recipe was replayed on saved
+regression, binary and multiclass results; it is not a promise that every custom
+predictor or external dependency can be recovered. Use a larger explanation
+budget for the analysis you intend to share.
 
 ```r
 predict(result, mtcars[1:3, ])       # applies the saved recipe; does not refit
 saveRDS(result, "analysis.rds")     # native R models and their evidence
-render_model_report(result, "report.html", uncertainty = TRUE)
+render_model_report(result, "report.html")
 ```
 
-The last call adds paired bootstrap intervals for evaluation performance and
-the difference from the baseline. These describe evaluation-sample uncertainty
-for the fitted models, not uncertainty from retraining or tuning.
+Reports include paired bootstrap intervals for the primary model and baseline
+when the sampling design supports them. Unsupported designs show the reason;
+`uncertainty = TRUE` requires an interval and `FALSE` omits it. These intervals
+describe evaluation-sample uncertainty conditional on the fitted models; they
+exclude uncertainty from retraining and tuning.
 
 ## Choose the validation design before interpreting scores
 
@@ -193,6 +261,9 @@ the requested portfolio based on what happens to be installed. Training recipes
 are learned again inside each fold. Candidate settings, fold scores, warnings,
 failures and out-of-fold predictions are retained by `tuning_results()`.
 Experienced users can specify `learners`, `max_models` and `tuning_control()`.
+Explicit optimizer nonconvergence excludes a candidate by default. The optional
+`optimization_policy = "warn"` retains it with its optimizer status; an unknown
+status is never presented as proof of convergence.
 H2O AutoML remains available through `engine = "h2o"` and requires Java.
 
 ## Inspect a question in more detail
@@ -205,8 +276,20 @@ calibration_diagnostics(tuned)        # probabilities versus observed frequencie
 compare_model_effects(tuned, "Petal.Length", class = "virginica")
 ```
 
-Use `as_explainers()` to work with individual retained models, or `explain_model()`
-to bring an existing model and a custom prediction function. Lower-level tools
+Use `evaluate_models()` to bring already fitted models into the same report:
+
+```r
+fit <- lm(mpg ~ wt + hp, data = mtcars[1:20, ])
+evaluated <- evaluate_models(list(linear = fit), mtcars[21:32, ], "mpg",
+  features = c("wt", "hp")
+)
+render_model_report(evaluated, "existing-model.html")
+```
+
+No training history, reference model or selection process is inferred. Supply
+custom prediction functions for other model classes, and an explicit reference
+if you want a baseline comparison. Use `as_explainers()` to work with individual
+retained models, or `explain_model()` for a focused model audit. Lower-level tools
 include grouped permutation importance, ALE, PDP, subgroup performance,
 missingness shift and binary threshold diagnostics.
 
@@ -224,7 +307,8 @@ computes explanations even if `explain = FALSE`. Explicit report budgets such as
 - Permutation importance measures reliance of a fitted model. Its intervals
   describe random-shuffle Monte Carlo error, not population uncertainty.
 - Correlated inputs can substitute for each other and make marginal shuffling
-  unrealistic. The report diagnoses dependence; it does not solve it.
+  unrealistic. Pairwise association summaries reveal some relationships;
+  small values do not establish independence.
 - ALE and PDP describe fitted associations, not the causal effect of an action.
 - Model disagreement covers the supplied fits. It is not a prediction interval
   or a search of every plausible model.
@@ -247,7 +331,7 @@ explanation and importance-inference use cases.
 - [Function reference](https://matt17br.github.io/autoXplainR/reference/index.html)
 - [Near-term development plan](https://matt17br.github.io/autoXplainR/ROADMAP.html)
 - [Validation and diagnostics](https://matt17br.github.io/autoXplainR/articles/validation-and-diagnostics.html)
-- [Existing models and narratives](https://matt17br.github.io/autoXplainR/articles/existing-models-and-narratives.html)
+- [Bring your own fitted models](https://matt17br.github.io/autoXplainR/articles/existing-models-and-narratives.html)
 - [Statistical methods](https://matt17br.github.io/autoXplainR/articles/statistical-methods.html)
 - [Validation scripts and evidence](https://github.com/Matt17BR/autoXplainR/tree/main/validation)
 - [Contributing](https://matt17br.github.io/autoXplainR/CONTRIBUTING.html) and [release checklist](https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.html)

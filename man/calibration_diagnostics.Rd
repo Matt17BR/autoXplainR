@@ -9,7 +9,7 @@ calibration_diagnostics(result, model = NULL, bins = 5L)
 \arguments{
 \item{result}{An \code{autoxplain_result}.}
 
-\item{model}{One model ID or index. \code{NULL} uses \code{main_model} when available,
+\item{model}{One model ID or index. \code{NULL} uses the recorded primary model,
 otherwise the first retained model.}
 
 \item{bins}{Maximum number of approximately equal-sized probability groups.

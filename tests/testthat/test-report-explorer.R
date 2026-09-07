@@ -7,7 +7,20 @@ test_that("the one-command default fits a core model comparison without optional
     expect_identical(result$provenance$model_set, "tuned")
     expect_identical(result$provenance$portfolio, "core")
     expect_s3_class(result$tuning, "autoxplain_tuning")
-    expect_true(all(c("linear", "tree", "neural", "baseline") %in% result$leaderboard$family))
+    candidates <- result$tuning$candidates
+    expect_setequal(unique(candidates$family), c("linear", "tree", "neural"))
+    expect_true("baseline" %in% result$leaderboard$family)
+    for (family in setdiff(unique(candidates$family), result$leaderboard$family)) {
+      omitted <- candidates[candidates$family == family, , drop = FALSE]
+      expect_true(
+        all(omitted$status != "ok" | omitted$refit_status == "failed"),
+        info = paste("A missing family needs a CV or refit failure:", task, family)
+      )
+      expect_true(
+        any(omitted$optimization_issues > 0 | nzchar(omitted$refit_error)),
+        info = paste("The omitted family needs an inspectable reason:", task, family)
+      )
+    }
     expect_true(all(is.finite(predict(result, head(data)))))
     expect_equal(nrow(result$tuning$candidates), 15L)
   }
@@ -130,10 +143,6 @@ test_that("small probability effects keep distinct signed axis labels", {
   expect_length(unique(labels), length(ticks))
   expect_identical(AutoXplainR:::report_axis_number(0), "0")
   expect_equal(as.numeric(AutoXplainR:::report_number(-1e-7)), -1e-7)
-  effect <- structure(data.frame(x = 1:3, accumulated_effect = c(-.01, 0, .013)), method = "ale")
-  svg <- AutoXplainR:::effect_svg(effect, "x")
-  expect_match(svg, ">0.005</text>", fixed = TRUE)
-  expect_match(svg, ">-0.005</text>", fixed = TRUE)
 })
 
 test_that("report titles are escaped and offline assets remain embedded", {
@@ -207,19 +216,4 @@ test_that("a model outside the explanation budget offers recovery without an emp
   expect_match(html, "Rebuild the report with a larger model budget", fixed = TRUE)
   expect_match(html, "max_models = length(result$models)", fixed = TRUE)
   expect_equal(lengths(regmatches(html, gregexpr('class="feature-select"', html, fixed = TRUE))), 1L)
-})
-
-test_that("classification mistakes retain class probabilities and prioritize confident errors", {
-  probability <- cbind(cat = c(.6, .03, .1), dog = c(.3, .02, .8), bird = c(.1, .95, .1))
-  observed <- factor(c("cat", "dog", "cat"), levels = c("cat", "dog", "bird"))
-  rows <- AutoXplainR:::explorer_classification_mistakes(observed, probability[, 3:1], levels(observed))
-  expect_equal(rows$Row, c(2L, 3L))
-  expect_equal(rows$Predicted, c("bird", "dog"))
-  expect_equal(rows[["Probability of observed class"]], c(.02, .1))
-  expect_equal(rows[["Probability of predicted class"]], c(.95, .8))
-  binary <- AutoXplainR:::explorer_classification_mistakes(c("no", "yes", "no"), c(.5, .01, .1), c("no", "yes"))
-  expect_equal(binary$Row, c(2L, 1L))
-  expect_equal(binary$Predicted, c("no", "yes"))
-  expect_equal(binary[["Probability of observed class"]], c(.01, .5))
-  expect_equal(binary[["Probability of predicted class"]], c(.99, .5))
 })

@@ -6,7 +6,7 @@
 \usage{
 threshold_diagnostics(
   result,
-  thresholds = seq(0.1, 0.9, by = 0.05),
+  thresholds = (2:18)/20,
   model = NULL,
   false_positive_cost = 1,
   false_negative_cost = 1
@@ -17,7 +17,7 @@ threshold_diagnostics(
 
 \item{thresholds}{Numeric candidate thresholds between 0 and 1.}
 
-\item{model}{One model ID or index. \code{NULL} uses \code{main_model} when available,
+\item{model}{One model ID or index. \code{NULL} uses the recorded primary model,
 otherwise the first retained model.}
 
 \item{false_positive_cost}{Non-negative relative cost assigned to one false

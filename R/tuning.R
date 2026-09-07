@@ -21,6 +21,13 @@
 #' the seed used for fitting. This makes data-dependent clamps such as `mtry`
 #' or neighbor count visible and prevents two requests that become the same
 #' fold fit from being compared only through different random seeds.
+#' `optimization` and `learned` retain available optimizer termination codes and
+#' values learned by fitting. Explicit unsuccessful termination is excluded by
+#' default; `tuning_control(optimization_policy = "warn")` retains it with a warning.
+#' Unknown convergence status is not evidence that an optimizer converged.
+#' `search_space` records the actual grid and rationale; `selection` preserves
+#' the numeric threshold and exact family preference used before refit fallback.
+#' The smaller aggregate interface [tuning_evidence()] omits case-level records.
 #'
 #' `refit` records every full-training refit attempt. If the resampling-selected
 #' configuration cannot be refitted, AutoXplainR tries the remaining valid
@@ -40,9 +47,11 @@
 #' @export
 #'
 #' @examples
-#' tuned <- autoxplain(iris, "Sepal.Length", model_set = "tuned",
-#'                     portfolio = "core", max_models = 4,
-#'                     nfolds = 3, seed = 2026)
+#' tuned <- autoxplain(iris, "Sepal.Length",
+#'   model_set = "tuned",
+#'   portfolio = "core", max_models = 4,
+#'   nfolds = 3, seed = 2026
+#' )
 #' tuning_results(tuned)
 tuning_results <- function(result) {
   if (!inherits(result, "autoxplain_result")) {
@@ -62,37 +71,53 @@ print.autoxplain_tuning <- function(x, ...) {
   selected <- x$candidates[x$candidates$selected, , drop = FALSE]
   cat("<AutoXplainR training-only tuning>\n")
   cat("  search:     ", nrow(x$candidates), " configurations across ",
-      length(unique(x$candidates$family)), " model families\n", sep = "")
+    length(unique(x$candidates$family)), " model families\n",
+    sep = ""
+  )
   cat("  resampling: ", x$folds_used, " folds; ", x$metric,
-      " minimized\n", sep = "")
+    " minimized\n",
+    sep = ""
+  )
   if (!is.null(x$rows_requested)) {
     if (isTRUE(x$control$retain_oof %||% TRUE)) {
       cat("  evidence:   ", x$rows_evaluated, "/", x$rows_requested,
-          " outer-training rows predicted",
-          if (x$rows_omitted) paste0("; ", x$rows_omitted, " omitted by preprocessing") else "",
-          "\n", sep = "")
+        " outer-training rows predicted",
+        if (x$rows_omitted) paste0("; ", x$rows_omitted, " omitted by preprocessing") else "",
+        "\n",
+        sep = ""
+      )
     } else {
       cat("  evidence:   row-level OOF predictions not retained\n")
     }
   }
   cat("  rule:       ", tuning_rule_label(x$selection_rule), "\n", sep = "")
   cat("  selected:   ", selected$model[[1L]], " (",
-      selected$configuration_id[[1L]], ")\n", sep = "")
+    selected$configuration_id[[1L]], ")\n",
+    sep = ""
+  )
   if (length(x$families_resampling_failed)) {
     cat("  no valid CV: ", paste(x$families_resampling_failed, collapse = ", "),
-        " (every configuration failed resampling)\n", sep = "")
+      " (every configuration failed resampling)\n",
+      sep = ""
+    )
   }
   if (!is.null(x$refit) && !is.na(x$final_configuration)) {
     cat("  final fit:  ", x$final_configuration,
-        if (isTRUE(x$refit$fallback_used)) " (recorded fallback)" else "",
-        "\n", sep = "")
+      if (isTRUE(x$refit$fallback_used)) " (recorded fallback)" else "",
+      "\n",
+      sep = ""
+    )
     if (length(x$refit$families_refit_failed)) {
       cat("  omitted:    ", paste(x$refit$families_refit_failed, collapse = ", "),
-          " (full-training refit failed)\n", sep = "")
+        " (full-training refit failed)\n",
+        sep = ""
+      )
     }
   }
   cat("  score:      ", format(round(selected$cv_score[[1L]], 5L), trim = TRUE),
-      " +/- ", format(round(selected$cv_se[[1L]], 5L), trim = TRUE), " SE\n", sep = "")
+    " +/- ", format(round(selected$cv_se[[1L]], 5L), trim = TRUE), " SE\n",
+    sep = ""
+  )
   cat("  boundary:   ", x$scope_note, "\n", sep = "")
   cat("  proxy:      family-specific flexibility; values are not comparable across families\n")
   display <- x$candidates[c(
@@ -131,6 +156,10 @@ tune_supervised_candidates <- function(raw_data,
     custom_grids = control$grids,
     family_budgets = control$family_budgets
   )
+  plan$optimization_policy <- control$optimization_policy %||% "exclude"
+  if (!is.null(control$family_priority)) {
+    plan$simplicity_rank <- match(plan$family, control$family_priority)
+  }
   fold_assignment <- tuning_fold_assignment(
     raw_data[[target]],
     task = task,
@@ -185,7 +214,8 @@ tune_supervised_candidates <- function(raw_data,
     NULL
   }
   candidates <- summarize_tuning_candidates(
-    plan, fold_scores, fold_assignment$folds, task, metric = control$metric
+    plan, fold_scores, fold_assignment$folds, task,
+    metric = control$metric
   )
   valid <- candidates$status == "ok" & is.finite(candidates$cv_score)
   if (!any(valid)) {
@@ -198,8 +228,8 @@ tune_supervised_candidates <- function(raw_data,
   }
   if (control$retain_oof) {
     out_of_fold_predictions <- out_of_fold_predictions[
-      out_of_fold_predictions$configuration_id %in% candidates$configuration_id[valid],
-      , drop = FALSE
+      out_of_fold_predictions$configuration_id %in% candidates$configuration_id[valid], ,
+      drop = FALSE
     ]
     rownames(out_of_fold_predictions) <- NULL
     expected_prediction_rows <- rows_evaluated * sum(valid)
@@ -230,6 +260,7 @@ tune_supervised_candidates <- function(raw_data,
   candidates$selected <- seq_len(nrow(candidates)) == selected_index
   selected_id <- candidates$configuration_id[[selected_index]]
   plan$selected <- plan$configuration_id == selected_id
+  selection_record <- tuning_selection_record(candidates, selected_id, selection_rule, control$metric)
   candidates <- candidates[order(
     !candidates$selected,
     candidates$status != "ok",
@@ -241,7 +272,9 @@ tune_supervised_candidates <- function(raw_data,
 
   structure(
     list(
-      schema_version = 4L,
+      schema_version = 5L,
+      search_space = attr(plan, "search_space"),
+      selection = selection_record,
       method = if (identical(control$fold_source, "supplied_vfold")) {
         "User-supplied V-fold resampling with fold-specific preprocessing"
       } else {
@@ -440,7 +473,9 @@ local_tuning_plan <- function(max_models,
         )
       }, character(1))
       stop("Family budget exceeds available configurations: ", paste(details, collapse = "; "),
-           ".", call. = FALSE)
+        ".",
+        call. = FALSE
+      )
     }
   }
   selected <- list()
@@ -477,7 +512,8 @@ local_tuning_plan <- function(max_models,
       simplicity_rank = definition$simplicity_rank,
       complexity_definition = definition$complexity_label,
       complexity_proxy = max(1, definition$complexity(
-        parameters, n = n, p = p, task = task, n_classes = n_classes
+        parameters,
+        n = n, p = p, task = task, n_classes = n_classes
       )),
       search_seed = seed,
       seed = stable_configuration_seed(seed, family, parameters),
@@ -485,11 +521,17 @@ local_tuning_plan <- function(max_models,
       stringsAsFactors = FALSE
     )
   })
-  do.call(rbind, rows)
+  output <- do.call(rbind, rows)
+  attr(output, "search_space") <- tuning_search_space(
+    grids, output, n, p, task, names(custom_grids %||% list())
+  )
+  output
 }
 
 canonicalize_task_specific_grids <- function(grids, task, custom_families = character()) {
-  if (!"kernel" %in% names(grids) || identical(task, "regression")) return(grids)
+  if (!"kernel" %in% names(grids) || identical(task, "regression")) {
+    return(grids)
+  }
   canonical_epsilon <- 0.1
   requested <- vapply(grids$kernel, `[[`, numeric(1), "epsilon")
   if ("kernel" %in% custom_families && any(requested != canonical_epsilon)) {
@@ -527,7 +569,9 @@ stable_configuration_seed <- function(seed, family, parameters) {
 }
 
 canonical_tuning_parameter_key <- function(parameters) {
-  if (!length(parameters)) return("<default>")
+  if (!length(parameters)) {
+    return("<default>")
+  }
   paste(vapply(names(parameters), function(name) {
     value <- parameters[[name]]
     type <- if (is.integer(value)) {
@@ -629,7 +673,8 @@ tuning_fold_assignment <- function(y,
   folds <- min(requested, maximum)
   if (folds < 2L) {
     stop("At least two resampling folds require two usable rows per outcome class.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   id <- integer(n)
   if (task == "regression") {
@@ -726,7 +771,9 @@ assert_drop_rows_class_coverage <- function(training,
   strategy <- normalize_missing_strategy(
     preprocessing_config$missing_value_strategy %||% "impute"
   )
-  if (!identical(strategy, "drop_rows")) return(invisible(TRUE))
+  if (!identical(strategy, "drop_rows")) {
+    return(invisible(TRUE))
+  }
 
   partitions <- list(training = training, validation = validation)
   for (partition_name in names(partitions)) {
@@ -760,6 +807,8 @@ score_tuning_configuration <- function(configuration,
   started <- proc.time()[["elapsed"]]
   error <- ""
   fit_warning <- character()
+  optimization <- optimization_record()
+  learned <- list()
   fit_spec <- tuning_configuration_fit_spec(
     configuration,
     data = fold$training,
@@ -776,6 +825,8 @@ score_tuning_configuration <- function(configuration,
           fit_spec = fit_spec,
           fit_scope = "resampling_fold"
         )
+        optimization <- attr(model, "autoxplain_tuning_fit")$optimization %||% optimization
+        learned <- attr(model, "autoxplain_tuning_fit")$learned %||% list()
         explainer <- explain_model(
           model,
           fold$validation,
@@ -808,6 +859,8 @@ score_tuning_configuration <- function(configuration,
     ),
     error = function(condition) {
       error <<- conditionMessage(condition)
+      optimization <<- condition$optimization %||% optimization
+      learned <<- condition$learned %||% learned
       list(score = NA_real_, predictions = empty_tuning_predictions(task))
     }
   )
@@ -826,6 +879,9 @@ score_tuning_configuration <- function(configuration,
     effective_parameter_key = fit_spec$effective_parameter_key,
     requested_configuration_seed = fit_spec$requested_configuration_seed,
     fit_seed = fit_spec$fit_seed,
+    training_rows = nrow(fold$training),
+    optimization_status = optimization$status,
+    optimization_message = optimization$message,
     score = result$score,
     validation_rows = nrow(fold$validation),
     validation_rows_requested = fold$validation_rows_requested,
@@ -838,6 +894,8 @@ score_tuning_configuration <- function(configuration,
   )
   score$requested_parameters <- I(list(fit_spec$requested_parameters))
   score$effective_parameters <- I(list(fit_spec$effective_parameters))
+  score$optimization <- I(list(optimization))
+  score$learned <- I(list(learned))
   list(
     score = score,
     predictions = result$predictions
@@ -875,7 +933,8 @@ format_tuning_predictions <- function(configuration,
       (output$truth - output$estimate)^2
     }
     output$probabilities <- I(matrix(
-      numeric(), nrow = rows, ncol = 0L,
+      numeric(),
+      nrow = rows, ncol = 0L,
       dimnames = list(NULL, character())
     ))
     return(output)
@@ -932,7 +991,9 @@ empty_tuning_predictions <- function(task) {
 
 combine_tuning_predictions <- function(rows, task) {
   populated <- vapply(rows, nrow, integer(1)) > 0L
-  if (!any(populated)) return(empty_tuning_predictions(task))
+  if (!any(populated)) {
+    return(empty_tuning_predictions(task))
+  }
   output <- do.call(rbind, rows[populated])
   rownames(output) <- NULL
   output
@@ -941,7 +1002,9 @@ combine_tuning_predictions <- function(rows, task) {
 combine_tuning_omissions <- function(folds) {
   rows <- lapply(seq_along(folds), function(fold_id) {
     fold <- folds[[fold_id]]
-    if (!length(fold$omitted_validation_row)) return(NULL)
+    if (!length(fold$omitted_validation_row)) {
+      return(NULL)
+    }
     data.frame(
       fold = rep(as.integer(fold_id), length(fold$omitted_validation_row)),
       training_row = as.integer(fold$omitted_validation_row),
@@ -986,8 +1049,7 @@ tuning_prediction_schema <- function(outcome,
     } else {
       "a numeric matrix in `class_levels` order, row-aligned with the evidence table"
     },
-    case_loss = switch(
-      metric,
+    case_loss = switch(metric,
       rmse = "squared error (pooled and square-rooted for RMSE)",
       mae = "absolute error",
       log_loss = "negative log likelihood",
@@ -1074,6 +1136,7 @@ summarize_tuning_candidates <- function(plan,
       cv_sd = uncertainty$sd,
       cv_se = uncertainty$se,
       folds_completed = complete,
+      optimization_issues = sum(scores$optimization_status %in% c("not_converged", "partial")),
       evaluated_rows = sum(scores$validation_rows[is.finite(scores$score)]),
       simplicity_rank = plan$simplicity_rank[[index]],
       complexity_definition = plan$complexity_definition[[index]],
@@ -1142,6 +1205,8 @@ fit_tuning_configuration <- function(configuration,
       seed = fit_spec$fit_seed
     )
   )
+  optimization <- model_optimization_record(model)
+  learned <- tuning_learned_settings(model)
   attr(model, "autoxplain_tuning_fit") <- list(
     configuration_id = configuration$configuration_id[[1L]],
     family = family,
@@ -1157,8 +1222,33 @@ fit_tuning_configuration <- function(configuration,
     requested_parameter_key = fit_spec$requested_parameter_key,
     effective_parameter_key = fit_spec$effective_parameter_key,
     requested_configuration_seed = fit_spec$requested_configuration_seed,
-    fit_seed = fit_spec$fit_seed
+    fit_seed = fit_spec$fit_seed,
+    optimization = optimization,
+    learned = learned
   )
+  policy <- if ("optimization_policy" %in% names(configuration)) {
+    configuration$optimization_policy[[1L]]
+  } else {
+    "exclude"
+  }
+  if (optimization$status %in% c("not_converged", "partial")) {
+    message <- paste0(
+      "Configuration `", configuration$configuration_id[[1L]], "`: ",
+      optimization$message, " Optimization policy: ", policy, "."
+    )
+    if (policy == "exclude") {
+      stop(structure(
+        list(
+          message = message, call = NULL, optimization = optimization,
+          learned = learned
+        ),
+        class = c("autoxplain_optimization_error", "error", "condition")
+      ))
+    }
+    warning(structure(list(message = message, call = NULL, optimization = optimization),
+      class = c("autoxplain_optimization_warning", "warning", "condition")
+    ))
+  }
   model
 }
 
@@ -1258,7 +1348,9 @@ predict.autoxplain_tuned_nnet <- function(object, newdata, ...) {
   if (object$task == "regression") {
     return(as.numeric(raw) * object$y_scale + object$y_center)
   }
-  if (object$task == "binary") return(as.numeric(raw))
+  if (object$task == "binary") {
+    return(as.numeric(raw))
+  }
   output <- as.matrix(raw)
   colnames(output) <- object$class_levels
   output
@@ -1293,7 +1385,7 @@ tuning_rule_label <- function(rule) {
   if (identical(rule, "one_se")) {
     paste(
       "one-standard-error (prefer the documented family priority, then the",
-      "least-flexible near-best setting within that family)"
+      "lowest recorded capacity proxy among eligible settings within that family)"
     )
   } else {
     "lowest resampled error"

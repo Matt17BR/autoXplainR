@@ -24,8 +24,9 @@ extract_model_characteristics(
 A list of class \code{autoxplainr_model_characteristics}.
 }
 \description{
-Extracts stable, compact metadata from guided base models or retained H2O
-models and joins it to the leaderboard. Native H2O variable importance is
+Extracts compact metadata from guided models, supplied existing fits or
+retained H2O models and joins it to the leaderboard. Unsupported model details
+remain unavailable. Native H2O variable importance is
 labeled as such; it is not substituted for model-agnostic permutation
 importance.
 }

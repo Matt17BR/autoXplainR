@@ -1,11 +1,11 @@
-#' Find held-out rows where supplied models disagree
+#' Find evaluation rows where supplied models disagree
 #'
 #' `prediction_ambiguity()` compares predictions from at least two retained
 #' models on the same evaluation rows. Regression output reports the range of
 #' predicted values. Classification output reports hard-class disagreement and
 #' the largest pairwise probability distance for each row.
 #'
-#' By default the simple baseline is excluded and every other supplied model is
+#' By default the recorded reference is excluded and every other supplied model is
 #' compared. These models need not form a statistically defined Rashomon set.
 #' Their performance table is retained beside the ambiguity results so that
 #' disagreement from a weak candidate is not mistaken for near-optimal model
@@ -15,7 +15,7 @@
 #' @param result An `autoxplain_result` containing at least two comparable
 #'   retained models.
 #' @param models Model IDs, indices, or `NULL`. `NULL` selects every retained
-#'   model not labeled as a baseline.
+#'   model except the recorded reference.
 #' @param performance_tolerance Optional non-negative relative gap from the best
 #'   selected evaluation score. `NULL` keeps all selected models.
 #'
@@ -38,11 +38,7 @@ prediction_ambiguity <- function(result,
     stop("The result leaderboard does not contain model IDs.", call. = FALSE)
   }
   if (is.null(models)) {
-    if ("role" %in% names(leaderboard)) {
-      models <- leaderboard$model_id[leaderboard$role != "baseline"]
-    } else {
-      models <- setdiff(names(result$models), "simple_baseline")
-    }
+    models <- setdiff(names(result$models), result_reference_id(result))
   }
   selected <- select_models(result$models, models)
   if (length(selected) < 2L) {
@@ -63,10 +59,8 @@ prediction_ambiguity <- function(result,
       call. = FALSE
     )
   }
-  explainers <- as_explainers(result, models = names(selected))
-  predictions <- lapply(explainers, function(explainer) {
-    predict(explainer, explainer$data)
-  })
+  explainers <- report_explainers(result, models = names(selected))
+  predictions <- report_predictions(result, models = names(selected), explainers = explainers)
   reference <- explainers[[1L]]
   row_ids <- rownames(reference$data)
   if (is.null(row_ids) || any(!nzchar(row_ids))) {
@@ -212,10 +206,9 @@ classification_prediction_ambiguity <- function(predictions,
   probability_arrays <- lapply(predictions, function(prediction) {
     if (length(class_levels) == 2L) {
       probability <- as.numeric(prediction)
-      cbind(
-        stats::setNames(1 - probability, class_levels[[1L]]),
-        stats::setNames(probability, positive)
-      )
+      columns <- cbind(1 - probability, probability)
+      colnames(columns) <- c(setdiff(class_levels, positive), positive)
+      columns[, class_levels, drop = FALSE]
     } else {
       as.matrix(prediction)[, class_levels, drop = FALSE]
     }
@@ -225,7 +218,11 @@ classification_prediction_ambiguity <- function(predictions,
     probability
   })
   predicted_classes <- vapply(probability_arrays, function(probability) {
-    class_levels[max.col(probability, ties.method = "first")]
+    if (length(class_levels) == 2L) {
+      ifelse(probability[, positive] >= .5, positive, setdiff(class_levels, positive))
+    } else {
+      class_levels[max.col(probability, ties.method = "first")]
+    }
   }, character(nrow(probability_arrays[[1L]])))
   if (is.null(dim(predicted_classes))) {
     predicted_classes <- matrix(

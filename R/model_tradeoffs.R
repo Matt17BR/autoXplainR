@@ -1,6 +1,7 @@
 #' Compare supplied models without hiding trade-offs
 #'
-#' Builds a two-objective comparison from an [autoxplain()] result. Predictive
+#' Builds a two-objective comparison from an [autoxplain()] or [evaluate_models()]
+#' result. Predictive
 #' performance is taken from the evaluation leaderboard and the secondary axis
 #' defaults to approximate model-object size. For local models this is R's
 #' in-memory `object.size()` estimate; H2O uses an engine-reported size when

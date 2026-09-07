@@ -13,7 +13,7 @@ permissions:
 jobs:
   generated-report:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       AUTOXPLAIN_RUN_H2O: false
@@ -41,8 +41,22 @@ jobs:
           python -m playwright install --with-deps chromium
           npm install --prefix "$RUNNER_TEMP/report-browser-tools" --no-audit --no-fund axe-core@4.13.0
           sudo apt-get install --yes poppler-utils
+      - name: Verify committed gallery before regenerating any reports
+        run: >-
+          python validation/check-gallery.py --browser
+          --output-dir "$RUNNER_TEMP/report-browser-results/gallery"
       - name: Generate regression and classification reports with R answer data
         run: Rscript validation/render-explorer-cases.R
+      - name: Generate raw and processed data exploration cases
+        run: Rscript validation/render-exploration-fixtures.R
+      - name: Generate reports from existing fitted models
+        run: Rscript validation/render-supplied-models.R
+      - name: Generate hand-calculated selection evidence
+        run: Rscript validation/render-selection-fixture.R
+      - name: Generate exact decimal cutoff evidence
+        run: Rscript validation/render-cutoff-fixture.R
+      - name: Generate linked classification cases at literal cutoffs
+        run: Rscript validation/render-cutoff-cases.R
       - name: Exercise model exploration, mobile, keyboard and print tasks
         run: >-
           python validation/check-explorer.py
@@ -52,6 +66,33 @@ jobs:
         run: >-
           python validation/check-report-mutations.py
           --output-dir "$RUNNER_TEMP/report-browser-results/mutations"
+          --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
+      - name: Verify prediction decisions against original R predictions
+        run: >-
+          python validation/check-predictions.py
+          --case-dir /tmp/autoxplain-explorer-cases
+          --output-dir "$RUNNER_TEMP/report-browser-results/predictions"
+          --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
+      - name: Verify data exploration against original source records
+        run: >-
+          python validation/check-data-explorer.py
+          --case-dir /tmp/autoxplain-explorer-cases
+          --output-dir "$RUNNER_TEMP/report-browser-results/data"
+          --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
+      - name: Verify linked mistakes and R code follow the selected cutoff
+        run: >-
+          python validation/check-cutoff-cases.py
+          --case-dir /tmp/autoxplain-explorer-cases
+          --output-dir "$RUNNER_TEMP/report-browser-results/cutoff-cases"
+      - name: Verify selection decisions and fold charts
+        run: >-
+          python validation/check-selection.py
+          --output-dir "$RUNNER_TEMP/report-browser-results/selection"
+      - name: Verify supplied-model reports and repeated prediction costs
+        run: >-
+          python validation/check-supplied-models.py
+          --case-dir /tmp/autoxplain-explorer-cases
+          --output-dir "$RUNNER_TEMP/report-browser-results/supplied-models"
           --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
       - name: Upload compact browser evidence
         if: always()

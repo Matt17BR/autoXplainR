@@ -5,7 +5,7 @@
 #' objects, and narrative provider credentials. Target and feature names, aggregate
 #' statistics, and diagnostic messages remain; review them before sharing.
 #'
-#' @param result An [autoxplain()] result.
+#' @param result An [autoxplain()] or [evaluate_models()] result.
 #' @return A plain list with `schema_version`, package version, task, model
 #'   selection, evaluation, explanation summaries, and interpretation limits.
 #'   Schema 2.0 allows additional fields within a minor package release. Removing
@@ -19,8 +19,9 @@
 #' # jsonlite::write_json(evidence, "evidence.json", auto_unbox = TRUE, pretty = TRUE)
 evidence_summary <- function(result) {
   if (!inherits(result, "autoxplain_result")) {
-    stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
+    stop("`result` must be returned by `autoxplain()` or `evaluate_models()`.", call. = FALSE)
   }
+  validate_evaluation_snapshot(result)
   audit <- result$explanations$audit
   view <- report_view_model(result)
   list(
@@ -52,7 +53,8 @@ evidence_summary <- function(result) {
       diagnostic_status = audit$diagnostic_status,
       importance = as.data.frame(audit$importance),
       findings = audit$findings,
-      effect_failures = result$explanations$failures
+      effect_failures = result$explanations$failures,
+      effect_status = view$effect_status
     ),
     diagnostic_status = lapply(view$diagnostics, function(record) {
       record[intersect(c("id", "status", "scope", "entities", "reason", "interpretation"),

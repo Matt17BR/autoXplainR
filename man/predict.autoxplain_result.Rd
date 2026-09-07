@@ -7,7 +7,7 @@
 \method{predict}{autoxplain_result}(object, newdata, model = NULL, type = c("response", "class"), ...)
 }
 \arguments{
-\item{object}{An \code{\link[=autoxplain]{autoxplain()}} result.}
+\item{object}{An \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}} result.}
 
 \item{newdata}{Data frame of raw predictor rows.}
 
@@ -21,12 +21,16 @@ multiclass tasks. \code{"class"} returns a factor for classification.}
 }
 \value{
 A vector or matrix with one prediction per input row. Classification
-levels follow the training outcome; binary probabilities refer to its second
-level. Novel categorical levels follow the recorded recipe strategy.
+levels follow the recorded class contract. Binary probabilities refer to
+the recorded positive class: the second outcome level for \code{\link[=autoxplain]{autoxplain()}},
+or the explicitly chosen event for \code{\link[=evaluate_models]{evaluate_models()}}. Novel categorical
+levels follow the stored recipe or supplied prediction contract.
 }
 \description{
 Applies the stored training recipe to raw predictor rows, then predicts with
-the pre-specified or training-selected primary model. No model is refitted.
+the pre-specified or training-selected primary model. Existing models brought
+through \code{\link[=evaluate_models]{evaluate_models()}} use their recorded prediction contracts, including
+any preprocessing inside the supplied predictor. No model is refitted.
 The target column is optional and ignored. Row order and row count are kept;
 recipes that drop incomplete rows return \code{NA} at those positions.
 }

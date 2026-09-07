@@ -67,11 +67,11 @@ test_that("evidence identities include model state and ordered data and survive 
   changed <- copy
   changed$models$main_model$coefficients[[1]] <- changed$models$main_model$coefficients[[1]] + 1
   expect_error(AutoXplainR:::validate_attached_audit(audit, as_explainers(changed, models = ids)),
-               "same selected model explainers")
+               "Stored evaluation evidence")
   changed <- copy
   changed$test_data$mpg <- changed$test_data$mpg + 1
   expect_error(AutoXplainR:::validate_attached_audit(audit, as_explainers(changed, models = ids)),
-               "same selected model explainers")
+               "Stored evaluation evidence")
 })
 
 test_that("paired audits reject reordered observations and opposite events", {

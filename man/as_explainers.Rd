@@ -2,12 +2,12 @@
 % Please edit documentation in R/autoxplain.R
 \name{as_explainers}
 \alias{as_explainers}
-\title{Convert an AutoML result to model-agnostic explainers}
+\title{Convert a fitted-model result to model-agnostic explainers}
 \usage{
 as_explainers(x, data = NULL, models = NULL)
 }
 \arguments{
-\item{x}{An \code{autoxplain_result}.}
+\item{x}{A result from \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}}.}
 
 \item{data}{Optional raw evaluation data. The fitted preprocessing recipe is
 applied automatically. Defaults to the configured \code{test_data} when available,
@@ -19,5 +19,5 @@ otherwise training data.}
 A named list of \code{autoxplain_explainer} objects.
 }
 \description{
-Convert an AutoML result to model-agnostic explainers
+Convert a fitted-model result to model-agnostic explainers
 }
