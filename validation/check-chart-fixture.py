@@ -88,6 +88,30 @@ with sync_playwright() as p:
      check(f'{name} print preserves geometry and separated labels',matched,evidence)
     page.pdf(path=str(args.output_dir/'dense-charts.pdf'),format='A4',print_background=True)
    page.close()
+ # A browser may substitute a wider system font than the one used during local
+ # development. This changes glyph widths without changing the SVG or answers.
+ wider_font='.axr-chart .axr-model-label {font-family:monospace !important;font-weight:700 !important;letter-spacing:.25px !important;}'
+ for fixture in ['chart-oracle','dense-chart-oracle']:
+  wide=args.output_dir/f'{fixture}-wide-font.html'
+  wide.write_text((base/f'{fixture}.html').read_text().replace('</style>',wider_font+'</style>'))
+  for width in [1440,390,320]:
+   page=browser.new_page(viewport={'width':width,'height':1050},java_script_enabled=False)
+   page.goto(wide.resolve().as_uri())
+   for i,figure in enumerate(page.locator('[data-kind=cost]').all()):
+    svg=figure.locator('svg')
+    bounds=svg.evaluate('''svg=>({fonts:[...svg.querySelectorAll('.axr-model-label')].map(t=>getComputedStyle(t).font),
+      clipped:[...svg.querySelectorAll('.axr-model-label')].filter(t=>{const a=t.getBoundingClientRect(),b=svg.getBoundingClientRect();
+      return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1}).map(t=>t.textContent)})''')
+    check(f'{fixture}/{i} wide fallback font remains inside static chart width={width}',
+          not bounds['clipped'] and all('monospace' in font and '14px' in font for font in bounds['fonts']),bounds)
+    check(f'{fixture}/{i} wide fallback font labels stay separated width={width}',not label_collisions(svg))
+    if fixture=='dense-chart-oracle':
+     name=['dense','near','timing'][i];resource='prediction_time_ms' if name=='timing' else 'model_size_kb'
+     matched,evidence=cost_geometry(figure,dense_source[name],'rmse',resource,False)
+     check(f'{name} wide fallback font preserves numeric geometry width={width}',matched,evidence)
+   if width==390:
+    page.locator('[data-kind=cost]').first.screenshot(path=str(args.output_dir/f'{fixture}-wide-font-390.png'))
+   page.close()
  # The collision oracle must reject the original failure, even when all numeric
  # points and model identities remain correct.
  page=browser.new_page();page.goto((base/'dense-chart-oracle.html').as_uri());settled(page)

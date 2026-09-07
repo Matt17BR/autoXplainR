@@ -76,6 +76,8 @@ export(tuning_control)
 export(tuning_evidence)
 export(tuning_results)
 export(validation_split)
+importFrom(nnet,nnet)
+importFrom(rpart,rpart)
 importFrom(stats,
   predict,
   setNames

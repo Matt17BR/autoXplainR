@@ -132,7 +132,7 @@ and 3,845 passing assertions. Subsequent inspection found additional defects:
   environment. The corrected fixture supplies that context in the global
   environment and restores it afterward. The focused suite passed 97 assertions
   with all guards retained; a separate old-R method probe also passed. Remote
-  R 4.1 CI is pending.
+  R 4.1 CI for the final release revision is pending.
 - At 320 pixels, an unbroken R call and font metrics made the multiclass Checks
   context note overflow. Scoped text wrapping and a Checks font-variation gate
   now cover that case.
@@ -141,12 +141,38 @@ and 3,845 passing assertions. Subsequent inspection found additional defects:
   identity now uses effective per-input basis sizes, with native `bs.dim` values
   in model details. Dense cost plots reserve a column for connected model names
   while preserving linear scales; tick spacing also has a minimum separation.
+- CI exposed a second chart defect: bold model names in the no-JavaScript SVG
+  exceeded their reserved width with a different system font. Static labels now
+  reserve room for bold 14-pixel text and wrap long compound names at their
+  hyphens. This preserves the full names, point geometry and production fonts.
+  The local chart gate passed 217 checks, including 33 new wider-font checks at
+  1440, 390 and 320 pixels. The same wider font reproduced clipping in the old
+  output before the repair; the clipping and collision assertions were retained.
+- A saved tuned-neural model failed prediction in a fresh R session because its
+  native nnet S3 method had only been loaded during fitting. Explicit namespace
+  imports of the existing nnet and rpart dependencies now register those methods
+  when AutoXplainR is loaded. The installed-package smoke test starts a separate
+  `Rscript --vanilla` process which reads saved results without fitting or
+  attaching either engine. The repaired local installation passed this replay
+  for 17 models across five scenarios and rendered four reports. Responses and
+  classification decisions matched the outputs saved by the earlier process;
+  the recipe scenario also handled missing values and a novel category.
 
 Intermediate checks passed 184 hand-chart assertions, 27 real extended-model
 plot combinations and 1,283 main browser assertions. These results precede the
-last tick-spacing repair. Refreshed reports, the complete final gates and the
-final installed-archive replay are pending; these intermediate counts do not
-replace the checkpoint or establish acceptance of the final release revision.
+last tick-spacing and font repairs. The subsequent 217-check chart run is in
+`static-chart-fonts/checks/chart-fixture-checks.json`; the fresh-session replay is
+in `core-namespace-replay/artifact-replay.log`, under the local evidence directory
+listed above. Refreshed reports, the complete final gates and the final
+installed-archive replay are pending; these local results do not establish
+acceptance of the final release revision.
+
+The candidate archive with SHA-256
+`c585530574482161b144e586af71f24407c780b5ca1e15d7be2653ca6220df4a`
+is explicitly superseded. Its package check reported zero errors and warnings,
+but the subsequent fresh-session replay demonstrated the missing native method.
+It is not the release artifact. The final source digest, revision and CI results
+remain pending and will be recorded after the repaired archive is checked.
 
 ## Acceptance still pending
 

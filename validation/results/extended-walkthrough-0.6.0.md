@@ -9,8 +9,9 @@ release artifact. Final installed-archive replay is pending below.
 
 The reviewer read the rendered report, recorded visible answers and inspected
 screenshots before calculating native prediction and selection answers. This
-was an implementer walkthrough, not a participant study. It found two defects
-that the four-model browser fixtures had not exposed.
+was an implementer walkthrough, not a participant study. It found two interface defects
+that the four-model browser fixtures had not exposed; the subsequent fresh-process
+archive replay also found a saved-model prediction failure.
 
 ## Scenario and tasks
 
@@ -58,6 +59,16 @@ learned smoothing penalties and the separate full-training refit.
    to its actual point. Independent inspection at 1440 and 390 pixels found all
    eleven names legible. Dense, clustered and tied-cost fixtures now challenge
    this case rather than inferring it from four well-spaced models.
+
+3. The first final-archive replay failed in a new R process after only
+   `library(AutoXplainR)` and `readRDS()`: the tuned-neural adapter called
+   `stats::predict()` without loading the nnet S3 method. Same-process
+   save/reload checks had already loaded that namespace during fitting and
+   therefore missed the failure. The failing archive was
+   `c585530574482161b144e586af71f24407c780b5ca1e15d7be2653ca6220df4a`;
+   its fresh installation and `final-replay/replay.log` preserve the counterexample.
+   Release acceptance requires a fresh-process replay without attaching the
+   missing engine by hand.
 
 At 390 pixels the inspected XGBoost effect and support chart remained readable,
 with no whole-page overflow. Detailed comparisons of eleven models require

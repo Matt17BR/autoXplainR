@@ -266,8 +266,8 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
   )
 }
 
-report_chart_text_lines <- function(value, width) {
-  columns <- max(5L, floor(width / 7.2))
+report_chart_text_lines <- function(value, width, character_width = 7.2) {
+  columns <- max(5L, floor(width / character_width))
   words <- strsplit(value, "[[:space:]]+")[[1L]]
   lines <- character()
   current <- ""
@@ -277,8 +277,11 @@ report_chart_text_lines <- function(value, width) {
       current <- ""
     }
     while (nchar(word) > columns) {
-      lines <- c(lines, substr(word, 1L, columns))
-      word <- substring(word, columns + 1L)
+      # Keep a compound name readable when its whole word does not fit.
+      breaks <- gregexpr("-", substr(word, 1L, columns), fixed = TRUE)[[1L]]
+      boundary <- if (any(breaks > 0L)) max(breaks) else columns
+      lines <- c(lines, substr(word, 1L, boundary))
+      word <- substring(word, boundary + 1L)
     }
     current <- paste0(current, if (nzchar(current)) " ", word)
   }
@@ -288,7 +291,11 @@ report_chart_text_lines <- function(value, width) {
 }
 
 report_chart_svg_text <- function(value, x, y, width = 300, anchor = "start", class = "") {
-  lines <- report_chart_text_lines(value, width)
+  # The browser chooses its own system font. Bold 14 px model names need more
+  # room than ordinary axis text, including when a wider fallback font is used.
+  lines <- report_chart_text_lines(value, width,
+    character_width = if (identical(class, "axr-model-label")) 9.5 else 7.2
+  )
   paste0(
     '<text x="', x, '" y="', y, '" text-anchor="', anchor, '" class="', class, '">',
     paste(vapply(seq_along(lines), function(i) {
@@ -310,7 +317,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
   top <- 42
   row_height <- if (categorical) max(50, max(nchar(categories)) / 12 * 17 + 20) else 0
   label_heights <- if (cost) vapply(points, function(point) {
-    length(report_chart_text_lines(point$label, label_width)) * 15
+    length(report_chart_text_lines(point$label, label_width, character_width = 9.5)) * 15
   }, numeric(1)) else numeric()
   bottom <- if (categorical) {
     top + length(categories) * row_height

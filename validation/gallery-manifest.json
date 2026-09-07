@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-07T17:32:21.024895+00:00",
+  "recorded_at_utc": "2026-09-07T17:44:52.462277+00:00",
   "sources": {
     "DESCRIPTION": "2870ee5801ab772cb906faf730c8d1ca791f5aa51681d00e606e55dc72c65cf8",
-    "R/AutoXplainR.R": "5d7abd6049cb1b65a266f6a79b1dba1620b0b6536adf0c1ab87125102a0e0d8f",
+    "R/AutoXplainR.R": "2693d4395d022ec5b6ca8a10fa0a9aa3a1d4225cc1a870516ca80f57a17eebf1",
     "R/audit.R": "5f5b6b5e52e1278edf6090f72a1f980fc40793a9c7302a01d917f6b1392ad050",
     "R/autoxplain.R": "3046543e4387b8e870555fac77eeb75e46fa312d6dcbf36623c3c0fd89ac5e47",
     "R/benchmark_predictions.R": "409ef169a4a84f82352b5be5398b03220547dc9147c932be6c4af0ade84b92d5",
@@ -35,7 +35,7 @@
     "R/plotting_functions.R": "393aa90eb3ac86e0e1012843eb69901ef34320b5abd9aafeece24eee6d2b2dcb",
     "R/prediction_ambiguity.R": "6f3dc1504c92d15d17d1a2376ec11be4bedad8101ab44387a2b1bf92d0a5aff0",
     "R/report_benchmark.R": "5aef63f33344ca83fbe105a6f24d83e43febf094914b5ce110319a4e36c486bb",
-    "R/report_charts.R": "a38eb35efc70465fbbb95e4ff2c6df463f7ac109d74b497d5d951fe739fa62bc",
+    "R/report_charts.R": "9d7fcaa4f0be72ce75638f56b63a2109ec4fa4af4c5f2139de03823824ec281d",
     "R/report_data.R": "9c5e3dc3ff98f91027696327a03944f5b4771c40ca42118ccdee5fb9a7c37cda",
     "R/report_disagreement.R": "0b184f194a24d80ec81a00bf63f2f5f7f57b2b60c3065c2e446ab37aecc66019",
     "R/report_explorer.R": "e280050a72f32c6ee3e4126ce29cef55139e264f99113ba36968d7f851ef6be3",
@@ -77,8 +77,8 @@
     "man/figures/model-patterns.png": "84de0d8e286d8ddfbf3a41298465a2b0833fa7cd8753583934a1ea256f7fd552",
     "man/figures/model-predictions.png": "269ff3a807036fd79a77e1306dec8f07bf7c2f326d6d77f610e37a8914394b6a",
     "man/figures/model-selection.png": "1c7ec61b2e7c11e032c507cb0489ec3d352f2fd80368d103df0314aeb1afafe9",
-    "pkgdown/assets/binary-report.html": "adcf4e81ad10b408d22ec5d02f013566d4e6037b43987707ac56e0478b77764d",
-    "pkgdown/assets/model-report.html": "e96c93a1ed55b2dd26f6df0ec81880d402649165e1771024db95d0912e9e5b53",
-    "pkgdown/assets/multiclass-report.html": "f28a5d1ebb1379c0b45fa3d30cfe1711a57f9c45cad1ca63b652786e6a07b511"
+    "pkgdown/assets/binary-report.html": "c4af6c7aa0e7c1a9a0508f173cfcdacd901222a738a575d1dfd0f2b347615dea",
+    "pkgdown/assets/model-report.html": "39a74e381d749d53c47df56cd3f876e69b30cda1cca936cfde439ddb777d9ab7",
+    "pkgdown/assets/multiclass-report.html": "32d66daf22072de056b3d3733a945b593d21fa316c3e5353efcb881703c374a8"
   }
 }

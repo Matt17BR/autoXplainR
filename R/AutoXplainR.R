@@ -42,7 +42,12 @@
 #' @docType package
 #' @name AutoXplainR-package
 #' @aliases AutoXplainR
+#' @importFrom nnet nnet
+#' @importFrom rpart rpart
 #' @importFrom stats predict setNames
 #' @importFrom utils head
 #' @keywords internal
 "_PACKAGE"
+
+# Core engine imports also register their native S3 prediction methods when
+# loading saved results in a fresh R session, before any fitting call occurs.
