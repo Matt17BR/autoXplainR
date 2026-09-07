@@ -1,10 +1,22 @@
 # AutoXplainR 0.6.0 release evidence
 
-Status: the initial local acceptance checkpoint passed. Follow-up repairs,
-the release artifact and remote CI still need final acceptance. No 0.6.0 tag or
-release has been published. The source revision, archive checksum, remote checks
-and public-site verification will be
-recorded here after they complete.
+Status: the repaired local archive, fresh-session installed workflows,
+extended-portfolio walkthrough and remote preflight checks passed. PR #3 was
+merged and `v0.6.0` tagged at `c0dfd97cada947923855ff67605fa3961c175fe0`.
+Its Git tree matches the reviewed `c96234d` revision exactly. The complete
+[release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34149652943)
+passed and [0.6.0 was published](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.6.0)
+at 2026-09-07 18:26:01 UTC. The actual published download, fresh-session
+workflows, saved eleven-model analysis and live website are verified.
+The authorized GitHub release and product-acceptance work are complete.
+
+The accepted local source archive has SHA-256
+`6b78b8968f27736d80e9b89e8343ed13030d12e7519b4d85be53607fef3f9e58`.
+It matches the packaged files of source revision
+`c96234d00925740f2d281aa8036b88cb97162d0c`. Its full `--as-cran` check passed
+with zero errors and warnings and two notes: new submission and unavailable
+external time verification. The final published archive will be identified
+separately; rebuilding an archive need not produce the same bytes.
 
 ## What changed and why
 
@@ -26,6 +38,30 @@ scales where models are compared.
 training history. `benchmark_predictions()` records repeated costs on a common
 batch, including raw timing records and reasons for withholding unreliable
 measurements. Both remain optional; `autoxplain()` is still the short entry point.
+
+## Remote preflight on the repaired revision
+
+All checks passed on `c96234d00925740f2d281aa8036b88cb97162d0c` before
+[PR #3](https://github.com/Matt17BR/autoXplainR/pull/3) was merged:
+
+| Check | Evidence |
+|---|---|
+| Seven package-check jobs, including Windows, macOS, Linux release/oldrel/devel, R 4.1 and an exact R-devel source archive | [R-CMD-check](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943594) |
+| Current Linux/Windows engines and the exact declared minimum versions | [Native engines](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943624) |
+| Live H2O | [H2O integration](https://github.com/Matt17BR/autoXplainR/actions/runs/34149009420) |
+| Lint and spelling | [Lint](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943659) |
+| Numerical references, deliberate leakage fault and simulation | [Statistical validation](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943665) |
+| Statement coverage, 91.46% | [Coverage](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943620) |
+| All browser workflows and deliberate UI faults | [Browser gates](https://github.com/Matt17BR/autoXplainR/actions/runs/34148943660) |
+
+The downloaded browser artifacts confirm 1,283 main, 217 literal-chart, 1,923
+prediction, 209 data, 107 selection, 35 cutoff and 118 gallery checks. Supplied
+models passed 165 checks remotely versus 168 locally: the remote run withheld
+an unreliable historical timing, replacing six numeric timing checks with three
+explicit-withholding checks. The different count is a measured-state branch,
+not an omitted workflow. No runtime errors occurred. The tagged
+[release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34149652943)
+repeats its gates and then checks the exact archive it publishes.
 
 ## Defects demonstrated during the review
 
@@ -61,11 +97,11 @@ These were reproduced incorrect behaviors, not hypothetical concerns:
   stale. The gallery gate checks source and asset hashes before regeneration,
   then opens the committed reports in a browser.
 
-## Final local validation
+## Initial local acceptance checkpoint
 
-These checks passed on the frozen local implementation and refreshed reports.
-They precede the final archive and remote platform checks; neither is inferred
-from the local results.
+These checks passed before the additional defects below were discovered.
+They document that checkpoint; final archive and remote results are recorded
+separately rather than inferred from these results.
 
 | Check | Recorded result |
 |---|---|
@@ -163,25 +199,144 @@ plot combinations and 1,283 main browser assertions. These results precede the
 last tick-spacing and font repairs. The subsequent 217-check chart run is in
 `static-chart-fonts/checks/chart-fixture-checks.json`; the fresh-session replay is
 in `core-namespace-replay/artifact-replay.log`, under the local evidence directory
-listed above. Refreshed reports, the complete final gates and the final
-installed-archive replay are pending; these local results do not establish
-acceptance of the final release revision.
+listed above. These intermediate results preceded the accepted repaired
+archive described below; remote acceptance is tracked separately.
 
 The candidate archive with SHA-256
 `c585530574482161b144e586af71f24407c780b5ca1e15d7be2653ca6220df4a`
 is explicitly superseded. Its package check reported zero errors and warnings,
 but the subsequent fresh-session replay demonstrated the missing native method.
-It is not the release artifact. The final source digest, revision and CI results
-remain pending and will be recorded after the repaired archive is checked.
+It is not the release artifact. The repaired local archive's digest and revision
+are recorded at the top of this document; published-artifact results remain
+separate obligations.
 
-## Acceptance still pending
+Remote preflight for commit `cb7d360a93ca0e2029f4e63924a38365f2e6bc48`
+passed the [full platform matrix, including Linux R 4.1](https://github.com/Matt17BR/autoXplainR/actions/runs/34148079885),
+[current and declared-minimum native engines](https://github.com/Matt17BR/autoXplainR/actions/runs/34148079911),
+[live H2O](https://github.com/Matt17BR/autoXplainR/actions/runs/34148080093),
+[lint](https://github.com/Matt17BR/autoXplainR/actions/runs/34148079930),
+[coverage](https://github.com/Matt17BR/autoXplainR/actions/runs/34148080060) and
+[statistical validation](https://github.com/Matt17BR/autoXplainR/actions/runs/34148080021).
+The [browser gate failed on static label clipping](https://github.com/Matt17BR/autoXplainR/actions/runs/34148079877),
+prompting the font repair above. Those successful runs validate that preflight
+revision, not the subsequent font and fresh-session dispatch repairs.
 
-- Check the final source archive and installed-package workflows in a fresh
-  library, including the supplied-model bridge and saved-result reuse.
-- Complete supported-platform, optional-engine and release-quality CI against
-  the release revision.
-- Publish the checked archive and website, then verify the downloaded source,
-  checksum, installed behavior and public reports.
+## Published release archive
+
+The published `AutoXplainR_0.6.0.tar.gz` is 2,750,939 bytes. Its SHA-256 is
+`902e9a6f122299e836cd73cfe9790b42cdec876e41753cb630d02e8199da7e35`.
+The release job built this archive once, checked it on R 4.6.1 with its PDF
+manual, examples and vignettes, installed it into a new library and ran both
+the parent workflow and separate-process reload guard. R-devel
+`2026-09-06 r90498` then checked the same downloaded archive with
+`--as-cran --no-manual`. Both checks reported zero errors, zero warnings and
+one note: "New submission." Checksums matched before and after these checks
+and immediately before publication.
+
+The CI fresh-session process restored 17 models across five saved scenarios,
+matched their responses and class decisions, rendered four reports, reapplied
+the saved recipe and reused the supplied-model benchmark. Raw job logs are
+retained locally in `release-source-package.log` and
+`release-final-r-devel.log`; the linked release workflow contains the public
+jobs and downloadable check artifacts.
+
+An independent download of GitHub release asset `549210346` matched both the
+published checksum and the staged archive byte-for-byte. It was installed into
+another new private library. The installed parent workflow and fresh
+`Rscript --vanilla` child passed all five scenarios: 17 models, matching raw
+responses and class decisions, four regenerated reports, saved preprocessing
+and benchmark reuse.
+
+The downloaded package also replayed the unchanged eleven-model saved analysis
+through the [portable walkthrough](extended-walkthrough/README.md). Its report
+SHA-256 is exactly
+`da7834ad6bd8f10ca0f41832a8ec0abc964a9f7a0ed35b9b24f3fac8ea528d2a`, matching
+the previously inspected report. Original and copied data/model RDS files both
+retain SHA-256
+`086f87ec494d8fe386715eb49f8826a6db7a58701e21e83a0d6b19de396f3aa4`.
+All 186 packaged source, test and documentation files match the checkout.
+Compared with the accepted local archive, differences are confined to packaging
+metadata, `build/vignette.rds` and two generated vignette HTML files; there are
+no authored-source changes. Downloaded files, installation logs, source
+comparison and replay evidence are under `published-package-verification/`
+in the local evidence directory.
+
+This completion record and portable review scripts are committed after the
+release as validation evidence. They are excluded from the package build and
+do not change the immutable release tag, archive or reviewed public gallery.
+
+## Tagged release prerequisites
+
+The release workflow on `c0dfd97` passed every supported-platform job,
+current and exact-minimum engine jobs, live H2O, browser tasks and quality
+checks before starting the source-package job. The quality job recorded 3,860
+passing assertions with zero failures or warnings and two opt-in integration
+skips; coverage was 91.86% in that environment. Roxygen synchronization, lint,
+spelling, all eleven numerical reference comparisons, the deliberate training
+leakage counterexample and the fixed-linear-model simulation passed.
+
+The live H2O job passed 95 assertions on H2O 3.44.0.3 and R 4.6.1. Each
+current-engine job passed 694 assertions on Linux and Windows. The tagged
+browser artifacts contain 1,283 main, 217 literal-chart, 1,923 prediction,
+209 data, 107 selection, 35 cutoff, 168 supplied-model and 118 gallery checks,
+with no recorded runtime errors. Both deliberate UI faults were rejected by
+the intended checks. These are results from the tag's own jobs, not counts
+copied from the earlier PR run.
+
+## Published website verification
+
+The [pkgdown build](https://github.com/Matt17BR/autoXplainR/actions/runs/34149633973)
+produced site revision `00097309ef01cb695132b869cd81088574e1ae07` from the
+merged source. Its completion initially left the old 0.5.0 reports online:
+the separate [Pages deployment](https://github.com/Matt17BR/autoXplainR/actions/runs/34149816152)
+was still queued. Acceptance waited until that deployment succeeded and the
+canonical URLs served the new bytes.
+
+All three downloaded HTML reports and eight PNG screenshots match the reviewed
+repository files exactly. The online walkthrough passed 280 checks across
+1440- and 390-pixel layouts, with no browser or console errors. It exercised
+the seven tabs, model settings and details, tree rationale and candidate folds,
+source-record links and affected-evidence deep links. New API references,
+guides and site navigation were also checked. A final in-app-browser reload
+showed the actual 0.6.0 selection view and its seven tree configurations.
+
+| Canonical report | SHA-256 |
+|---|---|
+| [Delivery time](https://matt17br.github.io/autoXplainR/model-report.html) | `39a74e381d749d53c47df56cd3f876e69b30cda1cca936cfde439ddb777d9ab7` |
+| [Customer churn](https://matt17br.github.io/autoXplainR/binary-report.html) | `c4af6c7aa0e7c1a9a0508f173cfcdacd901222a738a575d1dfd0f2b347615dea` |
+| [Flower species](https://matt17br.github.io/autoXplainR/multiclass-report.html) | `32d66daf22072de056b3d3733a945b593d21fa316c3e5353efcb881703c374a8` |
+
+Downloaded responses, hashes, browser observations and screenshots are in
+`public-release-verification/published-final/public-verification.json` and
+its adjacent files under the local evidence directory.
+
+## Accepted repaired local archive
+
+The exact `6b78b896…f3f9e58` archive passed 3,860 package assertions with two
+opt-in integration skips. It was checked with its manual, examples and
+vignettes, installed into a new private library, and exercised through the
+installed-workflow script. A separate `Rscript --vanilla` process restored
+17 models across five scenarios, reproduced their responses and class decisions,
+rendered four reports, reapplied missing/novel-category preprocessing, and
+reused a saved benchmark. Neither fitting nor manually attaching the model
+engines was used to make that replay succeed.
+
+The independent eleven-model [extended replay](results/extended-walkthrough-0.6.0.md)
+used that same archive and the unchanged original saved analysis. Its copied R
+calls and report answers match native engines; effective GAM settings, dense
+chart labels and original-record navigation were inspected again.
+
+After the final font repair, the main browser gate passed 1,283 checks and its
+literal chart fixture passed 217, including 33 wider-font cases. No browser
+runtime errors occurred. The final regenerated public gallery passed 118 checks
+and its manifest matches 65 sources and 11 assets. The eight recaptured PNGs
+are byte-identical to the previously inspected screenshots because the final
+chart repair affects the no-JavaScript fallback. Main/chart evidence is in
+`final-release-browser/`; gallery evidence is in `final-font-gallery/`, under
+the local evidence directory above. The other follow-up gates passed 1,923
+prediction, 209 data, 107 selection, 168 supplied-model and 35 literal-cutoff
+checks before the final static-font repair; the final remote browser workflow
+runs them all again against the release source.
 
 This is an implementer review with independent agents and numerical oracles,
 not a recruited-participant study. It does not establish superiority over other

@@ -5,7 +5,7 @@ It used a private installation of the locally checked source archive, not
 `pkgload::load_all()`. The initial archive SHA256 was
 `34595ac9b3e9a27e98beb099a18bdd0add364a6716a7e47aa4dec99ce4315756`.
 Later corrections make that archive an inspection checkpoint, not the final
-release artifact. Final installed-archive replay is pending below.
+release artifact. The repaired installed-archive replay passed, as recorded below.
 
 The reviewer read the rendered report, recorded visible answers and inspected
 screenshots before calculating native prediction and selection answers. This
@@ -67,8 +67,11 @@ learned smoothing penalties and the separate full-training refit.
    therefore missed the failure. The failing archive was
    `c585530574482161b144e586af71f24407c780b5ca1e15d7be2653ca6220df4a`;
    its fresh installation and `final-replay/replay.log` preserve the counterexample.
-   Release acceptance requires a fresh-process replay without attaching the
-   missing engine by hand.
+   The repair registers the hard-dependency prediction methods when AutoXplainR
+   loads. The successful replay below does not attach an engine by hand. The
+   durable [reload guard](../check-reloaded-artifact.R) now runs saved results in
+   a separate R process, so the original same-process test cannot conceal this
+   failure.
 
 At 390 pixels the inspected XGBoost effect and support chart remained readable,
 with no whole-page overflow. Detailed comparisons of eleven models require
@@ -79,6 +82,18 @@ These are observed limits, not claims that every extended-engine combination or
 mobile task has been tested.
 
 ## Evidence and final replay
+
+The [portable workflow bundle](../extended-walkthrough/README.md) retains the
+original synthetic generator, report-only replay, browser tasks and native
+answer checks. Output, installed-library, saved-result and browser paths are
+parameters; generated data, HTML, screenshots and logs stay outside Git.
+The portable scripts passed R/Python syntax checks and replayed the unchanged
+accepted RDS through the same private installed library. The resulting HTML,
+RDS and native-answer JSON are byte-identical to the accepted replay below;
+the fresh neural prediction and browser tasks pass again. This bundle check did
+not refit the canonical examples or generate a new fitted result. Its local
+record is
+`~/.cache/autoxplain-overhaul-0.6/extended-portable-replay/portable-replay-checks.json`.
 
 Local evidence is under
 `/home/mmazzarelli/.cache/autoxplain-overhaul-0.6/extended-journey/`:
@@ -95,7 +110,32 @@ Local evidence is under
   contain native mgcv/xgboost/ranger predictions, original-row comparisons,
   independently reconstructed CV arithmetic and copied-code execution.
 
-The repaired current-source preview was visually inspected; replay from the
-final installed archive remains pending. The original source, fits, fold records, timing measurements and seeds
-must be preserved when rerendering; the initial defects are not accepted merely
-because native numerical checks pass.
+The repaired candidate archive was installed into a separate private library:
+
+- Archive SHA256: `6b78b8968f27736d80e9b89e8343ed13030d12e7519b4d85be53607fef3f9e58`.
+- Replayed HTML SHA256: `da7834ad6bd8f10ca0f41832a8ec0abc964a9f7a0ed35b9b24f3fac8ea528d2a`.
+- Original data/result RDS SHA256, unchanged:
+  `086f87ec494d8fe386715eb49f8826a6db7a58701e21e83a0d6b19de396f3aa4`.
+
+A fresh `Rscript` loaded only AutoXplainR, read the saved result, predicted with
+the neural model before any report work, and then rendered all eleven models.
+The original missing-method failure is resolved. No fitting, seed change,
+measurement replacement or data mutation occurred during replay.
+
+The browser journeys then ran against that installed output. The GAM's summary
+and native basis dimensions are present; the dense cost labels are readable;
+model selection, effect panels, diagnostics and original-error navigation retain
+the recorded answers. The reviewer inspected the regenerated desktop comparison,
+GAM dialog and phone XGBoost effect. Both browser records have no runtime errors,
+and the inspected 390-pixel view has no page overflow. The three copied R calls
+again match native predictions exactly. The complete native-answer JSON is
+identical to its initial counterpart, including the CV arithmetic and rounded
+curve comparisons.
+
+These final replay files, logs, screenshots and `acceptance.json` are under
+`extended-journey/accepted-replay/`; the failed installation and log remain in
+`extended-journey/final-replay/`. The task scripts accept `AXR_EXTENDED_DIR` to
+keep repaired output separate from the original counterexamples. This completes
+the extended-portfolio task on the local candidate archive. Whole-package,
+remote platform and published-artifact acceptance are tracked in the
+[release record](../release-0.6.0.md).
