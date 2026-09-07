@@ -4,6 +4,14 @@
 
 - [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
   : Fit and evaluate a model through a guided workflow
+- [`predict(`*`<autoxplain_result>`*`)`](https://matt17br.github.io/autoXplainR/reference/predict.autoxplain_result.md)
+  : Predict from an AutoXplainR result
+- [`validation_split()`](https://matt17br.github.io/autoXplainR/reference/validation_split.md)
+  : Keep groups or future observations out of training
+- [`performance_uncertainty()`](https://matt17br.github.io/autoXplainR/reference/performance_uncertainty.md)
+  : Estimate evaluation-sample uncertainty with a paired bootstrap
+- [`evidence_summary()`](https://matt17br.github.io/autoXplainR/reference/evidence_summary.md)
+  : Extract a compact, versioned evidence summary
 - [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
   : Inspect automatic tuning evidence
 - [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)

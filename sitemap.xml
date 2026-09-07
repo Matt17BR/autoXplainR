@@ -15,8 +15,10 @@
 <url><loc>https://matt17br.github.io/autoXplainR/SECURITY.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/articles/index.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/articles/statistical-methods.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/authors.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/index.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/model-report.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/news/index.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/AutoXplainR-package.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/as_explainers.html</loc></url>
@@ -32,6 +34,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/compare_model_effects.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/evidence_summary.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/explain_effect.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/explain_model.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/extract_model_characteristics.html</loc></url>
@@ -43,6 +46,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/missingness_shift.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/model_tradeoffs.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/narrative_providers.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/performance_uncertainty.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot.autoxplain_model_effects.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_comparison.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_model_correlations.html</loc></url>
@@ -50,6 +54,7 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_partial_dependence_multi.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/plot_permutation_importance.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/predict.autoxplain_explainer.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/predict.autoxplain_result.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/preprocess_data.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/preprocess_for_h2o.html</loc></url>
@@ -60,5 +65,6 @@
 <url><loc>https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/tuning_control.html</loc></url>
 <url><loc>https://matt17br.github.io/autoXplainR/reference/tuning_results.html</loc></url>
+<url><loc>https://matt17br.github.io/autoXplainR/reference/validation_split.html</loc></url>
 </urlset>
 

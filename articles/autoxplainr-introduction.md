@@ -12,7 +12,7 @@ AutoXplainR puts those questions in one workflow. Its safe default is
 local and requires neither Java nor an API account. This vignette uses
 the small built-in `mtcars` data only so every step is reproducible.
 
-## Fit and evaluate in one call
+## Fit, evaluate and explain in one call
 
 ``` r
 
@@ -31,7 +31,8 @@ result
 #>   result:     primary model has rmse = 3.5529
 #>   baseline:   30.3% improvement in rmse
 #>   compare:    use model_set = "tuned" for automatic multi-family selection
-#>   explain:    use render_model_report() or as_explainers() for fitted patterns
+#>   evidence:   16 model-feature summaries; 3 fitted effects
+#>   next:       predict(result, newdata), render_model_report(result, "report.html")
 ```
 
 `mpg` is numeric with more than two distinct values, so this is
@@ -46,6 +47,44 @@ The baseline matters. It answers whether the fitted relationships
 improve on a very simple reference rather than merely producing
 predictions.
 
+The result also retains an explanation audit and up to three fitted
+effects. Add `report = "model-report.html"` to write a standalone report
+in the same call. Use `explain = FALSE` when only fitting and evaluation
+are needed.
+
+``` r
+
+predict(result, mtcars[1:3, ])
+#> [1] 21.94082 21.62070 26.67118
+head(result$explanations$audit$importance)
+#>        model feature importance  std_error   conf_low conf_high sign_stability
+#> 1 main_model      wt  1.5610918 0.20859268 1.12450229 1.9976813           0.85
+#> 2 main_model    qsec  1.2301093 0.14082410 0.93536107 1.5248575           1.00
+#> 3 main_model    disp  1.0061471 0.19180156 0.60470185 1.4075924           0.80
+#> 4 main_model      hp  0.6737610 0.09952944 0.46544353 0.8820785           0.90
+#> 5 main_model    carb  0.4941550 0.06505434 0.35799472 0.6303153           0.95
+#> 6 main_model     cyl  0.1339765 0.05200345 0.02513199 0.2428210           0.60
+#>   baseline permuted metric n_repeats max_association associated_feature
+#> 1 3.552918 5.114010   rmse        20       0.8285714               disp
+#> 2 3.552918 4.783028   rmse        20       0.8280787                 am
+#> 3 3.552918 4.559066   rmse        20       0.8285714                 wt
+#> 4 3.552918 4.226679   rmse        20       0.8280787                cyl
+#> 5 3.552918 4.047073   rmse        20       0.6956083                 vs
+#> 6 3.552918 3.686895   rmse        20       0.8280787               disp
+#>   evidence_grade                          claim
+#> 1              C       sensitivity finding only
+#> 2              C       sensitivity finding only
+#> 3              C       sensitivity finding only
+#> 4              C       sensitivity finding only
+#> 5              B usable with stated uncertainty
+#> 6              C       sensitivity finding only
+```
+
+New raw rows are processed using the saved training recipe. No model is
+refitted, and an outcome column is not required. Binary predictions
+refer to the second training outcome factor level; multiclass
+predictions have named columns.
+
 ## Read the held-out metrics
 
 ``` r
@@ -55,10 +94,10 @@ result$leaderboard
 #> 1    1      main_model       linear regression  primary   linear   stats
 #> 2    2 simple_baseline intercept-only baseline baseline baseline   stats
 #>       rmse      mae  r_squared training_time_ms model_size_kb complexity
-#> 1 3.552918 2.797996 -0.1281933                2      44.43750         11
+#> 1 3.552918 2.797996 -0.1281933                1      44.43750         11
 #> 2 5.096266 3.907692 -1.3212249                2      19.82812          1
 #>   fit_warning prediction_time_ms
-#> 1                              1
+#> 1                              0
 #> 2                              0
 result$evaluation$metric_definitions
 #>                                                                                                            rmse 
@@ -101,8 +140,7 @@ The standalone report uses progressive disclosure:
 4.  warnings and concrete next actions; and
 5.  a collapsed technical evidence audit and complete provenance.
 
-The report does not need an LLM, Plotly, H2O, or a browser runtime after
-it is written.
+The report needs only a browser after it is written; it works offline.
 
 ## Tune supervised models without opening the final holdout
 
@@ -173,15 +211,15 @@ catalog[, c(
 #> 10        mars      earth             regression, binary
 #>                     portfolios available
 #> 1  core, recommended, extended      TRUE
-#> 2        recommended, extended      TRUE
+#> 2        recommended, extended     FALSE
 #> 3        recommended, extended      TRUE
 #> 4  core, recommended, extended      TRUE
-#> 5        recommended, extended      TRUE
-#> 6        recommended, extended      TRUE
+#> 5        recommended, extended     FALSE
+#> 6        recommended, extended     FALSE
 #> 7               core, extended      TRUE
-#> 8                     extended      TRUE
+#> 8                     extended     FALSE
 #> 9                     extended     FALSE
-#> 10                    extended      TRUE
+#> 10                    extended     FALSE
 ```
 
 The presets are deliberately easy to explain:
@@ -673,7 +711,8 @@ flowers
 #>   result:     primary model has log_loss = 1.1513
 #>   baseline:   -4.8% improvement in log_loss
 #>   compare:    use model_set = "tuned" for automatic multi-family selection
-#>   explain:    use render_model_report() or as_explainers() for fitted patterns
+#>   evidence:   8 model-feature summaries; 3 fitted effects
+#>   next:       predict(result, newdata), render_model_report(result, "report.html")
 flowers$evaluation$metric_definitions
 #>                                                                                                                                                                                                                                                   log_loss 
 #>                                                                                                                                                                               "Probability error that penalizes confident wrong answers; lower is better." 
@@ -746,6 +785,66 @@ cars_with_group <- transform(
   transmission = factor(am, labels = c("automatic", "manual"))
 )
 group_fit <- autoxplain(cars_with_group, "mpg", test_fraction = 0.4, seed = 2026)
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning in predict.lm(model, newdata = newdata, type = "response"): prediction
+#> from rank-deficient fit; attr(*, "non-estim") has doubtful cases
 subgroup_performance(group_fit, by = "transmission", min_rows = 3)
 #> <AutoXplainR subgroup performance>
 #>   model:       main_model

@@ -36,7 +36,10 @@ autoxplain(
   h2o_max_mem_size = "2G",
   verbosity = c("quiet", "info"),
   evaluation_role = c("auto", "test", "validation", "evaluation"),
-  overlap_action = c("warn", "error", "ignore")
+  overlap_action = c("warn", "error", "ignore"),
+  validation = NULL,
+  explain = TRUE,
+  report = NULL
 )
 ```
 
@@ -198,10 +201,32 @@ autoxplain(
   can indicate leakage but can also occur naturally, so this check
   cannot establish whether the samples are independent.
 
+- validation:
+
+  Optional
+  [`validation_split()`](https://matt17br.github.io/autoXplainR/reference/validation_split.md)
+  specifying whole-group or chronological evaluation. Split columns are
+  excluded from model inputs.
+
+- explain:
+
+  Compute and retain permutation screening, an explanation audit, and up
+  to three fitted effects. Defaults to `TRUE`; use `FALSE` for fitting
+  only. Screening covers all inputs; the audit covers up to eight inputs
+  and five models with 20 permutations. These are descriptive, selected
+  summaries.
+
+- report:
+
+  Optional `.html` destination, written from the retained evidence.
+  Supplying a path also computes explanations when `explain = FALSE`.
+
 ## Value
 
-An `autoxplain_result` containing models, a data-frame leaderboard, task
-metadata, preprocessing provenance, and evaluation data.
+An `autoxplain_result` containing fitted models, a leaderboard,
+evaluation predictions, preprocessing provenance, and (by default)
+`explanations`. Use `predict(result, newdata)` on raw predictor rows.
+`report_file` records the HTML path when requested.
 
 ## Details
 
@@ -227,7 +252,8 @@ result
 #>   result:     primary model has rmse = 2.4413
 #>   baseline:   63.1% improvement in rmse
 #>   compare:    use model_set = "tuned" for automatic multi-family selection
-#>   explain:    use render_model_report() or as_explainers() for fitted patterns
+#>   evidence:   16 model-feature summaries; 3 fitted effects
+#>   next:       predict(result, newdata), render_model_report(result, "report.html")
 explainers <- as_explainers(result)
 audit_explanations(explainers)
 #> <AutoXplainR explanation evidence audit>

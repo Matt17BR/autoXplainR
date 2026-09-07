@@ -22,19 +22,18 @@ substitute for that review.
 - Run
   [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
   and ensure the generated files are committed.
-- Run
-  [`spelling::spell_check_package()`](https://docs.ropensci.org/spelling//reference/spell_check_package.html)
-  and
+- Run `spelling::spell_check_package()` and
   [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html).
   Review every response manually; automated release gating treats
   canonical-form failures and permanent 404/410 responses as blocking
   because DOI publishers commonly return bot-specific 202/403/503
   responses.
+- Run `validation/run-reference.R` and `validation/run-simulation.R`;
+  inspect agreement and coverage results, including undercoverage.
 - Run `lintr::lint_package(cache = FALSE)`,
   [`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html),
-  and
-  [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md);
-  statement coverage must remain at least 80%.
+  and `covr::package_coverage()`; statement coverage must remain at
+  least 80%.
 - Run `.github/scripts/build-check-source.sh <artifact-dir> <check-dir>`
   with current R-patched or R-release. This builds once, checks that
   exact archive with `--as-cran` including the PDF and HTML manuals, and
@@ -66,8 +65,10 @@ substitute for that review.
   signing is not a substitute for the recorded commit and source-archive
   SHA-256 digests.
 - Inspect the workflow-built source package and its SHA-256 checksum.
-- Review and publish the draft GitHub release created by the release
-  workflow.
+- The version tag authorizes publication. The release workflow publishes
+  only after its quality, H2O, source-archive and R-devel gates succeed.
+  Verify the published notes and attached checksum against the checked
+  archive.
 - Submit the exact checked source archive to CRAN and record any
   reviewer feedback in `cran-comments.md`.
 - After acceptance, verify CRAN installation, the pkgdown site,

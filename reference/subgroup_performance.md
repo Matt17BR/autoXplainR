@@ -50,6 +50,32 @@ They are descriptive context from the supplied evaluation rows.
 ``` r
 cars <- transform(mtcars, transmission = factor(am, labels = c("auto", "manual")))
 fit <- autoxplain(cars, "mpg", seed = 2026)
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
 subgroup_performance(fit, by = "transmission", min_rows = 3)
 #> <AutoXplainR subgroup performance>
 #>   model:       main_model

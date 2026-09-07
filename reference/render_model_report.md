@@ -21,7 +21,8 @@ render_model_report(
   open = FALSE,
   top_features = 8L,
   n_repeats = 20L,
-  max_models = 5L
+  max_models = 5L,
+  uncertainty = FALSE
 )
 ```
 
@@ -74,6 +75,13 @@ render_model_report(
 - max_models:
 
   Maximum models audited when `audit` is not supplied.
+
+- uncertainty:
+
+  Include
+  [`performance_uncertainty()`](https://matt17br.github.io/autoXplainR/reference/performance_uncertainty.md)
+  using its default paired bootstrap. Off by default; temporal
+  evaluation is not supported.
 
 ## Value
 
