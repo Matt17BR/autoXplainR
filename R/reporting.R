@@ -1,9 +1,10 @@
-#' Render a beginner-first model report
+#' Render an interactive model comparison
 #'
 #' Creates a standalone HTML report from an [autoxplain()] result. The report
-#' leads with the prediction question, evaluation role, simple-baseline
-#' comparison, and plain metric definitions. Feature reliance, fitted effects,
-#' and an explanation evidence audit follow with progressively more detail.
+#' opens with model scores, effective settings and measured costs. Focused tabs
+#' show feature importance, class-specific fitted effects, input relationships,
+#' prediction errors and checks. Model details expose the retained fit and its
+#' preprocessing; background explanations use optional help and expandable details.
 #'
 #' @param result An `autoxplain_result`.
 #' @param output_file Destination `.html` path.
@@ -20,8 +21,8 @@
 #' @param uncertainty Include [performance_uncertainty()] using its default paired
 #'   bootstrap. Off by default; temporal evaluation is not supported.
 #' @param open Open the report in a browser after writing it.
-#' @param top_features Maximum number of features audited when `audit` is not
-#'   supplied.
+#' @param top_features Maximum displayed features per model when `audit` is not
+#'   supplied. The audit uses their union; multiclass curves cover each outcome class.
 #' @param n_repeats Permutation repeats when `audit` is not supplied.
 #' @param max_models Maximum models audited when `audit` is not supplied.
 #'
@@ -563,7 +564,7 @@ tradeoff_svg <- function(tradeoffs) {
         ""
       } else {
         paste0(
-          '<text x="', px(v), '" y="', height - bottom + 23, '" class="tick" text-anchor="middle">', report_number(v, 2), "</text>"
+          '<text x="', px(v), '" y="', height - bottom + 23, '" class="tick" text-anchor="middle">', report_axis_number(v), "</text>"
         )
       }
     }, character(1)),
@@ -575,7 +576,7 @@ tradeoff_svg <- function(tradeoffs) {
     } else {
       paste0(
         '<line x1="', left, '" x2="', width - right, '" y1="', py(v), '" y2="', py(v), '" class="grid-line"/>',
-        '<text x="', left - 9, '" y="', py(v) + 5, '" class="tick" text-anchor="end">', report_number(v, 2), "</text>"
+        '<text x="', left - 9, '" y="', py(v) + 5, '" class="tick" text-anchor="end">', report_axis_number(v), "</text>"
       )
     }
   }, character(1)), collapse = ""))
@@ -1225,7 +1226,7 @@ effect_svg <- function(effect, feature, result = NULL) {
   ticks <- paste(vapply(ticks_x, function(v) {
     paste0(
       '<text x="', px(v), '" y="', baseline + 22,
-      '" class="tick" text-anchor="middle">', html_escape(if (numeric_x) report_number(v, 2L) else as.character(xval[v])),
+      '" class="tick" text-anchor="middle">', html_escape(if (numeric_x) report_axis_number(v) else as.character(xval[v])),
       "</text>"
     )
   }, character(1)), collapse = "")
@@ -1235,7 +1236,7 @@ effect_svg <- function(effect, feature, result = NULL) {
     } else {
       paste0(
         '<line class="grid-line" x1="', left, '" x2="', width - right, '" y1="', py(v), '" y2="', py(v), '"/>',
-        '<text x="', left - 10, '" y="', py(v) + 5, '" text-anchor="end" class="tick">', report_number(v, 2L), "</text>"
+        '<text x="', left - 10, '" y="', py(v) + 5, '" text-anchor="end" class="tick">', report_axis_number(v), "</text>"
       )
     }
   }, character(1)), collapse = ""))
@@ -1595,9 +1596,18 @@ html_escape <- function(x) {
   x
 }
 
+report_axis_number <- function(x) {
+  if (!is.finite(x)) return("n/a")
+  scientific <- x != 0 && (abs(x) < .001 || abs(x) >= 1e6)
+  format(signif(x, 4L), trim = TRUE, scientific = scientific)
+}
+
 report_number <- function(x, digits = 3L) {
   if (length(x) != 1L || !is.finite(x)) {
     return("n/a")
+  }
+  if (x != 0 && round(x, digits) == 0) {
+    return(format(signif(x, max(1L, digits)), trim = TRUE, scientific = TRUE))
   }
   format(round(x, digits), nsmall = min(2L, digits), trim = TRUE, scientific = FALSE)
 }

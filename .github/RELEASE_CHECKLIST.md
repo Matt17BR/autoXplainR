@@ -24,8 +24,9 @@ and the tested commit/archive. A CI run does not stand in for a manual review.
 - Require the configured Windows, macOS and Linux CI gates and the live H2O
   integration to pass. A hosted narrative live test is optional and must be
   identified as run or skipped.
-- Complete the task walkthrough in `validation/product-review-0.4.0.md` on
-  regression, binary and multiclass reports. Record answers and repair failures.
+- Complete both user journeys in `validation/product-walkthrough.md` on the
+  installed package and actual regression, binary and multiclass reports.
+  Record answers, friction, repairs and repeated tasks in the release record.
   Open generated report examples on desktop and a narrow viewport. Review
   numerical labels, unavailable diagnostics, keyboard navigation and print output.
 - Verify that logs, fixtures and shared reports contain no credentials or

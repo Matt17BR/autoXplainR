@@ -124,11 +124,12 @@ a low value does not exclude nonlinear or joint dependence.
 
 The default workflow screens all features for up to five models, audits the
 union of their eight highest-ranked inputs, and computes up to eight fitted
-curves per model. This is data-dependent
+curves per model and outcome class. This is data-dependent
 selection. The resulting intervals and diagnostics should be read descriptively;
-selection-adjusted inference is not supplied. Multiclass default effects refer
-to the first outcome class, which is labeled in the output. Request a particular
-class with `explain_effect(..., class = "name")` or `compare_model_effects()`.
+selection-adjusted inference is not supplied. Multiclass reports offer a class selector for probability curves.
+`effects_by_class` retains each class; `effects_by_model` retains the first class
+for compatibility. Lower-level calls select a class with
+`explain_effect(..., class = "name")` or `compare_model_effects()`.
 
 ## Scope and reference implementations
 

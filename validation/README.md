@@ -72,12 +72,19 @@ Alternatively, set `CHROME_PATH` to an installed Chrome executable and omit the
 browser download. The capture script uses a 1440px desktop viewport at 1.5x
 resolution and checks for page overflow at 390px. It saves the model comparison, fitted patterns, relationships, predictions
 and checks tabs to `man/figures/`.
+It also captures the fitted-model details view. Run
+`Rscript validation/render-explorer-cases.R` to refresh the public binary and
+multiclass demonstrations together with the regression example.
 Review the images visually before committing; the script does not replace
 checking text legibility and framing. These Python dependencies are only needed
 to refresh screenshots, not to install or use the R package.
 
 
 ## Browser regression gate
+
+The [product walkthrough](product-walkthrough.md) is the release acceptance
+process. Browser assertions support it; they do not replace working through the
+novice and experienced-user journeys and recording useful answers.
 
 `report-browser` generates four actual reports and compares their controls and
 displayed answers with R results. It checks model, metric and feature switching;

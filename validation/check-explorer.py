@@ -56,6 +56,22 @@ with sync_playwright() as playwright:
               and is_visible(page, '#overview'))
         check(f'{case}: all fitted models visible', set(page.locator('[data-model-row]').evaluate_all(
             'rows => rows.map(row => row.dataset.modelRow)')) == set(ids))
+        for spec in oracle['specifications']:
+            row = page.locator(f'[data-model-row="{spec["id"]}"]')
+            check(f'{case}/{spec["id"]}: visible fitted settings',
+                  row.locator('.model-settings').inner_text() == spec['summary'])
+            link = row.locator('[data-open-spec]')
+            link.focus()
+            page.keyboard.press('Enter')
+            dialog = page.get_by_role('dialog')
+            check(f'{case}/{spec["id"]}: model details open from keyboard', dialog.is_visible())
+            settings = dialog.locator('table').filter(has=page.locator('caption', has_text='Recorded settings, using R parameter names'))
+            shown = dict(settings.locator('tbody tr').evaluate_all(
+                'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))'))
+            check(f'{case}/{spec["id"]}: detailed settings match R', shown == spec['parameters'])
+            page.keyboard.press('Escape')
+            check(f'{case}/{spec["id"]}: escape returns focus to model',
+                  not dialog.is_visible() and link.evaluate('el => el === document.activeElement'))
         for metric in oracle['metrics']:
             page.select_option('#metric-select', metric)
             values = []
@@ -83,6 +99,9 @@ with sync_playwright() as playwright:
             page.locator('[data-page-link=patterns]').click()
             page.select_option('#feature-model-select', model_id)
             check(f'{case}/{model_id}: feature panel follows model', active_model(page, 'patterns') == model_id)
+            spec = next(spec for spec in oracle['specifications'] if spec['id'] == model_id)
+            check(f'{case}/{model_id}: selected model settings follow model',
+                  page.locator('#patterns [data-model-panel]:visible .model-settings').inner_text() == spec['summary'])
             rows = [row for row in oracle['importance'] if row['model'] == model_id]
             panel = page.locator(f'#patterns [data-model-panel="{model_id}"]')
             if not panel.is_visible():
@@ -96,23 +115,37 @@ with sync_playwright() as playwright:
                 selected = panel.locator('[data-feature-panel]:visible')
                 check(f'{case}/{model_id}/{row["feature"]}: selected feature evidence', selected.count() == 1
                       and selected.get_attribute('data-feature-panel') == row['feature'])
-                check(f'{case}/{model_id}/{row["feature"]}: curve or explicit failure',
-                      selected.locator('svg').count() == 1 or selected.locator('.empty-state').count() == 1)
-                curve = oracle.get('curves', {}).get(model_id, {}).get(row['feature'])
-                if curve:
-                    shown = selected.locator('table tbody tr').evaluate_all(
-                        'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))')
-                    expected_rows = list(zip(*curve.values()))
-                    matches = len(shown) == len(expected_rows)
-                    for actual_row, expected_row in zip(shown, expected_rows):
-                        for actual, expected in zip(actual_row, expected_row):
-                            if isinstance(expected, (int, float)):
-                                matches = matches and abs(float(actual) - expected) <= .000501
-                            elif expected is None:
-                                matches = matches and actual in ('Unavailable', 'n/a', 'NA')
-                            else:
-                                matches = matches and actual == str(expected)
-                    check(f'{case}/{model_id}/{row["feature"]}: curve values match R', matches)
+                for class_name in (oracle.get('classes') or [None]):
+                    if class_name:
+                        page.select_option('#effect-class-select', class_name)
+                        curve_panel = selected.locator('[data-class-panel]:visible')
+                        curves = oracle['class_curves'][class_name]
+                        check(f'{case}/{model_id}/{row["feature"]}/{class_name}: selected class only',
+                              curve_panel.count() == 1 and curve_panel.get_attribute('data-class-panel') == class_name)
+                    else:
+                        curve_panel = selected
+                        curves = oracle.get('curves', {})
+                    check(f'{case}/{model_id}/{row["feature"]}/{class_name}: curve or explicit failure',
+                          curve_panel.locator('svg').count() == 1 or curve_panel.locator('.empty-state').count() == 1)
+                    ticks = curve_panel.locator('svg .tick[text-anchor="end"]').all_text_contents()
+                    numeric_ticks = [text for text in ticks if text != 'zero']
+                    check(f'{case}/{model_id}/{row["feature"]}/{class_name}: distinct vertical tick labels',
+                          len(numeric_ticks) == len(set(numeric_ticks)))
+                    curve = curves.get(model_id, {}).get(row['feature'])
+                    if curve:
+                        shown = curve_panel.locator('table tbody tr').evaluate_all(
+                            'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))')
+                        expected_rows = list(zip(*curve.values()))
+                        matches = len(shown) == len(expected_rows)
+                        for actual_row, expected_row in zip(shown, expected_rows):
+                            for actual, expected in zip(actual_row, expected_row):
+                                if isinstance(expected, (int, float)):
+                                    matches = matches and abs(float(actual) - expected) <= .000501
+                                elif expected is None:
+                                    matches = matches and actual in ('Unavailable', 'n/a', 'NA')
+                                else:
+                                    matches = matches and actual == str(expected)
+                        check(f'{case}/{model_id}/{row["feature"]}/{class_name}: curve values match R', matches)
             page.locator('[data-page-link=evaluation]').click()
             check(f'{case}/{model_id}: prediction panel follows model', active_model(page, 'evaluation') == model_id)
             panel = page.locator(f'#evaluation [data-model-panel="{model_id}"]')
@@ -126,6 +159,18 @@ with sync_playwright() as playwright:
             else:
                 check(f'{case}/{model_id}: mistakes match R',
                       f'{expected["mistakes"]} of {expected["total"]} rows' in summary)
+                panel.locator('.prediction-errors summary').click()
+                shown = panel.locator('.prediction-errors tbody tr').evaluate_all(
+                    '''rows => rows.map(row => [row.dataset.mistakeRow,
+                      row.querySelector('.observed-class').textContent, row.querySelector('.predicted-class').textContent,
+                      row.querySelector('.predicted-probability').textContent, row.querySelector('.observed-probability').textContent])''')
+                examples = expected['examples']
+                matches = len(shown) == len(examples)
+                for actual, example in zip(shown, examples):
+                    matches = matches and int(actual[0]) == example['row'] and actual[1:3] == [example['observed'], example['predicted']]
+                    matches = matches and abs(float(actual[3]) - example['predicted_probability']) <= .0000501
+                    matches = matches and abs(float(actual[4]) - example['observed_probability']) <= .0000501
+                check(f'{case}/{model_id}: mistake probabilities and row order match R', matches)
         page.locator('[data-page-link=relationships]').click()
         pairs = oracle['relationships']
         off_diagonal = [pair for pair in pairs if pair['a'] != pair['b'] and pair['value'] is not None]
@@ -161,9 +206,35 @@ with sync_playwright() as playwright:
             str(args.output_dir / f'{case}-features.pdf'), '-'], text=True)
         check(f'{case}: print includes selected feature view', 'Feature importance' in pdf_text
               and 'Compare the models' not in pdf_text and 'Change in' in pdf_text)
+        if oracle.get('classes'):
+            check(f'{case}: printed curve retains selected class',
+                  page.locator('#effect-class-select').input_value() in pdf_text)
         primary_label = next(row['model'] for row in oracle['table'] if row['model_id'] == oracle['primary'])
         check(f'{case}: print retains report and model identity', primary_label in pdf_text
               and page.locator('h1').inner_text() in pdf_text)
+        # Open details on a phone as well as on desktop: the close action must
+        # remain reachable while long specifications scroll independently.
+        for width in (320, 390, 1440):
+            page.set_viewport_size({'width': width, 'height': 844})
+            page.locator('[data-page-link=overview]').click()
+            page.locator('[data-model-row] [data-open-spec]').first.click()
+            dialog = page.get_by_role('dialog')
+            check(f'{case}/{width}: details fit viewport', dialog.evaluate('el => { const b=el.getBoundingClientRect(); return b.left>=0 && b.right<=innerWidth && b.top>=0 && b.bottom<=innerHeight; }'))
+            dialog.locator('.dialog-content').evaluate('el => el.scrollTop = el.scrollHeight')
+            close = dialog.get_by_role('button', name='Close model details')
+            check(f'{case}/{width}: close remains visible after scrolling details', close.evaluate('el => { const b=el.getBoundingClientRect(); return b.top>=0 && b.bottom<=innerHeight; }'))
+            page.add_script_tag(path=str(args.axe_path.resolve()))
+            violations = page.evaluate("async () => (await axe.run(document, {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}})).violations.map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))")
+            check(f'{case}/{width}: model details accessibility', not violations, violations)
+            if case == 'regression':
+                dialog.locator('.dialog-content').evaluate('el => el.scrollTop = 0')
+                page.screenshot(path=str(args.output_dir / f'model-details-{width}.png'))
+                if width == 1440:
+                    page.pdf(path=str(args.output_dir / 'model-details.pdf'), print_background=True)
+                    text = subprocess.check_output(['pdftotext', str(args.output_dir / 'model-details.pdf'), '-'], text=True)
+                    check('details print keeps fit without background comparison',
+                          'Training settings' in text and 'Compare the models' not in text)
+            close.click()
         for width in (320, 390, 768, 1440):
             page.set_viewport_size({'width': width, 'height': 1000})
             for tab in ('overview', 'patterns', 'relationships', 'evaluation', 'checks', 'provenance'):
@@ -176,7 +247,17 @@ with sync_playwright() as playwright:
                   const n = document.querySelector('.sidebar').getBoundingClientRect();
                   return h.top >= 0 && (innerWidth > 760 || h.top >= n.bottom);
                 }'''))
+                if tab == 'evaluation' and oracle['task'] != 'regression':
+                    check(f'{case}/{width}: mistake probabilities fit without horizontal scrolling', page.evaluate('''() =>
+                      Array.from(document.querySelectorAll('.mistake-table')).filter(el => el.getBoundingClientRect().width > 0)
+                        .every(el => el.scrollWidth <= el.clientWidth + 1 && el.getBoundingClientRect().right <= innerWidth)
+                    '''))
                 if width < 760:
+                    check(f'{case}/{width}/{tab}: active mobile tab is visible', page.evaluate('''() => {
+                      const tab = document.querySelector('[data-page-link][aria-selected="true"]');
+                      const box = tab.getBoundingClientRect(), parent = tab.parentElement.getBoundingClientRect();
+                      return box.left >= parent.left - 1 && box.right <= parent.right + 1;
+                    }'''))
                     check(f'{case}/{width}/{tab}: numeric plots fit their visible region', page.evaluate('''() =>
                       Array.from(document.querySelectorAll('.tradeoff-plot,.prediction-plot,.effect-plot[data-axis-type="numeric"]'))
                         .filter(el => el.getBoundingClientRect().width > 0)
@@ -197,6 +278,8 @@ with sync_playwright() as playwright:
         static = no_js.new_page()
         static.goto(report.as_uri())
         check(f'{case}: no-JavaScript retains every model', static.locator('#patterns [data-model-panel]').count() == len(ids))
+        check(f'{case}: no-JavaScript retains model specifications',
+              static.locator('.model-spec').count() == len(ids))
         check(f'{case}: no-JavaScript exposes all tabs', static.locator('.workspace-page:visible').count() == 6)
         check(f'{case}: no-JavaScript has no page overflow', static.evaluate(
             'document.documentElement.scrollWidth <= innerWidth'))

@@ -14,6 +14,8 @@
 - [ ] Optional integration remains isolated
 - [ ] `devtools::document()`, `devtools::test()`, and `devtools::check()` pass
 - [ ] User-facing changes recorded in NEWS
+- [ ] Novice and experienced-user journeys in `validation/product-walkthrough.md` completed for affected workflows
+- [ ] Report screenshots refreshed and visually inspected when the UI changes
 
 ## Data and privacy
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/reporting.R
 \name{render_model_report}
 \alias{render_model_report}
-\title{Render a beginner-first model report}
+\title{Render an interactive model comparison}
 \usage{
 render_model_report(
   result,
@@ -40,8 +40,8 @@ performance check. See \code{\link[=subgroup_performance]{subgroup_performance()
 
 \item{open}{Open the report in a browser after writing it.}
 
-\item{top_features}{Maximum number of features audited when \code{audit} is not
-supplied.}
+\item{top_features}{Maximum displayed features per model when \code{audit} is not
+supplied. The audit uses their union; multiclass curves cover each outcome class.}
 
 \item{n_repeats}{Permutation repeats when \code{audit} is not supplied.}
 
@@ -60,9 +60,10 @@ result is not changed by rendering.
 }
 \description{
 Creates a standalone HTML report from an \code{\link[=autoxplain]{autoxplain()}} result. The report
-leads with the prediction question, evaluation role, simple-baseline
-comparison, and plain metric definitions. Feature reliance, fitted effects,
-and an explanation evidence audit follow with progressively more detail.
+opens with model scores, effective settings and measured costs. Focused tabs
+show feature importance, class-specific fitted effects, input relationships,
+prediction errors and checks. Model details expose the retained fit and its
+preprocessing; background explanations use optional help and expandable details.
 }
 \examples{
 result <- autoxplain(mtcars, "mpg", seed = 2026)

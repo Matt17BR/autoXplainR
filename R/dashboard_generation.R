@@ -7,9 +7,8 @@
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param output_file Destination HTML file.
-#' @param top_features Maximum number of features included in the audit. The
-#'   initial ranking is obtained from repeated permutation importance on the
-#'   leading model, never from impurity importance.
+#' @param top_features Maximum displayed inputs per model. The audit uses the
+#'   union of their leading inputs, ranked by repeated permutation importance.
 #' @param sample_instances Retained for backward compatibility; no longer used.
 #' @param include_llm_report Whether to request an optional narrative. The
 #'   evidence report remains complete without it.
@@ -170,6 +169,8 @@ prepare_model_report_data <- function(autoxplain_result,
   prepared <- autoxplain_result
   prepared$explanations <- output
   output$effects_by_model <- explorer_model_effects(prepared, audit, effects)
+  prepared$explanations <- output
+  output$effects_by_class <- explorer_class_effects(prepared, audit, effects)
   output
 }
 

@@ -10,24 +10,26 @@ Publication status and artifact identity are recorded below as gates complete.
 The report opens with retained models, held-out scores and measured costs.
 Six focused tabs expose model comparison, importance and fitted effects, input
 relationships, prediction errors, checks and methods. Background explanations
-use hover/focus/tap help and expandable details. The README screenshots are
+use hover/focus/tap help and expandable details. The novice and expert journeys in [the product walkthrough](product-walkthrough.md)
+are mandatory in the contributor guide and release checklist. The README screenshots are
 captures of the actual current implementation.
 
 Task checks use regression, binary, multiclass and quick-mode fixtures. Displayed
 scores, importance, curve values, errors, relationship methods and prediction
-commands are checked against R-generated answers. The developer also inspected
+commands are checked against R-generated answers. Model settings, keyboard-accessible
+details, class selection and the detail-view PDF are included. The developer also inspected
 desktop and phone screenshots and the selected-feature PDF. Specific failures
 and repairs are recorded in the product review; these are implementer acceptance
 checks, not a recruited participant study.
 
 ## Local validation
 
-- Full R suite: 2,800 passed, zero failures/errors/warnings; two opt-in integration
+- Full R suite: 2,883 passed, zero failures/errors/warnings; two opt-in integration
   skips. The separate live H2O suite passed 95 assertions with no skips or failures.
 - Eleven numerical references: maximum absolute discrepancy 5.69e-14, covering
   PDP, ALE shapes, analytic boundaries, ties and empirical centering.
-- Browser tasks: all 766 assertions passed on four generated reports, including
-  320/390/768/1440px layouts and 24 regression-tab axe scans. No JavaScript errors.
+- Browser tasks: all 1,150 assertions passed on four generated reports, including
+  320/390/768/1440px layouts and 24 regression-tab and 12 model-details axe scans. No JavaScript errors.
   Incomplete axe results are retained separately and are not counted as passes.
 - Negative control: deliberately disconnecting model selection causes a failed
   model-switch assertion and exit status 1, without an execution error.
@@ -49,10 +51,8 @@ fit/predict/report check.
 
 ## Explicit limits
 
-- Multiclass report curves describe the first class, labeled in the view. Named
-  classes remain available through `explain_effect()` and `compare_model_effects()`.
 - Default explanations cover up to five models and eight displayed inputs per
-  model; the audit uses their union. The matrix shows at most 12 selected inputs.
+  model and outcome class; the audit uses their union. The matrix shows at most 12 selected inputs.
 - Temporal tuning remains unsupported; chronological workflows must explicitly
   choose quick/comparison mode. Grouped tuning retains whole units.
 - Browser automation uses Chromium. Screen-reader, Firefox and Safari behaviour

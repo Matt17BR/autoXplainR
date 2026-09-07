@@ -1,5 +1,14 @@
 # AutoXplainR 0.5.0
 
+- Reports show effective settings beside each model. Model details expose fitted
+  coefficients or tree rules, exact controls, selection and preprocessing.
+  Native tree metadata now includes its full controls; neural metadata includes
+  the retained fitting controls and network size.
+- Classification mistakes include probabilities for the predicted and observed
+  classes, ordered by the lowest probability assigned to the observed class.
+- Multiclass reports offer a class selector for fitted probability curves and
+  retain all class-specific curves for reuse.
+
 ## Model exploration is the main workflow again
 
 - `autoxplain()` now searches 15 settings across the core linear, tree and neural
@@ -25,6 +34,10 @@
   checks against R-generated answer data. The README shows the working tabs.
 - Cost enrichment preserves available leaderboard measurements when an engine
   omits optional model-characteristic fields. Missing measurements stay missing.
+- Local elapsed times discard floating-point subtraction noise below a
+  microsecond so that equal measured costs remain equal in Pareto comparisons.
+- Small probability effects retain distinct signed axis labels instead of
+  rounding several different ticks to zero. Tiny table values use scientific notation.
 
 # AutoXplainR 0.4.0
 

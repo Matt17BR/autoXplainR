@@ -93,11 +93,13 @@ explorer_model_table <- function(result, models) {
       collapse = ""
     )
     role <- if (board$model_id[i] == primary) selected_label else if (board$role[i] == "baseline") "Baseline" else ""
+    spec <- model_specification(result, board$model_id[i])
     paste0(
       '<tr data-model-row="', html_escape(board$model_id[i]), '"', values, ">",
       '<th scope="row"><a class="model-link" data-pick-model="', html_escape(board$model_id[i]),
       '" href="#patterns"><span class="model-dot model-color-', board$role[i], '"></span>',
       html_escape(board$model[i]), "</a>", if (nzchar(role)) paste0('<small class="role">', role, "</small>"),
+      '<span class="model-settings">', html_escape(spec$summary), "</span>", explorer_spec_link(spec),
       "</th>", scores, costs, "</tr>"
     )
   }, character(1))
@@ -253,11 +255,23 @@ explorer_importance <- function(rows, metric, model_id) {
   )
 }
 
-explorer_model_effects <- function(result, audit, effects) {
+explorer_model_effects <- function(result, audit, effects, class = NULL) {
   ids <- names(audit$importance_objects)
   primary <- result$provenance$primary_model_id
-  saved <- result$explanations$effects_by_model %||% list()
-  saved[[primary]] <- effects
+  multiclass <- identical(result$task, "multiclass")
+  first_class <- if (multiclass) levels(result$training_data[[result$target_column]])[1] else NULL
+  class <- class %||% first_class
+  saved <- if (identical(class, first_class)) {
+    result$explanations$effects_by_model %||% list()
+  } else {
+    result$explanations$effects_by_class[[class]] %||% list()
+  }
+  if (!multiclass || !length(effects)) {
+    if (identical(class, first_class)) saved[[primary]] <- effects
+  } else {
+    overrides <- Filter(function(effect) identical(attr(effect, "prediction_class"), class), effects)
+    if (length(overrides)) saved[[primary]] <- overrides
+  }
   explainers <- as_explainers(result, models = ids)
   output <- lapply(ids, function(id) {
     if (!is.null(saved[[id]])) {
@@ -266,6 +280,9 @@ explorer_model_effects <- function(result, audit, effects) {
         if (inherits(effect, "effect_failure")) next
         if (!identical(attr(effect, "explainer_fingerprint"), expected)) {
           stop("A model-specific effect is stale; recompute explanations before reporting.", call. = FALSE)
+        }
+        if (multiclass && !identical(attr(effect, "prediction_class"), class)) {
+          stop("A retained effect has the wrong prediction class; recompute explanations.", call. = FALSE)
         }
       }
       return(saved[[id]])
@@ -277,7 +294,7 @@ explorer_model_effects <- function(result, audit, effects) {
         explain_effect(explainers[[id]], feature,
           method = if (is.numeric(explainers[[id]]$data[[feature]])) "ale" else "pdp",
           n_points = 16L, seed = result$provenance$seed,
-          class = if (result$task == "multiclass") explainers[[id]]$class_levels[1] else NULL
+          class = class
         ),
         error = function(e) structure(conditionMessage(e), class = "effect_failure")
       )
@@ -285,6 +302,16 @@ explorer_model_effects <- function(result, audit, effects) {
     stats::setNames(values, features)
   })
   stats::setNames(output, ids)
+}
+
+explorer_class_effects <- function(result, audit, effects) {
+  if (!identical(result$task, "multiclass")) {
+    return(NULL)
+  }
+  classes <- levels(result$training_data[[result$target_column]])
+  stats::setNames(lapply(classes, function(class) {
+    explorer_model_effects(result, audit, effects, class = class)
+  }), classes)
 }
 
 explorer_effect_summary <- function(effect, feature, result) {
@@ -304,38 +331,64 @@ explorer_effect_summary <- function(effect, feature, result) {
 
 explorer_features <- function(result, audit, effects, models) {
   all_effects <- explorer_model_effects(result, audit, effects)
+  class_effects <- explorer_class_effects(result, audit, effects)
+  classes <- names(class_effects)
   panels <- vapply(models$table$model_id, function(id) {
     rows <- audit$importance[audit$importance$model == id, , drop = FALSE]
     rows <- head(rows[order(-rows$importance), , drop = FALSE], result$explanations$config$top_features %||% 8L)
     values <- all_effects[[id]] %||% list()
     features <- if (nrow(rows)) rows$feature[order(-rows$importance)] else character()
+    if (!length(features)) {
+      return(paste0(
+        '<div class="model-panel" data-model-panel="', html_escape(id), '">',
+        '<h3 class="static-model-heading">', html_escape(explorer_label(result, id)), "</h3>",
+        explorer_model_identity(result, id),
+        '<p class="empty-state">Feature explanations were not computed for this model. ',
+        "Rebuild the report with a larger model budget to include it.</p><pre><code>",
+        "render_model_report(result, max_models = length(result$models))", "</code></pre></div>"
+      ))
+    }
     curves <- vapply(features, function(feature) {
-      effect <- values[[feature]]
-      content <- if (is.null(effect) || inherits(effect, "effect_failure")) {
-        paste0(
-          '<p class="empty-state">', if (inherits(effect, "effect_failure")) {
-            html_escape(as.character(effect))
-          } else {
-            "No curve is available for this input. See the recorded explanation or compute it explicitly."
-          },
-          "</p><pre><code>", html_escape(paste0(
-            'explain_effect(as_explainers(result, models = "',
-            id, '")[[1]], "', feature, '")'
-          )), "</code></pre>"
-        )
+      content_for_class <- function(class = NULL) {
+        effect <- if (is.null(class)) values[[feature]] else class_effects[[class]][[id]][[feature]]
+        content <- if (is.null(effect) || inherits(effect, "effect_failure")) {
+          paste0(
+            '<p class="empty-state">', if (inherits(effect, "effect_failure")) {
+              html_escape(as.character(effect))
+            } else {
+              "No curve is available for this input. See the recorded explanation or compute it explicitly."
+            },
+            "</p><pre><code>", html_escape(paste0(
+              "explain_effect(as_explainers(result, models = ", deparse(id),
+              ")[[1]], ", deparse(feature), if (!is.null(class)) paste0(", class = ", deparse(class)), ")"
+            )), "</code></pre>"
+          )
+        } else {
+          paste0(
+            '<p class="effect-description">', html_escape(explorer_effect_summary(effect, feature, result)), "</p>",
+            '<p class="effect-context">', html_escape(paste(toupper(attr(effect, "method")),
+              attr(effect, "prediction_target") %||% result$target_column,
+              sep = " \u00b7 "
+            )), "</p>",
+            effect_svg(effect, feature, result), "<details><summary>Curve values, support and method</summary>",
+            html_table(as.data.frame(effect), 3,
+              caption = paste("Fitted", feature, "effect for", explorer_label(result, id))
+            ),
+            "<p>", html_escape(attr(effect, "interval_note") %||% ""), "</p></details>"
+          )
+        }
+        if (is.null(class)) {
+          content
+        } else {
+          paste0(
+            '<div data-class-panel="', html_escape(class), '">', content, "</div>"
+          )
+        }
+      }
+      content <- if (length(classes)) {
+        paste(vapply(classes, content_for_class, character(1)), collapse = "")
       } else {
-        paste0(
-          '<p class="effect-description">', html_escape(explorer_effect_summary(effect, feature, result)), "</p>",
-          '<p class="effect-context">', html_escape(paste(toupper(attr(effect, "method")),
-            attr(effect, "prediction_target") %||% result$target_column,
-            sep = " \u00b7 "
-          )), "</p>",
-          effect_svg(effect, feature, result), "<details><summary>Curve values, support and method</summary>",
-          html_table(as.data.frame(effect), 3,
-            caption = paste("Fitted", feature, "effect for", explorer_label(result, id))
-          ),
-          "<p>", html_escape(attr(effect, "interval_note") %||% ""), "</p></details>"
-        )
+        content_for_class()
       }
       paste0(
         '<article class="effect-card" data-feature-panel="', html_escape(feature), '">',
@@ -345,6 +398,7 @@ explorer_features <- function(result, audit, effects, models) {
     paste0(
       '<div class="model-panel" data-model-panel="', html_escape(id), '">',
       '<h3 class="static-model-heading">', html_escape(explorer_label(result, id)), "</h3>",
+      explorer_model_identity(result, id),
       '<div class="feature-layout">',
       "<div>", explorer_importance(rows, audit$config$metric, id), '</div><div class="effect-workspace">',
       '<label class="control">Fitted pattern <select class="feature-select">', explorer_options(features),
@@ -357,12 +411,24 @@ explorer_features <- function(result, audit, effects, models) {
     explorer_help(
       "Exploring fitted effects",
       paste(
-        "Switch models to compare fitted reliance. Click an input to select its curve. ALE shows centered",
-        "local effects; PDP shows average predictions. These are fitted associations,",
-        "not predictions of an intervention."
+        "ALE follows local changes in predictions and centers the effect at zero.",
+        "Negative effects mean below this reference, not negative probabilities.",
+        "PDP averages predictions with an input set to each displayed value.",
+        "These describe fitted associations, not the consequences of an intervention."
       )
     ),
-    "</h2>", explorer_model_control(models, result$provenance$primary_model_id, "feature-model-select"),
+    "</h2><div class=\"feature-controls\">",
+    explorer_model_control(models, result$provenance$primary_model_id, "feature-model-select"),
+    if (length(classes)) {
+      paste0(
+        '<label class="control">Curve for class <select id="effect-class-select">',
+        explorer_options(classes), "</select></label>",
+        explorer_help("Class-specific curves", paste(
+          "Importance summarizes prediction loss across all classes.",
+          "The fitted curve describes the probability of the selected class."
+        ))
+      )
+    }, "</div>",
     paste(panels, collapse = ""), "</section>"
   )
 }
@@ -463,6 +529,46 @@ explorer_relationships <- function(result, audit) {
   )
 }
 
+explorer_classification_mistakes <- function(observed, prediction, levels) {
+  probabilities <- if (is.matrix(prediction)) prediction[, levels, drop = FALSE] else cbind(1 - prediction, prediction)
+  predicted <- if (is.matrix(prediction)) {
+    levels[max.col(probabilities, ties.method = "first")]
+  } else {
+    ifelse(prediction >= .5, levels[2], levels[1])
+  }
+  rows <- seq_along(observed)
+  output <- data.frame(
+    Row = rows, Observed = as.character(observed), Predicted = predicted,
+    `Probability of predicted class` = probabilities[cbind(rows, match(predicted, levels))],
+    `Probability of observed class` = probabilities[cbind(rows, match(observed, levels))], check.names = FALSE
+  )
+  output <- output[predicted != observed, , drop = FALSE]
+  head(output[order(output[["Probability of observed class"]]), , drop = FALSE], 10L)
+}
+
+explorer_mistake_table <- function(rows) {
+  if (!nrow(rows)) {
+    return("<p>No classification mistakes on these evaluation rows.</p>")
+  }
+  body <- vapply(seq_len(nrow(rows)), function(i) {
+    paste0(
+      '<tr data-mistake-row="', rows$Row[i], '"><th scope="row">', rows$Row[i], "</th><td>",
+      '<span class="observed-class">', html_escape(rows$Observed[i]), "</span>",
+      '<small class="class-probability observed-probability">',
+      report_number(rows[["Probability of observed class"]][i], 4), "</small></td><td>",
+      '<span class="predicted-class">', html_escape(rows$Predicted[i]), "</span>",
+      '<small class="class-probability predicted-probability">',
+      report_number(rows[["Probability of predicted class"]][i], 4), "</small></td></tr>"
+    )
+  }, character(1))
+  paste0(
+    '<table class="mistake-table"><caption>Evaluation rows. Each class label shows its model probability ',
+    "(0\u20131) underneath. Lowest probability for the observed class first.</caption>",
+    '<thead><tr><th scope="col">Row</th><th scope="col">Observed class</th>',
+    '<th scope="col">Predicted class</th></tr></thead><tbody>', paste(body, collapse = ""), "</tbody></table>"
+  )
+}
+
 explorer_predictions <- function(result, models) {
   explainers <- as_explainers(result, models = models$table$model_id)
   predictions <- lapply(explainers, function(x) predict(x, x$data))
@@ -495,14 +601,19 @@ explorer_predictions <- function(result, models) {
         sum(predicted != observed), " of ", length(observed), " rows were classified incorrectly.",
         if (result$task == "binary") paste0(" Probability \u22650.5 predicts ", labels[2], ".") else ""
       )
-      display <- data.frame(Row = seq_along(observed), Observed = as.character(observed), Predicted = predicted)
-      display <- head(display[predicted != observed, , drop = FALSE], 10)
+      display <- explorer_classification_mistakes(observed, prediction, labels)
     }
     paste0(
       '<div class="model-panel" data-model-panel="', html_escape(id), '"><h3 class="model-heading">',
-      html_escape(explorer_label(result, id)), '</h3><p class="task-intro">', html_escape(summary), "</p>", chart,
-      "<details><summary>", if (result$task == "regression") "Largest observed errors" else "Example mistakes",
-      "</summary>", html_table(display, 3, caption = "Evaluation-row positions, not training rows"), "</details>",
+      html_escape(explorer_label(result, id)), "</h3>", explorer_model_identity(result, id),
+      '<p class="task-intro">', html_escape(summary), "</p>", chart,
+      '<details class="prediction-errors"><summary>',
+      if (result$task == "regression") "Largest observed errors" else "Mistakes and probabilities",
+      "</summary>", if (result$task == "regression") {
+        html_table(display, 3, caption = "Evaluation-row positions, not training rows")
+      } else {
+        explorer_mistake_table(display)
+      }, "</details>",
       if (result$task != "regression") explorer_calibration(explainers[[id]], prediction),
       '<h3>Use this model in R</h3><pre tabindex="0" aria-label="Prediction command"><code>',
       html_escape(paste0('predict(result, new_data, model = "', id, '")')),
@@ -623,6 +734,10 @@ model_explorer_html <- function(result, audit, effects, narrative, subgroup_chec
     '<p class="section-number">06 / Methods & export</p><h2 id="provenance-title">Keep the analysis usable</h2>',
     '<pre><code>saveRDS(result, "analysis.rds")\nevidence_summary(result)\n',
     "result$leaderboard\nresult$explanations$audit</code></pre>",
+    "<h3>Retained model specifications</h3>",
+    paste(vapply(names(result$models), function(id) explorer_model_spec_details(result, id), character(1)),
+      collapse = ""
+    ),
     "<details><summary>Run settings and validation design</summary>",
     definition_list(c(
       Target = identity$target, Task = identity$task, Engine = identity$engine,

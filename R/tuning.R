@@ -831,7 +831,7 @@ score_tuning_configuration <- function(configuration,
     validation_rows_requested = fold$validation_rows_requested,
     validation_rows_omitted = length(fold$omitted_validation_row),
     novel_levels_mapped = fold$novel_levels_mapped,
-    elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
+    elapsed_ms = elapsed_milliseconds(started),
     warning = paste(unique(fit_warning), collapse = " | "),
     error = error,
     stringsAsFactors = FALSE
@@ -1146,6 +1146,11 @@ fit_tuning_configuration <- function(configuration,
     configuration_id = configuration$configuration_id[[1L]],
     family = family,
     scope = fit_scope,
+    backend_version = backend_package_version(if (family == "linear") {
+      if (task == "multiclass") "nnet" else "stats"
+    } else {
+      definition$backend
+    }),
     search_seed = fit_spec$search_seed,
     requested_parameters = fit_spec$requested_parameters,
     effective_parameters = fit_spec$effective_parameters,

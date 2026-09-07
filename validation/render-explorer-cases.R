@@ -30,6 +30,9 @@ for (name in names(cases)) {
     multiclass = "Flower species",
     quick = "Fuel consumption reference"
   ), target_units = if (name == "regression") "hours" else NULL)
+  if (name %in% c("binary", "multiclass")) {
+    file.copy(path, file.path("pkgdown", "assets", paste0(name, "-report.html")), overwrite = TRUE)
+  }
   board <- AutoXplainR:::explorer_models(result)
   importance <- result$explanations$audit$importance
   importance <- do.call(rbind, lapply(split(importance, importance$model), function(rows) {
@@ -48,7 +51,15 @@ for (name in names(cases)) {
       } else {
         ifelse(predicted >= .5, x$class_levels[2], x$class_levels[1])
       }
-      list(mistakes = sum(labels != x$y), total = length(labels))
+      p <- if (is.matrix(predicted)) predicted[, x$class_levels, drop = FALSE] else cbind(1 - predicted, predicted)
+      truth <- p[cbind(seq_along(x$y), match(x$y, x$class_levels))]
+      guessed <- p[cbind(seq_along(x$y), match(labels, x$class_levels))]
+      wrong <- which(labels != x$y)
+      selected <- head(wrong[order(truth[wrong])], 10)
+      list(mistakes = length(wrong), total = length(labels), examples = data.frame(
+        row = selected, observed = as.character(x$y[selected]), predicted = labels[selected],
+        predicted_probability = guessed[selected], observed_probability = truth[selected]
+      ))
     }
   })
   oracle <- list(
@@ -56,9 +67,26 @@ for (name in names(cases)) {
     primary_metric = result$evaluation$primary_metric, table = board$table,
     metrics = board$metrics, resources = board$resources,
     importance = importance[c("model", "feature", "importance")], predictions = predictions,
+    specifications = lapply(names(result$models), function(id) {
+      spec <- AutoXplainR:::model_specification(result, id)
+      list(id = id, summary = spec$summary, parameters = lapply(spec$parameters, AutoXplainR:::model_spec_value))
+    }),
+    classes = names(result$explanations$effects_by_class),
+    class_curves = lapply(result$explanations$effects_by_class, function(models) {
+      lapply(models, function(effects) {
+        lapply(effects, function(effect) {
+          if (inherits(effect, "effect_failure")) {
+            return(NULL)
+          }
+          lapply(as.data.frame(effect), as.vector)
+        })
+      })
+    }),
     curves = lapply(result$explanations$effects_by_model, function(effects) {
       lapply(effects, function(effect) {
-        if (inherits(effect, "effect_failure")) return(NULL)
+        if (inherits(effect, "effect_failure")) {
+          return(NULL)
+        }
         lapply(as.data.frame(effect), as.vector)
       })
     }),

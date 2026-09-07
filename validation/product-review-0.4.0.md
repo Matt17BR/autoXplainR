@@ -83,7 +83,7 @@ observed answers from the fixed datasets, not invented example conclusions.
 | Inspect related inputs | Distance and planned-route estimate have signed Spearman correlation about 0.99 on 288 preprocessed training rows. Selecting the cell supplies the exact method and count. |
 | Find delivery prediction errors | The linear model has mean absolute error 2.481 hours and maximum absolute error 9.190 hours on 72 evaluation rows. The largest-error table exposes the affected row positions. |
 | Inspect binary predictions | The churn example's selected logistic model has log loss 0.4920 and 11 mistakes on 48 rows. Probability refers to `yes`; the report states the 0.5 classification threshold. |
-| Inspect multiclass predictions | The flower example's selected neural model has log loss 0.1662 and 2 mistakes on 30 rows. Feature curves explicitly name the first class; another class can be requested in R. |
+| Inspect multiclass predictions | The flower example's selected neural model has log loss 0.1662 and 2 mistakes on 30 rows. The class selector exposes all three probability curves without changing the all-class importance measure. |
 | Use the inspected model | Switching models updates the displayed `predict(result, new_data, model = "...")` command and the prediction and feature panels. |
 
 The review caused concrete revisions after the first implementation:
@@ -102,6 +102,9 @@ The review caused concrete revisions after the first implementation:
 - The initial feature PDF wasted a page and a focused native selector could lose
   its label. Print now uses explicit selection text and a compact two-column
   layout, with checks for the report title and selected model.
+- Floating-point clock subtraction gave apparently tied fits a spurious cost
+  advantage. Elapsed times now discard noise below a microsecond, with a
+  counterexample checking that equal costs have the expected Pareto status.
 - A live H2O report exposed missing optional characteristic fields. Cost
   enrichment now preserves its existing measurements and represents absent
   values as unavailable.
@@ -111,8 +114,60 @@ The task checker failed the model-switch assertion, exited 1 and recorded no
 execution errors. This establishes that the check can reject a plausible-looking
 but broken interaction. It is not a substitute for the numerical reference tests.
 
-Remaining scope is explicit: multiclass report curves currently describe the
-first class; the matrix shows at most 12 selected inputs; explanation budgets
+Remaining scope is explicit: the matrix shows at most 12 selected inputs; explanation budgets
 can exclude models; temporal tuning is unsupported; Chromium automation does
 not establish screen-reader or Safari behaviour. These limits are recorded in
 the report or documentation rather than represented as successful checks.
+
+### Model identity review
+
+The next review exposed another regression: family names had replaced useful
+fit specifications. The comparison now keeps a concise setting line per model,
+with a keyboard-accessible detail view containing actual controls, fitted
+structure, formulas, coefficients or tree rules, training selection and encoded
+inputs. Model identity follows the feature and prediction selectors. The detail
+view uses retained fitted objects; a requested maximum depth is labeled
+separately from the resulting tree depth. Optional-engine effective settings
+are checked as well as the core fits. The static HTML retains the specifications
+when JavaScript is disabled.
+
+The multiclass walkthrough also found indistinguishable rounded probability
+axis ticks and first-class-only exploration. Tick precision now preserves small
+signed changes, and all outcome classes have selectable, cached fitted curves.
+
+The repeated in-browser journey used the model links, then the ordinary controls
+rather than navigating directly to internal panels. It recovered these answers,
+subsequently checked against retained R fits and predictions:
+
+| Question | Answer recovered from the report |
+|---|---|
+| Is the tree actually ten levels deep? | No: `maxdepth = 10` is the cap; the fitted tree has depth 6 and 33 terminal leaves. |
+| What is the linear service coefficient? | `servicepriority = -5.000612`; the formula and factor encoding can be inspected alongside it. |
+| Does the neural model show the same service association? | Its PDP averages fall by 4.958273 hours from economy to priority; this is a fitted association. |
+| Does changing tabs preserve the model? | Predictions keeps the neural model: MAE 2.485880, maximum absolute error 9.035591, and `predict(result, new_data, model = "neural_model")`. |
+| Is the flower curve really class-specific? | For the same neural model and Petal.Width range, the ALE endpoint change is -0.02295566 for setosa and +0.5033818 for virginica. Overall log-loss importance stays unchanged. |
+
+This pass removed the duplicated formula from the controls table, put the main
+tree settings first, kept the close button available while details scroll, and
+replaced irrelevant cross-family help with help for the inspected engine. The
+ALE help now explains that a negative centered effect is not a negative
+probability. A deliberately restricted model budget now offers a report command
+instead of an empty feature selector. Regression, binary and multiclass examples
+are published together so readers can inspect the supported task types before
+installation.
+
+The classification follow-up asked why similar accuracies can coexist with very
+different log loss. The original mistake list could not answer that: it contained
+only labels. It now shows probabilities for both the predicted and observed
+classes and sorts by the probability assigned to the observed class, lowest
+first. Unit checks include shuffled probability-column order and binary 0.5
+ties; the browser checks every displayed mistake against independently assembled
+R probability rows.
+
+In the flower fixture, the tree and neural model both have accuracy 28/30, while
+log loss is 1.213843 and 0.166199. The tree assigns probability zero to the true
+class on evaluation row 15; the neural model assigns 0.165180 there. This now
+provides a concrete reason for the score difference. Phone inspection initially
+found the probability columns off-screen. They now sit below their class labels
+in a three-column table, and browser checks reject horizontal overflow. The
+active mobile tab is also brought into view on navigation and deep links.

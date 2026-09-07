@@ -29,6 +29,11 @@ with sync_playwright() as playwright:
         assert page.locator('.workspace-page:visible').count() == 1
         for name in names:
             page.screenshot(path=str(OUTPUT / name), full_page=True, animations='disabled')
+    page.locator('[data-page-link=overview]').click()
+    page.locator('[data-model-row="tree_model"] [data-open-spec]').click()
+    assert page.get_by_role('dialog').is_visible()
+    page.screenshot(path=str(OUTPUT / 'model-details.png'), animations='disabled')
+    page.keyboard.press('Escape')
     page.set_viewport_size({'width': 390, 'height': 844})
     for tab in TABS:
         page.locator(f'[data-page-link={tab}]').click()

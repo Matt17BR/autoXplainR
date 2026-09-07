@@ -4,7 +4,7 @@
     {
       "name": "regression: fixture identity",
       "passed": true,
-      "evidence": "b5304f77281c1342e640173fcb6db06516b8cd06abe1482da3a6edbaa721e735"
+      "evidence": "28b6d90e3353002b13f0a3d9f4e9a41e6dc6d3f96e605e220417014af09b64f3"
     },
     {
       "name": "regression: unique IDs and valid navigation targets",
@@ -18,6 +18,86 @@
     },
     {
       "name": "regression: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: escape returns focus to model",
       "passed": true,
       "evidence": null
     },
@@ -147,6 +227,11 @@
       "evidence": null
     },
     {
+      "name": "regression/main_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/main_model/distance_km: importance matches R",
       "passed": true,
       "evidence": null
@@ -157,12 +242,17 @@
       "evidence": null
     },
     {
-      "name": "regression/main_model/distance_km: curve or explicit failure",
+      "name": "regression/main_model/distance_km/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/main_model/distance_km: curve values match R",
+      "name": "regression/main_model/distance_km/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/distance_km/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -177,12 +267,17 @@
       "evidence": null
     },
     {
-      "name": "regression/main_model/planned_route_hours: curve or explicit failure",
+      "name": "regression/main_model/planned_route_hours/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/main_model/planned_route_hours: curve values match R",
+      "name": "regression/main_model/planned_route_hours/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -197,12 +292,17 @@
       "evidence": null
     },
     {
-      "name": "regression/main_model/service: curve or explicit failure",
+      "name": "regression/main_model/service/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/main_model/service: curve values match R",
+      "name": "regression/main_model/service/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/service/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -217,12 +317,17 @@
       "evidence": null
     },
     {
-      "name": "regression/main_model/dispatch_backlog: curve or explicit failure",
+      "name": "regression/main_model/dispatch_backlog/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/main_model/dispatch_backlog: curve values match R",
+      "name": "regression/main_model/dispatch_backlog/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/dispatch_backlog/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -237,12 +342,17 @@
       "evidence": null
     },
     {
-      "name": "regression/main_model/parcel_kg: curve or explicit failure",
+      "name": "regression/main_model/parcel_kg/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/main_model/parcel_kg: curve values match R",
+      "name": "regression/main_model/parcel_kg/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -267,6 +377,11 @@
       "evidence": null
     },
     {
+      "name": "regression/neural_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/neural_model/planned_route_hours: importance matches R",
       "passed": true,
       "evidence": null
@@ -277,12 +392,17 @@
       "evidence": null
     },
     {
-      "name": "regression/neural_model/planned_route_hours: curve or explicit failure",
+      "name": "regression/neural_model/planned_route_hours/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/neural_model/planned_route_hours: curve values match R",
+      "name": "regression/neural_model/planned_route_hours/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/planned_route_hours/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -297,12 +417,17 @@
       "evidence": null
     },
     {
-      "name": "regression/neural_model/service: curve or explicit failure",
+      "name": "regression/neural_model/service/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/neural_model/service: curve values match R",
+      "name": "regression/neural_model/service/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -317,12 +442,17 @@
       "evidence": null
     },
     {
-      "name": "regression/neural_model/distance_km: curve or explicit failure",
+      "name": "regression/neural_model/distance_km/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/neural_model/distance_km: curve values match R",
+      "name": "regression/neural_model/distance_km/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/distance_km/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -337,12 +467,17 @@
       "evidence": null
     },
     {
-      "name": "regression/neural_model/dispatch_backlog: curve or explicit failure",
+      "name": "regression/neural_model/dispatch_backlog/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/neural_model/dispatch_backlog: curve values match R",
+      "name": "regression/neural_model/dispatch_backlog/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/dispatch_backlog/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -357,12 +492,17 @@
       "evidence": null
     },
     {
-      "name": "regression/neural_model/parcel_kg: curve or explicit failure",
+      "name": "regression/neural_model/parcel_kg/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/neural_model/parcel_kg: curve values match R",
+      "name": "regression/neural_model/parcel_kg/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -387,6 +527,11 @@
       "evidence": null
     },
     {
+      "name": "regression/tree_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/tree_model/distance_km: importance matches R",
       "passed": true,
       "evidence": null
@@ -397,12 +542,17 @@
       "evidence": null
     },
     {
-      "name": "regression/tree_model/distance_km: curve or explicit failure",
+      "name": "regression/tree_model/distance_km/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/tree_model/distance_km: curve values match R",
+      "name": "regression/tree_model/distance_km/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/distance_km/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -417,12 +567,17 @@
       "evidence": null
     },
     {
-      "name": "regression/tree_model/service: curve or explicit failure",
+      "name": "regression/tree_model/service/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/tree_model/service: curve values match R",
+      "name": "regression/tree_model/service/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -437,12 +592,17 @@
       "evidence": null
     },
     {
-      "name": "regression/tree_model/planned_route_hours: curve or explicit failure",
+      "name": "regression/tree_model/planned_route_hours/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/tree_model/planned_route_hours: curve values match R",
+      "name": "regression/tree_model/planned_route_hours/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/planned_route_hours/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -457,12 +617,17 @@
       "evidence": null
     },
     {
-      "name": "regression/tree_model/dispatch_backlog: curve or explicit failure",
+      "name": "regression/tree_model/dispatch_backlog/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/tree_model/dispatch_backlog: curve values match R",
+      "name": "regression/tree_model/dispatch_backlog/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/dispatch_backlog/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -477,12 +642,17 @@
       "evidence": null
     },
     {
-      "name": "regression/tree_model/parcel_kg: curve or explicit failure",
+      "name": "regression/tree_model/parcel_kg/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/tree_model/parcel_kg: curve values match R",
+      "name": "regression/tree_model/parcel_kg/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -507,6 +677,11 @@
       "evidence": null
     },
     {
+      "name": "regression/simple_baseline: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/simple_baseline/distance_km: importance matches R",
       "passed": true,
       "evidence": null
@@ -517,12 +692,17 @@
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/distance_km: curve or explicit failure",
+      "name": "regression/simple_baseline/distance_km/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/distance_km: curve values match R",
+      "name": "regression/simple_baseline/distance_km/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/distance_km/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -537,12 +717,17 @@
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/planned_route_hours: curve or explicit failure",
+      "name": "regression/simple_baseline/planned_route_hours/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/planned_route_hours: curve values match R",
+      "name": "regression/simple_baseline/planned_route_hours/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -557,12 +742,17 @@
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/service: curve or explicit failure",
+      "name": "regression/simple_baseline/service/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/service: curve values match R",
+      "name": "regression/simple_baseline/service/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/service/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -577,12 +767,17 @@
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/dispatch_backlog: curve or explicit failure",
+      "name": "regression/simple_baseline/dispatch_backlog/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/dispatch_backlog: curve values match R",
+      "name": "regression/simple_baseline/dispatch_backlog/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/dispatch_backlog/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -597,12 +792,17 @@
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/parcel_kg: curve or explicit failure",
+      "name": "regression/simple_baseline/parcel_kg/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "regression/simple_baseline/parcel_kg: curve values match R",
+      "name": "regression/simple_baseline/parcel_kg/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -662,12 +862,67 @@
       "evidence": null
     },
     {
+      "name": "regression/320: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/390: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "regression/1440: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/1440: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "details print keeps fit without background comparison",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/320/overview: one tab, no page overflow",
       "passed": true,
       "evidence": null
     },
     {
       "name": "regression/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -692,6 +947,11 @@
       "evidence": null
     },
     {
+      "name": "regression/320/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/320/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -708,6 +968,11 @@
     },
     {
       "name": "regression/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -732,6 +997,11 @@
       "evidence": null
     },
     {
+      "name": "regression/320/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/320/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -748,6 +1018,11 @@
     },
     {
       "name": "regression/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/320/checks: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -772,6 +1047,11 @@
       "evidence": null
     },
     {
+      "name": "regression/320/provenance: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/320/provenance: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -788,6 +1068,11 @@
     },
     {
       "name": "regression/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -812,6 +1097,11 @@
       "evidence": null
     },
     {
+      "name": "regression/390/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/390/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -828,6 +1118,11 @@
     },
     {
       "name": "regression/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -852,6 +1147,11 @@
       "evidence": null
     },
     {
+      "name": "regression/390/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/390/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -872,6 +1172,11 @@
       "evidence": null
     },
     {
+      "name": "regression/390/checks: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/390/checks: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -888,6 +1193,11 @@
     },
     {
       "name": "regression/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/390/provenance: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1087,6 +1397,11 @@
       "evidence": null
     },
     {
+      "name": "regression: no-JavaScript retains model specifications",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression: no-JavaScript exposes all tabs",
       "passed": true,
       "evidence": null
@@ -1099,7 +1414,7 @@
     {
       "name": "binary: fixture identity",
       "passed": true,
-      "evidence": "c2a0b18e66abc12d213d0fe201233ffd83668b6c2ec9bb8b0d74e3caf33d3571"
+      "evidence": "69e420e0385a70dff171cfef98dc60569f53e99977b586a74bfe431dd71a5a7d"
     },
     {
       "name": "binary: unique IDs and valid navigation targets",
@@ -1113,6 +1428,86 @@
     },
     {
       "name": "binary: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: escape returns focus to model",
       "passed": true,
       "evidence": null
     },
@@ -1362,6 +1757,11 @@
       "evidence": null
     },
     {
+      "name": "binary/main_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/main_model/support_calls: importance matches R",
       "passed": true,
       "evidence": null
@@ -1372,12 +1772,17 @@
       "evidence": null
     },
     {
-      "name": "binary/main_model/support_calls: curve or explicit failure",
+      "name": "binary/main_model/support_calls/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/main_model/support_calls: curve values match R",
+      "name": "binary/main_model/support_calls/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/support_calls/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1392,12 +1797,17 @@
       "evidence": null
     },
     {
-      "name": "binary/main_model/months: curve or explicit failure",
+      "name": "binary/main_model/months/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/main_model/months: curve values match R",
+      "name": "binary/main_model/months/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/months/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1412,12 +1822,17 @@
       "evidence": null
     },
     {
-      "name": "binary/main_model/plan: curve or explicit failure",
+      "name": "binary/main_model/plan/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/main_model/plan: curve values match R",
+      "name": "binary/main_model/plan/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1437,7 +1852,17 @@
       "evidence": null
     },
     {
+      "name": "binary/main_model: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/neural_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -1452,12 +1877,17 @@
       "evidence": null
     },
     {
-      "name": "binary/neural_model/support_calls: curve or explicit failure",
+      "name": "binary/neural_model/support_calls/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/neural_model/support_calls: curve values match R",
+      "name": "binary/neural_model/support_calls/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/support_calls/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1472,12 +1902,17 @@
       "evidence": null
     },
     {
-      "name": "binary/neural_model/plan: curve or explicit failure",
+      "name": "binary/neural_model/plan/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/neural_model/plan: curve values match R",
+      "name": "binary/neural_model/plan/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/plan/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1492,12 +1927,17 @@
       "evidence": null
     },
     {
-      "name": "binary/neural_model/months: curve or explicit failure",
+      "name": "binary/neural_model/months/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/neural_model/months: curve values match R",
+      "name": "binary/neural_model/months/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1517,7 +1957,17 @@
       "evidence": null
     },
     {
+      "name": "binary/neural_model: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/tree_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -1532,12 +1982,17 @@
       "evidence": null
     },
     {
-      "name": "binary/tree_model/support_calls: curve or explicit failure",
+      "name": "binary/tree_model/support_calls/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/tree_model/support_calls: curve values match R",
+      "name": "binary/tree_model/support_calls/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/support_calls/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1552,12 +2007,17 @@
       "evidence": null
     },
     {
-      "name": "binary/tree_model/plan: curve or explicit failure",
+      "name": "binary/tree_model/plan/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/tree_model/plan: curve values match R",
+      "name": "binary/tree_model/plan/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/plan/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1572,12 +2032,17 @@
       "evidence": null
     },
     {
-      "name": "binary/tree_model/months: curve or explicit failure",
+      "name": "binary/tree_model/months/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/tree_model/months: curve values match R",
+      "name": "binary/tree_model/months/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1597,7 +2062,17 @@
       "evidence": null
     },
     {
+      "name": "binary/tree_model: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -1612,12 +2087,17 @@
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/support_calls: curve or explicit failure",
+      "name": "binary/simple_baseline/support_calls/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/support_calls: curve values match R",
+      "name": "binary/simple_baseline/support_calls/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/support_calls/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1632,12 +2112,17 @@
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/plan: curve or explicit failure",
+      "name": "binary/simple_baseline/plan/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/plan: curve values match R",
+      "name": "binary/simple_baseline/plan/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/plan/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1652,12 +2137,17 @@
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/months: curve or explicit failure",
+      "name": "binary/simple_baseline/months/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "binary/simple_baseline/months: curve values match R",
+      "name": "binary/simple_baseline/months/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -1673,6 +2163,11 @@
     },
     {
       "name": "binary/simple_baseline: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: mistake probabilities and row order match R",
       "passed": true,
       "evidence": null
     },
@@ -1717,12 +2212,62 @@
       "evidence": null
     },
     {
+      "name": "binary/320: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "binary/390: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "binary/1440: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/1440: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
       "name": "binary/320/overview: one tab, no page overflow",
       "passed": true,
       "evidence": null
     },
     {
       "name": "binary/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1742,6 +2287,11 @@
       "evidence": null
     },
     {
+      "name": "binary/320/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/320/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1753,6 +2303,11 @@
     },
     {
       "name": "binary/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1772,6 +2327,16 @@
       "evidence": null
     },
     {
+      "name": "binary/320: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/320/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1783,6 +2348,11 @@
     },
     {
       "name": "binary/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/320/checks: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1802,6 +2372,11 @@
       "evidence": null
     },
     {
+      "name": "binary/320/provenance: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/320/provenance: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1813,6 +2388,11 @@
     },
     {
       "name": "binary/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1832,6 +2412,11 @@
       "evidence": null
     },
     {
+      "name": "binary/390/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/390/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1843,6 +2428,11 @@
     },
     {
       "name": "binary/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1862,6 +2452,16 @@
       "evidence": null
     },
     {
+      "name": "binary/390: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/390/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1877,6 +2477,11 @@
       "evidence": null
     },
     {
+      "name": "binary/390/checks: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/390/checks: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -1888,6 +2493,11 @@
     },
     {
       "name": "binary/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/390/provenance: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -1933,6 +2543,11 @@
     },
     {
       "name": "binary/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/768: mistake probabilities fit without horizontal scrolling",
       "passed": true,
       "evidence": null
     },
@@ -1997,6 +2612,11 @@
       "evidence": null
     },
     {
+      "name": "binary/1440: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/1440/checks: one tab, no page overflow",
       "passed": true,
       "evidence": null
@@ -2022,6 +2642,11 @@
       "evidence": null
     },
     {
+      "name": "binary: no-JavaScript retains model specifications",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary: no-JavaScript exposes all tabs",
       "passed": true,
       "evidence": null
@@ -2034,7 +2659,7 @@
     {
       "name": "multiclass: fixture identity",
       "passed": true,
-      "evidence": "c38e21a55e063816b52cd2cacc341ee93ed5574b9e633cd2361f6c106957c5e1"
+      "evidence": "112753144b16aae374e424e1ac8ac81da95a9d1eb220d1d3a75f2174a9a1d351"
     },
     {
       "name": "multiclass: unique IDs and valid navigation targets",
@@ -2048,6 +2673,86 @@
     },
     {
       "name": "multiclass: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: escape returns focus to model",
       "passed": true,
       "evidence": null
     },
@@ -2257,6 +2962,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Petal.Width: importance matches R",
       "passed": true,
       "evidence": null
@@ -2267,12 +2977,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Petal.Width: curve or explicit failure",
+      "name": "multiclass/main_model/Petal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Petal.Width: curve values match R",
+      "name": "multiclass/main_model/Petal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2287,12 +3047,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Petal.Length: curve or explicit failure",
+      "name": "multiclass/main_model/Petal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Petal.Length: curve values match R",
+      "name": "multiclass/main_model/Petal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2307,12 +3117,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Sepal.Length: curve or explicit failure",
+      "name": "multiclass/main_model/Sepal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Sepal.Length: curve values match R",
+      "name": "multiclass/main_model/Sepal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2327,12 +3187,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Sepal.Width: curve or explicit failure",
+      "name": "multiclass/main_model/Sepal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/main_model/Sepal.Width: curve values match R",
+      "name": "multiclass/main_model/Sepal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2352,7 +3262,17 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -2367,12 +3287,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Petal.Length: curve or explicit failure",
+      "name": "multiclass/linear_model/Petal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Petal.Length: curve values match R",
+      "name": "multiclass/linear_model/Petal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2387,12 +3357,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Petal.Width: curve or explicit failure",
+      "name": "multiclass/linear_model/Petal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Petal.Width: curve values match R",
+      "name": "multiclass/linear_model/Petal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2407,12 +3427,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Sepal.Length: curve or explicit failure",
+      "name": "multiclass/linear_model/Sepal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Sepal.Length: curve values match R",
+      "name": "multiclass/linear_model/Sepal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2427,12 +3497,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Sepal.Width: curve or explicit failure",
+      "name": "multiclass/linear_model/Sepal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/linear_model/Sepal.Width: curve values match R",
+      "name": "multiclass/linear_model/Sepal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2452,7 +3572,17 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -2467,12 +3597,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Petal.Length: curve or explicit failure",
+      "name": "multiclass/simple_baseline/Petal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Petal.Length: curve values match R",
+      "name": "multiclass/simple_baseline/Petal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2487,12 +3667,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Petal.Width: curve or explicit failure",
+      "name": "multiclass/simple_baseline/Petal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Petal.Width: curve values match R",
+      "name": "multiclass/simple_baseline/Petal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2507,12 +3737,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Sepal.Length: curve or explicit failure",
+      "name": "multiclass/simple_baseline/Sepal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Sepal.Length: curve values match R",
+      "name": "multiclass/simple_baseline/Sepal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2527,12 +3807,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Sepal.Width: curve or explicit failure",
+      "name": "multiclass/simple_baseline/Sepal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/simple_baseline/Sepal.Width: curve values match R",
+      "name": "multiclass/simple_baseline/Sepal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2552,7 +3882,17 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline: mistake probabilities and row order match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model: feature panel follows model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: selected model settings follow model",
       "passed": true,
       "evidence": null
     },
@@ -2567,12 +3907,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Petal.Length: curve or explicit failure",
+      "name": "multiclass/tree_model/Petal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Petal.Length: curve values match R",
+      "name": "multiclass/tree_model/Petal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2587,12 +3977,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Petal.Width: curve or explicit failure",
+      "name": "multiclass/tree_model/Petal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Petal.Width: curve values match R",
+      "name": "multiclass/tree_model/Petal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2607,12 +4047,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Sepal.Length: curve or explicit failure",
+      "name": "multiclass/tree_model/Sepal.Length/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Sepal.Length: curve values match R",
+      "name": "multiclass/tree_model/Sepal.Length/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2627,12 +4117,62 @@
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Sepal.Width: curve or explicit failure",
+      "name": "multiclass/tree_model/Sepal.Width/setosa: selected class only",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "multiclass/tree_model/Sepal.Width: curve values match R",
+      "name": "multiclass/tree_model/Sepal.Width/setosa: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/setosa: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/setosa: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/versicolor: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/versicolor: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/versicolor: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/versicolor: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/virginica: selected class only",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/virginica: curve or explicit failure",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/virginica: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/virginica: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -2648,6 +4188,11 @@
     },
     {
       "name": "multiclass/tree_model: mistakes match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model: mistake probabilities and row order match R",
       "passed": true,
       "evidence": null
     },
@@ -2687,9 +4232,59 @@
       "evidence": null
     },
     {
+      "name": "multiclass: printed curve retains selected class",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass: print retains report and model identity",
       "passed": true,
       "evidence": null
+    },
+    {
+      "name": "multiclass/320: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "multiclass/390: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "multiclass/1440: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/1440: model details accessibility",
+      "passed": true,
+      "evidence": []
     },
     {
       "name": "multiclass/320/overview: one tab, no page overflow",
@@ -2698,6 +4293,11 @@
     },
     {
       "name": "multiclass/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2717,6 +4317,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/320/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/320/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2728,6 +4333,11 @@
     },
     {
       "name": "multiclass/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2747,6 +4357,16 @@
       "evidence": null
     },
     {
+      "name": "multiclass/320: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/320/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2758,6 +4378,11 @@
     },
     {
       "name": "multiclass/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/320/checks: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2777,6 +4402,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/320/provenance: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/320/provenance: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2788,6 +4418,11 @@
     },
     {
       "name": "multiclass/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2807,6 +4442,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/390/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/390/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2818,6 +4458,11 @@
     },
     {
       "name": "multiclass/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2837,6 +4482,16 @@
       "evidence": null
     },
     {
+      "name": "multiclass/390: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/390/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2852,6 +4507,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/390/checks: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/390/checks: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -2863,6 +4523,11 @@
     },
     {
       "name": "multiclass/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/390/provenance: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -2908,6 +4573,11 @@
     },
     {
       "name": "multiclass/768/evaluation: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/768: mistake probabilities fit without horizontal scrolling",
       "passed": true,
       "evidence": null
     },
@@ -2972,6 +4642,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/1440: mistake probabilities fit without horizontal scrolling",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/1440/checks: one tab, no page overflow",
       "passed": true,
       "evidence": null
@@ -2997,6 +4672,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass: no-JavaScript retains model specifications",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass: no-JavaScript exposes all tabs",
       "passed": true,
       "evidence": null
@@ -3009,7 +4689,7 @@
     {
       "name": "quick: fixture identity",
       "passed": true,
-      "evidence": "b643e969d85617d0f5f19f5c1b722e428486f17077dbab4aed05e173250b00d4"
+      "evidence": "bfd6dea158aaa1ed719d64412f76be4a639178fbb5af340659e9752b4220193e"
     },
     {
       "name": "quick: unique IDs and valid navigation targets",
@@ -3023,6 +4703,46 @@
     },
     {
       "name": "quick: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: visible fitted settings",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: model details open from keyboard",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: detailed settings match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: escape returns focus to model",
       "passed": true,
       "evidence": null
     },
@@ -3122,6 +4842,11 @@
       "evidence": null
     },
     {
+      "name": "quick/main_model: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/main_model/wt: importance matches R",
       "passed": true,
       "evidence": null
@@ -3132,12 +4857,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/wt: curve or explicit failure",
+      "name": "quick/main_model/wt/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/wt: curve values match R",
+      "name": "quick/main_model/wt/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/wt/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3152,12 +4882,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/qsec: curve or explicit failure",
+      "name": "quick/main_model/qsec/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/qsec: curve values match R",
+      "name": "quick/main_model/qsec/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3172,12 +4907,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/am: curve or explicit failure",
+      "name": "quick/main_model/am/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/am: curve values match R",
+      "name": "quick/main_model/am/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/am/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3192,12 +4932,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/drat: curve or explicit failure",
+      "name": "quick/main_model/drat/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/drat: curve values match R",
+      "name": "quick/main_model/drat/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3212,12 +4957,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/disp: curve or explicit failure",
+      "name": "quick/main_model/disp/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/disp: curve values match R",
+      "name": "quick/main_model/disp/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/disp/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3232,12 +4982,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/gear: curve or explicit failure",
+      "name": "quick/main_model/gear/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/gear: curve values match R",
+      "name": "quick/main_model/gear/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3252,12 +5007,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/hp: curve or explicit failure",
+      "name": "quick/main_model/hp/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/hp: curve values match R",
+      "name": "quick/main_model/hp/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/hp/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3272,12 +5032,17 @@
       "evidence": null
     },
     {
-      "name": "quick/main_model/carb: curve or explicit failure",
+      "name": "quick/main_model/carb/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/main_model/carb: curve values match R",
+      "name": "quick/main_model/carb/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3302,6 +5067,11 @@
       "evidence": null
     },
     {
+      "name": "quick/simple_baseline: selected model settings follow model",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/simple_baseline/wt: importance matches R",
       "passed": true,
       "evidence": null
@@ -3312,12 +5082,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/wt: curve or explicit failure",
+      "name": "quick/simple_baseline/wt/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/wt: curve values match R",
+      "name": "quick/simple_baseline/wt/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/wt/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3332,12 +5107,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/qsec: curve or explicit failure",
+      "name": "quick/simple_baseline/qsec/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/qsec: curve values match R",
+      "name": "quick/simple_baseline/qsec/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3352,12 +5132,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/am: curve or explicit failure",
+      "name": "quick/simple_baseline/am/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/am: curve values match R",
+      "name": "quick/simple_baseline/am/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/am/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3372,12 +5157,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/drat: curve or explicit failure",
+      "name": "quick/simple_baseline/drat/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/drat: curve values match R",
+      "name": "quick/simple_baseline/drat/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3392,12 +5182,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/vs: curve or explicit failure",
+      "name": "quick/simple_baseline/vs/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/vs: curve values match R",
+      "name": "quick/simple_baseline/vs/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/vs/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3412,12 +5207,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/cyl: curve or explicit failure",
+      "name": "quick/simple_baseline/cyl/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/cyl: curve values match R",
+      "name": "quick/simple_baseline/cyl/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3432,12 +5232,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/gear: curve or explicit failure",
+      "name": "quick/simple_baseline/gear/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/gear: curve values match R",
+      "name": "quick/simple_baseline/gear/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/gear/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3452,12 +5257,17 @@
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/carb: curve or explicit failure",
+      "name": "quick/simple_baseline/carb/None: curve or explicit failure",
       "passed": true,
       "evidence": null
     },
     {
-      "name": "quick/simple_baseline/carb: curve values match R",
+      "name": "quick/simple_baseline/carb/None: distinct vertical tick labels",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb/None: curve values match R",
       "passed": true,
       "evidence": null
     },
@@ -3517,12 +5327,62 @@
       "evidence": null
     },
     {
+      "name": "quick/320: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "quick/390: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "quick/1440: details fit viewport",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440: close remains visible after scrolling details",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/1440: model details accessibility",
+      "passed": true,
+      "evidence": []
+    },
+    {
       "name": "quick/320/overview: one tab, no page overflow",
       "passed": true,
       "evidence": null
     },
     {
       "name": "quick/320/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3542,6 +5402,11 @@
       "evidence": null
     },
     {
+      "name": "quick/320/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/320/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3553,6 +5418,11 @@
     },
     {
       "name": "quick/320/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3572,6 +5442,11 @@
       "evidence": null
     },
     {
+      "name": "quick/320/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/320/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3583,6 +5458,11 @@
     },
     {
       "name": "quick/320/checks: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/320/checks: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3602,6 +5482,11 @@
       "evidence": null
     },
     {
+      "name": "quick/320/provenance: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/320/provenance: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3613,6 +5498,11 @@
     },
     {
       "name": "quick/390/overview: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/overview: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3632,6 +5522,11 @@
       "evidence": null
     },
     {
+      "name": "quick/390/patterns: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/390/patterns: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3643,6 +5538,11 @@
     },
     {
       "name": "quick/390/relationships: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/relationships: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3662,6 +5562,11 @@
       "evidence": null
     },
     {
+      "name": "quick/390/evaluation: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/390/evaluation: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3677,6 +5582,11 @@
       "evidence": null
     },
     {
+      "name": "quick/390/checks: active mobile tab is visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/390/checks: numeric plots fit their visible region",
       "passed": true,
       "evidence": null
@@ -3688,6 +5598,11 @@
     },
     {
       "name": "quick/390/provenance: heading is not hidden by navigation",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/390/provenance: active mobile tab is visible",
       "passed": true,
       "evidence": null
     },
@@ -3818,6 +5733,11 @@
     },
     {
       "name": "quick: no-JavaScript retains every model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick: no-JavaScript retains model specifications",
       "passed": true,
       "evidence": null
     },

@@ -5,6 +5,7 @@
   const modelControls = all('.model-select');
   const metricControl = document.querySelector('#metric-select');
   const resourceControl = document.querySelector('#resource-select');
+  const classControl = document.querySelector('#effect-class-select');
   const featureChoices = new Map();
   let model = modelControls[0]?.value;
   const higher = new Set(['accuracy', 'auc', 'roc_auc', 'balanced_accuracy', 'r_squared', 'macro_recall']);
@@ -42,6 +43,12 @@
       link.setAttribute('tabindex', selected ? '0' : '-1');
       if (selected) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
+      if (selected && innerWidth <= 760) {
+        const navigation = link.parentElement;
+        const tabBox = link.getBoundingClientRect(), navBox = navigation.getBoundingClientRect();
+        if (tabBox.left < navBox.left) navigation.scrollLeft += tabBox.left - navBox.left - 8;
+        if (tabBox.right > navBox.right) navigation.scrollLeft += tabBox.right - navBox.right + 8;
+      }
     });
     if (target) {
       for (let parent = target.parentElement; parent; parent = parent.parentElement) {
@@ -123,8 +130,28 @@
     all('[data-pair-detail]').forEach(el => el.classList.toggle('is-selected', el === button));
     document.querySelector('#pair-detail').textContent = button.dataset.pairDetail;
   }));
+  const dialog = document.createElement('dialog');
+  dialog.className = 'model-dialog';
+  dialog.setAttribute('aria-labelledby', 'model-dialog-title');
+  dialog.innerHTML = '<header class="dialog-header"><h2 id="model-dialog-title"></h2>' +
+    '<form method="dialog"><button class="dialog-close" aria-label="Close model details">Close</button></form></header>' +
+    '<div class="dialog-content"></div>';
+  document.body.append(dialog);
+  all('[data-open-spec]').forEach(link => link.addEventListener('click', event => {
+    if (typeof dialog.showModal !== 'function') return;
+    event.preventDefault();
+    const source = document.getElementById(link.hash.slice(1)).querySelector('.model-spec-content');
+    dialog.querySelector('h2').textContent = source.dataset.specLabel;
+    dialog.querySelector('.dialog-content').replaceChildren(source.cloneNode(true));
+    dialog.showModal();
+    dialog.querySelector('.dialog-content').scrollTop = 0;
+  }));
   metricControl?.addEventListener('change', chooseMetrics);
   resourceControl?.addEventListener('change', chooseMetrics);
+  function chooseClass() {
+    all('[data-class-panel]').forEach(panel => { panel.hidden = panel.dataset.classPanel !== classControl?.value; });
+  }
+  classControl?.addEventListener('change', chooseClass);
   const printControls = all('select').map(control => {
     const label = document.createElement('span');
     label.className = 'print-selection';
@@ -196,6 +223,7 @@
   });
   document.body.classList.add('has-js');
   chooseModel(model);
+  chooseClass();
   chooseMetrics();
   showPage(location.hash);
 })();

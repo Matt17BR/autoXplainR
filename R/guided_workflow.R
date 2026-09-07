@@ -835,6 +835,11 @@ refit_tuned_candidates <- function(tuning,
   list(fits = fits, labels = labels, roles = roles, tuning = tuning)
 }
 
+elapsed_milliseconds <- function(started, finished = proc.time()[["elapsed"]]) {
+  # Retain microseconds, but discard subtraction noise in floating-point clocks.
+  round(max(0, 1000 * (finished - started)), 3L)
+}
+
 safely_timed_model_fit <- function(callback) {
   started <- proc.time()[["elapsed"]]
   warnings <- character()
@@ -855,7 +860,7 @@ safely_timed_model_fit <- function(callback) {
   list(
     ok = !is.null(model) && !nzchar(error),
     model = model,
-    elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
+    elapsed_ms = elapsed_milliseconds(started),
     warnings = warnings,
     error = error
   )
@@ -873,7 +878,7 @@ timed_model_fit <- function(callback) {
   )
   list(
     model = model,
-    elapsed_ms = max(0, 1000 * (proc.time()[["elapsed"]] - started)),
+    elapsed_ms = elapsed_milliseconds(started),
     warnings = warnings
   )
 }
@@ -909,7 +914,7 @@ evaluate_candidates <- function(models,
     explainer <- explain_model(models[[id]], data, target, task = task, label = labels[[id]])
     started <- proc.time()[["elapsed"]]
     predictions <- predict(explainer, explainer$data)
-    prediction_time_ms <- max(0, 1000 * (proc.time()[["elapsed"]] - started))
+    prediction_time_ms <- elapsed_milliseconds(started)
     calibration <- if (identical(task, "regression")) {
       NULL
     } else {

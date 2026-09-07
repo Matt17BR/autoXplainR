@@ -16,6 +16,9 @@ For a material API or statistical-method change, open an issue first. Describe:
 Features are not accepted solely because they produce an attractive chart.
 Changes must also preserve the beginner-first workflow and progressive
 disclosure rules in [PRODUCT.md](PRODUCT.md).
+Report and workflow changes must also pass the novice and experienced-user
+journeys in [the product walkthrough](validation/product-walkthrough.md).
+Record what became easier to understand or do, not just which controls changed.
 
 ## Local setup
 

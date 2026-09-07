@@ -9,6 +9,10 @@ one learned—with one R command.
 Preview uses synthetic data.
 [Open the example report](https://matt17br.github.io/autoXplainR/model-report.html).*
 
+Also explore [customer churn](https://matt17br.github.io/autoXplainR/binary-report.html)
+or [three-class flower predictions](https://matt17br.github.io/autoXplainR/multiclass-report.html).
+The churn data are synthetic; the flower example uses R's `iris` data.
+
 ## Try it
 
 ```r
@@ -62,6 +66,16 @@ report keeps the model, feature and prediction target explicit.
 
 [![Feature tab with model selection, ranked importance bars and a selected fitted curve](man/figures/model-patterns.png)](https://matt17br.github.io/autoXplainR/model-report.html#patterns)
 
+### See exactly what was fitted
+
+Each model shows its effective settings beside its name. **Model details** opens
+the formula, coefficients or tree rules, fitted size, exact R controls, training
+selection and preprocessing. The same settings follow the model into Features
+and Predictions. In R, use `extract_model_characteristics(result)` or inspect
+`result$models[["model_id"]]` directly.
+
+[![Decision-tree details with fitted leaves, depth, formula and exact training controls](man/figures/model-details.png)](https://matt17br.github.io/autoXplainR/model-report.html#overview)
+
 ### Find related inputs
 
 Select a matrix cell to read the association method and sample count. Numeric
@@ -72,7 +86,8 @@ are labeled as unsigned.
 
 ### Inspect predictions
 
-Check observed errors or classification mistakes for the selected model. Copy
+Check observed errors or classification mistakes for the selected model.
+Mistakes include class probabilities, so confident errors are visible. Copy
 the matching R prediction command. Checks, uncertainty and methods each have a
 separate home in the remaining tabs.
 
@@ -198,8 +213,8 @@ missingness shift and binary threshold diagnostics.
 For fitting without explanations, set `explain = FALSE`. The default explanation
 budget screens all inputs for up to five models, audits the union of their top
 eight inputs with 20 permutations, and computes up to eight fitted curves per
-model. Multiclass report curves describe the first outcome class, explicitly
-labeled; use `compare_model_effects(..., class = "name")` for another class. Large
+model and outcome class. In multiclass reports, use **Curve for class** to switch
+probability curves; importance continues to summarize loss across all classes. Large
 feature sets or expensive prediction functions can take time. A report request
 computes explanations even if `explain = FALSE`. Explicit report budgets such as
 `n_repeats = 50` recompute evidence; otherwise the report reuses retained results.
