@@ -478,7 +478,7 @@ Keep the fitted result with its data version and analysis code.
 
 Complete run metadata
 
-- Generated: 2026-09-07 11:01:14 UTC
+- Generated: 2026-09-07 11:07:10 UTC
 - Package version: 0.4.0
 - Engine: base
 - Target: delivery_hours
