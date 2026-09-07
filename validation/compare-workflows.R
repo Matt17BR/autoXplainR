@@ -251,7 +251,7 @@ if (nzchar(browser_python)) {
     "        page.close()",
     "    browser.close()",
     "with output.open('w', newline='') as handle:",
-    "    writer = csv.DictWriter(handle, fieldnames=rows[0].keys())",
+    "    writer = csv.DictWriter(handle, fieldnames=rows[0].keys(), lineterminator=chr(10))",
     "    writer.writeheader()",
     "    writer.writerows(rows)",
     "print('Offline browser smoke passed for', len(rows), 'artifacts')"
