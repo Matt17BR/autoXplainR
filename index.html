@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
 <div class="page-header"><h1 id="autoxplainr">AutoXplainR<a class="anchor" aria-label="anchor" href="#autoxplainr"></a>
 </h1></div>
 <p>Fit several models, compare their predictions and costs, and explore the data behind their behavior with one R command.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html"><img src="reference/figures/guided-overview.png" alt="AutoXplainR model comparison tab showing held-out scores and measured costs"></a></p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html"><img src="reference/figures/guided-overview.png" alt="AutoXplainR model comparison with fitted settings, held-out scores and a cost-performance Pareto frontier"></a></p>
 <p><em>Start with the models: how well do they predict, and what do they cost? Preview uses synthetic data. <a href="https://matt17br.github.io/autoXplainR/model-report.html">Open the example report</a>.</em></p>
 <p>Also explore <a href="https://matt17br.github.io/autoXplainR/binary-report.html">customer churn</a> or <a href="https://matt17br.github.io/autoXplainR/multiclass-report.html">three-class flower predictions</a>. The churn data are synthetic; the flower example uses R’s <code>iris</code> data. These public previews deliberately include records, so you can try filters and follow prediction mistakes back to the data. Reports you create default to aggregates.</p>
 <div class="section level2">
@@ -90,23 +90,22 @@
 <div class="section level2">
 <h2 id="a-look-inside-the-report">A look inside the report<a class="anchor" aria-label="anchor" href="#a-look-inside-the-report"></a>
 </h2>
-<p>The report has focused tabs for comparison, model selection, data, feature effects, predictions, checks and methods. Controls sit beside the values they change; supporting explanations use <strong>?</strong> buttons and expandable details. Help works on hover, keyboard focus and tap. Each screenshot below comes from the same reproducible synthetic delivery example using the default model search.</p>
+<p>The report has focused tabs for comparison, model selection, data, feature effects, predictions, checks and methods. Controls sit beside the values they change; supporting explanations use <strong>?</strong> buttons and expandable details. Help works on hover, keyboard focus and tap. Each screenshot below comes from the same reproducible synthetic delivery example using the default model search. The images show a focused working view; click one to explore its report tab.</p>
 <div class="section level3">
 <h3 id="compare-models">Compare models<a class="anchor" aria-label="anchor" href="#compare-models"></a>
 </h3>
-<p>Read scores beside measured costs. The primary model is compared with the baseline, including a paired evaluation-sample interval when supported. Change the score or resource axis to inspect the tradeoff; points carry model names. The <strong>CV choice</strong> label records training selection; the best score on the held-out rows can belong to another model.</p>
+<p>Read scores beside measured costs. The primary model is compared with the baseline, including a paired evaluation-sample interval when supported. Change the score or resource axis to inspect the tradeoff; points carry model names. The dashed <strong>Pareto frontier</strong> shows the best observed score available within each resource budget. Outlined points have no alternative that is at least as good on both displayed axes and better on one. The <strong>CV choice</strong> label records training selection; the best score on the held-out rows can belong to another model.</p>
 <p>For a more useful timing comparison, run a repeated benchmark on a common batch:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/benchmark_predictions.html">benchmark_predictions</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"report.html"</span>, benchmark <span class="op">=</span> <span class="va">bench</span><span class="op">)</span></span></code></pre></div>
 <p>The report shows median prediction cost and repeat variation, with batch size, timer resolution and measurement scope. It keeps the original fit and prediction readings separate. Batch cost per row is not the latency of a single-row request.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#overview"><img src="reference/figures/model-comparison.png" alt="Model comparison with scores, measured costs and a performance versus model size plot"></a></p>
 </div>
 <div class="section level3">
 <h3 id="explore-inputs-and-fitted-patterns">Explore inputs and fitted patterns<a class="anchor" aria-label="anchor" href="#explore-inputs-and-fitted-patterns"></a>
 </h3>
 <p>Switch models, then click an importance bar to select its fitted curve. The report keeps the model, feature and prediction target explicit.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#patterns"><img src="reference/figures/model-patterns.png" alt="Feature tab with model selection, ranked importance bars and a selected fitted curve"></a></p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#patterns"><img src="reference/figures/model-patterns.png" alt="Feature importance beside linear and neural model curves on shared axes, with data support"></a></p>
 </div>
 <div class="section level3">
 <h3 id="see-exactly-what-was-fitted">See exactly what was fitted<a class="anchor" aria-label="anchor" href="#see-exactly-what-was-fitted"></a>
@@ -118,13 +117,13 @@
 <h3 id="understand-the-search">Understand the search<a class="anchor" aria-label="anchor" href="#understand-the-search"></a>
 </h3>
 <p><strong>Model selection</strong> connects the retained model to its candidate settings and fold scores. It separates the lowest cross-validation loss, the policy choice and the model that successfully refitted. Inspect the numerical selection threshold, parameter meanings, searched ranges and settings that failed. The preset grid is a practical starting search, not an optimal configuration claimed from the literature.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#selection"><img src="reference/figures/model-selection.png" alt="Model selection with searched settings, cross-validation scores and retained-fit provenance"></a></p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#selection"><img src="reference/figures/model-selection.png" alt="Decision-tree search rationale, seven parameter settings and their cross-validation fold losses"></a></p>
 </div>
 <div class="section level3">
 <h3 id="explore-the-underlying-data">Explore the underlying data<a class="anchor" aria-label="anchor" href="#explore-the-underlying-data"></a>
 </h3>
 <p><strong>Explore data</strong> shows outcome and input distributions, missing values and joint patterns across training and evaluation. Switch between supplied values and the values used by models to see what preprocessing changed. Aggregate profiles use the full available data.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#data"><img src="reference/figures/model-data.png" alt="Data explorer comparing distributions and missing values before and after preprocessing"></a></p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#data"><img src="reference/figures/model-data.png" alt="Parcel-weight distributions and missing values in the training and evaluation data"></a></p>
 <p>Individual records require an explicit export:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"report-with-rows.html"</span>, report_data <span class="op">=</span> <span class="st">"rows"</span><span class="op">)</span></span></code></pre></div>

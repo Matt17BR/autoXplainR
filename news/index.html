@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,17 @@
       <small>Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.1" id="autoxplainr-061">AutoXplainR 0.6.1<a class="anchor" aria-label="anchor" href="#autoxplainr-061"></a></h2>
+<ul><li>Cost charts draw the Pareto frontier: the best observed score available at each measured cost budget. The line does not imply intermediate fits. An explicit logarithmic cost axis separates positive costs spanning several orders of magnitude.</li>
+<li>Small cost ranges retain readable ticks. Almost equal scores no longer fill a chart with floating-point noise or lose their differences in point inspection.</li>
+<li>Data exploration reaches the plot sooner, uses a compact column selector on phones, and keeps binning explanations in keyboard- and touch-accessible help. Supporting details take less space and remain available in print.</li>
+<li>Model selection keeps parameters, scores and fold variation in one comparison. Select a configuration to inspect its folds, or expand the exact settings table. Fitting warnings open the failed configuration and its recorded errors.</li>
+<li>Regression reports place the three prediction diagnostics together. Feature charts remove repeated labels while retaining the prediction target and class.</li>
+<li>Evaluation intervals name their models, metric and units. A disagreement finding links to the recorded feature-importance ranges. Missingness changes explicitly use percentage points.</li>
+<li>GitHub screenshots show complete, focused report tasks instead of full-page posters. Browser checks now challenge vertical layout, print composition and the numeric geometry of the frontier, as well as the underlying values.</li>
+<li>Printed views keep model summaries, assumptions and importance values readable. Screen links and the selected view are restored after printing.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="autoxplainr-060">AutoXplainR 0.6.0<a class="anchor" aria-label="anchor" href="#autoxplainr-060"></a></h2>
 <ul><li>Reports add model-selection evidence: the exact selection threshold, searched settings and their rationale, fold scores, effective controls, optimizer status and final refit attempts. The minimum CV score, policy choice and final primary fit are separate recorded decisions.</li>
