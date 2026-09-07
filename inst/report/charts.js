@@ -13,11 +13,17 @@
     if (text !== undefined) el.textContent = text;
     return el;
   };
-  const range = (values, zero = false) => {
+  const range = (values, zero = false, relativeSpan = 0) => {
     values = values.filter(finite); if (zero) values.push(0);
     if (!values.length) return [0, 1];
-    const lo = Math.min(...values), hi = Math.max(...values);
-    const span = hi - lo || Math.max(Math.abs(lo) * .2, .1);
+    let lo = Math.min(...values), hi = Math.max(...values);
+    let span = hi - lo;
+    if (!span) span = Math.max(Math.abs(lo) * .2, .1);
+    else if (span < Math.max(Math.abs(lo), Math.abs(hi)) * relativeSpan) {
+      span = Math.max(Math.abs(lo), Math.abs(hi)) * relativeSpan;
+      const center = (lo + hi) / 2;
+      lo = center - span / 2; hi = center + span / 2;
+    }
     return [lo - span * .09, hi + span * .09];
   };
   function ticks(limits, count) {
@@ -31,6 +37,18 @@
       if (output.length > 20) break;
     }
     return output.length < 2 && count < 20 ? ticks(limits, count + 1) : output;
+  }
+  function logTicks(limits, count) {
+    const values = [];
+    for (let exponent = Math.floor(limits[0]); exponent <= Math.ceil(limits[1]); exponent++) {
+      [1, 2, 5].forEach(multiplier => {
+        const value = multiplier * 10 ** exponent, position = Math.log10(value);
+        if (position >= limits[0] && position <= limits[1]) values.push(value);
+      });
+    }
+    if (values.length < 2) return ticks(limits.map(value => 10 ** value), count);
+    if (values.length <= count) return values;
+    return Array.from({length: count}, (_, index) => values[Math.round(index * (values.length - 1) / (count - 1))]);
   }
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -179,6 +197,8 @@
     points.forEach(point => { point.radius = finite(point.count) ? 10 * Math.sqrt(point.count / maximumCount) : 4.2; });
     if (!points.length) return;
     const categorical = figure.dataset.kind === 'category', cost = figure.dataset.kind === 'cost';
+    const logCost = cost && state.costScale === 'log' && points.every(point => finite(point.x) && point.x > 0);
+    const xLabel = figure.dataset.xLabel + (logCost ? ' · log scale' : '');
     const zero = figure.dataset.zero === 'true';
     const categories = [...new Set(points.map(point => point.category))];
     const models = [...new Set(points.map(point => point.model))];
@@ -186,14 +206,18 @@
     const hasCounts = support.some(point => finite(point.n));
     const hasSupport = ['effect', 'category'].includes(figure.dataset.kind) && support.some(point => finite(point.n) || finite(point.support));
     let xlimits = range(categorical ? points.flatMap(point => [point.y, point.low, point.high]) :
-      points.flatMap(point => [point.x, point.left, point.right]), categorical && zero);
-    let ylimits = range(points.flatMap(point => [point.y, point.low, point.high]), zero);
+      points.flatMap(point => [point.x, point.left, point.right]), categorical && zero, cost ? .001 : 0);
+    let ylimits = range(points.flatMap(point => [point.y, point.low, point.high]), zero, cost ? .001 : 0);
     if (figure.dataset.reference === 'identity') xlimits = ylimits = range(points.flatMap(point => [point.x, point.y]));
     if (cost && points.every(point => point.x >= 0)) xlimits[0] = Math.max(0, xlimits[0]);
     if (cost && points.every(point => point.y >= 0)) ylimits[0] = Math.max(0, ylimits[0]);
     if (figure.dataset.kind === 'histogram' && points.every(point => point.y >= 0)) ylimits[0] = 0;
     if (finite(numeric(figure, 'xMin')) && finite(numeric(figure, 'xMax'))) xlimits = [numeric(figure, 'xMin'), numeric(figure, 'xMax')];
     if (finite(numeric(figure, 'yMin')) && finite(numeric(figure, 'yMax'))) ylimits = [numeric(figure, 'yMin'), numeric(figure, 'yMax')];
+    if (logCost) {
+      const minimum = Math.min(...points.map(point => point.x));
+      xlimits = [Math.log10(Math.max(xlimits[0], minimum / 1.1)), Math.log10(xlimits[1])];
+    }
     const labelLines = wrap(categorical ? figure.dataset.xLabel : figure.dataset.yLabel, width - 20);
     const top = 20 + labelLines.length * 16;
     const left = categorical ? Math.min(155, Math.max(105, width * .36)) :
@@ -209,17 +233,20 @@
     const plotHeight = categorical ? Math.max(100, categories.length * rowHeight) :
       cost ? Math.max(190, labelHeight, Math.min(360, points.length * 38)) : width < 420 ? 180 : 210;
     const bottom = top + plotHeight;
-    const bottomLabel = wrap(categorical ? figure.dataset.yLabel : figure.dataset.xLabel, right - left);
+    const bottomLabel = wrap(categorical ? figure.dataset.yLabel : xLabel, right - left);
     const supportHeight = hasSupport && !categorical ? 80 : 0;
     const height = bottom + 42 + bottomLabel.length * 16 + supportHeight;
     const svg = node('svg', {viewBox: `0 0 ${width} ${height}`, role: 'group',
-      'aria-label': `${figure.dataset.yLabel} by ${figure.dataset.xLabel}. Arrow keys move between values. Values and support follow the chart.`,
+      'aria-label': `${figure.dataset.yLabel} by ${xLabel}. Arrow keys move between values. Values and support follow the chart.`,
       'data-chart-layout': 'responsive', 'data-axis-type': categorical ? 'categorical' : 'numeric',
+      'data-x-scale': logCost ? 'log' : 'linear',
       ...(cost ? {'data-label-layout': labelColumn ? 'column' : 'nearby'} : {})});
     text(svg, categorical ? figure.dataset.xLabel : figure.dataset.yLabel, 2, 15, {width: width - 4});
-    const px = value => left + (value - xlimits[0]) / (xlimits[1] - xlimits[0]) * (right - left);
+    const px = value => left + ((logCost ? Math.log10(value) : value) - xlimits[0]) /
+      (xlimits[1] - xlimits[0]) * (right - left);
     const py = value => bottom - (value - ylimits[0]) / (ylimits[1] - ylimits[0]) * plotHeight;
-    ticks(xlimits, Math.max(labelColumn ? 2 : 3, Math.floor((right - left) / 70))).forEach(value => {
+    const xTickCount = Math.max(labelColumn ? 2 : 3, Math.floor((right - left) / 70));
+    (logCost ? logTicks(xlimits, xTickCount) : ticks(xlimits, xTickCount)).forEach(value => {
       const x = px(value);
       if (categorical) svg.append(node('line', {x1: x, x2: x, y1: top, y2: bottom, class: 'axr-grid'}));
       text(svg, number(value), x, bottom + 20, {anchor: 'middle'});
@@ -233,8 +260,23 @@
       {x1: left, x2: right, y1: py(0), y2: py(0), class: 'axr-zero'}));
     if (figure.dataset.reference === 'identity') svg.append(node('line', {x1: px(xlimits[0]), x2: px(xlimits[1]),
       y1: py(xlimits[0]), y2: py(xlimits[1]), class: 'axr-zero'}));
-    text(svg, categorical ? figure.dataset.yLabel : figure.dataset.xLabel, (left + right) / 2, bottom + 40,
+    text(svg, categorical ? figure.dataset.yLabel : xLabel, (left + right) / 2, bottom + 40,
       {anchor: 'middle', width: right - left});
+    if (cost) {
+      const frontier = [...new Map(points.filter(point => point.frontier && finite(point.x) && finite(point.y))
+        .map(point => [`${point.x},${point.y}`, point])).values()].sort((a, b) => a.x - b.x);
+      if (frontier.length > 1) {
+        // A better score becomes available only at the next measured cost.
+        // Equal measurements share a vertex; every model keeps its own glyph.
+        const steps = [`${px(frontier[0].x)},${py(frontier[0].y)}`];
+        frontier.slice(1).forEach((point, index) => {
+          steps.push(`${px(point.x)},${py(frontier[index].y)}`, `${px(point.x)},${py(point.y)}`);
+        });
+        svg.append(node('polyline', {class: 'axr-frontier', fill: 'none', stroke: '#203b2b',
+          'stroke-width': 2, 'stroke-dasharray': '6 4', 'stroke-linejoin': 'round',
+          'aria-hidden': 'true', 'pointer-events': 'none', points: steps.join(' ')}));
+      }
+    }
     if (figure.dataset.kind === 'effect') models.forEach(model => {
       const group = points.filter(point => point.model === model).sort((a, b) => a.x - b.x);
       if (group.every(point => finite(point.low) && finite(point.high))) {

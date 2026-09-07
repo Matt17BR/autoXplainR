@@ -192,7 +192,9 @@ test_that("comparison reports explain Pareto trade-offs without selecting on hol
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
   expect_match(html, "Compare the models", fixed = TRUE)
-  expect_match(html, "nondominated", fixed = TRUE)
+  # Keep the trade-off view discoverable by its name. Literal curve geometry and
+  # its interpretation are checked against independent browser fixtures.
+  expect_match(html, "Pareto frontier", fixed = TRUE)
   expect_match(html, "pre-specified default", ignore.case = TRUE)
   expect_match(html, "id=\"models\"", fixed = TRUE)
 })

@@ -14,7 +14,12 @@ with sync_playwright() as p:
     page.goto((root/'extended.html').as_uri())
     page.locator('[data-page-link="selection"]').click()
     page.select_option('#selection-family-filter','additive')
+    precision = page.locator('.selection-precision')
+    if precision.count() and not precision.evaluate('element=>element.open'):
+        precision.locator('summary').click()
     links=page.locator('.selection-candidate-table:visible a').evaluate_all('nodes=>nodes.map(n=>({text:n.innerText,href:n.getAttribute("href")}))')
+    if len(links) < 2:
+        raise RuntimeError('The additive comparison must expose at least two recorded configurations.')
     data={'links':links,'folds':[]}
     for link in links:
         page.locator('.selection-candidate-table:visible a[href="'+link['href']+'"]').click()

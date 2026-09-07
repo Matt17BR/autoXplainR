@@ -36,8 +36,11 @@ for name, html in mutations.items():
     directory.mkdir(parents=True, exist_ok=True)
     (directory / 'quick.html').write_text(html)
     shutil.copyfile(args.case_dir / 'quick.json', directory / 'quick.json')
-    if (args.case_dir/'chart-oracle.html').exists():
-        shutil.copyfile(args.case_dir/'chart-oracle.html',directory/'chart-oracle.html')
+    # Keep unrelated chart gates intact. A missing side fixture is not evidence
+    # that the deliberately broken control or numerical graphic was detected.
+    for fixture in ('chart-oracle.html', 'dense-chart-oracle.html', 'dense-chart-source.json',
+                    'frontier-oracle.html', 'frontier-source.json', 'cost-scale-oracle.html'):
+        shutil.copyfile(args.case_dir / fixture, directory / fixture)
     with (directory / 'check.log').open('w') as log:
         run = subprocess.run([sys.executable, str(Path(__file__).with_name('check-explorer.py')),
                               '--cases', 'quick', '--case-dir', str(directory),
@@ -52,9 +55,13 @@ for name, html in mutations.items():
     required = (['feature panel follows model', 'selected model settings follow model']
                 if name == 'disconnected-selector' else
                 ['plotted costs, scores and frontier match R', 'plotted curve matches its axes and R'])
-    caught = run.returncode == 1 and not result['errors'] and all(
+    side_checks = [check for check in result['checks']
+                   if check['name'] == 'independent chart fixture geometry and no-JavaScript readability']
+    side_checks_passed = len(side_checks) == 1 and side_checks[0]['passed']
+    caught = run.returncode == 1 and not result['errors'] and side_checks_passed and all(
         any(expected in failure for failure in failed) for expected in required)
-    records.append(dict(mutation=name, caught=caught, failures=failed, errors=result['errors']))
+    records.append(dict(mutation=name, caught=caught, independent_fixtures_passed=side_checks_passed,
+                        failures=failed, errors=result['errors']))
 (args.output_dir / 'mutation-checks.json').write_text(json.dumps(records, indent=2))
 print(json.dumps(records))
 raise SystemExit(0 if all(record['caught'] for record in records) else 1)

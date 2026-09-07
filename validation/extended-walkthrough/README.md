@@ -13,6 +13,11 @@ answers. This fixture expects a selected GAM plus retained boosting and forest
 models; changed engine versions or selection need investigation, not adjusted
 expected values merely to pass.
 
+The version guard defaults to 0.6.0. To check whether a later installed release
+can replay the unchanged saved analysis, set `AXR_EXTENDED_VERSION` explicitly
+(for example, `0.6.1`). Keep the original RDS and numerical answers unchanged;
+record the newer archive and any differences separately from the historical run.
+
 Run from the repository root. Choose an existing private library containing the
 installed archive and its dependencies, then an empty output directory:
 

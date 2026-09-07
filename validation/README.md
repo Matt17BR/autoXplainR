@@ -73,21 +73,39 @@ Rscript validation/render-explorer-cases.R
 python3 -m venv /tmp/autoxplain-screenshots
 /tmp/autoxplain-screenshots/bin/pip install playwright==1.58.0
 /tmp/autoxplain-screenshots/bin/playwright install chromium
-/tmp/autoxplain-screenshots/bin/python validation/capture-screenshots.py
+/tmp/autoxplain-screenshots/bin/python validation/capture-screenshots.py \
+  --qa-dir /tmp/autoxplain-gallery-review
 ```
 
 After reviewing all three public reports and the refreshed images, explicitly run
 `python validation/check-gallery.py --record` to update `gallery-manifest.json`.
 Normal mode checks the exact source and asset hashes; `--browser` also opens the
 committed reports and tests tabs, model selection and exported-record links.
+The gallery guard also rejects undersized or tall desktop screenshots, including
+when recording a new manifest. This landscape-shape check is a framing heuristic;
+it cannot establish legibility or usefulness.
 CI runs this guard before regenerating reports, so fresh temporary output cannot
 conceal a stale published gallery. Never record the manifest automatically in CI.
 
 Alternatively, set `CHROME_PATH` to an installed Chrome executable and omit the
-browser download. The capture script uses a 1440px desktop viewport at 1.5x
-resolution and checks for page overflow at 390px. It saves the model comparison,
-selection, data, fitted patterns, predictions and checks tabs to `man/figures/`.
-It also captures the fitted-model details view. Run
+browser download. The capture script uses a real 1280px desktop viewport at 1.5x
+resolution. Each image ends after a complete task, with a maximum viewport
+height of 1080px. Model selection is scrolled to the family comparison, chosen
+search and fold-score plot. The other views retain the report header and their
+main controls. Font sizes and report styles are unchanged during capture.
+
+It stages all eight images before replacing files in `man/figures/`, checking
+that required controls and evidence fit, text is not cut at the image edges,
+the navigation rail spans the viewport and the browser reports no runtime
+errors. It also checks page overflow at 390px. `--output-dir` can save a draft
+gallery elsewhere for review.
+
+The QA directory contains complete-page captures, the actual PNGs displayed at
+a typical GitHub README width of 896px, and `capture-geometry.json`. Review the
+896px previews for legibility and the complete pages for evidence the preview
+does not show. A well-framed screenshot does not establish that the rest of the
+report is usable. The model-comparison image is retained as a compatibility
+alias of the opening image; the README embeds it only once. Run
 `Rscript validation/render-explorer-cases.R` to refresh the public binary and
 multiclass demonstrations together with the regression example.
 
@@ -112,6 +130,24 @@ checks controls and displayed answers against original data or independent
 calculations, including source rows, missingness, cutoff decisions and plotted
 coordinates. Keyboard, narrow-layout, offline and selected-view print checks
 cover the tested states.
+
+Before regenerating fixtures, `check-layout-tasks.py` also exercises the committed
+public reports. It checks whether a phone viewport reaches useful distribution
+evidence, opens data disclosures from the keyboard, and prints every report tab.
+Printed chart captions must stay with their axes, Methods must retain model
+summaries, and interval and distribution assumptions must survive printing.
+Importance values must fit their rows at A4's printable width. A failed-family
+warning must open and focus the recorded fold errors in the Selection tab; its
+error text must remain readable within the horizontally scrolling table.
+The gate rejects a trailing page whose text occupies less than one quarter of
+the page height; its PDFs still need visual review. Injected excessive setup
+spacing, overflowing values and an actual printed orphan title must fail the
+relevant task checks. PDF captions are reconstructed from neighboring lines
+within their column, rather than loosely matching words elsewhere on the page.
+
+```sh
+python validation/check-layout-tasks.py --output-dir /tmp/report-layout-tasks
+```
 
 ```sh
 Rscript validation/render-explorer-cases.R

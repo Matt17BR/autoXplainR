@@ -63,6 +63,7 @@
 .feature-controls .model-control {margin: 0;}
 .quiet-button, .dialog-close {background: white; border: 1px solid #94aa9b; border-radius: 3px;
   color: #294f3e; padding: 7px 11px; font-size: 12px !important; min-height: 34px;}
+.print-icon {display: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5;}
 .explorer .table-wrap {overflow: auto; max-width: 100%; border: 1px solid var(--line);
   border-radius: 3px; background: white; margin: 12px 0;}
 .explorer table {font-size: 13px; width: 100%; border-collapse: collapse;}
@@ -101,9 +102,14 @@
 .comparison-chart h3 {font-size: 16px; margin: 0;}
 .comparison-context {display: flex; align-items: center; flex-wrap: wrap; gap: 7px 12px;
   font-size: 12px; color: var(--muted); margin: 8px 0;}
+.cost-scale-control {display: flex; align-items: center; gap: 6px;}
 .explorer details {border: 0; border-top: 1px solid var(--line); margin: 12px 0 0; padding: 0; background: transparent;}
 .explorer summary {padding: 9px 0; font-size: 13px; color: #31583e; font-weight: 650; cursor: pointer;}
 .explorer details p {font-size: 13px; max-width: 1050px;}
+.supporting-details {display: flex; flex-wrap: wrap; gap: 0 24px; border-top: 1px solid var(--line); margin-top: 12px;}
+.explorer .supporting-details > details {border: 0; margin: 0; padding: 0; min-width: 0; max-width: 100%;}
+.supporting-details > details[open] {flex-basis: 100%;}
+.supporting-details summary {min-height: 36px;}
 .feature-layout {display: grid; grid-template-columns: minmax(290px, .8fr) minmax(0, 1.35fr);
   align-items: start; gap: 18px;}
 .importance-bars {background: white; border: 1px solid var(--line); border-radius: 3px; padding: 12px;}
@@ -145,6 +151,14 @@
 .explorer code {background: transparent;}
 .explorer .finding, .explorer .callout {font-size: 13px; border-radius: 0;}
 .explorer .finding h3 {font-size: 14px;}
+.check-links {font-size: 13px; margin: 4px 0 6px;}
+#checks #reliability-title {position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;}
+#checks section h2 {font-size: 18px; margin: 8px 0;}
+#checks .table-wrap {margin: 8px 0;}
+#checks .diagnostic-cards {gap: 12px; margin: 8px 0;}
+#checks .diagnostic-cards .metric {padding-left: 9px;}
+#checks .diagnostic-cards .metric strong {display: inline-block; margin: 2px 7px 0 0; font-size: 18px;}
+#checks .diagnostic-cards .metric small {display: inline;}
 .evaluation-note {font-size: 13px; color: #775113; border-left: 3px solid #aa772c; padding-left: 10px;}
 .explorer footer {background: none; color: #53675a; font-size: 11px; margin: 10px 26px 0;
   padding: 12px 0; border-top: 1px solid var(--line);}
@@ -190,12 +204,17 @@
 .baseline-comparison dd {display: flex; align-items: baseline; gap: 5px 8px; flex-wrap: wrap; margin: 0; color: #28432f;}
 .baseline-comparison dd strong {font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums;}
 .baseline-comparison dd span {font-size: 12px; color: #526958;}
-.baseline-interval, .baseline-scope {font-size: 12px; color: #4a6051; margin: 7px 0 0;}
+.baseline-interval {font-size: 12px; color: #4a6051; margin: 7px 0 0;}
+.baseline-interval .help {margin-left: 5px;}
 .baseline-caution {font-size: 13px; color: #77521c; border-left: 3px solid #a97a37; padding-left: 9px; margin: 8px 0 0;}
 /* Responsive charts use CSS-pixel viewBoxes; JavaScript changes geometry, never values. */
 .axr-chart {margin: 8px 0 12px; min-width: 0; color: var(--ink);}
 .axr-chart[data-kind="cost"] {max-width: 720px;}
 .axr-chart figcaption {font-size: 13px; font-weight: 600; margin: 0 0 6px; line-height: 1.5;}
+@media screen {
+  .comparison-chart .axr-chart[data-kind="cost"] figcaption {position: absolute; width: 1px; height: 1px;
+    margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;}
+}
 .axr-chart .axr-chart-viewport {max-width: 100%; min-width: 0;}
 .axr-chart svg {display: block; width: 100%; height: auto; overflow: visible; font: 13px system-ui, sans-serif;}
 .axr-chart svg:not([data-chart-layout]) {max-width: 360px; font-size: 14px;}
@@ -259,6 +278,9 @@
   .section-heading {align-items: flex-start; gap: 8px;}
   .task-intro {font-size: 14px;}
   .comparison-chart, .effect-workspace {padding: 10px;}
+  .comparison-chart .section-heading {gap: 6px;}
+  .comparison-chart .control {font-size: 12px; gap: 5px;}
+  .comparison-chart .control select {font-size: 12px; padding: 6px;}
   .feature-layout {gap: 12px;}
   .feature-name {font-size: 12px;}
   .importance-row {grid-template-columns: minmax(100px, 1.3fr) minmax(55px, .8fr) 48px; gap: 6px;}
@@ -271,15 +293,24 @@
   .axr-chart .axr-model-label {font-size: 12px;}
 }
 @media (max-width: 430px) {
-  .explorer .workspace-header {flex-wrap: wrap;}
+  .explorer .workspace-header {position: relative;}
   .workspace-header > div {flex: 1 1 100%;}
-  .workspace-header #print-report {min-height: 28px;}
+  .workspace-header .eyebrow {padding-right: 40px;}
+  .workspace-header #print-report {position: absolute; top: 9px; right: 14px; min-height: 30px; padding: 5px;}
+  #print-report .print-icon {display: block;}
+  #print-report .print-label {position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;}
   .feature-controls {gap: 8px;}
 }
 @media (prefers-reduced-motion: reduce) {html {scroll-behavior: auto;}}
 @media print {
   .explorer {background: white; font-size: 10pt;}
+  .section-number, .check-links {display: none;}
   .explorer .sidebar, .explorer #print-report, .help, .axr-chart-tooltip, .axr-chart-detail, .dialog-close {display: none !important;}
+  .print-help {display: block; max-width: 100%;}
+  .print-help .help {display: block !important; position: static !important; margin: 6px 0; min-width: 0; width: 100%;}
+  .print-help .help-button {display: none;}
+  .print-help .help-tip {position: static; visibility: visible !important; opacity: 1 !important; width: 100% !important;
+    max-width: 100%; max-height: none; overflow-wrap: anywhere; padding: 0; color: #20312d; background: none; box-shadow: none; font-size: 9pt;}
   .report-body {margin: 0; max-width: none;}
   .explorer .workspace-header {padding: 0 0 10px; border-bottom: 1px solid #aaa;}
   .explorer h1 {font-size: 20pt;}
@@ -296,14 +327,25 @@
   .comparison-chart {max-width: none; margin-top: 10px;}
   .importance-bars, .comparison-chart {break-inside: avoid; padding: 8px; border-color: #aaa;}
   .effect-workspace {break-inside: auto; padding: 8px; border-color: #aaa;}
-  .importance-row {grid-template-columns: minmax(65px, 1fr) minmax(40px, 1fr) 42px; gap: 5px;}
+  .importance-bars {display: grid; grid-template-columns: minmax(65px, 1fr) minmax(40px, 1fr) max-content; column-gap: 5px;}
+  .importance-key {grid-column: 1 / -1;}
+  .importance-row {grid-column: 1 / -1; grid-template-columns: subgrid; gap: 5px;}
+  .importance-row strong {white-space: nowrap;}
   .explorer details::details-content {display: none !important;}
   .explorer details[open]::details-content {display: block !important;}
   .explorer details:not([open]) {display: none;}
+  .explorer .model-spec {display: block !important;}
+  .model-spec > summary {break-after: avoid;}
+  .explorer .uncertainty-method {display: block !important; break-inside: avoid;}
+  .explorer .uncertainty-method::details-content {display: block !important; content-visibility: visible !important;}
   .explorer table {font-size: 9pt;}
   .explorer th, .explorer td {padding: 6px;}
   .axr-chart {break-inside: auto; max-width: 360px;}
   .axr-chart-viewport {break-inside: avoid;}
+  .axr-chart figcaption {break-after: avoid;}
+  #uncertainty .table-wrap, #checks > .table-wrap {break-inside: avoid;}
+  #checks .finding {padding: 8px 10px;}
+  #checks section {padding: 8px 0;}
   .explorer .axr-chart-guidance {display: block !important; break-inside: avoid;}
   .explorer .axr-chart-guidance::details-content {display: block !important; content-visibility: visible !important;}
   .axr-chart svg {max-width: 100%;}

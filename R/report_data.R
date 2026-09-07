@@ -84,19 +84,16 @@ explorer_data <- function(result, export) {
   }, character(1)), collapse = "")
   paste0(
     '<section id="data" class="workspace-page data-explorer" data-page="data" aria-labelledby="data-title">',
-    '<p class="section-number">Data</p><h2 id="data-title">Explore the data</h2>',
+    '<p class="section-number">Data</p><div class="data-heading"><h2 id="data-title">Explore the data</h2>',
     '<p class="data-export-note">', html_escape(notice),
-    ' \u00b7 <a href="#data-export-details">Export details</a></p>',
+    ' \u00b7 <a href="#data-export-details">Export details</a></p></div>',
     '<div class="data-controls"><label>Values <select id="data-stage">',
     explorer_options(modes, unname(mode_labels[modes]), initial_stage), "</select></label>",
     '<label>Compare <select id="data-split">',
     if (training_available) {
       '<option value="both">Training and evaluation</option><option value="training">Training only</option>'
     },
-    '<option value="evaluation">Evaluation only</option></select></label>',
-    '<label id="data-scale-control">Bars <select id="data-scale">',
-    '<option value="percent">Percent within each split</option>',
-    '<option value="count">Number of rows</option></select></label></div>',
+    '<option value="evaluation">Evaluation only</option></select></label></div>',
     if (!training_available) {
       '<p class="data-chart-note">Training data was not supplied; no training comparison is available.</p>'
     },
@@ -108,23 +105,29 @@ explorer_data <- function(result, export) {
     '<div class="data-workspace"><aside class="data-column-list" aria-label="Dataset columns">',
     '<label for="data-search">Find a column</label><input id="data-search" type="search" placeholder="Column name">',
     '<div id="data-columns">', column_buttons, '</div></aside><div class="data-main">',
+    '<label class="data-column-picker">Column <select id="data-column-select">',
+    explorer_options(variables, variables, target), "</select></label>",
     '<div class="data-section-heading"><h3 id="data-variable-title">', html_escape(target), "</h3>",
     '<span id="data-variable-role">Outcome</span></div>',
-    '<div id="data-summary" class="data-summary"></div>',
     '<div class="data-view-controls" role="group" aria-label="Data workspace">',
     '<button type="button" data-data-view="distribution" aria-pressed="true" ',
     'aria-controls="data-distribution-panel">Distribution</button>',
     '<button type="button" data-data-view="relationships" aria-pressed="false" ',
     'aria-controls="relationships">Relationships</button>',
     '<button type="button" data-data-view="records" aria-pressed="false" ',
-    'aria-controls="data-records-panel">Records</button></div>',
+    'aria-controls="data-records-panel">Records</button>',
+    '<label id="data-scale-control">Bars <select id="data-scale">',
+    '<option value="percent">Percent within each split</option>',
+    '<option value="count">Number of rows</option></select></label></div>',
     '<div id="data-pair-control" class="data-pair-control" hidden><label>Compare with <select id="data-y">',
     explorer_options(variables, variables, initial_y), "</select></label></div>",
     '<div id="data-distribution-panel" data-data-panel="distribution">',
     '<div id="data-distribution" class="data-chart" tabindex="0" role="region" aria-label="Column distribution"></div>',
-    '<p id="data-distribution-note" class="data-chart-note"></p>',
-    '<details class="data-values"><summary>Distribution counts and missing values</summary>',
-    '<div id="data-distribution-table">', data_profile_table(profile, initial_stage, target), "</div></details></div>",
+    '<div id="data-summary" class="data-summary"></div>',
+    '<div class="data-chart-tools print-help"><details class="data-values">',
+    "<summary>Counts and missing values</summary>",
+    '<div id="data-distribution-table">', data_profile_table(profile, initial_stage, target), "</div></details>",
+    explorer_help("Distribution bins and denominators", "", id = "data-distribution-note"), "</div></div>",
     '<div id="relationships" class="data-relationships" data-data-panel="relationships" hidden>',
     '<p class="data-chart-note">Joint counts show where observations lie. ',
     "Binned outcome averages describe these rows, not fitted or causal effects.</p>",
@@ -144,7 +147,8 @@ explorer_data <- function(result, export) {
         'create a report with <code>report_data = "rows"</code>. This explicitly embeds individual records.</p></div>'
       )
     },
-    '</div></div></div><details class="data-ledger"><summary>Missing values, column types and preprocessing</summary>',
+    '</div></div></div><div class="supporting-details"><details class="data-ledger">',
+    "<summary>Column types and preprocessing</summary>",
     data_profile_inventory(profile),
     if (!is.null(profile$row_ledger)) {
       html_table(profile$row_ledger, 0L,
@@ -159,7 +163,7 @@ explorer_data <- function(result, export) {
     html_escape(manifest$scope), "</p><p>", html_escape(manifest$sampling),
     if (!is.null(manifest$seed)) paste0("; seed ", manifest$seed), "</p>",
     "<p>Aggregate profiles use all available rows. Pair summaries: ", profile$pair_coverage$included,
-    " of ", profile$pair_coverage$total, ". ", html_escape(profile$pair_coverage$policy), "</p></details>",
+    " of ", profile$pair_coverage$total, ". ", html_escape(profile$pair_coverage$policy), "</p></details></div>",
     report_json_script(export, "axr-data-payload"), "</section>"
   )
 }

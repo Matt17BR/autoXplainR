@@ -9,9 +9,13 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import struct
 import sys
 
 PUBLIC_REPORTS = ('model-report.html', 'binary-report.html', 'multiclass-report.html')
+SCREENSHOTS = ('guided-overview.png', 'model-comparison.png', 'model-selection.png',
+               'model-data.png', 'model-patterns.png', 'model-predictions.png',
+               'explanation-reliability.png', 'model-details.png')
 GENERATORS = ('validation/render-example.R', 'validation/render-explorer-cases.R',
               'validation/capture-screenshots.py', 'validation/check-gallery.py')
 REBUILD = ('Regenerate the public reports and screenshots, review them, then explicitly run '
@@ -26,6 +30,23 @@ def inventory(root):
     if not images:
         raise ValueError('No gallery PNG images were found.')
     assets = images | {root / 'pkgdown/assets' / name for name in PUBLIC_REPORTS}
+    for name in SCREENSHOTS:
+        path = root / 'man/figures' / name
+        if not path.is_file():
+            raise ValueError(f'Missing required workspace screenshot: {path.relative_to(root)}')
+        header = path.read_bytes()[:24]
+        if len(header) != 24 or header[:8] != b'\x89PNG\r\n\x1a\n':
+            raise ValueError(f'Invalid PNG screenshot: {path.relative_to(root)}')
+        width, height = struct.unpack('>II', header[16:24])
+        # These are desktop task previews. A tall full-page image shrinks text
+        # in GitHub and can stitch the fixed sidebar onto an empty lower page.
+        # This is a framing heuristic, not a readability or usability test.
+        # Check the shipped image itself, even when somebody records new hashes.
+        if width < 896 or height < 1 or height / width > .85:
+            raise ValueError(
+                f'{path.relative_to(root)} is {width} x {height}: capture a readable '
+                'landscape workspace (at least 896px wide, height at most 85% of width). '
+                'Complete-page QA captures belong outside the README gallery.')
     output = {}
     for kind, paths in (('sources', sources), ('assets', assets)):
         missing = [str(path.relative_to(root)) for path in paths if not path.is_file()]

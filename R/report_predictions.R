@@ -287,12 +287,11 @@ prediction_regression_html <- function(model, result) {
       "Positive residuals mean this model predicted too low. The bins include every evaluation row.",
       zero = TRUE
     ),
-    "</div>",
     report_chart_frame("scatter", bias_points, paste0("Predicted bin midpoint", unit), paste0("Mean residual", unit),
       "Does error change with the prediction?", report_chart_table(bias, "Mean residual and MAE by prediction bin"),
       "A mean residual above zero indicates underprediction in that bin. Bins with fewer than two rows omit means.",
       zero = TRUE
-    )
+    ), "</div>"
   )
 }
 

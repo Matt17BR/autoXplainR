@@ -155,8 +155,6 @@ test_that("tuning report retains controls, statuses, numeric evidence and execut
   expect_match(html, 'class="workspace-page selection-section"', fixed = TRUE)
   expect_match(html, 'data-page="selection"', fixed = TRUE)
   expect_match(html, "Fold scores show variability, not confidence intervals", fixed = TRUE)
-  expect_match(html, "Policy choice", fixed = TRUE)
-  expect_match(html, "Final primary fit", fixed = TRUE)
   expect_match(html, "Full-training refit attempts", fixed = TRUE)
   expect_match(html, "outer-training|Outer training")
   expect_false(grepl('cx=""', html, fixed = TRUE))

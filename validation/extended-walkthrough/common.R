@@ -10,7 +10,8 @@ if (nzchar(library_path)) {
   .libPaths(c(library_path, .libPaths()))
 }
 library(AutoXplainR)
-stopifnot(as.character(packageVersion("AutoXplainR")) == "0.6.0")
+expected_version <- Sys.getenv("AXR_EXTENDED_VERSION", "0.6.0")
+stopifnot(as.character(packageVersion("AutoXplainR")) == expected_version)
 if (nzchar(library_path)) {
   stopifnot(normalizePath(find.package("AutoXplainR")) ==
     file.path(library_path, "AutoXplainR"))
