@@ -27,7 +27,7 @@
 - [`subgroup_performance()`](https://matt17br.github.io/autoXplainR/reference/subgroup_performance.md)
   : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
-  : Render a beginner-first model report
+  : Render an interactive model comparison
 - [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
   : Summarize retained model evidence in prose
 - [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)

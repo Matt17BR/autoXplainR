@@ -1,10 +1,13 @@
 # Fit and evaluate a model through a guided workflow
 
 `autoxplain()` is the beginner-first entry point. By default it creates
-a reproducible held-out split, fits an intercept-only baseline and an
-understandable statistical model, evaluates both on unseen rows, and
-stores everything needed for explanation and reporting. This path only
-uses R and does not require Java or a cloud account.
+a reproducible held-out split, compares linear, tree and neural model
+families using training-only cross-validation, then evaluates the
+retained models and an intercept-only baseline on held-out rows. It
+stores predictions and explanations for an interactive offline report.
+No optional model engines, Java or cloud account are needed. Use
+`model_set = "quick"` for a fast pre-specified reference model and
+baseline.
 
 ## Usage
 
@@ -18,8 +21,8 @@ autoxplain(
   test_data = NULL,
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
-  model_set = c("quick", "tuned", "comparison"),
-  portfolio = c("recommended", "core", "extended"),
+  model_set = c("tuned", "quick", "comparison"),
+  portfolio = c("core", "recommended", "extended"),
   learners = NULL,
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
@@ -93,22 +96,23 @@ autoxplain(
 
 - model_set:
 
-  Guided base-engine workflow. `"quick"` fits the pre-specified
-  understandable model and baseline. `"comparison"` also fits two
-  pre-specified trees for a descriptive Pareto view. `"tuned"` compares
-  the requested behaviorally diverse learner portfolio using
-  training-only resampling, retains its family winners for comparison,
-  then evaluates the selected configuration once on the configured
-  evaluation rows.
+  Guided base-engine workflow. `"tuned"` is the default. `"quick"` fits
+  the pre-specified understandable model and baseline. `"comparison"`
+  also fits two pre-specified trees for a descriptive Pareto view.
+  `"tuned"` compares the requested behaviorally diverse learner
+  portfolio using training-only resampling, retains its family winners
+  for comparison, then evaluates the selected configuration once on the
+  configured evaluation rows.
 
 - portfolio:
 
-  Local tuned-model portfolio. `"recommended"` compares linear,
-  regularized, additive (when supported), tree, forest, and boosting
-  families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
-  families. `"core"` retains the dependency-light linear/tree/neural
-  tournament. Missing optional backends produce one installation command
-  rather than silently changing the tournament.
+  Local tuned-model portfolio. `"core"` is the default. `"recommended"`
+  compares linear, regularized, additive (when supported), tree, forest,
+  and boosting families. `"extended"` adds neural, kernel,
+  nearest-neighbor, and MARS families. `"core"` retains the
+  dependency-light linear/tree/neural tournament. Missing optional
+  backends produce one installation command rather than silently
+  changing the tournament.
 
 - learners:
 
@@ -211,10 +215,10 @@ autoxplain(
 - explain:
 
   Compute and retain permutation screening, an explanation audit, and up
-  to three fitted effects. Defaults to `TRUE`; use `FALSE` for fitting
-  only. Screening covers all inputs; the audit covers up to eight inputs
-  and five models with 20 permutations. These are descriptive, selected
-  summaries.
+  to eight fitted effects per audited model. Defaults to `TRUE`; use
+  `FALSE` for fitting only. Screening covers all inputs for up to five
+  models; the audit covers the union of their top eight inputs with 20
+  permutations. These are descriptive, selected summaries.
 
 - report:
 
@@ -246,31 +250,31 @@ result <- autoxplain(mtcars, "mpg")
 result
 #> <AutoXplainR guided result>
 #>   question:   predict `mpg` (regression)
-#>   primary:    linear regression [main_model]
+#>   primary:    tuned neural network [main_model]
 #>   engine:     base
 #>   data:       26 training + 6 test rows
 #>   design:     reproducible random holdout
-#>   selection:  Pre-specified model; candidate evaluation ranks did not select it.
-#>   models:     2 (primary + baseline)
-#>   score:      rmse = 2.4413 on test rows
-#>   baseline:   63.1% improvement in rmse
+#>   selection:  Selected using 5 training folds; evaluation rows did not select this model.
+#>   models:     4 (selected from 15 training-resampled configurations)
+#>   score:      rmse = 2.4559 on test rows
+#>   baseline:   62.9% improvement in rmse
 #>   caution:    Only 6 rows were available for test scoring.
 #>   next:       Treat the scores as preliminary and validate on more representative rows.
-#>   finding:    `wt` exceeds the pairwise association threshold.
-#>   inspect:    Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.
-#>   evidence:   16 model-feature shuffle summaries; 3 fitted effects
+#>   finding:    Near-optimal models disagree on the feature-importance ranking.
+#>   inspect:    Report the supplied candidates' importance ranges; these are not bounds over a complete model class.
+#>   evidence:   40 model-feature shuffle summaries; 8 fitted effects
 #>   inspect:    render_model_report(result, "report.html"), evidence_summary(result)
 #>   predict:    predict(result, newdata) uses the saved training recipe
+#>   compare:    compare_model_behavior(result) examines the retained models
 explainers <- as_explainers(result)
 audit_explanations(explainers)
 #> <AutoXplainR explanation evidence audit>
-#>   models:             2 (1 near-optimal)
+#>   models:             4 (3 near-optimal)
 #>   max association:    0.949
-#>   explanation accord: unavailable
-#>   prediction accord:  unavailable
+#>   explanation accord: 0.647
+#>   prediction accord:  0.99
 #>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
 #>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
-#>   comparison: Fewer than two supplied models meet the performance tolerance.
 #> 
 #> Findings
 #>   [warning] `cyl` exceeds the pairwise association threshold.

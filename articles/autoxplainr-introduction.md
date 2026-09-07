@@ -1,6 +1,6 @@
 # Your first prediction report
 
-AutoXplainR fits a tabular prediction model, evaluates it against a
+AutoXplainR compares tabular prediction models, evaluates them against a
 simple baseline, and retains fitted explanations and an optional HTML
 report. The ordinary workflow runs locally. This example predicts a
 parcel’s delivery time using information available at dispatch. All data
@@ -37,7 +37,7 @@ need a grouped validation plan.
 ``` r
 
 result <- autoxplain(
-  inputs, "delivery_hours",
+  inputs, "delivery_hours", model_set = "comparison",
   validation = validation_split(time = "dispatched"),
   preprocessing_config = list(novel_level_strategy = "error"),
   seed = 2026
@@ -50,16 +50,17 @@ result
 #>   data:       192 training + 48 test rows
 #>   design:     temporal
 #>   selection:  Pre-specified model; candidate evaluation ranks did not select it.
-#>   models:     2 (primary + baseline)
+#>   models:     4 (retained comparison set)
 #>   score:      rmse = 2.0031 on test rows
 #>   baseline:   74.3% improvement in rmse
 #>   caution:    Only 48 rows were available for test scoring.
 #>   next:       Treat the scores as preliminary and validate on more representative rows.
 #>   finding:    The pairwise association screen does not assess every form of dependence.
 #>   inspect:    Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.
-#>   evidence:   4 model-feature shuffle summaries; 2 fitted effects
+#>   evidence:   8 model-feature shuffle summaries; 2 fitted effects
 #>   inspect:    render_model_report(result, "report.html"), evidence_summary(result)
 #>   predict:    predict(result, newdata) uses the saved training recipe
+#>   compare:    compare_model_behavior(result) examines the retained models
 
 recipe <- result$preprocessing_metadata$training_data$recipe
 recipe$final_columns
@@ -77,12 +78,15 @@ recipe$novel_level_strategy
 #> [1] "error"
 ```
 
-This fits a linear regression and an intercept-only baseline on the
-earlier rows. The latest 20% of distinct dispatch dates are reserved for
-evaluation. `dispatched` determines the split and is excluded from
-predictors. Missing predictor values are imputed using values learned on
-training rows; character predictors are converted to factors using their
-training levels.
+This fits a linear regression, two trees and an intercept-only baseline
+on the earlier rows. The latest 20% of distinct dispatch dates are
+reserved for evaluation. We explicitly use comparison mode because
+chronological tuning is not yet implemented. For independently sampled
+rows, the ordinary default compares linear, tree and neural models using
+training-only cross-validation. `dispatched` determines the split and is
+excluded from predictors. Missing predictor values are imputed using
+values learned on training rows; character predictors are converted to
+factors using their training levels.
 
 The default novel-category strategy is `"mode"`, which maps an unseen
 category to the most frequent training category. Here we deliberately
@@ -94,15 +98,21 @@ existing one.
 ``` r
 
 result$leaderboard
-#>   rank        model_id                   model     role   family backend
-#> 1    1      main_model       linear regression  primary   linear   stats
-#> 2    2 simple_baseline intercept-only baseline baseline baseline   stats
+#>   rank        model_id                   model      role   family backend
+#> 1    1      main_model       linear regression   primary   linear   stats
+#> 2    2   flexible_tree  flexible decision tree candidate     tree   rpart
+#> 3    3      small_tree     small decision tree candidate     tree   rpart
+#> 4    4 simple_baseline intercept-only baseline  baseline baseline   stats
 #>       rmse      mae     r_squared training_time_ms model_size_kb complexity
-#> 1 2.003144 1.662172  9.339624e-01                1      67.79688          3
-#> 2 7.795201 6.683058 -5.052385e-05                3      56.07812          1
+#> 1 2.003144 1.662172  9.339624e-01                2      67.79688          3
+#> 2 2.241207 1.837860  9.173332e-01                2      52.28125         20
+#> 3 4.319412 3.508486  6.929447e-01                8      47.83594          4
+#> 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1
 #>   fit_warning prediction_time_ms
 #> 1                              1
-#> 2                              0
+#> 2                              1
+#> 3                              1
+#> 4                              0
 result$evaluation$metric_definitions
 #>                                                                                                            rmse 
 #>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -132,21 +142,37 @@ result$explanations$audit$importance
 #> 2      main_model     service   2.090297 0.05157578 1.982348  2.198246
 #> 3 simple_baseline distance_km   0.000000 0.00000000 0.000000  0.000000
 #> 4 simple_baseline     service   0.000000 0.00000000 0.000000  0.000000
+#> 5      small_tree distance_km   5.624624 0.16915766 5.270573  5.978675
+#> 6      small_tree     service   0.000000 0.00000000 0.000000  0.000000
+#> 7   flexible_tree distance_km   8.270003 0.16436878 7.925975  8.614031
+#> 8   flexible_tree     service   1.840996 0.03933630 1.758664  1.923328
 #>   sign_stability baseline  permuted metric n_repeats max_association
 #> 1              1 2.003144 10.233818   rmse        20       0.1499773
 #> 2              1 2.003144  4.093441   rmse        20       0.1499773
 #> 3              1 7.795201  7.795201   rmse        20       0.1499773
 #> 4              1 7.795201  7.795201   rmse        20       0.1499773
+#> 5              1 4.319412  9.944036   rmse        20       0.1499773
+#> 6              1 4.319412  4.319412   rmse        20       0.1499773
+#> 7              1 2.241207 10.511210   rmse        20       0.1499773
+#> 8              1 2.241207  4.082203   rmse        20       0.1499773
 #>   associated_feature       shuffle_status dependence_status
 #> 1            service positive_loss_change    limited_screen
 #> 2        distance_km positive_loss_change    limited_screen
 #> 3            service   no_observed_change    limited_screen
 #> 4        distance_km   no_observed_change    limited_screen
+#> 5            service positive_loss_change    limited_screen
+#> 6        distance_km   no_observed_change    limited_screen
+#> 7            service positive_loss_change    limited_screen
+#> 8        distance_km positive_loss_change    limited_screen
 #>                                                                              claim
 #> 1   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
 #> 2   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
 #> 3 No loss change in these shuffles; this is not proof of no population importance.
 #> 4 No loss change in these shuffles; this is not proof of no population importance.
+#> 5   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
+#> 6 No loss change in these shuffles; this is not proof of no population importance.
+#> 7   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
+#> 8   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
 result$explanations$audit$findings
 #>   severity                     code
 #> 1     note association_screen_scope
@@ -199,9 +225,15 @@ unlink(path)
 ```
 
 Use a persistent path such as `"delivery-report.html"` to keep the
-report. It opens offline in a browser. Review feature names and
-diagnostics before sharing. `saveRDS(result, "analysis.rds")` retains
-models **and training/evaluation data**.
+report. It opens offline in a browser. Start in **Compare models** to
+read the scores and costs, then click a model to see its important
+inputs and fitted curves. **Input relationships** shows which predictors
+move together; **Inspect predictions** shows errors and the R command
+for the selected model. Help buttons work on hover, keyboard focus and
+tap. **Print this view** exports the active tab and selections. Review
+feature names and diagnostics before sharing.
+`saveRDS(result, "analysis.rds")` retains models **and
+training/evaluation data**.
 
 For classification, set outcome factor levels deliberately: binary
 probabilities refer to the **second** level. For example,

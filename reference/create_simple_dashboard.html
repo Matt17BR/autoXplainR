@@ -9,7 +9,7 @@ Use render_model_report() instead. This wrapper warns once per call."></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,9 +80,8 @@ Use <code><a href="render_model_report.html">render_model_report()</a></code> in
 
 
 <dt id="arg-top-features">top_features<a class="anchor" aria-label="anchor" href="#arg-top-features"></a></dt>
-<dd><p>Maximum number of features included in the audit. The
-initial ranking is obtained from repeated permutation importance on the
-leading model, never from impurity importance.</p></dd>
+<dd><p>Maximum displayed inputs per model. The audit uses the
+union of their leading inputs, ranked by repeated permutation importance.</p></dd>
 
 
 <dt id="arg-sample-instances">sample_instances<a class="anchor" aria-label="anchor" href="#arg-sample-instances"></a></dt>

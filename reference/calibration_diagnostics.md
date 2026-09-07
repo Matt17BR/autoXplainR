@@ -49,8 +49,8 @@ calibration_diagnostics(flowers)
 #> <AutoXplainR probability calibration>
 #>   model:      main_model
 #>   check:      confidence in the predicted class
-#>   rows:       30 in 1 probability groups
-#>   average:    1 predicted vs 0.967 observed
-#>   binned gap: 0.033 (lower is better)
+#>   rows:       30 in 3 probability groups
+#>   average:    0.973 predicted vs 0.967 observed
+#>   binned gap: 0.021 (lower is better)
 #>   caution:    sample- and grouping-dependent; not a population guarantee
 ```

@@ -49,6 +49,14 @@ evidence$evaluation
 #> $metrics
 #> $metrics$main_model
 #>      rmse       mae r_squared 
+#> 2.4559419 1.7778871 0.8544681 
+#> 
+#> $metrics$tree_model
+#>      rmse       mae r_squared 
+#> 2.4951620 1.9000000 0.8497828 
+#> 
+#> $metrics$linear_model
+#>      rmse       mae r_squared 
 #>  2.441285  2.089462  0.856200 
 #> 
 #> $metrics$simple_baseline
@@ -65,7 +73,7 @@ evidence$evaluation
 #> "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better." 
 #> 
 #> $improvement_over_baseline
-#> [1] 0.631292
+#> [1] 0.6290783
 #> 
 #> $notes
 #>   severity                 code

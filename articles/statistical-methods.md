@@ -7,11 +7,10 @@ evaluates predictions against observed outcomes and describes the fitted
 prediction function. It does not estimate causal effects or identify an
 intervention.
 
-The default primary model is specified before looking at the holdout.
-Tuned mode selects a configuration using training-only cross-validation,
-learns preprocessing again within each fold, refits on all outer
-training rows, and evaluates on the outer holdout. This separation
-addresses selection bias [Cawley and Talbot,
+The default selects a configuration using training-only
+cross-validation, learns preprocessing again within each fold, refits on
+all outer training rows, and evaluates on the outer holdout. This
+separation addresses selection bias [Cawley and Talbot,
 2010](https://jmlr.org/papers/v11/cawley10a.html). Repeatedly revising a
 workflow after viewing the holdout can still overfit it.
 
@@ -77,10 +76,10 @@ confidence interval.
 result <- autoxplain(mtcars, "mpg", explain = FALSE)
 uncertainty <- performance_uncertainty(result, n_boot = 100, seed = 2026)
 uncertainty$estimates
-#>     quantity  estimate     lower      upper
-#> 1    primary  2.441285  1.559049  3.3689722
-#> 2   baseline  6.621187  3.705648  8.3772749
-#> 3 difference -4.179902 -6.148405 -0.4078893
+#>     quantity  estimate      lower     upper
+#> 1    primary  2.455942  0.6928441  3.609810
+#> 2   baseline  6.621187  3.7056483  8.377275
+#> 3 difference -4.165245 -6.0242302 -0.824004
 ```
 
 The example uses 100 draws for speed; use at least 1000 for analysis. It
@@ -133,12 +132,14 @@ they are not refit uncertainty bands. Neither curve is causal.
 Association screening uses limited pairwise summaries; a low value does
 not exclude nonlinear or joint dependence.
 
-The default workflow first screens all features by importance, then
-audits the eight highest-ranked features and plots up to three. This is
-data-dependent selection. The resulting intervals and diagnostics should
-be read descriptively; selection-adjusted inference is not supplied.
-Multiclass default effects refer to the first outcome class, which is
-labeled in the output. Request a particular class with
+The default workflow screens all features for up to five models, audits
+the union of their eight highest-ranked inputs, and computes up to eight
+fitted curves per model and outcome class. This is data-dependent
+selection. The resulting intervals and diagnostics should be read
+descriptively; selection-adjusted inference is not supplied. Multiclass
+reports offer a class selector for probability curves.
+`effects_by_class` retains each class; `effects_by_model` retains the
+first class for compatibility. Lower-level calls select a class with
 `explain_effect(..., class = "name")` or
 [`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md).
 

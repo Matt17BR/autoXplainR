@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,10 +56,11 @@
 <li>Review the public workflow, statistical interpretation, failure states and narrative wording. Generated prose must not claim guaranteed grounding.</li>
 <li>Regenerate documentation; run tutorials, lint, spelling and URL checks. Inspect permanent missing URLs and canonical-form failures. Record transient publisher failures separately.</li>
 <li>Run the complete test suite, optional-engine matrix, numerical references and coverage. Record skipped integrations and known numerical limitations.</li>
+<li>Review test quality for changed behavior. Require the browser and imputation mutation checks to reject their deliberate faults for the intended reasons; an execution error is not a successful negative control.</li>
 <li>Build once with <code>.github/scripts/build-check-source.sh</code>, check that exact archive under release R including manuals, and preserve its checksum.</li>
 <li>Check the same archive under R-devel. Explain remaining check notes.</li>
 <li>Require the configured Windows, macOS and Linux CI gates and the live H2O integration to pass. A hosted narrative live test is optional and must be identified as run or skipped.</li>
-<li>Open generated report examples on desktop and a narrow viewport. Review numerical labels, unavailable diagnostics, keyboard navigation and print output.</li>
+<li>Complete both user journeys in <code>validation/product-walkthrough.md</code> on the installed package and actual regression, binary and multiclass reports. Record answers, friction, repairs and repeated tasks in the release record. Open generated report examples on desktop and a narrow viewport. Review numerical labels, unavailable diagnostics, keyboard navigation and print output.</li>
 <li>Verify that logs, fixtures and shared reports contain no credentials or unintended private data.</li>
 </ul></div>
 <div class="section level2">

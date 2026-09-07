@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,6 +79,11 @@
 
     
     
+<p>The default, <code>model_set = "tuned", portfolio = "core"</code>,
+searches 15 settings across linear, tree and neural families using five
+training-only folds. It retains a representative from each successful
+family and a baseline for the report. The selected model is evaluated on
+rows kept outside that search.</p>
 <p><code>model_set = "quick"</code> fits a pre-specified linear,
 logistic or multinomial model and a baseline. <code>"comparison"</code>
 adds two pre-specified trees but keeps the same primary model. Its

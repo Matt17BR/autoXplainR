@@ -6,41 +6,35 @@ report. Existing packages already provide the underlying estimators and
 much of the reporting infrastructure. Integration and reader
 comprehension are hypotheses to test.
 
-## 0.4.0: correct and explain the current workflow
+## 0.5.0: restore model exploration
 
-This release follows the [0.3.0
-audit](https://matt17br.github.io/autoXplainR/validation/audit-0.3.0.md).
-The release record must identify which checks actually ran;
-implementation alone is not acceptance evidence.
+The [review of
+0.4.0](https://matt17br.github.io/autoXplainR/validation/product-review-0.4.0.md)
+found that statistical repairs had displaced the package’s main purpose:
+comparing models and understanding their behaviour. The current work
+restores that purpose.
 
-- Use the numerical feature grid in report graphics, label axes and
-  prediction targets, and retain categorical tables and unavailable
-  effects.
-- Replace overall explanation grades with scoped diagnostics. Keep
-  shuffle behavior, limited association screening, evaluation
-  uncertainty and model disagreement distinct. A missing check must not
-  look successful.
-- Render HTML and local narratives from the same retained evidence.
-  Explicit narrative overrides replace components without discarding
-  evaluation scores. Hosted text has format checks, not guaranteed
-  numerical grounding.
-- Preserve prediction identity, validation boundaries and recorded
-  preprocessing across adapters. Show when supplied models or rows
-  cannot be compared.
-- Teach a complete real-data workflow: choose predictors, exclude future
-  information, set outcome levels, choose a split, inspect the recipe,
-  evaluate, predict and share. Move specialized tasks into focused
-  articles.
-- Deprecate duplicate dashboard entry points with replacements and
-  warnings in 0.4.0; keep compatibility until at least 0.6.0. Separate
-  GitHub publication from optional CRAN submission and record manual
-  checks explicitly.
+- Make a small training-CV search across linear, tree and neural models
+  the one-command default. Keep a fast reference model available
+  explicitly.
+- Replace the long report with focused tabs. Compare scores and costs
+  first; let the reader switch models, choose an input, inspect
+  relationships and examine prediction errors. Put background
+  explanations in accessible help.
+- Audit the inputs used by each retained model and connect the displayed
+  importance bars to its fitted curves. Keep failures explicit.
+- Gate publication on executed task walkthroughs, numerical answers
+  checked against R, keyboard/mobile checks, actual screenshots and
+  printed views. Record concrete failures and repairs, not just a test
+  total.
+- Preserve the corrected statistical contracts from 0.4.0. Test ranking
+  is descriptive; training CV chooses the default. Associations remain
+  distinct from causal effects and sampling uncertainty.
 
-Acceptance requires meaningful regression tests for the reported
-failures, executed tutorials, numerical reference checks, rendered
-report review and package checks of the exact release archive. See the
-[release
+See the [release
 checklist](https://matt17br.github.io/autoXplainR/RELEASE_CHECKLIST.md).
+A participant study can add independent evidence, but ordinary task
+acceptance must happen now.
 
 ## Next: interoperability and demonstrated usefulness
 

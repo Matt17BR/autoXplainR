@@ -52,5 +52,5 @@ strategy.
 result <- autoxplain(mtcars, "mpg", explain = FALSE)
 predict(result, mtcars[1:3, c("wt", "hp", "cyl", "disp", "drat",
                              "qsec", "vs", "am", "gear", "carb")])
-#> [1] 22.37398 22.04596 27.38310
+#> [1] 21.90628 20.94303 27.06011
 ```

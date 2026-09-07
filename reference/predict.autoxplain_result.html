@@ -13,7 +13,7 @@ recipes that drop incomplete rows return NA at those positions."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,7 @@ level. Novel categorical levels follow the recorded recipe strategy.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span>, explain <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span>, <span class="st">"hp"</span>, <span class="st">"cyl"</span>, <span class="st">"disp"</span>, <span class="st">"drat"</span>,</span></span>
 <span class="r-in"><span>                             <span class="st">"qsec"</span>, <span class="st">"vs"</span>, <span class="st">"am"</span>, <span class="st">"gear"</span>, <span class="st">"carb"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 22.37398 22.04596 27.38310</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 21.90628 20.94303 27.06011</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -1,5 +1,62 @@
 # Changelog
 
+## AutoXplainR 0.5.0
+
+- Reports show effective settings beside each model. Model details
+  expose fitted coefficients or tree rules, exact controls, selection
+  and preprocessing. Native tree metadata now includes its full
+  controls; neural metadata includes the retained fitting controls and
+  network size.
+- Classification mistakes include probabilities for the predicted and
+  observed classes, ordered by the lowest probability assigned to the
+  observed class.
+- Multiclass reports offer a class selector for fitted probability
+  curves and retain all class-specific curves for reuse.
+
+### Model exploration is the main workflow again
+
+- [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+  now searches 15 settings across the core linear, tree and neural
+  families using five training-only folds. One representative per
+  successful family and a baseline are retained. Use
+  `model_set = "quick"` for the previous reference-model default.
+  Temporal splits require explicit quick/comparison mode until
+  rolling-origin tuning is implemented.
+- Reports use focused tabs for model comparison, features, input
+  relationships, prediction errors, checks and methods. Scores and
+  measured costs share the opening view. Short help is available on
+  hover, focus and tap.
+- Model and feature controls select the corresponding importance, fitted
+  curve, prediction diagnostics and R command. The training-CV choice
+  remains distinct from held-out score ordering. Metric and cost
+  controls use retained R values.
+- Feature screening now covers each audited model. The audit uses the
+  union of their leading inputs, and up to eight curves per model are
+  retained in `result$explanations$effects_by_model`. Primary-model
+  curves remain available at `result$explanations$effects`.
+- Input relationships show signed numeric correlations and explicitly
+  named unsigned associations for categories. Classification prediction
+  agreement compares class labels, including through the legacy
+  dashboard helper.
+- Print exports the selected view; no-JavaScript output exposes all
+  evidence. Keyboard, phone layouts and actual report screenshots are
+  covered by task checks against R-generated answer data. The README
+  shows the working tabs.
+- Cost enrichment preserves available leaderboard measurements when an
+  engine omits optional model-characteristic fields. Missing
+  measurements stay missing.
+- Local elapsed times discard floating-point subtraction noise below a
+  microsecond so that equal measured costs remain equal in Pareto
+  comparisons. A zero timer reading is shown as `~0`; its resolution
+  depends on the platform.
+- Small probability effects retain distinct signed axis labels instead
+  of rounding several different ticks to zero. Tiny table values use
+  scientific notation.
+- Report checks now read plotted values through visible axes.
+  Deliberately false graphics, disconnected model selection and leaked
+  fold imputation must fail before release; duplicated markup assertions
+  were removed.
+
 ## AutoXplainR 0.4.0
 
 ### Correct calculations and evidence identity

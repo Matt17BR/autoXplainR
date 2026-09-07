@@ -71,11 +71,11 @@ cat(memo)
 #> # Model Fit and Evaluation Report
 #> 
 #> ## Scope
-#> Target: `mpg` (regression). Models: 2. Inputs: 10.
+#> Target: `mpg` (regression). Models: 4. Inputs: 10.
 #> 
 #> ## Did the model improve on a simple baseline?
-#> The linear regression was evaluated on 6 test rows. Its **rmse** was 3.5529.
-#> That is a 30.3% improvement over the intercept-only baseline (5.0963).
+#> The tuned decision tree was evaluated on 6 test rows. Its **rmse** was 2.6856.
+#> That is a 47.3% improvement over the intercept-only baseline (5.0963).
 #> 
 #> ## What the main metric means
 #> **rmse:** Typical prediction error, with larger mistakes weighted more heavily; lower is better.
@@ -83,23 +83,38 @@ cat(memo)
 #> ## Score cautions
 #> - **caution:** Only 6 rows were available for test scoring. Treat the scores as preliminary and validate on more representative rows.
 #> - **caution:** 26 training rows were used with 10 input features. Use fewer justified features or more training data, and expect unstable coefficients.
-#> - **warning:** Evaluation R-squared is negative, so squared error exceeded an evaluation-mean reference. Do not rely on this model for prediction without substantially better validation performance.
+#> 
+#> ## How automatic tuning selected the model
+#> 15 configurations across 3 model families were compared with 5 training-only folds. The selection metric was rmse.
+#> The one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.
+#> The resampling-selected configuration was `tree_05`; the actual final fitted configuration was `tree_05` (decision tree). A recorded refit fallback was not needed.
+#> That resampled score selected a configuration; it is not the final performance estimate. The held-out score above evaluated the selected, refitted model on different rows.
+#> 
+#> ## What did the retained models do differently?
+#> This section is computed evidence from common evaluation rows, not a claim inferred from model-family names.
+#> The largest average paired prediction difference was between `main_model` and `linear_model`: 2.5416 using absolute difference in predicted target units.
+#> Descriptive comparison of supplied fitted models on common evaluation rows; not causal inference, uncertainty coverage, or a deployment rule.
 #> 
 #> ## Findings
-#> - Pairwise association flags affect wt, qsec, disp, hp, cyl, am. Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.
-#> - Shuffle intervals do not resolve the direction of the mean loss change for linear regression / vs. Inspect the repeat distribution; more shuffles address Monte Carlo error only.
+#> - Pairwise association flags affect cyl, hp, disp, drat, wt, qsec, am, gear. Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.
+#> - Shuffle intervals do not resolve the direction of the mean loss change for tuned neural network alternative / gear, tuned neural network alternative / qsec, tuned neural network alternative / am, tuned neural network alternative / drat, tuned neural network alternative / carb, linear regression reference / vs, linear regression reference / am. Inspect the repeat distribution; more shuffles address Monte Carlo error only.
 #> - The pairwise association screen does not assess every form of dependence. Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.
 #> 
-#> ## Fitted feature evidence for linear regression
+#> ## Fitted feature evidence for tuned decision tree
 #> Retained primary-model audit.
 #> Permutation importance is the change in rmse after shuffling an input. These fitted-model summaries should not be read as causal effects.
-#> - wt: 1.5611; shuffle Monte Carlo interval [1.1245, 1.9977]; positive loss change.
-#> - qsec: 1.2301; shuffle Monte Carlo interval [0.9354, 1.5249]; positive loss change.
-#> - disp: 1.0061; shuffle Monte Carlo interval [0.6047, 1.4076]; positive loss change.
-#> Showing three of 8 retained feature summaries; inspect the full audit for the rest.
-#> - ALE for wt (predicted value): centered effects range from -5.347 to 3.6053.
-#> - ALE for qsec (predicted value): centered effects range from -2.741 to 2.8551.
-#> - ALE for disp (predicted value): centered effects range from -3.1662 to 3.2498.
+#> - cyl: 0.6933; shuffle Monte Carlo interval [0.2558, 1.1308]; positive loss change.
+#> - hp: 0.4808; shuffle Monte Carlo interval [0.2272, 0.7344]; positive loss change.
+#> - disp: 0.00; shuffle Monte Carlo interval [0.00, 0.00]; no observed change.
+#> Showing three of 10 retained feature summaries; inspect the full audit for the rest.
+#> - ALE for cyl (predicted value): centered effects range from -1.5606 to 3.1213.
+#> - ALE for hp (predicted value): centered effects range from -1.7733 to 0.8867.
+#> - ALE for disp (predicted value): centered effects range from 0.00 to 0.00.
+#> - ALE for drat (predicted value): centered effects range from 0.00 to 0.00.
+#> - ALE for wt (predicted value): centered effects range from 0.00 to 0.00.
+#> - ALE for qsec (predicted value): centered effects range from 0.00 to 0.00.
+#> - ALE for vs (predicted value): centered effects range from 0.00 to 0.00.
+#> - ALE for am (predicted value): centered effects range from 0.00 to 0.00.
 #> Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
 #> - performance uncertainty: not run. 
 #> - resources: not run. This optional check has not been computed.

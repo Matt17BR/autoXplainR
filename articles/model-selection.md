@@ -1,5 +1,11 @@
 # Compare and tune models
 
+The default, `model_set = "tuned", portfolio = "core"`, searches 15
+settings across linear, tree and neural families using five
+training-only folds. It retains a representative from each successful
+family and a baseline for the report. The selected model is evaluated on
+rows kept outside that search.
+
 `model_set = "quick"` fits a pre-specified linear, logistic or
 multinomial model and a baseline. `"comparison"` adds two pre-specified
 trees but keeps the same primary model. Its evaluation ranks are

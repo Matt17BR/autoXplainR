@@ -70,10 +70,10 @@ result <- autoxplain(mtcars, "mpg", explain = FALSE)
 performance_uncertainty(result, n_boot = 50)
 #> <AutoXplainR paired evaluation bootstrap>
 #>   metric: rmse | units: 6 observations
-#>    quantity  estimate     lower     upper
-#>     primary  2.441285  1.569146  3.556459
-#>    baseline  6.621187  4.610014  8.512278
-#>  difference -4.179902 -6.340108 -1.555010
+#>    quantity  estimate      lower     upper
+#>     primary  2.455942  0.8680807  3.437006
+#>    baseline  6.621187  4.6100140  8.512278
+#>  difference -4.165245 -6.0630899 -1.917466
 #> Paired percentile intervals conditional on the fitted models; negative differences favor the primary model.
 #> These intervals omit fitting and selection uncertainty and assume independent sampling units.
 #> Fewer than 20 sampling units: interval endpoints may be very unstable. 

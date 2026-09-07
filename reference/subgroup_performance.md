@@ -76,11 +76,31 @@ fit <- autoxplain(cars, "mpg", seed = 2026)
 #> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
 #> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
 #> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
+#> Warning: prediction from rank-deficient fit; attr(*, "non-estim") has doubtful cases
 subgroup_performance(fit, by = "transmission", min_rows = 3)
 #> <AutoXplainR subgroup performance>
 #>   model:       main_model
 #>   compared by: transmission (2 groups)
 #>   metric:      rmse (lower is better)
-#>   largest gap: 3.3003
+#>   largest gap: 1.227
 #>   caution:     descriptive holdout check; not fairness certification
 ```

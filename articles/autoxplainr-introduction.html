@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,11 +79,11 @@
 
     
     
-<p>AutoXplainR fits a tabular prediction model, evaluates it against a
-simple baseline, and retains fitted explanations and an optional HTML
-report. The ordinary workflow runs locally. This example predicts a
-parcel’s delivery time using information available at dispatch. All data
-below are synthetic.</p>
+<p>AutoXplainR compares tabular prediction models, evaluates them
+against a simple baseline, and retains fitted explanations and an
+optional HTML report. The ordinary workflow runs locally. This example
+predicts a parcel’s delivery time using information available at
+dispatch. All data below are synthetic.</p>
 <div class="section level2">
 <h2 id="choose-what-can-be-known-when-predicting">Choose what can be known when predicting<a class="anchor" aria-label="anchor" href="#choose-what-can-be-known-when-predicting"></a>
 </h2>
@@ -113,7 +113,7 @@ need a grouped validation plan.</p>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">inputs</span>, <span class="st">"delivery_hours"</span>,</span>
+<span>  <span class="va">inputs</span>, <span class="st">"delivery_hours"</span>, model_set <span class="op">=</span> <span class="st">"comparison"</span>,</span>
 <span>  validation <span class="op">=</span> <span class="fu"><a href="../reference/validation_split.html">validation_split</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"dispatched"</span><span class="op">)</span>,</span>
 <span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>novel_level_strategy <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
@@ -126,16 +126,17 @@ need a grouped validation plan.</p>
 <span><span class="co">#&gt;   data:       192 training + 48 test rows</span></span>
 <span><span class="co">#&gt;   design:     temporal</span></span>
 <span><span class="co">#&gt;   selection:  Pre-specified model; candidate evaluation ranks did not select it.</span></span>
-<span><span class="co">#&gt;   models:     2 (primary + baseline)</span></span>
+<span><span class="co">#&gt;   models:     4 (retained comparison set)</span></span>
 <span><span class="co">#&gt;   score:      rmse = 2.0031 on test rows</span></span>
 <span><span class="co">#&gt;   baseline:   74.3% improvement in rmse</span></span>
 <span><span class="co">#&gt;   caution:    Only 48 rows were available for test scoring.</span></span>
 <span><span class="co">#&gt;   next:       Treat the scores as preliminary and validate on more representative rows.</span></span>
 <span><span class="co">#&gt;   finding:    The pairwise association screen does not assess every form of dependence.</span></span>
 <span><span class="co">#&gt;   inspect:    Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.</span></span>
-<span><span class="co">#&gt;   evidence:   4 model-feature shuffle summaries; 2 fitted effects</span></span>
+<span><span class="co">#&gt;   evidence:   8 model-feature shuffle summaries; 2 fitted effects</span></span>
 <span><span class="co">#&gt;   inspect:    render_model_report(result, "report.html"), evidence_summary(result)</span></span>
 <span><span class="co">#&gt;   predict:    predict(result, newdata) uses the saved training recipe</span></span>
+<span><span class="co">#&gt;   compare:    compare_model_behavior(result) examines the retained models</span></span>
 <span></span>
 <span><span class="va">recipe</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">preprocessing_metadata</span><span class="op">$</span><span class="va">training_data</span><span class="op">$</span><span class="va">recipe</span></span>
 <span><span class="va">recipe</span><span class="op">$</span><span class="va">final_columns</span></span>
@@ -151,12 +152,15 @@ need a grouped validation plan.</p>
 <span><span class="co">#&gt; [1] "express"  "standard"</span></span>
 <span><span class="va">recipe</span><span class="op">$</span><span class="va">novel_level_strategy</span></span>
 <span><span class="co">#&gt; [1] "error"</span></span></code></pre></div>
-<p>This fits a linear regression and an intercept-only baseline on the
-earlier rows. The latest 20% of distinct dispatch dates are reserved for
-evaluation. <code>dispatched</code> determines the split and is excluded
-from predictors. Missing predictor values are imputed using values
-learned on training rows; character predictors are converted to factors
-using their training levels.</p>
+<p>This fits a linear regression, two trees and an intercept-only
+baseline on the earlier rows. The latest 20% of distinct dispatch dates
+are reserved for evaluation. We explicitly use comparison mode because
+chronological tuning is not yet implemented. For independently sampled
+rows, the ordinary default compares linear, tree and neural models using
+training-only cross-validation. <code>dispatched</code> determines the
+split and is excluded from predictors. Missing predictor values are
+imputed using values learned on training rows; character predictors are
+converted to factors using their training levels.</p>
 <p>The default novel-category strategy is <code>"mode"</code>, which
 maps an unseen category to the most frequent training category. Here we
 deliberately choose <code>"error"</code> so that a new service cannot be
@@ -167,15 +171,21 @@ silently treated as an existing one.</p>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">leaderboard</span></span>
-<span><span class="co">#&gt;   rank        model_id                   model     role   family backend</span></span>
-<span><span class="co">#&gt; 1    1      main_model       linear regression  primary   linear   stats</span></span>
-<span><span class="co">#&gt; 2    2 simple_baseline intercept-only baseline baseline baseline   stats</span></span>
+<span><span class="co">#&gt;   rank        model_id                   model      role   family backend</span></span>
+<span><span class="co">#&gt; 1    1      main_model       linear regression   primary   linear   stats</span></span>
+<span><span class="co">#&gt; 2    2   flexible_tree  flexible decision tree candidate     tree   rpart</span></span>
+<span><span class="co">#&gt; 3    3      small_tree     small decision tree candidate     tree   rpart</span></span>
+<span><span class="co">#&gt; 4    4 simple_baseline intercept-only baseline  baseline baseline   stats</span></span>
 <span><span class="co">#&gt;       rmse      mae     r_squared training_time_ms model_size_kb complexity</span></span>
-<span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                1      67.79688          3</span></span>
-<span><span class="co">#&gt; 2 7.795201 6.683058 -5.052385e-05                3      56.07812          1</span></span>
+<span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                2      67.79688          3</span></span>
+<span><span class="co">#&gt; 2 2.241207 1.837860  9.173332e-01                2      52.28125         20</span></span>
+<span><span class="co">#&gt; 3 4.319412 3.508486  6.929447e-01                8      47.83594          4</span></span>
+<span><span class="co">#&gt; 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1</span></span>
 <span><span class="co">#&gt;   fit_warning prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                              1</span></span>
-<span><span class="co">#&gt; 2                              0</span></span>
+<span><span class="co">#&gt; 2                              1</span></span>
+<span><span class="co">#&gt; 3                              1</span></span>
+<span><span class="co">#&gt; 4                              0</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                                                            rmse </span></span>
 <span><span class="co">#&gt;                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
@@ -201,21 +211,37 @@ evidence.</p>
 <span><span class="co">#&gt; 2      main_model     service   2.090297 0.05157578 1.982348  2.198246</span></span>
 <span><span class="co">#&gt; 3 simple_baseline distance_km   0.000000 0.00000000 0.000000  0.000000</span></span>
 <span><span class="co">#&gt; 4 simple_baseline     service   0.000000 0.00000000 0.000000  0.000000</span></span>
+<span><span class="co">#&gt; 5      small_tree distance_km   5.624624 0.16915766 5.270573  5.978675</span></span>
+<span><span class="co">#&gt; 6      small_tree     service   0.000000 0.00000000 0.000000  0.000000</span></span>
+<span><span class="co">#&gt; 7   flexible_tree distance_km   8.270003 0.16436878 7.925975  8.614031</span></span>
+<span><span class="co">#&gt; 8   flexible_tree     service   1.840996 0.03933630 1.758664  1.923328</span></span>
 <span><span class="co">#&gt;   sign_stability baseline  permuted metric n_repeats max_association</span></span>
 <span><span class="co">#&gt; 1              1 2.003144 10.233818   rmse        20       0.1499773</span></span>
 <span><span class="co">#&gt; 2              1 2.003144  4.093441   rmse        20       0.1499773</span></span>
 <span><span class="co">#&gt; 3              1 7.795201  7.795201   rmse        20       0.1499773</span></span>
 <span><span class="co">#&gt; 4              1 7.795201  7.795201   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 5              1 4.319412  9.944036   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 6              1 4.319412  4.319412   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 7              1 2.241207 10.511210   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 8              1 2.241207  4.082203   rmse        20       0.1499773</span></span>
 <span><span class="co">#&gt;   associated_feature       shuffle_status dependence_status</span></span>
 <span><span class="co">#&gt; 1            service positive_loss_change    limited_screen</span></span>
 <span><span class="co">#&gt; 2        distance_km positive_loss_change    limited_screen</span></span>
 <span><span class="co">#&gt; 3            service   no_observed_change    limited_screen</span></span>
 <span><span class="co">#&gt; 4        distance_km   no_observed_change    limited_screen</span></span>
+<span><span class="co">#&gt; 5            service positive_loss_change    limited_screen</span></span>
+<span><span class="co">#&gt; 6        distance_km   no_observed_change    limited_screen</span></span>
+<span><span class="co">#&gt; 7            service positive_loss_change    limited_screen</span></span>
+<span><span class="co">#&gt; 8        distance_km positive_loss_change    limited_screen</span></span>
 <span><span class="co">#&gt;                                                                              claim</span></span>
 <span><span class="co">#&gt; 1   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
 <span><span class="co">#&gt; 2   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
 <span><span class="co">#&gt; 3 No loss change in these shuffles; this is not proof of no population importance.</span></span>
 <span><span class="co">#&gt; 4 No loss change in these shuffles; this is not proof of no population importance.</span></span>
+<span><span class="co">#&gt; 5   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
+<span><span class="co">#&gt; 6 No loss change in these shuffles; this is not proof of no population importance.</span></span>
+<span><span class="co">#&gt; 7   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
+<span><span class="co">#&gt; 8   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">explanations</span><span class="op">$</span><span class="va">audit</span><span class="op">$</span><span class="va">findings</span></span>
 <span><span class="co">#&gt;   severity                     code</span></span>
 <span><span class="co">#&gt; 1     note association_screen_scope</span></span>
@@ -260,9 +286,16 @@ should be represented before refitting or changing the recipe.</p>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
 <p>Use a persistent path such as <code>"delivery-report.html"</code> to
-keep the report. It opens offline in a browser. Review feature names and
-diagnostics before sharing. <code>saveRDS(result, "analysis.rds")</code>
-retains models <strong>and training/evaluation data</strong>.</p>
+keep the report. It opens offline in a browser. Start in <strong>Compare
+models</strong> to read the scores and costs, then click a model to see
+its important inputs and fitted curves. <strong>Input
+relationships</strong> shows which predictors move together;
+<strong>Inspect predictions</strong> shows errors and the R command for
+the selected model. Help buttons work on hover, keyboard focus and tap.
+<strong>Print this view</strong> exports the active tab and selections.
+Review feature names and diagnostics before sharing.
+<code>saveRDS(result, "analysis.rds")</code> retains models <strong>and
+training/evaluation data</strong>.</p>
 <p>For classification, set outcome factor levels deliberately: binary
 probabilities refer to the <strong>second</strong> level. For example,
 <code>factor(outcome, levels = c("no", "yes"))</code> makes predictions

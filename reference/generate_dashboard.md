@@ -37,9 +37,8 @@ generate_dashboard(
 
 - top_features:
 
-  Maximum number of features included in the audit. The initial ranking
-  is obtained from repeated permutation importance on the leading model,
-  never from impurity importance.
+  Maximum displayed inputs per model. The audit uses the union of their
+  leading inputs, ranked by repeated permutation importance.
 
 - sample_instances:
 

@@ -1,11 +1,12 @@
-# Render a beginner-first model report
+# Render an interactive model comparison
 
 Creates a standalone HTML report from an
 [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
-result. The report leads with the prediction question, evaluation role,
-simple-baseline comparison, and plain metric definitions. Feature
-reliance, fitted effects, and an explanation evidence audit follow with
-progressively more detail.
+result. The report opens with model scores, effective settings and
+measured costs. Focused tabs show feature importance, class-specific
+fitted effects, input relationships, prediction errors and checks. Model
+details expose the retained fit and its preprocessing; background
+explanations use optional help and expandable details.
 
 ## Usage
 
@@ -67,7 +68,8 @@ render_model_report(
 
 - top_features:
 
-  Maximum number of features audited when `audit` is not supplied.
+  Maximum displayed features per model when `audit` is not supplied. The
+  audit uses their union; multiclass curves cover each outcome class.
 
 - n_repeats:
 

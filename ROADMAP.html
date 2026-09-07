@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,15 +50,14 @@
 
 <p>AutoXplainR’s purpose is a short, inspectable path from a tabular prediction question to a baseline comparison, fitted explanations and a report. Existing packages already provide the underlying estimators and much of the reporting infrastructure. Integration and reader comprehension are hypotheses to test.</p>
 <div class="section level2">
-<h2 id="id_040-correct-and-explain-the-current-workflow">0.4.0: correct and explain the current workflow<a class="anchor" aria-label="anchor" href="#id_040-correct-and-explain-the-current-workflow"></a></h2>
-<p>This release follows the <a href="validation/audit-0.3.0.html">0.3.0 audit</a>. The release record must identify which checks actually ran; implementation alone is not acceptance evidence.</p>
-<ul><li>Use the numerical feature grid in report graphics, label axes and prediction targets, and retain categorical tables and unavailable effects.</li>
-<li>Replace overall explanation grades with scoped diagnostics. Keep shuffle behavior, limited association screening, evaluation uncertainty and model disagreement distinct. A missing check must not look successful.</li>
-<li>Render HTML and local narratives from the same retained evidence. Explicit narrative overrides replace components without discarding evaluation scores. Hosted text has format checks, not guaranteed numerical grounding.</li>
-<li>Preserve prediction identity, validation boundaries and recorded preprocessing across adapters. Show when supplied models or rows cannot be compared.</li>
-<li>Teach a complete real-data workflow: choose predictors, exclude future information, set outcome levels, choose a split, inspect the recipe, evaluate, predict and share. Move specialized tasks into focused articles.</li>
-<li>Deprecate duplicate dashboard entry points with replacements and warnings in 0.4.0; keep compatibility until at least 0.6.0. Separate GitHub publication from optional CRAN submission and record manual checks explicitly.</li>
-</ul><p>Acceptance requires meaningful regression tests for the reported failures, executed tutorials, numerical reference checks, rendered report review and package checks of the exact release archive. See the <a href="RELEASE_CHECKLIST.html">release checklist</a>.</p>
+<h2 id="id_050-restore-model-exploration">0.5.0: restore model exploration<a class="anchor" aria-label="anchor" href="#id_050-restore-model-exploration"></a></h2>
+<p>The <a href="validation/product-review-0.4.0.html">review of 0.4.0</a> found that statistical repairs had displaced the package’s main purpose: comparing models and understanding their behaviour. The current work restores that purpose.</p>
+<ul><li>Make a small training-CV search across linear, tree and neural models the one-command default. Keep a fast reference model available explicitly.</li>
+<li>Replace the long report with focused tabs. Compare scores and costs first; let the reader switch models, choose an input, inspect relationships and examine prediction errors. Put background explanations in accessible help.</li>
+<li>Audit the inputs used by each retained model and connect the displayed importance bars to its fitted curves. Keep failures explicit.</li>
+<li>Gate publication on executed task walkthroughs, numerical answers checked against R, keyboard/mobile checks, actual screenshots and printed views. Record concrete failures and repairs, not just a test total.</li>
+<li>Preserve the corrected statistical contracts from 0.4.0. Test ranking is descriptive; training CV chooses the default. Associations remain distinct from causal effects and sampling uncertainty.</li>
+</ul><p>See the <a href="RELEASE_CHECKLIST.html">release checklist</a>. A participant study can add independent evidence, but ordinary task acceptance must happen now.</p>
 </div>
 <div class="section level2">
 <h2 id="next-interoperability-and-demonstrated-usefulness">Next: interoperability and demonstrated usefulness<a class="anchor" aria-label="anchor" href="#next-interoperability-and-demonstrated-usefulness"></a></h2>

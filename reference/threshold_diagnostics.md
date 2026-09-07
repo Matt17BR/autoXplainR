@@ -66,6 +66,6 @@ threshold_diagnostics(fit, thresholds = c(0.3, 0.5, 0.7))
 #>   positive:    manual
 #>   rows:        7 (test)
 #>   thresholds:  3 checked
-#>   lowest cost: 0.2857 at 0.3, 0.5, 0.7 (descriptive only)
+#>   lowest cost: 0.1429 at 0.3, 0.5, 0.7 (descriptive only)
 #>   caution:     validate a chosen threshold on different data
 ```

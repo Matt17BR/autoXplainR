@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,10 +108,10 @@ cannot establish independence.</p>
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span>, explain <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">intervals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/performance_uncertainty.html">performance_uncertainty</a></span><span class="op">(</span><span class="va">result</span>, n_boot <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="va">intervals</span><span class="op">$</span><span class="va">estimates</span></span>
-<span><span class="co">#&gt;     quantity  estimate     lower      upper</span></span>
-<span><span class="co">#&gt; 1    primary  2.441285  1.559049  3.3689722</span></span>
-<span><span class="co">#&gt; 2   baseline  6.621187  3.705648  8.3772749</span></span>
-<span><span class="co">#&gt; 3 difference -4.179902 -6.148405 -0.4078893</span></span></code></pre></div>
+<span><span class="co">#&gt;     quantity  estimate      lower     upper</span></span>
+<span><span class="co">#&gt; 1    primary  2.455942  0.6928441  3.609810</span></span>
+<span><span class="co">#&gt; 2   baseline  6.621187  3.7056483  8.377275</span></span>
+<span><span class="co">#&gt; 3 difference -4.165245 -6.0242302 -0.824004</span></span></code></pre></div>
 <p>This small teaching example uses 100 bootstrap draws; use at least
 1000 for an analysis. The paired bootstrap measures evaluation-sample
 variation conditional on the fitted primary model and baseline. Grouped
@@ -131,8 +131,8 @@ methods</a>.</p>
 <span><span class="co">#&gt;   model:      main_model</span></span>
 <span><span class="co">#&gt;   check:      probability of the positive class `manual`</span></span>
 <span><span class="co">#&gt;   rows:       7 in 1 probability groups</span></span>
-<span><span class="co">#&gt;   average:    0.571 predicted vs 0.429 observed</span></span>
-<span><span class="co">#&gt;   binned gap: 0.143 (lower is better)</span></span>
+<span><span class="co">#&gt;   average:    0.423 predicted vs 0.429 observed</span></span>
+<span><span class="co">#&gt;   binned gap: 0.006 (lower is better)</span></span>
 <span><span class="co">#&gt;   caution:    sample- and grouping-dependent; not a population guarantee</span></span>
 <span><span class="fu"><a href="../reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;AutoXplainR decision-threshold check&gt;</span></span>
@@ -140,7 +140,7 @@ methods</a>.</p>
 <span><span class="co">#&gt;   positive:    manual</span></span>
 <span><span class="co">#&gt;   rows:        7 (test)</span></span>
 <span><span class="co">#&gt;   thresholds:  17 checked</span></span>
-<span><span class="co">#&gt;   lowest cost: 0.1429 at 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90 (descriptive only)</span></span>
+<span><span class="co">#&gt;   lowest cost: 0 at 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90 (descriptive only)</span></span>
 <span><span class="co">#&gt;   caution:     validate a chosen threshold on different data</span></span></code></pre></div>
 <p>Binary probabilities refer to the second training factor level, here
 <code>"manual"</code>. Calibration compares predicted probabilities with
@@ -156,7 +156,7 @@ selection.</p>
 <span><span class="co">#&gt;   model:       main_model</span></span>
 <span><span class="co">#&gt;   compared by: am (2 groups)</span></span>
 <span><span class="co">#&gt;   metric:      rmse (lower is better)</span></span>
-<span><span class="co">#&gt;   largest gap: 1.418</span></span>
+<span><span class="co">#&gt;   largest gap: 0.0763</span></span>
 <span><span class="co">#&gt;   caution:     descriptive holdout check; not fairness certification</span></span></code></pre></div>
 <p>Subgroup scores describe an explicitly selected column. They are not
 a fairness certification, and small groups may supply insufficient

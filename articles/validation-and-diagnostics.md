@@ -34,10 +34,10 @@ duplicate check cannot establish independence.
 result <- autoxplain(mtcars, "mpg", explain = FALSE)
 intervals <- performance_uncertainty(result, n_boot = 100, seed = 2026)
 intervals$estimates
-#>     quantity  estimate     lower      upper
-#> 1    primary  2.441285  1.559049  3.3689722
-#> 2   baseline  6.621187  3.705648  8.3772749
-#> 3 difference -4.179902 -6.148405 -0.4078893
+#>     quantity  estimate      lower     upper
+#> 1    primary  2.455942  0.6928441  3.609810
+#> 2   baseline  6.621187  3.7056483  8.377275
+#> 3 difference -4.165245 -6.0242302 -0.824004
 ```
 
 This small teaching example uses 100 bootstrap draws; use at least 1000
@@ -59,8 +59,8 @@ calibration_diagnostics(fit)
 #>   model:      main_model
 #>   check:      probability of the positive class `manual`
 #>   rows:       7 in 1 probability groups
-#>   average:    0.571 predicted vs 0.429 observed
-#>   binned gap: 0.143 (lower is better)
+#>   average:    0.423 predicted vs 0.429 observed
+#>   binned gap: 0.006 (lower is better)
 #>   caution:    sample- and grouping-dependent; not a population guarantee
 threshold_diagnostics(fit)
 #> <AutoXplainR decision-threshold check>
@@ -68,7 +68,7 @@ threshold_diagnostics(fit)
 #>   positive:    manual
 #>   rows:        7 (test)
 #>   thresholds:  17 checked
-#>   lowest cost: 0.1429 at 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90 (descriptive only)
+#>   lowest cost: 0 at 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90 (descriptive only)
 #>   caution:     validate a chosen threshold on different data
 ```
 
@@ -87,7 +87,7 @@ subgroup_performance(regression, "am")
 #>   model:       main_model
 #>   compared by: am (2 groups)
 #>   metric:      rmse (lower is better)
-#>   largest gap: 1.418
+#>   largest gap: 0.0763
 #>   caution:     descriptive holdout check; not fairness certification
 ```
 

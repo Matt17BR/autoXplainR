@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,11 +140,11 @@ establish equivalence on every possible perturbed input.</p>
 <span><span class="co">#&gt; # Model Fit and Evaluation Report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## Scope</span></span>
-<span><span class="co">#&gt; Target: `mpg` (regression). Models: 2. Inputs: 10.</span></span>
+<span><span class="co">#&gt; Target: `mpg` (regression). Models: 4. Inputs: 10.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## Did the model improve on a simple baseline?</span></span>
-<span><span class="co">#&gt; The linear regression was evaluated on 6 test rows. Its **rmse** was 3.5529.</span></span>
-<span><span class="co">#&gt; That is a 30.3% improvement over the intercept-only baseline (5.0963).</span></span>
+<span><span class="co">#&gt; The tuned decision tree was evaluated on 6 test rows. Its **rmse** was 2.6856.</span></span>
+<span><span class="co">#&gt; That is a 47.3% improvement over the intercept-only baseline (5.0963).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## What the main metric means</span></span>
 <span><span class="co">#&gt; **rmse:** Typical prediction error, with larger mistakes weighted more heavily; lower is better.</span></span>
@@ -152,23 +152,38 @@ establish equivalence on every possible perturbed input.</p>
 <span><span class="co">#&gt; ## Score cautions</span></span>
 <span><span class="co">#&gt; - **caution:** Only 6 rows were available for test scoring. Treat the scores as preliminary and validate on more representative rows.</span></span>
 <span><span class="co">#&gt; - **caution:** 26 training rows were used with 10 input features. Use fewer justified features or more training data, and expect unstable coefficients.</span></span>
-<span><span class="co">#&gt; - **warning:** Evaluation R-squared is negative, so squared error exceeded an evaluation-mean reference. Do not rely on this model for prediction without substantially better validation performance.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ## How automatic tuning selected the model</span></span>
+<span><span class="co">#&gt; 15 configurations across 3 model families were compared with 5 training-only folds. The selection metric was rmse.</span></span>
+<span><span class="co">#&gt; The one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.</span></span>
+<span><span class="co">#&gt; The resampling-selected configuration was `tree_05`; the actual final fitted configuration was `tree_05` (decision tree). A recorded refit fallback was not needed.</span></span>
+<span><span class="co">#&gt; That resampled score selected a configuration; it is not the final performance estimate. The held-out score above evaluated the selected, refitted model on different rows.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ## What did the retained models do differently?</span></span>
+<span><span class="co">#&gt; This section is computed evidence from common evaluation rows, not a claim inferred from model-family names.</span></span>
+<span><span class="co">#&gt; The largest average paired prediction difference was between `main_model` and `linear_model`: 2.5416 using absolute difference in predicted target units.</span></span>
+<span><span class="co">#&gt; Descriptive comparison of supplied fitted models on common evaluation rows; not causal inference, uncertainty coverage, or a deployment rule.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## Findings</span></span>
-<span><span class="co">#&gt; - Pairwise association flags affect wt, qsec, disp, hp, cyl, am. Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.</span></span>
-<span><span class="co">#&gt; - Shuffle intervals do not resolve the direction of the mean loss change for linear regression / vs. Inspect the repeat distribution; more shuffles address Monte Carlo error only.</span></span>
+<span><span class="co">#&gt; - Pairwise association flags affect cyl, hp, disp, drat, wt, qsec, am, gear. Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.</span></span>
+<span><span class="co">#&gt; - Shuffle intervals do not resolve the direction of the mean loss change for tuned neural network alternative / gear, tuned neural network alternative / qsec, tuned neural network alternative / am, tuned neural network alternative / drat, tuned neural network alternative / carb, linear regression reference / vs, linear regression reference / am. Inspect the repeat distribution; more shuffles address Monte Carlo error only.</span></span>
 <span><span class="co">#&gt; - The pairwise association screen does not assess every form of dependence. Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## Fitted feature evidence for linear regression</span></span>
+<span><span class="co">#&gt; ## Fitted feature evidence for tuned decision tree</span></span>
 <span><span class="co">#&gt; Retained primary-model audit.</span></span>
 <span><span class="co">#&gt; Permutation importance is the change in rmse after shuffling an input. These fitted-model summaries should not be read as causal effects.</span></span>
-<span><span class="co">#&gt; - wt: 1.5611; shuffle Monte Carlo interval [1.1245, 1.9977]; positive loss change.</span></span>
-<span><span class="co">#&gt; - qsec: 1.2301; shuffle Monte Carlo interval [0.9354, 1.5249]; positive loss change.</span></span>
-<span><span class="co">#&gt; - disp: 1.0061; shuffle Monte Carlo interval [0.6047, 1.4076]; positive loss change.</span></span>
-<span><span class="co">#&gt; Showing three of 8 retained feature summaries; inspect the full audit for the rest.</span></span>
-<span><span class="co">#&gt; - ALE for wt (predicted value): centered effects range from -5.347 to 3.6053.</span></span>
-<span><span class="co">#&gt; - ALE for qsec (predicted value): centered effects range from -2.741 to 2.8551.</span></span>
-<span><span class="co">#&gt; - ALE for disp (predicted value): centered effects range from -3.1662 to 3.2498.</span></span>
+<span><span class="co">#&gt; - cyl: 0.6933; shuffle Monte Carlo interval [0.2558, 1.1308]; positive loss change.</span></span>
+<span><span class="co">#&gt; - hp: 0.4808; shuffle Monte Carlo interval [0.2272, 0.7344]; positive loss change.</span></span>
+<span><span class="co">#&gt; - disp: 0.00; shuffle Monte Carlo interval [0.00, 0.00]; no observed change.</span></span>
+<span><span class="co">#&gt; Showing three of 10 retained feature summaries; inspect the full audit for the rest.</span></span>
+<span><span class="co">#&gt; - ALE for cyl (predicted value): centered effects range from -1.5606 to 3.1213.</span></span>
+<span><span class="co">#&gt; - ALE for hp (predicted value): centered effects range from -1.7733 to 0.8867.</span></span>
+<span><span class="co">#&gt; - ALE for disp (predicted value): centered effects range from 0.00 to 0.00.</span></span>
+<span><span class="co">#&gt; - ALE for drat (predicted value): centered effects range from 0.00 to 0.00.</span></span>
+<span><span class="co">#&gt; - ALE for wt (predicted value): centered effects range from 0.00 to 0.00.</span></span>
+<span><span class="co">#&gt; - ALE for qsec (predicted value): centered effects range from 0.00 to 0.00.</span></span>
+<span><span class="co">#&gt; - ALE for vs (predicted value): centered effects range from 0.00 to 0.00.</span></span>
+<span><span class="co">#&gt; - ALE for am (predicted value): centered effects range from 0.00 to 0.00.</span></span>
 <span><span class="co">#&gt; Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.</span></span>
 <span><span class="co">#&gt; - performance uncertainty: not run. </span></span>
 <span><span class="co">#&gt; - resources: not run. This optional check has not been computed.</span></span>

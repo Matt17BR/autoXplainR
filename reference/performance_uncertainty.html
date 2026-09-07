@@ -15,7 +15,7 @@ it does not include fitting, tuning, or feature-selection uncertainty."></head><
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,10 +121,10 @@ Their Application. Cambridge University Press. <a href="doi:10.1017/CBO978051180
 <span class="r-in"><span><span class="fu">performance_uncertainty</span><span class="op">(</span><span class="va">result</span>, n_boot <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR paired evaluation bootstrap&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   metric: rmse | units: 6 observations</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    quantity  estimate     lower     upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     primary  2.441285  1.569146  3.556459</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    baseline  6.621187  4.610014  8.512278</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  difference -4.179902 -6.340108 -1.555010</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    quantity  estimate      lower     upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     primary  2.455942  0.8680807  3.437006</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    baseline  6.621187  4.6100140  8.512278</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  difference -4.165245 -6.0630899 -1.917466</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Paired percentile intervals conditional on the fitted models; negative differences favor the primary model.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> These intervals omit fitting and selection uncertainty and assume independent sampling units.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fewer than 20 sampling units: interval endpoints may be very unstable. </span>
