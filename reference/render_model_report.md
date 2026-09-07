@@ -22,7 +22,8 @@ render_model_report(
   top_features = 8L,
   n_repeats = 20L,
   max_models = 5L,
-  uncertainty = FALSE
+  uncertainty = FALSE,
+  target_units = NULL
 )
 ```
 
@@ -83,9 +84,16 @@ render_model_report(
   using its default paired bootstrap. Off by default; temporal
   evaluation is not supported.
 
+- target_units:
+
+  Optional unit label for a numeric target. Used in the analysis brief
+  and effect captions; no units are inferred.
+
 ## Value
 
-The normalized output path, invisibly.
+The normalized output path, invisibly. Its `diagnostic_status` attribute
+records optional checks performed for this report. The input result is
+not changed by rendering.
 
 ## Examples
 

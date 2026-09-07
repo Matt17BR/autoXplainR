@@ -65,7 +65,7 @@ tuning_results(tuned)
 #>   search:     4 configurations across 3 model families
 #>   resampling: 3 folds; rmse minimized
 #>   evidence:   120/120 outer-training rows predicted
-#>   rule:       one-standard-error (prefer the reviewed family priority, then the least-flexible near-best setting within that family)
+#>   rule:       one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family)
 #>   selected:   linear regression (linear_01)
 #>   final fit:  linear_01
 #>   score:      0.32064 +/- 0.01519 SE

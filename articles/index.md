@@ -2,7 +2,13 @@
 
 ### Get started
 
-- [Your First Model with
-  AutoXplainR](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.md):
+- [Your first prediction
+  report](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.md):
+- [Compare and tune
+  models](https://matt17br.github.io/autoXplainR/articles/model-selection.md):
+- [Choose validation and inspect
+  diagnostics](https://matt17br.github.io/autoXplainR/articles/validation-and-diagnostics.md):
+- [Explain an existing model and write a
+  memo](https://matt17br.github.io/autoXplainR/articles/existing-models-and-narratives.md):
 - [Statistical methods and
   interpretation](https://matt17br.github.io/autoXplainR/articles/statistical-methods.md):

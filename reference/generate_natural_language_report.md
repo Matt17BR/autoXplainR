@@ -1,10 +1,13 @@
-# Generate an evidence-constrained narrative
+# Summarize retained model evidence in prose
 
 Produces a deterministic local narrative by default. Remote or locally
 hosted generative models are used only when `provider` is set
-explicitly. Raw rows, fitted objects, case-level predictions, and
-secrets are never included in the prompt. Generated prose remains
-secondary to the computed evaluation and explanation evidence.
+explicitly. Evaluation, retained explanation findings, fitted effects
+and failed checks are included automatically. Prompt construction omits
+raw rows, fitted objects and case-level predictions; names and
+diagnostic text may still be sensitive. Hosted output is checked for
+format and length, not numerical grounding. Review generated claims
+against the computed evidence.
 
 ## Usage
 
@@ -38,19 +41,25 @@ generate_natural_language_report(
 
 - importance_data:
 
-  Optional permutation importance data.
+  Optional permutation importance table overriding the retained audit's
+  importance component. Tables with an explainer identity must match the
+  primary model. Bare tables are labeled user-supplied with unverified
+  identity; their metric should be supplied as a `metric` attribute.
 
 - pdp_data:
 
-  Optional feature-effect list.
+  Optional feature-effect list overriding retained effects. An empty
+  list omits effects from the narrative.
 
 - model_characteristics:
 
-  Optional model metadata.
+  Retained for compatibility. Generic model-family capacity descriptions
+  are not included in the memo.
 
 - audit:
 
-  Optional `autoxplain_audit`.
+  Optional `autoxplain_audit` overriding retained audit findings and
+  importance. The result's evaluation and effects remain available.
 
 - provider:
 

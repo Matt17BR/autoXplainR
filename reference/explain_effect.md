@@ -48,7 +48,9 @@ explain_effect(
 
 - n_points:
 
-  Number of quantile bins for ALE or grid points for PDP.
+  Maximum number of empirical quantile bins for ALE or grid points for
+  PDP. Ties can reduce the ALE bin count. ALE returns both the first
+  lower boundary and each upper boundary.
 
 - quantile_range:
 
@@ -99,6 +101,18 @@ propagate within-bin variation in fixed-model local prediction
 differences and are unavailable when any bin has fewer than two rows.
 Neither is a model-fitting or population confidence interval.
 
+## Details
+
+ALE uses observed empirical quantiles (type 1), with right-closed bins
+and the minimum included in the first bin. Every bin therefore has
+observations even when predictor values are tied. Cumulative local
+differences are reported at the bin boundaries. The curve is centered by
+subtracting the empirical mean of its linearly interpolated values at
+the reference observations. The initial boundary has no separate bin
+count (`n = NA`); its support is that of the first bin. These are
+finite-bin approximations, and wider bins can obscure within-bin
+nonlinear behavior.
+
 ## Examples
 
 ``` r
@@ -108,25 +122,26 @@ explain_effect(x, feature = "wt")
 #> <AutoXplainR ALE effect>
 #>   feature: wt | rows: 32 | max association: 0.898
 #>   target:  predicted value
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
 #>   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.
-#>        wt accumulated_effect std_error conf_low conf_high n support
-#>  1.624500        6.043000304        NA       NA        NA 2    0.50
-#>  1.845750        5.208704821        NA       NA        NA 2    0.50
-#>  2.067250        4.359205776        NA       NA        NA 1    0.25
-#>  2.264000        3.713054377        NA       NA        NA 2    0.50
-#>  2.465125        2.830297539        NA       NA        NA 1    0.25
-#>  2.677125        2.101476770        NA       NA        NA 2    0.50
-#>  2.816875        1.767948621        NA       NA        NA 1    0.25
-#>  3.009375        0.638133895        NA       NA        NA 2    0.50
-#>  3.173500        0.520306287        NA       NA        NA 1    0.25
-#>  3.257000        0.003385168        NA       NA        NA 2    0.50
-#>  3.382500       -0.433717249        NA       NA        NA 1    0.25
-#>  3.454500       -0.543943076        NA       NA        NA 4    1.00
-#>  3.512000       -0.870819666        NA       NA        NA 1    0.25
-#>  3.582500       -1.079868648        NA       NA        NA 2    0.50
-#>  3.690000       -1.688011141        NA       NA        NA 1    0.25
-#>  3.805875       -1.960725040        NA       NA        NA 2    0.50
-#>  3.944625       -2.742758278        NA       NA        NA 1    0.25
-#>  4.670125       -7.475817276        NA       NA        NA 2    0.50
-#>  5.358375       -7.974684165        NA       NA        NA 2    0.50
+#>     wt accumulated_effect std_error conf_low conf_high  n support
+#>  1.513        6.477667775        NA       NA        NA NA    0.50
+#>  1.615        6.089976936        NA       NA        NA  2    0.50
+#>  1.935        4.873691950        NA       NA        NA  2    0.50
+#>  2.140        4.094509380        NA       NA        NA  1    0.25
+#>  2.320        3.410349075        NA       NA        NA  2    0.50
+#>  2.465        2.859219941        NA       NA        NA  1    0.25
+#>  2.770        1.699948313        NA       NA        NA  2    0.50
+#>  2.875        1.300854802        NA       NA        NA  2    0.50
+#>  3.150        0.255609892        NA       NA        NA  1    0.25
+#>  3.190        0.103574268        NA       NA        NA  2    0.50
+#>  3.215        0.008552004        NA       NA        NA  1    0.25
+#>  3.440       -0.846648377        NA       NA        NA  4    1.00
+#>  3.460       -0.922666189        NA       NA        NA  1    0.25
+#>  3.570       -1.340764153        NA       NA        NA  3    0.75
+#>  3.780       -2.138951175        NA       NA        NA  2    0.50
+#>  3.845       -2.386009063        NA       NA        NA  2    0.50
+#>  4.070       -3.241209444        NA       NA        NA  1    0.25
+#>  5.345       -8.087344937        NA       NA        NA  2    0.50
+#>  5.424       -8.387615293        NA       NA        NA  1    0.25
 ```

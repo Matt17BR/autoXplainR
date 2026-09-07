@@ -13,7 +13,7 @@ and an explanation evidence audit follow with progressively more detail."></head
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,10 @@ and an explanation evidence audit follow with progressively more detail."></head
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -71,7 +74,8 @@ and an explanation evidence audit follow with progressively more detail.</p>
 <span>  top_features <span class="op">=</span> <span class="fl">8L</span>,</span>
 <span>  n_repeats <span class="op">=</span> <span class="fl">20L</span>,</span>
 <span>  max_models <span class="op">=</span> <span class="fl">5L</span>,</span>
-<span>  uncertainty <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  uncertainty <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  target_units <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -131,10 +135,17 @@ supplied.</p></dd>
 <dd><p>Include <code><a href="performance_uncertainty.html">performance_uncertainty()</a></code> using its default paired
 bootstrap. Off by default; temporal evaluation is not supported.</p></dd>
 
+
+<dt id="arg-target-units">target_units<a class="anchor" aria-label="anchor" href="#arg-target-units"></a></dt>
+<dd><p>Optional unit label for a numeric target. Used in the
+analysis brief and effect captions; no units are inferred.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The normalized output path, invisibly.</p>
+    <p>The normalized output path, invisibly. Its <code>diagnostic_status</code>
+attribute records optional checks performed for this report. The input
+result is not changed by rendering.</p>
     </div>
 
     <div class="section level2">

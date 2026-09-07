@@ -141,7 +141,7 @@ autoxplain(
 - tuning_rule:
 
   Local tuning selection rule. `"one_se"` chooses the first eligible
-  family in the documented reviewed priority, then its least-flexible
+  family in the documented priority, then its least-flexible
   configuration, among candidates whose resampled error is within one
   standard error of the best. The family priority and family-specific
   flexibility proxies are shown by
@@ -246,27 +246,39 @@ result <- autoxplain(mtcars, "mpg")
 result
 #> <AutoXplainR guided result>
 #>   question:   predict `mpg` (regression)
+#>   primary:    linear regression [main_model]
 #>   engine:     base
-#>   data:       26 training + 6 evaluation rows
+#>   data:       26 training + 6 test rows
+#>   design:     reproducible random holdout
+#>   selection:  Pre-specified model; candidate evaluation ranks did not select it.
 #>   models:     2 (primary + baseline)
-#>   result:     primary model has rmse = 2.4413
+#>   score:      rmse = 2.4413 on test rows
 #>   baseline:   63.1% improvement in rmse
-#>   compare:    use model_set = "tuned" for automatic multi-family selection
-#>   evidence:   16 model-feature summaries; 3 fitted effects
-#>   next:       predict(result, newdata), render_model_report(result, "report.html")
+#>   caution:    Only 6 rows were available for test scoring.
+#>   next:       Treat the scores as preliminary and validate on more representative rows.
+#>   finding:    `wt` exceeds the pairwise association threshold.
+#>   inspect:    Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.
+#>   evidence:   16 model-feature shuffle summaries; 3 fitted effects
+#>   inspect:    render_model_report(result, "report.html"), evidence_summary(result)
+#>   predict:    predict(result, newdata) uses the saved training recipe
 explainers <- as_explainers(result)
 audit_explanations(explainers)
 #> <AutoXplainR explanation evidence audit>
-#>   grade:              C (diagnostic, not certification)
 #>   models:             2 (1 near-optimal)
-#>   stable claims:      0.0%
-#>   max dependence:     0.949
-#>   explanation accord: n/a (one model)
-#>   prediction accord:  n/a (one model)
+#>   max association:    0.949
+#>   explanation accord: unavailable
+#>   prediction accord:  unavailable
+#>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>   comparison: Fewer than two supplied models meet the performance tolerance.
 #> 
 #> Findings
-#>   [warning] 10 feature(s) exceed the dependence threshold.
-#>   [warning] 20 model-feature claim(s) are qualified or unsupported.
+#>   [warning] `cyl` exceeds the pairwise association threshold.
+#>   [warning] `disp` exceeds the pairwise association threshold.
+#>   [warning] `hp` exceeds the pairwise association threshold.
+#>   [warning] `drat` exceeds the pairwise association threshold.
+#>   [warning] `wt` exceeds the pairwise association threshold.
+#>   [warning] `qsec` exceeds the pairwise association threshold.
 
 if (FALSE) { # \dontrun{
 if (identical(Sys.getenv("AUTOXPLAIN_RUN_H2O"), "true")) {

@@ -1,8 +1,9 @@
 # Optional narrative providers
 
-AutoXplainR can turn aggregate analysis evidence into prose. The default
-is a deterministic local narrative and does not send a request, even if
-API keys are present in the environment.
+AutoXplainR can summarize evaluation scores, retained explanation
+findings, fitted effects and failed checks in prose. The default is a
+deterministic local narrative and does not send a request, even if API
+keys are present in the environment.
 
 ``` r
 
@@ -34,9 +35,22 @@ names, aggregate statistics and diagnostic text can still be sensitive.
 Review them before choosing a hosted provider. Do not commit API keys or
 provider response captures containing private data.
 
-Structured output constrains response format, not truth. The package
-validates fields and appends interpretation limits locally; generated
-claims still need review against the numerical output. Transport
-behavior is tested with mocked requests. The optional live Gemini test
-is not a statistical validation test and is not required to use or test
-the local workflow.
+The package validates response fields and length and appends
+interpretation limits locally. It does not verify generated numbers or
+enforce factual grounding. Review generated claims against the numerical
+output; prompt instructions and a valid response schema do not guarantee
+correctness. Transport behavior is tested with mocked requests. The
+optional live Gemini test is not a statistical validation test and is
+not required to use or test the local workflow.
+
+The result supplies all retained components automatically. An explicit
+`audit` overrides audit findings and importance while preserving
+evaluation and effects. `importance_data` and `pdp_data` override only
+their respective components. No explanation computation or model fitting
+is repeated to write a memo.
+
+Attached audits and effects must identify the same fitted model and
+evaluation data. Identified importance tables receive the same check.
+Bare importance tables remain available as explicitly labeled
+user-supplied evidence with unverified identity; set their `metric`
+attribute rather than implying that the package measured their values.

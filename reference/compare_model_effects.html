@@ -15,7 +15,7 @@ fitted response to a named input differs."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,10 @@ fitted response to a named input differs."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -175,14 +178,14 @@ difference variation for ALE; they do not include model-fitting uncertainty.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   support:   relative support &gt;= 0.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Findings</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 1.039) across 6 supported grid points.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 2.754) across 6 supported grid points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [boundary] Pairwise summaries exclude grid points below relative support 0.1 and describe fitted predictions, not causal effects.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pairwise summary</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        model A    model B points mean level gap shape RMSE max gap</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree main_model      6         0.9082      1.039    1.96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     small_tree main_model      6         0.9082      1.039    1.96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree small_tree      6         0.0000      0.000    0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree main_model      6          2.028      2.754   5.347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     small_tree main_model      6          2.028      2.754   5.347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree small_tree      6          0.000      0.000   0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  direction agreement</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    0</span>

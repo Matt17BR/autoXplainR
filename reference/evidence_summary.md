@@ -24,7 +24,7 @@ evidence_summary(result)
 
 A plain list with `schema_version`, package version, task, model
 selection, evaluation, explanation summaries, and interpretation limits.
-Schema 1.0 allows additional fields within a minor package release.
+Schema 2.0 allows additional fields within a minor package release.
 Removing or changing the meaning of a field requires a new schema major
 version.
 

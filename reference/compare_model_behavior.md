@@ -50,8 +50,7 @@ top-feature ranks and pairwise explanation-rank agreement; and
 ## Details
 
 - learner behavior cards describe what each model family can represent;
-  they are reviewed prior knowledge, not findings from the supplied
-  data;
+  they are general descriptions, not findings from the supplied data;
 
 - performance and paired prediction differences are computed from the
   result's common evaluation rows; approximate R object size or runtime,

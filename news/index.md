@@ -1,5 +1,103 @@
 # Changelog
 
+## AutoXplainR 0.4.0
+
+### Correct calculations and evidence identity
+
+- Binary explainers now track the probability event. Reversing
+  `positive` complements native probabilities and corresponding effects.
+  Custom numeric probabilities can declare their event with
+  `probability_class`. Numeric and logical binomial GLMs retain their
+  native success event under reordered evaluation factors; factor GLMs
+  without retained response levels require an explicit event
+  declaration.
+- Invalid labels and factor-valued regression predictions fail before
+  coercion. Hard classification labels remain labels; probability losses
+  and effects require probability-capable adapters. Custom functions
+  with `...` dispatch correctly and preserve their own error messages.
+- Within-stratum shuffles preserve membership even for singleton strata.
+  ALE values now use consistent endpoint coordinates and observed
+  quantile boundaries that avoid unsupported empty bins. Irregular and
+  tied inputs have analytic regression tests and an independent
+  reference comparison.
+- Paired model audits require identical ordered evaluation data,
+  outcomes and event semantics. Content identities include fitted model
+  state, prediction adapter code, data and predictions. Foreign or stale
+  attached evidence fails with instructions to recompute; unchanged
+  serialized evidence can be reused.
+- Dependence screening checks the complete predictor context, including
+  inputs outside the displayed feature subset. Low rank association is
+  explicitly a limited screen, not evidence of independence.
+- F1 is zero for an all-wrong classification with a nonzero denominator;
+  balanced accuracy is unavailable when an outcome class is absent.
+  Threshold, subgroup and overall metrics use the same definition.
+
+### Preserve the analysis boundary
+
+- Subgroup diagnostics retain raw evaluation context and row alignment
+  through imputation, recoding, structured splits and row removal.
+  Missing and novel categories no longer disappear into model
+  preprocessing values.
+- H2O internal cross-validation rejects external learned imputation,
+  missingness column selection and ordinal conversion that would
+  otherwise learn across its internal folds. This restriction is checked
+  before starting Java.
+- Neural learners retain and reuse their model-matrix blueprint,
+  including ordered-factor contrasts. Fitted formulas no longer retain
+  the calling session and sibling models through their environments.
+- Optional engine minimum versions now match exercised versions. A
+  dedicated CI job installs those exact versions in an isolated library
+  and checks their adapters. The core still supports R 4.1; optional
+  engines can require newer R.
+
+### Reports that explain the analysis
+
+- Replaced the card-heavy dashboard with an analysis brief: named
+  primary model, selection rule, evaluation design, baseline comparison
+  and leading caveat. Candidate scores remain descriptive when they did
+  not select the model.
+- Effects have quantitative axes, real numeric spacing, bin support and
+  table equivalents. Resource comparisons move into an expandable
+  section with correctly directed, labeled axes. Mobile tables remain
+  readable; printing includes evidence inside closed disclosures without
+  requiring JavaScript.
+- Findings identify affected models and features and link to the
+  relevant evidence and R inspection commands. Failed and unavailable
+  checks are shown explicitly. Console output surfaces evaluation
+  caveats and useful next steps.
+- Local narratives use the retained feature evidence, effects and failed
+  checks. Hosted narratives remain drafts for review; a format check
+  does not establish numerical grounding.
+- The README includes fresh screenshots of a reproducible synthetic
+  delivery analysis. A shorter first-report tutorial covers real
+  predictor choices, missingness, novel categories, chronological
+  evaluation and saved recipes. Separate articles cover selection,
+  diagnostics and existing fitted models.
+- Validation now includes a disposition for every independent audit
+  finding and an executable comparison with a DALEX/modelStudio
+  workflow. No comparative human-usability or general superiority claim
+  is made.
+
+### Compatibility
+
+Result and aggregate-export schemas are now **2.0**. Aggregate audit
+grades, `stable_claim_rate`, and per-feature `evidence_grade` have been
+removed. Use `shuffle_status`, `dependence_status`, per-model diagnostic
+counts and scoped findings instead. Regenerate explanations and reports
+created with 0.3.0; old calculation results are not repaired merely by
+installing this version.
+
+[`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md),
+[`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md),
+[`create_model_comparison_report()`](https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.md)
+and
+[`calculate_weighted_efficiency()`](https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.md)
+are deprecated and issue a classed warning. Use
+[`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+and inspect performance and resource measurements separately. Removal
+will occur no earlier than 0.6.0. The package remains distributed on
+GitHub; this release is not a claim of CRAN submission or acceptance.
+
 ## AutoXplainR 0.3.0
 
 ### One call, inspectable evidence

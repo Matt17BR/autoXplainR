@@ -29,7 +29,7 @@
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
   : Render a beginner-first model report
 - [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
-  : Generate an evidence-constrained narrative
+  : Summarize retained model evidence in prose
 - [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
   : List supported narrative providers
 - [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
@@ -99,9 +99,9 @@ Legacy entry points retained for existing code; new analyses should use
 the guided evidence workflow above.
 
 - [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
-  : Generate a guided model report
+  : Deprecated dashboard compatibility wrapper
 - [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
-  : Create a lightweight AutoXplainR dashboard
+  : Deprecated simple-dashboard compatibility wrapper
 - [`create_model_comparison_report()`](https://matt17br.github.io/autoXplainR/reference/create_model_comparison_report.md)
   : Create a compact model metadata report
 - [`calculate_weighted_efficiency()`](https://matt17br.github.io/autoXplainR/reference/calculate_weighted_efficiency.md)

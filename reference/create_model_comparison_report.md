@@ -1,6 +1,8 @@
 # Create a compact model metadata report
 
-Create a compact model metadata report
+Deprecated in 0.4.0, with removal no earlier than 0.6.0. Use
+[`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+for the maintained analysis report.
 
 ## Usage
 

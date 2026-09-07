@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -49,7 +52,7 @@
 <p>A first-time modeler should be able to answer four questions from the result: what was predicted, whether the primary model beat the baseline, which fitted patterns were inspected, and what limits the evidence. Every metric needs a plain definition. Every diagnostic failure needs a visible reason.</p>
 <p>An experienced user should be able to inspect the models, evaluation rows, training recipe, tuning folds, losses and explanation draws. Presets are a convenience, not a restriction on inspecting evidence. Lower-level functions accept existing models through a documented prediction contract.</p>
 <p>The primary model is pre-specified in quick/comparison mode and selected using training-only resampling in tuned mode. Evaluation ranks never silently replace it. Grouped validation keeps units intact; temporal evaluation respects time and ties. Unsupported validation designs must fail rather than silently use random rows. User-supplied evaluation data are not automatically described as independent.</p>
-<p>The package explains fitted prediction functions. It does not identify causal effects, certify deployment, or establish that every competitive model agrees. Uncertainty from permutations, evaluation sampling and fitting are different and must have different labels. Automatically selected feature summaries remain descriptive. Language-model prose is optional and cannot override numerical results.</p>
+<p>The package explains fitted prediction functions. It does not identify causal effects, certify deployment, or establish that every competitive model agrees. Uncertainty from permutations, evaluation sampling and fitting are different and must have different labels. Diagnostics report their scope, status and affected models or features; they are not collapsed into an overall quality grade. Automatically selected feature summaries remain descriptive. Optional generated prose is displayed separately from numerical results. Hosted responses are checked for format and length, not factual or numerical grounding; users must review their claims against the retained evidence.</p>
 <p>The contribution we aim to demonstrate is a simple, inspectable workflow that joins these pieces. We do not claim a unique estimator or demonstrated superiority to established R packages. See <a href="ROADMAP.html">the development plan</a> for architecture, feature proposals, acceptance tests and the evidence required for that claim.</p>
 </div>
 

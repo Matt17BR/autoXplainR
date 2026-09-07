@@ -15,7 +15,7 @@ does not require Java or a cloud account."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,10 @@ does not require Java or a cloud account."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -193,7 +196,7 @@ by training error alone.</p></dd>
 
 <dt id="arg-tuning-rule">tuning_rule<a class="anchor" aria-label="anchor" href="#arg-tuning-rule"></a></dt>
 <dd><p>Local tuning selection rule. <code>"one_se"</code> chooses the
-first eligible family in the documented reviewed priority, then its
+first eligible family in the documented priority, then its
 least-flexible configuration, among candidates whose resampled error is
 within one standard error of the best. The family priority and
 family-specific flexibility proxies
@@ -292,27 +295,39 @@ identifier removal, is opt-in and recorded in the result.</p>
 <span class="r-in"><span><span class="va">result</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR guided result&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   question:   predict `mpg` (regression)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   primary:    linear regression [main_model]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   engine:     base</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   data:       26 training + 6 evaluation rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   data:       26 training + 6 test rows</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   design:     reproducible random holdout</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   selection:  Pre-specified model; candidate evaluation ranks did not select it.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   models:     2 (primary + baseline)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   result:     primary model has rmse = 2.4413</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   score:      rmse = 2.4413 on test rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   baseline:   63.1% improvement in rmse</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   compare:    use model_set = "tuned" for automatic multi-family selection</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:   16 model-feature summaries; 3 fitted effects</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   next:       predict(result, newdata), render_model_report(result, "report.html")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   caution:    Only 6 rows were available for test scoring.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   next:       Treat the scores as preliminary and validate on more representative rows.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   finding:    `wt` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   inspect:    Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:   16 model-feature shuffle summaries; 3 fitted effects</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   inspect:    render_model_report(result, "report.html"), evidence_summary(result)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   predict:    predict(result, newdata) uses the saved training recipe</span>
 <span class="r-in"><span><span class="va">explainers</span> <span class="op">&lt;-</span> <span class="fu"><a href="as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="audit_explanations.html">audit_explanations</a></span><span class="op">(</span><span class="va">explainers</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR explanation evidence audit&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   grade:              C (diagnostic, not certification)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   models:             2 (1 near-optimal)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   stable claims:      0.0%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   max dependence:     0.949</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   explanation accord: n/a (one model)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   prediction accord:  n/a (one model)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   max association:    0.949</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   explanation accord: unavailable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   prediction accord:  unavailable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   comparison: Fewer than two supplied models meet the performance tolerance.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Findings</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] 10 feature(s) exceed the dependence threshold.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] 20 model-feature claim(s) are qualified or unsupported.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `cyl` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `disp` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `hp` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `drat` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `wt` exceeds the pairwise association threshold.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `qsec` exceeds the pairwise association threshold.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"AUTOXPLAIN_RUN_H2O"</span><span class="op">)</span>, <span class="st">"true"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>

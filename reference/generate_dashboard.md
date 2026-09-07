@@ -1,9 +1,11 @@
-# Generate a guided model report
+# Deprecated dashboard compatibility wrapper
 
-Creates a standalone report that starts with the modeling question,
-held-out performance, a simple-baseline comparison, and metric
-definitions. Fitted patterns and the more technical explanation evidence
-audit follow by progressive disclosure.
+Deprecated in 0.4.0; removal will occur no earlier than 0.6.0. Use
+[`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+for new analyses. For an optional memo, call
+[`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
+and pass its result as `narrative`. The wrapper remains callable during
+the transition and warns once per call.
 
 ## Usage
 

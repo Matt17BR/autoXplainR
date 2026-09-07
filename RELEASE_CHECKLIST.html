@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -45,38 +48,37 @@
 
 <div id="autoxplainr-release-checklist" class="section level1">
 
-<p>Releases are cut from a clean <code>main</code> branch after all required GitHub Actions checks pass. The maintainer owns the final statistical-language and CRAN-policy review; automation is supporting evidence, not a substitute for that review.</p>
+<p>GitHub releases and CRAN submissions have separate completion criteria. For each manual check, record <strong>passed</strong>, <strong>pending</strong>, or <strong>not applicable</strong>, with evidence and the tested commit/archive. A CI run does not stand in for a manual review.</p>
 <div class="section level2">
-<h2 id="prepare">Prepare<a class="anchor" aria-label="anchor" href="#prepare"></a></h2>
-<ul><li>Confirm the version and release date in <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code>, and <code>cran-comments.md</code>.</li>
-<li>Confirm every person and copyright holder is represented in <code>Authors@R</code> with the appropriate role. Add an ORCID only when the person has supplied or publicly verified that identifier; never infer one from a name match.</li>
-<li>Review <code>PROVENANCE.md</code> against the complete release diff and retain notices for any accepted third-party material.</li>
-<li>Confirm that README and vignette examples still express the beginner-first product contract in <code>PRODUCT.md</code>.</li>
-<li>Review user-facing metrics, warnings, and narrative prompts for unsupported causal, fairness, or certainty claims.</li>
-<li>Run <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> and ensure the generated files are committed.</li>
-<li>Run <code>spelling::spell_check_package()</code> and <code><a href="https://urlchecker.r-lib.org/reference/url_check.html" class="external-link">urlchecker::url_check()</a></code>. Review every response manually; automated release gating treats canonical-form failures and permanent 404/410 responses as blocking because DOI publishers commonly return bot-specific 202/403/503 responses.</li>
-<li>Run <code>validation/run-reference.R</code> and <code>validation/run-simulation.R</code>; inspect agreement and coverage results, including undercoverage.</li>
-<li>Run <code>lintr::lint_package(cache = FALSE)</code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code>, and <code>covr::package_coverage()</code>; statement coverage must remain at least 80%.</li>
-<li>Run <code>.github/scripts/build-check-source.sh &lt;artifact-dir&gt; &lt;check-dir&gt;</code> with current R-patched or R-release. This builds once, checks that exact archive with <code>--as-cran</code> including the PDF and HTML manuals, and verifies that its SHA-256 digest did not change during checking.</li>
-<li>Check that same source archive with current R-devel. The release workflow omits only the already-validated manuals in this second check, so the exact R-release-built archive still exercises R-devel code, examples, tests, and vignettes. Explain every remaining note in <code>cran-comments.md</code>.</li>
-<li>Run the isolated real-H2O test with <code>AUTOXPLAIN_RUN_H2O=true</code>.</li>
+<h2 id="prepare-a-github-release">Prepare a GitHub release<a class="anchor" aria-label="anchor" href="#prepare-a-github-release"></a></h2>
+<ul><li>Confirm version/date consistency in <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and release records. Label <code>cran-comments.md</code> as a preparation record until the corresponding archive is actually submitted.</li>
+<li>Review contributors and third-party material in <code>PROVENANCE.md</code>; retain required attribution and redistribution notices.</li>
+<li>Review the public workflow, statistical interpretation, failure states and narrative wording. Generated prose must not claim guaranteed grounding.</li>
+<li>Regenerate documentation; run tutorials, lint, spelling and URL checks. Inspect permanent missing URLs and canonical-form failures. Record transient publisher failures separately.</li>
+<li>Run the complete test suite, optional-engine matrix, numerical references and coverage. Record skipped integrations and known numerical limitations.</li>
+<li>Build once with <code>.github/scripts/build-check-source.sh</code>, check that exact archive under release R including manuals, and preserve its checksum.</li>
+<li>Check the same archive under R-devel. Explain remaining check notes.</li>
+<li>Require the configured Windows, macOS and Linux CI gates and the live H2O integration to pass. A hosted narrative live test is optional and must be identified as run or skipped.</li>
+<li>Open generated report examples on desktop and a narrow viewport. Review numerical labels, unavailable diagnostics, keyboard navigation and print output.</li>
+<li>Verify that logs, fixtures and shared reports contain no credentials or unintended private data.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="validate-remotely">Validate remotely<a class="anchor" aria-label="anchor" href="#validate-remotely"></a></h2>
-<ul><li>Require successful R CMD checks on Ubuntu (devel, release, and oldrel), Windows, and macOS.</li>
-<li>Submit the checked archive to Win-builder’s R-devel service and retain its result email or URL with the release evidence.</li>
-<li>Require successful lint, spelling, link, coverage, pkgdown, and H2O jobs.</li>
-<li>Open the deployed pkgdown site and smoke-test the beginner workflow on a narrow mobile viewport as well as desktop.</li>
-<li>Verify that no workflow log, fixture, or report contains an API key or raw private data.</li>
+<h2 id="publish-on-github">Publish on GitHub<a class="anchor" aria-label="anchor" href="#publish-on-github"></a></h2>
+<ul><li>Start from a clean reviewed <code>main</code> commit after required checks pass.</li>
+<li>Create an annotated version tag. Do not move an existing published tag.</li>
+<li>Inspect the version-tag workflow’s checked archive, release notes and checksum. Publish only after the configured release gates succeed.</li>
+<li>Download the published archive, verify its checksum, install it in a fresh library and run the documented fit/predict/report workflow.</li>
+<li>Record the final tag, archive digest, CI links and manual-check results in the version-specific release record. Win-builder and CRAN are not prerequisites for this GitHub completion status.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="publish">Publish<a class="anchor" aria-label="anchor" href="#publish"></a></h2>
-<ul><li>Create and push an annotated version tag <code>v&lt;DESCRIPTION version&gt;</code>. Sign it only when the maintainer already has a verified signing key; signing is not a substitute for the recorded commit and source-archive SHA-256 digests.</li>
-<li>Inspect the workflow-built source package and its SHA-256 checksum.</li>
-<li>The version tag authorizes publication. The release workflow publishes only after its quality, H2O, source-archive and R-devel gates succeed. Verify the published notes and attached checksum against the checked archive.</li>
-<li>Submit the exact checked source archive to CRAN and record any reviewer feedback in <code>cran-comments.md</code>.</li>
-<li>After acceptance, verify CRAN installation, the pkgdown site, citations, and release links from a clean R library.</li>
-</ul><p>Do not reuse or move a published version tag. Corrections require a new package version and a new tag.</p>
+<h2 id="optional-submit-that-release-to-cran">Optional: submit that release to CRAN<a class="anchor" aria-label="anchor" href="#optional-submit-that-release-to-cran"></a></h2>
+<p>Complete this section only when a CRAN submission is intended. Record <strong>not applicable — GitHub release only</strong> otherwise.</p>
+<ul><li>Review current CRAN requirements and the exact proposed source archive.</li>
+<li>Submit that archive to Win-builder R-devel and retain its result email or URL. Never reuse results for an older archive.</li>
+<li>Update <code>cran-comments.md</code> with actual checks, notes and submission context.</li>
+<li>The maintainer submits the reviewed archive and records reviewer feedback.</li>
+<li>After acceptance, verify CRAN installation, citations and website release links. Until then, describe the package as available on GitHub, not CRAN-approved.</li>
+</ul><p>Corrections to published package code require a new version and tag. Changes to release evidence must distinguish the published artifact from later main-branch configuration or documentation changes.</p>
 </div>
 </div>
 

@@ -13,8 +13,8 @@
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
 <meta property="og:title" content="Guided Model Fitting, Evaluation, and Explanation">
-<meta name="description" content="Guides first-time modelers through fitting, held-out evaluation, explanation, and communication for tabular prediction problems. Safe local defaults compare an understandable model with a simple baseline and define every reported metric. Training-only resampling can tune behaviorally diverse linear, regularized, additive, tree, forest, boosting, neural, kernel, nearest-neighbor, and multivariate adaptive regression spline families without opening the final holdout. Model-agnostic tools compare predictive disagreement and fitted reliance across families, and add repeated permutation importance, feature-dependence diagnostics, accumulated local effects, and provenance-rich evidence audits. Optional adapters support H2O AutoML, interactive Plotly graphics, and evidence-constrained narratives. Whole-group and chronological holdouts preserve study boundaries; paired evaluation bootstraps quantify fixed-model sampling uncertainty. Accumulated local effects follow Apley and Zhu (2020) &lt;doi:10.1111/rssb.12377&gt;. Fitted model reliance and near-optimal-model comparisons draw on Fisher, Rudin, and Dominici (2019) &lt;https://jmlr.org/papers/v20/18-760.html&gt;. The separation of tuning from final holdout evaluation is motivated by Cawley and Talbot (2010) &lt;https://jmlr.org/papers/v11/cawley10a.html&gt;.">
-<meta property="og:description" content="Guides first-time modelers through fitting, held-out evaluation, explanation, and communication for tabular prediction problems. Safe local defaults compare an understandable model with a simple baseline and define every reported metric. Training-only resampling can tune behaviorally diverse linear, regularized, additive, tree, forest, boosting, neural, kernel, nearest-neighbor, and multivariate adaptive regression spline families without opening the final holdout. Model-agnostic tools compare predictive disagreement and fitted reliance across families, and add repeated permutation importance, feature-dependence diagnostics, accumulated local effects, and provenance-rich evidence audits. Optional adapters support H2O AutoML, interactive Plotly graphics, and evidence-constrained narratives. Whole-group and chronological holdouts preserve study boundaries; paired evaluation bootstraps quantify fixed-model sampling uncertainty. Accumulated local effects follow Apley and Zhu (2020) &lt;doi:10.1111/rssb.12377&gt;. Fitted model reliance and near-optimal-model comparisons draw on Fisher, Rudin, and Dominici (2019) &lt;https://jmlr.org/papers/v20/18-760.html&gt;. The separation of tuning from final holdout evaluation is motivated by Cawley and Talbot (2010) &lt;https://jmlr.org/papers/v11/cawley10a.html&gt;.">
+<meta name="description" content="Guides first-time modelers through fitting, held-out evaluation, explanation, and communication for tabular prediction problems. Local defaults compare an understandable model with a simple baseline and define every reported metric. Training-only resampling can tune behaviorally diverse linear, regularized, additive, tree, forest, boosting, neural, kernel, nearest-neighbor, and multivariate adaptive regression spline families without opening the final holdout. Model-agnostic tools compare predictive disagreement and fitted reliance across families, and add repeated permutation importance, feature-dependence diagnostics, accumulated local effects, and diagnostics retaining settings and permutation draws. Optional adapters support H2O AutoML, interactive Plotly graphics, and draft narratives for review. Whole-group and chronological holdouts preserve study boundaries; paired evaluation bootstraps quantify fixed-model sampling uncertainty. Accumulated local effects follow Apley and Zhu (2020) &lt;doi:10.1111/rssb.12377&gt;. Fitted model reliance and near-optimal-model comparisons draw on Fisher, Rudin, and Dominici (2019) &lt;https://jmlr.org/papers/v20/18-760.html&gt;. The separation of tuning from final holdout evaluation is motivated by Cawley and Talbot (2010) &lt;https://jmlr.org/papers/v11/cawley10a.html&gt;.">
+<meta property="og:description" content="Guides first-time modelers through fitting, held-out evaluation, explanation, and communication for tabular prediction problems. Local defaults compare an understandable model with a simple baseline and define every reported metric. Training-only resampling can tune behaviorally diverse linear, regularized, additive, tree, forest, boosting, neural, kernel, nearest-neighbor, and multivariate adaptive regression spline families without opening the final holdout. Model-agnostic tools compare predictive disagreement and fitted reliance across families, and add repeated permutation importance, feature-dependence diagnostics, accumulated local effects, and diagnostics retaining settings and permutation draws. Optional adapters support H2O AutoML, interactive Plotly graphics, and draft narratives for review. Whole-group and chronological holdouts preserve study boundaries; paired evaluation bootstraps quantify fixed-model sampling uncertainty. Accumulated local effects follow Apley and Zhu (2020) &lt;doi:10.1111/rssb.12377&gt;. Fitted model reliance and near-optimal-model comparisons draw on Fisher, Rudin, and Dominici (2019) &lt;https://jmlr.org/papers/v20/18-760.html&gt;. The separation of tuning from final holdout evaluation is motivated by Cawley and Talbot (2010) &lt;https://jmlr.org/papers/v11/cawley10a.html&gt;.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+<li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -80,29 +83,29 @@
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span>, report <span class="op">=</span> <span class="st">"model-report.html"</span><span class="op">)</span></span>
 <span><span class="va">result</span></span></code></pre></div>
 <p>This fits a linear regression and an intercept-only baseline, evaluates them on a reproducible 20% holdout, computes feature importance and fitted effects, and writes a standalone HTML report. <a href="https://matt17br.github.io/autoXplainR/model-report.html">View a generated example</a>. Classification uses logistic or multinomial regression instead. The default runs locally without Java, an API key, or a language model. AutoXplainR is distributed on GitHub; it is not yet on CRAN.</p>
-<p><code>mtcars</code> is a small teaching example, not evidence that a model is ready for use. For your own analysis, supply a data frame and the name of the outcome column. Numeric outcomes with exactly two values are treated as binary classification; use <code>task = "regression"</code> to override that choice. Binary probabilities refer to the <strong>second outcome factor level</strong>; set your factor levels deliberately.</p>
+<p><code>mtcars</code> is a small teaching example, not evidence that a model is ready for use. For your own analysis, choose predictors that are available when a prediction will be made. Exclude arbitrary identifiers and columns measured after the outcome. The <a href="https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html">first-report tutorial</a> shows missing values, novel categories, an explicit split and recipe inspection. Numeric outcomes with exactly two values are treated as binary classification; use <code>task = "regression"</code> to override that choice. Binary probabilities refer to the <strong>second outcome factor level</strong>. For <code>factor(outcome, levels = c("no", "yes"))</code>, they are probabilities of <code>"yes"</code>. Set and inspect levels before fitting.</p>
 </div>
 <div class="section level2">
 <h2 id="a-look-inside-the-report">A look inside the report<a class="anchor" aria-label="anchor" href="#a-look-inside-the-report"></a>
 </h2>
-<p>These screenshots come from the current package’s report on reproducible synthetic data, using <code>model_set = "comparison"</code>. The example adds two decision trees to the default model and baseline. Its numbers differ from the <code>mtcars</code> quick start above. Click any screenshot to open that part of the full report.</p>
+<p>These screenshots show a reproducible synthetic parcel-delivery demonstration, using <code>model_set = "comparison"</code>. It adds two decision trees to the default model and baseline and includes a redundant planned-route predictor to illustrate association findings. This is not production validation; its numbers differ from the <code>mtcars</code> quick start. Click any screenshot to open that part of the full report.</p>
 <div class="section level3">
 <h3 id="compare-the-candidates">Compare the candidates<a class="anchor" aria-label="anchor" href="#compare-the-candidates"></a>
 </h3>
-<p>See prediction error alongside approximate model size. The chart helps you inspect trade-offs; the best score on these rows is not a new model-selection rule.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#models"><img src="reference/figures/model-comparison.png" alt="Model comparison showing four candidates, their prediction error, and approximate model-object size"></a></p>
+<p>Compare held-out prediction errors and see where candidates disagree on the same parcels. The best score on these rows is not a new model-selection rule. Resource comparisons are available in a later optional section.</p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#models"><img src="reference/figures/model-comparison.png" alt="Four candidates with held-out prediction errors and paired prediction disagreement"></a></p>
 </div>
 <div class="section level3">
 <h3 id="see-which-inputs-mattered-and-how">See which inputs mattered, and how<a class="anchor" aria-label="anchor" href="#see-which-inputs-mattered-and-how"></a>
 </h3>
-<p>Feature importance shows which inputs the model relied on. The curves show the direction of its fitted patterns, with a short explanation beside each one.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#patterns"><img src="reference/figures/model-patterns.png" alt="Feature reliance table and two fitted effect curves with plain-language descriptions"></a></p>
+<p>Feature importance measures the loss change after shuffling an input. The effect plot shows a fitted pattern on quantitative axes, with its scope and support stated beside it.</p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#patterns"><img src="reference/figures/model-patterns.png" alt="Feature importance and one fitted effect plot with quantitative axes and an interpretation"></a></p>
 </div>
 <div class="section level3">
 <h3 id="find-the-caveats-and-next-steps">Find the caveats and next steps<a class="anchor" aria-label="anchor" href="#find-the-caveats-and-next-steps"></a>
 </h3>
-<p>The reliability section flags weak evidence and suggests what to inspect next. Its grade is a diagnostic aid, not a certification of the model.</p>
-<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#reliability"><img src="reference/figures/explanation-reliability.png" alt="Explanation reliability section showing diagnostic summaries, a warning, and a suggested next action"></a></p>
+<p>The diagnostic section separates completed checks from unavailable results and identifies affected features and models. Each finding suggests a next step.</p>
+<p><a href="https://matt17br.github.io/autoXplainR/model-report.html#reliability"><img src="reference/figures/explanation-reliability.png" alt="Explanation diagnostics showing scoped findings and suggested next actions"></a></p>
 <p>The report is a standalone HTML file you can open offline or share with someone who does not use R. See the <a href="https://github.com/Matt17BR/autoXplainR/blob/main/validation/README.md#report-screenshots" class="external-link">example-generation and screenshot instructions</a> to reproduce these views.</p>
 </div>
 </div>
@@ -157,7 +160,7 @@
 </tr>
 </tbody>
 </table>
-<p>The report leads with performance against the baseline, then explains fitted patterns and the limits of the evidence. It works offline in a browser and has a print stylesheet. The numerical objects remain available in R.</p>
+<p>The report leads with performance against the baseline, then explains fitted patterns and the limits of the evidence. It works offline in a browser and has a print stylesheet. The numerical objects remain available in R. Version 0.4.0 uses result and aggregate-evidence schema 2.0; old grade fields are removed. Recompute affected 0.3.0 analyses rather than assuming old serialized results use the new contracts.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span>       <span class="co"># applies the saved recipe; does not refit</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"analysis.rds"</span><span class="op">)</span>     <span class="co"># native R models and their evidence</span></span>
@@ -224,7 +227,7 @@
 </tr>
 </tbody>
 </table>
-<p>The core portfolio uses linear models, trees and neural networks. Optional portfolios add regularization, additive models, forests, boosting, radial kernels, nearest neighbors and MARS. Inspect support and dependencies first:</p>
+<p>Choose the requested families and install their engines explicitly. The <a href="https://matt17br.github.io/autoXplainR/articles/model-selection.html">model-selection guide</a> explains portfolio support, selection rules and recorded failures:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/learner_catalog.html">learner_catalog</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span>, dry_run <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -252,7 +255,7 @@
 <li>Correlated inputs can substitute for each other and make marginal shuffling unrealistic. The report diagnoses dependence; it does not solve it.</li>
 <li>ALE and PDP describe fitted associations, not the causal effect of an action.</li>
 <li>Model disagreement covers the supplied fits. It is not a prediction interval or a search of every plausible model.</li>
-<li>A favorable score or diagnostic grade does not certify fairness, safety or readiness for deployment. Feature screening and repeated holdout inspection also limit what can be claimed from the same data.</li>
+<li>Completed diagnostics do not establish fairness, safety or readiness for deployment. Feature screening and repeated holdout inspection also limit what can be claimed from the same data.</li>
 </ul>
 <p>AutoXplainR’s intended contribution is the compact workflow connecting validation, model comparison, explanation diagnostics and shareable evidence. It is not a new explanation estimator, and superiority over other packages has not been established. <a href="https://doi.org/10.21105/joss.01798" class="external-link">modelStudio</a> and <a href="https://doi.org/10.21105/joss.01444" class="external-link">modelDown</a> already provide automated explanation interfaces; <a href="https://jmlr.org/papers/v19/18-416.html" class="external-link">DALEX</a> and <a href="https://mlr-org.github.io/xplainfi/articles/inference.html" class="external-link">xplainfi</a> cover broader explanation and importance-inference use cases.</p>
 </div>
@@ -262,7 +265,9 @@
 <ul>
 <li><a href="https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html">Getting started</a></li>
 <li><a href="https://matt17br.github.io/autoXplainR/reference/index.html">Function reference</a></li>
-<li><a href="https://matt17br.github.io/autoXplainR/ROADMAP.html">Architecture and development plan</a></li>
+<li><a href="https://matt17br.github.io/autoXplainR/ROADMAP.html">Near-term development plan</a></li>
+<li><a href="https://matt17br.github.io/autoXplainR/articles/validation-and-diagnostics.html">Validation and diagnostics</a></li>
+<li><a href="https://matt17br.github.io/autoXplainR/articles/existing-models-and-narratives.html">Existing models and narratives</a></li>
 <li><a href="https://matt17br.github.io/autoXplainR/articles/statistical-methods.html">Statistical methods</a></li>
 <li><a href="https://github.com/Matt17BR/autoXplainR/tree/main/validation" class="external-link">Validation scripts and evidence</a></li>
 <li>
@@ -273,7 +278,7 @@
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Live H2O integration is opt-in with <code>AUTOXPLAIN_RUN_H2O=true</code>. Hosted narrative providers are also opt-in; the default narrative is deterministic and local. See <a href="LLM_PROVIDERS.html">provider setup</a>. Reports and aggregate exports can contain feature names and diagnostic messages; review them before sharing. Saved RDS results contain the training and evaluation data.</p>
+<p>Live H2O integration is opt-in with <code>AUTOXPLAIN_RUN_H2O=true</code>. Hosted narrative providers are also opt-in; the default narrative renders retained evidence locally. Hosted output is checked for format and length, not numerical grounding. See <a href="LLM_PROVIDERS.html">provider setup</a>. Reports and aggregate exports can contain feature names and diagnostic messages; review them before sharing. Saved RDS results contain the training and evaluation data.</p>
 <p>MIT license. Copyright 2025–2026 Matteo Mazzarelli.</p>
 </div>
 </div>

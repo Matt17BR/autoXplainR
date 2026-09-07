@@ -1,8 +1,8 @@
-# Create a lightweight AutoXplainR dashboard
+# Deprecated simple-dashboard compatibility wrapper
 
-`create_simple_dashboard()` now uses the same dependency-free evidence
-report as
-[`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md).
+Deprecated in 0.4.0; removal will occur no earlier than 0.6.0. Use
+[`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+instead. This wrapper warns once per call.
 
 ## Usage
 

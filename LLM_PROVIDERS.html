@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -45,7 +48,7 @@
 
 <div id="optional-narrative-providers" class="section level1">
 
-<p>AutoXplainR can turn aggregate analysis evidence into prose. The default is a deterministic local narrative and does not send a request, even if API keys are present in the environment.</p>
+<p>AutoXplainR can summarize evaluation scores, retained explanation findings, fitted effects and failed checks in prose. The default is a deterministic local narrative and does not send a request, even if API keys are present in the environment.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, <span class="st">"Species"</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
@@ -58,7 +61,9 @@
 <span><span class="co"># Other adapters: groq, cloudflare, openrouter, ollama.</span></span></code></pre></div>
 <p>Use <code><a href="reference/generate_natural_language_report.html">?generate_natural_language_report</a></code> for model overrides, environment variables, endpoints, timeout and fallback behavior. Provider defaults are recorded in the returned provenance. Availability, pricing and model names can change; consult the provider’s own documentation when configuring an account.</p>
 <p>The package constructs prompts from aggregate evidence. It excludes raw training rows, per-case predictions and fitted model objects. Feature names, aggregate statistics and diagnostic text can still be sensitive. Review them before choosing a hosted provider. Do not commit API keys or provider response captures containing private data.</p>
-<p>Structured output constrains response format, not truth. The package validates fields and appends interpretation limits locally; generated claims still need review against the numerical output. Transport behavior is tested with mocked requests. The optional live Gemini test is not a statistical validation test and is not required to use or test the local workflow.</p>
+<p>The package validates response fields and length and appends interpretation limits locally. It does not verify generated numbers or enforce factual grounding. Review generated claims against the numerical output; prompt instructions and a valid response schema do not guarantee correctness. Transport behavior is tested with mocked requests. The optional live Gemini test is not a statistical validation test and is not required to use or test the local workflow.</p>
+<p>The result supplies all retained components automatically. An explicit <code>audit</code> overrides audit findings and importance while preserving evaluation and effects. <code>importance_data</code> and <code>pdp_data</code> override only their respective components. No explanation computation or model fitting is repeated to write a memo.</p>
+<p>Attached audits and effects must identify the same fitted model and evaluation data. Identified importance tables receive the same check. Bare importance tables remain available as explicitly labeled user-supplied evidence with unverified identity; set their <code>metric</code> attribute rather than implying that the package measured their values.</p>
 </div>
 
   </main></div>

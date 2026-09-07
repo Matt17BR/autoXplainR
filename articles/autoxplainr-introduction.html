@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Your First Model with AutoXplainR • AutoXplainR</title>
+<title>Your first prediction report • AutoXplainR</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Your First Model with AutoXplainR">
+<meta property="og:title" content="Your first prediction report">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+<li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -67,7 +70,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Your First Model with AutoXplainR</h1>
+      <h1>Your first prediction report</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/vignettes/autoxplainr-introduction.Rmd" class="external-link"><code>vignettes/autoxplainr-introduction.Rmd</code></a></small>
@@ -76,96 +79,100 @@
 
     
     
+<p>AutoXplainR fits a tabular prediction model, evaluates it against a
+simple baseline, and retains fitted explanations and an optional HTML
+report. The ordinary workflow runs locally. This example predicts a
+parcel’s delivery time using information available at dispatch. All data
+below are synthetic.</p>
 <div class="section level2">
-<h2 id="what-autoxplainr-is-for">What AutoXplainR is for<a class="anchor" aria-label="anchor" href="#what-autoxplainr-is-for"></a>
-</h2>
-<p>Fitting a model is only one part of a useful analysis. A first-time
-modeler also needs to know whether the model works on unseen rows,
-whether it improves on a simple guess, which fitted patterns matter, and
-how to describe those patterns without claiming more than the analysis
-established.</p>
-<p>AutoXplainR puts those questions in one workflow. Its safe default is
-local and requires neither Java nor an API account. This vignette uses
-the small built-in <code>mtcars</code> data only so every step is
-reproducible.</p>
-</div>
-<div class="section level2">
-<h2 id="fit-evaluate-and-explain-in-one-call">Fit, evaluate and explain in one call<a class="anchor" aria-label="anchor" href="#fit-evaluate-and-explain-in-one-call"></a>
+<h2 id="choose-what-can-be-known-when-predicting">Choose what can be known when predicting<a class="anchor" aria-label="anchor" href="#choose-what-can-be-known-when-predicting"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">mtcars</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"mpg"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">parcels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  parcel_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"parcel-%03d"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">240</span><span class="op">)</span>,</span>
+<span>  dispatched <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2025-01-01"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0</span><span class="op">:</span><span class="fl">239</span>,</span>
+<span>  distance_km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">240</span>, <span class="fl">20</span>, <span class="fl">600</span><span class="op">)</span>,</span>
+<span>  service <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"standard"</span>, <span class="st">"express"</span><span class="op">)</span>, <span class="fl">120</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">parcels</span><span class="op">$</span><span class="va">delivery_hours</span> <span class="op">&lt;-</span> <span class="fl">12</span> <span class="op">+</span> <span class="va">parcels</span><span class="op">$</span><span class="va">distance_km</span> <span class="op">/</span> <span class="fl">25</span> <span class="op">-</span></span>
+<span>  <span class="fl">5</span> <span class="op">*</span> <span class="op">(</span><span class="va">parcels</span><span class="op">$</span><span class="va">service</span> <span class="op">==</span> <span class="st">"express"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">240</span>, sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">parcels</span><span class="op">$</span><span class="va">delivered</span> <span class="op">&lt;-</span> <span class="va">parcels</span><span class="op">$</span><span class="va">dispatched</span> <span class="op">+</span> <span class="va">parcels</span><span class="op">$</span><span class="va">delivery_hours</span> <span class="op">/</span> <span class="fl">24</span></span>
+<span><span class="va">parcels</span><span class="op">$</span><span class="va">distance_km</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">40</span>, <span class="fl">90</span>, <span class="fl">211</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA_real_</span></span>
 <span></span>
-<span><span class="va">result</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR guided result&gt;</span></span>
-<span><span class="co">#&gt;   question:   predict `mpg` (regression)</span></span>
-<span><span class="co">#&gt;   engine:     base</span></span>
-<span><span class="co">#&gt;   data:       26 training + 6 evaluation rows</span></span>
-<span><span class="co">#&gt;   models:     2 (primary + baseline)</span></span>
-<span><span class="co">#&gt;   result:     primary model has rmse = 3.5529</span></span>
-<span><span class="co">#&gt;   baseline:   30.3% improvement in rmse</span></span>
-<span><span class="co">#&gt;   compare:    use model_set = "tuned" for automatic multi-family selection</span></span>
-<span><span class="co">#&gt;   evidence:   16 model-feature summaries; 3 fitted effects</span></span>
-<span><span class="co">#&gt;   next:       predict(result, newdata), render_model_report(result, "report.html")</span></span></code></pre></div>
-<p><code>mpg</code> is numeric with more than two distinct values, so
-this is recognized as a regression problem. AutoXplainR reproducibly
-holds out 20% of the rows, learns preprocessing from the remaining rows,
-and fits two models:</p>
-<ul>
-<li>a linear regression using the input features; and</li>
-<li>an intercept-only baseline that ignores all input features.</li>
-</ul>
-<p>The baseline matters. It answers whether the fitted relationships
-improve on a very simple reference rather than merely producing
-predictions.</p>
-<p>The result also retains an explanation audit and up to three fitted
-effects. Add <code>report = "model-report.html"</code> to write a
-standalone report in the same call. Use <code>explain = FALSE</code>
-when only fitting and evaluation are needed.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 21.94082 21.62070 26.67118</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">explanations</span><span class="op">$</span><span class="va">audit</span><span class="op">$</span><span class="va">importance</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        model feature importance  std_error   conf_low conf_high sign_stability</span></span>
-<span><span class="co">#&gt; 1 main_model      wt  1.5610918 0.20859268 1.12450229 1.9976813           0.85</span></span>
-<span><span class="co">#&gt; 2 main_model    qsec  1.2301093 0.14082410 0.93536107 1.5248575           1.00</span></span>
-<span><span class="co">#&gt; 3 main_model    disp  1.0061471 0.19180156 0.60470185 1.4075924           0.80</span></span>
-<span><span class="co">#&gt; 4 main_model      hp  0.6737610 0.09952944 0.46544353 0.8820785           0.90</span></span>
-<span><span class="co">#&gt; 5 main_model    carb  0.4941550 0.06505434 0.35799472 0.6303153           0.95</span></span>
-<span><span class="co">#&gt; 6 main_model     cyl  0.1339765 0.05200345 0.02513199 0.2428210           0.60</span></span>
-<span><span class="co">#&gt;   baseline permuted metric n_repeats max_association associated_feature</span></span>
-<span><span class="co">#&gt; 1 3.552918 5.114010   rmse        20       0.8285714               disp</span></span>
-<span><span class="co">#&gt; 2 3.552918 4.783028   rmse        20       0.8280787                 am</span></span>
-<span><span class="co">#&gt; 3 3.552918 4.559066   rmse        20       0.8285714                 wt</span></span>
-<span><span class="co">#&gt; 4 3.552918 4.226679   rmse        20       0.8280787                cyl</span></span>
-<span><span class="co">#&gt; 5 3.552918 4.047073   rmse        20       0.6956083                 vs</span></span>
-<span><span class="co">#&gt; 6 3.552918 3.686895   rmse        20       0.8280787               disp</span></span>
-<span><span class="co">#&gt;   evidence_grade                          claim</span></span>
-<span><span class="co">#&gt; 1              C       sensitivity finding only</span></span>
-<span><span class="co">#&gt; 2              C       sensitivity finding only</span></span>
-<span><span class="co">#&gt; 3              C       sensitivity finding only</span></span>
-<span><span class="co">#&gt; 4              C       sensitivity finding only</span></span>
-<span><span class="co">#&gt; 5              B usable with stated uncertainty</span></span>
-<span><span class="co">#&gt; 6              C       sensitivity finding only</span></span></code></pre></div>
-<p>New raw rows are processed using the saved training recipe. No model
-is refitted, and an outcome column is not required. Binary predictions
-refer to the second training outcome factor level; multiclass
-predictions have named columns.</p>
+<span><span class="co"># Exclude the identifier and the delivery timestamp, which is only known later.</span></span>
+<span><span class="va">inputs</span> <span class="op">&lt;-</span> <span class="va">parcels</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dispatched"</span>, <span class="st">"distance_km"</span>, <span class="st">"service"</span>, <span class="st">"delivery_hours"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<p>The package cannot decide whether a column leaks future information.
+Choose predictors from the intended prediction task before looking at
+model scores. Identifiers also require a decision: an arbitrary parcel
+ID should not predict delivery time. Repeated customers or sites would
+need a grouped validation plan.</p>
 </div>
 <div class="section level2">
-<h2 id="read-the-held-out-metrics">Read the held-out metrics<a class="anchor" aria-label="anchor" href="#read-the-held-out-metrics"></a>
+<h2 id="reserve-later-observations-and-inspect-preprocessing">Reserve later observations and inspect preprocessing<a class="anchor" aria-label="anchor" href="#reserve-later-observations-and-inspect-preprocessing"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
+<span>  <span class="va">inputs</span>, <span class="st">"delivery_hours"</span>,</span>
+<span>  validation <span class="op">=</span> <span class="fu"><a href="../reference/validation_split.html">validation_split</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"dispatched"</span><span class="op">)</span>,</span>
+<span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>novel_level_strategy <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">result</span></span>
+<span><span class="co">#&gt; &lt;AutoXplainR guided result&gt;</span></span>
+<span><span class="co">#&gt;   question:   predict `delivery_hours` (regression)</span></span>
+<span><span class="co">#&gt;   primary:    linear regression [main_model]</span></span>
+<span><span class="co">#&gt;   engine:     base</span></span>
+<span><span class="co">#&gt;   data:       192 training + 48 test rows</span></span>
+<span><span class="co">#&gt;   design:     temporal</span></span>
+<span><span class="co">#&gt;   selection:  Pre-specified model; candidate evaluation ranks did not select it.</span></span>
+<span><span class="co">#&gt;   models:     2 (primary + baseline)</span></span>
+<span><span class="co">#&gt;   score:      rmse = 2.0031 on test rows</span></span>
+<span><span class="co">#&gt;   baseline:   74.3% improvement in rmse</span></span>
+<span><span class="co">#&gt;   caution:    Only 48 rows were available for test scoring.</span></span>
+<span><span class="co">#&gt;   next:       Treat the scores as preliminary and validate on more representative rows.</span></span>
+<span><span class="co">#&gt;   finding:    The pairwise association screen does not assess every form of dependence.</span></span>
+<span><span class="co">#&gt;   inspect:    Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.</span></span>
+<span><span class="co">#&gt;   evidence:   4 model-feature shuffle summaries; 2 fitted effects</span></span>
+<span><span class="co">#&gt;   inspect:    render_model_report(result, "report.html"), evidence_summary(result)</span></span>
+<span><span class="co">#&gt;   predict:    predict(result, newdata) uses the saved training recipe</span></span>
+<span></span>
+<span><span class="va">recipe</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">preprocessing_metadata</span><span class="op">$</span><span class="va">training_data</span><span class="op">$</span><span class="va">recipe</span></span>
+<span><span class="va">recipe</span><span class="op">$</span><span class="va">final_columns</span></span>
+<span><span class="co">#&gt; [1] "distance_km"    "service"        "delivery_hours"</span></span>
+<span><span class="va">recipe</span><span class="op">$</span><span class="va">imputations</span></span>
+<span><span class="co">#&gt; $distance_km</span></span>
+<span><span class="co">#&gt; [1] 272.0664</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $service</span></span>
+<span><span class="co">#&gt; [1] "express"</span></span>
+<span><span class="va">recipe</span><span class="op">$</span><span class="va">factor_levels</span></span>
+<span><span class="co">#&gt; $service</span></span>
+<span><span class="co">#&gt; [1] "express"  "standard"</span></span>
+<span><span class="va">recipe</span><span class="op">$</span><span class="va">novel_level_strategy</span></span>
+<span><span class="co">#&gt; [1] "error"</span></span></code></pre></div>
+<p>This fits a linear regression and an intercept-only baseline on the
+earlier rows. The latest 20% of distinct dispatch dates are reserved for
+evaluation. <code>dispatched</code> determines the split and is excluded
+from predictors. Missing predictor values are imputed using values
+learned on training rows; character predictors are converted to factors
+using their training levels.</p>
+<p>The default novel-category strategy is <code>"mode"</code>, which
+maps an unseen category to the most frequent training category. Here we
+deliberately choose <code>"error"</code> so that a new service cannot be
+silently treated as an existing one.</p>
+</div>
+<div class="section level2">
+<h2 id="read-the-result-before-explaining-it">Read the result before explaining it<a class="anchor" aria-label="anchor" href="#read-the-result-before-explaining-it"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">leaderboard</span></span>
 <span><span class="co">#&gt;   rank        model_id                   model     role   family backend</span></span>
 <span><span class="co">#&gt; 1    1      main_model       linear regression  primary   linear   stats</span></span>
 <span><span class="co">#&gt; 2    2 simple_baseline intercept-only baseline baseline baseline   stats</span></span>
-<span><span class="co">#&gt;       rmse      mae  r_squared training_time_ms model_size_kb complexity</span></span>
-<span><span class="co">#&gt; 1 3.552918 2.797996 -0.1281933                1      44.43750         11</span></span>
-<span><span class="co">#&gt; 2 5.096266 3.907692 -1.3212249                3      19.82812          1</span></span>
+<span><span class="co">#&gt;       rmse      mae     r_squared training_time_ms model_size_kb complexity</span></span>
+<span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                1      67.79688          3</span></span>
+<span><span class="co">#&gt; 2 7.795201 6.683058 -5.052385e-05                2      56.07812          1</span></span>
 <span><span class="co">#&gt;   fit_warning prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                              1</span></span>
 <span><span class="co">#&gt; 2                              1</span></span>
@@ -176,910 +183,96 @@ predictions have named columns.</p>
 <span><span class="co">#&gt;                                     "Average absolute prediction error in the target's units; lower is better." </span></span>
 <span><span class="co">#&gt;                                                                                                       r_squared </span></span>
 <span><span class="co">#&gt; "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."</span></span>
-<span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">improvement_over_baseline</span></span>
-<span><span class="co">#&gt; [1] 0.3028389</span></span></code></pre></div>
-<p>For regression, RMSE is the primary comparison metric. It is a
-typical error in the outcome’s units, with larger errors weighted more
-heavily. Lower is better. MAE is the average absolute error. R-squared
-compares squared error with a held-out mean reference and can be
-negative on genuinely unseen data.</p>
-<p>The exact values from a six-row <code>mtcars</code> holdout are not a
-basis for scientific conclusions; the example demonstrates the contract.
-Real analyses need an evaluation set large and representative enough for
-the intended use.</p>
+<span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">notes</span></span>
+<span><span class="co">#&gt;   severity                 code                                       message</span></span>
+<span><span class="co">#&gt; 1  caution small_evaluation_set Only 48 rows were available for test scoring.</span></span>
+<span><span class="co">#&gt;                                                              recommendation</span></span>
+<span><span class="co">#&gt; 1 Treat the scores as preliminary and validate on more representative rows.</span></span></code></pre></div>
+<p>RMSE summarizes prediction error in hours, giving larger errors more
+weight. The baseline predicts the training mean without using distance
+or service. Beating it is useful context, but does not establish that
+the error is acceptable for a delivery promise. The scores describe
+these reserved rows; transfer to a future population needs further
+evidence.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span><span class="op">$</span><span class="va">explanations</span><span class="op">$</span><span class="va">audit</span><span class="op">$</span><span class="va">importance</span></span>
+<span><span class="co">#&gt;             model     feature importance  std_error conf_low conf_high</span></span>
+<span><span class="co">#&gt; 1      main_model distance_km   8.230674 0.19630872 7.819795  8.641553</span></span>
+<span><span class="co">#&gt; 2      main_model     service   2.090297 0.05157578 1.982348  2.198246</span></span>
+<span><span class="co">#&gt; 3 simple_baseline distance_km   0.000000 0.00000000 0.000000  0.000000</span></span>
+<span><span class="co">#&gt; 4 simple_baseline     service   0.000000 0.00000000 0.000000  0.000000</span></span>
+<span><span class="co">#&gt;   sign_stability baseline  permuted metric n_repeats max_association</span></span>
+<span><span class="co">#&gt; 1              1 2.003144 10.233818   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 2              1 2.003144  4.093441   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 3              1 7.795201  7.795201   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt; 4              1 7.795201  7.795201   rmse        20       0.1499773</span></span>
+<span><span class="co">#&gt;   associated_feature       shuffle_status dependence_status</span></span>
+<span><span class="co">#&gt; 1            service positive_loss_change    limited_screen</span></span>
+<span><span class="co">#&gt; 2        distance_km positive_loss_change    limited_screen</span></span>
+<span><span class="co">#&gt; 3            service   no_observed_change    limited_screen</span></span>
+<span><span class="co">#&gt; 4        distance_km   no_observed_change    limited_screen</span></span>
+<span><span class="co">#&gt;                                                                              claim</span></span>
+<span><span class="co">#&gt; 1   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
+<span><span class="co">#&gt; 2   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.</span></span>
+<span><span class="co">#&gt; 3 No loss change in these shuffles; this is not proof of no population importance.</span></span>
+<span><span class="co">#&gt; 4 No loss change in these shuffles; this is not proof of no population importance.</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">explanations</span><span class="op">$</span><span class="va">audit</span><span class="op">$</span><span class="va">findings</span></span>
+<span><span class="co">#&gt;   severity                     code</span></span>
+<span><span class="co">#&gt; 1     note association_screen_scope</span></span>
+<span><span class="co">#&gt;                                                                     message</span></span>
+<span><span class="co">#&gt; 1 The pairwise association screen does not assess every form of dependence.</span></span>
+<span><span class="co">#&gt;                                                                                                                                                                                                                                  evidence</span></span>
+<span><span class="co">#&gt; 1 Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.</span></span>
+<span><span class="co">#&gt;                                                                                              recommendation</span></span>
+<span><span class="co">#&gt; 1 Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.</span></span>
+<span><span class="co">#&gt;   model feature                            scope     entities</span></span>
+<span><span class="co">#&gt; 1  &lt;NA&gt;    &lt;NA&gt; Limits of the association screen c("main_....</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">explanations</span><span class="op">$</span><span class="va">failures</span></span>
+<span><span class="co">#&gt; [1] feature reason </span></span>
+<span><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></span></code></pre></div>
+<p>Permutation importance describes how the fitted model’s evaluation
+loss changes when an input is shuffled. Its intervals describe shuffle
+Monte Carlo error, not uncertainty about a population. ALE and PDP
+summarize fitted associations, not the effect of changing a real
+parcel’s service. A check that was not run or could not be computed
+remains visible with its reason.</p>
 </div>
 <div class="section level2">
-<h2 id="build-the-report">Build the report<a class="anchor" aria-label="anchor" href="#build-the-report"></a>
+<h2 id="predict-new-parcels-and-share-the-report">Predict new parcels and share the report<a class="anchor" aria-label="anchor" href="#predict-new-parcels-and-share-the-report"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">new_parcels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>distance_km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="cn">NA</span><span class="op">)</span>, service <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"express"</span>, <span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">new_parcels</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 11.32591 22.96807</span></span>
+<span></span>
+<span><span class="va">unknown_service</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>distance_km <span class="op">=</span> <span class="fl">100</span>, service <span class="op">=</span> <span class="st">"cargo"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">unknown_service</span><span class="op">)</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">error</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">error</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Column `service` has unseen levels: cargo"</span></span></code></pre></div>
+<p>Prediction applies the saved training recipe and preserves input row
+order. An outcome column is unnecessary. The unknown service produces an
+explicit error under our chosen strategy; decide how that category
+should be represented before refitting or changing the recipe.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">path</span>, top_features <span class="op">=</span> <span class="fl">4</span>, n_repeats <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">path</span>, narrative <span class="op">=</span> <span class="va">memo</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
-<p>The standalone report uses progressive disclosure:</p>
-<ol style="list-style-type: decimal">
-<li>the modeling question and baseline verdict;</li>
-<li>every held-out metric with definitions;</li>
-<li>input reliance and fitted effect directions;</li>
-<li>warnings and concrete next actions; and</li>
-<li>a collapsed technical evidence audit and complete provenance.</li>
-</ol>
-<p>The report needs only a browser after it is written; it works
-offline.</p>
-</div>
-<div class="section level2">
-<h2 id="tune-supervised-models-without-opening-the-final-holdout">Tune supervised models without opening the final holdout<a class="anchor" aria-label="anchor" href="#tune-supervised-models-without-opening-the-final-holdout"></a>
-</h2>
-<p>When model selection is the goal, use the explicit tuned
-workflow:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">iris</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>  model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span>
-<span>  portfolio <span class="op">=</span> <span class="st">"core"</span>,</span>
-<span>  max_models <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  nfolds <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">tuning</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tuning_results.html">tuning_results</a></span><span class="op">(</span><span class="va">tuned</span><span class="op">)</span></span>
-<span><span class="va">tuning</span><span class="op">$</span><span class="va">candidates</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"model"</span>, <span class="st">"hyperparameters"</span>, <span class="st">"cv_score"</span>, <span class="st">"cv_se"</span>, <span class="st">"selected"</span></span>
-<span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;                             model</span></span>
-<span><span class="co">#&gt; 1                  neural network</span></span>
-<span><span class="co">#&gt; 2                  neural network</span></span>
-<span><span class="co">#&gt; 3 multinomial logistic regression</span></span>
-<span><span class="co">#&gt; 4                   decision tree</span></span>
-<span><span class="co">#&gt; 5                   decision tree</span></span>
-<span><span class="co">#&gt; 6                   decision tree</span></span>
-<span><span class="co">#&gt;                                         hyperparameters   cv_score      cv_se</span></span>
-<span><span class="co">#&gt; 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199</span></span>
-<span><span class="co">#&gt; 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168</span></span>
-<span><span class="co">#&gt; 3                               default statistical fit 0.37178519 0.20170924</span></span>
-<span><span class="co">#&gt; 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486</span></span>
-<span><span class="co">#&gt; 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488</span></span>
-<span><span class="co">#&gt; 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488</span></span>
-<span><span class="co">#&gt;   selected</span></span>
-<span><span class="co">#&gt; 1     TRUE</span></span>
-<span><span class="co">#&gt; 2    FALSE</span></span>
-<span><span class="co">#&gt; 3    FALSE</span></span>
-<span><span class="co">#&gt; 4    FALSE</span></span>
-<span><span class="co">#&gt; 5    FALSE</span></span>
-<span><span class="co">#&gt; 6    FALSE</span></span></code></pre></div>
-<p>This executable vignette uses the dependency-light <code>core</code>
-portfolio: a statistical reference, decision-tree pruning/depth
-settings, and scaled neural-network hidden-unit/weight-decay settings.
-It learns preprocessing separately inside each training fold.</p>
-<p>The full registry is inspectable without installing any optional
-engine:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">catalog</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/learner_catalog.html">learner_catalog</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">catalog</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"family"</span>, <span class="st">"backend"</span>, <span class="st">"supported_tasks"</span>, <span class="st">"portfolios"</span>, <span class="st">"available"</span></span>
-<span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;         family    backend                supported_tasks</span></span>
-<span><span class="co">#&gt; 1       linear stats/nnet regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 2  regularized     glmnet regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 3     additive       mgcv             regression, binary</span></span>
-<span><span class="co">#&gt; 4         tree      rpart regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 5       forest     ranger regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 6     boosting    xgboost regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 7       neural       nnet regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 8       kernel      e1071 regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 9    neighbors       kknn regression, binary, multiclass</span></span>
-<span><span class="co">#&gt; 10        mars      earth             regression, binary</span></span>
-<span><span class="co">#&gt;                     portfolios available</span></span>
-<span><span class="co">#&gt; 1  core, recommended, extended      TRUE</span></span>
-<span><span class="co">#&gt; 2        recommended, extended     FALSE</span></span>
-<span><span class="co">#&gt; 3        recommended, extended      TRUE</span></span>
-<span><span class="co">#&gt; 4  core, recommended, extended      TRUE</span></span>
-<span><span class="co">#&gt; 5        recommended, extended     FALSE</span></span>
-<span><span class="co">#&gt; 6        recommended, extended     FALSE</span></span>
-<span><span class="co">#&gt; 7               core, extended      TRUE</span></span>
-<span><span class="co">#&gt; 8                     extended     FALSE</span></span>
-<span><span class="co">#&gt; 9                     extended     FALSE</span></span>
-<span><span class="co">#&gt; 10                    extended     FALSE</span></span></code></pre></div>
-<p>The presets are deliberately easy to explain:</p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th>Portfolio</th>
-<th>Families</th>
-<th>Intended first use</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><code>core</code></td>
-<td>linear, tree, neural</td>
-<td>dependency-light examples and a fast first tournament</td>
-</tr>
-<tr class="even">
-<td><code>recommended</code></td>
-<td>linear, regularized, additive, tree, forest, boosting</td>
-<td>the default serious tabular comparison after explicit engine
-installation</td>
-</tr>
-<tr class="odd">
-<td><code>extended</code></td>
-<td>all ten, adding neural, radial-kernel, neighbor, and MARS
-families</td>
-<td>broader model-specification sensitivity when extra runtime is
-acceptable</td>
-</tr>
-</tbody>
-</table>
-<p>Additive and MARS fits currently support regression and binary
-outcomes, not multiclass outcomes. That task contract is why the exact
-number of participating families can differ by problem.</p>
-<p>For a real model search, the default <code>recommended</code>
-portfolio is broader. It compares linear, regularized, additive (where
-supported), decision-tree, random-forest, and gradient-boosted-tree
-behavior. Installation is explicit so the tournament never changes
-silently with the packages present on one machine:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">recommended</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">my_data</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"outcome"</span>,</span>
-<span>  model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span>
-<span>  portfolio <span class="op">=</span> <span class="st">"recommended"</span>, <span class="co"># the default for tuned fits</span></span>
-<span>  nfolds <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/learner_catalog.html">learner_catalog</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/compare_model_behavior.html">compare_model_behavior</a></span><span class="op">(</span><span class="va">recommended</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>extended</code> portfolio additionally covers neural,
-radial-kernel, nearest-neighbor, and multivariate adaptive regression
-spline behavior when the task supports them. Advanced users can supply
-an explicit <code>learners</code> vector, but most users should keep a
-named preset.</p>
-<p>The default one-standard-error rule first uses the documented family
-priority, then chooses the least-flexible eligible setting inside that
-family. Its family-specific flexibility proxies are never compared as if
-they shared one unit. Use <code>tuning_rule = "best"</code> when the
-explicitly desired rule is minimum resampled error instead. Both rules
-and every fold score remain in the result. The within-family parsimony
-heuristic follows the classic one-standard-error rule of Breiman,
-Friedman, Olshen, and Stone (1984); the reviewed cross-family priority
-is an explicit AutoXplainR policy choice, not a statistical ordering of
-unlike model families.</p>
-<p>The resampled score answers <em>which configuration should be
-refitted?</em> The held-out score answers <em>how did that selected,
-refitted model perform on unseen rows?</em> AutoXplainR keeps the outer
-evaluation rows out of tuning and labels the two numbers separately in
-the report.</p>
-<p>When you supply <code>test_data</code> yourself, AutoXplainR uses the
-neutral role <code>evaluation</code> unless you explicitly set
-<code>evaluation_role = "test"</code> or <code>"validation"</code>. Set
-a role from the study design, not from the argument name. Exact
-duplicate-valued records across training and evaluation rows trigger a
-possible-leakage warning; choose <code>overlap_action = "error"</code>
-for strict pipeline enforcement or <code>"ignore"</code> only after
-confirming that coincident records are legitimate.</p>
-<div class="section level3">
-<h3 id="advanced-tuning-is-an-escape-hatch">Advanced tuning is an escape hatch<a class="anchor" aria-label="anchor" href="#advanced-tuning-is-an-escape-hatch"></a>
-</h3>
-<p>When a study has a pre-specified search design,
-<code><a href="../reference/tuning_control.html">tuning_control()</a></code> validates it without expanding the
-beginner call. This small example stays dependency-light:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">control</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tuning_control.html">tuning_control</a></span><span class="op">(</span></span>
-<span>  grids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>tree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    maxdepth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2L</span>, <span class="fl">5L</span><span class="op">)</span>,</span>
-<span>    cp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.002</span><span class="op">)</span>,</span>
-<span>    minsplit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10L</span>, <span class="fl">5L</span><span class="op">)</span></span>
-<span>  <span class="op">)</span><span class="op">)</span>,</span>
-<span>  family_budgets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>linear <span class="op">=</span> <span class="fl">1L</span>, tree <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span>,</span>
-<span>  metric <span class="op">=</span> <span class="st">"mae"</span>,</span>
-<span>  retain_oof <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">advanced</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">mtcars</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"mpg"</span>,</span>
-<span>  model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span>
-<span>  learners <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"tree"</span><span class="op">)</span>,</span>
-<span>  nfolds <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  tuning_control <span class="op">=</span> <span class="va">control</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/tuning_results.html">tuning_results</a></span><span class="op">(</span><span class="va">advanced</span><span class="op">)</span><span class="op">$</span><span class="va">control</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"family_budgets"</span>, <span class="st">"metric"</span>, <span class="st">"retain_oof"</span>, <span class="st">"failure_policy"</span></span>
-<span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; $family_budgets</span></span>
-<span><span class="co">#&gt; linear   tree </span></span>
-<span><span class="co">#&gt;      1      2 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $metric</span></span>
-<span><span class="co">#&gt; [1] "mae"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $retain_oof</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $failure_policy</span></span>
-<span><span class="co">#&gt; [1] "continue"</span></span></code></pre></div>
-<p>The same object can carry <code>fold_ids</code>, a supported
-task-specific loss, and <code>failure_policy = "stop"</code>. Supplied
-fold IDs require explicit <code>test_data</code> so they stay aligned
-with unchanged training rows. They define ordinary V-fold resampling;
-they are not automatically a grouped, rolling-origin, or
-forward-chaining design.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="compare-a-small-candidate-set">Compare a small candidate set<a class="anchor" aria-label="anchor" href="#compare-a-small-candidate-set"></a>
-</h2>
-<p>The first call stays intentionally simple. When comparing a few
-approachable model shapes would help, use the explicit comparison
-mode:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">iris</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"Sepal.Length"</span>,</span>
-<span>  model_set <span class="op">=</span> <span class="st">"comparison"</span>,</span>
-<span>  test_fraction <span class="op">=</span> <span class="fl">0.4</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/model_tradeoffs.html">model_tradeoffs</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR model trade-offs&gt;</span></span>
-<span><span class="co">#&gt;   performance: rmse (lower is better)</span></span>
-<span><span class="co">#&gt;   secondary:   model_size_kb (resource proxy; lower is better)</span></span>
-<span><span class="co">#&gt;   Pareto set:  3 / 4 supplied models</span></span>
-<span><span class="co">#&gt;         model_id                   model      role      rmse model_size_kb</span></span>
-<span><span class="co">#&gt;       main_model       linear regression   primary 0.2963068      49.46094</span></span>
-<span><span class="co">#&gt;       small_tree     small decision tree candidate 0.3744086      36.66406</span></span>
-<span><span class="co">#&gt;  simple_baseline intercept-only baseline  baseline 0.8691950      32.51562</span></span>
-<span><span class="co">#&gt;    flexible_tree  flexible decision tree candidate 0.4126230      43.25000</span></span>
-<span><span class="co">#&gt;  pareto_optimal</span></span>
-<span><span class="co">#&gt;            TRUE</span></span>
-<span><span class="co">#&gt;            TRUE</span></span>
-<span><span class="co">#&gt;            TRUE</span></span>
-<span><span class="co">#&gt;           FALSE</span></span>
-<span><span class="co">#&gt;   note: Pareto status compares only the supplied models on the supplied evaluation data and exact displayed axes. Resource proxies are not structural complexity; this is not a final model-selection rule.</span></span></code></pre></div>
-<p>This adds a shallow tree and a more flexible tree to the
-pre-specified statistical model and intercept-only baseline. Pareto
-status asks whether another supplied model is at least as good on both
-held-out performance and approximate model-object size, with a strict
-improvement on one. For local models, the size axis is R’s in-memory
-<code><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size()</a></code> estimate; it is a resource proxy rather than
-structural model complexity.</p>
-<p>The comparison is descriptive. AutoXplainR does not silently promote
-the holdout winner to primary, because selecting on the holdout and
-reporting the same score as final performance would be optimistic. Use
-fresh validation or a pre-specified resampling procedure when model
-selection itself is the goal.</p>
-<p>The same comparison can reveal rows whose prediction depends strongly
-on model specification:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ambiguity</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prediction_ambiguity.html">prediction_ambiguity</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ambiguity</span><span class="op">$</span><span class="va">rows</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   evaluation_row row_id observed prediction_min prediction_max prediction_range</span></span>
-<span><span class="co">#&gt; 1              1    121      6.9       6.302632       6.854533        0.5519014</span></span>
-<span><span class="co">#&gt; 2              2     38      4.9       5.042424       5.150000        0.1075758</span></span>
-<span><span class="co">#&gt; 3              3     45      5.1       5.042424       5.569338        0.5269134</span></span>
-<span><span class="co">#&gt; 4              4    111      6.5       6.302632       6.655556        0.3529240</span></span>
-<span><span class="co">#&gt; 5              5     91      5.5       5.939797       6.500000        0.5602030</span></span>
-<span><span class="co">#&gt; 6              6    108      7.3       7.143343       7.700000        0.5566568</span></span>
-<span><span class="co">#&gt;   prediction_sd</span></span>
-<span><span class="co">#&gt; 1    0.27950628</span></span>
-<span><span class="co">#&gt; 2    0.05421837</span></span>
-<span><span class="co">#&gt; 3    0.27157039</span></span>
-<span><span class="co">#&gt; 4    0.18215693</span></span>
-<span><span class="co">#&gt; 5    0.28414510</span></span>
-<span><span class="co">#&gt; 6    0.28013427</span></span></code></pre></div>
-<p>Regression rows report the range of supplied candidate predictions.
-Binary and multiclass rows report hard-class disagreement and
-probability distance. This is not uncertainty coverage: the supplied
-models can perform very differently, and their held-out scores must
-remain beside the disagreement summary.</p>
-<p><code><a href="../reference/compare_model_behavior.html">compare_model_behavior()</a></code> gives the portfolio-level view.
-Its behavior cards are reviewed prior knowledge about what each family
-can represent; its scores and prediction gaps are computed from common
-held-out rows:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">behavior</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_model_behavior.html">compare_model_behavior</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
-<span><span class="va">behavior</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR model behavior comparison&gt;</span></span>
-<span><span class="co">#&gt;   models:      3 (main_model, small_tree, flexible_tree)</span></span>
-<span><span class="co">#&gt;   evidence:    60 test rows</span></span>
-<span><span class="co">#&gt;   performance: rmse (lower is better)</span></span>
-<span><span class="co">#&gt;   trade-off:   model_size_kb (resource proxy)</span></span>
-<span><span class="co">#&gt;   distance:    absolute difference in predicted target units</span></span>
-<span><span class="co">#&gt;   feature check: not computed</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Models at a glance</span></span>
-<span><span class="co">#&gt;          model family backend   rmse relative_gap model_size_kb</span></span>
-<span><span class="co">#&gt;   main_model * linear   stats 0.2963         0.0%         49.46</span></span>
-<span><span class="co">#&gt;     small_tree   tree   rpart 0.3744        26.4%         36.66</span></span>
-<span><span class="co">#&gt;  flexible_tree   tree   rpart 0.4126        39.3%         43.25</span></span>
-<span><span class="co">#&gt;   * best supplied evaluation score; rankings remain descriptive</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; What differs</span></span>
-<span><span class="co">#&gt;   - main_model has the best supplied rmse score (0.2963).</span></span>
-<span><span class="co">#&gt;   - small_tree and flexible_tree differ most on average (0.284 using absolute difference in predicted target units).</span></span>
-<span><span class="co">#&gt;   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Evidence key</span></span>
-<span><span class="co">#&gt;   behavior cards = prior knowledge about model capacity</span></span>
-<span><span class="co">#&gt;   metrics, prediction gaps, and optional permutation importance = computed evidence</span></span>
-<span><span class="co">#&gt;   caution: descriptive comparison, not causal or uncertainty coverage</span></span></code></pre></div>
-<p><code><a href="../reference/compare_model_effects.html">compare_model_effects()</a></code> answers the narrower
-feature-level question by evaluating one named input on aligned rows and
-a common grid:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">petal_effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_model_effects.html">compare_model_effects</a></span><span class="op">(</span></span>
-<span>  <span class="va">comparison</span>,</span>
-<span>  feature <span class="op">=</span> <span class="st">"Petal.Length"</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"ale"</span>,</span>
-<span>  n_points <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">petal_effects</span><span class="op">$</span><span class="va">comparisons</span></span>
-<span><span class="co">#&gt;      model_a family_a       model_b family_b n_overlap        overlap</span></span>
-<span><span class="co">#&gt; 1 main_model   linear flexible_tree     tree         8 [1.35, 6.3125]</span></span>
-<span><span class="co">#&gt; 2 main_model   linear    small_tree     tree         8 [1.35, 6.3125]</span></span>
-<span><span class="co">#&gt; 3 small_tree     tree flexible_tree     tree         8 [1.35, 6.3125]</span></span>
-<span><span class="co">#&gt;   mean_absolute_level_gap centered_shape_rmse max_absolute_gap</span></span>
-<span><span class="co">#&gt; 1               0.5741751           0.6781914        1.2514697</span></span>
-<span><span class="co">#&gt; 2               0.4929357           0.6105097        1.1414220</span></span>
-<span><span class="co">#&gt; 3               0.1512730           0.2136835        0.5334924</span></span>
-<span><span class="co">#&gt;   effect_rank_correlation direction_agreement method support_threshold</span></span>
-<span><span class="co">#&gt; 1               0.9157291           0.5714286    ale               0.1</span></span>
-<span><span class="co">#&gt; 2               0.9636241           0.4285714    ale               0.1</span></span>
-<span><span class="co">#&gt; 3               0.9753048           0.6000000    ale               0.1</span></span>
-<span><span class="co">#&gt;   dependence_warning</span></span>
-<span><span class="co">#&gt; 1              FALSE</span></span>
-<span><span class="co">#&gt; 2              FALSE</span></span>
-<span><span class="co">#&gt; 3              FALSE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">petal_effects</span><span class="op">)</span></span></code></pre></div>
-<p><img src="autoxplainr-introduction_files/figure-html/effect-comparison-1.png" class="r-plt" alt="" width="672"></p>
-<p>Curve differences describe the supplied fitted prediction functions
-over the displayed support. They are not confidence intervals,
-intervention effects, or proof that a family used every nonlinear or
-interaction capacity available to it.</p>
-<p>An interactive view is available when Plotly is installed:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_model_comparison.html">plot_model_comparison</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="investigate-one-fitted-pattern">Investigate one fitted pattern<a class="anchor" aria-label="anchor" href="#investigate-one-fitted-pattern"></a>
-</h2>
-<p>The guided result can be converted to a model-agnostic explainer.
-Select the primary model rather than the simple baseline:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">explainer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span>, models <span class="op">=</span> <span class="st">"main_model"</span><span class="op">)</span><span class="op">$</span><span class="va">main_model</span></span>
-<span><span class="va">explainer</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR explainer&gt;</span></span>
-<span><span class="co">#&gt;   model:    main_model</span></span>
-<span><span class="co">#&gt;   task:     regression</span></span>
-<span><span class="co">#&gt;   data:     6 rows x 10 features</span></span>
-<span><span class="co">#&gt;   id:       axr-7221ef31</span></span></code></pre></div>
-<p>Repeated permutation importance measures how much held-out
-performance changes when an input is shuffled:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">importance</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_permutation_importance.html">calculate_permutation_importance</a></span><span class="op">(</span></span>
-<span>  <span class="va">explainer</span>,</span>
-<span>  features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span>, <span class="st">"hp"</span>, <span class="st">"disp"</span><span class="op">)</span>,</span>
-<span>  n_repeats <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">importance</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR permutation importance&gt;</span></span>
-<span><span class="co">#&gt;   metric: rmse | repeats: 10 | baseline: 3.5529</span></span>
-<span><span class="co">#&gt;  feature importance std_error  conf_low conf_high sign_stability</span></span>
-<span><span class="co">#&gt;       wt  1.7808278 0.3005901 1.1008457  2.460810            0.9</span></span>
-<span><span class="co">#&gt;     disp  0.8514659 0.2980729 0.1771782  1.525754            0.9</span></span>
-<span><span class="co">#&gt;       hp  0.6710299 0.1756528 0.2736757  1.068384            0.9</span></span>
-<span><span class="co">#&gt;   intervals describe permutation Monte Carlo variation, not population inference</span></span></code></pre></div>
-<p>The result keeps every repeat, a Monte Carlo interval, and sign
-stability. The interval describes randomness from shuffling. It is not a
-confidence interval for a population and cannot support a causal
-claim.</p>
-<p><code><a href="../reference/explain_effect.html">explain_effect()</a></code> defaults to accumulated local effects
-(ALE) for numeric inputs:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">weight_effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain_effect.html">explain_effect</a></span><span class="op">(</span><span class="va">explainer</span>, feature <span class="op">=</span> <span class="st">"wt"</span><span class="op">)</span></span>
-<span><span class="va">weight_effect</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR ALE effect&gt;</span></span>
-<span><span class="co">#&gt;   feature: wt | rows: 6 | max association: 0.829</span></span>
-<span><span class="co">#&gt;   target:  predicted value</span></span>
-<span><span class="co">#&gt;   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.</span></span>
-<span><span class="co">#&gt;        wt accumulated_effect std_error conf_low conf_high n support</span></span>
-<span><span class="co">#&gt;  2.688750          1.0055717        NA       NA        NA 1       1</span></span>
-<span><span class="co">#&gt;  2.826250          1.0055717        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  2.963750          1.0055717        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.101250          1.0055717        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.206250          0.7587882        NA       NA        NA 1       1</span></span>
-<span><span class="co">#&gt;  3.278750          0.7587882        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.351250          0.7587882        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.423750          0.7587882        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.493750          0.5290243        NA       NA        NA 1       1</span></span>
-<span><span class="co">#&gt;  3.561250          0.5290243        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.628750          0.5290243        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.696250          0.5290243        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.744375          0.4311619        NA       NA        NA 1       1</span></span>
-<span><span class="co">#&gt;  3.773125          0.4311619        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.801875          0.4311619        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  3.830625          0.4311619        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  4.020625         -0.7644614        NA       NA        NA 1       1</span></span>
-<span><span class="co">#&gt;  4.371875         -0.7644614        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  4.723125         -0.7644614        NA       NA        NA 0       0</span></span>
-<span><span class="co">#&gt;  5.074375         -1.9600847        NA       NA        NA 1       1</span></span></code></pre></div>
-<p>ALE summarizes local prediction changes inside observed feature bins.
-It reduces the most direct extrapolation problem of a marginal
-partial-dependence plot under dependent inputs, but it still describes a
-fitted prediction function—not the effect of intervening on vehicle
-weight.</p>
-</div>
-<div class="section level2">
-<h2 id="open-the-reliability-layer">Open the reliability layer<a class="anchor" aria-label="anchor" href="#open-the-reliability-layer"></a>
-</h2>
-<p>The evidence audit is available when more technical review is
-useful:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">audit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/audit_explanations.html">audit_explanations</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/as_explainers.html">as_explainers</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>,</span>
-<span>  features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span>, <span class="st">"hp"</span>, <span class="st">"disp"</span><span class="op">)</span>,</span>
-<span>  n_repeats <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">audit</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR explanation evidence audit&gt;</span></span>
-<span><span class="co">#&gt;   grade:              C (diagnostic, not certification)</span></span>
-<span><span class="co">#&gt;   models:             2 (1 near-optimal)</span></span>
-<span><span class="co">#&gt;   stable claims:      16.7%</span></span>
-<span><span class="co">#&gt;   max dependence:     0.829</span></span>
-<span><span class="co">#&gt;   explanation accord: n/a (one model)</span></span>
-<span><span class="co">#&gt;   prediction accord:  n/a (one model)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Findings</span></span>
-<span><span class="co">#&gt;   [warning] 2 feature(s) exceed the dependence threshold.</span></span>
-<span><span class="co">#&gt;   [warning] 5 model-feature claim(s) are qualified or unsupported.</span></span>
-<span><span class="co">#&gt;   [note] The permutation budget is suitable for smoke testing, not a final report.</span></span></code></pre></div>
-<p>The audit checks computation stability, feature association,
-supplied-model performance, and explanation agreement. Because this
-example supplies a primary model and a baseline, it can also demonstrate
-that only competitively performing supplied models should influence an
-explanation comparison.</p>
-<p>The A–D grade is a triage heuristic. It is not a p-value,
-certification, fairness test, or safety assessment.</p>
-</div>
-<div class="section level2">
-<h2 id="add-a-narrative-only-if-it-helps-communication">Add a narrative only if it helps communication<a class="anchor" aria-label="anchor" href="#add-a-narrative-only-if-it-helps-communication"></a>
-</h2>
-<p>The deterministic provider works offline:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">memo</span>, <span class="fl">1</span>, <span class="fl">400</span><span class="op">)</span>, <span class="st">"..."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # Model Fit and Evaluation Report</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## Scope</span></span>
-<span><span class="co">#&gt; This is a descriptive summary of a regression task for `mpg`, covering 2 model(s) and 10 feature(s).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## Did the model improve on a simple baseline?</span></span>
-<span><span class="co">#&gt; The linear regression was evaluated on 6 test rows. Its **rmse** was 3.5529.</span></span>
-<span><span class="co">#&gt; That is a 30.3% improvement over the intercept-only baseline (5.0963).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## What the main metric means</span></span>
-<span><span class="co">#&gt; **rmse:** Typical prediction ...</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">memo</span>, <span class="st">"narrative_provenance"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; $provider_requested</span></span>
-<span><span class="co">#&gt; [1] "local"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $provider_used</span></span>
-<span><span class="co">#&gt; [1] "local"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $model</span></span>
-<span><span class="co">#&gt; NULL</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $remote</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $fallback</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $structured_requested</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $structured_used</span></span>
-<span><span class="co">#&gt; [1] FALSE</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $disclosure</span></span>
-<span><span class="co">#&gt; [1] "Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included."</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $error</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
-<p>Remote use requires an explicit provider:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>GEMINI_API_KEY <span class="op">=</span> <span class="st">"..."</span><span class="op">)</span></span>
-<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"gemini"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Or use the Groq or Cloudflare free allowance</span></span>
-<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"groq"</span><span class="op">)</span></span>
-<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"cloudflare"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Or use a model running locally through Ollama</span></span>
-<span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"ollama"</span><span class="op">)</span></span></code></pre></div>
-<p>Only aggregated diagnostics are placed in the prompt. Raw rows,
-fitted objects, case-level predictions, and secrets are excluded.
-Provider and model details are attached to the returned text so the
-prose can be audited. Generated prose still needs human review against
-the numerical report.</p>
-<p>Schema-capable providers return five validated fields by default.
-AutoXplainR renders them locally and inserts fixed interpretation
-boundaries that the model cannot omit. The schema constrains format, not
-truth; malformed output falls back to the deterministic report. Gemini
-uses its stateless Interactions API with provider storage disabled for
-this one-shot request.</p>
-<p>See the repository’s narrative provider guide for the dated
-comparison of free access, structured-output support, privacy, and
-reproducibility. Provider plans and model catalogs can change
-independently of AutoXplainR.</p>
-</div>
-<div class="section level2">
-<h2 id="classification-uses-the-same-contract">Classification uses the same contract<a class="anchor" aria-label="anchor" href="#classification-uses-the-same-contract"></a>
-</h2>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">flowers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, target_column <span class="op">=</span> <span class="st">"Species"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
-<span><span class="va">flowers</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR guided result&gt;</span></span>
-<span><span class="co">#&gt;   question:   predict `Species` (multiclass)</span></span>
-<span><span class="co">#&gt;   engine:     base</span></span>
-<span><span class="co">#&gt;   data:       120 training + 30 evaluation rows</span></span>
-<span><span class="co">#&gt;   models:     2 (primary + baseline)</span></span>
-<span><span class="co">#&gt;   result:     primary model has log_loss = 1.1513</span></span>
-<span><span class="co">#&gt;   baseline:   -4.8% improvement in log_loss</span></span>
-<span><span class="co">#&gt;   compare:    use model_set = "tuned" for automatic multi-family selection</span></span>
-<span><span class="co">#&gt;   evidence:   8 model-feature summaries; 3 fitted effects</span></span>
-<span><span class="co">#&gt;   next:       predict(result, newdata), render_model_report(result, "report.html")</span></span>
-<span><span class="va">flowers</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                                   log_loss </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                               "Probability error that penalizes confident wrong answers; lower is better." </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                                brier_score </span></span>
-<span><span class="co">#&gt; "Unscaled mean sum of squared errors across all class probabilities, from 0 (best) to 2 (worst); lower is better. Its scale depends on the class set, so do not compare it directly with binary Brier scores or scores for a differently defined outcome." </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                          calibration_error </span></span>
-<span><span class="co">#&gt;                                                                                               "Average absolute gap between grouped probabilities and observed frequencies; lower is better, but the value depends on the evaluation sample and grouping." </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                                   accuracy </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                "Share of evaluation rows assigned to the correct class; higher is better." </span></span>
-<span><span class="co">#&gt;                                                                                                                                                                                                                                               macro_recall </span></span>
-<span><span class="co">#&gt;                                                                                                     "Recall calculated for each class and then averaged equally; higher is better. Unavailable when any trained class is absent from the evaluation rows."</span></span></code></pre></div>
-<p>Classification splits are stratified. Binary tasks report log loss,
-Brier score, a binned calibration gap, accuracy, balanced accuracy, and
-ROC AUC. Multiclass tasks report log loss, Brier score, predicted-class
-calibration, accuracy, and macro recall. Log loss is primary because it
-evaluates probability quality and penalizes confident wrong
-predictions.</p>
-<p>Calibration asks a more literal question: when the model reports a
-probability near 70%, does the corresponding event happen about 70% of
-the time on the held-out rows? The report explains this visually, and
-the grouped values remain available directly:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/calibration_diagnostics.html">calibration_diagnostics</a></span><span class="op">(</span><span class="va">flowers</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR probability calibration&gt;</span></span>
-<span><span class="co">#&gt;   model:      main_model</span></span>
-<span><span class="co">#&gt;   check:      confidence in the predicted class</span></span>
-<span><span class="co">#&gt;   rows:       30 in 1 probability groups</span></span>
-<span><span class="co">#&gt;   average:    1 predicted vs 0.967 observed</span></span>
-<span><span class="co">#&gt;   binned gap: 0.033 (lower is better)</span></span>
-<span><span class="co">#&gt;   caution:    sample- and grouping-dependent; not a population guarantee</span></span></code></pre></div>
-<p>The binned gap is descriptive. It changes with the evaluation sample
-and the grouping, so it should be read beside log loss and Brier score
-rather than as a population guarantee.</p>
-<p>For a binary task, the report also makes the 0.5 decision convention
-visible. Use <code><a href="../reference/threshold_diagnostics.html">threshold_diagnostics()</a></code> to compare a
-deliberate set of cutoffs:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">binary_cars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span></span>
-<span>  <span class="va">mtcars</span>,</span>
-<span>  am <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">binary_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">binary_cars</span>, <span class="st">"am"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/threshold_diagnostics.html">threshold_diagnostics</a></span><span class="op">(</span><span class="va">binary_fit</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Lower thresholds usually find more positive cases while creating more
-false positives; higher thresholds usually do the reverse. The relative
-consequences belong to the application. A threshold chosen on these
-held-out rows must be evaluated again on different representative
-data.</p>
-</div>
-<div class="section level2">
-<h2 id="check-an-explicitly-chosen-group">Check an explicitly chosen group<a class="anchor" aria-label="anchor" href="#check-an-explicitly-chosen-group"></a>
-</h2>
-<p>Aggregate scores can hide weak spots. If the evaluation data contain
-a group that matters to the intended use, ask for the comparison
-directly:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cars_with_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span></span>
-<span>  <span class="va">mtcars</span>,</span>
-<span>  transmission <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">am</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"automatic"</span>, <span class="st">"manual"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">group_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">cars_with_group</span>, <span class="st">"mpg"</span>, test_fraction <span class="op">=</span> <span class="fl">0.4</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="co">#&gt; Warning in predict.lm(model, newdata = newdata, type = "response"): prediction</span></span>
-<span><span class="co">#&gt; from rank-deficient fit; attr(*, "non-estim") has doubtful cases</span></span>
-<span><span class="fu"><a href="../reference/subgroup_performance.html">subgroup_performance</a></span><span class="op">(</span><span class="va">group_fit</span>, by <span class="op">=</span> <span class="st">"transmission"</span>, min_rows <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR subgroup performance&gt;</span></span>
-<span><span class="co">#&gt;   model:       main_model</span></span>
-<span><span class="co">#&gt;   compared by: transmission (2 groups)</span></span>
-<span><span class="co">#&gt;   metric:      rmse (lower is better)</span></span>
-<span><span class="co">#&gt;   largest gap: 0.9029</span></span>
-<span><span class="co">#&gt;   caution:     descriptive holdout check; not fairness certification</span></span></code></pre></div>
-<p>The same check can be included in the standalone report with
-<code>subgroup = "transmission"</code>. AutoXplainR does not guess which
-column is sensitive, and it does not call this a fairness assessment.
-Observed gaps can come from small samples, different case mix,
-measurement quality, or model behavior and require domain-specific
-investigation.</p>
-</div>
-<div class="section level2">
-<h2 id="check-whether-missingness-changed">Check whether missingness changed<a class="anchor" aria-label="anchor" href="#check-whether-missingness-changed"></a>
-</h2>
-<p>The guided workflow retains per-column missing-value rates before
-imputation. This matters because a field that is absent much more often
-in evaluation or future use can change what the model is effectively
-being asked to do:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">training</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span></span>
-<span><span class="va">evaluation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">46</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, y <span class="op">=</span> <span class="fl">41</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span></span>
-<span><span class="va">missing_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">training</span>, <span class="st">"y"</span>, test_data <span class="op">=</span> <span class="va">evaluation</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/missingness_shift.html">missingness_shift</a></span><span class="op">(</span><span class="va">missing_fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR missingness shift&gt;</span></span>
-<span><span class="co">#&gt;   data:        40 training + 20 evaluation rows</span></span>
-<span><span class="co">#&gt;   predictors:  1 with any missing values</span></span>
-<span><span class="co">#&gt;   flagged:     1 model inputs at 5 percentage points</span></span>
-<span><span class="co">#&gt;   caution:     practical flag; not a statistical test or general drift check</span></span></code></pre></div>
-<p>The default five-percentage-point flag is an investigation prompt,
-not a hypothesis test. The diagnostic does not claim that the complete
-predictor distribution is stable, and it reports the rates before the
-training-derived imputation was applied.</p>
-</div>
-<div class="section level2">
-<h2 id="bring-an-existing-model">Bring an existing model<a class="anchor" aria-label="anchor" href="#bring-an-existing-model"></a>
-</h2>
-<p>The explanation layer does not depend on the guided fitting engine.
-Wrap an ordinary R model directly:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
-<span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span> <span class="op">+</span> <span class="va">disp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">existing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain_model.html">explain_model</a></span><span class="op">(</span></span>
-<span>  <span class="va">fit</span>,</span>
-<span>  <span class="va">test</span>,</span>
-<span>  y <span class="op">=</span> <span class="st">"mpg"</span>,</span>
-<span>  label <span class="op">=</span> <span class="st">"existing linear model"</span>,</span>
-<span>  metadata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>evaluation_role <span class="op">=</span> <span class="st">"test"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Other frameworks can supply a <code>predict_function</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="where-optional-h2o-automl-fits">Where optional H2O AutoML fits<a class="anchor" aria-label="anchor" href="#where-optional-h2o-automl-fits"></a>
-</h2>
-<p>The native ten-family portfolio is the main local tuning path. H2O
-remains a separate, optional Java-backed engine when a broader AutoML
-search or stacked ensemble is appropriate:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">holdout_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, by <span class="op">=</span> <span class="fl">5L</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">h2o_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
-<span>  <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">holdout_rows</span>, <span class="op">]</span>,</span>
-<span>  target_column <span class="op">=</span> <span class="st">"Species"</span>,</span>
-<span>  test_data <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">holdout_rows</span>, <span class="op">]</span>,</span>
-<span>  engine <span class="op">=</span> <span class="st">"h2o"</span>,</span>
-<span>  max_models <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  max_runtime_secs <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  exclude_algos <span class="op">=</span> <span class="st">"DeepLearning"</span>,</span>
-<span>  use_test_as_validation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  evaluation_role <span class="op">=</span> <span class="st">"test"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">h2o_result</span>, <span class="st">"h2o-report.html"</span><span class="op">)</span></span></code></pre></div>
-<p>This requires the suggested <code>h2o</code> package, Java, and an
-H2O process. The default keeps the explicit test rows out of H2O
-validation so they retain their final-evaluation role.
-<code>engine_leaderboard</code> keeps H2O’s selection evidence; the
-ordinary <code>leaderboard</code> scores the fixed H2O primary,
-alternatives, and a simple baseline on common outer rows without
-re-selecting from those scores. Setting a fixed model budget, disabling
-the wall-clock limit, and excluding Deep Learning follows H2O’s
-documented route to a more reproducible AutoML search. The result
-records remaining caveats. H2O results still enter the same explainer,
-audit, and report contracts; H2O is not required to obtain a complete
-AutoXplainR report.</p>
-</div>
-<div class="section level2">
-<h2 id="what-to-sayand-not-say">What to say—and not say<a class="anchor" aria-label="anchor" href="#what-to-sayand-not-say"></a>
-</h2>
-<p>Reasonable language is specific to the fitted model and evaluation
-data:</p>
-<blockquote>
-<p>On the held-out rows, shuffling <code>wt</code> changed the fitted
-model’s RMSE by the reported amount, with the displayed variation across
-permutation repeats.</p>
-</blockquote>
-<p>The following requires a different design and evidence:</p>
-<blockquote>
-<p>Reducing vehicle weight will cause fuel economy to improve by the
-fitted ALE amount in a target population.</p>
-</blockquote>
-<p>AutoXplainR makes the first statement easier to compute and preserve.
-It does not turn it into the second.</p>
-</div>
-<div class="section level2">
-<h2 id="primary-method-literature">Primary method literature<a class="anchor" aria-label="anchor" href="#primary-method-literature"></a>
-</h2>
-<p>The portfolio is a common evaluation and explanation layer over
-established methods, not a claim that the learners themselves are new.
-Primary references for the implemented family ideas include:</p>
-<ul>
-<li>Nelder and Wedderburn (1972), <a href="https://doi.org/10.2307/2344614" class="external-link">generalized linear models</a>,
-and Friedman, Hastie, and Tibshirani (2010), <a href="https://doi.org/10.18637/jss.v033.i01" class="external-link">regularization paths for
-GLMs</a>;</li>
-<li>Hastie and Tibshirani (1986), <a href="https://doi.org/10.1214/ss/1177013604" class="external-link">generalized additive
-models</a>, and Breiman et al. (1984), <a href="https://doi.org/10.1201/9781315139470" class="external-link">classification and
-regression trees</a>;</li>
-<li>Breiman (2001), <a href="https://doi.org/10.1023/A:1010933404324" class="external-link">random forests</a>, and
-Chen and Guestrin (2016), <a href="https://doi.org/10.1145/2939672.2939785" class="external-link">XGBoost</a>;</li>
-<li>Hornik, Stinchcombe, and White (1989), <a href="https://doi.org/10.1016/0893-6080(89)90020-8" class="external-link">single-hidden-layer
-approximation capacity</a>, Cortes and Vapnik (1995), <a href="https://doi.org/10.1007/BF00994018" class="external-link">support-vector
-classification</a>, and Drucker et al. (1997), <a href="https://proceedings.neurips.cc/paper/1996/hash/d38901788c533e8286cb6400b40b386d-Abstract.html" class="external-link">epsilon-insensitive
-support-vector regression</a>;</li>
-<li>Cover and Hart (1967), <a href="https://doi.org/10.1109/TIT.1967.1053964" class="external-link">nearest-neighbor
-classification</a>, and Stone (1977), <a href="https://doi.org/10.1214/aos/1176343886" class="external-link">weighted nearest-neighbor
-regression consistency</a>;</li>
-<li>Friedman (1991), <a href="https://doi.org/10.1214/aos/1176347963" class="external-link">multivariate adaptive
-regression splines</a>; and</li>
-<li>Fisher, Rudin, and Dominici (2019), <a href="https://www.jmlr.org/papers/v20/18-760.html" class="external-link">model-class
-reliance</a>, and Apley and Zhu (2020), <a href="https://doi.org/10.1111/rssb.12377" class="external-link">accumulated local effects</a>,
-for the explanation scope used here.</li>
-</ul>
-<p>The package-level evaluation features have their own methodological
-basis; they are not consequences of whichever learner backend is
-installed:</p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th>AutoXplainR feature</th>
-<th>Methodological anchor</th>
-<th>Scope in this package</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>training-only selection plus an outer evaluation split</td>
-<td>Stone (1974), <a href="https://doi.org/10.1111/j.2517-6161.1974.tb00994.x" class="external-link">cross-validatory
-model choice</a>, and Varma and Simon (2006), <a href="https://doi.org/10.1186/1471-2105-7-91" class="external-link">bias from non-nested error
-estimation</a>
-</td>
-<td>separates configuration choice from final descriptive
-evaluation</td>
-</tr>
-<tr class="even">
-<td>one-standard-error eligibility</td>
-<td>Breiman, Friedman, Olshen, and Stone (1984), <a href="https://doi.org/10.1201/9781315139470" class="external-link">Classification and
-Regression Trees</a>
-</td>
-<td>adapts a parsimony heuristic within each family; the package’s
-cross-family priority remains a disclosed policy choice</td>
-</tr>
-<tr class="odd">
-<td>log loss and Brier score</td>
-<td>Brier (1950), <a href="https://doi.org/10.1175/1520-0493(1950)078%3C0001:VOFEIT%3E2.0.CO;2" class="external-link">probability
-forecast verification</a>, and Gneiting and Raftery (2007), <a href="https://doi.org/10.1198/016214506000001437" class="external-link">strictly proper
-scoring rules</a>
-</td>
-<td>scores probabilities without reducing them immediately to
-classes</td>
-</tr>
-<tr class="even">
-<td>binned calibration check</td>
-<td>Murphy (1973), <a href="https://doi.org/10.1175/1520-0450%281973%29012%3C0595%3AANVPOT%3E2.0.CO%3B2" class="external-link">probability-score
-decomposition</a>
-</td>
-<td>descriptive grouping diagnostic, not a population calibration
-interval</td>
-</tr>
-<tr class="odd">
-<td>decision-threshold sensitivity</td>
-<td>Fawcett (2006), <a href="https://doi.org/10.1016/j.patrec.2005.10.010" class="external-link">ROC
-analysis</a>
-</td>
-<td>displays false-positive/false-negative trade-offs without optimizing
-on the holdout</td>
-</tr>
-<tr class="even">
-<td>candidate-relative Pareto status</td>
-<td>Miettinen (1999), <a href="https://doi.org/10.1007/978-1-4615-5563-6" class="external-link">nonlinear
-multiobjective optimization</a>
-</td>
-<td>dominance only over supplied models and displayed objectives</td>
-</tr>
-</tbody>
-</table>
-<p>Implementation-specific behavior is also versioned in
-<code><a href="../reference/learner_catalog.html">learner_catalog()</a></code>. For example, the forest adapter follows
-Wright and Ziegler’s <a href="https://doi.org/10.18637/jss.v077.i01" class="external-link">ranger implementation</a>,
-while the SVM adapter inherits probability-estimation behavior from
-Chang and Lin’s <a href="https://doi.org/10.1145/1961189.1961199" class="external-link">LIBSVM</a>. Backend
-citations describe software and algorithms; they do not change the
-evaluation estimand above.</p>
-<p>These references motivate family capacity and model-agnostic
-explanation estimands. They do not make a fitted AutoXplainR result
-causal or externally valid; those claims still require an appropriate
-study design and new evidence.</p>
+<p>Use a persistent path such as <code>"delivery-report.html"</code> to
+keep the report. It opens offline in a browser. Review feature names and
+diagnostics before sharing. <code>saveRDS(result, "analysis.rds")</code>
+retains models <strong>and training/evaluation data</strong>.</p>
+<p>For classification, set outcome factor levels deliberately: binary
+probabilities refer to the <strong>second</strong> level. For example,
+<code>factor(outcome, levels = c("no", "yes"))</code> makes predictions
+probabilities of <code>"yes"</code>. Numeric outcomes with exactly two
+values default to classification; set <code>task = "regression"</code>
+for a numeric target.</p>
+<p>Continue with <a href="model-selection.html">model selection</a>, <a href="validation-and-diagnostics.html">validation and diagnostics</a>,
+<a href="existing-models-and-narratives.html">existing models and
+narratives</a>, or the <a href="statistical-methods.html">statistical
+methods</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

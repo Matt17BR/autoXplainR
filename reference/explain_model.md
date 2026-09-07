@@ -16,7 +16,8 @@ explain_model(
   task = c("auto", "regression", "binary", "multiclass"),
   label = NULL,
   positive = NULL,
-  metadata = list()
+  metadata = list(),
+  probability_class = NULL
 )
 ```
 
@@ -42,7 +43,10 @@ explain_model(
   `function(model, newdata)` or `function(newdata)`. Regression
   functions should return a numeric vector. Classification functions
   should return probabilities (a vector for binary outcomes or a
-  matrix/data frame with one column per class).
+  matrix/data frame with one column per class). Hard classification
+  labels are retained as factors for accuracy only; they cannot supply
+  probability losses or probability effects. An ellipsis after the
+  supported arguments is allowed.
 
 - task:
 
@@ -61,6 +65,16 @@ explain_model(
 
   Optional named list recorded in the explainer provenance.
 
+- probability_class:
+
+  Event represented by a binary probability vector. For custom functions
+  it defaults to `positive`. For native adapters it overrides the
+  inferred event; supply it when fitted response levels are unavailable,
+  such as a factor GLM fitted with `model = FALSE`. Numeric binomial
+  GLMs model event `"1"`, logical GLMs model `"TRUE"`, and factor GLMs
+  model their second fitted level. Named probability matrices identify
+  their events directly.
+
 ## Value
 
 An object of class `autoxplain_explainer`.
@@ -75,5 +89,5 @@ explainer
 #>   model:    linear model
 #>   task:     regression
 #>   data:     32 rows x 10 features
-#>   id:       axr-26a5a153
+#>   id:       axr-99a8ba73064c26acaa9f649daaf4156c8b6e7980755f1b8fea3d78c97ae4c9c6
 ```

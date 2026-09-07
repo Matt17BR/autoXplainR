@@ -1,7 +1,7 @@
 # List supported narrative providers
 
-Provider defaults reflect public offerings checked in July 2026 and can
-change independently of AutoXplainR. The local provider is
+Lists the adapter configuration shipped with this package. Hosted model
+availability and provider terms can change. The local provider is
 deterministic; every remote provider is opt-in.
 
 ## Usage

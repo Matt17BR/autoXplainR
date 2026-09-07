@@ -131,14 +131,14 @@ compare_model_effects(fit, "wt")
 #>   support:   relative support >= 0.1
 #> 
 #> Findings
-#>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 1.039) across 6 supported grid points.
+#>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 2.754) across 6 supported grid points.
 #>   [boundary] Pairwise summaries exclude grid points below relative support 0.1 and describe fitted predictions, not causal effects.
 #> 
 #> Pairwise summary
 #>        model A    model B points mean level gap shape RMSE max gap
-#>  flexible_tree main_model      6         0.9082      1.039    1.96
-#>     small_tree main_model      6         0.9082      1.039    1.96
-#>  flexible_tree small_tree      6         0.0000      0.000    0.00
+#>  flexible_tree main_model      6          2.028      2.754   5.347
+#>     small_tree main_model      6          2.028      2.754   5.347
+#>  flexible_tree small_tree      6          0.000      0.000   0.000
 #>  direction agreement
 #>                    0
 #>                    0

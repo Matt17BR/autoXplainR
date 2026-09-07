@@ -11,7 +11,7 @@ H2O models, and models from other frameworks can be audited in the same way."></
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +22,10 @@ H2O models, and models from other frameworks can be audited in the same way."></
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -64,7 +67,8 @@ H2O models, and models from other frameworks can be audited in the same way.</p>
 <span>  task <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"regression"</span>, <span class="st">"binary"</span>, <span class="st">"multiclass"</span><span class="op">)</span>,</span>
 <span>  label <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  positive <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  metadata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  metadata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  probability_class <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,7 +95,10 @@ explainer.</p></dd>
 <code>function(model, newdata)</code> or <code>function(newdata)</code>. Regression functions
 should return a numeric vector. Classification functions should return
 probabilities (a vector for binary outcomes or a matrix/data frame with
-one column per class).</p></dd>
+one column per class).
+Hard classification labels are retained as factors for accuracy only;
+they cannot supply probability losses or probability effects. An ellipsis
+after the supported arguments is allowed.</p></dd>
 
 
 <dt id="arg-task">task<a class="anchor" aria-label="anchor" href="#arg-task"></a></dt>
@@ -111,6 +118,16 @@ default the second outcome level is used.</p></dd>
 <dt id="arg-metadata">metadata<a class="anchor" aria-label="anchor" href="#arg-metadata"></a></dt>
 <dd><p>Optional named list recorded in the explainer provenance.</p></dd>
 
+
+<dt id="arg-probability-class">probability_class<a class="anchor" aria-label="anchor" href="#arg-probability-class"></a></dt>
+<dd><p>Event represented by a binary probability vector.
+For custom functions it defaults to <code>positive</code>. For native adapters it
+overrides the inferred event; supply it when fitted response levels are
+unavailable, such as a factor GLM fitted with <code>model = FALSE</code>. Numeric
+binomial GLMs model event <code>"1"</code>, logical GLMs model <code>"TRUE"</code>, and factor
+GLMs model their second fitted level. Named probability matrices identify
+their events directly.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -126,7 +143,7 @@ default the second outcome level is used.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   model:    linear model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   task:     regression</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   data:     32 rows x 10 features</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id:       axr-26a5a153</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id:       axr-99a8ba73064c26acaa9f649daaf4156c8b6e7980755f1b8fea3d78c97ae4c9c6</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

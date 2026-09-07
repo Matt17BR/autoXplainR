@@ -1,78 +1,70 @@
 # AutoXplainR release checklist
 
-Releases are cut from a clean `main` branch after all required GitHub
-Actions checks pass. The maintainer owns the final statistical-language
-and CRAN-policy review; automation is supporting evidence, not a
-substitute for that review.
+GitHub releases and CRAN submissions have separate completion criteria.
+For each manual check, record **passed**, **pending**, or **not
+applicable**, with evidence and the tested commit/archive. A CI run does
+not stand in for a manual review.
 
-## Prepare
+## Prepare a GitHub release
 
-- Confirm the version and release date in `DESCRIPTION`, `NEWS.md`,
-  `CITATION.cff`, and `cran-comments.md`.
-- Confirm every person and copyright holder is represented in
-  `Authors@R` with the appropriate role. Add an ORCID only when the
-  person has supplied or publicly verified that identifier; never infer
-  one from a name match.
-- Review `PROVENANCE.md` against the complete release diff and retain
-  notices for any accepted third-party material.
-- Confirm that README and vignette examples still express the
-  beginner-first product contract in `PRODUCT.md`.
-- Review user-facing metrics, warnings, and narrative prompts for
-  unsupported causal, fairness, or certainty claims.
-- Run
-  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
-  and ensure the generated files are committed.
-- Run `spelling::spell_check_package()` and
-  [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html).
-  Review every response manually; automated release gating treats
-  canonical-form failures and permanent 404/410 responses as blocking
-  because DOI publishers commonly return bot-specific 202/403/503
-  responses.
-- Run `validation/run-reference.R` and `validation/run-simulation.R`;
-  inspect agreement and coverage results, including undercoverage.
-- Run `lintr::lint_package(cache = FALSE)`,
-  [`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html),
-  and `covr::package_coverage()`; statement coverage must remain at
-  least 80%.
-- Run `.github/scripts/build-check-source.sh <artifact-dir> <check-dir>`
-  with current R-patched or R-release. This builds once, checks that
-  exact archive with `--as-cran` including the PDF and HTML manuals, and
-  verifies that its SHA-256 digest did not change during checking.
-- Check that same source archive with current R-devel. The release
-  workflow omits only the already-validated manuals in this second
-  check, so the exact R-release-built archive still exercises R-devel
-  code, examples, tests, and vignettes. Explain every remaining note in
-  `cran-comments.md`.
-- Run the isolated real-H2O test with `AUTOXPLAIN_RUN_H2O=true`.
+- Confirm version/date consistency in `DESCRIPTION`, `NEWS.md`,
+  `CITATION.cff` and release records. Label `cran-comments.md` as a
+  preparation record until the corresponding archive is actually
+  submitted.
+- Review contributors and third-party material in `PROVENANCE.md`;
+  retain required attribution and redistribution notices.
+- Review the public workflow, statistical interpretation, failure states
+  and narrative wording. Generated prose must not claim guaranteed
+  grounding.
+- Regenerate documentation; run tutorials, lint, spelling and URL
+  checks. Inspect permanent missing URLs and canonical-form failures.
+  Record transient publisher failures separately.
+- Run the complete test suite, optional-engine matrix, numerical
+  references and coverage. Record skipped integrations and known
+  numerical limitations.
+- Build once with `.github/scripts/build-check-source.sh`, check that
+  exact archive under release R including manuals, and preserve its
+  checksum.
+- Check the same archive under R-devel. Explain remaining check notes.
+- Require the configured Windows, macOS and Linux CI gates and the live
+  H2O integration to pass. A hosted narrative live test is optional and
+  must be identified as run or skipped.
+- Open generated report examples on desktop and a narrow viewport.
+  Review numerical labels, unavailable diagnostics, keyboard navigation
+  and print output.
+- Verify that logs, fixtures and shared reports contain no credentials
+  or unintended private data.
 
-## Validate remotely
+## Publish on GitHub
 
-- Require successful R CMD checks on Ubuntu (devel, release, and
-  oldrel), Windows, and macOS.
-- Submit the checked archive to Win-builder’s R-devel service and retain
-  its result email or URL with the release evidence.
-- Require successful lint, spelling, link, coverage, pkgdown, and H2O
-  jobs.
-- Open the deployed pkgdown site and smoke-test the beginner workflow on
-  a narrow mobile viewport as well as desktop.
-- Verify that no workflow log, fixture, or report contains an API key or
-  raw private data.
+- Start from a clean reviewed `main` commit after required checks pass.
+- Create an annotated version tag. Do not move an existing published
+  tag.
+- Inspect the version-tag workflow’s checked archive, release notes and
+  checksum. Publish only after the configured release gates succeed.
+- Download the published archive, verify its checksum, install it in a
+  fresh library and run the documented fit/predict/report workflow.
+- Record the final tag, archive digest, CI links and manual-check
+  results in the version-specific release record. Win-builder and CRAN
+  are not prerequisites for this GitHub completion status.
 
-## Publish
+## Optional: submit that release to CRAN
 
-- Create and push an annotated version tag `v<DESCRIPTION version>`.
-  Sign it only when the maintainer already has a verified signing key;
-  signing is not a substitute for the recorded commit and source-archive
-  SHA-256 digests.
-- Inspect the workflow-built source package and its SHA-256 checksum.
-- The version tag authorizes publication. The release workflow publishes
-  only after its quality, H2O, source-archive and R-devel gates succeed.
-  Verify the published notes and attached checksum against the checked
+Complete this section only when a CRAN submission is intended. Record
+**not applicable — GitHub release only** otherwise.
+
+- Review current CRAN requirements and the exact proposed source
   archive.
-- Submit the exact checked source archive to CRAN and record any
-  reviewer feedback in `cran-comments.md`.
-- After acceptance, verify CRAN installation, the pkgdown site,
-  citations, and release links from a clean R library.
+- Submit that archive to Win-builder R-devel and retain its result email
+  or URL. Never reuse results for an older archive.
+- Update `cran-comments.md` with actual checks, notes and submission
+  context.
+- The maintainer submits the reviewed archive and records reviewer
+  feedback.
+- After acceptance, verify CRAN installation, citations and website
+  release links. Until then, describe the package as available on
+  GitHub, not CRAN-approved.
 
-Do not reuse or move a published version tag. Corrections require a new
-package version and a new tag.
+Corrections to published package code require a new version and tag.
+Changes to release evidence must distinguish the published artifact from
+later main-branch configuration or documentation changes.

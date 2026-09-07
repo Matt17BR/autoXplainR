@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -43,6 +46,39 @@
       <small>Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="autoxplainr-040">AutoXplainR 0.4.0<a class="anchor" aria-label="anchor" href="#autoxplainr-040"></a></h2>
+<div class="section level3">
+<h3 id="correct-calculations-and-evidence-identity-0-4-0">Correct calculations and evidence identity<a class="anchor" aria-label="anchor" href="#correct-calculations-and-evidence-identity-0-4-0"></a></h3>
+<ul><li>Binary explainers now track the probability event. Reversing <code>positive</code> complements native probabilities and corresponding effects. Custom numeric probabilities can declare their event with <code>probability_class</code>. Numeric and logical binomial GLMs retain their native success event under reordered evaluation factors; factor GLMs without retained response levels require an explicit event declaration.</li>
+<li>Invalid labels and factor-valued regression predictions fail before coercion. Hard classification labels remain labels; probability losses and effects require probability-capable adapters. Custom functions with <code>...</code> dispatch correctly and preserve their own error messages.</li>
+<li>Within-stratum shuffles preserve membership even for singleton strata. ALE values now use consistent endpoint coordinates and observed quantile boundaries that avoid unsupported empty bins. Irregular and tied inputs have analytic regression tests and an independent reference comparison.</li>
+<li>Paired model audits require identical ordered evaluation data, outcomes and event semantics. Content identities include fitted model state, prediction adapter code, data and predictions. Foreign or stale attached evidence fails with instructions to recompute; unchanged serialized evidence can be reused.</li>
+<li>Dependence screening checks the complete predictor context, including inputs outside the displayed feature subset. Low rank association is explicitly a limited screen, not evidence of independence.</li>
+<li>F1 is zero for an all-wrong classification with a nonzero denominator; balanced accuracy is unavailable when an outcome class is absent. Threshold, subgroup and overall metrics use the same definition.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="preserve-the-analysis-boundary-0-4-0">Preserve the analysis boundary<a class="anchor" aria-label="anchor" href="#preserve-the-analysis-boundary-0-4-0"></a></h3>
+<ul><li>Subgroup diagnostics retain raw evaluation context and row alignment through imputation, recoding, structured splits and row removal. Missing and novel categories no longer disappear into model preprocessing values.</li>
+<li>H2O internal cross-validation rejects external learned imputation, missingness column selection and ordinal conversion that would otherwise learn across its internal folds. This restriction is checked before starting Java.</li>
+<li>Neural learners retain and reuse their model-matrix blueprint, including ordered-factor contrasts. Fitted formulas no longer retain the calling session and sibling models through their environments.</li>
+<li>Optional engine minimum versions now match exercised versions. A dedicated CI job installs those exact versions in an isolated library and checks their adapters. The core still supports R 4.1; optional engines can require newer R.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="reports-that-explain-the-analysis-0-4-0">Reports that explain the analysis<a class="anchor" aria-label="anchor" href="#reports-that-explain-the-analysis-0-4-0"></a></h3>
+<ul><li>Replaced the card-heavy dashboard with an analysis brief: named primary model, selection rule, evaluation design, baseline comparison and leading caveat. Candidate scores remain descriptive when they did not select the model.</li>
+<li>Effects have quantitative axes, real numeric spacing, bin support and table equivalents. Resource comparisons move into an expandable section with correctly directed, labeled axes. Mobile tables remain readable; printing includes evidence inside closed disclosures without requiring JavaScript.</li>
+<li>Findings identify affected models and features and link to the relevant evidence and R inspection commands. Failed and unavailable checks are shown explicitly. Console output surfaces evaluation caveats and useful next steps.</li>
+<li>Local narratives use the retained feature evidence, effects and failed checks. Hosted narratives remain drafts for review; a format check does not establish numerical grounding.</li>
+<li>The README includes fresh screenshots of a reproducible synthetic delivery analysis. A shorter first-report tutorial covers real predictor choices, missingness, novel categories, chronological evaluation and saved recipes. Separate articles cover selection, diagnostics and existing fitted models.</li>
+<li>Validation now includes a disposition for every independent audit finding and an executable comparison with a DALEX/modelStudio workflow. No comparative human-usability or general superiority claim is made.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="compatibility-0-4-0">Compatibility<a class="anchor" aria-label="anchor" href="#compatibility-0-4-0"></a></h3>
+<p>Result and aggregate-export schemas are now <strong>2.0</strong>. Aggregate audit grades, <code>stable_claim_rate</code>, and per-feature <code>evidence_grade</code> have been removed. Use <code>shuffle_status</code>, <code>dependence_status</code>, per-model diagnostic counts and scoped findings instead. Regenerate explanations and reports created with 0.3.0; old calculation results are not repaired merely by installing this version.</p>
+<p><code><a href="../reference/generate_dashboard.html">generate_dashboard()</a></code>, <code><a href="../reference/create_simple_dashboard.html">create_simple_dashboard()</a></code>, <code><a href="../reference/create_model_comparison_report.html">create_model_comparison_report()</a></code> and <code><a href="../reference/calculate_weighted_efficiency.html">calculate_weighted_efficiency()</a></code> are deprecated and issue a classed warning. Use <code><a href="../reference/render_model_report.html">render_model_report()</a></code> and inspect performance and resource measurements separately. Removal will occur no earlier than 0.6.0. The package remains distributed on GitHub; this release is not a claim of CRAN submission or acceptance.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="autoxplainr-030">AutoXplainR 0.3.0<a class="anchor" aria-label="anchor" href="#autoxplainr-030"></a></h2>
 <div class="section level3">

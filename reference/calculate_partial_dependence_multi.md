@@ -39,7 +39,9 @@ calculate_partial_dependence_multi(
 
 - n_points:
 
-  Number of quantile bins for ALE or grid points for PDP.
+  Maximum number of empirical quantile bins for ALE or grid points for
+  PDP. Ties can reduce the ALE bin count. ALE returns both the first
+  lower boundary and each upper boundary.
 
 - quantile_range:
 

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your First Model with AutoXplainR</a></li>
+<li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
+    <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -189,21 +192,27 @@ importance estimator.</p>
 <p>Fisher, Rudin and Dominici’s <a href="https://jmlr.org/papers/v20/18-760.html" class="external-link">model reliance paper</a>
 provides motivation for examining more than one competitive model.
 AutoXplainR compares only supplied fitted candidates; it does not
-implement their full model-class reliance bounds. A diagnostic grade is
-a heuristic summary, not a statistical guarantee.</p>
+implement their full model-class reliance bounds. Diagnostics report
+shuffle behavior, association screening and supplied-model comparison
+separately; there is no overall quality grade.</p>
 <p>Partial dependence averages predictions after setting one feature to
 a grid value for every reference row. With dependent inputs, this can
 require extrapolation. Accumulated local effects instead average local
-prediction differences within bins, accumulate them and center the
-result, following <a href="https://doi.org/10.1111/rssb.12377" class="external-link">Apley and
-Zhu, 2020</a>. Sparse bins, model instability and dependence still
-require interpretation. PDP bands describe variation across reference
+prediction differences within empirical quantile bins, accumulate them
+at bin boundaries, and center their linearly interpolated values over
+the reference rows, following <a href="https://doi.org/10.1111/rssb.12377" class="external-link">Apley and Zhu, 2020</a>. Tied
+quantiles reduce the number of bins. Boundary counts refer to the
+interval ending at that boundary; the first boundary has no separate bin
+count. Sparse bins, model instability and dependence still require
+interpretation. PDP bands describe variation across reference
 predictions under that calculation; they are not refit uncertainty
-bands. Neither curve is causal.</p>
+bands. Neither curve is causal. Association screening uses limited
+pairwise summaries; a low value does not exclude nonlinear or joint
+dependence.</p>
 <p>The default workflow first screens all features by importance, then
 audits the eight highest-ranked features and plots up to three. This is
-data-dependent selection. The resulting intervals and grades should be
-read descriptively; selection-adjusted inference is not supplied.
+data-dependent selection. The resulting intervals and diagnostics should
+be read descriptively; selection-adjusted inference is not supplied.
 Multiclass default effects refer to the first outcome class, which is
 labeled in the output. Request a particular class with
 <code>explain_effect(..., class = "name")</code> or

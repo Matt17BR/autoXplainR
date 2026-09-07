@@ -1,6 +1,6 @@
 # Source and intellectual-property provenance
 
-This record covers the source tree prepared for AutoXplainR 0.3.0. It is
+This record covers the source tree prepared for AutoXplainR 0.4.0. It is
 kept outside the CRAN source archive because it documents repository
 governance rather than installed package behavior.
 

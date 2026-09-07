@@ -24,6 +24,13 @@ learner_catalog(task = NULL)
 A data frame with learner capabilities, dependencies, and plain-
 language behavior notes.
 
+## Details
+
+The package's R \>= 4.1 requirement covers the core workflow. Optional
+engine versions and their dependencies can require newer R. The catalog
+reports unavailable engines explicitly; full portfolio checks use the
+declared engine minima on current R release.
+
 ## Examples
 
 ``` r

@@ -3,9 +3,10 @@
 `audit_explanations()` is AutoXplainR's advanced reliability layer. It
 evaluates repeated permutation importance, feature dependence, Monte
 Carlo stability, prediction disagreement, and explanation disagreement
-among near-equivalent models. The output distinguishes robust
-descriptive evidence from claims that need more data or a conditional
-method.
+among near-equivalent models. The output keeps shuffle variation, a
+limited pairwise association screen, evaluation scope, and candidate
+disagreement separate. It does not combine these questions into an
+evidence grade.
 
 ## Usage
 
@@ -60,8 +61,11 @@ audit_explanations(
 
 - dependence_threshold:
 
-  Association above which marginal importance and PDP claims receive a
-  dependence warning.
+  Pairwise association above which marginal importance receives a
+  warning. Numeric pairs use absolute Spearman correlation, mixed pairs
+  use a correlation ratio, and categorical pairs use Cramer's V. Small
+  values do not establish independence or rule out nonlinear or joint
+  dependence.
 
 ## Value
 
@@ -85,16 +89,19 @@ e2 <- explain_model(lm2, test, "mpg", label = "model B")
 audit <- audit_explanations(list(e1, e2), n_repeats = 5)
 audit
 #> <AutoXplainR explanation evidence audit>
-#>   grade:              C (diagnostic, not certification)
 #>   models:             2 (1 near-optimal)
-#>   stable claims:      0.0%
-#>   max dependence:     0.929
-#>   explanation accord: n/a (one model)
-#>   prediction accord:  n/a (one model)
+#>   max association:    0.929
+#>   explanation accord: unavailable
+#>   prediction accord:  unavailable
+#>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>   comparison: Fewer than two supplied models meet the performance tolerance.
 #> 
 #> Findings
-#>   [warning] 8 feature(s) exceed the dependence threshold.
-#>   [warning] 20 model-feature claim(s) are qualified or unsupported.
-#>   [note] The permutation budget is suitable for smoke testing, not a final report.
-#>   [note] The audit cannot verify that explanation data are independent of model fitting.
+#>   [warning] `cyl` exceeds the pairwise association threshold.
+#>   [warning] `disp` exceeds the pairwise association threshold.
+#>   [warning] `hp` exceeds the pairwise association threshold.
+#>   [warning] `wt` exceeds the pairwise association threshold.
+#>   [warning] `qsec` exceeds the pairwise association threshold.
+#>   [warning] `vs` exceeds the pairwise association threshold.
 ```
