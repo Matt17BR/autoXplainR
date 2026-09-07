@@ -1,0 +1,579 @@
+{
+  "tag": "v0.5.0",
+  "source_commit": "bcc72250968f47079f98e9c056b6cce208db0253",
+  "release_run": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133288982",
+  "publication": {
+    "tagName": "v0.5.0",
+    "publishedAt": "2026-09-07T14:57:19Z",
+    "isDraft": false,
+    "isPrerelease": false,
+    "url": "https://github.com/Matt17BR/autoXplainR/releases/tag/v0.5.0"
+  },
+  "source_archive": {
+    "name": "AutoXplainR_0.5.0.tar.gz",
+    "sha256": "b4cecefb6ad0fdf9f3553aa0e937b7340f094cd042d991337797d523d35c7052",
+    "built_once": true,
+    "release_R_check": {
+      "R": "4.6.1 (2026-06-24)",
+      "os": "Ubuntu 24.04.4 LTS",
+      "arguments": [
+        "--as-cran"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "notes": [
+        "New submission"
+      ],
+      "PDF_manual": "OK",
+      "HTML_manual": "OK",
+      "documentation_urls": "All URLs are correct"
+    },
+    "R_devel_check": {
+      "R": "Under development (2026-09-06 r90498)",
+      "os": "Ubuntu 24.04.4 LTS",
+      "arguments": [
+        "--as-cran",
+        "--no-manual"
+      ],
+      "errors": 0,
+      "warnings": 0,
+      "notes": [
+        "New submission"
+      ],
+      "unavailable_suggested_packages": [
+        "e1071",
+        "earth",
+        "glmnet",
+        "h2o",
+        "httr",
+        "kknn",
+        "plotly",
+        "ranger",
+        "xgboost"
+      ]
+    }
+  },
+  "release_jobs": [
+    {
+      "name": "h2o-gate / h2o",
+      "conclusion": "success",
+      "job_id": 101781782760
+    },
+    {
+      "name": "engine-minimum-gate / ${{ matrix.os }} (R release)",
+      "conclusion": "skipped",
+      "job_id": 101781783782
+    },
+    {
+      "name": "quality-gates",
+      "conclusion": "success",
+      "job_id": 101781784195
+    },
+    {
+      "name": "engine-minimum-gate / Declared engine minima (Ubuntu, R release)",
+      "conclusion": "success",
+      "job_id": 101781784477
+    },
+    {
+      "name": "browser-gate / generated-report",
+      "conclusion": "success",
+      "job_id": 101781825115
+    },
+    {
+      "name": "source-package",
+      "conclusion": "success",
+      "job_id": 101783101620
+    },
+    {
+      "name": "r-devel-source-check",
+      "conclusion": "success",
+      "job_id": 101784782629
+    },
+    {
+      "name": "github-release",
+      "conclusion": "success",
+      "job_id": 101786126419
+    }
+  ],
+  "release_jobs_note": "The current-engine matrix is intentionally skipped for minimum_only=true; separate Ubuntu and Windows current-engine jobs passed. H2O setup was cancelled during unusually slow Ubuntu apt downloads; only H2O and dependent jobs were rerun. No package checks were waived.",
+  "native_suite": {
+    "passed_assertions": 2872,
+    "failures": 0,
+    "warnings": 0,
+    "live_skips": 2,
+    "statement_coverage_percent": 88.81,
+    "source": "tagged release quality-gates job"
+  },
+  "minimum_engines": {
+    "passed_assertions": 731,
+    "failures": 0,
+    "warnings": 0,
+    "skips": 0,
+    "R": "4.6.1",
+    "engines": [
+      {
+        "package": "e1071",
+        "declared_minimum": "1.7-17",
+        "installed": "1.7-17",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": ""
+      },
+      {
+        "package": "earth",
+        "declared_minimum": "5.3.6",
+        "installed": "5.3.6",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 3.4.0), Formula (>= 1.2-3), plotmo (>= 3.6.0),"
+      },
+      {
+        "package": "glmnet",
+        "declared_minimum": "5.0",
+        "installed": "5.0",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 3.6.0), Matrix (>= 1.0-6)"
+      },
+      {
+        "package": "h2o",
+        "declared_minimum": "3.44.0.3",
+        "installed": "3.44.0.3",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 2.13.0), methods, stats"
+      },
+      {
+        "package": "kknn",
+        "declared_minimum": "1.4.1",
+        "installed": "1.4.1",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 3.5)"
+      },
+      {
+        "package": "mgcv",
+        "declared_minimum": "1.9-4",
+        "installed": "1.9-4",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 4.4.0), nlme (>= 3.1-64)"
+      },
+      {
+        "package": "ranger",
+        "declared_minimum": "0.18.0",
+        "installed": "0.18.0",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 3.1)"
+      },
+      {
+        "package": "xgboost",
+        "declared_minimum": "3.2.1.1",
+        "installed": "3.2.1.1",
+        "exact_minimum": true,
+        "library": "/home/runner/work/_temp/engine-minimum-library",
+        "direct_depends": "R (>= 4.3.0)"
+      }
+    ],
+    "installation": "isolated dedicated library; exact versions and library paths checked"
+  },
+  "live_h2o": {
+    "version": "3.44.0.3",
+    "Java": "Temurin 17.0.20.1+1",
+    "R": "4.6.1",
+    "passed_assertions": 95,
+    "failures": 0,
+    "warnings": 0,
+    "skips": 0
+  },
+  "browser": {
+    "source": "Four freshly generated reports in the tag workflow; timing and provenance differ from committed public fixtures.",
+    "passed": true,
+    "check_count": 1325,
+    "failed_checks": [],
+    "errors": [],
+    "accessibility_incomplete": [
+      {
+        "width": 320,
+        "tab": "overview",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "patterns",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "relationships",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "evaluation",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "checks",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "provenance",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "overview",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "relationships",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "evaluation",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "checks",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "provenance",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "overview",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "patterns",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "relationships",
+        "incomplete": []
+      },
+      {
+        "width": 768,
+        "tab": "evaluation",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "checks",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "provenance",
+        "incomplete": []
+      },
+      {
+        "width": 1440,
+        "tab": "overview",
+        "incomplete": [
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 1440,
+        "tab": "patterns",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 1440,
+        "tab": "relationships",
+        "incomplete": []
+      },
+      {
+        "width": 1440,
+        "tab": "evaluation",
+        "incomplete": [
+          "aria-prohibited-attr",
+          "color-contrast"
+        ]
+      },
+      {
+        "width": 1440,
+        "tab": "checks",
+        "incomplete": []
+      },
+      {
+        "width": 1440,
+        "tab": "provenance",
+        "incomplete": []
+      }
+    ],
+    "widths": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "axe_scans": 36,
+    "negative_controls": [
+      {
+        "mutation": "disconnected-selector",
+        "caught": true,
+        "failures": [
+          "quick/simple_baseline: feature panel follows model",
+          "quick/simple_baseline: selected model settings follow model"
+        ],
+        "errors": []
+      },
+      {
+        "mutation": "false-graphics",
+        "caught": true,
+        "failures": [
+          "quick/rmse/training_time_ms: plotted costs, scores and frontier match R",
+          "quick/rmse/prediction_time_ms: plotted costs, scores and frontier match R",
+          "quick/rmse/model_size_kb: plotted costs, scores and frontier match R",
+          "quick/mae/training_time_ms: plotted costs, scores and frontier match R",
+          "quick/mae/prediction_time_ms: plotted costs, scores and frontier match R",
+          "quick/mae/model_size_kb: plotted costs, scores and frontier match R",
+          "quick/r_squared/training_time_ms: plotted costs, scores and frontier match R",
+          "quick/r_squared/prediction_time_ms: plotted costs, scores and frontier match R",
+          "quick/r_squared/model_size_kb: plotted costs, scores and frontier match R",
+          "quick/main_model/wt/None: plotted curve matches its axes and R",
+          "quick/main_model/qsec/None: plotted curve matches its axes and R",
+          "quick/main_model/am/None: plotted curve matches its axes and R",
+          "quick/main_model/drat/None: plotted curve matches its axes and R",
+          "quick/main_model/disp/None: plotted curve matches its axes and R",
+          "quick/main_model/gear/None: plotted curve matches its axes and R",
+          "quick/main_model/hp/None: plotted curve matches its axes and R",
+          "quick/main_model/carb/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/wt/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/qsec/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/am/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/drat/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/vs/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/cyl/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/gear/None: plotted curve matches its axes and R",
+          "quick/simple_baseline/carb/None: plotted curve matches its axes and R"
+        ],
+        "errors": []
+      }
+    ],
+    "scope": "R-oracle task checks and implementer browser review; no recruited participants"
+  },
+  "test_quality": {
+    "review": "../test-quality-0.5.0.md",
+    "before_after_evidence": "test-quality-0.5.0.json",
+    "weak_or_duplicate_assertions_removed": 14,
+    "fold_imputation_negative_control": {
+      "correct": {
+        "passed": 3,
+        "failed": 0,
+        "errors": 0
+      },
+      "leaked": {
+        "passed": 1,
+        "failed": 2,
+        "errors": 0
+      }
+    },
+    "scope": "Targeted tests of plotted values, connected controls, fold preprocessing, class agreement and fitted tree metadata; not exhaustive mutation coverage."
+  },
+  "installed_publication_check": {
+    "passed": true,
+    "archive_matches_tag_artifact_byte_for_byte": true,
+    "SHA256SUMS_verified": true,
+    "fresh_library": true,
+    "execution": "Rscript validation/check-installed-artifact.R <fresh-library> <output-directory> 0.5.0, outside the source checkout",
+    "R": "4.5.2",
+    "os": "Ubuntu 26.04.1 LTS",
+    "workflows": [
+      "regression",
+      "binary",
+      "multiclass"
+    ],
+    "checks": [
+      "autoxplain fit",
+      "finite raw predictions",
+      "binary event/class contract",
+      "multiclass probability contract",
+      "standalone HTML",
+      "RDS prediction identity",
+      "retained audit",
+      "local narrative attachment",
+      "aggregate JSON schema 2.0",
+      "saved recipe handles missing values and novel categories"
+    ]
+  },
+  "public_site_evidence": "published-site-0.5.0.json",
+  "product_acceptance": {
+    "protocol": "../product-walkthrough.md",
+    "observed_tasks_and_repairs": "../product-review-0.4.0.md",
+    "scope": "Repeated implementer novice/expert task walkthroughs, independent R object answers, browser use, visual review and repairs; no recruited participant study is claimed."
+  },
+  "limits": [
+    "Chromium browser automation; Firefox, Safari and screen-reader behaviour are not established.",
+    "Temporal tuning is unsupported; choose quick/comparison mode for chronological splits.",
+    "CRAN submission and acceptance are not claimed."
+  ],
+  "tagged_commit_workflows": [
+    {
+      "conclusion": "success",
+      "databaseId": 34133288982,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133288982",
+      "workflowName": "release"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268908,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268908",
+      "workflowName": "statistical-validation"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268900,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268900",
+      "workflowName": "test-coverage"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268887,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268887",
+      "workflowName": "lint"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268920,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268920",
+      "workflowName": "pkgdown"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268888,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268888",
+      "workflowName": "report-browser"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268861,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268861",
+      "workflowName": "native-model-engines"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 34133268945,
+      "headSha": "bcc72250968f47079f98e9c056b6cce208db0253",
+      "status": "completed",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945",
+      "workflowName": "R-CMD-check"
+    }
+  ],
+  "tagged_commit_platform_checks": {
+    "run": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945",
+    "attempt": 2,
+    "jobs": [
+      {
+        "name": "macos-latest (R release)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786557488"
+      },
+      {
+        "name": "windows-latest (R release)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786557967"
+      },
+      {
+        "name": "Ubuntu R-devel (exact source archive)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786558677"
+      },
+      {
+        "name": "ubuntu-latest (R oldrel-1)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786558765"
+      },
+      {
+        "name": "ubuntu-22.04 (R 4.1)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786558813"
+      },
+      {
+        "name": "ubuntu-latest (R release)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786596924"
+      },
+      {
+        "name": "ubuntu-latest (R devel)",
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34133268945/job/101786606049"
+      }
+    ],
+    "retry_note": "Only the macOS job was rerun after setup-r failed to download gfortran with HTTP 504. R setup and package checks then passed; no test or source change was made."
+  }
+}

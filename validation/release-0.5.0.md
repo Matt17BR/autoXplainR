@@ -3,7 +3,9 @@
 This release restores model exploration after the maintainer's rejection of the
 0.4.0 report. The [product review](product-review-0.4.0.md) records the source
 comparison with 0.1, the observed task answers and revisions made during review.
-Publication status and artifact identity are recorded below as gates complete.
+[Version 0.5.0 was published on GitHub](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.5.0)
+on 7 September 2026. The [machine-readable record](results/release-0.5.0.json)
+identifies the source, checks and downloaded artifact.
 
 ## Product acceptance
 
@@ -44,13 +46,52 @@ qpdf/tidy tools. The function now uses `utils::tail()`, and the complete source
 check uses the existing local qpdf/tidy installation. Its clock-network probe is
 disabled locally; GitHub source checks retain their normal configuration.
 
-## Release gates
+## Published artifact and release checks
 
-The local source archive passed `R CMD check --as-cran` on R 4.5.2 with
-zero errors, zero warnings and one NOTE (new submission), including both manuals.
-GitHub platform jobs and publication are still being executed. A passing older release does not satisfy these gates. The final record
-will identify the tagged commit, downloaded archive checksum and fresh-library
-fit/predict/report check.
+Tag `v0.5.0` points to `bcc72250968f47079f98e9c056b6cce208db0253`.
+The [release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34133288982)
+built the source once and checked that archive on R 4.6.1 and R-devel
+(2026-09-06 r90498). Both checks reported zero errors, zero warnings and one NOTE
+for a new submission. The R release check included PDF and HTML manuals;
+R-devel used `--no-manual` and omitted unavailable optional dependencies.
+The full [R release log](results/release-0.5.0-r-check.txt) and
+[R-devel log](results/release-0.5.0-r-devel-check.txt) preserve those details.
+
+The tagged release also passed 2,872 native-suite assertions, 731 assertions with
+exactly the declared minimum engine versions, 95 live H2O assertions and all
+1,325 browser assertions. Deliberately broken graphics, model selection and fold
+imputation were rejected. Statement coverage was 88.81%; the negative controls
+provide separate evidence that these particular tests detect wrong behaviour.
+Documentation links, lint, spelling and generated-documentation checks passed.
+H2O setup was retried after unusually slow Ubuntu package downloads; no package
+checks were waived.
+
+All workflows on the tagged commit passed. The separate package-check matrix
+covers macOS and Windows with R release, Ubuntu with R 4.1, oldrel-1, release
+and devel, plus a source-archive check. Its macOS job was rerun after a gfortran
+download returned HTTP 504 during R setup; the retry passed without source or
+test changes. Job links are retained in the machine-readable record.
+
+The downloaded `AutoXplainR_0.5.0.tar.gz` matches the checked workflow artifact
+byte for byte and passes its published `SHA256SUMS` file:
+
+```text
+b4cecefb6ad0fdf9f3553aa0e937b7340f094cd042d991337797d523d35c7052
+```
+
+Installed into a fresh R library and exercised outside the source checkout,
+the published archive passed regression, binary and multiclass fit, prediction,
+HTML report, saved-result reuse, narrative and JSON export checks. Prediction
+with missing values and novel categories also passed using the saved recipe.
+The [installed-artifact log](results/release-0.5.0-installed-smoke.txt) records
+the result on R 4.5.2.
+
+The public regression, binary and multiclass reports match the reviewed files
+byte for byte. All six README screenshots load. Their URLs and checksums are
+recorded in the [published-site checks](results/published-site-0.5.0.json).
+The live report's model-details dialog was also opened and inspected after
+deployment. This release record was completed after publication; the release
+tag continues to identify the code that was checked and published.
 
 ## Explicit limits
 

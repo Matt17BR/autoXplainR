@@ -1,0 +1,58 @@
+{
+  "checked_at": "2026-09-07T14:34:58.254608+00:00",
+  "tag": "v0.5.0",
+  "commit": "bcc72250968f47079f98e9c056b6cce208db0253",
+  "checks": [
+    {
+      "url": "https://matt17br.github.io/autoXplainR/model-report.html",
+      "status": 200,
+      "sha256": "594157b0829fcce503d08c7f3b8638f47b352c0a7cc45cf053f524f15d72fce9",
+      "matches_reviewed_file": true,
+      "version_0_5_0": true
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/binary-report.html",
+      "status": 200,
+      "sha256": "7b2a00b1e0346662b33d5a7f36c173ee5e0644757aa832c5739d556b82161479",
+      "matches_reviewed_file": true,
+      "version_0_5_0": true
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/multiclass-report.html",
+      "status": 200,
+      "sha256": "5820007e733d0c02a5d1227fece777b55510740d556e7a9240845b433999f3a2",
+      "matches_reviewed_file": true,
+      "version_0_5_0": true
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/guided-overview.png",
+      "status": 200,
+      "content_type": "image/png"
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-comparison.png",
+      "status": 200,
+      "content_type": "image/png"
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-patterns.png",
+      "status": 200,
+      "content_type": "image/png"
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-details.png",
+      "status": 200,
+      "content_type": "image/png"
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/input-relationships.png",
+      "status": 200,
+      "content_type": "image/png"
+    },
+    {
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-predictions.png",
+      "status": 200,
+      "content_type": "image/png"
+    }
+  ]
+}
