@@ -112,7 +112,9 @@
 #' audit_explanations(explainers)
 #'
 #' \dontrun{
-#' h2o_result <- autoxplain(mtcars, "mpg", engine = "h2o", max_models = 3)
+#' if (identical(Sys.getenv("AUTOXPLAIN_RUN_H2O"), "true")) {
+#'   h2o_result <- autoxplain(mtcars, "mpg", engine = "h2o", max_models = 3)
+#' }
 #' }
 autoxplain <- function(data,
                        target_column,
