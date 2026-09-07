@@ -39,7 +39,7 @@ workflow then gates publication on native tests, coverage, lint, reference
 comparisons, the live H2O integration, and checks of the same source archive
 under release R and R-devel.
 
-Local archive check details and remote run links are appended below when available.
+Local archive check details and remote run links are recorded below.
 Older Win-builder results are deliberately not reused. CRAN submission is a
 separate maintainer action and is not performed by the GitHub release workflow.
 
@@ -54,3 +54,28 @@ job lacked knitr. Documentation was regenerated with 8.1.0 and that tool version
 was pinned in the synchronization gates. Both standalone source-check paths now
 explicitly install testthat, knitr and rmarkdown so tests and vignette rebuilding
 cannot disappear behind optional-dependency skips.
+
+## Verified remote checks
+
+The release tag points to `203bffe13882b503ccce1f7df268cbeb42680712`.
+All of the following checks completed successfully before tagging:
+
+- [Package matrix and separate R-devel source check](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986937):
+  Windows/macOS release R; Ubuntu release, oldrel-1, R 4.1 and R-devel.
+- [All native adapters on Windows and Linux](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986959).
+- [Statement coverage](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986933).
+- [Statistical reference comparisons and simulation](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986910).
+- [Lint and spelling](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986872).
+- [Website build and deployment](https://github.com/Matt17BR/autoXplainR/actions/runs/34107986965).
+
+The separately built mainline source archive passed R-devel
+(2026-09-06 r90498) with zero errors, zero warnings and one new-submission note.
+Its log is retained in `results/main-r-devel-source-check.txt`. That lightweight
+job reports unavailable optional engines as INFO; the native-engine and H2O
+jobs are the integration evidence for those paths.
+
+The [version-tag release pipeline](https://github.com/Matt17BR/autoXplainR/actions/runs/34108779852)
+records the final artifact checks and publication outcome. The official
+[0.3.0 release](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.3.0)
+provides the archive and its checksum. The final release archive is built by that
+pipeline and is distinct from the mainline diagnostic archive above.

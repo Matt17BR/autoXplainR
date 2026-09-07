@@ -23,6 +23,8 @@ The release pipeline builds a source archive, checks that exact archive with
 `R CMD check --as-cran`, includes PDF/HTML manuals, and verifies SHA-256 before
 and after checking. It checks the same archive with R-devel as a second gate.
 GitHub's main-branch matrix also covers Windows, macOS, current/older R and R 4.1.
+The tagged commit passed the complete matrix. The separate R-devel source
+check (2026-09-06 r90498) had zero errors/warnings and one new-submission note.
 Actual check results and artifact identifiers are recorded in
 `validation/release-0.3.0.md` and linked GitHub Actions runs.
 
