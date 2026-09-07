@@ -33,7 +33,7 @@ fit_engine_configuration <- function(family, data, target, task) {
 }
 
 expect_engine_prediction_contract <- function(family, package) {
-  skip_if_not_installed(package)
+  skip_if_package_unavailable(package)
   data <- engine_test_data()
 
   regression <- fit_engine_configuration(family, data$regression, "y", "regression")
@@ -127,7 +127,7 @@ native_explanation_fixture <- function(task) {
 }
 
 expect_native_explanation_contract <- function(family, package, task, seed) {
-  skip_if_not_installed(package)
+  skip_if_package_unavailable(package)
   fixture <- native_explanation_fixture(task)
   result <- autoxplain(
     fixture$data,
@@ -225,7 +225,7 @@ test_that("glmnet adapter satisfies every task prediction contract", {
 })
 
 test_that("glmnet supports one encoded predictor", {
-  skip_if_not_installed("glmnet")
+  skip_if_package_unavailable("glmnet")
   set.seed(2027)
   regression <- data.frame(x = seq(-2, 2, length.out = 60))
   regression$y <- 1.5 * regression$x + stats::rnorm(60, sd = 0.1)
@@ -248,7 +248,7 @@ test_that("ranger adapter satisfies every task prediction contract", {
 })
 
 test_that("ranger clamps mtry after fold-specific feature removal", {
-  skip_if_not_installed("ranger")
+  skip_if_package_unavailable("ranger")
   data <- engine_test_data()$regression[c("curved value", "noise", "y")]
   parameters <- AutoXplainR:::forest_learner_grid(
     nrow(data), 50L, "regression", 1L
@@ -319,7 +319,7 @@ for (row in seq_len(nrow(native_explanation_matrix))) {
 }
 
 test_that("kknn caps neighbor counts to small resampling training sets", {
-  skip_if_not_installed("kknn")
+  skip_if_package_unavailable("kknn")
   data <- data.frame(
     x = c(-2, -1, 1, 2),
     group = factor(c("a", "b", "a", "b")),
@@ -351,7 +351,7 @@ test_that("smoother neighbor settings have a lower flexibility proxy", {
 })
 
 test_that("kknn rejects a one-row training set clearly", {
-  skip_if_not_installed("kknn")
+  skip_if_package_unavailable("kknn")
   data <- data.frame(x = 1, y = 2)
   expect_error(
     AutoXplainR:::fit_neighbors_learner(
@@ -367,7 +367,7 @@ test_that("kknn rejects a one-row training set clearly", {
 })
 
 test_that("kknn supports one-row multiclass prediction after serialization", {
-  skip_if_not_installed("kknn")
+  skip_if_package_unavailable("kknn")
   data <- engine_test_data()$multiclass
   model <- fit_engine_configuration("neighbors", data, "Species", "multiclass")
   path <- tempfile(fileext = ".rds")
@@ -384,7 +384,7 @@ test_that("kknn supports one-row multiclass prediction after serialization", {
 
 test_that("recommended portfolio retains and displays every family", {
   for (package in c("glmnet", "mgcv", "ranger", "xgboost")) {
-    skip_if_not_installed(package)
+    skip_if_package_unavailable(package)
   }
   data <- engine_test_data()$regression
   result <- autoxplain(
@@ -423,7 +423,7 @@ test_that("recommended portfolio retains and displays every family", {
 
 test_that("recommended portfolio is integrated for binary and multiclass tasks", {
   for (package in c("glmnet", "mgcv", "ranger", "xgboost")) {
-    skip_if_not_installed(package)
+    skip_if_package_unavailable(package)
   }
   data <- engine_test_data()
   binary <- autoxplain(
@@ -459,7 +459,7 @@ test_that("recommended portfolio is integrated for binary and multiclass tasks",
 
 test_that("extended portfolio adds neural, kernel, neighbors, and MARS behavior", {
   for (package in c("glmnet", "mgcv", "ranger", "xgboost", "e1071", "earth", "kknn")) {
-    skip_if_not_installed(package)
+    skip_if_package_unavailable(package)
   }
   data <- engine_test_data()$regression
   result <- autoxplain(
@@ -480,7 +480,7 @@ test_that("extended portfolio adds neural, kernel, neighbors, and MARS behavior"
 
 test_that("large explicit search budgets are not silently capped", {
   for (package in c("glmnet", "mgcv", "ranger", "xgboost", "e1071", "earth", "kknn")) {
-    skip_if_not_installed(package)
+    skip_if_package_unavailable(package)
   }
   families <- AutoXplainR:::portfolio_learner_families("extended", "regression")
   plan <- AutoXplainR:::local_tuning_plan(

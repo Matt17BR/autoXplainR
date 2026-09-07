@@ -46,3 +46,20 @@ make_disjoint_evaluation <- function(data, target, rows) {
   rownames(evaluation) <- paste0("evaluation-", seq_len(nrow(evaluation)))
   evaluation
 }
+
+# Optional tests must use a supported dependency version. Read the loaded
+# package's DESCRIPTION so installed and pkgload test runs use the same contract.
+skip_if_package_unavailable <- function(package) {
+  path <- getNamespaceInfo(asNamespace("AutoXplainR"), "path")
+  description <- read.dcf(file.path(path, "DESCRIPTION"), fields = c("Imports", "Suggests"))
+  entries <- trimws(strsplit(paste(description, collapse = ","), ",", fixed = TRUE)[[1L]])
+  dependency_names <- trimws(sub("\\s*\\(.*$", "", entries))
+  entry <- entries[dependency_names == package]
+  if (length(entry) != 1L) stop("Expected one declared dependency for ", package, ".")
+  minimum <- if (grepl("\\(", entry)) {
+    sub(".*\\(>=\\s*([^)]*)\\).*", "\\1", entry)
+  } else {
+    "0"
+  }
+  testthat::skip_if_not_installed(package, minimum_version = trimws(minimum))
+}

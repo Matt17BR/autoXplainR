@@ -1,5 +1,5 @@
 test_that("optional plotting methods return widgets", {
-  skip_if_not_installed("plotly")
+  skip_if_package_unavailable("plotly")
   fixture <- make_regression_fixture()
   explainer <- explain_model(fixture$model, fixture$test, "y")
   importance <- calculate_permutation_importance(

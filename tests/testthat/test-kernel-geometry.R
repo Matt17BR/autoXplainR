@@ -49,7 +49,7 @@ test_that("treatment encoding remains the matrix blueprint default", {
 })
 
 test_that("radial SVR is equivariant to positive affine outcome rescaling", {
-  skip_if_not_installed("e1071")
+  skip_if_package_unavailable("e1071")
   training <- data.frame(
     x = seq(-2, 2, length.out = 72),
     group = factor(rep(c("a", "b", "c"), 24))
@@ -84,33 +84,29 @@ test_that("radial SVR is equivariant to positive affine outcome rescaling", {
   expect_equal(predict(restored, training), original_prediction, tolerance = 1e-12)
 })
 
-test_that("kernel and neighbor learners both request distance-safe encoding", {
-  data <- data.frame(
-    x = seq(-1, 1, length.out = 18),
-    group = factor(rep(c("a", "b", "c"), 6)),
-    y = rep(c(0, 1, 2), 6) + seq(-1, 1, length.out = 18)
-  )
-
-  if (requireNamespace("e1071", quietly = TRUE)) {
-    kernel <- AutoXplainR:::fit_kernel_learner(
-      data,
-      "y",
-      "regression",
-      list(cost = 1, gamma_multiplier = 1, epsilon = 0.1),
-      seed = 5L
+for (family in c("kernel", "neighbors")) local({
+  selected_family <- family
+  package <- if (selected_family == "kernel") "e1071" else "kknn"
+  test_that(paste(selected_family, "requests distance-safe encoding"), {
+    skip_if_package_unavailable(package)
+    data <- data.frame(
+      x = seq(-1, 1, length.out = 18),
+      group = factor(rep(c("a", "b", "c"), 6)),
+      y = rep(c(0, 1, 2), 6) + seq(-1, 1, length.out = 18)
     )
-    expect_identical(kernel$blueprint$categorical_encoding, "one_hot")
-  }
-  if (requireNamespace("kknn", quietly = TRUE)) {
-    neighbors <- AutoXplainR:::fit_neighbors_learner(
-      data,
-      "y",
-      "regression",
-      list(k = 3L, distance = 2, kernel = "optimal"),
-      seed = 5L
-    )
-    expect_identical(neighbors$blueprint$categorical_encoding, "one_hot")
-  }
+    fit <- if (selected_family == "kernel") {
+      AutoXplainR:::fit_kernel_learner(
+        data, "y", "regression",
+        list(cost = 1, gamma_multiplier = 1, epsilon = 0.1), seed = 5L
+      )
+    } else {
+      AutoXplainR:::fit_neighbors_learner(
+        data, "y", "regression",
+        list(k = 3L, distance = 2, kernel = "optimal"), seed = 5L
+      )
+    }
+    expect_identical(fit$blueprint$categorical_encoding, "one_hot")
+  })
 })
 
 test_that("low-budget kernel search prefixes vary every effective SVR control", {

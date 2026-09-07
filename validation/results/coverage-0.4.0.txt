@@ -24,7 +24,7 @@ R/audit.R: 95.66%
 R/model_tradeoffs.R: 95.97%
 R/dashboard_generation.R: 96.39%
 R/threshold_diagnostics.R: 96.64%
-R/evidence_contract.R: 96.77%
+R/evidence_contract.R: 96.88%
 R/calibration.R: 96.91%
 R/guided_workflow.R: 97.11%
 R/missingness_shift.R: 97.47%

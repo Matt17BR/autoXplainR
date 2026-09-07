@@ -342,7 +342,7 @@ test_that("families with no complete resampling configuration remain visible", {
 })
 
 test_that("all-configuration resampling failure is surfaced end to end", {
-  skip_if_not_installed("mgcv")
+  skip_if_package_unavailable("mgcv")
   set.seed(55)
   training <- data.frame(group = factor(rep(c("a", "b", "c"), 24)))
   training$y <- as.numeric(training$group) + rnorm(nrow(training), sd = 0.2)

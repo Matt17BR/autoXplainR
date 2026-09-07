@@ -9,7 +9,7 @@ checks and explicit remaining limits. This record does not claim CRAN acceptance
 | Check | Result |
 |---|---|
 | Runtime | R 4.5.2, Ubuntu 26.04.1, x86_64 |
-| Complete installed-engine suite | 2,710 passing assertions; no failures or warnings; two opt-in live skips |
+| Complete installed-engine suite | 2,717 passing assertions; no failures or warnings; two opt-in live skips |
 | Live H2O integration | 93 passing assertions on CRAN H2O 3.44.0.3 and Temurin 17; no failures, warnings or skips |
 | Statement coverage | 89.66%; [instrumented summary](results/coverage-0.4.0.txt) |
 | Minimum-version engine check | All eight declared engine versions match; 694 adapter/geometry/data-contract assertions pass |
@@ -62,6 +62,17 @@ fingerprint. Those nonstatistical references are now removed while prediction
 code and model/evaluation content remain checked. Regressions cover source
 metadata changes, compilation and RDS reuse; the exact previously failing
 `R_KEEP_PKG_SOURCE=yes NOT_CRAN=true R CMD build --no-manual` command passes.
+
+The R 4.1 job also found optional tests running against its bundled mgcv
+1.8.39, below the declared 1.9-4 floor. Test guards now read the loaded package
+DESCRIPTION and skip unavailable or unsupported dependencies. Supported versions
+remain mandatory in the separate exact-minimum and current-engine jobs.
+
+The [installed-artifact smoke check](check-installed-artifact.R) passed against
+the locally built archive in a fresh package library. It exercises regression,
+binary and multiclass fits, raw prediction, RDS reuse, narratives, HTML and JSON
+export, plus missing-value and novel-category preprocessing. The same script is
+required against the downloaded publication artifact below.
 
 ## Publication gates
 

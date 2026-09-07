@@ -1,6 +1,6 @@
 test_that("H2O AutoML integrates through the model-agnostic contract", {
   skip_if_not(identical(tolower(Sys.getenv("AUTOXPLAIN_RUN_H2O")), "true"))
-  skip_if_not_installed("h2o")
+  skip_if_package_unavailable("h2o")
 
   set.seed(101)
   data <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
