@@ -13,7 +13,7 @@ default loss, retained out-of-fold predictions, and failure isolation."></head><
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,7 +27,7 @@ default loss, retained out-of-fold predictions, and failure isolation."></head><
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -68,7 +68,9 @@ default loss, retained out-of-fold predictions, and failure isolation.</p>
 <span>  fold_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"rmse"</span>, <span class="st">"mae"</span>, <span class="st">"log_loss"</span>, <span class="st">"brier"</span><span class="op">)</span>,</span>
 <span>  retain_oof <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  failure_policy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"continue"</span>, <span class="st">"stop"</span><span class="op">)</span></span>
+<span>  failure_policy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"continue"</span>, <span class="st">"stop"</span><span class="op">)</span>,</span>
+<span>  optimization_policy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exclude"</span>, <span class="st">"warn"</span><span class="op">)</span>,</span>
+<span>  family_priority <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,6 +106,19 @@ classification also supports <code>"brier"</code>.</p></dd>
 <dd><p><code>"continue"</code> records a failed configuration and keeps
 searching; <code>"stop"</code> aborts on the first resampling or refit failure.</p></dd>
 
+
+<dt id="arg-optimization-policy">optimization_policy<a class="anchor" aria-label="anchor" href="#arg-optimization-policy"></a></dt>
+<dd><p><code>"exclude"</code> excludes an explicit unsuccessful
+optimizer termination from selection and refitting. <code>"warn"</code> retains it
+with a recorded warning. An unavailable convergence diagnostic is recorded
+as unknown, not treated as proof of convergence.</p></dd>
+
+
+<dt id="arg-family-priority">family_priority<a class="anchor" aria-label="anchor" href="#arg-family-priority"></a></dt>
+<dd><p>Optional character vector ordering every requested
+family for the one-standard-error policy, from most to least preferred.
+This is a user preference, not a statistical ordering of algorithms.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -134,9 +149,10 @@ once after fitting on all rows assigned to every other fold. They are not a
 rolling-origin or forward-chaining specification. To avoid ambiguity after
 AutoXplainR's automatic holdout split, fold IDs are accepted only when
 <code>test_data</code> is supplied explicitly to <code><a href="autoxplain.html">autoxplain()</a></code>. Candidate losses and
-their one-standard-error uncertainty are weighted by the number of validation
+their selection standard-error heuristic are weighted by the number of validation
 rows in each fold; RMSE uses pooled squared loss with a delta-method standard
-error on the RMSE scale.</p>
+error on the RMSE scale. Overlapping training folds mean that this heuristic
+is not a confidence interval or a test of equivalent model performance.</p>
     </div>
 
     <div class="section level2">
@@ -153,6 +169,7 @@ error on the RMSE scale.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   metric:     mae</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   OOF rows:   retained</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   failures:   continue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   optimizer:  exclude</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   grids:      tree</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   budgets:    linear, tree</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   fold IDs:   automatic</span>

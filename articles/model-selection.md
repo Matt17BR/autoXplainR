@@ -1,6 +1,6 @@
 # Compare and tune models
 
-The default, `model_set = "tuned", portfolio = "core"`, searches 15
+The default, `model_set = "tuned", portfolio = "core"`, schedules 15
 settings across linear, tree and neural families using five
 training-only folds. It retains a representative from each successful
 family and a baseline for the report. The selected model is evaluated on
@@ -61,17 +61,17 @@ tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected
 #>                             model
 #> 1                  neural network
 #> 2                  neural network
-#> 3 multinomial logistic regression
+#> 3                   decision tree
 #> 4                   decision tree
 #> 5                   decision tree
-#> 6                   decision tree
+#> 6 multinomial logistic regression
 #>                                         hyperparameters   cv_score      cv_se
 #> 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199
 #> 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168
-#> 3                               default statistical fit 0.37178519 0.20170924
-#> 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486
-#> 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488
-#> 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488
+#> 3 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486
+#> 4  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488
+#> 5  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488
+#> 6                               default statistical fit         NA         NA
 #>   selected
 #> 1     TRUE
 #> 2    FALSE
@@ -83,11 +83,46 @@ tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected
 
 Every fold learns its preprocessing from that fold’s training rows. The
 default one-standard-error rule favors the first eligible family in the
-documented priority, then its least-flexible eligible configuration.
+documented priority, then its smallest recorded within-family capacity
+proxy. Some tuning dimensions are not ordered by that proxy; for
+example, a neural weight-count proxy does not order weight decay.
 Cross-family priority is a package policy, not a statistical ordering of
 model families. Fold-score standard errors are a selection heuristic,
 not independent-test confidence intervals. Use `tuning_rule = "best"`
 for the lowest resampled error instead.
+
+``` r
+
+evidence <- tuning_evidence(tuned)
+evidence$selection[c("best_configuration", "selected_configuration", "threshold")]
+#> $best_configuration
+#> [1] "neural_02"
+#> 
+#> $selected_configuration
+#> [1] "neural_02"
+#> 
+#> $threshold
+#> [1] 0.1305506
+```
+
+The report’s **Model selection** view connects those decisions to the
+parameter values, effective fold settings and retained fit. The default
+grid is a small, versioned set of contrasting controls. It does not
+follow a theorem that makes those numbers optimal for your data. A
+winning setting on the edge of a searched range is a reason to
+investigate that range, not evidence that it should always be extended.
+The range includes failed attempts: being inside it does not imply that
+neighboring settings produced usable fits. Inspect the successful count
+and failure reasons. Candidate comparisons stay inside training data.
+
+Explicit optimizer nonconvergence excludes a configuration by default.
+Fold and refit records retain the status and reason.
+`optimization_policy = "warn"` in
+[`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
+deliberately keeps such fits with a warning; an unreported optimizer
+status remains unknown. Successful family representatives use their
+lowest valid within-family CV loss, while the primary follows the
+configured global selection rule. These are different choices.
 
 ``` r
 
@@ -110,7 +145,7 @@ outside this workflow.
 comparison <- autoxplain(iris, "Sepal.Length", model_set = "comparison", seed = 2026)
 compare_model_behavior(comparison)
 #> <AutoXplainR model behavior comparison>
-#>   models:      3 (main_model, flexible_tree, small_tree)
+#>   models:      3 (main_model, small_tree, flexible_tree)
 #>   evidence:    30 test rows
 #>   performance: rmse (lower is better)
 #>   trade-off:   model_size_kb (resource proxy)
@@ -120,14 +155,14 @@ compare_model_behavior(comparison)
 #> Models at a glance
 #>          model family backend   rmse relative_gap model_size_kb
 #>   main_model * linear   stats 0.2736         0.0%         58.60
-#>  flexible_tree   tree   rpart 0.4103        49.9%         46.84
 #>     small_tree   tree   rpart 0.4490        64.1%         40.81
+#>  flexible_tree   tree   rpart 0.4103        49.9%         46.84
 #>   * best supplied evaluation score; rankings remain descriptive
 #> 
 #> What differs
 #>   - main_model has the best supplied rmse score (0.2736).
 #>   - main_model and small_tree differ most on average (0.29 using absolute difference in predicted target units).
-#>   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; flexible_tree allows stepwise with automatic along tree paths.
+#>   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.
 #> 
 #> Evidence key
 #>   behavior cards = prior knowledge about model capacity
@@ -173,6 +208,21 @@ offers optional performance/resource comparisons. Its default size axis
 measures approximate R object storage, not structural complexity. Use it
 when storage or runtime is relevant to a concrete constraint; a
 favorable Pareto position is not a model-selection rule.
+
+For repeated prediction measurements on the same rows:
+
+``` r
+
+bench <- benchmark_predictions(comparison)
+render_model_report(comparison, "report.html", benchmark = bench)
+```
+
+The benchmark records a common batch, warmup, repeated blocks, warnings
+and timing limits. A per-row batch cost is not single-request latency;
+quartiles describe the repeated measurements, not a confidence interval.
+The benchmark excludes fitting and the guided workflow’s raw-data
+preprocessing. Transformations performed inside a custom prediction
+function are timed with that function.
 
 ## Optional H2O search
 

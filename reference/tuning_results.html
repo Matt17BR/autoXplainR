@@ -11,7 +11,7 @@ used to rank configurations.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,7 +25,7 @@ used to rank configurations.'></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -94,7 +94,14 @@ Each row of <code>fold_scores</code> preserves the requested parameter list and 
 records the fold-specific effective parameter list, its canonical key, and
 the seed used for fitting. This makes data-dependent clamps such as <code>mtry</code>
 or neighbor count visible and prevents two requests that become the same
-fold fit from being compared only through different random seeds.</p>
+fold fit from being compared only through different random seeds.
+<code>optimization</code> and <code>learned</code> retain available optimizer termination codes and
+values learned by fitting. Explicit unsuccessful termination is excluded by
+default; <code>tuning_control(optimization_policy = "warn")</code> retains it with a warning.
+Unknown convergence status is not evidence that an optimizer converged.
+<code>search_space</code> records the actual grid and rationale; <code>selection</code> preserves
+the numeric threshold and exact family preference used before refit fallback.
+The smaller aggregate interface <code><a href="tuning_evidence.html">tuning_evidence()</a></code> omits case-level records.</p>
 <p><code>refit</code> records every full-training refit attempt. If the resampling-selected
 configuration cannot be refitted, AutoXplainR tries the remaining valid
 configurations in resampled-score order, records the first successful one in
@@ -108,15 +115,17 @@ for the complete outer-training data.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, <span class="st">"Sepal.Length"</span>, model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span></span>
-<span class="r-in"><span>                    portfolio <span class="op">=</span> <span class="st">"core"</span>, max_models <span class="op">=</span> <span class="fl">4</span>,</span></span>
-<span class="r-in"><span>                    nfolds <span class="op">=</span> <span class="fl">3</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, <span class="st">"Sepal.Length"</span>,</span></span>
+<span class="r-in"><span>  model_set <span class="op">=</span> <span class="st">"tuned"</span>,</span></span>
+<span class="r-in"><span>  portfolio <span class="op">=</span> <span class="st">"core"</span>, max_models <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>  nfolds <span class="op">=</span> <span class="fl">3</span>, seed <span class="op">=</span> <span class="fl">2026</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">tuning_results</span><span class="op">(</span><span class="va">tuned</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR training-only tuning&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   search:     4 configurations across 3 model families</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   resampling: 3 folds; rmse minimized</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:   120/120 outer-training rows predicted</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   rule:       one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   rule:       one-standard-error (prefer the documented family priority, then the lowest recorded capacity proxy among eligible settings within that family)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   selected:   linear regression (linear_01)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   final fit:  linear_01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   score:      0.32064 +/- 0.01519 SE</span>

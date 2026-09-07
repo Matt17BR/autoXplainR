@@ -1,4 +1,4 @@
-# Find held-out rows where supplied models disagree
+# Find evaluation rows where supplied models disagree
 
 `prediction_ambiguity()` compares predictions from at least two retained
 models on the same evaluation rows. Regression output reports the range
@@ -20,8 +20,8 @@ prediction_ambiguity(result, models = NULL, performance_tolerance = NULL)
 
 - models:
 
-  Model IDs, indices, or `NULL`. `NULL` selects every retained model not
-  labeled as a baseline.
+  Model IDs, indices, or `NULL`. `NULL` selects every retained model
+  except the recorded reference.
 
 - performance_tolerance:
 
@@ -35,7 +35,7 @@ case-level `rows`, and aggregate summaries.
 
 ## Details
 
-By default the simple baseline is excluded and every other supplied
+By default the recorded reference is excluded and every other supplied
 model is compared. These models need not form a statistically defined
 Rashomon set. Their performance table is retained beside the ambiguity
 results so that disagreement from a weak candidate is not mistaken for
@@ -49,7 +49,7 @@ fit <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
 prediction_ambiguity(fit)
 #> <AutoXplainR prediction ambiguity>
 #>   task:       regression
-#>   models:     3 (flexible_tree, small_tree, main_model)
+#>   models:     3 (main_model, small_tree, flexible_tree)
 #>   rows:       6 (test)
 #>   median gap: 2.4701 target units
 #>   caution:    supplied-model disagreement is descriptive, not uncertainty coverage

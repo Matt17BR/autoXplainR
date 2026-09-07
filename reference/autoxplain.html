@@ -19,7 +19,7 @@ pre-specified reference model and baseline.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@ pre-specified reference model and baseline.'></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -101,7 +101,8 @@ pre-specified reference model and baseline.</p>
 <span>  overlap_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"ignore"</span><span class="op">)</span>,</span>
 <span>  validation <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  explain <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  report <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  report <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  report_data <span class="op">=</span> <span class="st">"summary"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -203,10 +204,12 @@ by training error alone.</p></dd>
 <dt id="arg-tuning-rule">tuning_rule<a class="anchor" aria-label="anchor" href="#arg-tuning-rule"></a></dt>
 <dd><p>Local tuning selection rule. <code>"one_se"</code> chooses the
 first eligible family in the documented priority, then its
-least-flexible configuration, among candidates whose resampled error is
+smallest recorded flexibility proxy, among candidates whose resampled error is
 within one standard error of the best. The family priority and
 family-specific flexibility proxies
-are shown by <code><a href="learner_catalog.html">learner_catalog()</a></code>. <code>"best"</code> chooses the lowest resampled
+are shown by <code><a href="learner_catalog.html">learner_catalog()</a></code>. This heuristic does not establish that
+eligible models are equivalent or that every tuning dimension is ordered.
+<code>"best"</code> chooses the lowest resampled
 error. Ignored by other workflows.</p></dd>
 
 
@@ -279,6 +282,14 @@ These are descriptive, selected summaries.</p></dd>
 <dd><p>Optional <code>.html</code> destination, written from the retained evidence.
 Supplying a path also computes explanations when <code>explain = FALSE</code>.</p></dd>
 
+
+<dt id="arg-report-data">report_data<a class="anchor" aria-label="anchor" href="#arg-report-data"></a></dt>
+<dd><p>Data included in the HTML: <code>"summary"</code> (default) exports
+aggregate exploration, <code>"rows"</code> also exports individual observations and
+predictions, and <code>"none"</code> omits data exploration and individual records.
+Use <code><a href="report_data_control.html">report_data_control()</a></code> to choose columns and limit exported rows.
+These settings govern HTML, not the raw data retained in the R result.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -300,7 +311,7 @@ identifier removal, is opt-in and recorded in the result.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">autoxplain</span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR guided result&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR result&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   question:   predict `mpg` (regression)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   primary:    tuned neural network [main_model]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   engine:     base</span>

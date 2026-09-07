@@ -1,10 +1,112 @@
-# Explain an existing model and write a memo
+# Bring your own fitted models
 
-The explanation interface accepts already fitted models. Supply
-evaluation predictors, outcomes and a prediction function when the
-model’s usual [`predict()`](https://rdrr.io/r/stats/predict.html) method
-does not return the required shape. Both `function(newdata, ...)` and
-`function(model, newdata, ...)` signatures are supported.
+If you already have fitted models, use
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+to open the same report used by
+[`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md).
+It evaluates the supplied models without fitting, selecting or replacing
+them. The primary model is your choice.
+
+``` r
+
+training <- mtcars[1:20, ]
+evaluation <- mtcars[21:32, ]
+fits <- list(
+  linear = lm(mpg ~ wt + hp, data = training),
+  tree = rpart::rpart(mpg ~ wt + hp, data = training),
+  reference = lm(mpg ~ 1, data = training)
+)
+result <- evaluate_models(
+  fits, evaluation, "mpg", features = c("wt", "hp"),
+  primary = "linear", reference = "reference"
+)
+result$leaderboard
+#>   rank  model_id     model        role family backend     rmse      mae
+#> 1    1    linear    linear     primary linear   stats 2.585338 2.144486
+#> 2    2      tree      tree alternative   tree   rpart 4.173713 3.176010
+#> 3    3 reference reference    baseline linear   stats 5.270474 4.430000
+#>       r_squared model_size_kb complexity training_time_ms prediction_time_ms
+#> 1  0.7592824193      23.24219          3               NA                 NA
+#> 2  0.3726381958      23.06250          2               NA                 NA
+#> 3 -0.0003970558      17.82812          1               NA                 NA
+#>                                            fit_warning
+#> 1 Training provenance was not recorded by AutoXplainR.
+#> 2 Training provenance was not recorded by AutoXplainR.
+#> 3 Training provenance was not recorded by AutoXplainR.
+predict(result, evaluation[1:3, ])
+#> [1] 24.96928 19.11718 19.40076
+```
+
+The default data role is `"evaluation"`; the package cannot verify
+whether these rows were excluded from fitting or earlier choices. This
+ordered `mtcars` split is a teaching example. Declare
+`evaluation_role = "test"` only when your analysis design supports that
+interpretation.
+
+Choose `features` explicitly. By default, every column except the
+outcome is treated as an input, including an ID or context column that
+your adapter might ignore. The report’s data and feature views use this
+declared input set.
+
+``` r
+
+path <- tempfile(fileext = ".html")
+render_model_report(result, path, n_repeats = 5)
+file.exists(path)
+#> [1] TRUE
+unlink(path)
+```
+
+The report shows scores, fitted behavior, error diagnostics and the
+supplied data. Training data are **unavailable** unless you pass
+`training_data`; supplied training data add context but do not prove how
+a model was fitted. No search history or training time is invented. A
+reference is optional and can be any explicitly supplied model. Without
+one, baseline improvement and paired reference intervals are
+unavailable.
+
+The default report embeds aggregate summaries. Set
+`report_data = "rows"` to add individual-record inspection and links
+from errors to source rows. With no training table supplied, **Explore
+data** shows only evaluation distributions; it does not invent a
+training sample. Save the R result with
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html) to retain models,
+data and custom prediction functions; external dependencies used by
+those functions must still be available when you reload it.
+
+## Custom prediction functions
+
+For an unsupported model class, supply a named `predict_functions` list.
+Each function takes `newdata`, or `model, newdata`, and returns one
+prediction per row. Regression uses a numeric vector; binary
+classification uses probabilities of `positive`; multiclass uses a
+probability matrix with named class columns. The outcome factor declares
+the complete class set. Your adapter owns any preprocessing needed by
+the fit;
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+does not learn a recipe.
+
+``` r
+
+result <- evaluate_models(
+  list(my_fit = fitted_object), evaluation_data, "outcome",
+  features = c("age", "measurement"),
+  predict_functions = list(my_fit = function(model, newdata) {
+    predict(model, newdata, type = "response")
+  }),
+  task = "binary", positive = "yes"
+)
+```
+
+## Work with one explanation or audit
+
+Use
+[`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
+and
+[`audit_explanations()`](https://matt17br.github.io/autoXplainR/reference/audit_explanations.md)
+when you want a focused audit or an individual estimator rather than the
+full model report. This interface also supports hard-label
+classification for metrics such as accuracy.
 
 ``` r
 
@@ -73,9 +175,9 @@ cat(memo)
 #> ## Scope
 #> Target: `mpg` (regression). Models: 4. Inputs: 10.
 #> 
-#> ## Did the model improve on a simple baseline?
+#> ## How did the primary model perform?
 #> The tuned decision tree was evaluated on 6 test rows. Its **rmse** was 2.6856.
-#> That is a 47.3% improvement over the intercept-only baseline (5.0963).
+#> That is a 47.3% improvement over intercept-only baseline (5.0963).
 #> 
 #> ## What the main metric means
 #> **rmse:** Typical prediction error, with larger mistakes weighted more heavily; lower is better.
@@ -86,7 +188,7 @@ cat(memo)
 #> 
 #> ## How automatic tuning selected the model
 #> 15 configurations across 3 model families were compared with 5 training-only folds. The selection metric was rmse.
-#> The one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.
+#> The one-standard-error (prefer the documented family priority, then the lowest recorded capacity proxy among eligible settings within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.
 #> The resampling-selected configuration was `tree_05`; the actual final fitted configuration was `tree_05` (decision tree). A recorded refit fallback was not needed.
 #> That resampled score selected a configuration; it is not the final performance estimate. The held-out score above evaluated the selected, refitted model on different rows.
 #> 
@@ -177,12 +279,35 @@ were retained.
 
 ## Migrating old report calls
 
+Saved 0.5.0 regression, binary and multiclass results were replayed with
+explicit explanation recomputation. Their older retained audits are
+rejected by the newer identity check. For an unchanged saved fit:
+
+``` r
+
+older <- readRDS("analysis-0.5.0.rds")
+render_model_report(older, "updated-report.html", top_features = 2, n_repeats = 3)
+```
+
+The small budget illustrates the migration; choose a suitable
+explanation budget for the final report. Rendering validates the
+available stored predictions and metrics, then recomputes explanation
+evidence without refitting. It cannot recover missing raw context or
+reconstruct historical external state used by a custom function on
+unobserved inputs. Changed models need a new evaluation via
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+rather than combining their predictions with saved scores.
+
 [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
 and
 [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
-are deprecated in 0.4.0 and will remain callable until at least 0.6.0.
+were deprecated in 0.4.0 and remain compatibility entry points in 0.6.0.
 Replace them with `render_model_report(result, output_file)`. For a
 memo, pass `narrative = generate_natural_language_report(result)`. Each
 compatibility call emits one migration warning. Use
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+followed by
+[`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
+for existing fitted models, or
 [`render_explanation_report()`](https://matt17br.github.io/autoXplainR/reference/render_explanation_report.md)
-for a standalone audit of an existing model.
+for a standalone explanation audit.

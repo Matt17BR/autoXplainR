@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -57,10 +57,14 @@
 <li>Regenerate documentation; run tutorials, lint, spelling and URL checks. Inspect permanent missing URLs and canonical-form failures. Record transient publisher failures separately.</li>
 <li>Run the complete test suite, optional-engine matrix, numerical references and coverage. Record skipped integrations and known numerical limitations.</li>
 <li>Review test quality for changed behavior. Require the browser and imputation mutation checks to reject their deliberate faults for the intended reasons; an execution error is not a successful negative control.</li>
+<li>Check candidate/fold values, selection thresholds and failed-refit explanations. Check distributions, associations and source-record links against original supplied tables, including imputation, novel categories and row removal.</li>
+<li>Verify every binary cutoff and calibration group against independent source predictions. Exercise explicit event-class order and existing-model adapters.</li>
+<li>Attempt to reuse scores and explanations after changing model state, adapter context, outcomes or row order. Require a clear rejection of stale evidence.</li>
+<li>Test summary, sampled-row and no-data exports, including hidden payloads. Verify benchmark units, common batches, incomplete runs and resolution limits.</li>
 <li>Build once with <code>.github/scripts/build-check-source.sh</code>, check that exact archive under release R including manuals, and preserve its checksum.</li>
 <li>Check the same archive under R-devel. Explain remaining check notes.</li>
 <li>Require the configured Windows, macOS and Linux CI gates and the live H2O integration to pass. A hosted narrative live test is optional and must be identified as run or skipped.</li>
-<li>Complete both user journeys in <code>validation/product-walkthrough.md</code> on the installed package and actual regression, binary and multiclass reports. Record answers, friction, repairs and repeated tasks in the release record. Open generated report examples on desktop and a narrow viewport. Review numerical labels, unavailable diagnostics, keyboard navigation and print output.</li>
+<li>Complete both user journeys in <code>validation/product-walkthrough.md</code> on the installed package and actual regression, binary and multiclass reports. Record answers, friction, repairs and repeated tasks in the release record. Open generated report examples on desktop and a narrow viewport. Review numerical labels, unavailable diagnostics, keyboard navigation and print output. Inspect actual PDF pages and font sizes; text extraction alone is insufficient.</li>
 <li>Verify that logs, fixtures and shared reports contain no credentials or unintended private data.</li>
 </ul></div>
 <div class="section level2">

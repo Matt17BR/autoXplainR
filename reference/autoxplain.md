@@ -42,7 +42,8 @@ autoxplain(
   overlap_action = c("warn", "error", "ignore"),
   validation = NULL,
   explain = TRUE,
-  report = NULL
+  report = NULL,
+  report_data = "summary"
 )
 ```
 
@@ -145,13 +146,14 @@ autoxplain(
 - tuning_rule:
 
   Local tuning selection rule. `"one_se"` chooses the first eligible
-  family in the documented priority, then its least-flexible
-  configuration, among candidates whose resampled error is within one
-  standard error of the best. The family priority and family-specific
-  flexibility proxies are shown by
+  family in the documented priority, then its smallest recorded
+  flexibility proxy, among candidates whose resampled error is within
+  one standard error of the best. The family priority and
+  family-specific flexibility proxies are shown by
   [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
-  `"best"` chooses the lowest resampled error. Ignored by other
-  workflows.
+  This heuristic does not establish that eligible models are equivalent
+  or that every tuning dimension is ordered. `"best"` chooses the lowest
+  resampled error. Ignored by other workflows.
 
 - tuning_control:
 
@@ -225,6 +227,16 @@ autoxplain(
   Optional `.html` destination, written from the retained evidence.
   Supplying a path also computes explanations when `explain = FALSE`.
 
+- report_data:
+
+  Data included in the HTML: `"summary"` (default) exports aggregate
+  exploration, `"rows"` also exports individual observations and
+  predictions, and `"none"` omits data exploration and individual
+  records. Use
+  [`report_data_control()`](https://matt17br.github.io/autoXplainR/reference/report_data_control.md)
+  to choose columns and limit exported rows. These settings govern HTML,
+  not the raw data retained in the R result.
+
 ## Value
 
 An `autoxplain_result` containing fitted models, a leaderboard,
@@ -248,7 +260,7 @@ as identifier removal, is opt-in and recorded in the result.
 ``` r
 result <- autoxplain(mtcars, "mpg")
 result
-#> <AutoXplainR guided result>
+#> <AutoXplainR result>
 #>   question:   predict `mpg` (regression)
 #>   primary:    tuned neural network [main_model]
 #>   engine:     base

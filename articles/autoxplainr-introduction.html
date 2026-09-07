@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -119,7 +119,7 @@ need a grouped validation plan.</p>
 <span>  seed <span class="op">=</span> <span class="fl">2026</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">result</span></span>
-<span><span class="co">#&gt; &lt;AutoXplainR guided result&gt;</span></span>
+<span><span class="co">#&gt; &lt;AutoXplainR result&gt;</span></span>
 <span><span class="co">#&gt;   question:   predict `delivery_hours` (regression)</span></span>
 <span><span class="co">#&gt;   primary:    linear regression [main_model]</span></span>
 <span><span class="co">#&gt;   engine:     base</span></span>
@@ -177,15 +177,15 @@ silently treated as an existing one.</p>
 <span><span class="co">#&gt; 3    3      small_tree     small decision tree candidate     tree   rpart</span></span>
 <span><span class="co">#&gt; 4    4 simple_baseline intercept-only baseline  baseline baseline   stats</span></span>
 <span><span class="co">#&gt;       rmse      mae     r_squared training_time_ms model_size_kb complexity</span></span>
-<span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                2      67.79688          3</span></span>
-<span><span class="co">#&gt; 2 2.241207 1.837860  9.173332e-01                2      52.28125         20</span></span>
-<span><span class="co">#&gt; 3 4.319412 3.508486  6.929447e-01                8      47.83594          4</span></span>
+<span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                1      67.79688          3</span></span>
+<span><span class="co">#&gt; 2 2.241207 1.837860  9.173332e-01                1      52.28125         20</span></span>
+<span><span class="co">#&gt; 3 4.319412 3.508486  6.929447e-01                2      47.83594          4</span></span>
 <span><span class="co">#&gt; 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1</span></span>
 <span><span class="co">#&gt;   fit_warning prediction_time_ms</span></span>
-<span><span class="co">#&gt; 1                              1</span></span>
+<span><span class="co">#&gt; 1                              0</span></span>
 <span><span class="co">#&gt; 2                              1</span></span>
 <span><span class="co">#&gt; 3                              1</span></span>
-<span><span class="co">#&gt; 4                              0</span></span>
+<span><span class="co">#&gt; 4                              1</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
 <span><span class="co">#&gt;                                                                                                            rmse </span></span>
 <span><span class="co">#&gt;                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
@@ -264,9 +264,38 @@ parcel’s service. A check that was not run or could not be computed
 remains visible with its reason.</p>
 </div>
 <div class="section level2">
-<h2 id="predict-new-parcels-and-share-the-report">Predict new parcels and share the report<a class="anchor" aria-label="anchor" href="#predict-new-parcels-and-share-the-report"></a>
+<h2 id="inspect-the-supplied-data">Inspect the supplied data<a class="anchor" aria-label="anchor" href="#inspect-the-supplied-data"></a>
 </h2>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">context</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">data_context</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">context</span><span class="op">$</span><span class="va">raw</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"training"</span>, <span class="st">"evaluation"</span><span class="op">)</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">rows</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">rows</span><span class="op">$</span><span class="va">distance_km</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   training evaluation </span></span>
+<span><span class="co">#&gt;          3          1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">training_data</span><span class="op">$</span><span class="va">distance_km</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">evaluation_data</span><span class="op">$</span><span class="va">distance_km</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
+<p>There are three missing distances in training and one in evaluation;
+after the saved recipe is applied, neither partition has missing
+distances. The result retains both versions and their source
+positions.</p>
+<p>In the report’s <strong>Explore data</strong> tab, select
+<code>distance_km</code>. <strong>Distribution</strong> compares the
+training and evaluation rows. Switch <strong>Values</strong> from
+<strong>Raw supplied values</strong> to <strong>Values used by
+models</strong> to see the imputation. In
+<strong>Relationships</strong>, compare distance with
+<code>delivery_hours</code>: the binned pattern and signed Spearman
+association describe the observed rows, not the effect of changing a
+parcel’s route. The training and evaluation summaries use common
+bins.</p>
+</div>
+<div class="section level2">
+<h2 id="predict-new-parcels-and-share-the-report">Predict new parcels and share the report<a class="anchor" aria-label="anchor" href="#predict-new-parcels-and-share-the-report"></a>
+</h2>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_parcels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>distance_km <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="cn">NA</span><span class="op">)</span>, service <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"express"</span>, <span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">new_parcels</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 11.32591 22.96807</span></span>
@@ -278,7 +307,7 @@ remains visible with its reason.</p>
 order. An outcome column is unnecessary. The unknown service produces an
 explicit error under our chosen strategy; decide how that category
 should be represented before refitting or changing the recipe.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">path</span>, narrative <span class="op">=</span> <span class="va">memo</span><span class="op">)</span></span>
@@ -287,13 +316,40 @@ should be represented before refitting or changing the recipe.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
 <p>Use a persistent path such as <code>"delivery-report.html"</code> to
 keep the report. It opens offline in a browser. Start in <strong>Compare
-models</strong> to read the scores and costs, then click a model to see
-its important inputs and fitted curves. <strong>Input
-relationships</strong> shows which predictors move together;
-<strong>Inspect predictions</strong> shows errors and the R command for
-the selected model. Help buttons work on hover, keyboard focus and tap.
-<strong>Print this view</strong> exports the active tab and selections.
-Review feature names and diagnostics before sharing.
+models</strong> to read the scores and costs, then use <strong>Feature
+effects</strong> for the selected model’s important inputs and fitted
+curves. <strong>Predictions</strong> shows error summaries and the
+matching R command. Help buttons work on hover, keyboard focus and tap.
+<strong>Print this view</strong> exports the active tab and selections;
+expand details you want included.</p>
+<p>The default report includes aggregates. To inspect individual
+records, choose row export explicitly:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">path</span>, report_data <span class="op">=</span> <span class="st">"rows"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
+<p>In <strong>Explore data → Records</strong>, keep <strong>Raw supplied
+values</strong>, set the filter’s <strong>Column</strong> to
+<code>distance_km</code> and <strong>Condition</strong> to <strong>Is
+missing</strong>, then click <strong>Add filter</strong>. Four records
+match in this example. Select one to compare its original distance with
+the imputed value and identify its source position. Filters use only the
+exported sample, which is capped at 5,000 records by default; this
+example exports all 240. They do not change model scores.</p>
+<p>For a smaller export with a deliberately included context column:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"delivery-report.html"</span>, report_data <span class="op">=</span> <span class="fu"><a href="../reference/report_data_control.html">report_data_control</a></span><span class="op">(</span></span>
+<span>  <span class="st">"rows"</span>, columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"distance_km"</span>, <span class="st">"service"</span><span class="op">)</span>,</span>
+<span>  context_columns <span class="op">=</span> <span class="st">"dispatched"</span>, max_rows <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">2026</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The target is included automatically. Anyone receiving the file
+receives all embedded records, including rows hidden by filters.
+<code>report_data = "none"</code> omits the data explorer and individual
+predictions. These options do not redact feature names, fitted-model
+details or explanation results elsewhere in the report. Review the
+export before sharing; aggregates can also reveal small groups.
 <code>saveRDS(result, "analysis.rds")</code> retains models <strong>and
 training/evaluation data</strong>.</p>
 <p>For classification, set outcome factor levels deliberately: binary

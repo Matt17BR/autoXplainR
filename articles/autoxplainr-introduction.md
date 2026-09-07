@@ -43,7 +43,7 @@ result <- autoxplain(
   seed = 2026
 )
 result
-#> <AutoXplainR guided result>
+#> <AutoXplainR result>
 #>   question:   predict `delivery_hours` (regression)
 #>   primary:    linear regression [main_model]
 #>   engine:     base
@@ -104,15 +104,15 @@ result$leaderboard
 #> 3    3      small_tree     small decision tree candidate     tree   rpart
 #> 4    4 simple_baseline intercept-only baseline  baseline baseline   stats
 #>       rmse      mae     r_squared training_time_ms model_size_kb complexity
-#> 1 2.003144 1.662172  9.339624e-01                2      67.79688          3
-#> 2 2.241207 1.837860  9.173332e-01                2      52.28125         20
-#> 3 4.319412 3.508486  6.929447e-01                8      47.83594          4
+#> 1 2.003144 1.662172  9.339624e-01                1      67.79688          3
+#> 2 2.241207 1.837860  9.173332e-01                1      52.28125         20
+#> 3 4.319412 3.508486  6.929447e-01                2      47.83594          4
 #> 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1
 #>   fit_warning prediction_time_ms
-#> 1                              1
+#> 1                              0
 #> 2                              1
 #> 3                              1
-#> 4                              0
+#> 4                              1
 result$evaluation$metric_definitions
 #>                                                                                                            rmse 
 #>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -196,6 +196,34 @@ fitted associations, not the effect of changing a real parcel’s service.
 A check that was not run or could not be computed remains visible with
 its reason.
 
+## Inspect the supplied data
+
+``` r
+
+context <- result$data_context
+vapply(context$raw[c("training", "evaluation")], function(rows) {
+  sum(is.na(rows$distance_km))
+}, integer(1))
+#>   training evaluation 
+#>          3          1
+sum(is.na(result$training_data$distance_km))
+#> [1] 0
+sum(is.na(result$evaluation_data$distance_km))
+#> [1] 0
+```
+
+There are three missing distances in training and one in evaluation;
+after the saved recipe is applied, neither partition has missing
+distances. The result retains both versions and their source positions.
+
+In the report’s **Explore data** tab, select `distance_km`.
+**Distribution** compares the training and evaluation rows. Switch
+**Values** from **Raw supplied values** to **Values used by models** to
+see the imputation. In **Relationships**, compare distance with
+`delivery_hours`: the binned pattern and signed Spearman association
+describe the observed rows, not the effect of changing a parcel’s route.
+The training and evaluation summaries use common bins.
+
 ## Predict new parcels and share the report
 
 ``` r
@@ -226,12 +254,48 @@ unlink(path)
 
 Use a persistent path such as `"delivery-report.html"` to keep the
 report. It opens offline in a browser. Start in **Compare models** to
-read the scores and costs, then click a model to see its important
-inputs and fitted curves. **Input relationships** shows which predictors
-move together; **Inspect predictions** shows errors and the R command
-for the selected model. Help buttons work on hover, keyboard focus and
-tap. **Print this view** exports the active tab and selections. Review
-feature names and diagnostics before sharing.
+read the scores and costs, then use **Feature effects** for the selected
+model’s important inputs and fitted curves. **Predictions** shows error
+summaries and the matching R command. Help buttons work on hover,
+keyboard focus and tap. **Print this view** exports the active tab and
+selections; expand details you want included.
+
+The default report includes aggregates. To inspect individual records,
+choose row export explicitly:
+
+``` r
+
+path <- tempfile(fileext = ".html")
+render_model_report(result, path, report_data = "rows")
+file.exists(path)
+#> [1] TRUE
+unlink(path)
+```
+
+In **Explore data → Records**, keep **Raw supplied values**, set the
+filter’s **Column** to `distance_km` and **Condition** to **Is
+missing**, then click **Add filter**. Four records match in this
+example. Select one to compare its original distance with the imputed
+value and identify its source position. Filters use only the exported
+sample, which is capped at 5,000 records by default; this example
+exports all 240. They do not change model scores.
+
+For a smaller export with a deliberately included context column:
+
+``` r
+
+render_model_report(result, "delivery-report.html", report_data = report_data_control(
+  "rows", columns = c("distance_km", "service"),
+  context_columns = "dispatched", max_rows = 100, seed = 2026
+))
+```
+
+The target is included automatically. Anyone receiving the file receives
+all embedded records, including rows hidden by filters.
+`report_data = "none"` omits the data explorer and individual
+predictions. These options do not redact feature names, fitted-model
+details or explanation results elsewhere in the report. Review the
+export before sharing; aggregates can also reveal small groups.
 `saveRDS(result, "analysis.rds")` retains models **and
 training/evaluation data**.
 

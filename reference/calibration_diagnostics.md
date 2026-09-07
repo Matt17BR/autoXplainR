@@ -20,7 +20,7 @@ calibration_diagnostics(result, model = NULL, bins = 5L)
 
 - model:
 
-  One model ID or index. `NULL` uses `main_model` when available,
+  One model ID or index. `NULL` uses the recorded primary model,
   otherwise the first retained model.
 
 - bins:

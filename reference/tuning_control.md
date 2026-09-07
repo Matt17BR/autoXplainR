@@ -16,7 +16,9 @@ tuning_control(
   fold_ids = NULL,
   metric = c("auto", "rmse", "mae", "log_loss", "brier"),
   retain_oof = TRUE,
-  failure_policy = c("continue", "stop")
+  failure_policy = c("continue", "stop"),
+  optimization_policy = c("exclude", "warn"),
+  family_priority = NULL
 )
 ```
 
@@ -50,6 +52,19 @@ tuning_control(
 
   `"continue"` records a failed configuration and keeps searching;
   `"stop"` aborts on the first resampling or refit failure.
+
+- optimization_policy:
+
+  `"exclude"` excludes an explicit unsuccessful optimizer termination
+  from selection and refitting. `"warn"` retains it with a recorded
+  warning. An unavailable convergence diagnostic is recorded as unknown,
+  not treated as proof of convergence.
+
+- family_priority:
+
+  Optional character vector ordering every requested family for the
+  one-standard-error policy, from most to least preferred. This is a
+  user preference, not a statistical ordering of algorithms.
 
 ## Value
 
@@ -85,9 +100,11 @@ They are not a rolling-origin or forward-chaining specification. To
 avoid ambiguity after AutoXplainR's automatic holdout split, fold IDs
 are accepted only when `test_data` is supplied explicitly to
 [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md).
-Candidate losses and their one-standard-error uncertainty are weighted
-by the number of validation rows in each fold; RMSE uses pooled squared
-loss with a delta-method standard error on the RMSE scale.
+Candidate losses and their selection standard-error heuristic are
+weighted by the number of validation rows in each fold; RMSE uses pooled
+squared loss with a delta-method standard error on the RMSE scale.
+Overlapping training folds mean that this heuristic is not a confidence
+interval or a test of equivalent model performance.
 
 ## Examples
 
@@ -104,6 +121,7 @@ control
 #>   metric:     mae
 #>   OOF rows:   retained
 #>   failures:   continue
+#>   optimizer:  exclude
 #>   grids:      tree
 #>   budgets:    linear, tree
 #>   fold IDs:   automatic

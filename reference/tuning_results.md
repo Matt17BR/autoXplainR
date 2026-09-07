@@ -41,7 +41,16 @@ records the fold-specific effective parameter list, its canonical key,
 and the seed used for fitting. This makes data-dependent clamps such as
 `mtry` or neighbor count visible and prevents two requests that become
 the same fold fit from being compared only through different random
-seeds.
+seeds. `optimization` and `learned` retain available optimizer
+termination codes and values learned by fitting. Explicit unsuccessful
+termination is excluded by default;
+`tuning_control(optimization_policy = "warn")` retains it with a
+warning. Unknown convergence status is not evidence that an optimizer
+converged. `search_space` records the actual grid and rationale;
+`selection` preserves the numeric threshold and exact family preference
+used before refit fallback. The smaller aggregate interface
+[`tuning_evidence()`](https://matt17br.github.io/autoXplainR/reference/tuning_evidence.md)
+omits case-level records.
 
 `refit` records every full-training refit attempt. If the
 resampling-selected configuration cannot be refitted, AutoXplainR tries
@@ -57,15 +66,17 @@ and seed record for the complete outer-training data.
 ## Examples
 
 ``` r
-tuned <- autoxplain(iris, "Sepal.Length", model_set = "tuned",
-                    portfolio = "core", max_models = 4,
-                    nfolds = 3, seed = 2026)
+tuned <- autoxplain(iris, "Sepal.Length",
+  model_set = "tuned",
+  portfolio = "core", max_models = 4,
+  nfolds = 3, seed = 2026
+)
 tuning_results(tuned)
 #> <AutoXplainR training-only tuning>
 #>   search:     4 configurations across 3 model families
 #>   resampling: 3 folds; rmse minimized
 #>   evidence:   120/120 outer-training rows predicted
-#>   rule:       one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family)
+#>   rule:       one-standard-error (prefer the documented family priority, then the lowest recorded capacity proxy among eligible settings within that family)
 #>   selected:   linear regression (linear_01)
 #>   final fit:  linear_01
 #>   score:      0.32064 +/- 0.01519 SE

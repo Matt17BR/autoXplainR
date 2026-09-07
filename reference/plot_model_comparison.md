@@ -9,7 +9,7 @@ plot_model_comparison(
   autoxplain_result,
   performance_metric = NULL,
   complexity_metric = NULL,
-  title = "Model Trade-off Landscape"
+  title = "Model performance and cost"
 )
 ```
 

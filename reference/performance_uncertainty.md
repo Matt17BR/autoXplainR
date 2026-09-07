@@ -1,11 +1,12 @@
 # Estimate evaluation-sample uncertainty with a paired bootstrap
 
 Resamples evaluation observations, using the same sampled rows for the
-primary model and intercept-only baseline. The models stay fixed. The
-difference is primary loss minus baseline loss, so negative values favor
-the primary model. This estimates evaluation-sample variability
-conditional on the fitted models; it does not include fitting, tuning,
-or feature-selection uncertainty.
+primary model and designated reference model (the intercept-only
+baseline in guided workflows). The models stay fixed. The difference is
+primary loss minus reference loss, so negative values favor the primary
+model. This estimates evaluation-sample variability conditional on the
+fitted models; it does not include fitting, tuning, or feature-selection
+uncertainty.
 
 ## Usage
 
@@ -19,6 +20,8 @@ performance_uncertainty(result, n_boot = 1000L, confidence = 0.95, seed = 123L)
 
   An
   [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+  or
+  [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
   result.
 
 - n_boot:

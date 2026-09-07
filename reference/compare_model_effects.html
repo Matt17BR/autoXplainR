@@ -15,7 +15,7 @@ fitted response to a named input differs."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@ fitted response to a named input differs."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -173,19 +173,19 @@ difference variation for ALE; they do not include model-fitting uncertainty.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR cross-model effect comparison&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   feature:   wt (ALE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   target:    predicted value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   models:    3 of 3 requested (flexible_tree, small_tree, main_model)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   models:    3 of 3 requested (main_model, small_tree, flexible_tree)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:  6 effect rows from 6 test rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   support:   relative support &gt;= 0.1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Findings</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 2.754) across 6 supported grid points.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [note] The largest centered curve difference was between `main_model` and `flexible_tree` (RMSE = 2.754) across 6 supported grid points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [boundary] Pairwise summaries exclude grid points below relative support 0.1 and describe fitted predictions, not causal effects.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Pairwise summary</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        model A    model B points mean level gap shape RMSE max gap</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree main_model      6          2.028      2.754   5.347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     small_tree main_model      6          2.028      2.754   5.347</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree small_tree      6          0.000      0.000   0.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     model A       model B points mean level gap shape RMSE max gap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  main_model flexible_tree      6          2.028      2.754   5.347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  main_model    small_tree      6          2.028      2.754   5.347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  small_tree flexible_tree      6          0.000      0.000   0.000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  direction agreement</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    0</span>

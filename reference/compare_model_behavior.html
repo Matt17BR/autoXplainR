@@ -9,7 +9,7 @@ common, model-agnostic comparison. It keeps two kinds of evidence separate:"></h
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,7 +23,7 @@ common, model-agnostic comparison. It keeps two kinds of evidence separate:"></h
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -123,7 +123,7 @@ named feature after reviewing the audit's dependence diagnostics.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span>, model_set <span class="op">=</span> <span class="st">"comparison"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">compare_model_behavior</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR model behavior comparison&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   models:      3 (flexible_tree, small_tree, main_model)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   models:      3 (main_model, small_tree, flexible_tree)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   evidence:    6 test rows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   performance: rmse (lower is better)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   trade-off:   model_size_kb (resource proxy)</span>
@@ -132,15 +132,15 @@ named feature after reviewing the audit's dependence diagnostics.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Models at a glance</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            model family backend  rmse relative_gap model_size_kb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree *   tree   rpart 1.825         0.0%         38.35</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       small_tree   tree   rpart 3.032        66.1%         34.20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       main_model linear   stats 3.553        94.7%         44.44</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       small_tree   tree   rpart 3.032        66.1%         34.20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  flexible_tree *   tree   rpart 1.825         0.0%         38.35</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   * best supplied evaluation score; rankings remain descriptive</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> What differs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   - flexible_tree has the best supplied rmse score (1.825).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - flexible_tree and main_model differ most on average (2.62 using absolute difference in predicted target units).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   - Before considering this dataset, flexible_tree allows stepwise with automatic along tree paths; main_model allows none unless encoded in features with none unless specified in features.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   - main_model and flexible_tree differ most on average (2.62 using absolute difference in predicted target units).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Evidence key</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   behavior cards = prior knowledge about model capacity</span>

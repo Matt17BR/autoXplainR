@@ -11,7 +11,7 @@ rows.
 ``` r
 threshold_diagnostics(
   result,
-  thresholds = seq(0.1, 0.9, by = 0.05),
+  thresholds = (2:18)/20,
   model = NULL,
   false_positive_cost = 1,
   false_negative_cost = 1
@@ -30,7 +30,7 @@ threshold_diagnostics(
 
 - model:
 
-  One model ID or index. `NULL` uses `main_model` when available,
+  One model ID or index. `NULL` uses the recorded primary model,
   otherwise the first retained model.
 
 - false_positive_cost:

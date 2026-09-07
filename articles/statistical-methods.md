@@ -41,12 +41,14 @@ The fitted baseline uses the training-set mean, so beating that baseline
 and having positive R-squared are different statements.
 
 Binary classification reports log loss, Brier score, accuracy, balanced
-accuracy and ROC AUC. Probabilities refer to the second training outcome
-level. Accuracy uses a 0.5 threshold. Undefined AUC or balanced accuracy
-in a one-class test sample is returned as missing, not as a favorable
-value. Multiclass Brier score is the mean sum of squared
-class-probability errors (range 0 to 2); binary Brier score uses only
-the positive probability (range 0 to 1).
+accuracy and ROC AUC. Guided-workflow probabilities refer to the second
+training outcome level;
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+also accepts an explicit `positive` event. Accuracy uses a 0.5
+threshold. Undefined AUC or balanced accuracy in a one-class test sample
+is returned as missing, not as a favorable value. Multiclass Brier score
+is the mean sum of squared class-probability errors (range 0 to 2);
+binary Brier score uses only the positive probability (range 0 to 1).
 
 The one-standard-error tuning rule is a heuristic preference among
 competitive configurations, not a significance test. Its family priority
@@ -142,6 +144,34 @@ reports offer a class selector for probability curves.
 first class for compatibility. Lower-level calls select a class with
 `explain_effect(..., class = "name")` or
 [`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md).
+
+## Data exploration describes supplied observations
+
+The Data tab compares the retained raw partitions with the values used
+by models. Numeric distributions share training-derived bins, with
+evaluation values outside the training range counted separately.
+Categories distinguish missing, pooled training levels and new
+evaluation levels. Without supplied training data, the basis is
+evaluation data and no training comparison is shown. Missingness
+denominators include all rows in the displayed partition and stage;
+relationship plots use complete usable pairs and report exclusions.
+
+For numeric or time pairs, the displayed association is signed Spearman
+rank correlation. Mixed pairs use the unsigned correlation ratio;
+categorical pairs use unsigned Cramer’s V. Constants and insufficient
+pairs are unavailable. These are limited descriptive summaries: zero
+does not establish independence, and none supplies a p-value or
+identifies a causal relationship. Binned target means and binary event
+rates summarize observed outcomes, not model predictions.
+
+Unfiltered profiles use all available rows for the selected stage. Row
+exports sample uniformly within partitions after allocating the row
+budget between them. Browser filters then describe only the embedded
+sample, with its displayed denominator. They do not recompute official
+model scores. Outcomes inspected after adaptive filtering remain
+exploratory uses of the same evaluation data. Aggregate export avoids
+individual record payloads but can reveal rare category labels or small
+counts; it is not an anonymization method.
 
 ## Scope and reference implementations
 

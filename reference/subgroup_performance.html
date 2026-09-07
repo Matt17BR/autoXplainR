@@ -13,7 +13,7 @@ collection or validation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,7 +27,7 @@ collection or validation."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -62,7 +62,7 @@ collection or validation.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">subgroup_performance</span><span class="op">(</span><span class="va">result</span>, <span class="va">by</span>, model <span class="op">=</span> <span class="cn">NULL</span>, min_rows <span class="op">=</span> <span class="fl">10L</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">subgroup_performance</span><span class="op">(</span><span class="va">result</span>, <span class="va">by</span>, model <span class="op">=</span> <span class="cn">NULL</span>, min_rows <span class="op">=</span> <span class="fl">10L</span>, metric <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,20 +78,26 @@ collection or validation.</p>
 
 
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>One model ID or index. <code>NULL</code> uses <code>main_model</code> when available,
-otherwise the first retained model.</p></dd>
+<dd><p>One model ID or index. <code>NULL</code> uses the recorded primary model.</p></dd>
 
 
 <dt id="arg-min-rows">min_rows<a class="anchor" aria-label="anchor" href="#arg-min-rows"></a></dt>
 <dd><p>Minimum rows used to label a group as large enough for a
 preliminary comparison. Smaller groups remain visible and are flagged.</p></dd>
 
+
+<dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
+<dd><p>Optional loss metric for this descriptive comparison: <code>rmse</code>
+or <code>mae</code> for regression; <code>log_loss</code> or <code>brier_score</code> for classification.
+<code>NULL</code> uses the recorded evaluation metric. This does not change the
+official leaderboard, selected model, or stored evaluation evidence.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>autoxplain_subgroups</code> object containing overall metrics and a
 group-level <code>performance</code> data frame. Its primary metric matches the
-result's evaluation metric (including MAE or Brier score), and
+requested metric or, by default, the result's evaluation metric, and
 <code>secondary_metric</code> names a different supporting metric.</p>
     </div>
     <div class="section level2">

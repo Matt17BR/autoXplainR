@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -87,7 +87,7 @@ prediction time.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">measurements</span>, <span class="st">"outcome"</span>,</span>
 <span>                     validation <span class="op">=</span> <span class="fu"><a href="../reference/validation_split.html">validation_split</a></span><span class="op">(</span>group <span class="op">=</span> <span class="st">"site_id"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">observations</span>, <span class="st">"outcome"</span>,</span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">observations</span>, <span class="st">"outcome"</span>, model_set <span class="op">=</span> <span class="st">"comparison"</span>,</span>
 <span>                     validation <span class="op">=</span> <span class="fu"><a href="../reference/validation_split.html">validation_split</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"recorded_at"</span>, gap <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Split columns are excluded from predictors. Fractions refer to whole
 groups or distinct times, so row fractions can differ. A temporal gap of
@@ -182,6 +182,13 @@ metrics.</p>
 descriptive review signal, not a distribution-shift test or proof that
 imputation preserved predictive validity. The report and result retain
 unavailable checks separately from completed checks.</p>
+<p>The report’s <strong>Explore data</strong> tab also shows missingness
+for every exported input. Use <strong>Raw supplied values</strong> to
+see it before imputation and <strong>Values used by models</strong> to
+inspect the transformed values. Relationships and filtered subgroup
+outcomes describe the supplied sample. Groups discovered while exploring
+final evaluation labels are exploratory; they are not a new unbiased
+test set.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

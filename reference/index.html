@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -99,6 +99,13 @@
 
         <dt>
 
+          <code><a href="tuning_evidence.html">tuning_evidence()</a></code>
+
+        </dt>
+        <dd>Inspect the evidence behind a tuning decision</dd>
+
+        <dt>
+
           <code><a href="tuning_control.html">tuning_control()</a></code>
 
         </dt>
@@ -109,7 +116,7 @@
           <code><a href="as_explainers.html">as_explainers()</a></code>
 
         </dt>
-        <dd>Convert an AutoML result to model-agnostic explainers</dd>
+        <dd>Convert a fitted-model result to model-agnostic explainers</dd>
 
         <dt>
 
@@ -148,6 +155,13 @@
 
         <dt>
 
+          <code><a href="report_data_control.html">report_data_control()</a></code>
+
+        </dt>
+        <dd>Control the data included in a standalone report</dd>
+
+        <dt>
+
           <code><a href="generate_natural_language_report.html">generate_natural_language_report()</a></code>
 
         </dt>
@@ -165,7 +179,7 @@
           <code><a href="prediction_ambiguity.html">prediction_ambiguity()</a></code>
 
         </dt>
-        <dd>Find held-out rows where supplied models disagree</dd>
+        <dd>Find evaluation rows where supplied models disagree</dd>
 
         <dt>
 
@@ -191,6 +205,20 @@
 
 
       <dl><dt>
+
+          <code><a href="evaluate_models.html">evaluate_models()</a></code>
+
+        </dt>
+        <dd>Evaluate already fitted models on explicitly supplied observations</dd>
+
+        <dt>
+
+          <code><a href="benchmark_predictions.html">benchmark_predictions()</a></code>
+
+        </dt>
+        <dd>Measure repeated prediction cost on one common evaluation batch</dd>
+
+        <dt>
 
           <code><a href="explain_model.html">explain_model()</a></code>
 

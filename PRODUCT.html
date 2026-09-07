@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -51,10 +51,12 @@
 <p>AutoXplainR turns a data frame and an outcome column into fitted models, evaluation against a baseline, explanation diagnostics and an optional HTML report. <code><a href="reference/autoxplain.html">autoxplain()</a></code> is the entry point. The default requires R and the package’s ordinary dependencies, with no account or service setup.</p>
 <p>A first-time modeler should be able to compare the fitted models, see which inputs they use, inspect related inputs and find prediction errors. Scores and plots belong beside the controls that change them. Short help belongs on hover, focus or tap; full method details belong in their own tab or disclosure. A control earns its place by changing useful evidence. Decorative grades, repeated generic conclusions and dead controls do not belong in the report.</p>
 <p>The default compares linear, tree and neural families using training-only cross-validation, then evaluates the retained fits and baseline on held-out rows. Quick mode provides the previous fast reference workflow explicitly.</p>
-<p>An experienced user should be able to inspect the models, evaluation rows, training recipe, tuning folds, losses and explanation draws. Presets are a convenience, not a restriction on inspecting evidence. Lower-level functions accept existing models through a documented prediction contract.</p>
+<p>An experienced user should be able to inspect the models, evaluation rows, training recipe, tuning folds, losses and explanation draws. Presets are a convenience, not a restriction on inspecting evidence. <code><a href="reference/evaluate_models.html">evaluate_models()</a></code> gives existing fitted models the same report through explicit prediction contracts, without claiming that AutoXplainR trained, tuned or timed them. A training table may be unavailable; the report must say so.</p>
+<p>Model selection must expose why the search contained particular settings, which fold results support its choice, which configurations failed and what was successfully refitted. General parameter advice cannot substitute for these recorded facts. Repeated benchmarks use common batches and retain raw timings; single millisecond readings cannot establish a speed ranking.</p>
+<p>The result retains supplied and processed values, partition membership and original input-table positions. The Data tab exports aggregate profiles by default. Individual records require explicit export and retain their source identity after filtering, splitting or row removal. Row filters operate on the exported sample; full-data summaries and model scores must remain distinguishable. Hiding a record in a view never removes it from HTML. Aggregate output can still reveal sensitive labels or small groups, and export controls do not redact fitted model details or feature explanations.</p>
 <p>The primary model is pre-specified in quick/comparison mode and selected using training-only resampling in tuned mode. Evaluation ranks never silently replace it. Grouped validation keeps units intact; temporal evaluation respects time and ties. Unsupported validation designs must fail rather than silently use random rows. User-supplied evaluation data are not automatically described as independent.</p>
 <p>The package explains fitted prediction functions. It does not identify causal effects, certify deployment, or establish that every competitive model agrees. Uncertainty from permutations, evaluation sampling and fitting are different and must have different labels. Diagnostics report their scope, status and affected models or features; they are not collapsed into an overall quality grade. Automatically selected feature summaries remain descriptive. Optional generated prose is displayed separately from numerical results. Hosted responses are checked for format and length, not factual or numerical grounding; users must review their claims against the retained evidence.</p>
-<p>The contribution we aim to demonstrate is a simple, inspectable workflow that joins these pieces. We do not claim a unique estimator or demonstrated superiority to established R packages. See <a href="ROADMAP.html">the development plan</a> for architecture, feature proposals, acceptance tests and the evidence required for that claim.</p>
+<p>The contribution we aim to demonstrate is a simple, inspectable workflow that joins these pieces. We do not claim a unique estimator or demonstrated superiority to established R packages. See <a href="ROADMAP.html">the development plan</a> for remaining work and the evidence needed to assess reader comprehension and usefulness.</p>
 </div>
 
   </main></div>

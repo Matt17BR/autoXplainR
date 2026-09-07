@@ -1,6 +1,6 @@
-# Convert an AutoML result to model-agnostic explainers
+# Convert a fitted-model result to model-agnostic explainers
 
-Convert an AutoML result to model-agnostic explainers
+Convert a fitted-model result to model-agnostic explainers
 
 ## Usage
 
@@ -12,7 +12,10 @@ as_explainers(x, data = NULL, models = NULL)
 
 - x:
 
-  An `autoxplain_result`.
+  A result from
+  [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+  or
+  [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md).
 
 - data:
 

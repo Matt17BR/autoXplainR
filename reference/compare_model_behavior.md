@@ -76,7 +76,7 @@ for a named feature after reviewing the audit's dependence diagnostics.
 fit <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
 compare_model_behavior(fit)
 #> <AutoXplainR model behavior comparison>
-#>   models:      3 (flexible_tree, small_tree, main_model)
+#>   models:      3 (main_model, small_tree, flexible_tree)
 #>   evidence:    6 test rows
 #>   performance: rmse (lower is better)
 #>   trade-off:   model_size_kb (resource proxy)
@@ -85,15 +85,15 @@ compare_model_behavior(fit)
 #> 
 #> Models at a glance
 #>            model family backend  rmse relative_gap model_size_kb
-#>  flexible_tree *   tree   rpart 1.825         0.0%         38.35
-#>       small_tree   tree   rpart 3.032        66.1%         34.20
 #>       main_model linear   stats 3.553        94.7%         44.44
+#>       small_tree   tree   rpart 3.032        66.1%         34.20
+#>  flexible_tree *   tree   rpart 1.825         0.0%         38.35
 #>   * best supplied evaluation score; rankings remain descriptive
 #> 
 #> What differs
 #>   - flexible_tree has the best supplied rmse score (1.825).
-#>   - flexible_tree and main_model differ most on average (2.62 using absolute difference in predicted target units).
-#>   - Before considering this dataset, flexible_tree allows stepwise with automatic along tree paths; main_model allows none unless encoded in features with none unless specified in features.
+#>   - main_model and flexible_tree differ most on average (2.62 using absolute difference in predicted target units).
+#>   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.
 #> 
 #> Evidence key
 #>   behavior cards = prior knowledge about model capacity

@@ -2,6 +2,8 @@
 
 Builds a two-objective comparison from an
 [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+or
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
 result. Predictive performance is taken from the evaluation leaderboard
 and the secondary axis defaults to approximate model-object size. For
 local models this is R's in-memory

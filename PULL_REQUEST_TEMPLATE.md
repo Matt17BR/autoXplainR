@@ -2,11 +2,11 @@
 
 ## Purpose
 
-## Statistical contract
+## Statistical contract, when applicable
 
 ## Validation
 
-Fast unit tests added or updated
+Relevant tests updated, or why tests are unnecessary explained
 
 Numerical/simulation test added when applicable
 

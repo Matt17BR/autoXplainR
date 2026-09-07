@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -50,11 +50,14 @@
 
 <p>AutoXplainR’s purpose is a short, inspectable path from a tabular prediction question to a baseline comparison, fitted explanations and a report. Existing packages already provide the underlying estimators and much of the reporting infrastructure. Integration and reader comprehension are hypotheses to test.</p>
 <div class="section level2">
-<h2 id="id_050-restore-model-exploration">0.5.0: restore model exploration<a class="anchor" aria-label="anchor" href="#id_050-restore-model-exploration"></a></h2>
-<p>The <a href="validation/product-review-0.4.0.html">review of 0.4.0</a> found that statistical repairs had displaced the package’s main purpose: comparing models and understanding their behaviour. The current work restores that purpose.</p>
-<ul><li>Make a small training-CV search across linear, tree and neural models the one-command default. Keep a fast reference model available explicitly.</li>
-<li>Replace the long report with focused tabs. Compare scores and costs first; let the reader switch models, choose an input, inspect relationships and examine prediction errors. Put background explanations in accessible help.</li>
-<li>Audit the inputs used by each retained model and connect the displayed importance bars to its fitted curves. Keep failures explicit.</li>
+<h2 id="id_060-make-exploration-useful">0.6.0: make exploration useful<a class="anchor" aria-label="anchor" href="#id_060-make-exploration-useful"></a></h2>
+<p>The <a href="validation/product-review-0.4.0.html">review of 0.4.0</a> found that statistical repairs had displaced the package’s main purpose: comparing models and understanding their behaviour. Version 0.5.0 restored tabs and model controls, but the next review found sparse charts, missing search rationale and little access to the supplied data. The <a href="validation/product-overhaul-0.6.0.html">0.6.0 work record</a> tracks the repairs and rejected intermediate designs.</p>
+<ul><li>Make selection inspectable: parameter rationale, candidate and fold losses, convergence, the numerical selection rule and successful final fits.</li>
+<li>Preserve raw partitions and source positions separately from processed model inputs. Let readers inspect distributions, missingness, associations and explicitly exported records without losing their place.</li>
+<li>Use readable responsive charts, shared comparison axes and direct labels. Check plot coordinates, text size and print reflow against independent values.</li>
+<li>Add the same workflow for existing fitted models, with explicit prediction contracts and no invented training or selection history.</li>
+<li>Compute report predictions once and validate every attached artifact against the current model, outcomes, row order and recorded prediction context. A result must not mix old scores or explanations with changed predictions. Such checks do not prove equivalence on unseen inputs or validate hidden external state.</li>
+<li>Retain repeated prediction measurements on common batches. Expose timer and budget limitations, raw timings and variation before offering a cost comparison.</li>
 <li>Gate publication on executed task walkthroughs, numerical answers checked against R, keyboard/mobile checks, actual screenshots and printed views. Record concrete failures and repairs, not just a test total.</li>
 <li>Preserve the corrected statistical contracts from 0.4.0. Test ranking is descriptive; training CV chooses the default. Associations remain distinct from causal effects and sampling uncertainty.</li>
 </ul><p>See the <a href="RELEASE_CHECKLIST.html">release checklist</a>. A participant study can add independent evidence, but ordinary task acceptance must happen now.</p>
@@ -62,13 +65,13 @@
 <div class="section level2">
 <h2 id="next-interoperability-and-demonstrated-usefulness">Next: interoperability and demonstrated usefulness<a class="anchor" aria-label="anchor" href="#next-interoperability-and-demonstrated-usefulness"></a></h2>
 <ol style="list-style-type: decimal"><li>
-<strong>Existing-model adapters.</strong> Document tested prediction contracts for common tidymodels/DALEX/mlr3 workflows, including preprocessing, probability-column order and raw-row prediction. Prefer adapters over additional learner families.</li>
+<strong>Framework-specific adapters.</strong> <code><a href="reference/evaluate_models.html">evaluate_models()</a></code> accepts native models and explicit prediction functions. Dedicated tidymodels and mlr3 adapters still need examples covering embedded recipes, probability-column order, new factor levels and serialization. Prefer these over more learner families.</li>
 <li>
 <strong>User comprehension.</strong> Compare the complete workflow with equivalent DALEX/modelStudio and tidymodels workflows on identical data and partitions. Ask users to choose a split, identify the positive class, interpret an importance interval and locate a failed check. Publish task completion, interpretation errors and time, not only code length.</li>
 <li>
 <strong>Report accessibility.</strong> Exercise keyboard order, contrast, table semantics, mobile layouts, print output and screen readers. Automated checks complement manual review; attractive screenshots do not establish accessibility.</li>
 <li>
-<strong>Compatibility and performance.</strong> Publish result-schema migration rules and aggregate JSON fixtures. Measure prediction-call counts, runtime and memory on wide/tall data before adding batching or parallel execution.</li>
+<strong>Compatibility and performance.</strong> Extend the retained schema and raw-data tests with wide/tall memory profiles and old-result migration fixtures. Report preparation and benchmarking have different scopes; test their call counts and resource costs separately before adding parallel execution.</li>
 </ol></div>
 <div class="section level2">
 <h2 id="deferred-until-the-current-workflow-meets-those-criteria">Deferred until the current workflow meets those criteria<a class="anchor" aria-label="anchor" href="#deferred-until-the-current-workflow-meets-those-criteria"></a></h2>

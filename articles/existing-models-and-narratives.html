@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Explain an existing model and write a memo • AutoXplainR</title>
+<title>Bring your own fitted models • AutoXplainR</title>
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Explain an existing model and write a memo">
+<meta property="og:title" content="Bring your own fitted models">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -70,7 +70,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Explain an existing model and write a memo</h1>
+      <h1>Bring your own fitted models</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/vignettes/existing-models-and-narratives.Rmd" class="external-link"><code>vignettes/existing-models-and-narratives.Rmd</code></a></small>
@@ -79,12 +79,98 @@
 
     
     
-<p>The explanation interface accepts already fitted models. Supply
-evaluation predictors, outcomes and a prediction function when the
-model’s usual <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> method does not return the required
-shape. Both <code>function(newdata, ...)</code> and
-<code>function(model, newdata, ...)</code> signatures are supported.</p>
+<p>If you already have fitted models, use <code><a href="../reference/evaluate_models.html">evaluate_models()</a></code>
+to open the same report used by <code><a href="../reference/autoxplain.html">autoxplain()</a></code>. It evaluates
+the supplied models without fitting, selecting or replacing them. The
+primary model is your choice.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">training</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="op">]</span></span>
+<span><span class="va">evaluation</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">21</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
+<span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  linear <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">training</span><span class="op">)</span>,</span>
+<span>  tree <span class="op">=</span> <span class="fu">rpart</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rpart/man/rpart.html" class="external-link">rpart</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">training</span><span class="op">)</span>,</span>
+<span>  reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">training</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_models.html">evaluate_models</a></span><span class="op">(</span></span>
+<span>  <span class="va">fits</span>, <span class="va">evaluation</span>, <span class="st">"mpg"</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wt"</span>, <span class="st">"hp"</span><span class="op">)</span>,</span>
+<span>  primary <span class="op">=</span> <span class="st">"linear"</span>, reference <span class="op">=</span> <span class="st">"reference"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">leaderboard</span></span>
+<span><span class="co">#&gt;   rank  model_id     model        role family backend     rmse      mae</span></span>
+<span><span class="co">#&gt; 1    1    linear    linear     primary linear   stats 2.585338 2.144486</span></span>
+<span><span class="co">#&gt; 2    2      tree      tree alternative   tree   rpart 4.173713 3.176010</span></span>
+<span><span class="co">#&gt; 3    3 reference reference    baseline linear   stats 5.270474 4.430000</span></span>
+<span><span class="co">#&gt;       r_squared model_size_kb complexity training_time_ms prediction_time_ms</span></span>
+<span><span class="co">#&gt; 1  0.7592824193      23.24219          3               NA                 NA</span></span>
+<span><span class="co">#&gt; 2  0.3726381958      23.06250          2               NA                 NA</span></span>
+<span><span class="co">#&gt; 3 -0.0003970558      17.82812          1               NA                 NA</span></span>
+<span><span class="co">#&gt;                                            fit_warning</span></span>
+<span><span class="co">#&gt; 1 Training provenance was not recorded by AutoXplainR.</span></span>
+<span><span class="co">#&gt; 2 Training provenance was not recorded by AutoXplainR.</span></span>
+<span><span class="co">#&gt; 3 Training provenance was not recorded by AutoXplainR.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">evaluation</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 24.96928 19.11718 19.40076</span></span></code></pre></div>
+<p>The default data role is <code>"evaluation"</code>; the package
+cannot verify whether these rows were excluded from fitting or earlier
+choices. This ordered <code>mtcars</code> split is a teaching example.
+Declare <code>evaluation_role = "test"</code> only when your analysis
+design supports that interpretation.</p>
+<p>Choose <code>features</code> explicitly. By default, every column
+except the outcome is treated as an input, including an ID or context
+column that your adapter might ignore. The report’s data and feature
+views use this declared input set.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="va">path</span>, n_repeats <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
+<p>The report shows scores, fitted behavior, error diagnostics and the
+supplied data. Training data are <strong>unavailable</strong> unless you
+pass <code>training_data</code>; supplied training data add context but
+do not prove how a model was fitted. No search history or training time
+is invented. A reference is optional and can be any explicitly supplied
+model. Without one, baseline improvement and paired reference intervals
+are unavailable.</p>
+<p>The default report embeds aggregate summaries. Set
+<code>report_data = "rows"</code> to add individual-record inspection
+and links from errors to source rows. With no training table supplied,
+<strong>Explore data</strong> shows only evaluation distributions; it
+does not invent a training sample. Save the R result with
+<code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> to retain models, data and custom prediction
+functions; external dependencies used by those functions must still be
+available when you reload it.</p>
+<div class="section level2">
+<h2 id="custom-prediction-functions">Custom prediction functions<a class="anchor" aria-label="anchor" href="#custom-prediction-functions"></a>
+</h2>
+<p>For an unsupported model class, supply a named
+<code>predict_functions</code> list. Each function takes
+<code>newdata</code>, or <code>model, newdata</code>, and returns one
+prediction per row. Regression uses a numeric vector; binary
+classification uses probabilities of <code>positive</code>; multiclass
+uses a probability matrix with named class columns. The outcome factor
+declares the complete class set. Your adapter owns any preprocessing
+needed by the fit; <code><a href="../reference/evaluate_models.html">evaluate_models()</a></code> does not learn a
+recipe.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_models.html">evaluate_models</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>my_fit <span class="op">=</span> <span class="va">fitted_object</span><span class="op">)</span>, <span class="va">evaluation_data</span>, <span class="st">"outcome"</span>,</span>
+<span>  features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"measurement"</span><span class="op">)</span>,</span>
+<span>  predict_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>my_fit <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">newdata</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span>,</span>
+<span>  task <span class="op">=</span> <span class="st">"binary"</span>, positive <span class="op">=</span> <span class="st">"yes"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="work-with-one-explanation-or-audit">Work with one explanation or audit<a class="anchor" aria-label="anchor" href="#work-with-one-explanation-or-audit"></a>
+</h2>
+<p>Use <code><a href="../reference/explain_model.html">explain_model()</a></code> and
+<code><a href="../reference/audit_explanations.html">audit_explanations()</a></code> when you want a focused audit or an
+individual estimator rather than the full model report. This interface
+also supports hard-label classification for metrics such as
+accuracy.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">train</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">24</span>, <span class="op">]</span></span>
 <span><span class="va">test</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">25</span><span class="op">:</span><span class="fl">32</span>, <span class="op">]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span>
@@ -124,16 +210,17 @@ binomial response conventions</a>. Recreate a custom explainer and
 recompute its evidence after changing external state used by its
 prediction function. A content check on observed predictions cannot
 establish equivalence on every possible perturbed input.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".html"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/render_explanation_report.html">render_explanation_report</a></span><span class="op">(</span><span class="va">audit</span>, <span class="va">path</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="narrative-from-retained-evidence">Narrative from retained evidence<a class="anchor" aria-label="anchor" href="#narrative-from-retained-evidence"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"mpg"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">memo</span><span class="op">)</span></span>
@@ -142,9 +229,9 @@ establish equivalence on every possible perturbed input.</p>
 <span><span class="co">#&gt; ## Scope</span></span>
 <span><span class="co">#&gt; Target: `mpg` (regression). Models: 4. Inputs: 10.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## Did the model improve on a simple baseline?</span></span>
+<span><span class="co">#&gt; ## How did the primary model perform?</span></span>
 <span><span class="co">#&gt; The tuned decision tree was evaluated on 6 test rows. Its **rmse** was 2.6856.</span></span>
-<span><span class="co">#&gt; That is a 47.3% improvement over the intercept-only baseline (5.0963).</span></span>
+<span><span class="co">#&gt; That is a 47.3% improvement over intercept-only baseline (5.0963).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## What the main metric means</span></span>
 <span><span class="co">#&gt; **rmse:** Typical prediction error, with larger mistakes weighted more heavily; lower is better.</span></span>
@@ -155,7 +242,7 @@ establish equivalence on every possible perturbed input.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## How automatic tuning selected the model</span></span>
 <span><span class="co">#&gt; 15 configurations across 3 model families were compared with 5 training-only folds. The selection metric was rmse.</span></span>
-<span><span class="co">#&gt; The one-standard-error (prefer the documented family priority, then the least-flexible near-best setting within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.</span></span>
+<span><span class="co">#&gt; The one-standard-error (prefer the documented family priority, then the lowest recorded capacity proxy among eligible settings within that family) rule selected the decision tree with max depth = 3, pruning cp = 0.01, minimum split = 5. Its resampled rmse was 3.03628.</span></span>
 <span><span class="co">#&gt; The resampling-selected configuration was `tree_05`; the actual final fitted configuration was `tree_05` (decision tree). A recorded refit fallback was not needed.</span></span>
 <span><span class="co">#&gt; That resampled score selected a configuration; it is not the final performance estimate. The held-out score above evaluated the selected, refitted model on different rows.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -211,7 +298,7 @@ the fitted model and ordered evaluation data. Bare importance tables are
 labeled user-supplied with unverified identity; set their
 <code>metric</code> attribute explicitly. A fitting-only result reports
 that feature evidence was not supplied.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Configure the credentials listed by narrative_providers() first.</span></span>
 <span><span class="va">memo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_natural_language_report.html">generate_natural_language_report</a></span><span class="op">(</span><span class="va">result</span>, provider <span class="op">=</span> <span class="st">"gemini"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"report.html"</span>, narrative <span class="op">=</span> <span class="va">memo</span><span class="op">)</span></span></code></pre></div>
@@ -237,14 +324,30 @@ status records were retained.</p>
 <div class="section level2">
 <h2 id="migrating-old-report-calls">Migrating old report calls<a class="anchor" aria-label="anchor" href="#migrating-old-report-calls"></a>
 </h2>
+<p>Saved 0.5.0 regression, binary and multiclass results were replayed
+with explicit explanation recomputation. Their older retained audits are
+rejected by the newer identity check. For an unchanged saved fit:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">older</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"analysis-0.5.0.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">older</span>, <span class="st">"updated-report.html"</span>, top_features <span class="op">=</span> <span class="fl">2</span>, n_repeats <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<p>The small budget illustrates the migration; choose a suitable
+explanation budget for the final report. Rendering validates the
+available stored predictions and metrics, then recomputes explanation
+evidence without refitting. It cannot recover missing raw context or
+reconstruct historical external state used by a custom function on
+unobserved inputs. Changed models need a new evaluation via
+<code><a href="../reference/evaluate_models.html">evaluate_models()</a></code> rather than combining their predictions
+with saved scores.</p>
 <p><code><a href="../reference/generate_dashboard.html">generate_dashboard()</a></code> and
-<code><a href="../reference/create_simple_dashboard.html">create_simple_dashboard()</a></code> are deprecated in 0.4.0 and will
-remain callable until at least 0.6.0. Replace them with
+<code><a href="../reference/create_simple_dashboard.html">create_simple_dashboard()</a></code> were deprecated in 0.4.0 and
+remain compatibility entry points in 0.6.0. Replace them with
 <code>render_model_report(result, output_file)</code>. For a memo, pass
 <code>narrative = generate_natural_language_report(result)</code>. Each
 compatibility call emits one migration warning. Use
-<code><a href="../reference/render_explanation_report.html">render_explanation_report()</a></code> for a standalone audit of an
-existing model.</p>
+<code><a href="../reference/evaluate_models.html">evaluate_models()</a></code> followed by
+<code><a href="../reference/render_model_report.html">render_model_report()</a></code> for existing fitted models, or
+<code><a href="../reference/render_explanation_report.html">render_explanation_report()</a></code> for a standalone explanation
+audit.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

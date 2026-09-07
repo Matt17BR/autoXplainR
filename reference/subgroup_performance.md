@@ -8,7 +8,7 @@ prompt better data collection or validation.
 ## Usage
 
 ``` r
-subgroup_performance(result, by, model = NULL, min_rows = 10L)
+subgroup_performance(result, by, model = NULL, min_rows = 10L, metric = NULL)
 ```
 
 ## Arguments
@@ -23,19 +23,25 @@ subgroup_performance(result, by, model = NULL, min_rows = 10L)
 
 - model:
 
-  One model ID or index. `NULL` uses `main_model` when available,
-  otherwise the first retained model.
+  One model ID or index. `NULL` uses the recorded primary model.
 
 - min_rows:
 
   Minimum rows used to label a group as large enough for a preliminary
   comparison. Smaller groups remain visible and are flagged.
 
+- metric:
+
+  Optional loss metric for this descriptive comparison: `rmse` or `mae`
+  for regression; `log_loss` or `brier_score` for classification. `NULL`
+  uses the recorded evaluation metric. This does not change the official
+  leaderboard, selected model, or stored evaluation evidence.
+
 ## Value
 
 An `autoxplain_subgroups` object containing overall metrics and a
 group-level `performance` data frame. Its primary metric matches the
-result's evaluation metric (including MAE or Brier score), and
+requested metric or, by default, the result's evaluation metric, and
 `secondary_metric` names a different supporting metric.
 
 ## Details

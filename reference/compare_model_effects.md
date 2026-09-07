@@ -126,19 +126,19 @@ compare_model_effects(fit, "wt")
 #> <AutoXplainR cross-model effect comparison>
 #>   feature:   wt (ALE)
 #>   target:    predicted value
-#>   models:    3 of 3 requested (flexible_tree, small_tree, main_model)
+#>   models:    3 of 3 requested (main_model, small_tree, flexible_tree)
 #>   evidence:  6 effect rows from 6 test rows
 #>   support:   relative support >= 0.1
 #> 
 #> Findings
-#>   [note] The largest centered curve difference was between `flexible_tree` and `main_model` (RMSE = 2.754) across 6 supported grid points.
+#>   [note] The largest centered curve difference was between `main_model` and `flexible_tree` (RMSE = 2.754) across 6 supported grid points.
 #>   [boundary] Pairwise summaries exclude grid points below relative support 0.1 and describe fitted predictions, not causal effects.
 #> 
 #> Pairwise summary
-#>        model A    model B points mean level gap shape RMSE max gap
-#>  flexible_tree main_model      6          2.028      2.754   5.347
-#>     small_tree main_model      6          2.028      2.754   5.347
-#>  flexible_tree small_tree      6          0.000      0.000   0.000
+#>     model A       model B points mean level gap shape RMSE max gap
+#>  main_model flexible_tree      6          2.028      2.754   5.347
+#>  main_model    small_tree      6          2.028      2.754   5.347
+#>  small_tree flexible_tree      6          0.000      0.000   0.000
 #>  direction agreement
 #>                    0
 #>                    0

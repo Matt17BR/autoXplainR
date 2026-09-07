@@ -18,6 +18,8 @@ evidence_summary(result)
 
   An
   [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+  or
+  [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
   result.
 
 ## Value

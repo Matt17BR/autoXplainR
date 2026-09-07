@@ -14,10 +14,12 @@
   : Extract a compact, versioned evidence summary
 - [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
   : Inspect automatic tuning evidence
+- [`tuning_evidence()`](https://matt17br.github.io/autoXplainR/reference/tuning_evidence.md)
+  : Inspect the evidence behind a tuning decision
 - [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
   : Advanced controls for local model tuning
 - [`as_explainers()`](https://matt17br.github.io/autoXplainR/reference/as_explainers.md)
-  : Convert an AutoML result to model-agnostic explainers
+  : Convert a fitted-model result to model-agnostic explainers
 - [`calibration_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/calibration_diagnostics.md)
   : Check whether held-out class probabilities behave literally
 - [`threshold_diagnostics()`](https://matt17br.github.io/autoXplainR/reference/threshold_diagnostics.md)
@@ -28,12 +30,14 @@
   : Compare held-out performance across an explicitly chosen group
 - [`render_model_report()`](https://matt17br.github.io/autoXplainR/reference/render_model_report.md)
   : Render an interactive model comparison
+- [`report_data_control()`](https://matt17br.github.io/autoXplainR/reference/report_data_control.md)
+  : Control the data included in a standalone report
 - [`generate_natural_language_report()`](https://matt17br.github.io/autoXplainR/reference/generate_natural_language_report.md)
   : Summarize retained model evidence in prose
 - [`narrative_providers()`](https://matt17br.github.io/autoXplainR/reference/narrative_providers.md)
   : List supported narrative providers
 - [`prediction_ambiguity()`](https://matt17br.github.io/autoXplainR/reference/prediction_ambiguity.md)
-  : Find held-out rows where supplied models disagree
+  : Find evaluation rows where supplied models disagree
 - [`compare_model_behavior()`](https://matt17br.github.io/autoXplainR/reference/compare_model_behavior.md)
   : Compare what retained models do differently
 - [`compare_model_effects()`](https://matt17br.github.io/autoXplainR/reference/compare_model_effects.md)
@@ -41,6 +45,10 @@
 
 ## Model-agnostic evidence workflow
 
+- [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
+  : Evaluate already fitted models on explicitly supplied observations
+- [`benchmark_predictions()`](https://matt17br.github.io/autoXplainR/reference/benchmark_predictions.md)
+  : Measure repeated prediction cost on one common evaluation batch
 - [`explain_model()`](https://matt17br.github.io/autoXplainR/reference/explain_model.md)
   : Create a model-agnostic explainer
 - [`predict(`*`<autoxplain_explainer>`*`)`](https://matt17br.github.io/autoXplainR/reference/predict.autoxplain_explainer.md)

@@ -10,7 +10,7 @@ prediction time.
 
 result <- autoxplain(measurements, "outcome",
                      validation = validation_split(group = "site_id"))
-result <- autoxplain(observations, "outcome",
+result <- autoxplain(observations, "outcome", model_set = "comparison",
                      validation = validation_split(time = "recorded_at", gap = 2))
 ```
 
@@ -117,3 +117,10 @@ Missingness rates are recorded before imputation. A difference is a
 descriptive review signal, not a distribution-shift test or proof that
 imputation preserved predictive validity. The report and result retain
 unavailable checks separately from completed checks.
+
+The report’s **Explore data** tab also shows missingness for every
+exported input. Use **Raw supplied values** to see it before imputation
+and **Values used by models** to inspect the transformed values.
+Relationships and filtered subgroup outcomes describe the supplied
+sample. Groups discovered while exploring final evaluation labels are
+exploratory; they are not a new unbiased test set.

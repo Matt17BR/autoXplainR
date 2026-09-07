@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
 <li><a class="dropdown-item" href="../articles/autoxplainr-introduction.html">Your first prediction report</a></li>
     <li><a class="dropdown-item" href="../articles/model-selection.html">Compare and tune models</a></li>
     <li><a class="dropdown-item" href="../articles/validation-and-diagnostics.html">Choose validation and inspect diagnostics</a></li>
-    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Explain an existing model and write a memo</a></li>
+    <li><a class="dropdown-item" href="../articles/existing-models-and-narratives.html">Bring your own fitted models</a></li>
     <li><a class="dropdown-item" href="../articles/statistical-methods.html">Statistical methods and interpretation</a></li>
   </ul>
 </li>
@@ -80,7 +80,7 @@
     
     
 <p>The default, <code>model_set = "tuned", portfolio = "core"</code>,
-searches 15 settings across linear, tree and neural families using five
+schedules 15 settings across linear, tree and neural families using five
 training-only folds. It retains a representative from each successful
 family and a baseline for the report. The selected model is evaluated on
 rows kept outside that search.</p>
@@ -158,17 +158,17 @@ missing engine produces an installation instruction.</p>
 <span><span class="co">#&gt;                             model</span></span>
 <span><span class="co">#&gt; 1                  neural network</span></span>
 <span><span class="co">#&gt; 2                  neural network</span></span>
-<span><span class="co">#&gt; 3 multinomial logistic regression</span></span>
+<span><span class="co">#&gt; 3                   decision tree</span></span>
 <span><span class="co">#&gt; 4                   decision tree</span></span>
 <span><span class="co">#&gt; 5                   decision tree</span></span>
-<span><span class="co">#&gt; 6                   decision tree</span></span>
+<span><span class="co">#&gt; 6 multinomial logistic regression</span></span>
 <span><span class="co">#&gt;                                         hyperparameters   cv_score      cv_se</span></span>
 <span><span class="co">#&gt; 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199</span></span>
 <span><span class="co">#&gt; 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168</span></span>
-<span><span class="co">#&gt; 3                               default statistical fit 0.37178519 0.20170924</span></span>
-<span><span class="co">#&gt; 4 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486</span></span>
-<span><span class="co">#&gt; 5  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488</span></span>
-<span><span class="co">#&gt; 6  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488</span></span>
+<span><span class="co">#&gt; 3 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486</span></span>
+<span><span class="co">#&gt; 4  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488</span></span>
+<span><span class="co">#&gt; 5  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488</span></span>
+<span><span class="co">#&gt; 6                               default statistical fit         NA         NA</span></span>
 <span><span class="co">#&gt;   selected</span></span>
 <span><span class="co">#&gt; 1     TRUE</span></span>
 <span><span class="co">#&gt; 2    FALSE</span></span>
@@ -178,13 +178,44 @@ missing engine produces an installation instruction.</p>
 <span><span class="co">#&gt; 6    FALSE</span></span></code></pre></div>
 <p>Every fold learns its preprocessing from that fold’s training rows.
 The default one-standard-error rule favors the first eligible family in
-the documented priority, then its least-flexible eligible configuration.
+the documented priority, then its smallest recorded within-family
+capacity proxy. Some tuning dimensions are not ordered by that proxy;
+for example, a neural weight-count proxy does not order weight decay.
 Cross-family priority is a package policy, not a statistical ordering of
 model families. Fold-score standard errors are a selection heuristic,
 not independent-test confidence intervals. Use
 <code>tuning_rule = "best"</code> for the lowest resampled error
 instead.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">evidence</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tuning_evidence.html">tuning_evidence</a></span><span class="op">(</span><span class="va">tuned</span><span class="op">)</span></span>
+<span><span class="va">evidence</span><span class="op">$</span><span class="va">selection</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"best_configuration"</span>, <span class="st">"selected_configuration"</span>, <span class="st">"threshold"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; $best_configuration</span></span>
+<span><span class="co">#&gt; [1] "neural_02"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $selected_configuration</span></span>
+<span><span class="co">#&gt; [1] "neural_02"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $threshold</span></span>
+<span><span class="co">#&gt; [1] 0.1305506</span></span></code></pre></div>
+<p>The report’s <strong>Model selection</strong> view connects those
+decisions to the parameter values, effective fold settings and retained
+fit. The default grid is a small, versioned set of contrasting controls.
+It does not follow a theorem that makes those numbers optimal for your
+data. A winning setting on the edge of a searched range is a reason to
+investigate that range, not evidence that it should always be extended.
+The range includes failed attempts: being inside it does not imply that
+neighboring settings produced usable fits. Inspect the successful count
+and failure reasons. Candidate comparisons stay inside training
+data.</p>
+<p>Explicit optimizer nonconvergence excludes a configuration by
+default. Fold and refit records retain the status and reason.
+<code>optimization_policy = "warn"</code> in
+<code><a href="../reference/tuning_control.html">tuning_control()</a></code> deliberately keeps such fits with a
+warning; an unreported optimizer status remains unknown. Successful
+family representatives use their lowest valid within-family CV loss,
+while the primary follows the configured global selection rule. These
+are different choices.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/install_model_engines.html">install_model_engines</a></span><span class="op">(</span><span class="st">"recommended"</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">my_data</span>, <span class="st">"outcome"</span>, model_set <span class="op">=</span> <span class="st">"tuned"</span>, portfolio <span class="op">=</span> <span class="st">"recommended"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/tuning_control.html">tuning_control()</a></code> accepts explicit parameter grids, fold
@@ -196,11 +227,11 @@ requires an explicit rolling-origin design outside this workflow.</p>
 <div class="section level2">
 <h2 id="compare-fitted-behavior">Compare fitted behavior<a class="anchor" aria-label="anchor" href="#compare-fitted-behavior"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, <span class="st">"Sepal.Length"</span>, model_set <span class="op">=</span> <span class="st">"comparison"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/compare_model_behavior.html">compare_model_behavior</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;AutoXplainR model behavior comparison&gt;</span></span>
-<span><span class="co">#&gt;   models:      3 (main_model, flexible_tree, small_tree)</span></span>
+<span><span class="co">#&gt;   models:      3 (main_model, small_tree, flexible_tree)</span></span>
 <span><span class="co">#&gt;   evidence:    30 test rows</span></span>
 <span><span class="co">#&gt;   performance: rmse (lower is better)</span></span>
 <span><span class="co">#&gt;   trade-off:   model_size_kb (resource proxy)</span></span>
@@ -210,14 +241,14 @@ requires an explicit rolling-origin design outside this workflow.</p>
 <span><span class="co">#&gt; Models at a glance</span></span>
 <span><span class="co">#&gt;          model family backend   rmse relative_gap model_size_kb</span></span>
 <span><span class="co">#&gt;   main_model * linear   stats 0.2736         0.0%         58.60</span></span>
-<span><span class="co">#&gt;  flexible_tree   tree   rpart 0.4103        49.9%         46.84</span></span>
 <span><span class="co">#&gt;     small_tree   tree   rpart 0.4490        64.1%         40.81</span></span>
+<span><span class="co">#&gt;  flexible_tree   tree   rpart 0.4103        49.9%         46.84</span></span>
 <span><span class="co">#&gt;   * best supplied evaluation score; rankings remain descriptive</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; What differs</span></span>
 <span><span class="co">#&gt;   - main_model has the best supplied rmse score (0.2736).</span></span>
 <span><span class="co">#&gt;   - main_model and small_tree differ most on average (0.29 using absolute difference in predicted target units).</span></span>
-<span><span class="co">#&gt;   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; flexible_tree allows stepwise with automatic along tree paths.</span></span>
+<span><span class="co">#&gt;   - Before considering this dataset, main_model allows none unless encoded in features with none unless specified in features; small_tree allows stepwise with automatic along tree paths.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Evidence key</span></span>
 <span><span class="co">#&gt;   behavior cards = prior knowledge about model capacity</span></span>
@@ -242,7 +273,7 @@ requires an explicit rolling-origin design outside this workflow.</p>
 and prediction differences describe what these particular fitted models
 did on common evaluation rows. Disagreement does not supply prediction
 intervals or identify the correct prediction.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_model_effects.html">compare_model_effects</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"Petal.Length"</span>, method <span class="op">=</span> <span class="st">"ale"</span>, n_points <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">effects</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-selection_files/figure-html/effects-1.png" class="r-plt" alt="" width="672"></p>
@@ -255,6 +286,16 @@ comparisons. Its default size axis measures approximate R object
 storage, not structural complexity. Use it when storage or runtime is
 relevant to a concrete constraint; a favorable Pareto position is not a
 model-selection rule.</p>
+<p>For repeated prediction measurements on the same rows:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/benchmark_predictions.html">benchmark_predictions</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"report.html"</span>, benchmark <span class="op">=</span> <span class="va">bench</span><span class="op">)</span></span></code></pre></div>
+<p>The benchmark records a common batch, warmup, repeated blocks,
+warnings and timing limits. A per-row batch cost is not single-request
+latency; quartiles describe the repeated measurements, not a confidence
+interval. The benchmark excludes fitting and the guided workflow’s
+raw-data preprocessing. Transformations performed inside a custom
+prediction function are timed with that function.</p>
 </div>
 <div class="section level2">
 <h2 id="optional-h2o-search">Optional H2O search<a class="anchor" aria-label="anchor" href="#optional-h2o-search"></a>
@@ -268,7 +309,7 @@ creates its folds. Use the default keep-missing path, the base engine
 for fold-local preprocessing, or explicitly designed validation with
 <code>nfolds = 0</code>. H2O’s own transformations remain engine
 responsibilities.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">holdout</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, by <span class="op">=</span> <span class="fl">5L</span><span class="op">)</span></span>
 <span><span class="va">h2o_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">holdout</span>, <span class="op">]</span>, <span class="st">"Species"</span>, test_data <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">holdout</span>, <span class="op">]</span>,</span>
