@@ -1,0 +1,20 @@
+POSITIVE CLASS GLM
+            p_yes         p_no
+[1,] 2.220446e-16 2.220446e-16
+[2,] 1.000000e+00 1.000000e+00
+max complement error: 1 
+FACTOR REGRESSION OUTPUT
+[1] 2 2 2 2
+UNKNOWN BINARY LABELS
+ [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+FINGERPRINT CHANGED MODEL/DATA
+[1] "axr-729db549" "axr-729db549"
+CUSTOM ONE ARG PLUS ELLIPSIS
+[1] "invalid 'times' argument"
+SERIALIZED SIZE
+object.size: 152.8 Kb serialized: 254057 
+logical preprocessing
+'data.frame':	4 obs. of  2 variables:
+ $ x: Factor w/ 2 levels "FALSE","TRUE": 2 1 2 2
+ $ y: int  1 2 3 4
+NULL

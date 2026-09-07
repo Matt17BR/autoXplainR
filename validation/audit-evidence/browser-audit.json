@@ -1,0 +1,191 @@
+{
+  "1280": {
+    "measurement": {
+      "height": 7779,
+      "width": 1280,
+      "words": 1228,
+      "cards": 19,
+      "sections": [
+        {
+          "title": "The modeling question",
+          "top": 411.6875,
+          "height": 649.09375
+        },
+        {
+          "title": "Did the model generalize?",
+          "top": 1080.78125,
+          "height": 819.171875
+        },
+        {
+          "title": "How variable is this score?",
+          "top": 1919.953125,
+          "height": 445.953125
+        },
+        {
+          "title": "What trade-offs did the candidates make?",
+          "top": 2385.90625,
+          "height": 2458.890625
+        },
+        {
+          "title": "Patterns used for prediction",
+          "top": 4864.796875,
+          "height": 890.25
+        },
+        {
+          "title": "Explanation reliability",
+          "top": 5775.046875,
+          "height": 765.015625
+        },
+        {
+          "title": "What this analysis does not establish",
+          "top": 6560.0625,
+          "height": 389.3125
+        },
+        {
+          "title": "How this result was produced",
+          "top": 6969.375,
+          "height": 638.375
+        }
+      ],
+      "effect_text": [
+        {
+          "text": "",
+          "aria": "ALE curve for x ranging from -4.205 to 6.359"
+        },
+        {
+          "text": "",
+          "aria": "ALE curve for z ranging from -1.209 to 1.733"
+        }
+      ],
+      "navPosition": "static"
+    },
+    "axe_version": "4.13.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "count": 6
+      }
+    ]
+  },
+  "390": {
+    "measurement": {
+      "height": 13420,
+      "width": 390,
+      "words": 1228,
+      "cards": 19,
+      "sections": [
+        {
+          "title": "The modeling question",
+          "top": 500.5625,
+          "height": 1191.703125
+        },
+        {
+          "title": "Did the model generalize?",
+          "top": 1712.265625,
+          "height": 1361.921875
+        },
+        {
+          "title": "How variable is this score?",
+          "top": 3094.1875,
+          "height": 534.453125
+        },
+        {
+          "title": "What trade-offs did the candidates make?",
+          "top": 3648.640625,
+          "height": 4610.390625
+        },
+        {
+          "title": "Patterns used for prediction",
+          "top": 8279.03125,
+          "height": 1503.921875
+        },
+        {
+          "title": "Explanation reliability",
+          "top": 9802.953125,
+          "height": 1456.015625
+        },
+        {
+          "title": "What this analysis does not establish",
+          "top": 11278.96875,
+          "height": 798.015625
+        },
+        {
+          "title": "How this result was produced",
+          "top": 12096.984375,
+          "height": 1102.96875
+        }
+      ],
+      "effect_text": [
+        {
+          "text": "",
+          "aria": "ALE curve for x ranging from -4.205 to 6.359"
+        },
+        {
+          "text": "",
+          "aria": "ALE curve for z ranging from -1.209 to 1.733"
+        }
+      ],
+      "navPosition": "static"
+    },
+    "axe_version": "4.13.0",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+        "nodes": [
+          {
+            "html": "<div class=\"table-wrap\">",
+            "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable",
+            "target": [
+              "#evaluation > .table-wrap"
+            ]
+          },
+          {
+            "html": "<div class=\"table-wrap\">",
+            "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable",
+            "target": [
+              "#models > .table-wrap"
+            ]
+          },
+          {
+            "html": "<div class=\"table-wrap\">",
+            "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable",
+            "target": [
+              ".behavior-comparison > .table-wrap"
+            ]
+          },
+          {
+            "html": "<div class=\"table-wrap\">",
+            "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable",
+            "target": [
+              ".ambiguity > .table-wrap"
+            ]
+          },
+          {
+            "html": "<div class=\"table-wrap\">",
+            "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable",
+            "target": [
+              "#patterns > .table-wrap"
+            ]
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "count": 6
+      }
+    ]
+  }
+}

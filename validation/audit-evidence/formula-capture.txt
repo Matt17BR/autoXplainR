@@ -1,0 +1,15 @@
+model formula environment bindings:
+ [1] "baseline"             "baseline_formula"     "data"                
+ [4] "diagnostics"          "enable_preprocessing" "features"            
+ [7] "fits"                 "label"                "labels"              
+[10] "learners"             "max_models"           "model_set"           
+[13] "models"               "nfolds"               "preprocessing_config"
+[16] "primary"              "primary_formula"      "roles"               
+[19] "seed"                 "target"               "task"                
+[22] "tuning"               "tuning_control"       "tuning_data"         
+[25] "tuning_rule"         
+serialized baseline bytes: 7657086  object.size: 596912 
+with sterile formula env: 155654 
+training rows in environment: 2400 
+baseline environment contains primary model: TRUE 
+predictions unchanged: TRUE 

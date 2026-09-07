@@ -1,0 +1,2 @@
+[1] "Neural-network prediction columns do not match the fitted schema."
+[1] "Automatic tuning could not fit a complete configuration across every fold: Neural-network prediction columns do not match the fitted schema."

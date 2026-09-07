@@ -1,5 +1,10 @@
 # Validation evidence
 
+The [critical 0.3.0 audit](audit-0.3.0.md) records reproduced correctness bugs,
+report-design findings and repair acceptance criteria. Its counterexamples
+complement the passing release checks below; test totals alone did not cover
+these cases.
+
 Run these commands from the repository root. They write small reviewable
 artifacts under `validation/results/`. They do not send data to a service.
 

@@ -1,0 +1,13 @@
+# Diagnostic reproduction for the audited 0.3.0 source; run from repository root.
+pkgload::load_all('.',quiet=TRUE)
+r1 <- autoxplain(mtcars,'mpg',model_set='comparison',explain=FALSE,seed=10)
+r2 <- autoxplain(mtcars,'mpg',model_set='comparison',explain=FALSE,seed=20)
+a <- audit_explanations(as_explainers(r1,models=c('main_model','small_tree')),features=c('wt','hp'),n_repeats=2)
+cat('Different test rows:',!identical(r1$test_data,r2$test_data),'\n')
+print(sapply(as_explainers(r1),function(x)x$provenance$fingerprint)); print(sapply(as_explainers(r2),function(x)x$provenance$fingerprint))
+b <- compare_model_behavior(r2,models=c('main_model','small_tree'),explanation_audit=a)
+cat('Cross-run audit was accepted:',!is.null(b$feature_evidence),'\n')
+cat('ordered factor workflow\n')
+d <- data.frame(x=ordered(rep(c('low','medium','high'),20),levels=c('low','medium','high')),z=1:60,y=sin(1:60))
+p <- preprocess_data(d,'y',missing_value_strategy='keep'); q <- AutoXplainR:::apply_preprocessing_recipe(d,p$recipe,'y'); print(c(training_ordered=is.ordered(p$data$x),baked_ordered=is.ordered(q$data$x)))
+r <- autoxplain(d,'y',explain=FALSE); print(tryCatch(predict(r,d[1:3,]),error=conditionMessage))

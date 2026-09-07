@@ -1,0 +1,72 @@
+THRESHOLD EDGE CASES
+  sensitivity specificity balanced_accuracy
+1          NA           1                 1
+  f1 false_positives false_negatives
+1 NA               2               2
+TIED-INPUT ALE
+    x accumulated_effect  n
+1 0.4              -0.96 10
+2 0.9              -0.96  0
+3 1.3              -0.36 10
+4 1.8              -0.36  0
+5 2.2               0.04 10
+6 2.7               0.04  0
+7 3.1               0.24 10
+8 3.6               1.04 10
+    effect_span coordinate_span 
+            2.0             3.2 
+BASELINE CHANGES AGGREGATE GRADE
+$models
+[1] "main_model"
+
+$grade
+[1] "A"
+
+$stable_claim_rate
+[1] 1
+
+$models
+[1] "main_model"      "simple_baseline"
+
+$grade
+[1] "B"
+
+$stable_claim_rate
+[1] 0.5
+
+NARRATIVE DOES NOT USE RETAINED EXPLANATIONS
+importance_rows         effects 
+              8               3 
+# Model Fit and Evaluation Report
+
+## Scope
+This is a descriptive summary of a multiclass task for `Species`, covering 2 model(s) and 4 feature(s).
+
+## Did the model improve on a simple baseline?
+The multinomial logistic regression was evaluated on 30 test rows. Its **log_loss** was 1.1513.
+It did not improve on the intercept-only baseline (1.0986). Treat the fitted relationships as exploratory.
+
+## What the main metric means
+**log_loss:** Probability error that penalizes confident wrong answers; lower is better.
+
+## Can the probabilities be taken literally?
+The descriptive binned calibration gap was 3.3% across 1 groups. Mean reported probability was 100.0% and observed frequency was 96.7%.
+This depends on the held-out sample and grouping; it is not a population guarantee. Read it beside log loss and Brier score.
+
+## Score cautions
+- **caution:** Only 30 rows were available for test scoring. Treat the scores as preliminary and validate on more representative rows.
+- **warning:** The primary model did not improve on the intercept-only baseline. Revisit data quality and model assumptions before interpreting fitted patterns as useful.
+
+## What kinds of models were retained?
+The family descriptions below are prior/model-capacity knowledge. They describe what a family can represent, not patterns proven to have been used by these fitted models.
+- `main_model`: linear via nnet; can represent none unless encoded in features; interaction capacity: none unless specified in features.
+
+## What to do next
+Inspect the held-out errors and explanation evidence, check whether the data represent the intended use, and validate the result on new data before relying on it.
+
+## Required limitations
+Permutation repeats quantify computation-level variability, not population uncertainty. 
+Feature explanations do not establish causality, fairness, safety, or deployment readiness. 
+Use held-out data, domain review, and external validation.
+
+Data disclosure: Aggregated diagnostics only. No raw rows, fitted model objects, case-level predictions, or secrets are included. 

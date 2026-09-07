@@ -1,0 +1,44 @@
+✔ | F W  S  OK | Context
+
+⠏ |          0 | calibration                                                    
+⠋ |          1 | calibration                                                    
+⠏ |         10 | calibration                                                    
+⠧ |         18 | calibration                                                    
+⠇ |         19 | calibration                                                    
+✔ |         21 | calibration [1.2s]
+
+⠏ |          0 | effects                                                        
+⠇ |         19 | effects                                                        
+✔ |         40 | effects
+
+⠏ |          0 | importance                                                     
+⠋ |         21 | importance                                                     
+✔ |         43 | importance
+
+⠏ |          0 | inner-cv-integrity                                             
+⠋ |          1 | inner-cv-integrity                                             
+✔ |         11 | inner-cv-integrity
+
+⠏ |          0 | performance-uncertainty                                        
+⠏ |         10 | performance-uncertainty                                        
+✔ |         13 | performance-uncertainty
+
+⠏ |          0 | statistical-oracles                                            
+⠙ |         12 | statistical-oracles                                            
+✔ |         15 | statistical-oracles
+
+⠏ |          0 | threshold-diagnostics                                          
+⠏ |         10 | threshold-diagnostics                                          
+⠏ |         20 | threshold-diagnostics                                          
+⠇ |         29 | threshold-diagnostics                                          
+✔ |         29 | threshold-diagnostics [1.1s]
+
+⠏ |          0 | validation-design                                              
+⠋ |          1 | validation-design                                              
+⠦ |         27 | validation-design                                              
+✔ |         29 | validation-design
+
+══ Results ═════════════════════════════════════════════════════════════════════
+Duration: 3.6 s
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 201 ]
