@@ -4,7 +4,7 @@
     {
       "name": "regression: fixture identity",
       "passed": true,
-      "evidence": "b7fd12f378be7ab02b01e893bac46c1fe2f6de464b5bd221c9024ea8a0fdef42"
+      "evidence": "fac84b5dab113b4af95002eb0d458f8b778f58af5d5b88f17a83b82f791b715d"
     },
     {
       "name": "regression: unique IDs and valid navigation targets",
@@ -18,6 +18,11 @@
     },
     {
       "name": "regression: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -42,6 +47,11 @@
       "evidence": null
     },
     {
+      "name": "regression/neural_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/neural_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -62,6 +72,11 @@
       "evidence": null
     },
     {
+      "name": "regression/tree_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/tree_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -78,6 +93,11 @@
     },
     {
       "name": "regression/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -132,12 +152,27 @@
       "evidence": null
     },
     {
+      "name": "regression/rmse/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/rmse/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "regression/rmse/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/rmse/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/rmse/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -172,12 +207,27 @@
       "evidence": null
     },
     {
+      "name": "regression/mae/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/mae/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "regression/mae/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/mae/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/mae/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -212,12 +262,27 @@
       "evidence": null
     },
     {
+      "name": "regression/r_squared/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/r_squared/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "regression/r_squared/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/r_squared/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/r_squared/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -257,6 +322,11 @@
       "evidence": null
     },
     {
+      "name": "regression/main_model/distance_km/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/main_model/planned_route_hours: importance matches R",
       "passed": true,
       "evidence": null
@@ -278,6 +348,11 @@
     },
     {
       "name": "regression/main_model/planned_route_hours/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/planned_route_hours/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -307,6 +382,11 @@
       "evidence": null
     },
     {
+      "name": "regression/main_model/service/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/main_model/dispatch_backlog: importance matches R",
       "passed": true,
       "evidence": null
@@ -332,6 +412,11 @@
       "evidence": null
     },
     {
+      "name": "regression/main_model/dispatch_backlog/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/main_model/parcel_kg: importance matches R",
       "passed": true,
       "evidence": null
@@ -353,6 +438,11 @@
     },
     {
       "name": "regression/main_model/parcel_kg/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/main_model/parcel_kg/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -407,6 +497,11 @@
       "evidence": null
     },
     {
+      "name": "regression/neural_model/planned_route_hours/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/neural_model/service: importance matches R",
       "passed": true,
       "evidence": null
@@ -428,6 +523,11 @@
     },
     {
       "name": "regression/neural_model/service/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/service/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -457,6 +557,11 @@
       "evidence": null
     },
     {
+      "name": "regression/neural_model/distance_km/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/neural_model/dispatch_backlog: importance matches R",
       "passed": true,
       "evidence": null
@@ -482,6 +587,11 @@
       "evidence": null
     },
     {
+      "name": "regression/neural_model/dispatch_backlog/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/neural_model/parcel_kg: importance matches R",
       "passed": true,
       "evidence": null
@@ -503,6 +613,11 @@
     },
     {
       "name": "regression/neural_model/parcel_kg/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/neural_model/parcel_kg/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -557,6 +672,11 @@
       "evidence": null
     },
     {
+      "name": "regression/tree_model/distance_km/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/tree_model/service: importance matches R",
       "passed": true,
       "evidence": null
@@ -578,6 +698,11 @@
     },
     {
       "name": "regression/tree_model/service/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/service/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -607,6 +732,11 @@
       "evidence": null
     },
     {
+      "name": "regression/tree_model/planned_route_hours/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/tree_model/dispatch_backlog: importance matches R",
       "passed": true,
       "evidence": null
@@ -632,6 +762,11 @@
       "evidence": null
     },
     {
+      "name": "regression/tree_model/dispatch_backlog/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/tree_model/parcel_kg: importance matches R",
       "passed": true,
       "evidence": null
@@ -653,6 +788,11 @@
     },
     {
       "name": "regression/tree_model/parcel_kg/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/tree_model/parcel_kg/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -707,6 +847,11 @@
       "evidence": null
     },
     {
+      "name": "regression/simple_baseline/distance_km/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/simple_baseline/planned_route_hours: importance matches R",
       "passed": true,
       "evidence": null
@@ -728,6 +873,11 @@
     },
     {
       "name": "regression/simple_baseline/planned_route_hours/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/planned_route_hours/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -757,6 +907,11 @@
       "evidence": null
     },
     {
+      "name": "regression/simple_baseline/service/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/simple_baseline/dispatch_backlog: importance matches R",
       "passed": true,
       "evidence": null
@@ -782,6 +937,11 @@
       "evidence": null
     },
     {
+      "name": "regression/simple_baseline/dispatch_backlog/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "regression/simple_baseline/parcel_kg: importance matches R",
       "passed": true,
       "evidence": null
@@ -803,6 +963,11 @@
     },
     {
       "name": "regression/simple_baseline/parcel_kg/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "regression/simple_baseline/parcel_kg/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -1434,7 +1599,7 @@
     {
       "name": "binary: fixture identity",
       "passed": true,
-      "evidence": "593453703392f816e7fc8fe67cc54c0010918492587b1a057a8578d514801d3d"
+      "evidence": "7b2a00b1e0346662b33d5a7f36c173ee5e0644757aa832c5739d556b82161479"
     },
     {
       "name": "binary: unique IDs and valid navigation targets",
@@ -1448,6 +1613,11 @@
     },
     {
       "name": "binary: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -1472,6 +1642,11 @@
       "evidence": null
     },
     {
+      "name": "binary/neural_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/neural_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -1492,6 +1667,11 @@
       "evidence": null
     },
     {
+      "name": "binary/tree_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/tree_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -1508,6 +1688,11 @@
     },
     {
       "name": "binary/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -1562,12 +1747,27 @@
       "evidence": null
     },
     {
+      "name": "binary/log_loss/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/log_loss/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/log_loss/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/log_loss/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/log_loss/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1602,12 +1802,27 @@
       "evidence": null
     },
     {
+      "name": "binary/brier_score/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/brier_score/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/brier_score/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/brier_score/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/brier_score/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1642,12 +1857,27 @@
       "evidence": null
     },
     {
+      "name": "binary/calibration_error/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/calibration_error/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/calibration_error/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/calibration_error/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/calibration_error/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1682,12 +1912,27 @@
       "evidence": null
     },
     {
+      "name": "binary/accuracy/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/accuracy/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/accuracy/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/accuracy/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1722,12 +1967,27 @@
       "evidence": null
     },
     {
+      "name": "binary/balanced_accuracy/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/balanced_accuracy/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/balanced_accuracy/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/balanced_accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/balanced_accuracy/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1762,12 +2022,27 @@
       "evidence": null
     },
     {
+      "name": "binary/roc_auc/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/roc_auc/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "binary/roc_auc/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/roc_auc/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/roc_auc/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -1807,6 +2082,11 @@
       "evidence": null
     },
     {
+      "name": "binary/main_model/support_calls/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/main_model/months: importance matches R",
       "passed": true,
       "evidence": null
@@ -1832,6 +2112,11 @@
       "evidence": null
     },
     {
+      "name": "binary/main_model/months/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/main_model/plan: importance matches R",
       "passed": true,
       "evidence": null
@@ -1853,6 +2138,11 @@
     },
     {
       "name": "binary/main_model/plan/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/main_model/plan/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -1912,6 +2202,11 @@
       "evidence": null
     },
     {
+      "name": "binary/neural_model/support_calls/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/neural_model/plan: importance matches R",
       "passed": true,
       "evidence": null
@@ -1937,6 +2232,11 @@
       "evidence": null
     },
     {
+      "name": "binary/neural_model/plan/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/neural_model/months: importance matches R",
       "passed": true,
       "evidence": null
@@ -1958,6 +2258,11 @@
     },
     {
       "name": "binary/neural_model/months/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/neural_model/months/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -2017,6 +2322,11 @@
       "evidence": null
     },
     {
+      "name": "binary/tree_model/support_calls/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/tree_model/plan: importance matches R",
       "passed": true,
       "evidence": null
@@ -2042,6 +2352,11 @@
       "evidence": null
     },
     {
+      "name": "binary/tree_model/plan/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/tree_model/months: importance matches R",
       "passed": true,
       "evidence": null
@@ -2063,6 +2378,11 @@
     },
     {
       "name": "binary/tree_model/months/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/tree_model/months/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -2122,6 +2442,11 @@
       "evidence": null
     },
     {
+      "name": "binary/simple_baseline/support_calls/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/simple_baseline/plan: importance matches R",
       "passed": true,
       "evidence": null
@@ -2147,6 +2472,11 @@
       "evidence": null
     },
     {
+      "name": "binary/simple_baseline/plan/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "binary/simple_baseline/months: importance matches R",
       "passed": true,
       "evidence": null
@@ -2168,6 +2498,11 @@
     },
     {
       "name": "binary/simple_baseline/months/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "binary/simple_baseline/months/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -2699,7 +3034,7 @@
     {
       "name": "multiclass: fixture identity",
       "passed": true,
-      "evidence": "b69946746b4fdb97ecaeb7c59265421992c8f1f1176a606aa2352e2e1fcfa72d"
+      "evidence": "5820007e733d0c02a5d1227fece777b55510740d556e7a9240845b433999f3a2"
     },
     {
       "name": "multiclass: unique IDs and valid navigation targets",
@@ -2713,6 +3048,11 @@
     },
     {
       "name": "multiclass: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -2737,6 +3077,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -2757,6 +3102,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model: displayed cost measurements match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model: visible fitted settings",
       "passed": true,
       "evidence": null
@@ -2773,6 +3123,11 @@
     },
     {
       "name": "multiclass/tree_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -2827,12 +3182,27 @@
       "evidence": null
     },
     {
+      "name": "multiclass/log_loss/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/log_loss/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "multiclass/log_loss/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/log_loss/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/log_loss/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -2867,12 +3237,27 @@
       "evidence": null
     },
     {
+      "name": "multiclass/brier_score/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/brier_score/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "multiclass/brier_score/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/brier_score/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/brier_score/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -2907,12 +3292,27 @@
       "evidence": null
     },
     {
+      "name": "multiclass/calibration_error/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/calibration_error/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "multiclass/calibration_error/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/calibration_error/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/calibration_error/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -2947,12 +3347,27 @@
       "evidence": null
     },
     {
+      "name": "multiclass/accuracy/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/accuracy/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "multiclass/accuracy/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/accuracy/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/accuracy/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -2987,12 +3402,27 @@
       "evidence": null
     },
     {
+      "name": "multiclass/macro_recall/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/macro_recall/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "multiclass/macro_recall/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/macro_recall/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/macro_recall/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -3037,6 +3467,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Petal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Petal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3057,6 +3492,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Petal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Petal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3073,6 +3513,11 @@
     },
     {
       "name": "multiclass/main_model/Petal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3107,6 +3552,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Petal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Petal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3127,6 +3577,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Petal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Petal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3143,6 +3598,11 @@
     },
     {
       "name": "multiclass/main_model/Petal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Petal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3177,6 +3637,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Sepal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Sepal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3197,6 +3662,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Sepal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Sepal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3213,6 +3683,11 @@
     },
     {
       "name": "multiclass/main_model/Sepal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3247,6 +3722,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Sepal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Sepal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3267,6 +3747,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/main_model/Sepal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/main_model/Sepal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3283,6 +3768,11 @@
     },
     {
       "name": "multiclass/main_model/Sepal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/main_model/Sepal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3347,6 +3837,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Petal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Petal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3367,6 +3862,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Petal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Petal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3383,6 +3883,11 @@
     },
     {
       "name": "multiclass/linear_model/Petal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3417,6 +3922,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Petal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Petal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3437,6 +3947,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Petal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Petal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3453,6 +3968,11 @@
     },
     {
       "name": "multiclass/linear_model/Petal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Petal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3487,6 +4007,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Sepal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Sepal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3507,6 +4032,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Sepal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Sepal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3523,6 +4053,11 @@
     },
     {
       "name": "multiclass/linear_model/Sepal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3557,6 +4092,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Sepal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Sepal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3577,6 +4117,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/linear_model/Sepal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/linear_model/Sepal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3593,6 +4138,11 @@
     },
     {
       "name": "multiclass/linear_model/Sepal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/linear_model/Sepal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3657,6 +4207,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Petal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Petal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3677,6 +4232,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Petal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Petal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3693,6 +4253,11 @@
     },
     {
       "name": "multiclass/simple_baseline/Petal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3727,6 +4292,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Petal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Petal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3747,6 +4317,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Petal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Petal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3763,6 +4338,11 @@
     },
     {
       "name": "multiclass/simple_baseline/Petal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Petal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3797,6 +4377,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Sepal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Sepal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3817,6 +4402,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Sepal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Sepal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3833,6 +4423,11 @@
     },
     {
       "name": "multiclass/simple_baseline/Sepal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3867,6 +4462,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Sepal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Sepal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3887,6 +4487,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/simple_baseline/Sepal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/simple_baseline/Sepal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -3903,6 +4508,11 @@
     },
     {
       "name": "multiclass/simple_baseline/Sepal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/simple_baseline/Sepal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -3967,6 +4577,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Petal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Petal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -3987,6 +4602,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Petal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Petal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -4003,6 +4623,11 @@
     },
     {
       "name": "multiclass/tree_model/Petal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -4037,6 +4662,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Petal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Petal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -4057,6 +4687,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Petal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Petal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -4073,6 +4708,11 @@
     },
     {
       "name": "multiclass/tree_model/Petal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Petal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -4107,6 +4747,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Sepal.Length/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Sepal.Length/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -4127,6 +4772,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Sepal.Length/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Sepal.Length/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -4143,6 +4793,11 @@
     },
     {
       "name": "multiclass/tree_model/Sepal.Length/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Length/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -4177,6 +4832,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Sepal.Width/setosa: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Sepal.Width/versicolor: selected class only",
       "passed": true,
       "evidence": null
@@ -4197,6 +4857,11 @@
       "evidence": null
     },
     {
+      "name": "multiclass/tree_model/Sepal.Width/versicolor: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "multiclass/tree_model/Sepal.Width/virginica: selected class only",
       "passed": true,
       "evidence": null
@@ -4213,6 +4878,11 @@
     },
     {
       "name": "multiclass/tree_model/Sepal.Width/virginica: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "multiclass/tree_model/Sepal.Width/virginica: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -4749,7 +5419,7 @@
     {
       "name": "quick: fixture identity",
       "passed": true,
-      "evidence": "c57733f1bb4467ba99ef6b25d672e18511b4e5848b6b8ee7f08722511b8211d0"
+      "evidence": "d6bd750899b3f755e42cf1bcd78b01b5ee5e1860eb0f3a1a5b1bf524e297d507"
     },
     {
       "name": "quick: unique IDs and valid navigation targets",
@@ -4763,6 +5433,11 @@
     },
     {
       "name": "quick: all fitted models visible",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -4783,6 +5458,11 @@
     },
     {
       "name": "quick/main_model: escape returns focus to model",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline: displayed cost measurements match R",
       "passed": true,
       "evidence": null
     },
@@ -4827,12 +5507,27 @@
       "evidence": null
     },
     {
+      "name": "quick/rmse/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/rmse/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "quick/rmse/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/rmse/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/rmse/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -4857,12 +5552,27 @@
       "evidence": null
     },
     {
+      "name": "quick/mae/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/mae/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "quick/mae/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/mae/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/mae/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -4887,12 +5597,27 @@
       "evidence": null
     },
     {
+      "name": "quick/r_squared/training_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/r_squared/prediction_time_ms: selected cost plot",
       "passed": true,
       "evidence": null
     },
     {
+      "name": "quick/r_squared/prediction_time_ms: plotted costs, scores and frontier match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/r_squared/model_size_kb: selected cost plot",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/r_squared/model_size_kb: plotted costs, scores and frontier match R",
       "passed": true,
       "evidence": null
     },
@@ -4932,6 +5657,11 @@
       "evidence": null
     },
     {
+      "name": "quick/main_model/wt/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/main_model/qsec: importance matches R",
       "passed": true,
       "evidence": null
@@ -4953,6 +5683,11 @@
     },
     {
       "name": "quick/main_model/qsec/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/qsec/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -4982,6 +5717,11 @@
       "evidence": null
     },
     {
+      "name": "quick/main_model/am/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/main_model/drat: importance matches R",
       "passed": true,
       "evidence": null
@@ -5003,6 +5743,11 @@
     },
     {
       "name": "quick/main_model/drat/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/drat/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5032,6 +5777,11 @@
       "evidence": null
     },
     {
+      "name": "quick/main_model/disp/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/main_model/gear: importance matches R",
       "passed": true,
       "evidence": null
@@ -5053,6 +5803,11 @@
     },
     {
       "name": "quick/main_model/gear/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/gear/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5082,6 +5837,11 @@
       "evidence": null
     },
     {
+      "name": "quick/main_model/hp/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/main_model/carb: importance matches R",
       "passed": true,
       "evidence": null
@@ -5103,6 +5863,11 @@
     },
     {
       "name": "quick/main_model/carb/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/main_model/carb/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5157,6 +5922,11 @@
       "evidence": null
     },
     {
+      "name": "quick/simple_baseline/wt/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/simple_baseline/qsec: importance matches R",
       "passed": true,
       "evidence": null
@@ -5178,6 +5948,11 @@
     },
     {
       "name": "quick/simple_baseline/qsec/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/qsec/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5207,6 +5982,11 @@
       "evidence": null
     },
     {
+      "name": "quick/simple_baseline/am/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/simple_baseline/drat: importance matches R",
       "passed": true,
       "evidence": null
@@ -5228,6 +6008,11 @@
     },
     {
       "name": "quick/simple_baseline/drat/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/drat/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5257,6 +6042,11 @@
       "evidence": null
     },
     {
+      "name": "quick/simple_baseline/vs/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/simple_baseline/cyl: importance matches R",
       "passed": true,
       "evidence": null
@@ -5278,6 +6068,11 @@
     },
     {
       "name": "quick/simple_baseline/cyl/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/cyl/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },
@@ -5307,6 +6102,11 @@
       "evidence": null
     },
     {
+      "name": "quick/simple_baseline/gear/None: plotted curve matches its axes and R",
+      "passed": true,
+      "evidence": null
+    },
+    {
       "name": "quick/simple_baseline/carb: importance matches R",
       "passed": true,
       "evidence": null
@@ -5328,6 +6128,11 @@
     },
     {
       "name": "quick/simple_baseline/carb/None: curve values match R",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "quick/simple_baseline/carb/None: plotted curve matches its axes and R",
       "passed": true,
       "evidence": null
     },

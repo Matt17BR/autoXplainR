@@ -76,6 +76,7 @@ jobs:
         shell: Rscript {0}
       - name: Validate against reference methods
         run: |
+          Rscript validation/check-tuning-mutation.R
           Rscript validation/run-reference.R
           Rscript validation/run-simulation.R
       - name: Enforce statement coverage

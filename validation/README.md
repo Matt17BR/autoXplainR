@@ -8,6 +8,9 @@ complement the passing release checks below; test totals alone did not cover
 these cases. The [0.4.0 repair disposition](resolution-0.4.0.md) tracks every
 finding, its acceptance checks and the remaining limits.
 
+The [0.5.0 test-quality review](test-quality-0.5.0.md) records tests that passed
+despite wrong behavior, their replacements and the required negative controls.
+
 Run these commands from the repository root. They write small reviewable
 artifacts under `validation/results/`. They do not send data to a service.
 

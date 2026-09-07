@@ -29,6 +29,8 @@ output directory. Any failed assertion or execution error exits nonzero.
 
 - Every metric and resource control selects the corresponding R-computed view;
   score ordering respects whether larger or smaller values are better.
+- Plotted coordinates are read back through labeled axes and compared with R
+  values. Frontier outlines are checked with direct dominance comparisons.
 - Each model's displayed importance, prediction errors or mistake counts, and
   prediction command match that model's R result.
 - Clicking an input selects its curve; selecting a relationship reports its
@@ -46,6 +48,20 @@ screen-reader usability, universal browser compatibility or participant task
 completion. The accompanying [product review](product-review-0.4.0.md) records
 why the old report failed and the acceptance tasks used during implementation.
 The developer must also inspect the actual screenshots, controls and PDF.
+
+The [test-quality review](test-quality-0.5.0.md) records checks that passed despite
+wrong graphics and leaked imputation, and the replacements. Run the browser's
+negative controls after the normal check:
+
+```sh
+python validation/check-report-mutations.py \
+  --axe-path /path/to/node_modules/axe-core/axe.min.js \
+  --output-dir /tmp/autoxplain-report-mutations
+Rscript validation/check-tuning-mutation.R
+```
+
+The normal report must pass; deliberately broken reports must fail for the
+intended reasons. These scripts never overwrite the original fixtures.
 
 The [GitHub workflow](../.github/workflows/report-browser.yaml) runs this check
 on pull requests and main and is a blocking dependency of release publication.

@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import subprocess
 from playwright.sync_api import sync_playwright
+from report_geometry import cost_geometry, effect_geometry
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -74,6 +75,14 @@ with sync_playwright() as playwright:
             'rows => rows.map(row => row.dataset.modelRow)')) == set(ids))
         for spec in oracle['specifications']:
             row = page.locator(f'[data-model-row="{spec["id"]}"]')
+            measurements = next(item for item in oracle['table'] if item['model_id'] == spec['id'])
+            costs = row.locator('td.number:visible').all_text_contents()[1:]
+            costs_match = len(costs) == len(oracle['resources'])
+            for shown, resource in zip(costs, oracle['resources']):
+                expected = measurements.get(resource)
+                costs_match = costs_match and (shown == 'Unavailable' if expected is None else
+                    within_tolerance(0 if shown == '~0' else float(shown), expected))
+            check(f'{case}/{spec["id"]}: displayed cost measurements match R', costs_match)
             check(f'{case}/{spec["id"]}: visible fitted settings',
                   row.locator('.model-settings').inner_text() == spec['summary'])
             link = row.locator('[data-open-spec]')
@@ -109,6 +118,8 @@ with sync_playwright() as playwright:
                 check(f'{case}/{metric}/{resource}: selected cost plot', plot.count() == 1
                       and plot.get_attribute('data-resource') == resource
                       and plot.get_attribute('data-cost-plot') == metric)
+                matched, evidence = cost_geometry(plot, oracle['table'], metric, resource, higher)
+                check(f'{case}/{metric}/{resource}: plotted costs, scores and frontier match R', matched, evidence)
         page.select_option('#metric-select', oracle['primary_metric'])
         page.select_option('#resource-select', oracle['resources'][0])
         for model_id in ids:
@@ -162,6 +173,9 @@ with sync_playwright() as playwright:
                                 else:
                                     matches = matches and actual == str(expected)
                         check(f'{case}/{model_id}/{row["feature"]}/{class_name}: curve values match R', matches)
+                        matched, evidence = effect_geometry(curve_panel, curve)
+                        check(f'{case}/{model_id}/{row["feature"]}/{class_name}: plotted curve matches its axes and R',
+                              matched, evidence)
             page.locator('[data-page-link=evaluation]').click()
             check(f'{case}/{model_id}: prediction panel follows model', active_model(page, 'evaluation') == model_id)
             panel = page.locator(f'#evaluation [data-model-panel="{model_id}"]')

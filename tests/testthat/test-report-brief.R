@@ -14,7 +14,6 @@ test_that("effect graphics preserve numeric geometry and expose scale and suppor
   expect_match(html, "zero-line", fixed = TRUE)
   expect_match(html, "Relative support 0–1", fixed = TRUE)
   expect_match(html, "effect-band", fixed = TRUE)
-  expect_match(html, "min-width:600px", fixed = TRUE)
   expect_match(html, 'role="region" tabindex="0"', fixed = TRUE)
 })
 
@@ -81,7 +80,6 @@ test_that("brief links named findings to evidence and gives mobile and print rou
   expect_match(html, 'href="#provenance"', fixed = TRUE)
   expect_false(grepl('class="grade', html, fixed = TRUE))
   expect_match(html, "Print this view", fixed = TRUE)
-  expect_match(html, "details::details-content", fixed = TRUE)
   links <- regmatches(html, gregexpr('href="#evidence-[^"]+"', html))[[1L]]
   expect_match(html, 'id="uncertainty"', fixed = TRUE)
   for (link in links) {

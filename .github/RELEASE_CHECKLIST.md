@@ -18,6 +18,9 @@ and the tested commit/archive. A CI run does not stand in for a manual review.
   publisher failures separately.
 - Run the complete test suite, optional-engine matrix, numerical references and
   coverage. Record skipped integrations and known numerical limitations.
+- Review test quality for changed behavior. Require the browser and imputation
+  mutation checks to reject their deliberate faults for the intended reasons;
+  an execution error is not a successful negative control.
 - Build once with `.github/scripts/build-check-source.sh`, check that exact
   archive under release R including manuals, and preserve its checksum.
 - Check the same archive under R-devel. Explain remaining check notes.

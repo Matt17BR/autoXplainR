@@ -79,17 +79,25 @@ test_that("screening retains inputs used by alternative models and supplies thei
 })
 
 test_that("legacy classification comparison is invariant to class codes", {
-  result <- autoxplain(iris, "Species", model_set = "comparison", seed = 22, explain = FALSE)
-  text <- AutoXplainR:::calculate_correlation_insights(result)
-  expect_match(text, "predicted-class agreement", fixed = TRUE)
-  explainers <- as_explainers(result)
-  labels <- lapply(explainers, function(x) {
-    p <- predict(x, x$data)
-    colnames(p)[max.col(p, ties.method = "first")]
-  })
-  pairs <- utils::combn(seq_along(labels), 2)
-  expected <- mean(apply(pairs, 2, function(pair) mean(labels[[pair[1]]] == labels[[pair[2]]])))
-  expect_match(text, format(expected, digits = 3), fixed = TRUE)
+  # Agreements on four cases: A/B = 2/4, A/C = 3/4, B/C = 2/4.
+  winners <- list(A = c(1, 1, 2, 3), B = c(1, 2, 2, 1), C = c(1, 3, 2, 3))
+  make_explainers <- function(labels, order = 1:3) {
+    lapply(winners, function(winner) {
+      probability <- matrix(.1, nrow = 4, ncol = 3, dimnames = list(NULL, labels))
+      probability[cbind(1:4, winner)] <- .8
+      explain_model(
+        probability[, order], data.frame(row = 1:4, y = factor(labels[c(1, 2, 3, 1)], levels = labels[order])), "y",
+        task = "multiclass", predict_function = function(model, data) model[data$row, , drop = FALSE]
+      )
+    })
+  }
+  explainers <- make_explainers(c("a", "b", "c"))
+  testthat::local_mocked_bindings(as_explainers = function(...) explainers, .package = "AutoXplainR")
+  result <- list(task = "multiclass")
+  original <- AutoXplainR:::calculate_correlation_insights(result)
+  expect_match(original, "predicted-class agreement is 0.583", fixed = TRUE)
+  explainers <- make_explainers(c("zeta", "alpha", "mu"), c(3, 1, 2))
+  expect_identical(AutoXplainR:::calculate_correlation_insights(result), original)
 })
 
 test_that("cost enrichment tolerates engine-specific optional metadata", {
@@ -128,21 +136,13 @@ test_that("small probability effects keep distinct signed axis labels", {
   expect_match(svg, ">-0.005</text>", fixed = TRUE)
 })
 
-test_that("explorer reports expose linked controls and preserve malicious text as text", {
+test_that("report titles are escaped and offline assets remain embedded", {
   result <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 8)
   path <- tempfile(fileext = ".html")
   render_model_report(result, path, title = "Cars </title><script>window.bad=1</script>")
   html <- paste(readLines(path), collapse = "\n")
   expect_match(html, "Cars &lt;/title&gt;&lt;script&gt;window.bad=1&lt;/script&gt;", fixed = TRUE)
   expect_false(grepl("<script>window.bad=1</script>", html, fixed = TRUE))
-  for (id in names(result$models)) {
-    expect_match(html, paste0('data-model-panel="', id, '"'), fixed = TRUE)
-    expect_match(html, paste0('data-model-row="', id, '"'), fixed = TRUE)
-  }
-  expect_match(html, 'id="metric-select"', fixed = TRUE)
-  expect_match(html, 'id="resource-select"', fixed = TRUE)
-  expect_match(html, 'role="tooltip"', fixed = TRUE)
-  expect_match(html, "Print this view", fixed = TRUE)
   expect_false(grepl('src="https?://', html))
 })
 
@@ -155,8 +155,12 @@ test_that("model details expose effective controls and learned values from the r
   spec <- AutoXplainR:::model_specification(result, tree_id)
   expect_equal(spec$parameters$cp, tree$control$cp)
   expect_equal(spec$parameters$minbucket, tree$control$minbucket)
-  expect_equal(spec$learned$`Terminal leaves`, sum(tree$frame$var == "<leaf>"))
-  expect_equal(spec$learned$`Fitted depth`, max(floor(log2(as.numeric(rownames(tree$frame))))))
+  known_tree <- rpart::rpart(y ~ x, data = data.frame(x = 1:12, y = rep(c(0, 10, 20), each = 4)),
+    control = rpart::rpart.control(cp = 0, minsplit = 2, minbucket = 1, maxdepth = 2, xval = 0)
+  )
+  known_spec <- AutoXplainR:::model_specification(list(models = list(tree = known_tree), task = "regression"), "tree")
+  expect_equal(known_spec$learned$`Terminal leaves`, 3)
+  expect_equal(known_spec$learned$`Fitted depth`, 2)
   expect_match(spec$engine_version, "^[0-9]")
   result$models[[tree_id]]$control$cp <- .123
   expect_equal(AutoXplainR:::model_specification(result, tree_id)$parameters$cp, .123)

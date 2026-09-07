@@ -21,6 +21,7 @@ jobs:
           extra-packages: any::pkgload, any::iml
       - name: Compare numerical output and record coverage simulation
         run: |
+          Rscript validation/check-tuning-mutation.R
           Rscript validation/run-reference.R
           Rscript validation/run-simulation.R
       - uses: actions/upload-artifact@v7

@@ -48,6 +48,11 @@ jobs:
           python validation/check-explorer.py
           --output-dir "$RUNNER_TEMP/report-browser-results"
           --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
+      - name: Require rejection of disconnected controls and false graphics
+        run: >-
+          python validation/check-report-mutations.py
+          --output-dir "$RUNNER_TEMP/report-browser-results/mutations"
+          --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
       - name: Upload compact browser evidence
         if: always()
         uses: actions/upload-artifact@v7

@@ -39,6 +39,9 @@
   A zero timer reading is shown as `~0`; its resolution depends on the platform.
 - Small probability effects retain distinct signed axis labels instead of
   rounding several different ticks to zero. Tiny table values use scientific notation.
+- Report checks now read plotted values through visible axes. Deliberately
+  false graphics, disconnected model selection and leaked fold imputation must
+  fail before release; duplicated markup assertions were removed.
 
 # AutoXplainR 0.4.0
 

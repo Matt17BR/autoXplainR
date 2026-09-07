@@ -16,6 +16,7 @@
 - [ ] User-facing changes recorded in NEWS
 - [ ] Novice and experienced-user journeys in `validation/product-walkthrough.md` completed for affected workflows
 - [ ] Report screenshots refreshed and visually inspected when the UI changes
+- [ ] Tests checked for copied expectations, incidental markup assertions and wrong behavior that still passes
 
 ## Data and privacy
 

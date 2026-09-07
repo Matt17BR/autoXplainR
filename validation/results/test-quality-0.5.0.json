@@ -1,0 +1,64 @@
+{
+  "reviewed_baseline": "cc4bf18ce3e7ab90290df9518d377c56f81d271e",
+  "false_graphics": {
+    "mutant_sha256": "eaa77c9ba9da21ce7f12e4c6610b532191f5b03df82f095413ea686bec3b2825",
+    "before": {
+      "passed": true,
+      "checks": 215,
+      "errors": []
+    },
+    "after": {
+      "passed": false,
+      "checks": 240,
+      "failed": [
+        "quick/rmse/training_time_ms: plotted costs, scores and frontier match R",
+        "quick/rmse/prediction_time_ms: plotted costs, scores and frontier match R",
+        "quick/rmse/model_size_kb: plotted costs, scores and frontier match R",
+        "quick/mae/training_time_ms: plotted costs, scores and frontier match R",
+        "quick/mae/prediction_time_ms: plotted costs, scores and frontier match R",
+        "quick/mae/model_size_kb: plotted costs, scores and frontier match R",
+        "quick/r_squared/training_time_ms: plotted costs, scores and frontier match R",
+        "quick/r_squared/prediction_time_ms: plotted costs, scores and frontier match R",
+        "quick/r_squared/model_size_kb: plotted costs, scores and frontier match R",
+        "quick/main_model/wt/None: plotted curve matches its axes and R",
+        "quick/main_model/qsec/None: plotted curve matches its axes and R",
+        "quick/main_model/am/None: plotted curve matches its axes and R",
+        "quick/main_model/drat/None: plotted curve matches its axes and R",
+        "quick/main_model/disp/None: plotted curve matches its axes and R",
+        "quick/main_model/gear/None: plotted curve matches its axes and R",
+        "quick/main_model/hp/None: plotted curve matches its axes and R",
+        "quick/main_model/carb/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/wt/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/qsec/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/am/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/drat/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/vs/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/cyl/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/gear/None: plotted curve matches its axes and R",
+        "quick/simple_baseline/carb/None: plotted curve matches its axes and R"
+      ],
+      "errors": []
+    }
+  },
+  "leaked_imputation": {
+    "old_test_under_mutation": {
+      "failed": 0,
+      "error": 0,
+      "warning": 0,
+      "passed": 3
+    },
+    "replacement_without_mutation": {
+      "failed": 0,
+      "error": 0,
+      "warning": 0,
+      "passed": 3
+    },
+    "replacement_under_mutation": {
+      "failed": 2,
+      "error": 0,
+      "warning": 0,
+      "passed": 1
+    }
+  },
+  "scope": "Targeted fault-injection checks; not an exhaustive package mutation score."
+}

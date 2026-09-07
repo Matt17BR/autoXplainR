@@ -631,7 +631,7 @@ scale_plot_values <- function(values, lower, upper) {
 
 pretty_complexity <- function(metric) {
   labels <- c(
-    model_size_kb = "approximate model-object size (KB)",
+    model_size_kb = "approximate model-object size (KiB)",
     size_mb = "approximate model-object size (MB)",
     model_size = "approximate model-object size",
     training_time_ms = "training time (ms)",

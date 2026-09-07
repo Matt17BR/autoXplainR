@@ -54,7 +54,11 @@ budget so that uncomputed evidence is encountered deliberately.
 5. Record each defect, the concrete repair and a repeat of the affected task.
    Add a regression check when the defect could recur. Preserve a negative
    control demonstrating that the interaction checks can detect a broken model
-   selector. Run the broader release checks after the repairs settle.
+   selector. Challenge the tests too: identify the user-facing failure each one
+   would catch, avoid calculating expected answers through the implementation
+   under test, and try deliberate wrong outputs. Replace weak or duplicated
+   assertions; do not preserve arbitrary wording or pixel sizes just to keep a
+   test green. Run the broader release checks after the repairs settle.
 
 The review is complete when both journeys yield accurate, understandable answers
 without unexplained dead ends. Record unresolved limitations explicitly and
