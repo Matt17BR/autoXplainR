@@ -10,7 +10,9 @@ tuning_control(
   fold_ids = NULL,
   metric = c("auto", "rmse", "mae", "log_loss", "brier"),
   retain_oof = TRUE,
-  failure_policy = c("continue", "stop")
+  failure_policy = c("continue", "stop"),
+  optimization_policy = c("exclude", "warn"),
+  family_priority = NULL
 )
 }
 \arguments{
@@ -30,6 +32,15 @@ classification also supports \code{"brier"}.}
 
 \item{failure_policy}{\code{"continue"} records a failed configuration and keeps
 searching; \code{"stop"} aborts on the first resampling or refit failure.}
+
+\item{optimization_policy}{\code{"exclude"} excludes an explicit unsuccessful
+optimizer termination from selection and refitting. \code{"warn"} retains it
+with a recorded warning. An unavailable convergence diagnostic is recorded
+as unknown, not treated as proof of convergence.}
+
+\item{family_priority}{Optional character vector ordering every requested
+family for the one-standard-error policy, from most to least preferred.
+This is a user preference, not a statistical ordering of algorithms.}
 }
 \value{
 An \code{autoxplain_tuning_control} object for the \code{tuning_control}
@@ -66,9 +77,10 @@ once after fitting on all rows assigned to every other fold. They are not a
 rolling-origin or forward-chaining specification. To avoid ambiguity after
 AutoXplainR's automatic holdout split, fold IDs are accepted only when
 \code{test_data} is supplied explicitly to \code{\link[=autoxplain]{autoxplain()}}. Candidate losses and
-their one-standard-error uncertainty are weighted by the number of validation
+their selection standard-error heuristic are weighted by the number of validation
 rows in each fold; RMSE uses pooled squared loss with a delta-method standard
-error on the RMSE scale.
+error on the RMSE scale. Overlapping training folds mean that this heuristic
+is not a confidence interval or a test of equivalent model performance.
 }
 \examples{
 control <- tuning_control(

@@ -195,7 +195,7 @@ test_that("MAE and Brier tuning retain reconstructable case losses", {
 
   classification <- data.frame(x = rnorm(60), z = rnorm(60))
   classification$event <- factor(
-    ifelse(classification$x + classification$z > 0, "yes", "no"),
+    ifelse(runif(60) < plogis(classification$x + classification$z), "yes", "no"),
     levels = c("no", "yes")
   )
   cls <- autoxplain(
@@ -293,7 +293,7 @@ test_that("retain_oof can disable row-level evidence without losing summaries", 
   expect_false(result$tuning$prediction_schema$retained)
   expect_identical(result$tuning$prediction_schema$metric, "rmse")
   expect_match(result$tuning$prediction_schema$note, "were not retained")
-  expect_identical(result$tuning$schema_version, 4L)
+  expect_identical(result$tuning$schema_version, 5L)
   expect_false(result$tuning$control$retain_oof)
   expect_true(all(is.finite(result$tuning$candidates$cv_score)))
   expect_equal(nrow(result$tuning$fold_scores), 3L)

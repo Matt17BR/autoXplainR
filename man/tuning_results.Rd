@@ -37,6 +37,13 @@ records the fold-specific effective parameter list, its canonical key, and
 the seed used for fitting. This makes data-dependent clamps such as \code{mtry}
 or neighbor count visible and prevents two requests that become the same
 fold fit from being compared only through different random seeds.
+\code{optimization} and \code{learned} retain available optimizer termination codes and
+values learned by fitting. Explicit unsuccessful termination is excluded by
+default; \code{tuning_control(optimization_policy = "warn")} retains it with a warning.
+Unknown convergence status is not evidence that an optimizer converged.
+\code{search_space} records the actual grid and rationale; \code{selection} preserves
+the numeric threshold and exact family preference used before refit fallback.
+The smaller aggregate interface \code{\link[=tuning_evidence]{tuning_evidence()}} omits case-level records.
 
 \code{refit} records every full-training refit attempt. If the resampling-selected
 configuration cannot be refitted, AutoXplainR tries the remaining valid
@@ -49,8 +56,10 @@ Each refit attempt repeats the requested/effective parameter and seed record
 for the complete outer-training data.
 }
 \examples{
-tuned <- autoxplain(iris, "Sepal.Length", model_set = "tuned",
-                    portfolio = "core", max_models = 4,
-                    nfolds = 3, seed = 2026)
+tuned <- autoxplain(iris, "Sepal.Length",
+  model_set = "tuned",
+  portfolio = "core", max_models = 4,
+  nfolds = 3, seed = 2026
+)
 tuning_results(tuned)
 }

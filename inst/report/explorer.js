@@ -6,94 +6,87 @@
   const metricControl = document.querySelector('#metric-select');
   const resourceControl = document.querySelector('#resource-select');
   const classControl = document.querySelector('#effect-class-select');
-  const featureChoices = new Map();
-  let model = modelControls[0]?.value;
+  const comparisonControl = document.querySelector('#comparison-model-select');
+  const comparisonIdentity = document.createElement('div');
+  comparisonIdentity.className = 'model-identity comparison-identity';
+  comparisonIdentity.hidden = true;
   const higher = new Set(['accuracy', 'auc', 'roc_auc', 'balanced_accuracy', 'r_squared', 'macro_recall']);
-  function chooseFeature(panel, requested) {
+  const state = {modelId: modelControls[0]?.value, feature: null, page: pages[0]?.id,
+    metric: metricControl?.value, resource: resourceControl?.value, className: classControl?.value, comparisonModelId: comparisonControl?.value || ''};
+  const emit = (name, detail) => document.dispatchEvent(new CustomEvent(`axr:${name}`, {detail, bubbles: true}));
+  const options = control => control ? Array.from(control.options, option => option.value) : [];
+  function saveState(replace = true) {
+    const query = new URLSearchParams();
+    for (const key of ['modelId', 'feature', 'metric', 'resource', 'className', 'comparisonModelId']) {
+      if (state[key] != null && state[key] !== '') query.set(key, state[key]);
+    }
+    const hash = `#${state.page}${query.size ? `?${query}` : ''}`;
+    if (location.hash !== hash) history[replace ? 'replaceState' : 'pushState'](null, '', hash);
+  }
+  function setFeature(panel, requested) {
     const control = panel.querySelector('.feature-select');
-    if (!control) return;
-    const available = Array.from(control.options, option => option.value);
+    if (!control) return null;
+    const available = options(control);
     const feature = available.includes(requested) ? requested : available[0];
     control.value = feature || '';
-    featureChoices.set(panel.dataset.modelPanel, feature);
     all('[data-feature-panel]', panel).forEach(el => { el.hidden = el.dataset.featurePanel !== feature; });
     all('[data-pick-feature]', panel).forEach(el => {
       const selected = el.dataset.pickFeature === feature;
       el.classList.toggle('is-selected', selected);
       el.setAttribute('aria-pressed', String(selected));
     });
+    return feature;
   }
-  function chooseModel(id) {
-    if (!modelControls.some(control => Array.from(control.options).some(option => option.value === id))) return;
-    model = id;
+  function selectFeature(feature, {persist = true} = {}) {
+    let selected;
+    all('[data-model-panel]').filter(panel => panel.dataset.modelPanel === state.modelId).forEach(panel => {
+      selected = setFeature(panel, feature) || selected;
+    });
+    state.feature = selected || feature || null;
+    if (persist) saveState();
+    emit('feature-change', {...state});
+    return state.feature;
+  }
+  function selectModel(id, {persist = true} = {}) {
+    if (!modelControls.some(control => options(control).includes(id))) return false;
+    state.modelId = id;
+    if (state.comparisonModelId === id) {
+      state.comparisonModelId = '';
+      if (comparisonControl) comparisonControl.value = '';
+    }
+    if (comparisonControl) Array.from(comparisonControl.options).forEach(option => {
+      option.disabled = option.value === id;
+    });
     modelControls.forEach(control => { control.value = id; });
-    all('[data-model-panel]').forEach(panel => {
-      panel.hidden = panel.dataset.modelPanel !== id;
-      chooseFeature(panel, featureChoices.get(panel.dataset.modelPanel));
-    });
+    all('[data-model-panel]').forEach(panel => { panel.hidden = panel.dataset.modelPanel !== id; });
+    selectFeature(state.feature, {persist: false});
+    all('[data-model-scope]').forEach(el => { el.hidden = el.dataset.modelScope !== id; });
+    if (persist) saveState();
+    emit('model-change', {...state});
+    return true;
   }
-  function showPage(hash, focus = false) {
-    let target;
-    try { target = document.getElementById(decodeURIComponent(hash.replace(/^#/, ''))); } catch (_) { return; }
-    const page = target?.closest('.workspace-page') || pages[0];
-    pages.forEach(el => { el.hidden = el !== page; });
-    all('[data-page-link]').forEach(link => {
-      const selected = link.dataset.pageLink === page.id;
-      link.setAttribute('aria-selected', String(selected));
-      link.setAttribute('tabindex', selected ? '0' : '-1');
-      if (selected) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-      if (selected && innerWidth <= 760) {
-        const navigation = link.parentElement;
-        const tabBox = link.getBoundingClientRect(), navBox = navigation.getBoundingClientRect();
-        if (tabBox.left < navBox.left) navigation.scrollLeft += tabBox.left - navBox.left - 8;
-        if (tabBox.right > navBox.right) navigation.scrollLeft += tabBox.right - navBox.right + 8;
-      }
-    });
-    if (target) {
-      for (let parent = target.parentElement; parent; parent = parent.parentElement) {
-        if (parent.tagName === 'DETAILS') parent.open = true;
-      }
-    }
-    if (focus) {
-      const heading = page.querySelector('h2');
-      heading.setAttribute('tabindex', '-1');
-      heading.focus({preventScroll: true});
-      window.scrollTo({top: 0, left: 0, behavior: 'instant'});
-    }
-  }
-  function chooseMetrics() {
-    const metric = metricControl?.value;
-    const resource = resourceControl?.value;
-    all('[data-score-column]').forEach(el => { el.hidden = el.dataset.scoreColumn !== metric; });
-    all('[data-metric-definition]').forEach(el => { el.hidden = el.dataset.metricDefinition !== metric; });
-    all('[data-cost-plot]').forEach(el => {
-      el.hidden = el.dataset.costPlot !== metric || el.dataset.resource !== resource;
-    });
-    const rows = all('[data-model-row]');
-    rows.sort((a, b) => {
-      const left = a.getAttribute(`data-value-${metric}`), right = b.getAttribute(`data-value-${metric}`);
-      if (left === '') return 1;
-      if (right === '') return -1;
-      return (Number(left) - Number(right)) * (higher.has(metric) ? -1 : 1);
-    });
-    const summary = document.querySelector('#score-summary');
-    const first = rows[0];
-    if (summary && first) {
-      const value = first.getAttribute(`data-value-${metric}`);
-      summary.textContent = value === '' ? 'This score is unavailable for the retained models.' :
-        `${first.querySelector('.model-link').textContent.trim()} has the ${higher.has(metric) ? 'highest' : 'lowest'} ` +
-        `${metricControl.selectedOptions[0].textContent} on these ${summary.dataset.rows} ${summary.dataset.role} rows: ` +
-        `${Number(value).toPrecision(4)}.`;
-    }
-    sortTable(metric, higher.has(metric) ? -1 : 1);
+  function updateComparisonIdentity() {
+    const panels = all('#patterns [data-model-panel]');
+    const primary = panels.find(panel => panel.dataset.modelPanel === state.modelId);
+    const secondary = panels.find(panel => panel.dataset.modelPanel === state.comparisonModelId);
+    const original = secondary?.querySelector('.model-identity:not(.comparison-identity)');
+    comparisonIdentity.hidden = !original || !primary || state.modelId === state.comparisonModelId;
+    if (comparisonIdentity.hidden) return;
+    const heading = document.createElement('strong');
+    heading.textContent = `Comparison: ${comparisonControl.selectedOptions[0].textContent}`;
+    const settings = original.querySelector('.model-settings').cloneNode(true);
+    settings.className = 'comparison-settings';
+    comparisonIdentity.replaceChildren(heading, settings, original.querySelector('[data-open-spec]').cloneNode(true));
+    comparisonIdentity.dataset.comparisonModel = state.comparisonModelId;
+    primary.querySelector('.model-identity:not(.comparison-identity)').after(comparisonIdentity);
   }
   function sortTable(key, direction) {
     const table = document.querySelector('.model-table');
     if (!table) return;
-    const rows = all('tbody tr', table);
+    const rows = all('[data-model-row]', table);
     rows.sort((a, b) => {
       const left = a.getAttribute(`data-value-${key}`), right = b.getAttribute(`data-value-${key}`);
+      if (left === '' && right === '') return 0;
       if (left === '') return 1;
       if (right === '') return -1;
       return (Number(left) - Number(right)) * direction;
@@ -103,32 +96,135 @@
     const button = all('[data-sort]', table).find(el => el.dataset.sort === key);
     if (button) button.parentElement.setAttribute('aria-sort', direction === 1 ? 'ascending' : 'descending');
   }
-  modelControls.forEach(control => control.addEventListener('change', () => chooseModel(control.value)));
-  function navigate(hash) {
-    if (location.hash !== hash) history.pushState(null, '', hash);
-    showPage(hash, true);
+  function chooseResource({persist = true} = {}) {
+    state.resource = resourceControl?.value;
+    all('[data-cost-plot]').forEach(el => {
+      el.hidden = el.dataset.costPlot !== state.metric || el.dataset.resource !== state.resource;
+    });
+    if (persist) saveState();
+    emit('chart-change', {...state});
   }
+  function chooseMetric({persist = true, sort = true} = {}) {
+    state.metric = metricControl?.value;
+    all('[data-score-column]').forEach(el => { el.hidden = el.dataset.scoreColumn !== state.metric; });
+    all('[data-metric-definition]').forEach(el => { el.hidden = el.dataset.metricDefinition !== state.metric; });
+    chooseResource({persist: false});
+    if (sort) sortTable(state.metric, higher.has(state.metric) ? -1 : 1);
+    const summary = document.querySelector('#score-summary');
+    if (summary && summary.dataset.dynamicSummary !== 'false') {
+      summary.textContent = `${summary.dataset.rows} ${summary.dataset.role} rows · ` +
+        `${metricControl?.selectedOptions[0]?.textContent || state.metric}: ` +
+        `${higher.has(state.metric) ? 'higher' : 'lower'} is better. ` +
+        'Table order is descriptive; the primary model is unchanged.';
+    }
+    if (persist) saveState();
+  }
+  function chooseClass({persist = true} = {}) {
+    state.className = classControl?.value;
+    all('[data-class-panel]').forEach(panel => { panel.hidden = panel.dataset.classPanel !== state.className; });
+    if (persist) saveState();
+    emit('class-change', {...state});
+  }
+  function parseHash(hash) {
+    const [fragment, query = ''] = hash.replace(/^#/, '').split('?');
+    let id;
+    try { id = decodeURIComponent(fragment); } catch (_) { id = ''; }
+    return {id, params: new URLSearchParams(query)};
+  }
+  function showPage(id, target, focus) {
+    const page = document.getElementById(id)?.closest('.workspace-page') || pages[0];
+    if (!page) return;
+    state.page = page.id;
+    pages.forEach(el => { el.hidden = el !== page; });
+    all('[data-page-link]').forEach(link => {
+      const selected = link.dataset.pageLink === page.id;
+      link.setAttribute('aria-selected', String(selected));
+      link.tabIndex = selected ? 0 : -1;
+      if (selected) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+      if (selected && innerWidth <= 760) link.scrollIntoView({block: 'nearest', inline: 'nearest'});
+    });
+    if (target && target !== page) {
+      for (let parent = target.parentElement; parent; parent = parent.parentElement) {
+        if (parent.tagName === 'DETAILS') parent.open = true;
+      }
+    }
+    if (focus) {
+      const destination = target && target !== page ? target : page.querySelector('h2');
+      if (destination) {
+        if (!destination.matches('a,button,input,select,summary,[tabindex]')) destination.tabIndex = -1;
+        destination.focus({preventScroll: true});
+        if (target && target !== page) destination.scrollIntoView({block: 'center', behavior: 'instant'});
+        else window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+      }
+    }
+    emit('page-change', {...state});
+  }
+  function navigate(hash, {focus = true, persist = true} = {}) {
+    const {id, params} = parseHash(hash);
+    for (const [key, control] of [['metric', metricControl], ['resource', resourceControl], ['className', classControl], ['comparisonModelId', comparisonControl]]) {
+      if (params.has(key) && options(control).includes(params.get(key))) control.value = params.get(key);
+    }
+    if (params.has('feature')) state.feature = params.get('feature');
+    if (params.has('modelId')) selectModel(params.get('modelId'), {persist: false});
+    else if (params.has('feature')) selectFeature(state.feature, {persist: false});
+    chooseMetric({persist: false, sort: false});
+    chooseClass({persist: false});
+    state.comparisonModelId = comparisonControl?.value || '';
+    if (state.comparisonModelId === state.modelId) {
+      state.comparisonModelId = '';
+      if (comparisonControl) comparisonControl.value = '';
+    }
+    emit('comparison-change', {...state});
+    const target = document.getElementById(id);
+    const evidenceScope = target?.dataset.evidenceModel ? target.dataset :
+      all('a[data-evidence-model]').find(link => parseHash(link.hash).id === id)?.dataset;
+    if (evidenceScope?.evidenceModel) selectModel(evidenceScope.evidenceModel, {persist: false});
+    if (evidenceScope?.evidenceFeature) selectFeature(evidenceScope.evidenceFeature, {persist: false});
+    showPage(id, target, focus);
+    if (persist) {
+      if (target && target.id !== state.page) history.pushState(null, '', `#${encodeURIComponent(id)}`);
+      else saveState(false);
+    }
+  }
+  modelControls.forEach(control => control.addEventListener('change', () => selectModel(control.value)));
+  all('.feature-select').forEach(control => control.addEventListener('change', () => selectFeature(control.value)));
+  all('[data-pick-feature]').forEach(button => button.addEventListener('click', () => {
+    if (button.dataset.forModel && button.dataset.forModel !== state.modelId) selectModel(button.dataset.forModel);
+    selectFeature(button.dataset.pickFeature);
+    if (innerWidth <= 940) {
+      button.closest("[data-model-panel]")?.querySelector(".effect-workspace")?.scrollIntoView({block: "start"});
+    }
+  }));
   all('[data-pick-model]').forEach(link => link.addEventListener('click', event => {
-    event.preventDefault();
-    chooseModel(link.dataset.pickModel);
-    // hashchange does not fire when the same destination is selected again.
-    navigate('#patterns');
+    event.preventDefault(); selectModel(link.dataset.pickModel); navigate('#patterns');
   }));
-  all('.feature-select').forEach(control => control.addEventListener('change', () =>
-    chooseFeature(control.closest('[data-model-panel]'), control.value)));
-  all('[data-pick-feature]').forEach(button => button.addEventListener('click', () =>
-    chooseFeature(button.closest('[data-model-panel]'), button.dataset.pickFeature)));
-  all('[data-page-link], .wordmark').forEach(link => link.addEventListener('click', event => {
-    event.preventDefault();
-    navigate(link.hash);
+  all('[data-page-link],.wordmark').forEach(link => link.addEventListener('click', event => {
+    event.preventDefault(); navigate(link.hash);
   }));
-  all('[data-sort]').forEach(button => button.addEventListener('click', () => {
-    const ascending = button.parentElement.getAttribute('aria-sort') !== 'ascending';
-    sortTable(button.dataset.sort, ascending ? 1 : -1);
-  }));
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link || event.defaultPrevented || link.hasAttribute('data-open-spec') || link.classList.contains('skip')) return;
+    const {id} = parseHash(link.hash);
+    if (document.getElementById(id)?.closest('.workspace-page')) {
+      event.preventDefault();
+      if (link.dataset.evidenceModel) selectModel(link.dataset.evidenceModel, {persist: false});
+      if (link.dataset.evidenceFeature) selectFeature(link.dataset.evidenceFeature, {persist: false});
+      navigate(link.hash);
+    }
+  });
+  all('[data-sort]').forEach(button => button.addEventListener('click', () =>
+    sortTable(button.dataset.sort, button.parentElement.getAttribute('aria-sort') === 'ascending' ? -1 : 1)));
+  metricControl?.addEventListener('change', () => chooseMetric());
+  resourceControl?.addEventListener('change', () => chooseResource());
+  classControl?.addEventListener('change', () => chooseClass());
+  comparisonControl?.addEventListener('change', () => {
+    state.comparisonModelId = comparisonControl.value === state.modelId ? '' : comparisonControl.value;
+    comparisonControl.value = state.comparisonModelId; saveState(); emit('comparison-change', {...state});
+  });
   all('[data-pair-detail]').forEach(button => button.addEventListener('click', () => {
     all('[data-pair-detail]').forEach(el => el.classList.toggle('is-selected', el === button));
-    document.querySelector('#pair-detail').textContent = button.dataset.pairDetail;
+    const detail = document.querySelector('#pair-detail');
+    if (detail) detail.textContent = button.dataset.pairDetail;
   }));
   const dialog = document.createElement('dialog');
   dialog.className = 'model-dialog';
@@ -137,93 +233,85 @@
     '<form method="dialog"><button class="dialog-close" aria-label="Close model details">Close</button></form></header>' +
     '<div class="dialog-content"></div>';
   document.body.append(dialog);
-  all('[data-open-spec]').forEach(link => link.addEventListener('click', event => {
+  document.addEventListener('click', event => {
+    const link = event.target.closest('[data-open-spec]');
+    if (!link) return;
     if (typeof dialog.showModal !== 'function') return;
+    const source = document.getElementById(link.hash.slice(1))?.querySelector('.model-spec-content');
+    if (!source) return;
     event.preventDefault();
-    const source = document.getElementById(link.hash.slice(1)).querySelector('.model-spec-content');
     dialog.querySelector('h2').textContent = source.dataset.specLabel;
     dialog.querySelector('.dialog-content').replaceChildren(source.cloneNode(true));
-    dialog.showModal();
-    dialog.querySelector('.dialog-content').scrollTop = 0;
-  }));
-  metricControl?.addEventListener('change', chooseMetrics);
-  resourceControl?.addEventListener('change', chooseMetrics);
-  function chooseClass() {
-    all('[data-class-panel]').forEach(panel => { panel.hidden = panel.dataset.classPanel !== classControl?.value; });
-  }
-  classControl?.addEventListener('change', chooseClass);
+    dialog.showModal(); dialog.querySelector('.dialog-content').scrollTop = 0;
+  });
   const printControls = all('select').map(control => {
-    const label = document.createElement('span');
-    label.className = 'print-selection';
-    control.after(label);
+    const label = document.createElement('span'); label.className = 'print-selection'; control.after(label);
     return {control, label};
   });
   addEventListener('beforeprint', () => {
     printControls.forEach(({control, label}) => { label.textContent = control.selectedOptions[0]?.textContent || ''; });
     document.activeElement?.blur();
-    window.scrollTo({top: 0, left: 0, behavior: 'instant'});
   });
   document.querySelector('#print-report')?.addEventListener('click', () => window.print());
-  addEventListener('hashchange', () => showPage(location.hash, true));
-  all('.help').forEach(help => {
-    const button = help.querySelector('.help-button');
-    const tooltip = help.querySelector('.help-tip');
+  addEventListener('hashchange', () => navigate(location.hash, {persist: false}));
+  const helpItems = all('.help');
+  function closeHelp(except) {
+    helpItems.filter(item => item !== except).forEach(item => {
+      item.classList.remove('is-open'); item.querySelector('.help-button').setAttribute('aria-expanded', 'false');
+    });
+  }
+  helpItems.forEach(help => {
+    const button = help.querySelector('.help-button'), tooltip = help.querySelector('.help-tip');
     function position() {
-      const box = button.getBoundingClientRect();
-      const width = Math.min(340, innerWidth - 24);
+      const box = button.getBoundingClientRect(), width = Math.min(360, innerWidth - 24);
       tooltip.style.width = `${width}px`;
       tooltip.style.left = `${Math.max(12, Math.min(box.left, innerWidth - width - 12))}px`;
-      tooltip.style.top = `${Math.min(box.bottom + 8, innerHeight - tooltip.offsetHeight - 12)}px`;
+      tooltip.style.top = `${Math.max(12, Math.min(box.bottom + 8, innerHeight - tooltip.offsetHeight - 12))}px`;
     }
     help.addEventListener('pointerenter', position);
     button.addEventListener('focus', position);
     button.addEventListener('click', () => {
-      const opened = button.getAttribute('aria-expanded') !== 'true';
-      button.setAttribute('aria-expanded', String(opened));
-      help.classList.toggle('is-open', opened);
-      help.classList.remove('dismissed');
-      position();
+      const opened = button.getAttribute('aria-expanded') !== 'true'; closeHelp(help);
+      button.setAttribute('aria-expanded', String(opened)); help.classList.toggle('is-open', opened);
+      help.classList.remove('dismissed'); position();
     });
     button.addEventListener('keydown', event => {
-      if (event.key === 'Escape') {
-        button.setAttribute('aria-expanded', 'false');
-        help.classList.remove('is-open');
-        help.classList.add('dismissed');
-      }
+      if (event.key === 'Escape') { closeHelp(); help.classList.add('dismissed'); }
     });
     button.addEventListener('blur', () => help.classList.remove('dismissed'));
     help.addEventListener('pointerleave', () => help.classList.remove('dismissed'));
   });
+  document.addEventListener('pointerdown', event => { if (!event.target.closest('.help')) closeHelp(); });
   const navigation = document.querySelector('.explorer-nav');
-  navigation.setAttribute('role', 'tablist');
-  navigation.setAttribute('aria-orientation', innerWidth > 760 ? 'vertical' : 'horizontal');
-  addEventListener('resize', () => navigation.setAttribute('aria-orientation',
-    innerWidth > 760 ? 'vertical' : 'horizontal'));
+  navigation?.setAttribute('role', 'tablist');
+  const orient = () => navigation?.setAttribute('aria-orientation', innerWidth > 760 ? 'vertical' : 'horizontal');
+  orient(); addEventListener('resize', orient);
   const tabs = all('[data-page-link]');
   tabs.forEach((tab, index) => {
-    tab.id = `tab-${tab.dataset.pageLink}`;
-    tab.setAttribute('role', 'tab');
+    tab.id = `tab-${tab.dataset.pageLink}`; tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-controls', tab.dataset.pageLink);
     const page = document.getElementById(tab.dataset.pageLink);
-    page.setAttribute('role', 'tabpanel');
-    page.setAttribute('aria-labelledby', tab.id);
+    page?.setAttribute('role', 'tabpanel'); page?.setAttribute('aria-labelledby', tab.id);
     tab.addEventListener('keydown', event => {
       let next;
       if (['ArrowDown', 'ArrowRight'].includes(event.key)) next = (index + 1) % tabs.length;
       if (['ArrowUp', 'ArrowLeft'].includes(event.key)) next = (index + tabs.length - 1) % tabs.length;
       if (event.key === 'Home') next = 0;
       if (event.key === 'End') next = tabs.length - 1;
-      if (next !== undefined) {
-        event.preventDefault();
-        tabs[next].focus();
-        tabs[next].click();
-        tabs[next].focus();
-      }
+      if (next !== undefined) { event.preventDefault(); tabs[next].click(); tabs[next].focus(); }
     });
   });
+  window.AutoXplainRReport = {navigate, selectModel, selectFeature, getState: () => ({...state})};
+  document.addEventListener('axr:model-change', updateComparisonIdentity);
+  document.addEventListener('axr:comparison-change', updateComparisonIdentity);
   document.body.classList.add('has-js');
-  chooseModel(model);
-  chooseClass();
-  chooseMetrics();
-  showPage(location.hash);
+  selectModel(state.modelId, {persist: false}); chooseMetric({persist: false});
+  const initialHash = location.hash;
+  navigate(initialHash, {focus: false, persist: false});
+  const initialTarget = document.getElementById(parseHash(initialHash).id);
+  if (initialTarget?.closest('.workspace-page') && !initialTarget.classList.contains('workspace-page')) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (location.hash === initialHash) showPage(initialTarget.closest('.workspace-page')?.id, initialTarget, true);
+    }));
+  }
 })();

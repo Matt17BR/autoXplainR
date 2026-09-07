@@ -31,7 +31,7 @@ test_that("multiclass effects retain the exact selected probability target", {
   )
   fake_result <- list(task = "multiclass")
   expect_match(
-    AutoXplainR:::effect_plain_summary(effect, fake_result),
+    AutoXplainR:::effect_chart(effect, "Petal.Length", result = fake_result),
     "class `virginica`",
     fixed = TRUE
   )

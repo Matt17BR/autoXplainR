@@ -55,5 +55,34 @@ result <- autoxplain(train, "y", explain = FALSE)
 raw <- data.frame(x = c(NA, 4, 10), category = c("a", "new", "b"))
 stopifnot(length(predict(result, raw)) == 3L, all(is.finite(predict(result, raw))))
 cat("Missing values and novel categories: saved recipe prediction passed\n")
+
+# Exercise the new bridge and report assets from the installed archive. The
+# event is deliberately the first factor level, unlike the guided default.
+binary$outcome <- factor(binary$outcome, levels = c("yes", "no"))
+training <- binary[1:140, ]
+evaluation <- binary[141:200, ]
+fit <- glm(outcome ~ x + group, data = training, family = binomial())
+reference <- glm(outcome ~ 1, data = training, family = binomial())
+existing <- evaluate_models(
+  list(current = fit, reference = reference), evaluation, "outcome",
+  training_data = training, positive = "yes", primary = "current", reference = "reference"
+)
+expected <- 1 - predict(fit, evaluation, type = "response")
+stopifnot(max(abs(predict(existing, evaluation) - expected)) < 1e-12)
+bench <- benchmark_predictions(existing, batch_size = 20L, n_repeats = 3L,
+  min_duration = .01, max_seconds = 2
+)
+stopifnot(inherits(bench, "autoxplain_prediction_benchmark"))
+existing_path <- file.path(args[2], "existing-binary.html")
+render_model_report(existing, existing_path, benchmark = bench,
+  report_data = report_data_control("rows", max_rows = 200L)
+)
+saveRDS(existing, file.path(args[2], "existing-binary.rds"))
+restored <- readRDS(file.path(args[2], "existing-binary.rds"))
+stopifnot(identical(predict(existing, evaluation), predict(restored, evaluation)))
+render_model_report(restored, file.path(args[2], "existing-binary-restored.html"),
+  benchmark = bench, report_data = "summary"
+)
+cat("Existing models: first-level event, benchmark, row/summary reports and RDS reuse passed\n")
 writeLines(capture.output(sessionInfo()), file.path(args[2], "session-info.txt"))
 cat("Installed artifact smoke passed from", find.package("AutoXplainR"), "\n")

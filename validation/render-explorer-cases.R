@@ -31,7 +31,13 @@ for (name in names(cases)) {
     quick = "Fuel consumption reference"
   ), target_units = if (name == "regression") "hours" else NULL)
   if (name %in% c("binary", "multiclass")) {
-    file.copy(path, file.path("pkgdown", "assets", paste0(name, "-report.html")), overwrite = TRUE)
+    # Public demonstration data are deliberately exported so readers can try
+    # linked mistakes, filters and individual-record inspection in the preview.
+    render_model_report(
+      result, file.path("pkgdown", "assets", paste0(name, "-report.html")),
+      title = if (name == "binary") "Customer churn" else "Flower species",
+      report_data = "rows"
+    )
   }
   board <- AutoXplainR:::explorer_models(result)
   importance <- result$explanations$audit$importance
@@ -62,11 +68,26 @@ for (name in names(cases)) {
       ))
     }
   })
+  # Independent browser answers retain full evaluation predictions separately
+  # from the HTML. Never copy report bins, cutoff grids or chart coordinates.
+  prediction_source <- lapply(as_explainers(result), function(x) {
+    predicted <- predict(x, x$data)
+    list(
+      observed = as.list(as.vector(x$y)),
+      prediction = if (is.matrix(predicted)) {
+        lapply(seq_len(nrow(predicted)), function(i) as.list(unname(predicted[i, x$class_levels])))
+      } else {
+        as.list(unname(predicted))
+      },
+      class_levels = as.list(x$class_levels), positive = x$positive
+    )
+  })
   oracle <- list(
     case = name, task = result$task, primary = result$provenance$primary_model_id,
     primary_metric = result$evaluation$primary_metric, table = board$table,
     metrics = board$metrics, resources = board$resources,
-    importance = importance[c("model", "feature", "importance")], predictions = predictions,
+    importance = importance[c("model", "feature", "importance", "conf_low", "conf_high")], predictions = predictions,
+    prediction_source = prediction_source,
     specifications = lapply(names(result$models), function(id) {
       spec <- AutoXplainR:::model_specification(result, id)
       list(id = id, summary = spec$summary, parameters = lapply(spec$parameters, AutoXplainR:::model_spec_value))
@@ -93,8 +114,20 @@ for (name in names(cases)) {
     relationships = AutoXplainR:::explorer_relationship_data(result, result$explanations$audit)$pairs
   )
   jsonlite::write_json(oracle, file.path(output, paste0(name, ".json")),
-    auto_unbox = TRUE, digits = 16, pretty = TRUE, na = "null"
+    auto_unbox = TRUE, digits = 16, pretty = TRUE, na = "null", null = "null"
   )
   saveRDS(result, file.path(output, paste0(name, ".rds")))
+  if (name == "binary") {
+    jsonlite::write_json(list(
+      target = result$target_column, positive = levels(churn$left)[2],
+      features = result$features, source = churn, raw = result$data_context$raw
+    ), file.path(output, "binary-data-oracle.json"), auto_unbox = TRUE, digits = 16, na = "null", null = "null")
+    for (mode in c("summary", "rows", "none")) {
+      render_model_report(result, file.path(output, paste0("binary-", mode, ".html")),
+        title = "Customer churn", report_data = mode)
+    }
+  }
 }
 cat("Generated", length(cases), "real reports and answer data in", output, "\n")
+
+source("validation/render-chart-fixture.R", local = TRUE)

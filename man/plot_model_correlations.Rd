@@ -17,3 +17,9 @@ A Plotly heatmap.
 \description{
 Plot prediction agreement among retained AutoML models
 }
+\details{
+Classification compares predicted class labels (the fraction in
+agreement), using a 0.5 probability cutoff for binary outcomes. Regression
+compares signed Spearman correlations; constant predictions have no defined
+correlation. Neither measure establishes prediction accuracy.
+}

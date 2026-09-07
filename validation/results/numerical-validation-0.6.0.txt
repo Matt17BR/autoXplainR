@@ -1,0 +1,46 @@
+AutoXplainR numerical validation, captured 2026-09-07T16:50:28Z
+Package version: 0.6.0.9000
+Source: uncommitted working tree based on 12e9ba1d5b0aca07c6477d0055d45b5795c68114
+Environment: R 4.5.2, Linux x86_64, iml 0.11.4, rpart 4.1.27
+Full reference environment: validation/results/reference-session.txt
+Timings below are one observed validation run, not comparative benchmarks.
+
+Command: Rscript validation/run-reference.R
+Exit status: 0
+Wall seconds: 1.71
+Comparisons: 11 passed, 0 failed
+Scope: 4 PDP comparisons to iml; 4 ALE shapes anchored at their minimum;
+       3 analytic ALE boundary/empirical-centering comparisons.
+Largest absolute error: 5.6843418860808e-14
+Output: validation/results/reference-agreement.csv
+
+Command: Rscript validation/check-tuning-mutation.R
+Exit status: 0
+Wall seconds: 2.19
+Correct implementation: 3 passed, 0 failed, 0 errors, 0 warnings
+Deliberate leaked-imputation mutation: 1 passed, 2 failed, 0 errors, 0 warnings
+The negative control failed its numerical assertions as intended; the script
+passed. The mutation is process-local and does not edit package sources.
+
+Command: Rscript validation/run-simulation.R
+Exit status: 0
+Wall seconds: 10.30
+Design: 100 replicates for each of 20 and 100 evaluation observations;
+        200 training observations and 300 bootstrap draws per replicate.
+Seeds: unchanged, 1000 * evaluation size + replicate; bootstrap seed = replicate.
+Estimator: explicitly requested quick linear workflow, with an lm class assertion.
+The script previously inherited the workflow default, which now performs model
+selection and can invalidate its analytic straight-line RMSE target. That stale
+default dependency was corrected; no seeds, distributions or interval settings
+were changed. The initial default-dependent run was interrupted and supplied no
+coverage output. It is not recorded as an estimator failure.
+
+Evaluation rows  Replicates  Nominal  Coverage  Monte Carlo SE  Mean interval width
+20               100         0.95     0.90      0.03000000      0.5696932
+100              100         0.95     0.96      0.01959592      0.2677526
+
+Outputs: validation/results/bootstrap-coverage-draws.csv
+         validation/results/bootstrap-coverage-summary.csv
+All three numerical CSV outputs are identical to their previously tracked values.
+Coverage is a small simulation diagnostic, not a universal inferential guarantee.
+The 20-observation undercoverage remains visible; seeds were not adjusted.

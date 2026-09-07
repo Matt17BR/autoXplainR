@@ -48,6 +48,9 @@ prepare_h2o_outer_split <- function(data,
     list(
       training = data,
       evaluation = test_data,
+      training_source_rows = seq_len(nrow(data)),
+      evaluation_source_rows = seq_len(nrow(test_data)),
+      evaluation_source = "test_data",
       method = "user-supplied evaluation data",
       moved_for_unseen_levels = 0L
     )
@@ -103,6 +106,11 @@ prepare_h2o_outer_split <- function(data,
   evaluation$final_info <- data_info(evaluation$data)
 
   list(
+    raw_training = split$training,
+    raw_evaluation = split$evaluation,
+    training_source_rows = split$training_source_rows,
+    evaluation_source_rows = split$evaluation_source_rows,
+    evaluation_source = split$evaluation_source,
     training = training,
     evaluation = evaluation,
     evaluation_context = split$evaluation[

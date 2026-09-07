@@ -68,8 +68,12 @@ test_that("provider registry makes current trade-offs inspectable", {
 })
 
 test_that("hosted and local model adapters share one sanitized prompt contract", {
-  result <- autoxplain(model_set = "quick", mtcars, "mpg", seed = 6)
-  result$training_data$mpg[[1L]] <- 987654321
+  training <- mtcars[1:20, ]
+  training$private_note <- paste0("private-record-987654321-", seq_len(nrow(training)))
+  result <- evaluate_models(
+    list(fuel = lm(mpg ~ wt, data = training)), mtcars[21:32, ], "mpg",
+    training_data = training, features = "wt", seed = 6
+  )
   cases <- list(
     gemini = list(key = "gemini-secret", model = "gemini-test", url = "interactions"),
     groq = list(key = "groq-secret", model = "groq-test", url = "groq.com"),

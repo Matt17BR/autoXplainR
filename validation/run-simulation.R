@@ -9,7 +9,11 @@ results <- lapply(c(20L, 100L), function(n_test) {
     train$y <- 2 * train$x + rnorm(200)
     test <- data.frame(x = rnorm(n_test))
     test$y <- 2 * test$x + rnorm(n_test)
-    result <- autoxplain(train, "y", test_data = test, evaluation_role = "test", explain = FALSE)
+    # Fix the estimator independently of the workflow's changing search default:
+    # the analytic target below is valid for a fitted straight line only.
+    result <- autoxplain(train, "y", test_data = test, evaluation_role = "test",
+                         model_set = "quick", explain = FALSE)
+    stopifnot(inherits(result$models$main_model, "lm"))
     # For new independent standard-normal x and noise, the conditional MSE of
     # this particular fitted line is 1 + intercept^2 + (slope - 2)^2.
     coefficients <- stats::coef(result$models$main_model)

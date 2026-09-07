@@ -7,7 +7,7 @@
 performance_uncertainty(result, n_boot = 1000L, confidence = 0.95, seed = 123L)
 }
 \arguments{
-\item{result}{An \code{\link[=autoxplain]{autoxplain()}} result.}
+\item{result}{An \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}} result.}
 
 \item{n_boot}{Number of bootstrap draws (at least 20). Use at least 1000 for
 analysis; smaller values are useful for examples and software tests.}
@@ -24,8 +24,9 @@ classification, following the fitted result's primary metric.
 }
 \description{
 Resamples evaluation observations, using the same sampled rows for the primary
-model and intercept-only baseline. The models stay fixed. The difference is
-primary loss minus baseline loss, so negative values favor the primary model.
+model and designated reference model (the intercept-only baseline in guided
+workflows). The models stay fixed. The difference is primary loss minus
+reference loss, so negative values favor the primary model.
 This estimates evaluation-sample variability conditional on the fitted models;
 it does not include fitting, tuning, or feature-selection uncertainty.
 }

@@ -12,7 +12,7 @@
 #'
 #' @param result An `autoxplain_result` for binary classification.
 #' @param thresholds Numeric candidate thresholds between 0 and 1.
-#' @param model One model ID or index. `NULL` uses `main_model` when available,
+#' @param model One model ID or index. `NULL` uses the recorded primary model,
 #'   otherwise the first retained model.
 #' @param false_positive_cost Non-negative relative cost assigned to one false
 #'   positive.
@@ -29,7 +29,7 @@
 #' fit <- autoxplain(cars, "am", seed = 2026)
 #' threshold_diagnostics(fit, thresholds = c(0.3, 0.5, 0.7))
 threshold_diagnostics <- function(result,
-                                  thresholds = seq(0.1, 0.9, by = 0.05),
+                                  thresholds = (2:18) / 20,
                                   model = NULL,
                                   false_positive_cost = 1,
                                   false_negative_cost = 1) {
@@ -50,14 +50,15 @@ threshold_diagnostics <- function(result,
     stop("At least one threshold error cost must be greater than zero.", call. = FALSE)
   }
   available <- names(result$models)
-  model <- model %||% if ("main_model" %in% available) "main_model" else available[[1L]]
+  model <- model %||% result$provenance$primary_model_id %||% available[[1L]]
   selected <- select_models(result$models, model)
   if (length(selected) != 1L) {
     stop("`model` must select exactly one retained model.", call. = FALSE)
   }
   model_id <- names(selected)[[1L]]
-  explainer <- as_explainers(result, models = model_id)[[1L]]
-  probability <- as.numeric(predict(explainer, explainer$data))
+  explainers <- report_explainers(result, models = model_id)
+  explainer <- explainers[[1L]]
+  probability <- as.numeric(report_predictions(result, models = model_id, explainers = explainers)[[1L]])
   truth <- as.character(explainer$y) == explainer$positive
   performance <- threshold_performance(
     truth,

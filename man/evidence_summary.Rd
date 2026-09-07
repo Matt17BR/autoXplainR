@@ -7,7 +7,7 @@
 evidence_summary(result)
 }
 \arguments{
-\item{result}{An \code{\link[=autoxplain]{autoxplain()}} result.}
+\item{result}{An \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}} result.}
 }
 \value{
 A plain list with \code{schema_version}, package version, task, model

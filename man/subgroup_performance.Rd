@@ -4,23 +4,27 @@
 \alias{subgroup_performance}
 \title{Compare held-out performance across an explicitly chosen group}
 \usage{
-subgroup_performance(result, by, model = NULL, min_rows = 10L)
+subgroup_performance(result, by, model = NULL, min_rows = 10L, metric = NULL)
 }
 \arguments{
 \item{result}{An \code{autoxplain_result}.}
 
 \item{by}{Name of one categorical or low-cardinality evaluation column.}
 
-\item{model}{One model ID or index. \code{NULL} uses \code{main_model} when available,
-otherwise the first retained model.}
+\item{model}{One model ID or index. \code{NULL} uses the recorded primary model.}
 
 \item{min_rows}{Minimum rows used to label a group as large enough for a
 preliminary comparison. Smaller groups remain visible and are flagged.}
+
+\item{metric}{Optional loss metric for this descriptive comparison: \code{rmse}
+or \code{mae} for regression; \code{log_loss} or \code{brier_score} for classification.
+\code{NULL} uses the recorded evaluation metric. This does not change the
+official leaderboard, selected model, or stored evaluation evidence.}
 }
 \value{
 An \code{autoxplain_subgroups} object containing overall metrics and a
 group-level \code{performance} data frame. Its primary metric matches the
-result's evaluation metric (including MAE or Brier score), and
+requested metric or, by default, the result's evaluation metric, and
 \code{secondary_metric} names a different supporting metric.
 }
 \description{

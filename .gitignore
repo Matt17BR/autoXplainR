@@ -83,6 +83,7 @@ _targets/
 CLAUDE.md
 
 # Generated output files
+/Rplots.pdf
 *.html
 !pkgdown/assets/model-report.html
 !pkgdown/assets/binary-report.html

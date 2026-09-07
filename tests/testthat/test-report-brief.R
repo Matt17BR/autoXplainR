@@ -1,34 +1,3 @@
-test_that("effect graphics preserve numeric geometry and expose scale and support", {
-  effect <- data.frame(
-    x = c(0, 1, 10), accumulated_effect = c(-2, -1, 2),
-    conf_low = c(-2.2, -1.2, 1.8), conf_high = c(-1.8, -.8, 2.2),
-    support = c(1, .5, .2)
-  )
-  attr(effect, "method") <- "ale"
-  html <- AutoXplainR:::effect_svg(effect, "x")
-  match <- regmatches(html, regexec('class="effect-line" points="([^"]+)"', html))[[1L]][2L]
-  coordinates <- do.call(rbind, lapply(strsplit(match, " ", fixed = TRUE)[[1L]], function(p) {
-    as.numeric(strsplit(p, ",", fixed = TRUE)[[1L]])
-  }))
-  expect_equal(diff(coordinates[, 1])[2] / diff(coordinates[, 1])[1], 9)
-  expect_match(html, "zero-line", fixed = TRUE)
-  expect_match(html, "Relative support 0–1", fixed = TRUE)
-  expect_match(html, "effect-band", fixed = TRUE)
-  expect_match(html, 'role="region" tabindex="0"', fixed = TRUE)
-})
-
-test_that("categorical effects use named points without a connecting trend", {
-  effect <- data.frame(
-    group = factor(c("east", "north & west", "south")),
-    partial_dependence = c(1, 3, 2), support = c(1, .5, .8)
-  )
-  attr(effect, "method") <- "pdp"
-  html <- AutoXplainR:::effect_svg(effect, "group")
-  expect_false(grepl('class="effect-line"', html, fixed = TRUE))
-  expect_match(html, "north &amp; west", fixed = TRUE)
-  expect_match(html, "effect-point", fixed = TRUE)
-})
-
 test_that("report view uses retained evidence without computing missing checks", {
   result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE, seed = 91)
   result$explanations <- NULL
@@ -88,31 +57,22 @@ test_that("brief links named findings to evidence and gives mobile and print rou
   }
 })
 
-test_that("failed optional comparisons remain visible with their reason", {
-  result <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 1)
-  testthat::local_mocked_bindings(
-    model_tradeoffs = function(...) stop("measurement <unavailable>"),
-    .package = "AutoXplainR"
-  )
-  html <- AutoXplainR:::render_model_comparison(result)
-  expect_match(html, "Resource comparison: failed", fixed = TRUE)
-  expect_match(html, "measurement &lt;unavailable&gt;", fixed = TRUE)
-  expect_match(html, 'id="models"', fixed = TRUE)
-})
-
 test_that("report-only failures have shared records without mutating the result", {
   result <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 1)
   testthat::local_mocked_bindings(
-    model_tradeoffs = function(...) stop("resource measurement failed"), .package = "AutoXplainR"
+    model_tradeoffs = function(...) stop("resource measurement <unavailable>"), .package = "AutoXplainR"
   )
   prepared <- AutoXplainR:::prepare_report_diagnostics(result)
   view <- AutoXplainR:::report_view_model(prepared)
   expect_identical(view$diagnostics$resources$status, "failed")
-  expect_identical(view$diagnostics$resources$reason, "resource measurement failed")
+  expect_identical(view$diagnostics$resources$reason, "resource measurement <unavailable>")
   expect_null(result$explanations$report_diagnostics)
   expect_identical(AutoXplainR:::report_view_model(result)$diagnostics$resources$status, "not_run")
   path <- tempfile(fileext = ".html")
   output <- render_model_report(result, path)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  expect_match(html, "resources: failed", fixed = TRUE)
+  expect_match(html, "resource measurement &lt;unavailable&gt;", fixed = TRUE)
   records <- attr(output, "diagnostic_status")
   expect_identical(as.character(output), normalizePath(path))
   expect_identical(records$resources$status, "failed")
@@ -121,15 +81,15 @@ test_that("report-only failures have shared records without mutating the result"
   expect_null(result$explanations$report_diagnostics)
 })
 
-test_that("binary brief identifies the trained positive probability event", {
+test_that("the actual report identifies the trained positive probability event", {
   data <- iris
   data$event <- factor(data$Species == "virginica", levels = c(FALSE, TRUE), labels = c("other", "virginica"))
   data$Species <- NULL
   result <- autoxplain(model_set = "quick", data, "event", seed = 12)
   view <- AutoXplainR:::report_view_model(result)
   expect_identical(view$identity$positive, "virginica")
-  overview <- AutoXplainR:::render_model_overview(
-    result, AutoXplainR:::model_report_evaluation(result, result$explanations$audit)
-  )
-  expect_match(overview, "Probability event:</strong> virginica", fixed = TRUE)
+  path <- tempfile(fileext = ".html")
+  render_model_report(result, path)
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  expect_match(html, "Probability event: virginica", fixed = TRUE)
 })

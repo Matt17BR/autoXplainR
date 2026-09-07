@@ -1,0 +1,39 @@
+.selection-section .selection-threshold{padding:12px 15px;border-left:3px solid var(--green);background:#f0f5f2;font-size:.92rem}
+.selection-section .selection-filter{margin:18px 0;font-size:.88rem}
+.selection-section select{font:inherit;padding:6px 10px;border:1px solid var(--line);background:#fff;border-radius:4px}
+.selection-section #selection-visible-count{color:var(--muted);margin-left:10px}
+.selection-section .selection-plot{display:block;width:100%;max-width:1100px;height:auto}
+.selection-section .selection-fold-point{fill:#fff;stroke:#78908b;stroke-width:1.5}
+.selection-section .selection-score-point{fill:#295d83;stroke:#fff;stroke-width:1.5}
+.selection-section .selection-picked{fill:#17654e;stroke:#173d31;stroke-width:2}
+.selection-section .selection-cutoff{stroke:#916321;stroke-width:1.5;stroke-dasharray:5 4}
+.selection-section .selection-role{font:12px ui-sans-serif,system-ui,sans-serif;fill:#435d50}
+.selection-section .selection-settings{font-size:.82rem;overflow-wrap:anywhere}
+.selection-section .selection-candidate>summary{font-variant-numeric:tabular-nums}
+.selection-section [hidden]{display:none!important}
+@media print{.selection-section .selection-filter{display:none}.selection-section .selection-plot{min-width:0;break-inside:avoid}}
+.selection-section .selection-context{font-size:13px;color:var(--muted);margin:0 0 12px}
+.selection-section .selection-reason{font-size:14px;line-height:1.5;background:#edf4ec;border-left:3px solid var(--green);padding:10px 13px;margin:10px 0}
+.selection-section .selection-family-overview{max-width:760px;margin:12px 0}
+.selection-section .selection-family-overview caption{padding:5px 10px}
+.selection-section .selection-family-overview th,.selection-section .selection-family-overview td{padding:6px 10px}
+.selection-section .selection-family-pick{font:inherit;color:#245941;border:0;background:transparent;padding:0;text-align:left;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.selection-section .selection-family-pick[aria-pressed=true]{font-weight:750;text-decoration-thickness:2px}
+.selection-section .selection-filter{margin:12px 0}
+.selection-section .selection-rationale{font-size:13px;line-height:1.5;max-width:1100px}
+.selection-section .selection-rationale h3{font-size:16px;margin:10px 0 4px}
+.selection-section .selection-rationale p{margin:5px 0}
+.selection-section .selection-boundary{color:#705522}
+.selection-section .selection-tested{font-variant-numeric:tabular-nums}
+.selection-section .selection-chart-help{font-size:12px;color:var(--muted);margin:10px 0 3px}
+.selection-section .selection-candidate-table td,.selection-section .selection-candidate-table th{padding:6px 10px;font-size:12px}
+.selection-section .selection-candidate-table td:first-child{width:72%}
+.selection-section .selection-candidate-table small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.selection-section .selection-decision{gap:14px;margin:12px 0}
+.selection-section .selection-decision .metric strong{font-size:1.15rem}
+@media(max-width:700px){.selection-section .selection-decision{grid-template-columns:1fr}.selection-section .selection-decision .metric{display:grid;grid-template-columns:120px 1fr;gap:0 8px}.selection-section .selection-decision .metric strong{font-size:16px;margin:0}.selection-section .selection-decision .metric small{grid-column:2}.selection-section .selection-rationale,.selection-section .selection-reason{font-size:12px}.selection-section .selection-family-overview th,.selection-section .selection-family-overview td{padding:6px;font-size:11px}}
+
+.selection-section .selection-chart-wrap{width:100%;overflow:visible}
+.selection-section .selection-plot text{font-size:14px}
+.selection-section .selection-plot .selection-role{font-size:12px}
+@media(max-width:650px){.selection-section .selection-candidate-table table,.selection-section .selection-family-overview table{table-layout:fixed}.selection-section .selection-candidate-table th,.selection-section .selection-candidate-table td{white-space:normal;overflow-wrap:anywhere;padding:6px}.selection-section .selection-candidate-table th:first-child,.selection-section .selection-candidate-table td:first-child{width:55%}.selection-section .selection-candidate-table th:nth-child(2){width:20%}.selection-section .selection-candidate-table th:nth-child(3){width:25%}.selection-section .selection-family-overview th,.selection-section .selection-family-overview td{white-space:normal;overflow-wrap:anywhere}.selection-section .selection-family-overview th:first-child{width:31%}.selection-section .selection-family-overview th:nth-child(2){width:22%}.selection-section .selection-family-overview th:nth-child(3){width:29%}.selection-section .selection-family-overview th:nth-child(4){width:18%}}

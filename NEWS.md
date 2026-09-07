@@ -1,3 +1,53 @@
+# AutoXplainR 0.6.0
+
+- Reports add model-selection evidence: the exact selection threshold, searched
+  settings and their rationale, fold scores, effective controls, optimizer
+  status and final refit attempts. The minimum CV score, policy choice and final
+  primary fit are separate recorded decisions.
+- Explicit local optimizer nonconvergence excludes a candidate by default.
+  `tuning_control(optimization_policy = "warn")` opts into retaining such fits
+  with their status. Unknown convergence is reported as unknown.
+- Data exploration retains original partitions and source-row positions. Raw
+  and processed distributions expose missingness, imputation and category mapping.
+  `report_data` controls aggregate, explicit sampled-row, or no-data HTML exports.
+- Charts use responsive geometry, direct model labels and stable model colors.
+  Model-effect comparisons share axes, categorical effects use separate named
+  points, and support counts remain distinct from relative support measures.
+- Prediction diagnostics expose aggregate errors and calibration. Binary cutoff
+  exploration updates counts, rates, mistake ordering and matching R code for
+  the selected model, including exact decimal boundaries. Explicit row
+  exports link mistakes and their probabilities to original source records.
+- Reports prepare predictions once per model per render and validate retained
+  evidence against the current fit. Effect failures cover every model and class.
+- Evaluation identity checks cover fitted state, captured prediction dependencies,
+  data, class contracts, scores and substantive provenance. Changed predictions
+  cannot be combined with saved evaluation evidence. Unchanged native and supported
+  custom fits survive save/reload; dynamic external prediction state is unsupported.
+- `evaluate_models()` brings already fitted models into the same comparison,
+  data, effect and prediction workflow. Users declare the primary model,
+  reference, event class and evaluation role; missing training history stays
+  explicitly unavailable.
+- `benchmark_predictions()` measures repeated predictions on a common batch,
+  retaining raw timings, repeat variation and timer limitations. Attach it with
+  `render_model_report(..., benchmark = bench)` to compare normalized costs.
+- Model disagreement is available beside the compared models' evaluation scores.
+  Individual case links respect the report's explicit row-export settings.
+- Primary-versus-baseline paired intervals are included automatically when
+  supported, with sampling assumptions and unavailable reasons recorded.
+- `subgroup_performance(metric = ...)` inspects another supported loss without
+  changing the result's official primary metric or model selection.
+- Classification correlation plots now compare predicted-class agreement;
+  relabeling classes cannot change the comparison. Public categorical PDP plots
+  no longer connect unordered categories with a line or ribbon.
+- Release archives require supported-platform checks as well as current and
+  minimum optional-engine checks from the release commit.
+
+Saved 0.5.0 results require recomputation of incompatible retained explanations.
+For example, `render_model_report(result, "updated.html", top_features = 2,
+n_repeats = 3)` recomputes a small audit without refitting. Older results cannot
+recover raw source context that was never saved. Re-evaluate changed fitted
+models through `evaluate_models()` instead of editing their saved metrics.
+
 # AutoXplainR 0.5.0
 
 - Reports show effective settings beside each model. Model details expose fitted

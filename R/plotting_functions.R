@@ -103,7 +103,9 @@ plot_partial_dependence <- function(pdp_data,
     if ("support" %in% names(pdp_data)) "<br>Relative support: %{customdata:.2f}" else "",
     "<extra></extra>"
   )
-  ribbon <- all(c("conf_low", "conf_high") %in% names(pdp_data))
+  numeric_feature <- is.numeric(pdp_data[[feature]])
+  interval <- all(c("conf_low", "conf_high") %in% names(pdp_data))
+  ribbon <- numeric_feature && interval
   plot <- plotly::plot_ly(width = width, height = height)
   if (ribbon) {
     plot <- plot |>
@@ -118,15 +120,31 @@ plot_partial_dependence <- function(pdp_data,
         showlegend = FALSE
       )
   }
-  plot |>
-    plotly::add_lines(
+  plot <- if (numeric_feature) {
+    plotly::add_lines(plot,
       x = pdp_data[[feature]],
       y = pdp_data[[effect_column]],
       customdata = if ("support" %in% names(pdp_data)) pdp_data$support else NULL,
       line = list(color = color, width = 3),
       hovertemplate = hover,
       name = method
-    ) |>
+    )
+  } else {
+    plotly::add_markers(plot,
+      x = as.character(pdp_data[[feature]]),
+      y = pdp_data[[effect_column]],
+      customdata = if ("support" %in% names(pdp_data)) pdp_data$support else NULL,
+      marker = list(color = color, size = 9),
+      error_y = if (interval) list(
+        type = "data", symmetric = FALSE,
+        array = pdp_data$conf_high - pdp_data[[effect_column]],
+        arrayminus = pdp_data[[effect_column]] - pdp_data$conf_low,
+        color = color
+      ) else NULL,
+      hovertemplate = hover, name = method
+    )
+  }
+  plot |>
     plotly::layout(
       title = list(text = title),
       xaxis = list(title = feature),
@@ -183,6 +201,10 @@ plot_partial_dependence_multi <- function(pdp_list,
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param test_data Optional evaluation data.
+#' @details Classification compares predicted class labels (the fraction in
+#'   agreement), using a 0.5 probability cutoff for binary outcomes. Regression
+#'   compares signed Spearman correlations; constant predictions have no defined
+#'   correlation. Neither measure establishes prediction accuracy.
 #'
 #' @return A Plotly heatmap.
 #' @export
@@ -192,27 +214,40 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
   if (length(explainers) < 2L) {
     stop("At least two models are required for an agreement heatmap.", call. = FALSE)
   }
+  classification <- autoxplain_result$task != "regression"
   predictions <- lapply(explainers, function(explainer) {
     value <- predict(explainer, explainer$data)
-    if (is.matrix(value)) max.col(value, ties.method = "first") else value
+    if (!classification) return(value)
+    if (is.matrix(value)) {
+      colnames(value)[max.col(value, ties.method = "first")]
+    } else {
+      ifelse(value >= 0.5, explainer$positive, setdiff(explainer$class_levels, explainer$positive))
+    }
   })
-  prediction_matrix <- do.call(cbind, predictions)
-  colnames(prediction_matrix) <- names(explainers)
-  agreement <- suppressWarnings(stats::cor(
-    prediction_matrix, method = "spearman", use = "pairwise.complete.obs"
-  ))
+  agreement <- if (classification) {
+    outer(seq_along(predictions), seq_along(predictions), Vectorize(function(a, b) {
+      mean(predictions[[a]] == predictions[[b]])
+    }))
+  } else {
+    suppressWarnings(stats::cor(do.call(cbind, predictions), method = "spearman"))
+  }
+  dimnames(agreement) <- list(names(explainers), names(explainers))
   plotly::plot_ly(
     x = colnames(agreement),
     y = rownames(agreement),
     z = agreement,
     type = "heatmap",
-    zmin = -1,
+    zmin = if (classification) 0 else -1,
     zmax = 1,
-    colors = c("#b84b4b", "#f6f7f2", "#237a57"),
-    hovertemplate = "%{y} / %{x}<br>Spearman: %{z:.3f}<extra></extra>"
+    colors = if (classification) c("#f6f7f2", "#237a57") else c("#b84b4b", "#f6f7f2", "#237a57"),
+    hovertemplate = if (classification) {
+      "%{y} / %{x}<br>Same predicted class: %{z:.1%}<extra></extra>"
+    } else {
+      "%{y} / %{x}<br>Spearman: %{z:.3f}<extra></extra>"
+    }
   ) |>
     plotly::layout(
-      title = "Prediction Rank Agreement",
+      title = if (classification) "Predicted-class agreement" else "Prediction rank agreement",
       xaxis = list(title = ""), yaxis = list(title = ""),
       margin = list(l = 150, b = 130, t = 55, r = 20)
     ) |>
@@ -233,7 +268,7 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
 plot_model_comparison <- function(autoxplain_result,
                                   performance_metric = NULL,
                                   complexity_metric = NULL,
-                                  title = "Model Trade-off Landscape") {
+                                  title = "Model performance and cost") {
   require_optional("plotly", "interactive model comparison plots")
   tradeoffs <- model_tradeoffs(
     autoxplain_result,

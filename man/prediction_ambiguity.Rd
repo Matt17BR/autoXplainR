@@ -2,7 +2,7 @@
 % Please edit documentation in R/prediction_ambiguity.R
 \name{prediction_ambiguity}
 \alias{prediction_ambiguity}
-\title{Find held-out rows where supplied models disagree}
+\title{Find evaluation rows where supplied models disagree}
 \usage{
 prediction_ambiguity(result, models = NULL, performance_tolerance = NULL)
 }
@@ -11,7 +11,7 @@ prediction_ambiguity(result, models = NULL, performance_tolerance = NULL)
 retained models.}
 
 \item{models}{Model IDs, indices, or \code{NULL}. \code{NULL} selects every retained
-model not labeled as a baseline.}
+model except the recorded reference.}
 
 \item{performance_tolerance}{Optional non-negative relative gap from the best
 selected evaluation score. \code{NULL} keeps all selected models.}
@@ -27,7 +27,7 @@ predicted values. Classification output reports hard-class disagreement and
 the largest pairwise probability distance for each row.
 }
 \details{
-By default the simple baseline is excluded and every other supplied model is
+By default the recorded reference is excluded and every other supplied model is
 compared. These models need not form a statistically defined Rashomon set.
 Their performance table is retained beside the ambiguity results so that
 disagreement from a weak candidate is not mistaken for near-optimal model

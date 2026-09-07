@@ -1,18 +1,25 @@
-test_that("beginner report separates capacity cards from computed evidence", {
+test_that("reports identify actual fits and preserve computed model differences", {
   result <- autoxplain(mtcars, "mpg", model_set = "comparison", seed = 2026)
   path <- tempfile(fileext = ".html")
   on.exit(unlink(path), add = TRUE)
   render_model_report(result, path, top_features = 2L, n_repeats = 2L)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "How are these model families different?", fixed = TRUE)
-  expect_match(html, "Prior/model-capacity knowledge", fixed = TRUE)
-  expect_match(html, "do not show that this fitted model actually used", fixed = TRUE)
-  expect_match(html, "Computed evidence from this analysis", fixed = TRUE)
-  expect_match(html, "Family", fixed = TRUE)
-  expect_match(html, "Backend", fixed = TRUE)
-  expect_match(html, "Performance vs cost", fixed = TRUE)
-  expect_match(html, "not a count of learned rules", fixed = TRUE)
+  for (id in names(result$models)) {
+    spec <- AutoXplainR:::model_specification(result, id)
+    expect_true(grepl(AutoXplainR:::html_escape(spec$summary), html, fixed = TRUE))
+    expect_true(grepl(AutoXplainR:::html_escape(spec$engine), html, fixed = TRUE))
+  }
+  view <- AutoXplainR:::report_disagreement_view(result)
+  ids <- view$performance$model_id
+  predictions <- lapply(as_explainers(result, models = ids), function(explainer) predict(explainer, explainer$data))
+  for (i in seq_len(nrow(view$pairs))) {
+    row <- view$pairs[i, ]
+    expected <- abs(predictions[[row$model_a]] - predictions[[row$model_b]])
+    expect_equal(row$mean_prediction_distance, mean(expected))
+    expect_equal(row$p90_prediction_distance, unname(quantile(expected, .9)))
+  }
+  expect_true(grepl('class="prediction-disagreement"', html, fixed = TRUE))
 })
 
 test_that("aggregate narrative context records retained engines and refit truth", {
@@ -71,17 +78,18 @@ test_that("fallback and failed-family audit fields reach beginner outputs", {
   context <- AutoXplainR:::prepare_analysis_context(result)
   text <- AutoXplainR:::context_to_text(context)
   memo <- AutoXplainR:::create_fallback_report(context)
-  path <- tempfile(fileext = ".html")
-  on.exit(unlink(path), add = TRUE)
-  render_model_report(result, path, top_features = 1L, n_repeats = 2L)
-  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  # This presentation fixture deliberately changes captured stage metadata.
+  html <- AutoXplainR:::render_model_selection(result)
 
   expect_true(context$tuning_summary$fallback_used)
   expect_match(text, "fallback used: yes", fixed = TRUE)
   expect_match(text, "Families with no complete resampling result: forest", fixed = TRUE)
   expect_match(text, "Families that failed full-training refit: kernel", fixed = TRUE)
   expect_match(memo, "recorded refit fallback was used", fixed = TRUE)
-  expect_match(html, "The resampling choice could not be refitted", fixed = TRUE)
-  expect_match(html, "No complete resampling result", fixed = TRUE)
-  expect_match(html, "Full-training refit failed", fixed = TRUE)
+  expect_true(grepl("The original choice failed refitting", html, fixed = TRUE))
+  evidence <- tuning_evidence(result)
+  expect_identical(evidence$family_failures$resampling, "forest")
+  expect_identical(evidence$family_failures$refit, "kernel")
+  expect_true(grepl("No complete resampling result: Random forest (forest)", html, fixed = TRUE))
+  expect_true(grepl("Full-training refit failed: Radial support vector (kernel)", html, fixed = TRUE))
 })

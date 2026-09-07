@@ -1,5 +1,6 @@
 
 al
+anonymization
 Apley
 associational
 auditable
@@ -56,6 +57,7 @@ modelStudio
 multiclass
 multiobjective
 Nelder
+nonconvergence
 Ollama
 Olshen
 OpenAI
@@ -71,8 +73,10 @@ pre
 Raftery
 Rashomon
 README
+recomputation
 Repositioned
 reproducibly
+rescored
 roadmap
 rsample
 rssb

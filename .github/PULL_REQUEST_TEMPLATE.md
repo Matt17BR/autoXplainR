@@ -1,14 +1,14 @@
 ## Purpose
 
-<!-- What user problem and explanation claim does this change address? -->
+<!-- What concrete user problem does this change solve? Show the resulting behavior. -->
 
-## Statistical contract
+## Statistical contract, when applicable
 
 <!-- Estimand, assumptions, interval interpretation, and known failure modes. -->
 
 ## Validation
 
-- [ ] Fast unit tests added or updated
+- [ ] Relevant tests updated, or why tests are unnecessary explained
 - [ ] Numerical/simulation test added when applicable
 - [ ] Invalid input and edge cases tested
 - [ ] Optional integration remains isolated

@@ -138,7 +138,7 @@ explain_model <- function(model,
     data_rows = nrow(feature_data),
     data_columns = ncol(feature_data),
     feature_names = names(feature_data),
-    identity_version = "2",
+    identity_version = "3",
     custom_instance = custom_instance,
     fingerprint = explainer_content_fingerprint(
       model, feature_data, outcome, resolved_task, positive, outcome_levels,
@@ -157,6 +157,7 @@ explain_model <- function(model,
       class_levels = outcome_levels,
       label = label,
       predict_function = prediction_adapter,
+      reference_predictions = reference_predictions,
       prediction_type = if (is.factor(probe)) {
         "class"
       } else if (resolved_task == "regression") {

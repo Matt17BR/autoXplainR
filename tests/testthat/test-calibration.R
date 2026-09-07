@@ -60,3 +60,19 @@ test_that("calibration handles ties and rejects unsupported requests", {
     "finite probabilities"
   )
 })
+
+test_that("the recorded primary determines calibration even when another model is called main_model", {
+  data <- data.frame(x = 1:4, outcome = factor(c("yes", "yes", "yes", "no"), levels = c("no", "yes")))
+  constant <- function(model, newdata) rep(model$probability, nrow(newdata))
+  result <- evaluate_models(
+    list(main_model = list(probability = .05), chosen = list(probability = .85)),
+    data, "outcome", primary = "chosen",
+    predict_functions = list(main_model = constant, chosen = constant)
+  )
+  diagnostic <- calibration_diagnostics(result)
+  expect_identical(diagnostic$model_id, "chosen")
+  expect_equal(diagnostic$mean_probability, .85)
+  expect_equal(diagnostic$observed_rate, .75)
+  expect_equal(diagnostic$calibration_error, .10)
+  expect_equal(calibration_diagnostics(result, model = "main_model")$mean_probability, .05)
+})

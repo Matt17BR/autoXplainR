@@ -43,6 +43,9 @@ fit_guided_base <- function(data,
     list(
       training = data,
       evaluation = test_data,
+      training_source_rows = seq_len(nrow(data)),
+      evaluation_source_rows = seq_len(nrow(test_data)),
+      evaluation_source = "test_data",
       method = "user-supplied evaluation data",
       moved_for_unseen_levels = 0L
     )
@@ -67,6 +70,8 @@ fit_guided_base <- function(data,
   # decisions across folds. Each tuning fold therefore starts from this raw copy
   # and learns its own ID, missing-column, and constant-predictor removals.
   raw_tuning_data <- split$training
+  raw_training_context <- split$training
+  raw_evaluation_data <- split$evaluation
   raw_evaluation_context <- split$evaluation[setdiff(names(split$evaluation), target_column)]
   raw_constant_features <- guided_constant_predictors(split$training, target_column)
   if (length(raw_constant_features)) {
@@ -157,6 +162,14 @@ fit_guided_base <- function(data,
         processed$evaluation$row_indices, , drop = FALSE
       ],
       evaluation_row_indices = processed$evaluation$row_indices,
+      data_context = capture_data_context(
+        raw_training_context, raw_evaluation_data, target_column, features,
+        processed$training, processed$evaluation,
+        training_source_rows = split$training_source_rows,
+        evaluation_source_rows = split$evaluation_source_rows,
+        evaluation_source = split$evaluation_source,
+        split_method = split$method
+      ),
       target_column = target_column,
       features = features,
       task = resolved_task,
@@ -337,6 +350,9 @@ make_evaluation_split <- function(data, target, task, fraction, seed) {
   list(
     training = data[training_indices, , drop = FALSE],
     evaluation = data[indices, , drop = FALSE],
+    training_source_rows = training_indices,
+    evaluation_source_rows = indices,
+    evaluation_source = "data",
     method = if (task == "regression") {
       "reproducible random holdout"
     } else {
@@ -653,6 +669,8 @@ refit_tuned_candidates <- function(tuning,
   tuning$candidates$refit_role <- NA_character_
   tuning$candidates$refit_warning <- ""
   tuning$candidates$refit_error <- ""
+  tuning$candidates$refit_optimization_status <- "not_attempted"
+  tuning$candidates$refit_optimization_message <- ""
 
   refit_state <- new.env(parent = emptyenv())
   refit_state$candidates <- tuning$candidates
@@ -668,6 +686,8 @@ refit_tuned_candidates <- function(tuning,
       unique(result$warnings), collapse = " | "
     )
     candidates$refit_error[[candidate_index]] <- result$error
+    candidates$refit_optimization_status[[candidate_index]] <- result$optimization$status %||% "unknown"
+    candidates$refit_optimization_message[[candidate_index]] <- result$optimization$message %||% ""
     if (result$ok) {
       candidates$retained_model_id[[candidate_index]] <- model_id
     }
@@ -685,10 +705,14 @@ refit_tuned_candidates <- function(tuning,
       elapsed_ms = result$elapsed_ms,
       warning = paste(unique(result$warnings), collapse = " | "),
       error = result$error,
+      optimization_status = result$optimization$status %||% "unknown",
+      optimization_message = result$optimization$message %||% "",
       stringsAsFactors = FALSE
     )
     attempt$requested_parameters <- I(list(fit_spec$requested_parameters))
     attempt$effective_parameters <- I(list(fit_spec$effective_parameters))
+    attempt$optimization <- I(list(result$optimization))
+    attempt$learned <- I(list(result$learned))
     attempts <- refit_state$attempts
     attempts[[length(attempts) + 1L]] <- attempt
     refit_state$attempts <- attempts
@@ -844,6 +868,8 @@ safely_timed_model_fit <- function(callback) {
   started <- proc.time()[["elapsed"]]
   warnings <- character()
   error <- ""
+  optimization <- NULL
+  learned <- NULL
   model <- tryCatch(
     withCallingHandlers(
       callback(),
@@ -854,15 +880,24 @@ safely_timed_model_fit <- function(callback) {
     ),
     error = function(condition) {
       error <<- conditionMessage(condition)
+      optimization <<- condition$optimization
+      learned <<- condition$learned
       NULL
     }
   )
+  if (!is.null(model)) {
+    fit_record <- attr(model, "autoxplain_tuning_fit")
+    optimization <- fit_record$optimization %||% optimization
+    learned <- fit_record$learned %||% learned
+  }
   list(
     ok = !is.null(model) && !nzchar(error),
     model = model,
     elapsed_ms = elapsed_milliseconds(started),
     warnings = warnings,
-    error = error
+    error = error,
+    optimization = optimization,
+    learned = learned
   )
 }
 

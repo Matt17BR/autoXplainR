@@ -18,6 +18,8 @@ model_spec_value <- function(value) {
 model_specification <- function(result, id) {
   model <- result$models[[id]]
   if (is.null(model)) stop("No retained model with ID: ", id, call. = FALSE)
+  intercept_baseline <- identical(id, "simple_baseline") &&
+    !identical(result$provenance$workflow, "supplied-model evaluation")
   tuning <- attr(model, "autoxplain_tuning_fit")
   wrapped <- inherits(model, "autoxplain_fitted_model")
   neural <- inherits(model, "autoxplain_tuned_nnet")
@@ -37,11 +39,13 @@ model_specification <- function(result, id) {
     "rpart"
   } else if (inherits(fit, "nnet")) {
     "nnet"
-  } else {
+  } else if (inherits(fit, "lm")) {
     "stats"
+  } else {
+    "Not recorded"
   }
   if (inherits(fit, "lm") && !inherits(fit, "glm")) parameters$method <- "qr"
-  if (identical(id, "simple_baseline")) parameters$inputs <- "none (intercept only)"
+  if (intercept_baseline) parameters$inputs <- "none (intercept only)"
   formula <- if (neural) model$terms else tryCatch(stats::formula(fit), error = function(e) NULL)
   formula <- if (is.null(formula)) NULL else paste(trimws(deparse(formula)), collapse = " ")
   learned <- list()
@@ -97,7 +101,7 @@ model_specification <- function(result, id) {
       if (model$backend == "glmnet") paste0("; lambda = ", model_spec_value(model$fit_details$lambda))
     )
   } else if (!is.null(coefficients)) {
-    if (identical(id, "simple_baseline")) {
+    if (intercept_baseline) {
       if (result$task == "regression") {
         paste0("Constant prediction = ", model_spec_value(unname(coefficients[1])))
       } else {
@@ -105,7 +109,8 @@ model_specification <- function(result, id) {
       }
     } else {
       paste0(
-        sum(!is.na(coefficients)), " fitted coefficients \u00b7 ",
+        sum(!is.na(coefficients)),
+        if (sum(!is.na(coefficients)) == 1L) " fitted coefficient \u00b7 " else " fitted coefficients \u00b7 ",
         if (inherits(fit, "glm")) {
           paste(fit$family$link, "link")
         } else if (inherits(fit, "multinom")) {
@@ -206,7 +211,7 @@ explorer_model_spec_details <- function(result, id) {
   } else {
     ""
   }
-  recipe <- result$preprocessing$training_data$recipe
+  recipe <- result$preprocessing_metadata$training_data$recipe
   preprocessing <- c(
     recipe[c("missing_value_strategy", "novel_level_strategy", "removed_columns")],
     spec$blueprint[c("categorical_encoding", "centered", "scaled", "columns")]
@@ -216,10 +221,11 @@ explorer_model_spec_details <- function(result, id) {
     levels <- if (inherits(model, "H2OModel")) {
       recipe$factor_levels
     } else {
-      native$xlevels %||% attr(native, "xlevels") %||% recipe$factor_levels
+      (if (is.list(native)) native[["xlevels"]] else NULL) %||%
+        attr(native, "xlevels") %||% recipe$factor_levels
     }
     preprocessing <- c(preprocessing, list(factor_levels = levels))
-    if (!inherits(model, "H2OModel") && !is.null(native$contrasts)) {
+    if (is.list(native) && !is.null(native$contrasts)) {
       preprocessing$contrasts <- native$contrasts
     }
     if (inherits(model, "autoxplain_fitted_model")) {
@@ -229,15 +235,28 @@ explorer_model_spec_details <- function(result, id) {
   tuning <- spec$tuning
   selection <- list(
     `Model ID` = id, Engine = spec$engine, `Recorded engine version` = spec$engine_version,
-    `Training rows` = nrow(result$training_data)
+    `Training rows supplied` = if (is.null(result$training_data)) "Not supplied" else nrow(result$training_data)
   )
   if (!is.null(tuning)) {
     candidates <- result$tuning$candidates
     row <- candidates[candidates$configuration_id == tuning$configuration_id, , drop = FALSE]
+    role <- row$refit_role
+    if (!length(role) || is.na(role[[1L]])) {
+      role <- if (identical(id, result$provenance$primary_model_id)) "selected" else "alternative"
+    }
+    selection_rule <- if (identical(as.character(role[[1L]]), "alternative")) {
+      "Lowest training-CV loss within this family; refit fallback recorded if needed"
+    } else if (identical(as.character(role[[1L]]), "fallback")) {
+      paste0("Refit fallback after the ", result$tuning$selection_rule, " selection could not be fitted")
+    } else {
+      result$tuning$selection_rule
+    }
     selection <- c(selection, list(
       Configuration = tuning$configuration_id, `Fit seed` = tuning$fit_seed,
       `Training CV folds` = result$tuning$folds_used, `CV metric` = result$tuning$metric,
-      `Mean training CV score` = row$cv_score, `Selection rule` = result$tuning$selection_rule
+      `Training CV score` = row$cv_score, `Selection rule` = selection_rule,
+      `Optimization status` = row$refit_optimization_status %||% "Not recorded",
+      `Optimization note` = row$refit_optimization_message %||% ""
     ))
   }
   warning <- result$model_diagnostics$fit_warning[match(id, result$model_diagnostics$model_id)]

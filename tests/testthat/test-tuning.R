@@ -220,15 +220,11 @@ test_that("guided report explains tuning separately from final evaluation", {
   render_model_report(result, path, top_features = 2, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "How was the primary model selected", fixed = TRUE)
-  expect_match(html, "Preprocessing was learned again inside every fold", fixed = TRUE)
-  expect_match(html, "Do not quote the resampled tuning score", fixed = TRUE)
-  expect_match(
-    html,
-    "evaluation rows did not select this model",
-    fixed = TRUE
-  )
-  expect_match(html, result$tuning$selected_configuration, fixed = TRUE)
+  expect_true(grepl("Why these settings?", html, fixed = TRUE))
+  expect_true(grepl("Preprocessing was learned again inside every fold", html, fixed = TRUE))
+  expect_true(grepl("These CV scores are not final performance estimates", html, fixed = TRUE))
+  expect_true(grepl("evaluation rows did not select this model", html, fixed = TRUE))
+  expect_true(grepl(result$tuning$selected_configuration, html, fixed = TRUE))
 
   context <- AutoXplainR:::prepare_analysis_context(result)
   prompt <- AutoXplainR:::context_to_text(context)

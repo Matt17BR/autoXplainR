@@ -26,7 +26,7 @@ test_that("tuning retains paired regression out-of-fold evidence", {
   evidence <- result$tuning$out_of_fold_predictions
   valid <- result$tuning$candidates[result$tuning$candidates$status == "ok", ]
 
-  expect_equal(result$tuning$schema_version, 4L)
+  expect_equal(result$tuning$schema_version, 5L)
   expect_equal(nrow(evidence), nrow(training) * nrow(valid))
   expect_named(evidence, c(
     "configuration_id", "family", "backend", "fold", "training_row",

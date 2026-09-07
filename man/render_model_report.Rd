@@ -16,8 +16,10 @@ render_model_report(
   top_features = 8L,
   n_repeats = 20L,
   max_models = 5L,
-  uncertainty = FALSE,
-  target_units = NULL
+  uncertainty = "auto",
+  target_units = NULL,
+  report_data = "summary",
+  benchmark = NULL
 )
 }
 \arguments{
@@ -47,11 +49,25 @@ supplied. The audit uses their union; multiclass curves cover each outcome class
 
 \item{max_models}{Maximum models audited when \code{audit} is not supplied.}
 
-\item{uncertainty}{Include \code{\link[=performance_uncertainty]{performance_uncertainty()}} using its default paired
-bootstrap. Off by default; temporal evaluation is not supported.}
+\item{uncertainty}{\code{"auto"} (default) includes the primary-versus-reference
+paired bootstrap from \code{\link[=performance_uncertainty]{performance_uncertainty()}} when supported and records
+why it is unavailable otherwise. \code{TRUE} requires it; \code{FALSE} omits it.
+Intervals condition on the fitted models. Temporal evaluation is unsupported.
+Guided workflows use the intercept-only baseline as their reference;
+supplied-model results need an explicit reference.}
 
 \item{target_units}{Optional unit label for a numeric target. Used in the
 analysis brief and effect captions; no units are inferred.}
+
+\item{report_data}{Data included in HTML: \code{"summary"} for aggregate views,
+\code{"rows"} to include individual observations and predictions, or \code{"none"}
+to omit data exploration and case-level displays. \code{\link[=report_data_control]{report_data_control()}}
+selects exported columns and the maximum number of rows. Hidden rows and
+panels remain accessible to anyone receiving the file.}
+
+\item{benchmark}{Optional result of \code{\link[=benchmark_predictions]{benchmark_predictions()}} made from the
+same unchanged models and evaluation data. Adds repeated prediction costs
+and their measurement protocol; rendering does not run a benchmark.}
 }
 \value{
 The normalized output path, invisibly. Its \code{diagnostic_status}
@@ -59,11 +75,12 @@ attribute records optional checks performed for this report. The input
 result is not changed by rendering.
 }
 \description{
-Creates a standalone HTML report from an \code{\link[=autoxplain]{autoxplain()}} result. The report
-opens with model scores, effective settings and measured costs. Focused tabs
-show feature importance, class-specific fitted effects, input relationships,
-prediction errors and checks. Model details expose the retained fit and its
-preprocessing; background explanations use optional help and expandable details.
+Creates a standalone HTML report from an \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}}
+result. It opens with model scores, effective settings and available measured
+costs. Focused tabs show recorded model selection, supplied data, feature
+importance, class-specific fitted effects, prediction errors and checks.
+Model details expose the retained fit and recorded preprocessing; supporting
+explanations use optional help and expandable details.
 }
 \examples{
 result <- autoxplain(mtcars, "mpg", seed = 2026)

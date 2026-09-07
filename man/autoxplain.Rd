@@ -34,7 +34,8 @@ autoxplain(
   overlap_action = c("warn", "error", "ignore"),
   validation = NULL,
   explain = TRUE,
-  report = NULL
+  report = NULL,
+  report_data = "summary"
 )
 }
 \arguments{
@@ -101,10 +102,12 @@ by training error alone.}
 
 \item{tuning_rule}{Local tuning selection rule. \code{"one_se"} chooses the
 first eligible family in the documented priority, then its
-least-flexible configuration, among candidates whose resampled error is
+smallest recorded flexibility proxy, among candidates whose resampled error is
 within one standard error of the best. The family priority and
 family-specific flexibility proxies
-are shown by \code{\link[=learner_catalog]{learner_catalog()}}. \code{"best"} chooses the lowest resampled
+are shown by \code{\link[=learner_catalog]{learner_catalog()}}. This heuristic does not establish that
+eligible models are equivalent or that every tuning dimension is ordered.
+\code{"best"} chooses the lowest resampled
 error. Ignored by other workflows.}
 
 \item{tuning_control}{Optional advanced local-tuning settings returned by
@@ -150,6 +153,12 @@ These are descriptive, selected summaries.}
 
 \item{report}{Optional \code{.html} destination, written from the retained evidence.
 Supplying a path also computes explanations when \code{explain = FALSE}.}
+
+\item{report_data}{Data included in the HTML: \code{"summary"} (default) exports
+aggregate exploration, \code{"rows"} also exports individual observations and
+predictions, and \code{"none"} omits data exploration and individual records.
+Use \code{\link[=report_data_control]{report_data_control()}} to choose columns and limit exported rows.
+These settings govern HTML, not the raw data retained in the R result.}
 }
 \value{
 An \code{autoxplain_result} containing fitted models, a leaderboard,

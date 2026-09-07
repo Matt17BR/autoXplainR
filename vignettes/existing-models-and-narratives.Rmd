@@ -1,8 +1,8 @@
 ---
-title: "Explain an existing model and write a memo"
+title: "Bring your own fitted models"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Explain an existing model and write a memo}
+  %\VignetteIndexEntry{Bring your own fitted models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,10 +12,82 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(AutoXplainR)
 ```
 
-The explanation interface accepts already fitted models. Supply evaluation
-predictors, outcomes and a prediction function when the model's usual `predict()`
-method does not return the required shape. Both `function(newdata, ...)` and
-`function(model, newdata, ...)` signatures are supported.
+If you already have fitted models, use `evaluate_models()` to open the same report
+used by `autoxplain()`. It evaluates the supplied models without fitting,
+selecting or replacing them. The primary model is your choice.
+
+```{r evaluate-existing}
+training <- mtcars[1:20, ]
+evaluation <- mtcars[21:32, ]
+fits <- list(
+  linear = lm(mpg ~ wt + hp, data = training),
+  tree = rpart::rpart(mpg ~ wt + hp, data = training),
+  reference = lm(mpg ~ 1, data = training)
+)
+result <- evaluate_models(
+  fits, evaluation, "mpg", features = c("wt", "hp"),
+  primary = "linear", reference = "reference"
+)
+result$leaderboard
+predict(result, evaluation[1:3, ])
+```
+
+The default data role is `"evaluation"`; the package cannot verify whether these
+rows were excluded from fitting or earlier choices. This ordered `mtcars` split
+is a teaching example. Declare `evaluation_role = "test"` only when your analysis
+design supports that interpretation.
+
+Choose `features` explicitly. By default, every column except the outcome is
+treated as an input, including an ID or context column that your adapter might
+ignore. The report's data and feature views use this declared input set.
+
+```{r fitted-report}
+path <- tempfile(fileext = ".html")
+render_model_report(result, path, n_repeats = 5)
+file.exists(path)
+unlink(path)
+```
+
+The report shows scores, fitted behavior, error diagnostics and the supplied data.
+Training data are **unavailable** unless you pass `training_data`; supplied
+training data add context but do not prove how a model was fitted. No search
+history or training time is invented. A reference is optional and can be any
+explicitly supplied model. Without one, baseline improvement and paired
+reference intervals are unavailable.
+
+The default report embeds aggregate summaries. Set `report_data = "rows"` to add
+individual-record inspection and links from errors to source rows. With no
+training table supplied, **Explore data** shows only evaluation distributions;
+it does not invent a training sample. Save the R
+result with `saveRDS()` to retain models, data and custom prediction functions;
+external dependencies used by those functions must still be available when you
+reload it.
+
+## Custom prediction functions
+
+For an unsupported model class, supply a named `predict_functions` list. Each
+function takes `newdata`, or `model, newdata`, and returns one prediction per row.
+Regression uses a numeric vector; binary classification uses probabilities of
+`positive`; multiclass uses a probability matrix with named class columns.
+The outcome factor declares the complete class set. Your adapter owns any
+preprocessing needed by the fit; `evaluate_models()` does not learn a recipe.
+
+```{r custom-prediction, eval=FALSE}
+result <- evaluate_models(
+  list(my_fit = fitted_object), evaluation_data, "outcome",
+  features = c("age", "measurement"),
+  predict_functions = list(my_fit = function(model, newdata) {
+    predict(model, newdata, type = "response")
+  }),
+  task = "binary", positive = "yes"
+)
+```
+
+## Work with one explanation or audit
+
+Use `explain_model()` and `audit_explanations()` when you want a focused audit or
+an individual estimator rather than the full model report. This interface also
+supports hard-label classification for metrics such as accuracy.
 
 ```{r existing}
 train <- mtcars[1:24, ]
@@ -98,9 +170,26 @@ records were retained.
 
 ## Migrating old report calls
 
-`generate_dashboard()` and `create_simple_dashboard()` are deprecated in 0.4.0
-and will remain callable until at least 0.6.0. Replace them with
+Saved 0.5.0 regression, binary and multiclass results were replayed with explicit
+explanation recomputation. Their older retained audits are rejected by the newer
+identity check. For an unchanged saved fit:
+
+```{r saved-result-migration, eval=FALSE}
+older <- readRDS("analysis-0.5.0.rds")
+render_model_report(older, "updated-report.html", top_features = 2, n_repeats = 3)
+```
+
+The small budget illustrates the migration; choose a suitable explanation budget
+for the final report. Rendering validates the available stored predictions and
+metrics, then recomputes explanation evidence without refitting. It cannot
+recover missing raw context or reconstruct historical external state used by a
+custom function on unobserved inputs. Changed models need a new evaluation via
+`evaluate_models()` rather than combining their predictions with saved scores.
+
+`generate_dashboard()` and `create_simple_dashboard()` were deprecated in 0.4.0
+and remain compatibility entry points in 0.6.0. Replace them with
 `render_model_report(result, output_file)`. For a memo, pass
 `narrative = generate_natural_language_report(result)`. Each compatibility call
-emits one migration warning. Use `render_explanation_report()` for a standalone
-audit of an existing model.
+emits one migration warning. Use `evaluate_models()` followed by
+`render_model_report()` for existing fitted models, or `render_explanation_report()`
+for a standalone explanation audit.

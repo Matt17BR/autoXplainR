@@ -21,6 +21,8 @@ jobs:
       AUTOXPLAIN_RUN_H2O: false
     steps:
       - uses: actions/checkout@v6
+      - name: Verify committed reports and screenshots match the source
+        run: python3 validation/check-gallery.py
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-r@v2
         with:

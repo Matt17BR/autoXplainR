@@ -30,11 +30,27 @@ budget so that uncomputed evidence is encountered deliberately.
 | Orient: what did my command do? | Find target, task, training/evaluation counts, evaluation role and retained models without opening Methods. Distinguish fitted objects from an HTML export. | `result$models`, `result$provenance`, training/evaluation data |
 | Compare: is this better than guessing? | Compare the baseline, all candidate scores and measured costs. Find score direction and units. Separate CV choice from the best held-out score; do not imply a tiny observed difference is established superiority. | Recompute loss from each explainer's predictions; inspect tuning candidates and resource measurements |
 | Identify: what exactly am I comparing? | Read key settings beside the name. Open details for actual controls, formula, coefficients or fitted structure. Tell a depth cap from fitted depth and requested settings from effective values. | Native fitted object, `extract_model_characteristics(result)`, fit attributes |
+| Trace selection: why these parameters? | Follow the selected family from scheduled tuples through fold losses, the numerical selection limit and final refit. Distinguish a successful family alternative from a candidate eligible to become primary. Investigate an omitted family and reproduce the recorded grid. | Original fold predictions and losses, candidate settings, optimizer records and `tuning_evidence(result)` |
+| Inspect data: what went into the models? | Compare original and processed missing values, distributions and relationships by partition. Switch columns and filters without misleading counts or lost row identity. Inspect explicit unavailable training context in an existing-model report. | Original supplied tables, saved recipe, source-row map and independent association calculations |
 | Explain: what does this model rely on? | Select a model and input, interpret signed importance, inspect the fitted curve and its support. Switch outcome class without changing the meaning of overall importance. | Permutation result, `explain_effect()` and recorded class/fingerprint |
 | Challenge: could related inputs explain this? | Find a pair, retain correlation direction for numeric inputs, and read the method/sample count for mixed types. Avoid interpreting zero as independence or importance as causation. | Recompute the relevant association on the displayed training rows |
 | Diagnose: where does it get things wrong? | Inspect observed-versus-predicted values or a confusion matrix, locate example mistakes and match them to evaluation rows. Distinguish a probability from a predicted label, and inspect confidence in wrong predictions. | Stored observed outcomes and actual model predictions |
 | Continue: can I use and share this? | Copy the selected model's prediction command, save/reload the result, predict new rows, open the HTML offline and export the selected view with its model/class identity intact. | Execute copied code after a fresh-library install; compare predictions after save/reload |
 | Recover: what is missing or invalid? | Recognize an excluded model, failed calculation or unsupported input. Find a specific next action. Never show an empty control, fabricated number or generic reassurance as a result. | Deliberately limited budgets, malformed input, missing/novel levels and retained failure records |
+
+Repeat prediction diagnosis with a changed binary cutoff, including a probability
+equal to the cutoff. Counts, mistake ordering, selected records and copied R code
+must agree. Test a first-level positive class through `evaluate_models()` and
+switch outcome classes in the multiclass report. Copy a finding's direct link,
+reload it, and require the same model, feature and focused evidence.
+
+For the experienced-user journey, include one existing fitted model with no
+training data, multiple models with an explicit reference, and an attached
+repeated benchmark. Check actual raw blocks, batch units and unavailable timing
+reasons before interpreting costs. Repeat a grouped tuned analysis and a
+chronological comparison; inspect the original group/time boundaries and the
+reported uncertainty scope. A limited explanation budget must expose what was
+omitted without presenting it as a completed check.
 
 ## Inspect, repair, repeat
 
