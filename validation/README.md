@@ -34,3 +34,25 @@ Release evidence belongs in `release-0.3.0.md`; record the tested commit, runtim
 package versions, check status and skipped tests. Do not reuse an older release's
 CRAN or Win-builder evidence for a new archive. Checksums identify an artifact;
 they do not make it CRAN-approved.
+
+## Report screenshots
+
+The README images are browser captures of `pkgdown/assets/model-report.html`,
+generated from public synthetic data by the current R implementation. Refresh
+the report and all four images together when the report changes:
+
+```sh
+Rscript validation/render-example.R
+python3 -m venv /tmp/autoxplain-screenshots
+/tmp/autoxplain-screenshots/bin/pip install playwright==1.58.0
+/tmp/autoxplain-screenshots/bin/playwright install chromium
+/tmp/autoxplain-screenshots/bin/python validation/capture-screenshots.py
+```
+
+Alternatively, set `CHROME_PATH` to an installed Chrome executable and omit the
+browser download. The capture script uses a 1100px desktop viewport at 1.5x
+resolution and checks for page overflow at 390px. It saves the overview, model
+comparison chart, fitted patterns and reliability sections to `man/figures/`.
+Review the images visually before committing; the script does not replace
+checking text legibility and framing. These Python dependencies are only needed
+to refresh screenshots, not to install or use the R package.
