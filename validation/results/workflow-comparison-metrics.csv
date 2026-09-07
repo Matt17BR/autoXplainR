@@ -1,0 +1,7 @@
+"model","metric","autoxplain","dalex","absolute_error","reference_method"
+"main_model","rmse",5.18003287062156,5.18003287062156,0,"DALEX model_performance rmse"
+"main_model","mae",4.09340353143349,4.09340353143349,0,"mean absolute DALEX residual"
+"main_model","r_squared",0.936965871259982,0.936965871259982,0,"DALEX model_performance r2"
+"simple_baseline","rmse",20.6581744449485,20.6581744449485,0,"DALEX model_performance rmse"
+"simple_baseline","mae",15.7812026802298,15.7812026802298,0,"mean absolute DALEX residual"
+"simple_baseline","r_squared",-0.0025235977736322,-0.0025235977736322,0,"DALEX model_performance r2"

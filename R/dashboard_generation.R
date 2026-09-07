@@ -1,9 +1,9 @@
-#' Generate a guided model report
+#' Deprecated dashboard compatibility wrapper
 #'
-#' Creates a standalone report that starts with the modeling question,
-#' held-out performance, a simple-baseline comparison, and metric definitions.
-#' Fitted patterns and the more technical explanation evidence audit follow by
-#' progressive disclosure.
+#' Deprecated in 0.4.0; removal will occur no earlier than 0.6.0.
+#' Use [render_model_report()] for new analyses. For an optional memo, call
+#' [generate_natural_language_report()] and pass its result as `narrative`.
+#' The wrapper remains callable during the transition and warns once per call.
 #'
 #' @param autoxplain_result An `autoxplain_result`.
 #' @param output_file Destination HTML file.
@@ -38,6 +38,21 @@ generate_dashboard <- function(autoxplain_result,
                                performance_weight = NULL,
                                n_repeats = 20L,
                                max_models = 5L) {
+  do.call(generate_dashboard_impl, as.list(environment()))
+}
+
+generate_dashboard_impl <- function(autoxplain_result,
+                                    output_file = "autoxplain-dashboard.html",
+                                    top_features = 8L,
+                                    sample_instances = 3L,
+                                    include_llm_report = FALSE,
+                                    narrative_provider = "local",
+                                    narrative_args = list(),
+                                    open_browser = FALSE,
+                                    performance_weight = NULL,
+                                    n_repeats = 20L,
+                                    max_models = 5L,
+                                    legacy_name = "generate_dashboard") {
   if (!inherits(autoxplain_result, "autoxplain_result")) {
     stop("`autoxplain_result` must be returned by `autoxplain()`.", call. = FALSE)
   }
@@ -48,12 +63,7 @@ generate_dashboard <- function(autoxplain_result,
   if (!is.list(narrative_args) || length(narrative_args) && is.null(names(narrative_args))) {
     stop("`narrative_args` must be a named list.", call. = FALSE)
   }
-  if (!is.null(performance_weight)) {
-    warning(
-      "`performance_weight` is deprecated. Performance and evidence quality are no longer collapsed into one score.",
-      call. = FALSE
-    )
-  }
+  warn_legacy_report(legacy_name)
   report_data <- prepare_model_report_data(
     autoxplain_result,
     top_features = top_features,
@@ -69,8 +79,8 @@ generate_dashboard <- function(autoxplain_result,
         utils::modifyList(
           list(
             autoxplain_result = autoxplain_result,
-            importance_data = report_data$screening,
-            model_characteristics = autoxplain_result$model_characteristics,
+            audit = report_data$audit,
+            pdp_data = report_data$effects,
             provider = narrative_provider
           ),
           narrative_args
@@ -151,10 +161,10 @@ prepare_model_report_data <- function(autoxplain_result,
        config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models))
 }
 
-#' Create a lightweight AutoXplainR dashboard
+#' Deprecated simple-dashboard compatibility wrapper
 #'
-#' `create_simple_dashboard()` now uses the same dependency-free evidence
-#' report as [generate_dashboard()].
+#' Deprecated in 0.4.0; removal will occur no earlier than 0.6.0.
+#' Use [render_model_report()] instead. This wrapper warns once per call.
 #'
 #' @inheritParams generate_dashboard
 #' @param ... Additional arguments forwarded to [generate_dashboard()].
@@ -167,7 +177,7 @@ create_simple_dashboard <- function(autoxplain_result,
                                     open_browser = FALSE,
                                     n_repeats = 10L,
                                     ...) {
-  generate_dashboard(
+  generate_dashboard_impl(
     autoxplain_result = autoxplain_result,
     output_file = output_file,
     top_features = top_features,
@@ -175,6 +185,7 @@ create_simple_dashboard <- function(autoxplain_result,
     include_llm_report = FALSE,
     open_browser = open_browser,
     n_repeats = n_repeats,
+    legacy_name = "create_simple_dashboard",
     ...
   )
 }
@@ -284,4 +295,12 @@ create_simple_html <- function(imp_plot = NULL,
 
 result_importance_metric <- function(result) {
   importance_metric_from_primary(result$evaluation$primary_metric %||% NULL) %||% "auto"
+}
+
+warn_legacy_report <- function(name, replacement = "render_model_report(result, output_file)") {
+  warning(structure(list(
+    message = paste0("`", name, "()` is deprecated in AutoXplainR 0.4.0; use `",
+                     replacement, "`. Removal will occur no earlier than 0.6.0."),
+    call = NULL
+  ), class = c("autoxplain_deprecated", "warning", "condition")))
 }

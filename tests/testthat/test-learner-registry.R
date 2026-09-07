@@ -45,6 +45,17 @@ test_that("dependency status distinguishes core, missing, and outdated backends"
   expect_match(outdated$reason, "requires")
 })
 
+test_that("an outdated installed engine reports an incompatible R version", {
+  status <- AutoXplainR:::learner_dependency_status(list(
+    package = "stats", minimum_version = "9999.0", current_cran_r_minimum = "9999.0"
+  ))
+  expect_true(status$installed)
+  expect_false(status$available)
+  expect_true(status$current_r_blocked)
+  expect_identical(status$status, "incompatible_r")
+  expect_match(status$reason, "supported engine version requires R >= 9999.0", fixed = TRUE)
+})
+
 test_that("portfolio dependency checks are explicit and reproducible", {
   core <- AutoXplainR:::resolve_tuning_learners("core", NULL, "regression")
   expect_identical(core, c("linear", "tree", "neural"))

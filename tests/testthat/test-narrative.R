@@ -8,7 +8,8 @@ test_that("local narratives are deterministic and limitation-first", {
   expect_identical(first, second)
   expect_equal(attr(first, "narrative_provenance")$provider_used, "local")
   expect_false(attr(first, "narrative_provenance")$remote)
-  expect_match(first, "not a certification", ignore.case = TRUE)
+  expect_match(first, "do not establish causality", ignore.case = TRUE)
+  expect_false(grepl("evidence grade is", first, fixed = TRUE))
   expect_match(first, "not be read as causal", ignore.case = TRUE)
 })
 
@@ -58,11 +59,11 @@ test_that("provider registry makes current trade-offs inspectable", {
   expect_true(providers$structured_output[providers$provider == "groq"])
   expect_match(
     providers$free_access[providers$provider == "cloudflare"],
-    "10,000 neurons"
+    "consult provider terms"
   )
   expect_match(
     providers$reproducibility[providers$provider == "openrouter"],
-    "different free models"
+    "different models"
   )
 })
 
@@ -405,7 +406,7 @@ test_that("classification and missingness evidence reach the sanitized prompt", 
   expect_match(prompt, "Probability calibration check", fixed = TRUE)
   expect_match(prompt, "Missingness check: 1 model input", fixed = TRUE)
   expect_match(prompt, "Candidate-selection boundary", fixed = TRUE)
-  expect_match(prompt, "Aggregated diagnostics only", fixed = TRUE)
+  expect_match(prompt, "Aggregate diagnostics only", fixed = TRUE)
 })
 
 test_that("Gemini Interaction responses expose only completed model text", {

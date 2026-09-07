@@ -1,5 +1,12 @@
 "scenario","method","reference","rows","grid_points","max_absolute_error"
 "additive","PDP","iml",300,20,2.22044604925031e-14
+"additive","ALE anchored shape","iml",300,21,8.88178419700125e-16
 "interaction","PDP","iml",300,20,1.4432899320127e-15
+"interaction","ALE anchored shape","iml",300,21,2.22044604925031e-16
 "nonlinear","PDP","iml",300,20,5.32907051820075e-15
+"nonlinear","ALE anchored shape","iml",300,21,2.22044604925031e-16
 "correlated","PDP","iml",300,20,8.43769498715119e-15
+"correlated","ALE anchored shape","iml",300,21,8.88178419700125e-16
+"irregular_linear","ALE values and centering","closed-form additive",101,21,5.6843418860808e-14
+"tied_linear","ALE values and centering","closed-form additive",49,5,4.44089209850063e-16
+"tied_quadratic","ALE values and centering","closed-form additive",49,5,3.5527136788005e-15

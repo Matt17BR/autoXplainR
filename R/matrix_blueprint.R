@@ -313,5 +313,7 @@ safe_reformulate <- function(termlabels, response = NULL) {
   } else {
     call("~", as.name(response), right_hand_side)
   }
-  structure(expression, class = "formula", .Environment = parent.frame())
+  # These formulas contain only column names, addition, and an intercept. A
+  # caller environment would retain fitting data and sibling models on export.
+  structure(expression, class = "formula", .Environment = baseenv())
 }

@@ -6,11 +6,18 @@ assert_flag <- function(value, name) {
 }
 
 finalize_autoxplain <- function(result, design, explain, report) {
-  result$schema_version <- "1.0"
+  result$schema_version <- "2.0"
   result$provenance$package_version <- package_version_or_development()
   result$provenance$r_version <- paste(R.version$major, R.version$minor, sep = ".")
   if (!is.null(design)) {
+    indices <- result$evaluation_row_indices %||% seq_len(nrow(result$test_data))
+    result$evaluation_context <- design$evaluation_context[indices, , drop = FALSE]
     result$validation <- design$provenance
+    result$validation$evaluation_rows <- result$validation$evaluation_rows[indices]
+    result$validation$evaluation_row_names <- result$validation$evaluation_row_names[indices]
+    if (!is.null(result$validation$evaluation_groups)) {
+      result$validation$evaluation_groups <- result$validation$evaluation_groups[indices]
+    }
     result$provenance$split_method <- design$provenance$method
     result$provenance$test_fraction_requested <- design$provenance$fraction
     if (!is.null(result$tuning)) {

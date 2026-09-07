@@ -12,7 +12,8 @@ explain_model(
   task = c("auto", "regression", "binary", "multiclass"),
   label = NULL,
   positive = NULL,
-  metadata = list()
+  metadata = list(),
+  probability_class = NULL
 )
 }
 \arguments{
@@ -28,7 +29,10 @@ explainer.}
 \verb{function(model, newdata)} or \verb{function(newdata)}. Regression functions
 should return a numeric vector. Classification functions should return
 probabilities (a vector for binary outcomes or a matrix/data frame with
-one column per class).}
+one column per class).
+Hard classification labels are retained as factors for accuracy only;
+they cannot supply probability losses or probability effects. An ellipsis
+after the supported arguments is allowed.}
 
 \item{task}{One of \code{"auto"}, \code{"regression"}, \code{"binary"}, or
 \code{"multiclass"}.}
@@ -39,6 +43,14 @@ one column per class).}
 default the second outcome level is used.}
 
 \item{metadata}{Optional named list recorded in the explainer provenance.}
+
+\item{probability_class}{Event represented by a binary probability vector.
+For custom functions it defaults to \code{positive}. For native adapters it
+overrides the inferred event; supply it when fitted response levels are
+unavailable, such as a factor GLM fitted with \code{model = FALSE}. Numeric
+binomial GLMs model event \code{"1"}, logical GLMs model \code{"TRUE"}, and factor
+GLMs model their second fitted level. Named probability matrices identify
+their events directly.}
 }
 \value{
 An object of class \code{autoxplain_explainer}.

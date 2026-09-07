@@ -34,16 +34,29 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
   if (!is.character(by) || length(by) != 1L || is.na(by) || !nzchar(by)) {
     stop("`by` must be one non-empty evaluation-column name.", call. = FALSE)
   }
-  evaluation <- result$test_data %||% result$training_data
-  if (!by %in% names(evaluation)) {
-    stop("`by` is not available in the evaluation data: ", by, ".", call. = FALSE)
-  }
   if (identical(by, result$target_column)) {
     stop("`by` must name an input or context column, not the outcome.", call. = FALSE)
   }
+  evaluation <- result$test_data %||% result$training_data
+  context <- result$evaluation_context
+  if (is.null(context)) {
+    if (isTRUE(result$preprocessing_metadata$enabled)) {
+      stop("This result has no raw evaluation context. Refit it before comparing subgroups; ",
+           "processed categories may have been imputed or mapped.", call. = FALSE)
+    }
+    context <- evaluation
+  }
+  if (!is.data.frame(context) || nrow(context) != nrow(evaluation) ||
+        !identical(rownames(context), rownames(evaluation))) {
+    stop("Raw evaluation context is not aligned with the evaluated rows.", call. = FALSE)
+  }
+  if (!by %in% names(context)) {
+    stop("`by` is not available in the raw evaluation context: ", by, ".", call. = FALSE)
+  }
   min_rows <- assert_count(min_rows, "min_rows")
-  groups <- as.character(evaluation[[by]])
-  groups[is.na(groups)] <- "(missing)"
+  groups <- as.character(context[[by]])
+  missing_label <- utils::tail(make.unique(c(unique(groups[!is.na(groups)]), "(missing)")), 1L)
+  groups[is.na(groups)] <- missing_label
   group_levels <- sort(unique(groups))
   if (length(group_levels) < 2L) {
     stop("`by` must contain at least two observed groups in the evaluation data.", call. = FALSE)
@@ -106,9 +119,11 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L) {
       largest_observed_gap = diff(range(performance[[primary_metric]], na.rm = TRUE)),
       performance = performance,
       evaluation_role = role,
+      context_source = "raw evaluation values before preprocessing",
       scope_note = paste0(
         "Descriptive performance by `", by, "` on ", role,
-        " rows. This does not certify fairness or explain why groups differ."
+        " rows, grouped by raw values before preprocessing. ",
+        "This does not certify fairness or explain why groups differ."
       )
     ),
     class = c("autoxplain_subgroups", "list")

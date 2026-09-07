@@ -8,7 +8,7 @@
 #' @param result An [autoxplain()] result.
 #' @return A plain list with `schema_version`, package version, task, model
 #'   selection, evaluation, explanation summaries, and interpretation limits.
-#'   Schema 1.0 allows additional fields within a minor package release. Removing
+#'   Schema 2.0 allows additional fields within a minor package release. Removing
 #'   or changing the meaning of a field requires a new schema major version.
 #' @export
 #' @examples
@@ -22,8 +22,9 @@ evidence_summary <- function(result) {
     stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
   }
   audit <- result$explanations$audit
+  view <- report_view_model(result)
   list(
-    schema_version = "1.0",
+    schema_version = "2.0",
     package_version = result$provenance$package_version %||% package_version_or_development(),
     task = result$task,
     target = result$target_column,
@@ -45,10 +46,18 @@ evidence_summary <- function(result) {
     ),
     explanations = if (is.null(audit)) NULL else list(
       config = audit$config,
+      scope = audit$summary$scope_note,
+      association_scope = audit$summary$association_scope,
+      model_diagnostics = audit$model_diagnostics,
+      diagnostic_status = audit$diagnostic_status,
       importance = as.data.frame(audit$importance),
       findings = audit$findings,
       effect_failures = result$explanations$failures
     ),
+    diagnostic_status = lapply(view$diagnostics, function(record) {
+      record[intersect(c("id", "status", "scope", "entities", "reason", "interpretation"),
+                       names(record))]
+    }),
     limits = c(
       "Evaluation describes the supplied rows and study design.",
       "Permutation intervals describe Monte Carlo error, not population uncertainty.",

@@ -1,0 +1,1222 @@
+{
+  "checks": [
+    {
+      "name": "320: unique IDs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "320: fragment targets",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "320: report scope",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "320: axe version",
+      "passed": true,
+      "evidence": "4.13.0"
+    },
+    {
+      "name": "320/closed: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 320,
+        "document_width": 320,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "320/closed: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "320/closed: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "320/open: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 320,
+        "document_width": 320,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "320/open: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "320/open: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "390: unique IDs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "390: fragment targets",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "390: report scope",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "390: axe version",
+      "passed": true,
+      "evidence": "4.13.0"
+    },
+    {
+      "name": "390/closed: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 390,
+        "document_width": 390,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "390/closed: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "390/closed: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "390/open: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 390,
+        "document_width": 390,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "390/open: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "390/open: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "768: unique IDs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "768: fragment targets",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "768: report scope",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "768: axe version",
+      "passed": true,
+      "evidence": "4.13.0"
+    },
+    {
+      "name": "768/closed: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 768,
+        "document_width": 768,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14.700000000000001,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "768/closed: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14.700000000000001,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "768/closed: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "768/open: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 768,
+        "document_width": 768,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 14.700000000000001,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "768/open: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 14.700000000000001,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "768/open: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "1440: unique IDs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "1440: fragment targets",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "1440: report scope",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "1440: axe version",
+      "passed": true,
+      "evidence": "4.13.0"
+    },
+    {
+      "name": "1440/closed: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 1440,
+        "document_width": 1440,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 18.52941176470588,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "1440/closed: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 18.52941176470588,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "1440/closed: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "1440/open: page overflow",
+      "passed": true,
+      "evidence": {
+        "viewport_width": 1440,
+        "document_width": 1440,
+        "quantitative_label_count": 33,
+        "minimum_quantitative_font_px": 18.52941176470588,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "1440/open: readable quantitative labels",
+      "passed": true,
+      "evidence": {
+        "minimum_css_px": 18.52941176470588,
+        "required_css_px": 12,
+        "small_labels": []
+      }
+    },
+    {
+      "name": "1440/open: WCAG A/AA",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "name": "javascript: native keyboard disclosures",
+      "passed": true,
+      "evidence": {
+        "count": 10,
+        "invalid": [],
+        "visited": [
+          {
+            "index": 0,
+            "text": "Diagnostic coverage and association evidence",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 1,
+            "text": "All evaluation metrics and definitions",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 2,
+            "text": "Definitions for every metric",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 3,
+            "text": "Values, support and descriptive intervals for distance_km",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 4,
+            "text": "Values, support and descriptive intervals for planned_route_hours",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 5,
+            "text": "Values, support and descriptive intervals for service",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 6,
+            "text": "All model-feature evidence and shuffle intervals",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 7,
+            "text": "Resource measurements and Pareto comparison",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 8,
+            "text": "What each model family can represent",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 9,
+            "text": "Complete run metadata",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "no-javascript: native keyboard disclosures",
+      "passed": true,
+      "evidence": {
+        "count": 10,
+        "invalid": [],
+        "visited": [
+          {
+            "index": 0,
+            "text": "Diagnostic coverage and association evidence",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 1,
+            "text": "All evaluation metrics and definitions",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 2,
+            "text": "Definitions for every metric",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 3,
+            "text": "Values, support and descriptive intervals for distance_km",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 4,
+            "text": "Values, support and descriptive intervals for planned_route_hours",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 5,
+            "text": "Values, support and descriptive intervals for service",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 6,
+            "text": "All model-feature evidence and shuffle intervals",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 7,
+            "text": "Resource measurements and Pareto comparison",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 8,
+            "text": "What each model family can represent",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          },
+          {
+            "index": 9,
+            "text": "Complete run metadata",
+            "opened": true,
+            "focus_visible": true,
+            "enter_toggles": true,
+            "space_restores": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "print/closed: nonempty report",
+      "passed": true,
+      "evidence": {
+        "pdf": "print-closed.pdf",
+        "text_characters": 15561,
+        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      }
+    },
+    {
+      "name": "print/open: nonempty report",
+      "passed": true,
+      "evidence": {
+        "pdf": "print-open.pdf",
+        "text_characters": 15561,
+        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      }
+    },
+    {
+      "name": "print/no-javascript: nonempty report",
+      "passed": true,
+      "evidence": {
+        "pdf": "print-no-javascript.pdf",
+        "text_characters": 15561,
+        "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+      }
+    },
+    {
+      "name": "print: closed equals open",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "print: closed equals no-javascript",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "report unchanged during validation",
+      "passed": true,
+      "evidence": null
+    }
+  ],
+  "errors": [],
+  "scope": {
+    "fixture": "Synthetic delivery report with comparison models, effects, diagnostics and uncertainty",
+    "axe_tags": [
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+      "wcag22aa"
+    ],
+    "axe_incomplete": "Recorded for human review; not counted as passes",
+    "no_javascript": "Renderer scripts disabled; browser evaluation only inspects or sets test state",
+    "print_comparison": "pdftotext -layout output with whitespace removed"
+  },
+  "report": "pkgdown/assets/model-report.html",
+  "report_sha256": "81cb1e1754aae4ef6df3efb60f761cd367281a8615cf8e91151bc0b9961fb147",
+  "playwright": "1.58.0",
+  "widths": [
+    {
+      "width": 320,
+      "states": [
+        {
+          "state": "closed",
+          "layout": {
+            "viewport_width": 320,
+            "document_width": 320,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 34,
+              "nodes_omitted": 24,
+              "nodes": [
+                {
+                  "target": [
+                    "a[href$=\"#uncertainty\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#patterns\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#models\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#limits\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    ".shell > a[href$=\"#provenance\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "state": "open",
+          "layout": {
+            "viewport_width": 320,
+            "document_width": 320,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 50,
+              "nodes_omitted": 40,
+              "nodes": [
+                {
+                  "target": [
+                    "a[href$=\"#uncertainty\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#patterns\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#models\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#limits\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    ".shell > a[href$=\"#provenance\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "states": [
+        {
+          "state": "closed",
+          "layout": {
+            "viewport_width": 390,
+            "document_width": 390,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 33,
+              "nodes_omitted": 23,
+              "nodes": [
+                {
+                  "target": [
+                    "a[href$=\"#patterns\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#models\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#limits\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    ".shell > a[href$=\"#provenance\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "state": "open",
+          "layout": {
+            "viewport_width": 390,
+            "document_width": 390,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 49,
+              "nodes_omitted": 39,
+              "nodes": [
+                {
+                  "target": [
+                    "a[href$=\"#patterns\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#models\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "a[href$=\"#limits\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    ".shell > a[href$=\"#provenance\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "states": [
+        {
+          "state": "closed",
+          "layout": {
+            "viewport_width": 768,
+            "document_width": 768,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14.700000000000001,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 29,
+              "nodes_omitted": 19,
+              "nodes": [
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"45.2387928330361\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"119.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[x=\"300\"][y=\"280\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .tick[y=\"338\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "state": "open",
+          "layout": {
+            "viewport_width": 768,
+            "document_width": 768,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 14.700000000000001,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 45,
+              "nodes_omitted": 35,
+              "nodes": [
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"45.2387928330361\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"119.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[x=\"300\"][y=\"280\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .tick[y=\"338\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "states": [
+        {
+          "state": "closed",
+          "layout": {
+            "viewport_width": 1440,
+            "document_width": 1440,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 18.52941176470588,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 29,
+              "nodes_omitted": 19,
+              "nodes": [
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"45.2387928330361\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"119.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[x=\"300\"][y=\"280\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .tick[y=\"338\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "state": "open",
+          "layout": {
+            "viewport_width": 1440,
+            "document_width": 1440,
+            "quantitative_label_count": 33,
+            "minimum_quantitative_font_px": 18.52941176470588,
+            "small_labels": []
+          },
+          "violations": [],
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "impact": "serious",
+              "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+              "node_count": 45,
+              "nodes_omitted": 35,
+              "nodes": [
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[y=\"18\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"210.986916443651\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"360.258400237883\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[x=\"509.529884032114\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"216.557140031139\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"130.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"45.2387928330361\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "text[y=\"119.897966432088\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .axis-label[x=\"300\"][y=\"280\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                },
+                {
+                  "target": [
+                    "div[aria-label=\"Effect chart for distance_km\"] > .effect-plot[viewBox=\"0 0 600 350\"] > .tick[y=\"338\"][x=\"70\"]"
+                  ],
+                  "failure": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "print": {
+    "closed": {
+      "pdf": "print-closed.pdf",
+      "text_characters": 15561,
+      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+    },
+    "open": {
+      "pdf": "print-open.pdf",
+      "text_characters": 15561,
+      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+    },
+    "no-javascript": {
+      "pdf": "print-no-javascript.pdf",
+      "text_characters": 15561,
+      "normalized_text_sha256": "af90ba1c43ecb51d4f9545848715a98205e938f5fba4f0a9c1d7f0acd40f265a"
+    }
+  },
+  "chromium": "145.0.7632.6",
+  "axe_core": "4.13.0",
+  "passed": true,
+  "failed_checks": []
+}

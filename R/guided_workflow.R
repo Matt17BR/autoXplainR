@@ -67,6 +67,7 @@ fit_guided_base <- function(data,
   # decisions across folds. Each tuning fold therefore starts from this raw copy
   # and learns its own ID, missing-column, and constant-predictor removals.
   raw_tuning_data <- split$training
+  raw_evaluation_context <- split$evaluation[setdiff(names(split$evaluation), target_column)]
   raw_constant_features <- guided_constant_predictors(split$training, target_column)
   if (length(raw_constant_features)) {
     split$training <- split$training[
@@ -152,6 +153,10 @@ fit_guided_base <- function(data,
       evaluation = evaluated$summary,
       training_data = train,
       test_data = evaluation_data,
+      evaluation_context = raw_evaluation_context[
+        processed$evaluation$row_indices, , drop = FALSE
+      ],
+      evaluation_row_indices = processed$evaluation$row_indices,
       target_column = target_column,
       features = features,
       task = resolved_task,
@@ -395,6 +400,7 @@ unprocessed_metadata <- function(data) {
       preprocessing_log = list(),
       original_info = data_info(data),
       final_info = data_info(data),
+      row_indices = seq_len(nrow(data)),
       recipe = list()
     ),
     class = c("autoxplain_preprocessing", "list")
@@ -1020,6 +1026,11 @@ model_backend_name <- function(model) {
 }
 
 evaluate_predictions <- function(observed, predicted, explainer) {
+  if (explainer$task != "regression" &&
+        (is.factor(predicted) || is.character(predicted) || is.logical(predicted))) {
+    stop("Probability metrics require class probabilities; hard class labels support accuracy only.",
+         call. = FALSE)
+  }
   if (explainer$task == "regression") {
     residual <- as.numeric(observed) - as.numeric(predicted)
     denominator <- sum((as.numeric(observed) - mean(as.numeric(observed)))^2)
@@ -1033,17 +1044,12 @@ evaluate_predictions <- function(observed, predicted, explainer) {
     truth <- as.character(observed) == explainer$positive
     probability <- pmin(pmax(as.numeric(predicted), 1e-15), 1 - 1e-15)
     hard <- probability >= 0.5
-    sensitivity <- if (any(truth)) mean(hard[truth]) else NA_real_
-    specificity <- if (any(!truth)) mean(!hard[!truth]) else NA_real_
+    confusion <- binary_confusion_metrics(truth, hard)
     return(c(
       log_loss = -mean(ifelse(truth, log(probability), log1p(-probability))),
       brier_score = mean((probability - as.numeric(truth))^2),
-      accuracy = mean(hard == truth),
-      balanced_accuracy = if (all(is.finite(c(sensitivity, specificity)))) {
-        mean(c(sensitivity, specificity))
-      } else {
-        NA_real_
-      },
+      accuracy = confusion[["accuracy"]],
+      balanced_accuracy = confusion[["balanced_accuracy"]],
       roc_auc = guided_binary_auc(truth, probability)
     ))
   }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dashboard_generation.R
 \name{create_simple_dashboard}
 \alias{create_simple_dashboard}
-\title{Create a lightweight AutoXplainR dashboard}
+\title{Deprecated simple-dashboard compatibility wrapper}
 \usage{
 create_simple_dashboard(
   autoxplain_result,
@@ -35,6 +35,6 @@ leading model, never from impurity importance.}
 The normalized output path, invisibly.
 }
 \description{
-\code{create_simple_dashboard()} now uses the same dependency-free evidence
-report as \code{\link[=generate_dashboard]{generate_dashboard()}}.
+Deprecated in 0.4.0; removal will occur no earlier than 0.6.0.
+Use \code{\link[=render_model_report]{render_model_report()}} instead. This wrapper warns once per call.
 }

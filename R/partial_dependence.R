@@ -11,7 +11,9 @@
 #'   its stored feature data.
 #' @param feature A single feature name.
 #' @param method `"ale"` or `"pdp"`.
-#' @param n_points Number of quantile bins for ALE or grid points for PDP.
+#' @param n_points Maximum number of empirical quantile bins for ALE or grid
+#'   points for PDP. Ties can reduce the ALE bin count. ALE returns both the
+#'   first lower boundary and each upper boundary.
 #' @param quantile_range Numeric length-two range used for a numeric PDP grid.
 #' @param sample_size Maximum number of reference rows used by PDP. `NULL` uses
 #'   all rows. ALE always uses all rows that fall inside its bins.
@@ -33,6 +35,15 @@
 #'   within-bin variation in fixed-model local prediction differences and are
 #'   unavailable when any bin has fewer than two rows. Neither is a
 #'   model-fitting or population confidence interval.
+#'
+#' @details ALE uses observed empirical quantiles (type 1), with right-closed
+#'   bins and the minimum included in the first bin. Every bin therefore has
+#'   observations even when predictor values are tied. Cumulative local
+#'   differences are reported at the bin boundaries. The curve is centered by
+#'   subtracting the empirical mean of its linearly interpolated values at the
+#'   reference observations. The initial boundary has no separate bin count
+#'   (`n = NA`); its support is that of the first bin. These are finite-bin
+#'   approximations, and wider bins can obscure within-bin nonlinear behavior.
 #' @export
 #'
 #' @examples
@@ -80,6 +91,15 @@ explain_effect <- function(model,
   attr(effect, "task") <- input$task
   attr(effect, "prediction_target") <- input$prediction_target
   attr(effect, "prediction_class") <- input$prediction_class
+  if (inherits(model, "autoxplain_explainer")) {
+    effect_explainer <- model
+    effect_explainer$data <- input$data[names(model$data)]
+    if (!is.null(model$target) && model$target %in% names(input$data)) {
+      effect_explainer$y <- input$data[[model$target]]
+    }
+    attr(effect, "explainer_fingerprint") <- current_explainer_fingerprint(effect_explainer)
+    attr(effect, "reference_fingerprint") <- content_fingerprint(effect_explainer$data)
+  }
   effect
 }
 
@@ -206,7 +226,10 @@ print.autoxplain_effect <- function(x, ...) {
     cat("  target:  ", attr(x, "prediction_target"), "\n", sep = "")
   }
   if (isTRUE(attr(x, "dependence_warning"))) {
-    cat("  caution: strong feature dependence can make a marginal PDP misleading\n")
+    cat("  caution: flagged pairwise association can make a marginal PDP misleading\n")
+  }
+  if (!is.null(attr(x, "association_scope"))) {
+    cat("  association: ", attr(x, "association_scope"), "\n", sep = "")
   }
   if (!is.null(attr(x, "interval_note"))) {
     cat("  bands:   ", attr(x, "interval_note"), "\n", sep = "")
@@ -468,15 +491,18 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
     values <- values[keep]
     reference_rows <- reference_rows[keep]
   }
+  if (!length(values) || any(!is.finite(values))) {
+    stop("ALE requires finite observed feature values.", call. = FALSE)
+  }
   boundaries <- unique(as.numeric(stats::quantile(
     values, probs = seq(0, 1, length.out = n_points + 1L), na.rm = TRUE,
-    names = FALSE, type = 7
+    names = FALSE, type = 1
   )))
   if (length(boundaries) < 2L) {
     stop("ALE requires at least two distinct feature values.", call. = FALSE)
   }
-  bins <- findInterval(values, boundaries, all.inside = TRUE)
-  bins[bins == length(boundaries)] <- length(boundaries) - 1L
+  bins <- as.integer(cut(values, breaks = boundaries, include.lowest = TRUE,
+                         right = TRUE))
   n_bins <- length(boundaries) - 1L
 
   lower_data <- data
@@ -487,26 +513,34 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
 
   bin_effect <- vapply(seq_len(n_bins), function(index) {
     selected <- bins == index
-    if (any(selected)) mean(local_effect[selected]) else 0
+    mean(local_effect[selected])
   }, numeric(1))
   bin_n <- tabulate(bins, nbins = n_bins)
   bin_se <- vapply(seq_len(n_bins), function(index) {
     selected <- bins == index
     if (sum(selected) > 1L) stats::sd(local_effect[selected]) / sqrt(sum(selected)) else NA_real_
   }, numeric(1))
-  accumulated <- cumsum(bin_effect)
-  weights <- bin_n / sum(bin_n)
-  centered <- accumulated - sum(accumulated * weights)
-  cumulative_se <- ale_centered_standard_error(bin_se, weights)
+  # Empirical quantile boundaries are observed values, so every right-closed
+  # bin contains its upper endpoint. Never fill an unsupported bin with zero.
+  if (any(bin_n == 0L)) stop("ALE formed an unsupported bin.", call. = FALSE)
+  fractions <- (values - boundaries[bins]) /
+    (boundaries[bins + 1L] - boundaries[bins])
+  center_coefficients <- vapply(seq_len(n_bins), function(index) {
+    mean(as.numeric(bins > index) + (bins == index) * fractions)
+  }, numeric(1))
+  accumulation <- outer(0:n_bins, seq_len(n_bins), ">=") * 1
+  coefficients <- sweep(accumulation, 2L, center_coefficients, "-")
+  centered <- as.numeric(coefficients %*% bin_effect)
+  cumulative_se <- ale_centered_standard_error(bin_se, coefficients = coefficients)
 
   result <- data.frame(
-    feature_value = (boundaries[-1L] + boundaries[-length(boundaries)]) / 2,
+    feature_value = boundaries,
     accumulated_effect = centered,
     std_error = cumulative_se,
     conf_low = centered - stats::qnorm(0.975) * cumulative_se,
     conf_high = centered + stats::qnorm(0.975) * cumulative_se,
-    n = bin_n,
-    support = bin_n / max(bin_n),
+    n = c(NA_integer_, bin_n),
+    support = c(bin_n[[1L]], bin_n) / max(bin_n),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -519,17 +553,31 @@ calculate_ale_impl <- function(predict_function, data, feature, n_points) {
     "confidence, or causal intervals."
   )
   attr(out, "reference_rows") <- reference_rows
+  attr(out, "bin_boundaries") <- boundaries
+  attr(out, "bin_counts") <- bin_n
+  attr(out, "estimator_note") <- paste(
+    "ALE at empirical-quantile boundaries (type 1), using right-closed occupied bins;",
+    "centered by the reference-row mean of linearly interpolated boundary effects."
+  )
+  attr(out, "support_note") <- paste(
+    "ALE support is the adjacent bin count relative to the largest bin.",
+    "The initial boundary uses the first bin's support and has no separate count."
+  )
   out
 }
 
-ale_centered_standard_error <- function(bin_se, weights) {
+ale_centered_standard_error <- function(bin_se, weights = NULL, coefficients = NULL) {
   n_bins <- length(bin_se)
-  if (!n_bins || length(weights) != n_bins || any(!is.finite(bin_se))) {
-    return(rep(NA_real_, n_bins))
+  output_rows <- if (is.null(coefficients)) n_bins else nrow(coefficients)
+  if (!n_bins || any(!is.finite(bin_se))) {
+    return(rep(NA_real_, output_rows))
   }
-  accumulation <- lower.tri(matrix(0, n_bins, n_bins), diag = TRUE) * 1
-  centering <- diag(n_bins) - outer(rep(1, n_bins), weights)
-  coefficients <- centering %*% accumulation
+  if (is.null(coefficients)) {
+    if (length(weights) != n_bins) return(rep(NA_real_, n_bins))
+    accumulation <- lower.tri(matrix(0, n_bins, n_bins), diag = TRUE) * 1
+    centering <- diag(n_bins) - outer(rep(1, n_bins), weights)
+    coefficients <- centering %*% accumulation
+  }
   sqrt(rowSums(sweep(coefficients, 2L, bin_se, "*")^2))
 }
 
@@ -548,6 +596,7 @@ finalize_effect <- function(result, data, feature, method, n_reference) {
     NA_character_
   }
   attr(result, "dependence_warning") <- method == "pdp" && max_association >= 0.7
+  attr(result, "association_scope") <- association_screen_scope()
   attr(result, "support_note") <- "Support is relative local empirical density on a 0-1 scale."
   result
 }

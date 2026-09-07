@@ -7,19 +7,24 @@ test_that("audit detects explanation disagreement among competitive models", {
   data$y <- x1 + x2 + rnorm(n, sd = 0.25)
   train <- data[1:240, ]
   test <- data[241:360, ]
-  e1 <- explain_model(lm(y ~ x1, train), test, "y", label = "x1 model",
-                      metadata = list(evaluation_role = "test"))
-  e2 <- explain_model(lm(y ~ x2, train), test, "y", label = "x2 model",
-                      metadata = list(evaluation_role = "test"))
+  e1 <- explain_model(lm(y ~ x1, train), test, "y",
+    label = "x1 model",
+    metadata = list(evaluation_role = "test")
+  )
+  e2 <- explain_model(lm(y ~ x2, train), test, "y",
+    label = "x2 model",
+    metadata = list(evaluation_role = "test")
+  )
   audit <- audit_explanations(
-    list(e1, e2), n_repeats = 12, performance_tolerance = 0.25,
+    list(e1, e2),
+    n_repeats = 12, performance_tolerance = 0.25,
     dependence_threshold = 0.7, seed = 2
   )
 
   expect_s3_class(audit, "autoxplain_audit")
   expect_equal(audit$summary$n_models, 2)
   expect_equal(audit$summary$n_near_optimal, 2)
-  expect_true(all(c("evidence_grade", "claim") %in% names(audit$importance)))
+  expect_true(all(c("shuffle_status", "dependence_status", "claim") %in% names(audit$importance)))
   expect_true(any(audit$findings$code == "feature_dependence"))
   expect_output(print(audit), "evidence audit")
   expect_type(summary(audit), "list")
@@ -28,7 +33,8 @@ test_that("audit detects explanation disagreement among competitive models", {
 test_that("reports are standalone, escaped, and provenance-rich", {
   fixture <- make_regression_fixture()
   explainer <- explain_model(
-    fixture$model, fixture$test, "y", label = "<unsafe & model>",
+    fixture$model, fixture$test, "y",
+    label = "<unsafe & model>",
     metadata = list(evaluation_role = "test")
   )
   audit <- audit_explanations(explainer, features = c("x1", "x2"), n_repeats = 4)
@@ -64,9 +70,9 @@ test_that("guided reports lead with evaluation and progressively disclose eviden
   )
   html <- paste(readLines(output, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "Guided model report", fixed = TRUE)
-  expect_match(html, "The modeling question", fixed = TRUE)
-  expect_match(html, "Did the model generalize?", fixed = TRUE)
+  expect_match(html, "Analysis brief", fixed = TRUE)
+  expect_match(html, "Prediction and evidence", fixed = TRUE)
+  expect_match(html, "Prediction performance on test rows", fixed = TRUE)
   expect_match(html, "How large were individual errors?", fixed = TRUE)
   expect_match(html, "Patterns used for prediction", fixed = TRUE)
   expect_match(html, "What this analysis does not establish", fixed = TRUE)
@@ -114,20 +120,20 @@ test_that("reports keep supplied evaluation data descriptively neutral by defaul
 test_that("dashboard compatibility entry point produces the guided report", {
   result <- autoxplain(mtcars, "mpg", seed = 18)
   path <- tempfile(fileext = ".html")
-  output <- generate_dashboard(
+  expect_warning(output <- generate_dashboard(
     result,
     output_file = path,
     top_features = 2,
     n_repeats = 3,
     include_llm_report = TRUE
-  )
+  ), class = "autoxplain_deprecated")
   html <- paste(readLines(output, warn = FALSE), collapse = "\n")
 
   expect_match(html, "Understanding mpg", fixed = TRUE)
   expect_match(html, "Plain-language memo", fixed = TRUE)
   expect_match(html, "Provider used: local", fixed = TRUE)
   expect_match(html, "simple baseline", ignore.case = TRUE)
-  expect_match(html, "Important context for these scores", fixed = TRUE)
+  expect_match(html, "leading-caveat", fixed = TRUE)
   expect_error(
     generate_dashboard(result, tempfile(fileext = ".html"), narrative_args = list("bad")),
     "named list"
@@ -181,10 +187,10 @@ test_that("comparison reports explain Pareto trade-offs without selecting on hol
   render_model_report(result, path, top_features = 2, n_repeats = 2)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
 
-  expect_match(html, "What trade-offs did the candidates make?", fixed = TRUE)
+  expect_match(html, "Candidate scores and prediction differences", fixed = TRUE)
   expect_match(html, "<svg class=\"tradeoff-plot\"", fixed = TRUE)
   expect_match(html, "Pareto-efficient", fixed = TRUE)
-  expect_match(html, "primary model remains pre-specified", ignore.case = TRUE)
+  expect_match(html, "Pre-specified model", ignore.case = TRUE)
   expect_match(html, "#models", fixed = TRUE)
 })
 

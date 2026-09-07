@@ -10,7 +10,7 @@ narrative_providers()
 A data frame describing providers, default models, and credentials.
 }
 \description{
-Provider defaults reflect public offerings checked in July 2026 and can
-change independently of AutoXplainR. The local provider is deterministic;
+Lists the adapter configuration shipped with this package. Hosted model
+availability and provider terms can change. The local provider is deterministic;
 every remote provider is opt-in.
 }

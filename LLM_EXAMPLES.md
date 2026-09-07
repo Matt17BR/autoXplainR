@@ -11,8 +11,9 @@ cat(memo)
 render_model_report(result, "iris-report.html", narrative = memo)
 ```
 
-Check the narrative against `result$evaluation` and the retained explanation
-audit. The result contains the model, split, metric definitions and numerical
+The memo includes the primary model's retained feature summaries and effects,
+plus audit findings and failed checks. Check it against `result$evaluation` and
+`result$explanations`. The result contains the model, split, metric definitions and numerical
 evidence; the narrative is an additional presentation of that evidence.
 
 See [provider setup](LLM_PROVIDERS.md) for optional generated wording. Historical

@@ -21,5 +21,6 @@ create_model_comparison_report(
 The normalized output path, invisibly.
 }
 \description{
-Create a compact model metadata report
+Deprecated in 0.4.0, with removal no earlier than 0.6.0. Use
+\code{\link[=render_model_report]{render_model_report()}} for the maintained analysis report.
 }

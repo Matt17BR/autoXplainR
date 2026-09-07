@@ -11,7 +11,7 @@ test_that("beginner report separates capacity cards from computed evidence", {
   expect_match(html, "Computed evidence from this analysis", fixed = TRUE)
   expect_match(html, "Family", fixed = TRUE)
   expect_match(html, "Backend", fixed = TRUE)
-  expect_match(html, "resource proxy", fixed = TRUE)
+  expect_match(html, "Resource measurements and Pareto comparison", fixed = TRUE)
   expect_match(html, "not structural complexity", fixed = TRUE)
 })
 
@@ -41,12 +41,11 @@ test_that("aggregate narrative context records retained engines and refit truth"
     result$tuning$final_configuration
   )
   expect_match(text, "Retained model identities (aggregate metadata)", fixed = TRUE)
-  expect_match(text, "PRIOR/MODEL-CAPACITY KNOWLEDGE", fixed = TRUE)
-  expect_match(text, "do not show that the fitted models used", fixed = TRUE)
+  expect_false(grepl("PRIOR/MODEL-CAPACITY KNOWLEDGE", text, fixed = TRUE))
   expect_match(text, "COMPUTED MODEL-COMPARISON EVIDENCE", fixed = TRUE)
   expect_match(text, "Actual final fitted configuration", fixed = TRUE)
   expect_match(text, result$tuning$final_configuration, fixed = TRUE)
-  expect_match(memo, "What kinds of models were retained?", fixed = TRUE)
+  expect_false(grepl("What kinds of models were retained?", memo, fixed = TRUE))
   expect_match(memo, "What did the retained models do differently?", fixed = TRUE)
 })
 

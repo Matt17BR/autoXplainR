@@ -1,0 +1,111 @@
+---
+title: "Compare and tune models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compare and tune models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(AutoXplainR)
+```
+
+`model_set = "quick"` fits a pre-specified linear, logistic or multinomial model
+and a baseline. `"comparison"` adds two pre-specified trees but keeps the same
+primary model. Its evaluation ranks are descriptive. Use `"tuned"` when the
+analysis calls for model selection: candidates are compared using training-only
+cross-validation before the selected model is scored on the outer evaluation set.
+
+## Choose a portfolio
+
+```{r catalog}
+as.data.frame(learner_catalog())[, c("family", "backend", "supported_tasks", "portfolios")]
+```
+
+| Portfolio | Included families | Dependencies |
+|---|---|---|
+| `core` | Linear, tree, neural | Ordinary package dependencies |
+| `recommended` | Linear, regularized, additive, tree, forest, boosting | Optional engines installed explicitly |
+| `extended` | All ten, including kernel, nearest-neighbor and MARS | Additional optional engines |
+
+Additive and MARS learners support regression and binary tasks. The requested
+portfolio does not change silently with installed packages; a missing engine
+produces an installation instruction.
+
+```{r tune}
+tuned <- autoxplain(iris, "Species", model_set = "tuned", portfolio = "core",
+                    max_models = 6, nfolds = 3, seed = 2026)
+tuning <- tuning_results(tuned)
+tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected")]
+```
+
+Every fold learns its preprocessing from that fold's training rows. The default
+one-standard-error rule favors the first eligible family in the documented
+priority, then its least-flexible eligible configuration. Cross-family priority
+is a package policy, not a statistical ordering of model families. Fold-score
+standard errors are a selection heuristic, not independent-test confidence intervals.
+Use `tuning_rule = "best"` for the lowest resampled error instead.
+
+```{r optional-install, eval=FALSE}
+install_model_engines("recommended")
+result <- autoxplain(my_data, "outcome", model_set = "tuned", portfolio = "recommended")
+```
+
+`tuning_control()` accepts explicit parameter grids, fold IDs, selection rules
+and failure policies. Inspect its help and `tuning_results()` before changing
+these defaults. Chronological tuning is not implemented; temporal model selection
+requires an explicit rolling-origin design outside this workflow.
+
+## Compare fitted behavior
+
+```{r behavior}
+comparison <- autoxplain(iris, "Sepal.Length", model_set = "comparison", seed = 2026)
+compare_model_behavior(comparison)
+head(prediction_ambiguity(comparison)$rows)
+```
+
+Family descriptions state what an algorithm can represent. The scores and
+prediction differences describe what these particular fitted models did on
+common evaluation rows. Disagreement does not supply prediction intervals or
+identify the correct prediction.
+
+```{r effects, fig.width=7, fig.height=4}
+effects <- compare_model_effects(comparison, "Petal.Length", method = "ale", n_points = 8)
+plot(effects)
+```
+
+Effects are evaluated on a common grid. Their differences cover the supplied
+fits, not every competitive model or uncertainty from refitting. For multiclass
+outcomes, request a named class with `class = "virginica"`.
+
+`model_tradeoffs()` offers optional performance/resource comparisons. Its default
+size axis measures approximate R object storage, not structural complexity.
+Use it when storage or runtime is relevant to a concrete constraint; a favorable
+Pareto position is not a model-selection rule.
+
+## Optional H2O search
+
+H2O is a separate engine requiring Java, the `h2o` package and a running process.
+It does not support this package's grouped or temporal validation plans. With
+H2O internal cross-validation, learned external imputation, missingness-based
+column removal and automatic ordinal coercion are rejected because they would
+be learned before H2O creates its folds. Use the default keep-missing path, the
+base engine for fold-local preprocessing, or explicitly designed validation
+with `nfolds = 0`. H2O's own transformations remain engine responsibilities.
+
+```{r h2o, eval=FALSE}
+holdout <- seq(5L, nrow(iris), by = 5L)
+h2o_result <- autoxplain(
+  iris[-holdout, ], "Species", test_data = iris[holdout, ],
+  engine = "h2o", evaluation_role = "test", max_models = 10,
+  max_runtime_secs = 0, exclude_algos = "DeepLearning", seed = 2026
+)
+render_model_report(h2o_result, "h2o-report.html")
+```
+
+This keeps supplied evaluation rows out of H2O selection. A fixed model budget,
+no wall-clock limit and exclusion of Deep Learning reduce known sources of H2O
+variation; consult the recorded provenance for remaining limits. See the
+[statistical methods](statistical-methods.html) for evaluation assumptions.

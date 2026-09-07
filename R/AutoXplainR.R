@@ -1,6 +1,6 @@
 #' AutoXplainR: guided model fitting, evaluation, and explanation
 #'
-#' AutoXplainR gives a first-time modeler one safe path from a data frame to a
+#' AutoXplainR gives a first-time modeler a guided path from a data frame to a
 #' held-out evaluation and plain-language explanation. An explicit local mode
 #' tunes a portfolio spanning linear, regularized, additive, tree, forest,
 #' boosting, neural, kernel, nearest-neighbor, and piecewise-linear behavior
@@ -26,8 +26,8 @@
 #' Permutation importance describes reliance of a fitted model on evaluation
 #' data. It does not establish causality. Intervals reported by the default
 #' estimator describe Monte Carlo variation across permutations, not sampling
-#' uncertainty in a target population. Audit grades are transparent heuristics,
-#' not safety, fairness, statistical, or regulatory certification.
+#' uncertainty in a target population. Diagnostics name their model, feature,
+#' and scope; they do not establish deployment readiness.
 #'
 #' @references
 #' Fisher A, Rudin C, Dominici F (2019). "All Models are Wrong, but Many are

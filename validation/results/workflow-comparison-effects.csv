@@ -1,0 +1,5 @@
+"model","method","reference","rows","grid_points","max_absolute_error"
+"main_model","PDP values","iml",100,16,4.2632564145606e-14
+"main_model","ALE shape anchored at minimum","iml",100,17,1.4210854715202e-14
+"simple_baseline","PDP values","iml",100,16,1.20792265079217e-13
+"simple_baseline","ALE shape anchored at minimum","iml",100,17,0

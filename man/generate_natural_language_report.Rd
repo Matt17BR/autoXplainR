@@ -2,7 +2,7 @@
 % Please edit documentation in R/llm_integration.R
 \name{generate_natural_language_report}
 \alias{generate_natural_language_report}
-\title{Generate an evidence-constrained narrative}
+\title{Summarize retained model evidence in prose}
 \usage{
 generate_natural_language_report(
   autoxplain_result,
@@ -27,13 +27,19 @@ generate_natural_language_report(
 \arguments{
 \item{autoxplain_result}{An \code{autoxplain_result} or \code{autoxplain_audit}.}
 
-\item{importance_data}{Optional permutation importance data.}
+\item{importance_data}{Optional permutation importance table overriding the
+retained audit's importance component. Tables with an explainer identity
+must match the primary model. Bare tables are labeled user-supplied with
+unverified identity; their metric should be supplied as a \code{metric} attribute.}
 
-\item{pdp_data}{Optional feature-effect list.}
+\item{pdp_data}{Optional feature-effect list overriding retained effects.
+An empty list omits effects from the narrative.}
 
-\item{model_characteristics}{Optional model metadata.}
+\item{model_characteristics}{Retained for compatibility. Generic model-family
+capacity descriptions are not included in the memo.}
 
-\item{audit}{Optional \code{autoxplain_audit}.}
+\item{audit}{Optional \code{autoxplain_audit} overriding retained audit findings
+and importance. The result's evaluation and effects remain available.}
 
 \item{provider}{One of \code{"local"}, \code{"gemini"}, \code{"groq"},
 \code{"cloudflare"}, \code{"ollama"}, \code{"openrouter"}, or \code{"custom"}. The default
@@ -83,7 +89,9 @@ A single character string with a \code{narrative_provenance} attribute.
 \description{
 Produces a deterministic local narrative by default. Remote or locally
 hosted generative models are used only when \code{provider} is set explicitly.
-Raw rows, fitted objects, case-level predictions, and secrets are never
-included in the prompt. Generated prose remains secondary to the computed
-evaluation and explanation evidence.
+Evaluation, retained explanation findings, fitted effects and failed checks
+are included automatically. Prompt construction omits raw rows, fitted
+objects and case-level predictions; names and diagnostic text may still be
+sensitive. Hosted output is checked for format and length, not numerical
+grounding. Review generated claims against the computed evidence.
 }

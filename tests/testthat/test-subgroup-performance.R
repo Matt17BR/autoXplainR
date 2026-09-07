@@ -94,9 +94,9 @@ test_that("subgroup performance validates the requested comparison", {
   )
   evaluation <- transform(training, x = x + 50, y = y + 50)
   result <- autoxplain(training, "y", test_data = evaluation, seed = 8)
-  result$test_data$one_group <- "same"
-  result$test_data$two_groups <- rep(c("a", "b"), 25)
-  result$test_data$many_groups <- rep(sprintf("group-%02d", seq_len(25)), each = 2)
+  result$evaluation_context$one_group <- "same"
+  result$evaluation_context$two_groups <- rep(c("a", "b"), 25)
+  result$evaluation_context$many_groups <- rep(sprintf("group-%02d", seq_len(25)), each = 2)
 
   expect_error(subgroup_performance(result, "missing"), "not available")
   expect_error(subgroup_performance(result, "y"), "not the outcome")

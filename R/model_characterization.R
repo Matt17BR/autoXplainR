@@ -190,6 +190,9 @@ summary.autoxplainr_model_characteristics <- function(object, ...) {
 #' sensitivity analysis; AutoXplainR reports the underlying dimensions
 #' separately in its primary workflow.
 #'
+#' Deprecated in 0.4.0, with removal no earlier than 0.6.0. Report predictive
+#' error and measured resource use separately using [render_model_report()].
+#'
 #' @param performance_scores Numeric model scores.
 #' @param training_times Numeric training times in seconds.
 #' @param performance_weight Weight on predictive performance.
@@ -214,9 +217,9 @@ calculate_weighted_efficiency <- function(performance_scores,
   if (!is.logical(higher_is_better) || length(higher_is_better) != 1L || is.na(higher_is_better)) {
     stop("`higher_is_better` must be TRUE or FALSE.", call. = FALSE)
   }
-  warning(
-    "Weighted efficiency is candidate-set-relative and weight-dependent; report both raw dimensions.",
-    call. = FALSE
+  warn_legacy_report(
+    "calculate_weighted_efficiency",
+    "render_model_report(result, output_file) to compare error and resource use separately"
   )
   performance <- minmax(performance_scores)
   if (!higher_is_better) performance <- 1 - performance
@@ -225,6 +228,9 @@ calculate_weighted_efficiency <- function(performance_scores,
 }
 
 #' Create a compact model metadata report
+#'
+#' Deprecated in 0.4.0, with removal no earlier than 0.6.0. Use
+#' [render_model_report()] for the maintained analysis report.
 #'
 #' @param model_characteristics Output from [extract_model_characteristics()].
 #' @param output_file Destination HTML file.
@@ -243,6 +249,7 @@ create_model_comparison_report <- function(model_characteristics,
         tolower(tools::file_ext(output_file)) != "html") {
     stop("`output_file` must be a single .html path.", call. = FALSE)
   }
+  warn_legacy_report("create_model_comparison_report")
   summary <- attr(model_characteristics, "summary")
   table <- model_characteristics_table(model_characteristics)
   html <- paste0(

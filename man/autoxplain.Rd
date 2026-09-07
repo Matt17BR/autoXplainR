@@ -100,7 +100,7 @@ class contains fewer rows. For H2O, zero is accepted only with explicit
 by training error alone.}
 
 \item{tuning_rule}{Local tuning selection rule. \code{"one_se"} chooses the
-first eligible family in the documented reviewed priority, then its
+first eligible family in the documented priority, then its
 least-flexible configuration, among candidates whose resampled error is
 within one standard error of the best. The family priority and
 family-specific flexibility proxies

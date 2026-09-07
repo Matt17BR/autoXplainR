@@ -28,7 +28,9 @@ its stored feature data.}
 
 \item{features}{Non-empty character vector of feature names.}
 
-\item{n_points}{Number of quantile bins for ALE or grid points for PDP.}
+\item{n_points}{Maximum number of empirical quantile bins for ALE or grid
+points for PDP. Ties can reduce the ALE bin count. ALE returns both the
+first lower boundary and each upper boundary.}
 
 \item{quantile_range}{Numeric length-two range used for a numeric PDP grid.}
 

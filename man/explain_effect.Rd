@@ -31,7 +31,9 @@ its stored feature data.}
 
 \item{method}{\code{"ale"} or \code{"pdp"}.}
 
-\item{n_points}{Number of quantile bins for ALE or grid points for PDP.}
+\item{n_points}{Maximum number of empirical quantile bins for ALE or grid
+points for PDP. Ties can reduce the ALE bin count. ALE returns both the
+first lower boundary and each upper boundary.}
 
 \item{quantile_range}{Numeric length-two range used for a numeric PDP grid.}
 
@@ -70,6 +72,16 @@ ALE is the default because it avoids the most direct extrapolation problem of
 marginal PDPs when predictors are correlated. PDP output includes local
 support and dependence diagnostics so unsupported curves are not presented as
 unqualified facts.
+}
+\details{
+ALE uses observed empirical quantiles (type 1), with right-closed
+bins and the minimum included in the first bin. Every bin therefore has
+observations even when predictor values are tied. Cumulative local
+differences are reported at the bin boundaries. The curve is centered by
+subtracting the empirical mean of its linearly interpolated values at the
+reference observations. The initial boundary has no separate bin count
+(\code{n = NA}); its support is that of the first bin. These are finite-bin
+approximations, and wider bins can obscure within-bin nonlinear behavior.
 }
 \examples{
 fit <- lm(mpg ~ wt + hp + disp, data = mtcars)

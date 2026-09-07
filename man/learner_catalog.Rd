@@ -20,6 +20,12 @@ describe the kind of pattern a model can learn; backends identify the R
 implementation. Keeping those concepts separate lets reports explain model
 behavior without exposing beginners to backend-specific syntax.
 }
+\details{
+The package's R >= 4.1 requirement covers the core workflow.
+Optional engine versions and their dependencies can require newer R. The
+catalog reports unavailable engines explicitly; full portfolio checks use
+the declared engine minima on current R release.
+}
 \examples{
 learner_catalog()
 learner_catalog("regression")

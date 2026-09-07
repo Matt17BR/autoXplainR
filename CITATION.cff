@@ -9,7 +9,7 @@ authors:
 repository-code: "https://github.com/Matt17BR/autoXplainR"
 url: "https://matt17br.github.io/autoXplainR/"
 license: MIT
-version: 0.3.0
+version: 0.4.0
 date-released: 2026-09-07
 keywords:
   - beginner model fitting

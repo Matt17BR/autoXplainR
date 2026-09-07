@@ -158,7 +158,10 @@ calculate_permutation_importance <- function(model,
   attr(out, "interval_type") <- "Monte Carlo t interval across permutations"
   attr(out, "feature_groups") <- groups
   attr(out, "blocked_within") <- if (is.null(within)) NULL else within
-  attr(out, "explainer_fingerprint") <- explainer$provenance$fingerprint
+  evaluation_explainer <- explainer
+  evaluation_explainer$data <- x
+  evaluation_explainer$y <- y
+  attr(out, "explainer_fingerprint") <- current_explainer_fingerprint(evaluation_explainer)
   out
 }
 
@@ -283,7 +286,9 @@ stratified_permutation <- function(n, strata = NULL) {
   if (is.null(strata)) return(sample.int(n))
   permutation <- seq_len(n)
   split_indices <- split(seq_len(n), strata, drop = TRUE)
-  for (indices in split_indices) permutation[indices] <- sample(indices)
+  for (indices in split_indices) {
+    permutation[indices] <- indices[sample.int(length(indices))]
+  }
   permutation
 }
 
@@ -334,10 +339,16 @@ importance_metric_from_primary <- function(metric) {
 }
 
 metric_score <- function(y, prediction, metric, explainer) {
+  if (is.factor(prediction) && metric != "accuracy") {
+    stop("This metric requires probabilities; the prediction adapter supplies class labels. ",
+         "Use `metric = \"accuracy\"`.",
+         call. = FALSE)
+  }
   if (metric == "rmse") return(sqrt(mean((as.numeric(y) - prediction)^2)))
   if (metric == "mae") return(mean(abs(as.numeric(y) - prediction)))
   if (metric == "accuracy") {
     if (explainer$task == "binary") {
+      if (is.factor(prediction)) return(mean(as.character(y) == as.character(prediction)))
       observed <- as.character(y) == explainer$positive
       return(mean(observed == (prediction >= 0.5)))
     }

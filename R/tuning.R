@@ -1186,17 +1186,8 @@ tuning_configuration_fit_spec <- function(configuration, data, target) {
 
 fit_tuned_neural_network <- function(data, target, task, size, decay) {
   features <- setdiff(names(data), target)
-  feature_formula <- safe_reformulate(features)
-  frame <- stats::model.frame(feature_formula, data = data, na.action = stats::na.fail)
-  terms <- stats::terms(frame)
-  matrix <- stats::model.matrix(terms, frame)
-  if ("(Intercept)" %in% colnames(matrix)) {
-    matrix <- matrix[, colnames(matrix) != "(Intercept)", drop = FALSE]
-  }
-  center <- colMeans(matrix)
-  scale <- apply(matrix, 2L, stats::sd)
-  scale[!is.finite(scale) | scale == 0] <- 1
-  x <- sweep(sweep(matrix, 2L, center, "-"), 2L, scale, "/")
+  blueprint <- fit_matrix_blueprint(data, predictors = features, center = TRUE, scale = TRUE)
+  x <- bake_matrix_blueprint(blueprint, data)
   y <- data[[target]]
   levels <- if (task == "regression") NULL else base::levels(y)
   y_center <- 0
@@ -1233,11 +1224,12 @@ fit_tuned_neural_network <- function(data, target, task, size, decay) {
   structure(
     list(
       model = fitted,
-      terms = terms,
-      columns = colnames(matrix),
-      xlevels = lapply(data[features][vapply(data[features], is.factor, logical(1))], levels),
-      center = center,
-      scale = scale,
+      blueprint = blueprint,
+      terms = blueprint$terms,
+      columns = blueprint$columns,
+      xlevels = blueprint$xlevels,
+      center = blueprint$center,
+      scale = blueprint$scale,
       y_center = y_center,
       y_scale = y_scale,
       task = task,
@@ -1252,6 +1244,24 @@ fit_tuned_neural_network <- function(data, target, task, size, decay) {
 #' @export
 predict.autoxplain_tuned_nnet <- function(object, newdata, ...) {
   assert_data_frame(newdata, "newdata")
+  x <- if (!is.null(object$blueprint)) {
+    bake_matrix_blueprint(object$blueprint, newdata)
+  } else {
+    bake_legacy_neural_matrix(object, newdata)
+  }
+  raw <- stats::predict(object$model, x, type = "raw")
+  if (object$task == "regression") {
+    return(as.numeric(raw) * object$y_scale + object$y_center)
+  }
+  if (object$task == "binary") return(as.numeric(raw))
+  output <- as.matrix(raw)
+  colnames(output) <- object$class_levels
+  output
+}
+
+bake_legacy_neural_matrix <- function(object, newdata) {
+  # Preserve prediction support for numeric/unordered models saved before the
+  # fitted blueprint became part of the neural-model contract.
   for (feature in intersect(names(object$xlevels), names(newdata))) {
     newdata[[feature]] <- factor(
       as.character(newdata[[feature]]),
@@ -1271,21 +1281,13 @@ predict.autoxplain_tuned_nnet <- function(object, newdata, ...) {
   if (!identical(colnames(matrix), object$columns)) {
     stop("Neural-network prediction columns do not match the fitted schema.", call. = FALSE)
   }
-  x <- sweep(sweep(matrix, 2L, object$center, "-"), 2L, object$scale, "/")
-  raw <- stats::predict(object$model, x, type = "raw")
-  if (object$task == "regression") {
-    return(as.numeric(raw) * object$y_scale + object$y_center)
-  }
-  if (object$task == "binary") return(as.numeric(raw))
-  output <- as.matrix(raw)
-  colnames(output) <- object$class_levels
-  output
+  sweep(sweep(matrix, 2L, object$center, "-"), 2L, object$scale, "/")
 }
 
 tuning_rule_label <- function(rule) {
   if (identical(rule, "one_se")) {
     paste(
-      "one-standard-error (prefer the reviewed family priority, then the",
+      "one-standard-error (prefer the documented family priority, then the",
       "least-flexible near-best setting within that family)"
     )
   } else {

@@ -166,7 +166,7 @@ test_that("optional explanation audit adds compact rank evidence", {
   expect_setequal(unique(evidence$top_features$model), model_ids)
   expect_true(all(evidence$top_features$rank_within_model <= 5L))
   expect_true(all(c(
-    "feature", "importance", "sign_stability", "evidence_grade", "claim"
+    "feature", "importance", "sign_stability", "shuffle_status", "dependence_status", "claim"
   ) %in% names(evidence$top_features)))
   expect_equal(nrow(evidence$rank_agreement), 1L)
   expect_named(evidence$rank_agreement, c(

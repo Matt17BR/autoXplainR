@@ -114,6 +114,7 @@ prepare_validation_design <- function(data, target, test_data, validation, fract
   }
   predictors <- setdiff(names(data), column)
   list(
+    evaluation_context = data[evaluation, setdiff(names(data), target), drop = FALSE],
     training = data[training, predictors, drop = FALSE],
     evaluation = data[evaluation, predictors, drop = FALSE],
     tuning_control = control,

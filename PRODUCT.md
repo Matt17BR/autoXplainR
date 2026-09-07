@@ -24,9 +24,12 @@ rows. User-supplied evaluation data are not automatically described as independe
 The package explains fitted prediction functions. It does not identify causal
 effects, certify deployment, or establish that every competitive model agrees.
 Uncertainty from permutations, evaluation sampling and fitting are different and
-must have different labels. Automatically selected feature summaries remain
-descriptive. Language-model prose is optional and cannot override numerical
-results.
+must have different labels. Diagnostics report their scope, status and affected
+models or features; they are not collapsed into an overall quality grade.
+Automatically selected feature summaries remain
+descriptive. Optional generated prose is displayed separately from numerical results.
+Hosted responses are checked for format and length, not factual or numerical
+grounding; users must review their claims against the retained evidence.
 
 The contribution we aim to demonstrate is a simple, inspectable workflow that
 joins these pieces. We do not claim a unique estimator or demonstrated superiority

@@ -32,7 +32,8 @@ with sync_playwright() as playwright:
         options["executable_path"] = os.environ["CHROME_PATH"]
     browser = playwright.chromium.launch(**options)
     page = browser.new_page(
-        viewport={"width": 1100, "height": 900}, device_scale_factor=1.5
+        viewport={"width": 1100, "height": 900}, device_scale_factor=1.5,
+        reduced_motion="reduce"
     )
     page.goto(REPORT.as_uri(), wait_until="load")
     page.evaluate("document.fonts.ready")
@@ -44,20 +45,29 @@ with sync_playwright() as playwright:
         overview["y"] + overview["height"] + 20,
     )
 
-    # Frame the comparison opening and chart together so axis labels remain
-    # readable; the complete report also contains detailed comparison tables.
+    # Show scores and prediction disagreement. Resource measurements are
+    # secondary details in the report, rather than the comparison headline.
     comparison = page.locator("#models").bounding_box()
-    chart = page.locator("#models .tradeoff-layout").bounding_box()
     capture_region(
         page, "model-comparison.png", comparison["y"] - 20,
-        chart["y"] + chart["height"] + 20,
+        comparison["y"] + comparison["height"] + 20,
     )
-    for section, filename in (
-        ("patterns", "model-patterns.png"),
-        ("reliability", "explanation-reliability.png"),
-    ):
-        box = page.locator(f"#{section}").bounding_box()
-        capture_region(page, filename, box["y"] - 20, box["y"] + box["height"] + 20)
+    patterns = page.locator("#patterns").bounding_box()
+    first_effect = page.locator("#patterns .effect-card").first.bounding_box()
+    capture_region(
+        page, "model-patterns.png", patterns["y"] - 20,
+        first_effect["y"] + first_effect["height"] + 20,
+    )
+
+    # Open the real diagnostic table so the gallery shows the completed checks.
+    page.locator("#reliability details").evaluate_all(
+        "elements => elements.forEach(element => element.open = true)"
+    )
+    reliability = page.locator("#reliability").bounding_box()
+    capture_region(
+        page, "explanation-reliability.png", reliability["y"] - 20,
+        reliability["y"] + reliability["height"] + 20,
+    )
 
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate(

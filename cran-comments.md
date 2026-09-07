@@ -1,45 +1,43 @@
 ## Release candidate
 
-AutoXplainR 0.3.0, prepared 2026-09-07. The package is currently distributed on
-GitHub. This file is a preparation record, not evidence of CRAN acceptance or
-submission of this version.
+AutoXplainR 0.4.0, prepared 2026-09-07. The package is distributed on GitHub.
+This is a preparation record, not evidence of CRAN submission or acceptance.
+The next CRAN submission requires maintainer review of the exact archive.
 
-## Local validation
+## Scope of this release
 
-- Ubuntu 26.04.1 LTS, R 4.5.2, all declared optional native model engines installed.
-- Complete suite: 1,915 passing expectations, no failures or warnings. Two
-  opt-in live tests skipped (H2O and Gemini).
-- Separate live H2O suite: 93 passing expectations, no failures or skips.
-- Statement coverage: 89.28%; ordinary coverage excludes the live H2O path.
-- Lint and spelling checks passed; pkgdown site and both vignettes built.
-- Independent numerical oracles and iml PDP agreement passed. A small bootstrap
-  simulation found 90% coverage with 20 evaluation rows and 96% with 100 rows
-  for nominal 95% intervals (100 replicates per setting). Small-sample limits
-  are documented; these results do not establish general coverage guarantees.
-
-## Source archive and remote checks
-
-The release pipeline builds a source archive, checks that exact archive with
-`R CMD check --as-cran`, includes PDF/HTML manuals, and verifies SHA-256 before
-and after checking. It checks the same archive with R-devel as a second gate.
-GitHub's main-branch matrix also covers Windows, macOS, current/older R and R 4.1.
-The tagged commit passed the complete matrix. The separate R-devel source
-check (2026-09-06 r90498) had zero errors/warnings and one new-submission note.
-Actual check results and artifact identifiers are recorded in
-`validation/release-0.3.0.md` and linked GitHub Actions runs.
-
-The Win-builder URLs previously recorded for 0.2.0 apply only to that older
-archive. They are not evidence for this version. A new CRAN submission still
-requires a fresh review of the exact proposed archive and maintainer submission.
-
-## Optional software and scope
+This release repairs the calculation and evidence-contract failures recorded in
+`validation/audit-0.3.0.md`. The disposition of all 25 findings is in
+`validation/resolution-0.4.0.md`. Binary prediction events, invalid prediction
+coercion, stratified permutations, ALE coordinates, subgroup context and stale
+attached evidence have dedicated regression tests. Aggregate heuristic grades
+are removed. Reports and local narratives use scoped diagnostics.
 
 The core does not require Java, a browser, network access or credentials during
-checks. H2O and hosted narrative integrations are explicitly opt-in. Ordinary
-examples use local data and models. Existing modeling and explanation methods
-are cited in DESCRIPTION and the installed statistical-methods vignette.
+checks. H2O and hosted narrative integrations are explicitly opt-in. Examples
+and installed vignettes use local data and models. The five vignettes describe
+first use, selection, validation, statistical methods and existing-model reports.
 
-This release integrates fitting, study-aware validation, baseline evaluation,
-explanation diagnostics, raw-row prediction and reports. The percentile bootstrap
-conditions on fitted models; it does not include selection or refitting
-uncertainty. Structured H2O validation and temporal tuning are unsupported.
+## Validation record
+
+`validation/release-0.4.0.md` records the executed tests, runtime, source checks,
+browser checks and final release artifact. Older 0.2.0 Win-builder and 0.3.0
+release checks do not establish anything about this archive.
+
+The release pipeline builds once, fully checks that archive with R CMD check
+--as-cran including PDF/HTML manuals, checks the same archive under R-devel,
+verifies its SHA-256 and publishes that checked archive. Native engines and live
+H2O have separate gates. An isolated job installs and tests the exact optional
+engine minimum versions declared in DESCRIPTION; current-version jobs remain.
+
+## Interpretation and compatibility
+
+Result and aggregate export schemas are 2.0. Affected analyses from 0.3.0 should
+be recomputed. Fitting and explanation methods are described and cited in the
+installed documentation. Shuffle intervals describe Monte Carlo variation;
+fixed-model evaluation bootstraps omit selection and refitting uncertainty.
+Structured H2O validation and temporal tuning remain unsupported. External
+learned preprocessing that crosses H2O's internal folds is rejected.
+
+The executed DALEX/modelStudio comparison establishes a bounded same-model
+workflow comparison, not a general superiority or human-usability claim.

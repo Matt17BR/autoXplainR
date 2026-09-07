@@ -23,7 +23,9 @@ its stored feature data.}
 
 \item{feature}{A single feature name.}
 
-\item{n_points}{Number of quantile bins for ALE or grid points for PDP.}
+\item{n_points}{Maximum number of empirical quantile bins for ALE or grid
+points for PDP. Ties can reduce the ALE bin count. ALE returns both the
+first lower boundary and each upper boundary.}
 
 \item{predict_function}{Optional prediction function for a fitted model.}
 

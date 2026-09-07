@@ -3,6 +3,12 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      minimum_only:
+        type: boolean
+        required: false
+        default: false
 
 name: native-model-engines
 
@@ -11,6 +17,7 @@ permissions:
 
 jobs:
   diverse-model-portfolio:
+    if: ${{ !inputs.minimum_only }}
     name: ${{ matrix.os }} (R release)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -47,3 +54,56 @@ jobs:
             stop_on_failure = TRUE
           )
         shell: Rscript {0}
+
+  minimum-engine-versions:
+    name: Declared engine minima (Ubuntu, R release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      AUTOXPLAIN_RUN_H2O: false
+      MAKEFLAGS: -j2
+    steps:
+      - uses: actions/checkout@v6
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          dependencies: '"hard"'
+          # Bootstrap current packages to provision binary dependencies and
+          # system requirements; only the isolated exact pins are tested below.
+          extra-packages: >-
+            any::pkgload,
+            any::remotes,
+            any::testthat,
+            any::e1071,
+            any::earth,
+            any::glmnet,
+            any::h2o,
+            any::kknn,
+            any::mgcv,
+            any::ranger,
+            any::xgboost
+      - name: Install the exact DESCRIPTION engine minima in an isolated library
+        run: >-
+          Rscript .github/scripts/check-engine-support.R
+          --install
+          --library="$RUNNER_TEMP/engine-minimum-library"
+          --report="$RUNNER_TEMP/engine-support-install"
+      - name: Verify pins and exercise adapters in a fresh R process
+        run: >-
+          Rscript .github/scripts/check-engine-support.R
+          --tests
+          --library="$RUNNER_TEMP/engine-minimum-library"
+          --report="$RUNNER_TEMP/engine-support-tests"
+      - name: Upload engine versions and dependency environment
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: AutoXplainR-minimum-engine-support-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/engine-support-install/
+            ${{ runner.temp }}/engine-support-tests/
+          if-no-files-found: warn

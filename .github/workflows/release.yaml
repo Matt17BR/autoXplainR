@@ -10,6 +10,14 @@ permissions:
   contents: read
 
 jobs:
+  browser-gate:
+    uses: ./.github/workflows/report-browser.yaml
+
+  engine-minimum-gate:
+    uses: ./.github/workflows/native-model-engines.yaml
+    with:
+      minimum_only: true
+
   quality-gates:
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -99,7 +107,7 @@ jobs:
         shell: Rscript {0}
 
   source-package:
-    needs: [quality-gates, h2o-gate]
+    needs: [quality-gates, h2o-gate, browser-gate, engine-minimum-gate]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:

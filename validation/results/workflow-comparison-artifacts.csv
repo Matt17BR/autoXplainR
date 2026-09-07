@@ -1,0 +1,5 @@
+"artifact","workflow","implementation","exists","bytes","sha256","interactive_browser_check"
+"autoxplain-delivery.html","AutoXplainR","native report",TRUE,54752,"80fc7478e381c5dfff771c7cdf33846024aad8f1fcef824b21c5cf69e001a7eb","passed"
+"dalex-comparison-index.html","DALEX + modelStudio","comparison-script index",TRUE,1242,"d6b6e2a60ed8a405f8fb55a62187526fca7f6803ec07965fe6ec9e7ef2253d6b","passed"
+"dalex-modelstudio-main_model.html","DALEX + modelStudio","native modelStudio",TRUE,697570,"93db4469b70984f31a3d04ea78a0d47056a51b825a763f86125ddeac8c10f05d","passed"
+"dalex-modelstudio-simple_baseline.html","DALEX + modelStudio","native modelStudio",TRUE,695452,"d7631bf5bec36dde845fa02c7443b4df01f909936f0fae9573569766490e47a4","passed"

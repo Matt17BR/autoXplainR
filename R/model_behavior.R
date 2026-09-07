@@ -4,7 +4,7 @@
 #' common, model-agnostic comparison. It keeps two kinds of evidence separate:
 #'
 #' * learner behavior cards describe what each model family can represent;
-#'   they are reviewed prior knowledge, not findings from the supplied data;
+#'   they are general descriptions, not findings from the supplied data;
 #' * performance and paired prediction differences are computed from the
 #'   result's common evaluation rows; approximate R object size or runtime,
 #'   when shown, is an operational resource proxy rather than structural model
@@ -99,7 +99,7 @@ compare_model_behavior <- function(result,
     evaluation_role = ambiguity$evaluation_role,
     prediction = ambiguity$scope_note,
     behavior_cards = paste(
-      "Behavior cards are reviewed descriptions of model-family capacity;",
+      "Behavior cards are descriptions of model-family capacity;",
       "they do not prove that a fitted model used every available pattern."
     ),
     tradeoff = paste(
@@ -366,7 +366,7 @@ behavior_card <- function(family) {
     nonlinearity = "not described by the learner registry",
     interactions = "not described by the learner registry",
     scaling = "inspect the backend documentation",
-    strengths = "No reviewed AutoXplainR behavior card is available.",
+    strengths = "No AutoXplainR behavior card is available.",
     cautions = "Do not infer model behavior from its name alone."
   )
 }
@@ -554,20 +554,7 @@ behavior_feature_evidence <- function(audit, model_ids, explainers) {
       call. = FALSE
     )
   }
-  expected_fingerprints <- vapply(
-    explainers,
-    function(explainer) explainer$provenance$fingerprint,
-    character(1)
-  )
-  observed_fingerprints <- audit$provenance$explainer_fingerprints[model_ids]
-  if (length(observed_fingerprints) != length(model_ids) ||
-        anyNA(observed_fingerprints) ||
-        !identical(unname(observed_fingerprints), unname(expected_fingerprints))) {
-    stop(
-      "`explanation_audit` was not made from the same selected model explainers.",
-      call. = FALSE
-    )
-  }
+  validate_attached_audit(audit, explainers)
   objects <- objects[model_ids]
   features <- Reduce(intersect, lapply(objects, function(object) object$feature))
   if (!length(features)) {
@@ -598,7 +585,7 @@ behavior_feature_evidence <- function(audit, model_ids, explainers) {
   keep <- intersect(
     c(
       "model", "rank_within_model", "feature", "importance", "std_error",
-      "conf_low", "conf_high", "sign_stability", "evidence_grade", "claim",
+      "conf_low", "conf_high", "sign_stability", "shuffle_status", "dependence_status", "claim",
       "max_association", "associated_feature"
     ),
     names(top_features)

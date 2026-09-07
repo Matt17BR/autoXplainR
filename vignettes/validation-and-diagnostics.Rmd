@@ -1,0 +1,90 @@
+---
+title: "Choose validation and inspect diagnostics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Choose validation and inspect diagnostics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(AutoXplainR)
+```
+
+Choose the sampling unit before interpreting scores. A random row holdout
+assumes rows can be sampled independently. Repeated people, households or sites
+usually need whole-group partitions; observations over time need a chronological
+boundary and features available at prediction time.
+
+```{r designs, eval=FALSE}
+result <- autoxplain(measurements, "outcome",
+                     validation = validation_split(group = "site_id"))
+result <- autoxplain(observations, "outcome",
+                     validation = validation_split(time = "recorded_at", gap = 2))
+```
+
+Split columns are excluded from predictors. Fractions refer to whole groups or
+distinct times, so row fractions can differ. A temporal gap of two excludes two
+distinct time values, not necessarily two days. Tied times stay together.
+Grouped tuning keeps units intact and fails if classification folds cannot
+contain every outcome class. Chronological tuning is unsupported.
+
+For an external evaluation set, supply `test_data`. The default role is
+`"evaluation"`; use `evaluation_role = "test"` only when the study design supports
+that role. Duplicate-valued rows across training and evaluation produce a possible
+leakage warning. The role label and duplicate check cannot establish independence.
+
+## Separate different uncertainties
+
+```{r uncertainty}
+result <- autoxplain(mtcars, "mpg", explain = FALSE)
+intervals <- performance_uncertainty(result, n_boot = 100, seed = 2026)
+intervals$estimates
+```
+
+This small teaching example uses 100 bootstrap draws; use at least 1000 for an
+analysis. The paired bootstrap measures evaluation-sample variation conditional
+on the fitted primary model and baseline. Grouped designs resample whole groups.
+It does not include uncertainty from fitting or model selection, and temporal
+designs reject the IID bootstrap. See [statistical methods](statistical-methods.html).
+
+## Probabilities, thresholds and groups
+
+```{r classification}
+cars <- transform(mtcars, am = factor(am, labels = c("automatic", "manual")))
+fit <- autoxplain(cars, "am")
+calibration_diagnostics(fit)
+threshold_diagnostics(fit)
+```
+
+Binary probabilities refer to the second training factor level, here `"manual"`.
+Calibration compares predicted probabilities with observed frequencies. The
+binned calibration gap depends on the sample and chosen grouping. Threshold
+sensitivity displays false-positive/false-negative trade-offs; choosing a
+threshold after viewing final evaluation labels would reuse those labels for selection.
+
+```{r subgroup}
+regression <- autoxplain(cars, "mpg")
+subgroup_performance(regression, "am")
+```
+
+Subgroup scores describe an explicitly selected column. They are not a fairness
+certification, and small groups may supply insufficient evidence. The function
+retains group counts and reasons for unavailable metrics.
+
+## Missingness changes
+
+```{r missingness}
+set.seed(23)
+training <- data.frame(x = rnorm(100), y = rnorm(100))
+evaluation <- data.frame(x = rnorm(40), y = rnorm(40))
+evaluation$x[1:12] <- NA_real_
+missing_fit <- autoxplain(training, "y", test_data = evaluation, explain = FALSE)
+missingness_shift(missing_fit)
+```
+
+Missingness rates are recorded before imputation. A difference is a descriptive
+review signal, not a distribution-shift test or proof that imputation preserved
+predictive validity. The report and result retain unavailable checks separately
+from completed checks.

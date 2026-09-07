@@ -60,7 +60,7 @@
 #'   `test_data` and `use_test_as_validation = TRUE`; this prevents model ranking
 #'   by training error alone.
 #' @param tuning_rule Local tuning selection rule. `"one_se"` chooses the
-#'   first eligible family in the documented reviewed priority, then its
+#'   first eligible family in the documented priority, then its
 #'   least-flexible configuration, among candidates whose resampled error is
 #'   within one standard error of the best. The family priority and
 #'   family-specific flexibility proxies
@@ -288,6 +288,9 @@ autoxplain <- function(data,
     preprocessing_config
   )
 
+  preprocessing_contract <- validate_h2o_preprocessing_contract(
+    enable_preprocessing, config, nfolds
+  )
   require_optional("h2o", "fitting H2O AutoML models")
   prepared <- prepare_h2o_outer_split(
     data = data,
@@ -389,6 +392,8 @@ autoxplain <- function(data,
       evaluation = evaluated$summary,
       training_data = train,
       test_data = evaluation,
+      evaluation_context = prepared$evaluation_context,
+      evaluation_row_indices = prepared$evaluation_row_indices,
       target_column = target_column,
       features = features,
       task = resolved_task,
@@ -406,6 +411,7 @@ autoxplain <- function(data,
         max_models = max_models,
         max_runtime_secs = max_runtime_secs,
         reproducibility = reproducibility,
+        preprocessing_contract = preprocessing_contract,
         nfolds = nfolds,
         sort_metric = sort_metric,
         primary_model_id = primary_model_id,
@@ -527,54 +533,68 @@ as_explainers <- function(x, data = NULL, models = NULL) {
 
 #' @export
 print.autoxplain_result <- function(x, ...) {
+  view <- report_view_model(x)
+  identity <- view$identity
   cat("<AutoXplainR guided result>\n")
-  cat("  question:   predict `", x$target_column, "` (", x$task, ")\n", sep = "")
-  cat("  engine:     ", x$engine %||% "h2o", "\n", sep = "")
-  cat("  data:       ", nrow(x$training_data), " training + ",
-      nrow(x$test_data %||% x$training_data), " evaluation rows\n", sep = "")
+  cat("  question:   predict `", identity$target, "` (", identity$task, ")\n", sep = "")
+  cat("  primary:    ", identity$model_label, " [", identity$model_id, "]\n", sep = "")
+  cat("  engine:     ", identity$engine, "\n", sep = "")
+  if (!is.null(identity$positive)) {
+    cat("  event:      probabilities of `", identity$positive, "`\n", sep = "")
+  }
+  cat("  data:       ", identity$training_rows, " training + ",
+      identity$evaluation_rows, " ", identity$evaluation_role, " rows\n", sep = "")
+  cat("  design:     ", identity$split_method, "\n", sep = "")
+  cat("  selection:  ", identity$selection_note, "\n", sep = "")
   cat("  models:     ", length(x$models), if (inherits(x$tuning, "autoxplain_tuning")) {
     paste0(" (selected from ", nrow(x$tuning$candidates),
            " training-resampled configurations)")
-  } else if (identical(x$engine, "h2o")) {
-    " (H2O-selected primary + alternatives + baseline)"
   } else if (length(x$models) > 2L) {
-    " (comparison set; primary remains pre-specified)"
+    " (retained comparison set)"
   } else {
     " (primary + baseline)"
   }, "\n", sep = "")
   if (!is.null(x$evaluation$primary_metric)) {
-    reference <- x$evaluation$primary_model_id %||%
-      if ("main_model" %in% names(x$evaluation$metrics)) "main_model" else x$evaluation$winner
     metric <- x$evaluation$primary_metric
-    score <- x$evaluation$metrics[[reference]][[metric]]
-    cat("  result:     primary model has ", metric, " = ",
-        format(round(score, 4L), trim = TRUE), "\n", sep = "")
+    score <- x$evaluation$metrics[[identity$model_id]][[metric]]
+    cat("  score:      ", metric, " = ",
+        format(round(score, 4L), trim = TRUE), " on ",
+        identity$evaluation_role, " rows\n", sep = "")
     improvement <- x$evaluation$improvement_over_baseline
     if (is.finite(improvement)) {
-      cat("  baseline:   ", format(round(100 * improvement, 1L), trim = TRUE),
-          "% improvement in ", metric, "\n", sep = "")
+      cat("  baseline:   ", format(round(100 * abs(improvement), 1L), trim = TRUE),
+          if (improvement >= 0) "% improvement in " else "% worse in ", metric, "\n", sep = "")
     }
-    if (inherits(x$tuning, "autoxplain_tuning")) {
-      selected <- x$tuning$candidates[x$tuning$candidates$selected, , drop = FALSE]
-      cat("  tuning:     ", selected$model[[1L]], " chosen by ",
-          x$tuning$folds_used, "-fold ", tuning_rule_label(x$tuning$selection_rule),
-          "\n", sep = "")
-      cat("  compare:    use compare_model_behavior() to see why retained families differ\n")
-    } else if (identical(x$engine, "h2o")) {
-      cat("  selection:  H2O engine leaderboard; outer ranks remain descriptive\n")
-      cat("  compare:    use compare_model_behavior() for aligned fitted-model differences\n")
-    } else if (identical(x$engine %||% "base", "base")) {
-      cat("  compare:    use model_set = \"tuned\" for automatic multi-family selection\n")
-    }
-    if (!is.null(x$explanations)) {
-      cat("  evidence:   ", nrow(x$explanations$audit$importance), " model-feature summaries; ",
-          length(x$explanations$effects), " fitted effects\n", sep = "")
-    }
-    if (!is.null(x$report_file)) cat("  report:     ", x$report_file, "\n", sep = "")
-    cat("  next:       predict(result, newdata), render_model_report(result, \"report.html\")\n")
+  }
+  notes <- x$evaluation$notes
+  if (!is.null(notes) && nrow(notes)) {
+    leading <- order(match(notes$severity, c("warning", "caution", "note")))[[1L]]
+    cat("  caution:    ", notes$message[[leading]], "\n", sep = "")
+    cat("  next:       ", notes$recommendation[[leading]], "\n", sep = "")
   } else {
-    cat("  models:     ", length(x$models), "\n", sep = "")
-    cat("  evaluation: ", x$provenance$evaluation_role, "\n", sep = "")
+    cat("  scope:      Scores describe this evaluation sample; effects describe fitted associations.\n")
+  }
+  if (length(view$findings)) {
+    severity <- vapply(view$findings, function(finding) finding$severity, character(1))
+    leading <- order(match(severity, c("critical", "warning", "caution", "note")))[[1L]]
+    finding <- view$findings[[leading]]
+    cat("  finding:    ", finding$title, "\n", sep = "")
+    cat("  inspect:    ", finding$action, "\n", sep = "")
+  }
+  if (!is.null(view$audit)) {
+    cat("  evidence:   ", nrow(view$audit$importance), " model-feature shuffle summaries; ",
+        length(view$effects), " fitted effects\n", sep = "")
+  }
+  failed <- Filter(function(diagnostic) identical(diagnostic$status, "failed"), view$diagnostics)
+  if (length(failed)) {
+    cat("  incomplete: ", paste(names(failed), collapse = ", "),
+        "; inspect result$explanations and the report diagnostics\n", sep = "")
+  }
+  if (!is.null(x$report_file)) cat("  report:     ", x$report_file, "\n", sep = "")
+  cat("  inspect:    render_model_report(result, \"report.html\"), evidence_summary(result)\n")
+  cat("  predict:    predict(result, newdata) uses the saved training recipe\n")
+  if (length(x$models) > 2L) {
+    cat("  compare:    compare_model_behavior(result) examines the retained models\n")
   }
   invisible(x)
 }
@@ -642,7 +662,8 @@ validate_train_test_schema <- function(train, test, target) {
         stop("Test feature `", feature, "` contains unseen levels: ",
              paste(unseen, collapse = ", "), call. = FALSE)
       }
-      test[[feature]] <- factor(test[[feature]], levels = levels(train[[feature]]))
+      test[[feature]] <- factor(test[[feature]], levels = levels(train[[feature]]),
+                                ordered = is.ordered(train[[feature]]))
     }
   }
   test[names(train)]

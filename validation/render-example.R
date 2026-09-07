@@ -1,8 +1,22 @@
-# Public synthetic data; generated output is suitable for sharing.
+# Synthetic delivery times: no private observations or trained service model.
+# Every predictor is available when a parcel is dispatched. The primary model
+# is pre-specified; held-out candidate scores do not choose a new primary.
 if (dir.exists("R")) pkgload::load_all(quiet = TRUE) else library(AutoXplainR)
 set.seed(82)
-data <- data.frame(x = rnorm(240), z = rnorm(240))
-data$outcome <- 3 * data$x + sin(data$z) + rnorm(240)
-result <- autoxplain(data, "outcome", model_set = "comparison")
+parcels <- data.frame(
+  distance_km = round(runif(360, 5, 700), 1),
+  parcel_kg = round(rlnorm(360, 0.5, 0.8), 1),
+  dispatch_backlog = rpois(360, 12),
+  service = factor(sample(c("economy", "priority"), 360, replace = TRUE))
+)
+parcels$planned_route_hours <- parcels$distance_km / 40 + runif(360, 1, 3)
+# A route estimate overlaps with distance; the report should flag that context.
+parcels$delivery_hours <- 9 + 0.034 * parcels$distance_km +
+  1.4 * log1p(parcels$parcel_kg) + 0.3 * parcels$dispatch_backlog -
+  5 * (parcels$service == "priority") + rnorm(360, sd = 3)
+result <- autoxplain(parcels, "delivery_hours", model_set = "comparison", seed = 2026)
 dir.create("pkgdown/assets", recursive = TRUE, showWarnings = FALSE)
-render_model_report(result, "pkgdown/assets/model-report.html", uncertainty = TRUE)
+render_model_report(
+  result, "pkgdown/assets/model-report.html", uncertainty = TRUE,
+  title = "Delivery time at dispatch", target_units = "hours"
+)

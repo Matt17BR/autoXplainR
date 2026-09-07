@@ -3,8 +3,9 @@
 #' `audit_explanations()` is AutoXplainR's advanced reliability layer. It evaluates
 #' repeated permutation importance, feature dependence, Monte Carlo stability,
 #' prediction disagreement, and explanation disagreement among near-equivalent
-#' models. The output distinguishes robust descriptive evidence from claims
-#' that need more data or a conditional method.
+#' models. The output keeps shuffle variation, a limited pairwise association
+#' screen, evaluation scope, and candidate disagreement separate. It does not
+#' combine these questions into an evidence grade.
 #'
 #' This is a diagnostic protocol, not a formal certification or a substitute
 #' for domain review, causal identification, or external validation.
@@ -22,8 +23,11 @@
 #' @param performance_tolerance Relative tolerance defining the empirical set
 #'   of near-optimal supplied models. For example, `0.05` retains models whose
 #'   evaluation score is within five percent of the best supplied score.
-#' @param dependence_threshold Association above which marginal importance and
-#'   PDP claims receive a dependence warning.
+#' @param dependence_threshold Pairwise association above which marginal
+#'   importance receives a warning. Numeric pairs use absolute Spearman
+#'   correlation, mixed pairs use a correlation ratio, and categorical pairs
+#'   use Cramer's V. Small values do not establish independence or rule out
+#'   nonlinear or joint dependence.
 #'
 #' @return An object of class `autoxplain_audit`.
 #' @export
@@ -51,15 +55,7 @@ audit_explanations <- function(explainers,
   assert_probability(performance_tolerance, "performance_tolerance")
   assert_probability(dependence_threshold, "dependence_threshold", open = TRUE)
 
-  tasks <- unique(vapply(explainers, `[[`, character(1), "task"))
-  if (length(tasks) != 1L) {
-    stop("All explainers in an audit must have the same task.", call. = FALSE)
-  }
-  row_counts <- unique(vapply(explainers, function(x) nrow(x$data), integer(1)))
-  if (length(row_counts) != 1L) {
-    stop("All explainers must use evaluation data with the same number of rows.",
-         call. = FALSE)
-  }
+  assert_common_evaluation(explainers)
   available <- Reduce(intersect, lapply(explainers, function(x) names(x$data)))
   features <- features %||% available
   if (!is.character(features) || !length(features) || anyNA(features)) {
@@ -111,16 +107,14 @@ audit_explanations <- function(explainers,
   )
   performance$relative_gap <- relative_performance_gap(performance$score, resolved_metric)
 
-  dependence <- dependence_table(explainers[[1L]]$data[features], dependence_threshold)
+  dependence <- dependence_table(explainers[[1L]]$data, dependence_threshold,
+                                 features = features)
   importance <- combine_importance(importance_objects, dependence)
-  importance$evidence_grade <- evidence_grade(
-    importance$sign_stability,
-    importance$conf_low,
-    importance$conf_high,
-    importance$max_association,
-    dependence_threshold
-  )
-  importance$claim <- evidence_claim(importance$evidence_grade)
+  importance$shuffle_status <- shuffle_diagnostic_status(importance, importance_objects)
+  importance$dependence_status <- dependence$screen_status[
+    match(importance$feature, dependence$feature)
+  ]
+  importance$claim <- shuffle_diagnostic_claim(importance$shuffle_status)
 
   agreement <- explanation_agreement(importance_objects, performance$near_optimal, features)
   prediction <- prediction_agreement(explainers, performance$near_optimal)
@@ -142,6 +136,11 @@ audit_explanations <- function(explainers,
       explanation_agreement = agreement,
       prediction_agreement = prediction,
       importance_objects = importance_objects,
+      model_diagnostics = audit_model_diagnostics(importance),
+      diagnostic_status = audit_diagnostic_status(
+        explainers, features, importance, dependence, performance,
+        agreement, prediction, n_repeats
+      ),
       config = list(
         features = features,
         metric = resolved_metric,
@@ -155,7 +154,7 @@ audit_explanations <- function(explainers,
         created_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
         package_version = package_version_or_development(),
         explainer_fingerprints = vapply(
-          explainers, function(x) x$provenance$fingerprint, character(1)
+          explainers, current_explainer_fingerprint, character(1)
         ),
         model_labels = names(explainers),
         diagnostic_scope = paste(
@@ -171,13 +170,16 @@ audit_explanations <- function(explainers,
 #' @export
 print.autoxplain_audit <- function(x, ...) {
   cat("<AutoXplainR explanation evidence audit>\n")
-  cat("  grade:              ", x$summary$grade, " (diagnostic, not certification)\n", sep = "")
   cat("  models:             ", x$summary$n_models, " (", x$summary$n_near_optimal,
       " near-optimal)\n", sep = "")
-  cat("  stable claims:      ", format_percent(x$summary$stable_claim_rate), "\n", sep = "")
-  cat("  max dependence:     ", format(x$summary$max_association, digits = 3), "\n", sep = "")
+  cat("  max association:    ", format(x$summary$max_association, digits = 3), "\n", sep = "")
   cat("  explanation accord: ", format_optional(x$summary$mean_rank_agreement), "\n", sep = "")
   cat("  prediction accord:  ", format_optional(x$summary$prediction_agreement), "\n", sep = "")
+  cat("  scope: ", x$summary$scope_note, "\n", sep = "")
+  cat("  association: ", x$summary$association_scope, "\n", sep = "")
+  if (x$diagnostic_status$comparison$status != "computed") {
+    cat("  comparison: ", x$diagnostic_status$comparison$reason, "\n", sep = "")
+  }
   if (nrow(x$findings)) {
     cat("\nFindings\n")
     for (index in seq_len(min(6L, nrow(x$findings)))) {
@@ -242,8 +244,7 @@ combine_importance <- function(objects, dependence) {
   out[c("model", setdiff(names(out), "model"))]
 }
 
-dependence_table <- function(data, threshold) {
-  features <- names(data)
+dependence_table <- function(data, threshold, features = names(data)) {
   rows <- lapply(features, function(feature) {
     association <- feature_associations(data, feature)
     if (length(association)) {
@@ -259,6 +260,14 @@ dependence_table <- function(data, threshold) {
       max_association = maximum,
       associated_feature = paired,
       high_dependence = maximum >= threshold,
+      screen_status = if (!length(association)) {
+        "no_other_predictors"
+      } else if (maximum >= threshold) {
+        "association_flagged"
+      } else {
+        "limited_screen"
+      },
+      predictors_checked = length(association),
       stringsAsFactors = FALSE
     )
   })
@@ -304,22 +313,36 @@ feature_association <- function(x, y) {
   if (denominator > 0) sqrt(chi_squared / denominator) else 0
 }
 
-evidence_grade <- function(stability, lower, upper, association, threshold) {
-  excludes_zero <- !is.na(lower) & !is.na(upper) & (lower > 0 | upper < 0)
-  grade <- rep("D", length(stability))
-  grade[stability >= 0.6] <- "C"
-  grade[stability >= 0.8 & association < threshold & excludes_zero] <- "B"
-  grade[stability >= 0.9 & association < min(0.5, threshold) & excludes_zero] <- "A"
-  factor(grade, levels = c("A", "B", "C", "D"), ordered = TRUE)
+association_screen_scope <- function() {
+  paste(
+    "Limited pairwise screen: absolute Spearman correlation for numeric pairs,",
+    "correlation ratio for mixed pairs, and Cramer's V for categorical pairs.",
+    "Small values do not establish independence or exclude nonlinear or joint dependence."
+  )
 }
 
-evidence_claim <- function(grade) {
+shuffle_diagnostic_status <- function(importance, objects) {
+  status <- rep("interval_includes_zero", nrow(importance))
+  unavailable <- !is.finite(importance$conf_low) | !is.finite(importance$conf_high)
+  status[unavailable] <- "interval_unavailable"
+  status[!unavailable & importance$conf_low > 0] <- "positive_loss_change"
+  status[!unavailable & importance$conf_high < 0] <- "negative_loss_change"
+  unchanged <- vapply(seq_len(nrow(importance)), function(index) {
+    repeats <- attr(objects[[importance$model[[index]]]], "repeat_scores")
+    all(repeats[importance$feature[[index]], ] == 0)
+  }, logical(1))
+  status[unchanged] <- "no_observed_change"
+  status
+}
+
+shuffle_diagnostic_claim <- function(status) {
   unname(c(
-    A = "stable marginal evidence",
-    B = "usable with stated uncertainty",
-    C = "sensitivity finding only",
-    D = "do not make a feature claim"
-  )[as.character(grade)])
+    no_observed_change = "No loss change in these shuffles; this is not proof of no population importance.",
+    positive_loss_change = "Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.",
+    negative_loss_change = "Shuffling reduced loss; the fixed-sample Monte Carlo interval excludes zero.",
+    interval_includes_zero = "The fixed-sample Monte Carlo interval includes zero.",
+    interval_unavailable = "The permutation budget does not provide a Monte Carlo interval."
+  )[status])
 }
 
 explanation_agreement <- function(objects, near_optimal, features) {
@@ -365,13 +388,30 @@ prediction_agreement <- function(explainers, near_optimal) {
   }
   task <- selected[[1L]]$task
   predictions <- lapply(selected, function(x) predict(x, x$data))
+  if (task == "binary" && any(vapply(predictions, is.factor, logical(1)))) {
+    hard <- vapply(seq_along(predictions), function(index) {
+      value <- predictions[[index]]
+      if (is.factor(value)) return(as.character(value))
+      positive <- selected[[index]]$positive
+      negative <- setdiff(selected[[index]]$class_levels, positive)[[1L]]
+      ifelse(value >= 0.5, positive, negative)
+    }, character(nrow(selected[[1L]]$data)))
+    pairwise <- outer(seq_along(selected), seq_along(selected), Vectorize(function(i, j) {
+      mean(hard[, i] == hard[, j])
+    }))
+    dimnames(pairwise) <- list(names(selected), names(selected))
+    ambiguity <- mean(apply(hard, 1L, function(x) length(unique(x)) > 1L))
+    return(list(score = mean(pairwise[lower.tri(pairwise)]), pairwise = pairwise,
+                ambiguity = ambiguity))
+  }
   if (task == "multiclass") {
     hard <- vapply(predictions, function(x) {
       if (is.matrix(x)) colnames(x)[max.col(x, ties.method = "first")] else as.character(x)
     }, character(nrow(selected[[1L]]$data)))
-    class_levels <- sort(unique(as.vector(hard)))
-    coded <- apply(hard, 2L, function(x) as.integer(factor(x, levels = class_levels)))
-    pairwise <- suppressWarnings(stats::cor(coded, method = "spearman"))
+    pairwise <- outer(seq_along(selected), seq_along(selected), Vectorize(function(i, j) {
+      mean(hard[, i] == hard[, j])
+    }))
+    dimnames(pairwise) <- list(names(selected), names(selected))
     ambiguity <- mean(apply(hard, 1L, function(x) length(unique(x)) > 1L))
     return(list(score = 1 - ambiguity, pairwise = pairwise, ambiguity = ambiguity))
   }
@@ -400,53 +440,62 @@ audit_findings <- function(importance,
                            explainers) {
   accumulator <- new.env(parent = emptyenv())
   accumulator$findings <- list()
-  add <- function(severity, code, message, evidence, recommendation) {
+  add <- function(severity, code, message, evidence, recommendation,
+                  model = NA_character_, feature = NA_character_,
+                  scope = "Supplied fitted models and evaluation rows") {
     findings <- accumulator$findings
     findings[[length(findings) + 1L]] <- data.frame(
       severity = severity, code = code, message = message, evidence = evidence,
-      recommendation = recommendation, stringsAsFactors = FALSE
+      recommendation = recommendation, model = model, feature = feature,
+      scope = scope, stringsAsFactors = FALSE
     )
+    findings[[length(findings)]]$entities <- I(list(list(
+      models = if (is.na(model)) names(explainers) else model,
+      features = if (is.na(feature)) character() else feature
+    )))
     accumulator$findings <- findings
   }
   high <- dependence[dependence$high_dependence, , drop = FALSE]
-  if (nrow(high)) {
+  for (index in seq_len(nrow(high))) {
+    item <- high[index, , drop = FALSE]
     add(
       "warning", "feature_dependence",
-      paste(nrow(high), "feature(s) exceed the dependence threshold."),
-      paste0("Maximum observed association is ", format(max(high$max_association), digits = 3), "."),
-      paste(
-        "Prefer ALE for effects; treat marginal PFI as model reliance, and use a conditional",
-        "method for conditional claims."
-      )
+      paste0("`", item$feature, "` exceeds the pairwise association threshold."),
+      paste0("Association with `", item$associated_feature, "`: ",
+             format(item$max_association, digits = 3), "."),
+      "Inspect joint support; interpret marginal shuffling as fitted reliance and consider ALE for effects.",
+      feature = item$feature,
+      scope = "Selected feature checked against the full evaluation predictor context"
     )
   }
-  limited <- importance[as.character(importance$evidence_grade) %in% c("C", "D"), , drop = FALSE]
-  if (nrow(limited)) {
-    crosses_zero <- with(limited, is.na(conf_low) | is.na(conf_high) |
-                           !(conf_low > 0 | conf_high < 0))
-    unstable <- limited$sign_stability < 0.8
-    dependent <- limited$max_association >= threshold
+  limited <- importance[importance$shuffle_status %in%
+                          c("interval_includes_zero", "interval_unavailable"), , drop = FALSE]
+  for (index in seq_len(nrow(limited))) {
+    item <- limited[index, , drop = FALSE]
     add(
-      "warning", "limited_importance_evidence",
-      paste(nrow(limited), "model-feature claim(s) are qualified or unsupported."),
-      paste0(
-        sum(crosses_zero), " interval(s) include zero; ", sum(unstable),
-        " have sign stability below 0.8; ", sum(dependent),
-        " exceed the dependence threshold."
-      ),
-      paste(
-        "Inspect repeat distributions and dependence, increase evaluation data when uncertainty",
-        "is material, and avoid ranking unsupported features."
-      )
+      "note", "shuffle_interval_unresolved",
+      paste0("The shuffle interval for `", item$model, "` / `", item$feature,
+             "` does not resolve the sign of the mean loss change."),
+      item$claim,
+      "Inspect the repeat distribution; more shuffles address Monte Carlo error only.",
+      model = item$model, feature = item$feature,
+      scope = "Permutation randomness conditional on this fitted model and evaluation sample"
     )
   }
+  add(
+    "note", "association_screen_scope",
+    "The pairwise association screen does not assess every form of dependence.",
+    association_screen_scope(),
+    "Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.",
+    scope = "Limits of the association screen"
+  )
   if (sum(performance$near_optimal) > 1L &&
         is.finite(agreement$mean_rank_correlation) && agreement$mean_rank_correlation < 0.7) {
     add(
       "critical", "rashomon_disagreement",
       "Near-optimal models disagree on the feature-importance ranking.",
       paste("Mean Spearman agreement:", format(agreement$mean_rank_correlation, digits = 3)),
-      "Report model-class importance ranges instead of presenting one best model's ranking as unique."
+      "Report the supplied candidates' importance ranges; these are not bounds over a complete model class."
     )
   }
   if (sum(performance$near_optimal) > 1L && is.finite(prediction$ambiguity) &&
@@ -461,9 +510,10 @@ audit_findings <- function(importance,
   if (n_repeats < 20L) {
     add(
       "note", "low_monte_carlo_budget",
-      "The permutation budget is suitable for smoke testing, not a final report.",
+      "The permutation budget is small; its interval endpoints may depend on the shuffles drawn.",
       paste(n_repeats, "repeats per model-feature pair."),
-      "Use at least 20 repeats for routine work and more when feature ranks are close."
+      paste("Inspect Monte Carlo error and increase repeats when it is material;",
+            "more repeats do not add evaluation observations.")
     )
   }
   evaluation_roles <- vapply(explainers, function(x) x$metadata$evaluation_role %||% "unspecified",
@@ -476,14 +526,6 @@ audit_findings <- function(importance,
       "Use held-out data and record metadata = list(evaluation_role = 'test')."
     )
   }
-  if (!length(accumulator$findings)) {
-    add(
-      "note", "no_automatic_red_flags",
-      "No automatic reliability threshold was breached.",
-      "Diagnostics passed the configured heuristic thresholds.",
-      "Continue with domain review, external validation, and explicit limitations."
-    )
-  }
   do.call(rbind, accumulator$findings)
 }
 
@@ -493,17 +535,14 @@ audit_summary <- function(importance,
                           agreement,
                           prediction,
                           findings) {
-  grades <- as.character(importance$evidence_grade)
-  stable <- grades %in% c("A", "B")
-  numeric_grade <- c(A = 4, B = 3, C = 2, D = 1)[grades]
-  overall <- names(which.min(abs(c(A = 4, B = 3, C = 2, D = 1) - stats::median(numeric_grade))))
-  if (any(findings$severity == "critical")) overall <- downgrade_grade(overall, 2L)
   list(
-    grade = overall,
-    grade_note = "Heuristic evidence grade; not a certification or formal inferential guarantee.",
+    scope_note = paste(
+      "Separate descriptive diagnostics; no overall evidence grade.",
+      "Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty."
+    ),
+    association_scope = association_screen_scope(),
     n_models = nrow(performance),
     n_near_optimal = sum(performance$near_optimal),
-    stable_claim_rate = mean(stable),
     max_association = max(dependence$max_association),
     mean_rank_agreement = agreement$mean_rank_correlation,
     prediction_agreement = prediction$score,
@@ -512,9 +551,64 @@ audit_summary <- function(importance,
   )
 }
 
-downgrade_grade <- function(grade, steps = 1L) {
-  levels <- c("A", "B", "C", "D")
-  levels[min(match(grade, levels) + steps, length(levels))]
+audit_model_diagnostics <- function(importance) {
+  statuses <- c("no_observed_change", "positive_loss_change", "negative_loss_change",
+                "interval_includes_zero", "interval_unavailable")
+  rows <- lapply(unique(importance$model), function(model) {
+    item <- importance[importance$model == model, , drop = FALSE]
+    counts <- table(factor(item$shuffle_status, levels = statuses))
+    data.frame(model = model, features = nrow(item),
+               stats::setNames(as.list(as.integer(counts)), statuses),
+               check.names = FALSE, stringsAsFactors = FALSE)
+  })
+  output <- do.call(rbind, rows)
+  names(output) <- c("model", "features", statuses)
+  rownames(output) <- NULL
+  output
+}
+
+audit_diagnostic_status <- function(explainers, features, importance, dependence,
+                                    performance, agreement, prediction, n_repeats) {
+  models <- names(explainers)
+  selected <- performance$model[performance$near_optimal]
+  comparison_available <- length(selected) >= 2L
+  entry <- function(id, status, scope, entities, evidence, interpretation, reason = NULL) {
+    list(id = id, status = status, scope = scope, entities = entities,
+         evidence = evidence, interpretation = interpretation, reason = reason)
+  }
+  list(
+    evaluation = entry(
+      "evaluation", "computed", "Evaluation contract and reported sample size",
+      list(models = models),
+      list(rows = nrow(explainers[[1L]]$data),
+           roles = vapply(explainers, function(x) x$metadata$evaluation_role %||% "unspecified",
+                          character(1))),
+      paste("Ordered observations, outcomes and event semantics agree;",
+            "independence and representativeness are not established by these checks.")
+    ),
+    association = entry(
+      "association", if (all(dependence$predictors_checked == 0L)) "inapplicable" else "computed",
+      "Selected features against all evaluation predictors",
+      list(models = models, features = features), dependence, association_screen_scope(),
+      if (all(dependence$predictors_checked == 0L)) "No other predictors are available for pairwise association."
+    ),
+    permutation = entry(
+      "permutation", "computed", "Fixed models and fixed evaluation observations",
+      list(models = models, features = features),
+      list(repeats = n_repeats, rows = nrow(importance), interval = "Monte Carlo t interval"),
+      paste("Loss changes describe these shuffles. The intervals quantify shuffle randomness,",
+            "not sampling, fitting or selection uncertainty.")
+    ),
+    comparison = entry(
+      "comparison", if (comparison_available) "computed" else "insufficient_evidence",
+      "Supplied candidates within the configured empirical performance tolerance",
+      list(models = selected, features = features),
+      list(mean_rank_agreement = agreement$mean_rank_correlation,
+           prediction_agreement = prediction$score, ambiguity = prediction$ambiguity),
+      "Observed candidate disagreement does not bound all models or establish a unique explanation.",
+      if (!comparison_available) "Fewer than two supplied models meet the performance tolerance."
+    )
+  )
 }
 
 format_percent <- function(x) {
@@ -523,5 +617,5 @@ format_percent <- function(x) {
 }
 
 format_optional <- function(x) {
-  if (length(x) != 1L || !is.finite(x)) "n/a (one model)" else format(x, digits = 3)
+  if (length(x) != 1L || !is.finite(x)) "unavailable" else format(x, digits = 3)
 }

@@ -1,3 +1,35 @@
+validate_h2o_preprocessing_contract <- function(enable_preprocessing, config, nfolds) {
+  internal_cv <- nfolds >= 2L
+  strategy <- normalize_missing_strategy(config$missing_value_strategy %||% "keep")
+  learned <- character()
+  if (isTRUE(enable_preprocessing)) {
+    if (strategy %in% c("impute", "drop_columns")) learned <- c(learned, strategy)
+    if (isTRUE(config$enable_ordinal_factors)) learned <- c(learned, "enable_ordinal_factors")
+  }
+  if (internal_cv && length(learned)) {
+    stop(
+      "H2O internal cross-validation cannot use learned external preprocessing: ",
+      paste(learned, collapse = ", "), ". These transformations would be learned ",
+      "before H2O creates its folds. Use missing_value_strategy = \"keep\" and ",
+      "disable automatic ordinal coercion, use the base engine for fold-local ",
+      "preprocessing, or use explicit validation with nfolds = 0.",
+      call. = FALSE
+    )
+  }
+  list(
+    internal_cross_validation = internal_cv,
+    learned_external_transforms = learned,
+    scope_note = if (internal_cv) {
+      paste(
+        "External preprocessing is limited to schema conversions and explicit row/column rules.",
+        "Missing-value handling and other fitted transformations inside H2O remain engine responsibilities."
+      )
+    } else {
+      "External transformations are learned from the training partition before explicit validation."
+    }
+  )
+}
+
 prepare_h2o_outer_split <- function(data,
                                     test_data,
                                     target,
@@ -73,6 +105,10 @@ prepare_h2o_outer_split <- function(data,
   list(
     training = training,
     evaluation = evaluation,
+    evaluation_context = split$evaluation[
+      evaluation$row_indices, setdiff(names(split$evaluation), target), drop = FALSE
+    ],
+    evaluation_row_indices = evaluation$row_indices,
     split_method = split$method,
     test_data_supplied = !is.null(test_data),
     test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_

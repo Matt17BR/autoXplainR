@@ -30,8 +30,8 @@ explainers. Non-audit inputs are passed to \code{\link[=audit_explanations]{audi
 The normalized output path, invisibly.
 }
 \description{
-Creates a dependency-free, accessible HTML report from an explanation audit.
-The report leads with limitations and evidence grades rather than presenting
+Creates a standalone HTML report from an explanation audit.
+The report presents separate diagnostic scopes and findings rather than presenting
 every numerical explanation as equally trustworthy.
 }
 \examples{

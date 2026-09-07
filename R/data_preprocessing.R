@@ -143,6 +143,7 @@ preprocess_data <- function(data,
 
   recipe$final_columns <- names(data)
   recipe$factor_levels <- lapply(data[vapply(data, is.factor, logical(1))], base::levels)
+  recipe$factor_ordered <- vapply(data[names(recipe$factor_levels)], is.ordered, logical(1))
   factor_predictors <- setdiff(names(recipe$factor_levels), target_column)
   recipe$factor_fallbacks <- lapply(factor_predictors, function(column) {
     values <- data[[column]][!is.na(data[[column]])]
@@ -155,6 +156,7 @@ preprocess_data <- function(data,
     preprocessing_log = log,
     original_info = original,
     final_info = data_info(data),
+    row_indices = missing_result$row_indices,
     recipe = recipe
   )
   class(result) <- c("autoxplain_preprocessing", "list")
@@ -194,16 +196,26 @@ apply_preprocessing_recipe <- function(data,
   }
   original <- data_info(data)
   novel_level_mappings <- integer()
+  row_indices <- seq_len(nrow(data))
   if (length(recipe$removed_columns)) {
     data <- data[setdiff(names(data), recipe$removed_columns)]
   }
+  missing <- setdiff(recipe$final_columns, names(data))
+  if (length(missing)) stop("Evaluation data is missing processed columns: ",
+                            paste(missing, collapse = ", "), call. = FALSE)
+  # Extra context columns must not determine which model-input rows are kept.
+  data <- data[recipe$final_columns]
   if (identical(missing_value_strategy, "drop_rows")) {
-    data <- data[stats::complete.cases(data), , drop = FALSE]
+    retained <- stats::complete.cases(data)
+    row_indices <- row_indices[retained]
+    data <- data[retained, , drop = FALSE]
   }
   if (identical(missing_value_strategy, "impute")) {
     for (column in intersect(names(recipe$imputations), names(data))) {
       if (is.factor(data[[column]])) data[[column]] <- as.character(data[[column]])
-      data[[column]][is.na(data[[column]])] <- recipe$imputations[[column]]
+      value <- recipe$imputations[[column]]
+      if (is.factor(value)) value <- as.character(value)
+      data[[column]][is.na(data[[column]])] <- value
     }
   }
   for (column in intersect(names(recipe$ordered_columns), names(data))) {
@@ -231,12 +243,13 @@ apply_preprocessing_recipe <- function(data,
       novel_level_mappings[[column]] <- sum(replace)
       raw[replace] <- fallback
     }
-    data[[column]] <- factor(raw, levels = recipe$factor_levels[[column]])
+    ordered <- if (!is.null(recipe$factor_ordered)) {
+      isTRUE(recipe$factor_ordered[[column]])
+    } else {
+      identical(unname(recipe$input_classes[column]), "ordered")
+    }
+    data[[column]] <- factor(raw, levels = recipe$factor_levels[[column]], ordered = ordered)
   }
-  missing <- setdiff(recipe$final_columns, names(data))
-  if (length(missing)) stop("Evaluation data is missing processed columns: ",
-                            paste(missing, collapse = ", "), call. = FALSE)
-  data <- data[recipe$final_columns]
   structure(
     list(
       data = data,
@@ -247,6 +260,7 @@ apply_preprocessing_recipe <- function(data,
       ),
       original_info = original,
       final_info = data_info(data),
+      row_indices = row_indices,
       recipe = recipe
     ),
     class = c("autoxplain_preprocessing", "list")
@@ -288,10 +302,13 @@ handle_missing_values <- function(data,
   strategy <- normalize_missing_strategy(strategy)
   missing <- vapply(data, function(x) sum(is.na(x)), integer(1))
   original_rows <- nrow(data)
+  row_indices <- seq_len(original_rows)
   removed_columns <- character()
   imputations <- list()
   if (strategy == "drop_rows") {
-    data <- data[stats::complete.cases(data), , drop = FALSE]
+    retained <- stats::complete.cases(data)
+    row_indices <- row_indices[retained]
+    data <- data[retained, , drop = FALSE]
   } else if (strategy == "drop_columns") {
     fraction <- missing / max(1L, nrow(data))
     removed_columns <- setdiff(names(fraction)[fraction > threshold], target_column)
@@ -306,6 +323,7 @@ handle_missing_values <- function(data,
       } else {
         statistical_mode(data[[column]])
       }
+      if (is.factor(value)) value <- as.character(value)
       data[[column]][is.na(data[[column]])] <- value
       imputations[[column]] <- value
     }
@@ -314,6 +332,7 @@ handle_missing_values <- function(data,
   list(
     data = data,
     removed_columns = removed_columns,
+    row_indices = row_indices,
     imputations = imputations,
     log = list(
       strategy = strategy,
@@ -367,7 +386,13 @@ statistical_mode <- function(x) {
   counts <- sort(table(x, useNA = "no"), decreasing = TRUE)
   if (!length(counts)) stop("Cannot impute a column containing only missing values.", call. = FALSE)
   value <- names(counts)[[1L]]
-  if (is.factor(x)) factor(value, levels = base::levels(x)) else value
+  if (is.factor(x)) {
+    factor(value, levels = base::levels(x))
+  } else if (is.logical(x)) {
+    as.logical(value)
+  } else {
+    value
+  }
 }
 
 data_info <- function(data) {

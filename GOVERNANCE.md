@@ -7,7 +7,7 @@ stability.
 Material method changes require a public design issue and evidence appropriate
 to the claim: literature references, simulations, cross-package comparisons,
 or all three. A second reviewer should approve changes to statistical
-estimators, remote-data boundaries, or evidence-grade thresholds before a
+estimators, remote-data boundaries, or diagnostic decision rules before a
 stable 1.0 release.
 
 Decisions should favor explicit assumptions, reproducibility, and honest

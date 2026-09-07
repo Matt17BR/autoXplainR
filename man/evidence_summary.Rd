@@ -12,7 +12,7 @@ evidence_summary(result)
 \value{
 A plain list with \code{schema_version}, package version, task, model
 selection, evaluation, explanation summaries, and interpretation limits.
-Schema 1.0 allows additional fields within a minor package release. Removing
+Schema 2.0 allows additional fields within a minor package release. Removing
 or changing the meaning of a field requires a new schema major version.
 }
 \description{

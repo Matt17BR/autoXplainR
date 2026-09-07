@@ -36,8 +36,11 @@ performance screening and permutation importance.}
 of near-optimal supplied models. For example, \code{0.05} retains models whose
 evaluation score is within five percent of the best supplied score.}
 
-\item{dependence_threshold}{Association above which marginal importance and
-PDP claims receive a dependence warning.}
+\item{dependence_threshold}{Pairwise association above which marginal
+importance receives a warning. Numeric pairs use absolute Spearman
+correlation, mixed pairs use a correlation ratio, and categorical pairs
+use Cramer's V. Small values do not establish independence or rule out
+nonlinear or joint dependence.}
 }
 \value{
 An object of class \code{autoxplain_audit}.
@@ -46,8 +49,9 @@ An object of class \code{autoxplain_audit}.
 \code{audit_explanations()} is AutoXplainR's advanced reliability layer. It evaluates
 repeated permutation importance, feature dependence, Monte Carlo stability,
 prediction disagreement, and explanation disagreement among near-equivalent
-models. The output distinguishes robust descriptive evidence from claims
-that need more data or a conditional method.
+models. The output keeps shuffle variation, a limited pairwise association
+screen, evaluation scope, and candidate disagreement separate. It does not
+combine these questions into an evidence grade.
 }
 \details{
 This is a diagnostic protocol, not a formal certification or a substitute

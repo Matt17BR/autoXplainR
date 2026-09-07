@@ -8,6 +8,11 @@
 #' @param task Optional task filter: one of `"regression"`, `"binary"`, or
 #'   `"multiclass"`.
 #'
+#' @details The package's R >= 4.1 requirement covers the core workflow.
+#'   Optional engine versions and their dependencies can require newer R. The
+#'   catalog reports unavailable engines explicitly; full portfolio checks use
+#'   the declared engine minima on current R release.
+#'
 #' @return A data frame with learner capabilities, dependencies, and plain-
 #'   language behavior notes.
 #' @export
@@ -104,7 +109,7 @@ autoxplain_learner_registry <- function() {
       family = "regularized",
       backend = "glmnet",
       package = "glmnet",
-      minimum_version = "4.1",
+      minimum_version = "5.0",
       tasks = c("regression", "binary", "multiclass"),
       portfolios = c("recommended", "extended"),
       labels = c(
@@ -129,7 +134,8 @@ autoxplain_learner_registry <- function() {
       family = "additive",
       backend = "mgcv",
       package = "mgcv",
-      minimum_version = "1.8",
+      minimum_version = "1.9-4",
+      current_cran_r_minimum = "4.4.0",
       tasks = c("regression", "binary"),
       portfolios = c("recommended", "extended"),
       labels = c(
@@ -178,7 +184,7 @@ autoxplain_learner_registry <- function() {
       family = "forest",
       backend = "ranger",
       package = "ranger",
-      minimum_version = "0.16",
+      minimum_version = "0.18.0",
       tasks = c("regression", "binary", "multiclass"),
       portfolios = c("recommended", "extended"),
       labels = c(
@@ -203,7 +209,7 @@ autoxplain_learner_registry <- function() {
       family = "boosting",
       backend = "xgboost",
       package = "xgboost",
-      minimum_version = "2.0",
+      minimum_version = "3.2.1.1",
       current_cran_r_minimum = "4.3.0",
       tasks = c("regression", "binary", "multiclass"),
       portfolios = c("recommended", "extended"),
@@ -254,7 +260,7 @@ autoxplain_learner_registry <- function() {
       family = "kernel",
       backend = "e1071",
       package = "e1071",
-      minimum_version = "1.7",
+      minimum_version = "1.7-17",
       tasks = c("regression", "binary", "multiclass"),
       portfolios = "extended",
       labels = c(
@@ -279,7 +285,7 @@ autoxplain_learner_registry <- function() {
       family = "neighbors",
       backend = "kknn",
       package = "kknn",
-      minimum_version = "1.4",
+      minimum_version = "1.4.1",
       tasks = c("regression", "binary", "multiclass"),
       portfolios = "extended",
       labels = c(
@@ -304,7 +310,7 @@ autoxplain_learner_registry <- function() {
       family = "mars",
       backend = "earth",
       package = "earth",
-      minimum_version = "5.3",
+      minimum_version = "5.3.6",
       tasks = c("regression", "binary"),
       portfolios = "extended",
       labels = c(
@@ -364,13 +370,16 @@ learner_dependency_status <- function(definition) {
   }
   minimum <- definition$minimum_version %||% NULL
   current_r_minimum <- definition$current_cran_r_minimum %||% NULL
-  current_r_blocked <- !installed && !is.null(current_r_minimum) &&
+  installed_compatible <- installed && (
+    is.null(minimum) || utils::packageVersion(package) >= numeric_version(minimum)
+  )
+  current_r_blocked <- !installed_compatible && !is.null(current_r_minimum) &&
     getRversion() < numeric_version(current_r_minimum)
   if (!installed) {
     reason <- paste0("Package `", package, "` is not installed.")
     if (current_r_blocked) {
       reason <- paste0(
-        reason, " Its current CRAN release requires R >= ", current_r_minimum,
+        reason, " The supported engine version requires R >= ", current_r_minimum,
         "; this session uses R ", as.character(getRversion()), "."
       )
     }
@@ -387,13 +396,17 @@ learner_dependency_status <- function(definition) {
     return(list(
       available = FALSE,
       installed = TRUE,
-      status = "outdated",
+      status = if (current_r_blocked) "incompatible_r" else "outdated",
       installed_version = installed_version,
       reason = paste0(
         "Package `", package, "` ", installed_version,
-        " is installed; AutoXplainR requires >= ", minimum, "."
+        " is installed; AutoXplainR requires >= ", minimum, ".",
+        if (current_r_blocked) paste0(
+          " The supported engine version requires R >= ", current_r_minimum,
+          "; this session uses R ", as.character(getRversion()), "."
+        ) else ""
       ),
-      current_r_blocked = FALSE
+      current_r_blocked = current_r_blocked
     ))
   }
   list(
@@ -544,7 +557,7 @@ install_model_engines <- function(portfolio = c("recommended", "extended"),
       registry[[family]]$current_cran_r_minimum
     }, character(1)))
     stop(
-      "The current CRAN backend requires R >= ", paste(requirements, collapse = ", "),
+      "The supported backend requires R >= ", paste(requirements, collapse = ", "),
       ", but this session uses R ", as.character(getRversion()),
       ". Upgrade R or use `portfolio = \"core\"`.",
       call. = FALSE

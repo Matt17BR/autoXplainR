@@ -39,7 +39,7 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   on.exit(unlink(report), add = TRUE)
   render_model_report(result, report, audit = audit, effects = list())
   html <- paste(readLines(report, warn = FALSE), collapse = "\n")
-  expect_match(html, "Did the model generalize", fixed = TRUE)
+  expect_match(html, "Prediction performance on test rows", fixed = TRUE)
   expect_match(html, "intercept-only baseline", fixed = TRUE)
 
   set.seed(202)

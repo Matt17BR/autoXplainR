@@ -1,7 +1,7 @@
 test_that("weighted efficiency validates and warns about subjectivity", {
   expect_warning(
     score <- calculate_weighted_efficiency(c(0.7, 0.8, 0.9), c(1, 3, 8)),
-    "candidate-set-relative"
+    class = "autoxplain_deprecated"
   )
   expect_true(all(score >= 0 & score <= 1))
   expect_error(calculate_weighted_efficiency(1, 2), "at least two")
@@ -39,7 +39,8 @@ test_that("metadata reports are escaped and validated", {
   names(metadata)[[1L]] <- "<unsafe>"
   metadata[[1L]]$model_id <- "<unsafe>"
   path <- tempfile(fileext = ".html")
-  output <- create_model_comparison_report(metadata, path)
+  expect_warning(output <- create_model_comparison_report(metadata, path),
+                 class = "autoxplain_deprecated")
   html <- paste(readLines(output, warn = FALSE), collapse = "\n")
 
   expect_match(html, "&lt;unsafe&gt;", fixed = TRUE)

@@ -1,0 +1,5 @@
+artifact,sha256,browser,network,status,javascript_errors,svg_count,interaction,scope
+autoxplain-delivery.html,80fc7478e381c5dfff771c7cdf33846024aad8f1fcef824b21c5cf69e001a7eb,Chromium 145.0.7632.6,HTTP and HTTPS blocked,passed,0,3,details disclosure opened,render/control smoke check only; no human comprehension or usability result
+dalex-comparison-index.html,d6b6e2a60ed8a405f8fb55a62187526fca7f6803ec07965fe6ec9e7ef2253d6b,Chromium 145.0.7632.6,HTTP and HTTPS blocked,passed,0,0,both local studio links present,render/control smoke check only; no human comprehension or usability result
+dalex-modelstudio-main_model.html,93db4469b70984f31a3d04ea78a0d47056a51b825a763f86125ddeac8c10f05d,Chromium 145.0.7632.6,HTTP and HTTPS blocked,passed,0,1,feature selector changed to traffic_index,render/control smoke check only; no human comprehension or usability result
+dalex-modelstudio-simple_baseline.html,d7631bf5bec36dde845fa02c7443b4df01f909936f0fae9573569766490e47a4,Chromium 145.0.7632.6,HTTP and HTTPS blocked,passed,0,1,feature selector changed to traffic_index,render/control smoke check only; no human comprehension or usability result

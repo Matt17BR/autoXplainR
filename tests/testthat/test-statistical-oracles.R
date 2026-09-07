@@ -51,7 +51,7 @@ test_that("evidence export excludes case values and model objects", {
   result <- autoxplain(data, "mpg", validation = validation_split(group = "case_id"))
   summary <- evidence_summary(result)
   text <- paste(capture.output(str(summary, max.level = 10)), collapse = "\n")
-  expect_identical(summary$schema_version, "1.0")
+  expect_identical(summary$schema_version, "2.0")
   expect_false(grepl("private-case-", text, fixed = TRUE))
   expect_false("models" %in% names(summary))
   expect_equal(summary$evaluation$metrics, result$evaluation$metrics)

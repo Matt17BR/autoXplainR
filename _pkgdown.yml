@@ -71,4 +71,7 @@ articles:
     navbar: ~
     contents:
       - autoxplainr-introduction
+      - model-selection
+      - validation-and-diagnostics
+      - existing-models-and-narratives
       - statistical-methods

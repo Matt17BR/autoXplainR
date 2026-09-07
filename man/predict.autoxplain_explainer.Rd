@@ -15,7 +15,8 @@
 }
 \value{
 A numeric vector for regression or binary classification, or a
-probability matrix for multiclass classification.
+probability matrix for multiclass classification. Adapters that supply only
+class labels return a factor; probability-based diagnostics reject those labels.
 }
 \description{
 Predict with an AutoXplainR explainer

@@ -14,12 +14,22 @@
 #'   should return a numeric vector. Classification functions should return
 #'   probabilities (a vector for binary outcomes or a matrix/data frame with
 #'   one column per class).
+#'   Hard classification labels are retained as factors for accuracy only;
+#'   they cannot supply probability losses or probability effects. An ellipsis
+#'   after the supported arguments is allowed.
 #' @param task One of `"auto"`, `"regression"`, `"binary"`, or
 #'   `"multiclass"`.
 #' @param label Human-readable model label.
 #' @param positive Positive outcome level for binary classification. By
 #'   default the second outcome level is used.
 #' @param metadata Optional named list recorded in the explainer provenance.
+#' @param probability_class Event represented by a binary probability vector.
+#'   For custom functions it defaults to `positive`. For native adapters it
+#'   overrides the inferred event; supply it when fitted response levels are
+#'   unavailable, such as a factor GLM fitted with `model = FALSE`. Numeric
+#'   binomial GLMs model event `"1"`, logical GLMs model `"TRUE"`, and factor
+#'   GLMs model their second fitted level. Named probability matrices identify
+#'   their events directly.
 #'
 #' @return An object of class `autoxplain_explainer`.
 #' @export
@@ -35,7 +45,8 @@ explain_model <- function(model,
                           task = c("auto", "regression", "binary", "multiclass"),
                           label = NULL,
                           positive = NULL,
-                          metadata = list()) {
+                          metadata = list(),
+                          probability_class = NULL) {
   task <- match.arg(task)
   assert_data_frame(data, "data")
   if (nrow(data) < 2L) {
@@ -93,7 +104,7 @@ explain_model <- function(model,
       stop("Binary classification requires exactly two outcome levels.", call. = FALSE)
     }
     positive <- positive %||% outcome_levels[[2L]]
-    if (!as.character(positive) %in% outcome_levels) {
+    if (length(positive) != 1L || is.na(positive) || !as.character(positive) %in% outcome_levels) {
       stop("`positive` must be one of the observed outcome levels.", call. = FALSE)
     }
     positive <- as.character(positive)
@@ -104,13 +115,18 @@ explain_model <- function(model,
     task = resolved_task,
     positive = positive,
     class_levels = outcome_levels,
-    predict_function = predict_function
+    predict_function = predict_function,
+    probability_class = probability_class
   )
 
   # Fail early with a small prediction, before an expensive audit starts.
   probe_n <- min(3L, nrow(feature_data))
   probe <- prediction_adapter(feature_data[seq_len(probe_n), , drop = FALSE])
   validate_predictions(probe, probe_n, resolved_task, outcome_levels)
+
+  reference_predictions <- prediction_adapter(feature_data)
+  validate_predictions(reference_predictions, nrow(feature_data), resolved_task, outcome_levels)
+  custom_instance <- if (!is.null(predict_function)) new_explainer_instance() else NULL
 
   label <- label %||% paste(class(model), collapse = "/")
   created_at <- format(Sys.time(), tz = "UTC", usetz = TRUE)
@@ -122,10 +138,11 @@ explain_model <- function(model,
     data_rows = nrow(feature_data),
     data_columns = ncol(feature_data),
     feature_names = names(feature_data),
-    fingerprint = lightweight_fingerprint(
-      list(label, class(model), names(feature_data),
-           vapply(feature_data, class1, character(1)), nrow(feature_data),
-           resolved_task, outcome_levels)
+    identity_version = "2",
+    custom_instance = custom_instance,
+    fingerprint = explainer_content_fingerprint(
+      model, feature_data, outcome, resolved_task, positive, outcome_levels,
+      reference_predictions, custom_instance, prediction_adapter
     )
   )
 
@@ -140,6 +157,13 @@ explain_model <- function(model,
       class_levels = outcome_levels,
       label = label,
       predict_function = prediction_adapter,
+      prediction_type = if (is.factor(probe)) {
+        "class"
+      } else if (resolved_task == "regression") {
+        "numeric"
+      } else {
+        "probability"
+      },
       metadata = metadata,
       provenance = provenance
     ),
@@ -165,7 +189,8 @@ print.autoxplain_explainer <- function(x, ...) {
 #' @param ... Unused.
 #'
 #' @return A numeric vector for regression or binary classification, or a
-#'   probability matrix for multiclass classification.
+#'   probability matrix for multiclass classification. Adapters that supply only
+#'   class labels return a factor; probability-based diagnostics reject those labels.
 #' @export
 predict.autoxplain_explainer <- function(object, newdata, ...) {
   assert_data_frame(newdata, "newdata")
@@ -196,14 +221,28 @@ make_prediction_adapter <- function(model,
                                     task,
                                     positive = NULL,
                                     class_levels = NULL,
-                                    predict_function = NULL) {
+                                    predict_function = NULL,
+                                    probability_class = NULL) {
+  native_event <- if (task == "binary") {
+    probability_class %||% if (!is.null(predict_function)) {
+      positive
+    } else {
+      binary_model_event(model, class_levels)
+    }
+  } else {
+    NULL
+  }
+  if (!is.null(native_event) && (length(native_event) != 1L || is.na(native_event) ||
+                                   !native_event %in% class_levels)) {
+    stop("`probability_class` must name one binary outcome level.", call. = FALSE)
+  }
   function(newdata) {
     raw <- if (!is.null(predict_function)) {
       invoke_user_predict(predict_function, model, newdata)
     } else if (inherits(model, "H2OModel")) {
       require_optional("h2o", "explaining H2O models")
       as.data.frame(h2o::h2o.predict(model, h2o::as.h2o(newdata)))
-    } else if (inherits(model, "glm") && identical(model$family$family, "binomial")) {
+    } else if (inherits(model, "glm") && model$family$family %in% c("binomial", "quasibinomial")) {
       stats::predict(model, newdata = newdata, type = "response")
     } else {
       default_predict(model, newdata, task)
@@ -213,14 +252,37 @@ make_prediction_adapter <- function(model,
       task,
       positive,
       class_levels,
-      n = nrow(newdata)
+      n = nrow(newdata),
+      probability_class = native_event
     )
   }
 }
 
 invoke_user_predict <- function(fun, model, newdata) {
-  n_args <- length(formals(fun))
+  n_args <- length(setdiff(names(formals(fun)), "..."))
+  if (!n_args %in% 1:2) {
+    stop("`predict_function` must take newdata, or model and newdata, with optional `...`.",
+         call. = FALSE)
+  }
   if (n_args <= 1L) fun(newdata) else fun(model, newdata)
+}
+
+binary_model_event <- function(model, class_levels) {
+  if (inherits(model, "autoxplain_fitted_model")) return(model$class_levels[[2L]])
+  if (inherits(model, "autoxplain_tuned_nnet")) return(model$class_levels[[2L]])
+  if (inherits(model, "glm") && model$family$family %in% c("binomial", "quasibinomial")) {
+    response <- if (!is.null(model$model)) stats::model.response(model$model) else NULL
+    if (is.factor(response) && nlevels(response) == 2L) return(levels(response)[[2L]])
+    if (is.logical(response)) return("TRUE")
+    if (is.numeric(response) && is.null(dim(response))) return("1")
+    response_type <- attr(model$terms, "dataClasses")[[1L]] %||% "unknown"
+    if (identical(response_type, "numeric")) return("1")
+    if (identical(response_type, "logical")) return("TRUE")
+    stop("The native binomial GLM probability event is unavailable. ",
+         "Supply `probability_class` with the event represented by its response probability, ",
+         "or retain the fitted model frame with `model = TRUE`.", call. = FALSE)
+  }
+  class_levels[[2L]]
 }
 
 default_predict <- function(model, newdata, task) {
@@ -241,7 +303,8 @@ normalize_predictions <- function(x,
                                   task,
                                   positive = NULL,
                                   class_levels = NULL,
-                                  n = NULL) {
+                                  n = NULL,
+                                  probability_class = NULL) {
   if (task == "regression") {
     if (is.data.frame(x) || is.matrix(x)) {
       if ("predict" %in% colnames(x)) {
@@ -256,12 +319,19 @@ normalize_predictions <- function(x,
         )
       }
     }
+    if (!is.numeric(x) || !is.null(dim(x))) {
+      stop("Regression prediction output must be numeric, not factors or labels.", call. = FALSE)
+    }
     return(as.numeric(x))
   }
 
   if (task == "binary") {
     if (is.factor(x) || is.character(x) || is.logical(x)) {
-      return(as.numeric(as.character(x) == positive))
+      labels <- as.character(x)
+      if (anyNA(labels) || is.null(class_levels) || any(!labels %in% class_levels)) {
+        stop("Hard binary predictions must use the declared outcome classes.", call. = FALSE)
+      }
+      return(factor(labels, levels = class_levels))
     }
     if (is.data.frame(x) || is.matrix(x)) {
       x <- as.data.frame(x, check.names = FALSE)
@@ -273,7 +343,11 @@ normalize_predictions <- function(x,
         paste0("prob_", positive)
       ))
       selected <- intersect(candidates, probability_names)
-      if (length(selected) == 1L) return(as.numeric(x[[selected]]))
+      if (length(selected) == 1L) {
+        probability <- x[[selected]]
+        if (!is.numeric(probability)) stop("Probability columns must be numeric.", call. = FALSE)
+        return(as.numeric(probability))
+      }
       if (length(probability_names) >= 2L) {
         stop(
           "Binary probability output with multiple columns must identify the ",
@@ -282,9 +356,17 @@ normalize_predictions <- function(x,
         )
       }
       if (length(probability_names) == 1L) {
-        return(as.numeric(x[[probability_names[[1L]]]]))
+        # A named column for the other event is unambiguous; otherwise the
+        # supplied adapter's vector-event contract applies.
+        name <- probability_names[[1L]]
+        if (!is.null(class_levels) && name %in% class_levels) probability_class <- name
+        x <- x[[name]]
       }
     }
+    if (!is.numeric(x) || !is.null(dim(x))) {
+      stop("Binary probabilities must be a numeric vector or named numeric columns.", call. = FALSE)
+    }
+    if (!is.null(probability_class) && probability_class != positive) x <- 1 - x
     return(as.numeric(x))
   }
 
@@ -311,9 +393,12 @@ normalize_predictions <- function(x,
     }
     return(probability)
   }
-  if (is.vector(x) && !is.list(x)) {
+  if ((is.vector(x) && !is.list(x)) || is.factor(x)) {
     # Hard multiclass predictions remain usable for accuracy, but probability
     # metrics will reject them with a targeted message.
+    if (anyNA(x) || any(!as.character(x) %in% class_levels)) {
+      stop("Hard multiclass predictions must use observed outcome classes.", call. = FALSE)
+    }
     return(factor(x, levels = class_levels))
   }
   if (is.data.frame(x)) {
@@ -328,6 +413,7 @@ normalize_predictions <- function(x,
       out <- out[, colnames(out) != "predict", drop = FALSE]
     }
   }
+  if (!is.numeric(out)) stop("Probability columns must be numeric.", call. = FALSE)
   align_multiclass_probability_columns(out, class_levels)
 }
 
@@ -357,6 +443,12 @@ validate_predictions <- function(x, n, task, class_levels = NULL) {
   if (actual_n != n) {
     stop("The prediction function returned ", actual_n, " predictions for ", n,
          " rows.", call. = FALSE)
+  }
+  if (task %in% c("binary", "multiclass") && is.factor(x)) {
+    if (anyNA(x) || any(!as.character(x) %in% class_levels)) {
+      stop("Hard classification predictions must use the declared classes.", call. = FALSE)
+    }
+    return(invisible(TRUE))
   }
   if (task %in% c("regression", "binary") && (!is.numeric(x) || any(!is.finite(x)))) {
     stop("The prediction function must return finite numeric predictions.", call. = FALSE)
@@ -423,11 +515,4 @@ class1 <- function(x) class(x)[[1L]]
 
 package_version_or_development <- function() {
   tryCatch(as.character(utils::packageVersion("AutoXplainR")), error = function(e) "development")
-}
-
-lightweight_fingerprint <- function(x) {
-  bytes <- as.integer(serialize(x, NULL, version = 2L))
-  hash <- 2166136261
-  for (byte in bytes) hash <- (hash * 16777619 + byte) %% 4294967291
-  sprintf("axr-%08x", as.integer(hash %% .Machine$integer.max))
 }

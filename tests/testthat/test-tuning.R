@@ -207,7 +207,7 @@ test_that("guided report explains tuning separately from final evaluation", {
   expect_match(html, "Do not quote the resampled tuning score", fixed = TRUE)
   expect_match(
     html,
-    "primary model was chosen without using these evaluation rows",
+    "evaluation rows did not select this model",
     fixed = TRUE
   )
   expect_match(html, result$tuning$selected_configuration, fixed = TRUE)

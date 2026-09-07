@@ -135,37 +135,13 @@ threshold_performance <- function(truth,
   }
   rows <- lapply(thresholds, function(threshold) {
     predicted <- probability >= threshold
-    true_positive <- sum(predicted & truth)
-    false_positive <- sum(predicted & !truth)
-    true_negative <- sum(!predicted & !truth)
-    false_negative <- sum(!predicted & truth)
-    sensitivity <- safe_threshold_rate(true_positive, true_positive + false_negative)
-    specificity <- safe_threshold_rate(true_negative, true_negative + false_positive)
-    precision <- safe_threshold_rate(true_positive, true_positive + false_positive)
-    negative_predictive_value <- safe_threshold_rate(
-      true_negative, true_negative + false_negative
-    )
-    f1 <- if (is.finite(precision) && is.finite(sensitivity) &&
-                precision + sensitivity > 0) {
-      2 * precision * sensitivity / (precision + sensitivity)
-    } else {
-      NA_real_
-    }
+    metrics <- binary_confusion_metrics(truth, predicted)
     data.frame(
       threshold = threshold,
-      predicted_positive_rate = mean(predicted),
-      sensitivity = sensitivity,
-      specificity = specificity,
-      precision = precision,
-      negative_predictive_value = negative_predictive_value,
-      accuracy = mean(predicted == truth),
-      balanced_accuracy = mean(c(sensitivity, specificity), na.rm = TRUE),
-      f1 = f1,
-      false_positives = false_positive,
-      false_negatives = false_negative,
+      as.list(metrics),
       expected_cost = (
-        false_positive_cost * false_positive +
-          false_negative_cost * false_negative
+        false_positive_cost * metrics[["false_positives"]] +
+          false_negative_cost * metrics[["false_negatives"]]
       ) / length(truth),
       stringsAsFactors = FALSE
     )
@@ -177,4 +153,35 @@ threshold_performance <- function(truth,
 
 safe_threshold_rate <- function(numerator, denominator) {
   if (denominator == 0) NA_real_ else numerator / denominator
+}
+
+# Shared with ordinary evaluation so absence of a class has one metric policy.
+binary_confusion_metrics <- function(truth, predicted) {
+  if (!is.logical(truth) || !is.logical(predicted) || !length(truth) ||
+        length(truth) != length(predicted) || anyNA(truth) || anyNA(predicted)) {
+    stop("Confusion metrics require matching non-missing logical events and decisions.",
+         call. = FALSE)
+  }
+  tp <- sum(predicted & truth)
+  fp <- sum(predicted & !truth)
+  tn <- sum(!predicted & !truth)
+  fn <- sum(!predicted & truth)
+  sensitivity <- safe_threshold_rate(tp, tp + fn)
+  specificity <- safe_threshold_rate(tn, tn + fp)
+  c(
+    predicted_positive_rate = mean(predicted),
+    sensitivity = sensitivity,
+    specificity = specificity,
+    precision = safe_threshold_rate(tp, tp + fp),
+    negative_predictive_value = safe_threshold_rate(tn, tn + fn),
+    accuracy = mean(predicted == truth),
+    balanced_accuracy = if (all(is.finite(c(sensitivity, specificity)))) {
+      mean(c(sensitivity, specificity))
+    } else {
+      NA_real_
+    },
+    f1 = safe_threshold_rate(2 * tp, 2 * tp + fp + fn),
+    false_positives = fp,
+    false_negatives = fn
+  )
 }

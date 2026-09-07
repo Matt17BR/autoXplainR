@@ -2,7 +2,7 @@
 % Please edit documentation in R/dashboard_generation.R
 \name{generate_dashboard}
 \alias{generate_dashboard}
-\title{Generate a guided model report}
+\title{Deprecated dashboard compatibility wrapper}
 \usage{
 generate_dashboard(
   autoxplain_result,
@@ -53,8 +53,8 @@ into an arbitrary weighted score.}
 The normalized dashboard path, invisibly.
 }
 \description{
-Creates a standalone report that starts with the modeling question,
-held-out performance, a simple-baseline comparison, and metric definitions.
-Fitted patterns and the more technical explanation evidence audit follow by
-progressive disclosure.
+Deprecated in 0.4.0; removal will occur no earlier than 0.6.0.
+Use \code{\link[=render_model_report]{render_model_report()}} for new analyses. For an optional memo, call
+\code{\link[=generate_natural_language_report]{generate_natural_language_report()}} and pass its result as \code{narrative}.
+The wrapper remains callable during the transition and warns once per call.
 }

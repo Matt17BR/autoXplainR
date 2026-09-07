@@ -1,7 +1,7 @@
 #' List supported narrative providers
 #'
-#' Provider defaults reflect public offerings checked in July 2026 and can
-#' change independently of AutoXplainR. The local provider is deterministic;
+#' Lists the adapter configuration shipped with this package. Hosted model
+#' availability and provider terms can change. The local provider is deterministic;
 #' every remote provider is opt-in.
 #'
 #' @return A data frame describing providers, default models, and credentials.
@@ -25,40 +25,49 @@ narrative_providers <- function() {
       NA_character_, NA_character_, NA_character_
     ),
     free_access = c(
-      "no API cost", "hosted free tier", "hosted free plan",
-      "10,000 neurons per day", "local compute", "limited free-model requests",
-      "endpoint-specific"
+      "local computation", "consult provider terms", "consult provider terms",
+      "consult provider terms", "local computation", "consult provider terms",
+      "consult endpoint terms"
     ),
     structured_output = c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE),
     privacy_note = c(
-      "data stays in R", "aggregates sent to Google; free-tier data-use terms apply",
+      "data stays in R", "aggregates sent to Google; consult provider terms",
       "aggregates sent to Groq; consult provider terms",
       "aggregates sent to Cloudflare; consult provider terms", "data stays local",
       "aggregates may be routed to a third-party model provider",
       "depends on the configured endpoint"
     ),
     reproducibility = c(
-      "deterministic", "model pinned", "model pinned", "model pinned",
-      "local model pinned", "router may select different free models",
+      "deterministic", "model identifier recorded; output may vary",
+      "model identifier recorded; output may vary", "model identifier recorded; output may vary",
+      "local model identifier recorded; output may vary", "router may select different models",
       "depends on endpoint"
     ),
     stringsAsFactors = FALSE
   )
 }
 
-#' Generate an evidence-constrained narrative
+#' Summarize retained model evidence in prose
 #'
 #' Produces a deterministic local narrative by default. Remote or locally
 #' hosted generative models are used only when `provider` is set explicitly.
-#' Raw rows, fitted objects, case-level predictions, and secrets are never
-#' included in the prompt. Generated prose remains secondary to the computed
-#' evaluation and explanation evidence.
+#' Evaluation, retained explanation findings, fitted effects and failed checks
+#' are included automatically. Prompt construction omits raw rows, fitted
+#' objects and case-level predictions; names and diagnostic text may still be
+#' sensitive. Hosted output is checked for format and length, not numerical
+#' grounding. Review generated claims against the computed evidence.
 #'
 #' @param autoxplain_result An `autoxplain_result` or `autoxplain_audit`.
-#' @param importance_data Optional permutation importance data.
-#' @param pdp_data Optional feature-effect list.
-#' @param model_characteristics Optional model metadata.
-#' @param audit Optional `autoxplain_audit`.
+#' @param importance_data Optional permutation importance table overriding the
+#'   retained audit's importance component. Tables with an explainer identity
+#'   must match the primary model. Bare tables are labeled user-supplied with
+#'   unverified identity; their metric should be supplied as a `metric` attribute.
+#' @param pdp_data Optional feature-effect list overriding retained effects.
+#'   An empty list omits effects from the narrative.
+#' @param model_characteristics Retained for compatibility. Generic model-family
+#'   capacity descriptions are not included in the memo.
+#' @param audit Optional `autoxplain_audit` overriding retained audit findings
+#'   and importance. The result's evaluation and effects remain available.
 #' @param provider One of `"local"`, `"gemini"`, `"groq"`,
 #'   `"cloudflare"`, `"ollama"`, `"openrouter"`, or `"custom"`. The default
 #'   is always `"local"`.
@@ -149,13 +158,9 @@ generate_natural_language_report <- function(autoxplain_result,
   if (!is.null(audit) && !inherits(audit, "autoxplain_audit")) {
     stop("`audit` must be returned by `audit_explanations()`.", call. = FALSE)
   }
-  context <- if (!is.null(audit)) {
-    prepare_audit_context(audit)
-  } else {
-    prepare_analysis_context(
-      autoxplain_result, importance_data, pdp_data, model_characteristics
-    )
-  }
+  context <- prepare_narrative_context(
+    autoxplain_result, audit, importance_data, pdp_data, model_characteristics
+  )
   local_report <- create_fallback_report(context)
   if (provider == "local") {
     return(annotate_narrative(
@@ -638,41 +643,145 @@ annotate_narrative <- function(text,
     fallback = fallback,
     structured_requested = structured_requested,
     structured_used = structured_used,
+    content_validation = if (identical(provider_used, "local")) {
+      "deterministic rendering of retained evidence"
+    } else {
+      "format and length only; numerical grounding not checked"
+    },
     disclosure = disclosure,
     error = error
   )
   text
 }
 
+prepare_narrative_context <- function(result, audit = NULL, importance_data = NULL,
+                                      effects = NULL, model_characteristics = NULL) {
+  if (is.null(result)) {
+    context <- prepare_audit_context(audit)
+    if (!is.null(importance_data)) {
+      context$importance_summary <- narrative_importance_summary(
+        importance_data, attr(importance_data, "metric") %||% "an unspecified user-supplied metric",
+        "User-supplied importance; identity is not verified against a fitted result."
+      )
+    }
+    context$effect_summary <- narrative_effect_summary(effects %||% list())
+    return(context)
+  }
+  view <- report_view_model(result, audit = audit, effects = effects)
+  context <- prepare_analysis_context(result, model_characteristics = model_characteristics)
+  resolved_audit <- view$audit
+  importance_source <- validate_narrative_attachments(result, resolved_audit, view$effects, importance_data)
+  importance <- importance_data %||% resolved_audit$importance
+  primary <- view$identity$model_id
+  if (!is.null(importance) && "model" %in% names(importance)) {
+    importance <- importance[importance$model == primary, , drop = FALSE]
+  }
+  context$importance_summary <- narrative_importance_summary(
+    importance,
+    if (!is.null(importance_data)) {
+      attr(importance_data, "metric") %||% "an unspecified user-supplied metric"
+    } else {
+      resolved_audit$config$metric %||% context$best_metric
+    }, importance_source
+  )
+  context$findings <- resolved_audit$findings
+  context$audit_scope <- resolved_audit$summary$scope_note
+  context$diagnostic_status <- view$diagnostics
+  context$effect_summary <- narrative_effect_summary(view$effects)
+  context$effect_failures <- view$effect_failures
+  context$explanations_available <- !is.null(resolved_audit)
+  context$explanation_model_label <- view$identity$model_label
+  context$model_labels <- vapply(names(result$models), function(id) {
+    report_model_label(result, id)
+  }, character(1))
+  context
+}
+
+validate_narrative_attachments <- function(result, audit, effects, importance_data) {
+  if (!is.null(audit)) {
+    ids <- names(audit$importance_objects)
+    if (!length(ids) || any(!ids %in% names(result$models))) {
+      stop("The audit references model IDs absent from this result.", call. = FALSE)
+    }
+    validate_attached_audit(audit, as_explainers(result, models = ids))
+  }
+  if (!is.list(effects)) stop("`pdp_data` must be a list or NULL.", call. = FALSE)
+  importance_identity <- attr(importance_data, "explainer_fingerprint")
+  if (length(effects) || !is.null(importance_identity)) {
+    primary <- result$evaluation$primary_model_id %||% result$provenance$primary_model_id
+    expected <- current_explainer_fingerprint(as_explainers(result, models = primary)[[1L]])
+    for (effect in effects) {
+      observed <- attr(effect, "explainer_fingerprint")
+      if (is.null(observed) || !identical(observed, expected)) {
+        stop("An attached effect was not made from the same primary model and evaluation evidence.",
+             call. = FALSE)
+      }
+    }
+    if (!is.null(importance_identity) && !identical(importance_identity, expected)) {
+      stop("The importance table was not made from the same primary model and evaluation evidence.",
+           call. = FALSE)
+    }
+  }
+  if (is.null(importance_data)) return("Retained primary-model audit.")
+  if (is.null(importance_identity)) {
+    "User-supplied importance; identity is not verified against the fitted result."
+  } else {
+    "Supplied importance identity matches the primary model and ordered evaluation data."
+  }
+}
+
+narrative_importance_summary <- function(importance, metric, source = "Supplied audit.") {
+  if (is.null(importance)) return(NULL)
+  if (!is.data.frame(importance) ||
+        !all(c("feature", "importance") %in% names(importance))) {
+    stop("`importance_data` must contain feature and importance columns.", call. = FALSE)
+  }
+  if (!nrow(importance)) return(NULL)
+  ordered <- importance[order(importance$importance, decreasing = TRUE), , drop = FALSE]
+  keep <- intersect(c("model", "feature", "importance", "conf_low", "conf_high",
+                      "sign_stability", "shuffle_status", "dependence_status", "claim"), names(ordered))
+  list(top_features = head(ordered$feature, 3L), metric = metric,
+       rows = head(ordered[keep], 3L), total_features = nrow(ordered), source = source)
+}
+
+narrative_effect_summary <- function(effects) {
+  lapply(seq_along(effects), function(index) {
+    effect <- effects[[index]]
+    feature <- attr(effect, "feature") %||% (names(effects) %||% paste0("feature_", seq_along(effects)))[[index]]
+    method <- attr(effect, "method") %||% "pdp"
+    column <- if (identical(method, "ale")) "accumulated_effect" else "partial_dependence"
+    values <- effect[[column]]
+    if (!is.numeric(values) || !any(is.finite(values))) return(NULL)
+    list(feature = feature, method = method,
+         prediction_target = attr(effect, "prediction_target") %||% "model prediction",
+         prediction_class = attr(effect, "prediction_class"),
+         lower = min(values[is.finite(values)]), upper = max(values[is.finite(values)]),
+         support_note = attr(effect, "support_note"))
+  })
+}
+
 prepare_audit_context <- function(audit) {
-  top <- audit$importance[order(audit$importance$importance, decreasing = TRUE), , drop = FALSE]
-  top <- top[!duplicated(top$feature), , drop = FALSE]
-  top <- head(top, 8L)
+  if (!inherits(audit, "autoxplain_audit")) {
+    stop("Supply an AutoXplainR result or audit.", call. = FALSE)
+  }
   list(
     context_type = "audit",
     task_type = audit$provenance$automl_task %||% "unspecified",
     target_column = audit$provenance$automl_target %||% "unspecified",
     n_features = length(audit$config$features),
     n_models = audit$summary$n_models,
-    best_model_type = audit$performance$model[[which.min(audit$performance$relative_gap)]],
-    best_performance = audit$performance$score[[which.min(audit$performance$relative_gap)]],
-    best_metric = audit$config$metric,
-    grade = audit$summary$grade,
-    grade_note = audit$summary$grade_note,
-    stable_claim_rate = audit$summary$stable_claim_rate,
-    importance_summary = list(
-      top_features = top$feature,
-      evidence_grades = as.character(top$evidence_grade),
-      claims = top$claim,
-      metric = audit$config$metric
-    ),
-    findings = audit$findings[c("severity", "code", "message", "recommendation")],
-    pdp_summary = NULL,
-    disclosure = paste(
-      "Aggregated diagnostics only. No raw rows, model objects, case-level",
-      "predictions, or secrets are included."
-    )
+    importance_summary = narrative_importance_summary(audit$importance, audit$config$metric),
+    findings = audit$findings,
+    audit_scope = audit$summary$scope_note,
+    diagnostic_status = audit$diagnostic_status,
+    explanations_available = TRUE,
+    disclosure = narrative_disclosure()
   )
+}
+
+narrative_disclosure <- function() {
+  paste("Aggregate diagnostics only; raw rows, fitted model objects and case-level predictions",
+        "are omitted. Names and diagnostic text may still contain sensitive information.")
 }
 
 prepare_analysis_context <- function(autoxplain_result,
@@ -686,11 +795,8 @@ prepare_analysis_context <- function(autoxplain_result,
   evaluation <- autoxplain_result$evaluation
   if (!is.null(evaluation$primary_metric)) {
     metric <- evaluation$primary_metric
-    reference_model <- if ("main_model" %in% names(evaluation$metrics)) {
-      "main_model"
-    } else {
-      evaluation$winner
-    }
+    reference_model <- evaluation$primary_model_id %||%
+      autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
     performance <- evaluation$metrics[[reference_model]][[metric]]
     baseline_performance <- evaluation$metrics[["simple_baseline"]][[metric]] %||% NA_real_
     metric_definition <- evaluation$metric_definitions[[metric]] %||% "See the metric documentation."
@@ -799,6 +905,11 @@ prepare_analysis_context <- function(autoxplain_result,
     task_type = autoxplain_result$task %||%
       detect_task(autoxplain_result$training_data[[autoxplain_result$target_column]]),
     target_column = autoxplain_result$target_column,
+    positive_class = if (identical(autoxplain_result$task, "binary")) {
+      levels(autoxplain_result$training_data[[autoxplain_result$target_column]])[[2L]]
+    } else {
+      NULL
+    },
     engine = autoxplain_result$engine %||% "h2o",
     n_features = length(autoxplain_result$features),
     n_models = length(autoxplain_result$models),
@@ -824,10 +935,7 @@ prepare_analysis_context <- function(autoxplain_result,
     } else {
       NULL
     },
-    disclosure = paste(
-      "Aggregated diagnostics only. No raw rows, fitted model objects, case-level",
-      "predictions, or secrets are included."
-    )
+    disclosure = narrative_disclosure()
   )
 }
 
@@ -925,12 +1033,104 @@ create_report_prompt <- function(context) {
       "- Treat held-out performance, prediction disagreement, and supplied repeated ",
       "permutation importance as computed evidence.\n"
     ),
-    "- Treat grade labels as heuristic diagnostics, never certification.\n",
+    "- Treat diagnostics as descriptive checks, never certification.\n",
     "- For an explanation audit, lead with critical limitations and disagreement before rankings.\n",
     "- Do not invent metrics, model behavior, domain meaning, or recommendations.\n",
     "- Use plain language and at most 500 words.\n\n",
     serialized
   )
+}
+
+narrative_explanation_lines <- function(context) {
+  lines <- character()
+  importance <- context$importance_summary
+  if (!is.null(importance)) {
+    lines <- c(lines, importance$source, paste0(
+      "Permutation importance is the change in ", importance$metric,
+      " after shuffling an input. These fitted-model summaries should not be read as causal effects."
+    ))
+    rows <- importance$rows
+    if (!is.null(rows)) for (index in seq_len(nrow(rows))) {
+      row <- rows[index, , drop = FALSE]
+      interval <- if (all(c("conf_low", "conf_high") %in% names(row))) {
+        paste0("; shuffle Monte Carlo interval [", report_number(row$conf_low, 4L),
+               ", ", report_number(row$conf_high, 4L), "]")
+      } else {
+        ""
+      }
+      status <- if ("shuffle_status" %in% names(row)) {
+        paste0("; ", gsub("_", " ", row$shuffle_status, fixed = TRUE))
+      } else {
+        ""
+      }
+      model <- if (identical(context$context_type, "audit") && "model" %in% names(row)) {
+        paste0(row$model, " / ")
+      } else {
+        ""
+      }
+      lines <- c(lines, paste0("- ", model, row$feature, ": ",
+                               report_number(row$importance, 4L), interval, status, "."))
+    }
+    if (importance$total_features > 3L) {
+      lines <- c(lines, paste0("Showing three of ", importance$total_features,
+                               " retained feature summaries; inspect the full audit for the rest."))
+    }
+  } else {
+    lines <- c(lines, "Feature importance was not supplied; no feature ranking is reported.")
+  }
+  effects <- Filter(Negate(is.null), context$effect_summary %||% list())
+  if (length(effects)) {
+    for (effect in effects) {
+      lines <- c(lines, paste0(
+        "- ", toupper(effect$method), " for ", effect$feature, " (", effect$prediction_target,
+        if (identical(effect$method, "ale")) "): centered effects range from " else "): predictions range from ",
+        report_number(effect$lower, 4L), " to ",
+        report_number(effect$upper, 4L), "."
+      ))
+    }
+  } else {
+    lines <- c(lines, "Fitted effect curves were not supplied.")
+  }
+  failures <- context$effect_failures
+  if (!is.null(failures) && nrow(failures)) {
+    lines <- c(lines, paste0("- Effect unavailable for ", failures$feature, ": ", failures$reason))
+  }
+  if (!is.null(context$audit_scope)) lines <- c(lines, context$audit_scope)
+  statuses <- context$diagnostic_status
+  if (is.list(statuses) && !is.data.frame(statuses)) for (item in statuses) {
+    if (!is.null(item$status) && !item$status %in% c("available", "computed")) {
+      lines <- c(lines, paste0("- ", gsub("_", " ", item$id, fixed = TRUE), ": ",
+                               gsub("_", " ", item$status, fixed = TRUE),
+                               ". ", item$reason %||% item$interpretation %||% ""))
+    }
+  }
+  lines
+}
+
+narrative_finding_lines <- function(findings, model_labels = NULL) {
+  if (is.null(findings) || !nrow(findings)) return(character())
+  groups <- split(seq_len(nrow(findings)), factor(findings$code, levels = unique(findings$code)))
+  vapply(groups, function(indices) {
+    rows <- findings[indices, , drop = FALSE]
+    if (!is.null(model_labels) && "model" %in% names(rows)) {
+      known <- rows$model %in% names(model_labels)
+      rows$model[known] <- model_labels[rows$model[known]]
+    }
+    message <- if (identical(rows$code[[1L]], "feature_dependence") && "feature" %in% names(rows)) {
+      paste0("Pairwise association flags affect ", paste(unique(rows$feature), collapse = ", "), ".")
+    } else if (identical(rows$code[[1L]], "shuffle_interval_unresolved") &&
+                 all(c("model", "feature") %in% names(rows))) {
+      paste0("Shuffle intervals do not resolve the direction of the mean loss change for ",
+             paste(paste(rows$model, rows$feature, sep = " / "), collapse = ", "), ".")
+    } else {
+      paste(unique(rows$message), collapse = " ")
+    }
+    if (!is.null(model_labels)) for (id in names(model_labels)) {
+      message <- gsub(paste0("`", id, "`"), paste0("`", model_labels[[id]], "`"),
+                      message, fixed = TRUE)
+    }
+    paste0("- ", message, " ", paste(unique(rows$recommendation), collapse = " "))
+  }, character(1), USE.NAMES = FALSE)
 }
 
 context_to_text <- function(context) {
@@ -951,6 +1151,9 @@ context_to_text <- function(context) {
       paste("Evaluation rows:", context$evaluation_rows %||% "unspecified"),
       paste("Metric meaning:", context$metric_definition %||% "unspecified")
     )
+  }
+  if (!is.null(context$positive_class)) {
+    lines <- c(lines, paste("Binary probability target:", context$positive_class))
   }
   if (is.finite(context$baseline_performance %||% NA_real_)) {
     lines <- c(
@@ -1035,24 +1238,9 @@ context_to_text <- function(context) {
         ", backend=", row[["backend"]], ", role=", row[["role"]], "]"
       )
     })
-    capacities <- apply(context$retained_models, 1L, function(row) {
-      paste0(
-        row[["model_id"]], ": can represent ", row[["capacity_nonlinearity"]],
-        "; interaction capacity: ", row[["capacity_interactions"]]
-      )
-    })
-    lines <- c(
-      lines,
-      "Retained model identities (aggregate metadata):",
-      paste0("- ", identities),
-      paste(
-        "PRIOR/MODEL-CAPACITY KNOWLEDGE:",
-        "the following reviewed cards describe what each family can represent;",
-        "they do not show that the fitted models used those patterns."
-      ),
-      paste0("- ", capacities)
-    )
+    lines <- c(lines, "Retained model identities (aggregate metadata):", paste0("- ", identities))
   }
+
   if (!is.null(context$model_behavior_summary)) {
     behavior <- context$model_behavior_summary
     score_lines <- apply(behavior$performance, 1L, function(row) {
@@ -1087,23 +1275,9 @@ context_to_text <- function(context) {
     })
     lines <- c(lines, "Evaluation cautions:", note_lines)
   }
-  if (!is.null(context$grade)) {
-    lines <- c(lines, paste("Diagnostic evidence grade:", context$grade),
-               paste("Stable claim rate:", format_percent(context$stable_claim_rate)))
-  }
-  if (!is.null(context$importance_summary)) {
-    lines <- c(lines, paste(
-      "COMPUTED repeated-permutation-importance features:",
-      paste(context$importance_summary$top_features, collapse = ", "),
-      "(model reliance on supplied evaluation rows; not family capacity or causality)."
-    ))
-  }
+  lines <- c(lines, narrative_explanation_lines(context))
   if (!is.null(context$findings) && nrow(context$findings)) {
-    finding_lines <- apply(context$findings, 1L, function(row) {
-      paste0("- [", row[["severity"]], "] ", row[["message"]],
-             " Action: ", row[["recommendation"]])
-    })
-    lines <- c(lines, "Audit findings:", finding_lines)
+    lines <- c(lines, "Audit findings:", narrative_finding_lines(context$findings, context$model_labels))
   }
   lines <- c(lines, paste("Disclosure:", context$disclosure %||% "Aggregated context only."))
   paste(lines, collapse = "\n")
@@ -1119,12 +1293,10 @@ create_fallback_report <- function(context) {
     heading,
     "",
     "## Scope",
-    paste0(
-      "This is a descriptive summary of a ", context$task_type %||% "modeling",
-      " task for `", context$target_column %||% "unspecified", "`, covering ",
-      context$n_models %||% "an unspecified number of", " model(s) and ",
-      context$n_features %||% "an unspecified number of", " feature(s)."
-    )
+    paste0("Target: `", context$target_column %||% "unspecified", "` (",
+           context$task_type %||% "task unspecified", "). Models: ",
+           context$n_models %||% "unspecified", ". Inputs: ",
+           context$n_features %||% "unspecified", ".")
   )
   if (!is.null(context$evaluation_role)) {
     lines <- c(
@@ -1155,6 +1327,10 @@ create_fallback_report <- function(context) {
       lines, "", "## What the main metric means",
       paste0("**", context$best_metric, ":** ", context$metric_definition)
     )
+    if (!is.null(context$positive_class)) {
+      lines <- c(lines, paste0("Binary probabilities refer to `", context$positive_class,
+                               "`, the second training outcome level."))
+    }
     if (!is.null(context$calibration_summary)) {
       calibration <- context$calibration_summary
       lines <- c(
@@ -1223,25 +1399,6 @@ create_fallback_report <- function(context) {
       ))
     }
   }
-  if (!is.null(context$retained_models) && nrow(context$retained_models)) {
-    lines <- c(
-      lines, "", "## What kinds of models were retained?",
-      paste(
-        "The family descriptions below are prior/model-capacity knowledge.",
-        "They describe what a family can represent, not patterns proven to have",
-        "been used by these fitted models."
-      )
-    )
-    for (index in seq_len(nrow(context$retained_models))) {
-      model <- context$retained_models[index, , drop = FALSE]
-      lines <- c(lines, paste0(
-        "- `", model$model_id[[1L]], "`: ", model$family[[1L]], " via ",
-        model$backend[[1L]], "; can represent ",
-        model$capacity_nonlinearity[[1L]], "; interaction capacity: ",
-        model$capacity_interactions[[1L]], "."
-      ))
-    }
-  }
   if (!is.null(context$model_behavior_summary)) {
     behavior <- context$model_behavior_summary
     widest <- behavior$largest_disagreement
@@ -1260,42 +1417,15 @@ create_fallback_report <- function(context) {
       behavior$scope_note
     )
   }
-  if (!is.null(context$grade)) {
-    lines <- c(
-      lines, "", "## Reliability first",
-      paste0("The heuristic explanation-evidence grade is **", context$grade,
-             "**; this is a diagnostic, not a certification."),
-      paste0("The stable-claim rate is ", format_percent(context$stable_claim_rate), ".")
-    )
-  }
   if (!is.null(context$findings) && nrow(context$findings)) {
-    lines <- c(lines, "", "## Findings")
-    for (index in seq_len(nrow(context$findings))) {
-      lines <- c(lines, paste0(
-        "- **", context$findings$severity[[index]], " - ",
-        context$findings$code[[index]], ":** ", context$findings$message[[index]],
-        " ", context$findings$recommendation[[index]]
-      ))
-    }
+    lines <- c(lines, "", "## Findings", narrative_finding_lines(context$findings, context$model_labels))
   }
-  if (!is.null(context$importance_summary)) {
-    lines <- c(
-      lines, "", "## Computed feature evidence",
-      paste0(
-        "The leading descriptive permutation-importance features are ",
-        paste(context$importance_summary$top_features, collapse = ", "),
-        ". They are computed evidence of model reliance on the evaluation data, ",
-        "not family-capacity claims, and should not be read as causal effects."
-      )
-    )
-  }
-  if (!is.null(context$pdp_summary)) {
-    lines <- c(
-      lines, "", "## Partial Dependence",
-      paste0("Partial dependence was evaluated for ", context$pdp_summary$n_features,
-             " feature(s). Inspect support and dependence warnings before interpreting the curves.")
-    )
-  }
+  feature_title <- paste0("## Fitted feature evidence", if (!is.null(context$explanation_model_label)) {
+    paste0(" for ", context$explanation_model_label)
+  } else {
+    ""
+  })
+  lines <- c(lines, "", feature_title, narrative_explanation_lines(context))
   lines <- c(
     lines, "", "## What to do next",
     paste(
@@ -1303,7 +1433,7 @@ create_fallback_report <- function(context) {
       "represent the intended use, and validate the result on new data before relying on it."
     ),
     "", "## Required limitations",
-    "Permutation repeats quantify computation-level variability, not population uncertainty. ",
+    "Shuffle repeats measure randomness in this calculation, not population uncertainty. ",
     "Feature explanations do not establish causality, fairness, safety, or deployment readiness. ",
     "Use held-out data, domain review, and external validation.",
     "", paste0("Data disclosure: ", context$disclosure %||% "Aggregated context only.")

@@ -29,3 +29,7 @@ depend on the candidate set and the subjective weight, use this only as a
 sensitivity analysis; AutoXplainR reports the underlying dimensions
 separately in its primary workflow.
 }
+\details{
+Deprecated in 0.4.0, with removal no earlier than 0.6.0. Report predictive
+error and measured resource use separately using \code{\link[=render_model_report]{render_model_report()}}.
+}

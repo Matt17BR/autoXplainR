@@ -30,7 +30,8 @@ test_that("guided regression uses a reproducible untouched holdout", {
   expect_true(all(c("mean_error", "median_absolute_error", "p90_absolute_error") %in%
                     names(first$evaluation$diagnostics)))
   expect_output(print(first), "improvement")
-  expect_output(print(first), 'model_set = "tuned"', fixed = TRUE)
+  expect_output(print(first), "reproducible random holdout")
+  expect_output(print(first), "Only 24 rows")
   expect_output(print(first), "render_model_report")
   expect_named(summary(first), c(
     "task", "target", "n_models", "n_features", "leaderboard", "evaluation", "provenance"
