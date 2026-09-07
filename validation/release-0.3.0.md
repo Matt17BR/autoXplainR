@@ -79,3 +79,11 @@ records the final artifact checks and publication outcome. The official
 [0.3.0 release](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.3.0)
 provides the archive and its checksum. The final release archive is built by that
 pipeline and is distinct from the mainline diagnostic archive above.
+
+The tagged release's remote H2O job passed all 93 expectations but emitted 13
+performance-fallback warnings because its minimal CI library contained data.table
+without H2O's optional bit64 helper. The local full library emitted no warnings.
+CI configuration on main now explicitly installs bit64 for H2O runs; this is an
+environment correction and does not change the tagged package code. These
+warnings concern data conversion speed, not failed predictions or statistical
+assertions.

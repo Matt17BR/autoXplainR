@@ -23,7 +23,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::devtools, any::testthat, any::h2o
+          extra-packages: any::devtools, any::testthat, any::h2o, any::bit64
       - name: Run isolated H2O tests
         run: devtools::test(filter = "h2o", stop_on_failure = TRUE)
         shell: Rscript {0}

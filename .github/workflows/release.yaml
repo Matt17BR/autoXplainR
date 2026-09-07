@@ -93,7 +93,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::devtools, any::h2o, any::testthat
+          extra-packages: any::devtools, any::h2o, any::testthat, any::bit64
       - name: Run the live H2O integration
         run: devtools::test(filter = "h2o", stop_on_failure = TRUE)
         shell: Rscript {0}
