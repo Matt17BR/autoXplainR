@@ -1,0 +1,71 @@
+{
+  "initial_allocator_source_hash": "a8be44ce33d6673399e25fb5bfff2a32",
+  "generator_seed": 51312,
+  "allocator_seed": 7,
+  "cases": 2500,
+  "policies": {
+    "fixed_order": "Every retry orders by decreasing rarity and priority, randomizing only ties.",
+    "random_order": "First retry uses the original greedy order; remaining retries sample a uniform group permutation.",
+    "weighted_order": "First retry uses the original greedy order; remaining retries sample a group permutation weighted by rarity.",
+    "jitter_priority": "First retry uses the original greedy order; later retries multiply rarity by Uniform(0.5,1.5)."
+  },
+  "results": {
+    "fixed_order": {
+      "false_failures": 30,
+      "false_failure_case_ids": [
+        451,
+        1541,
+        1553,
+        1556,
+        1595,
+        1597,
+        1603,
+        1629,
+        1653,
+        1679,
+        1695,
+        1788,
+        1831,
+        1847,
+        1906,
+        1963,
+        1989,
+        2105,
+        2106,
+        2114,
+        2126,
+        2178,
+        2260,
+        2270,
+        2307,
+        2324,
+        2334,
+        2350,
+        2474,
+        2486
+      ],
+      "invalid_successes": 0,
+      "elapsed_seconds": 2.599
+    },
+    "random_order": {
+      "false_failures": 0,
+      "false_failure_case_ids": [],
+      "invalid_successes": 0,
+      "elapsed_seconds": 2.676
+    },
+    "weighted_order": {
+      "false_failures": 0,
+      "false_failure_case_ids": [],
+      "invalid_successes": 0,
+      "elapsed_seconds": 2.416
+    },
+    "jitter_priority": {
+      "false_failures": 1,
+      "false_failure_case_ids": [
+        1556
+      ],
+      "invalid_successes": 0,
+      "elapsed_seconds": 2.613
+    }
+  }
+}

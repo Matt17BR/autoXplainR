@@ -156,7 +156,16 @@ explorer_tradeoffs <- function(result, models) {
       "Linear spacing compares absolute cost differences. Log spacing compares ratios:",
       "1 to 10 uses the same space as 10 to 100. It can separate inexpensive models when one model",
       "is much larger or slower. All plotted costs must be positive; scores and the Pareto frontier do not change."
+    )), "</div>",
+    '<div class="cost-scale-control"><label class="control">Score scale ',
+    '<select id="score-scale-select" disabled aria-describedby="score-scale-note">',
+    '<option value="linear">Linear</option><option value="log">Log</option></select></label>',
+    explorer_help("Choosing a score scale", paste(
+      "Log spacing compares ratios between positive losses. It can separate useful models when",
+      "one alternative has a much larger error. All models and their original scores remain visible.",
+      "Zero losses and scores such as accuracy or R-squared use a linear axis."
     )), "</div></div>",
+    '<p id="score-scale-note" class="microcopy" role="status" hidden></p>',
     '<p id="cost-scale-note" class="microcopy" role="status">',
     "Linear cost axis. Scale switching requires JavaScript.</p>",
     paste(plots, collapse = ""),

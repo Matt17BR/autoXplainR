@@ -1,5 +1,12 @@
 # Validation evidence
 
+The [harder-modeling comparison](stress-modeling/findings.md) tests predictive
+quality against independently fitted reference models. The accompanying
+[adapter probes](stress-adapters/README.md),
+[grouped-fold checks](stress-grouped/README.md) and
+[report stress review](stress-reports/README.md) record failures, repairs and
+remaining limits. These challenge behavior beyond the smaller teaching examples.
+
 The [product review of the 0.4.0 report](product-review-0.4.0.md) records the
 maintainer’s feedback and the regressions from 0.1. Current acceptance tasks are
 in the [product walkthrough](product-walkthrough.md) and the 0.6.0 work record.

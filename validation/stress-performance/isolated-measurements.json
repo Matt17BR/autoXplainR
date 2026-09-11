@@ -1,0 +1,70 @@
+{
+  "pair_profile_isolation": {
+    "baseline": {
+      "elapsed_seconds": [
+        16.247,
+        17.604000000000003,
+        17.921999999999997
+      ],
+      "median_elapsed": 17.604000000000003,
+      "identical_profile": true,
+      "r_object_bytes": 20057232,
+      "allocated_bytes": 506685472,
+      "allocation_count": 300004,
+      "largest_allocation_bytes": 1074512
+    },
+    "candidate": {
+      "elapsed_seconds": [
+        3.5819999999999936,
+        4.147999999999996,
+        3.3589999999999947
+      ],
+      "median_elapsed": 3.5819999999999936,
+      "identical_profile": true,
+      "r_object_bytes": 20057232,
+      "allocated_bytes": 503786320,
+      "allocation_count": 278040,
+      "largest_allocation_bytes": 1074512
+    },
+    "mixed_cases": {
+      "names": [
+        "both",
+        "evaluation_only",
+        "training_only",
+        "empty"
+      ],
+      "identical_full_profiles": true
+    },
+    "improvement": {
+      "elapsed_reduction_fraction": 0.7965235173824134,
+      "allocation_reduction_fraction": 0.0057217981572599275,
+      "scope": "Full prepare_data_explorer(summary), saved 1,200-row/100-predictor fit, same process, same installed baseline namespace, only R/data_profile.R replaced in a child environment. Timings measured without Rprofmem; one separate allocation run per implementation."
+    }
+  },
+  "serialization_isolation": {
+    "prepare": 29.296000000000003,
+    "transpose": 3.294999999999998,
+    "candidate_serialization": 6.631999999999998,
+    "baseline_serialization": 67.899,
+    "decoded_payload_identical": true,
+    "json_bytes_identical": true
+  },
+  "selected_column_cache": {
+    "prepare_seconds": 5.694000000000001,
+    "serialization_with_escaping_seconds": 11.024000000000001,
+    "entire_export_identical": true
+  },
+  "original_report_payload_comparison": {
+    "original_report_payload_bytes": 56405308,
+    "candidate_payload_bytes": 56405308,
+    "escaped_json_identical": true,
+    "decoded_full_payload_identical": true,
+    "baseline_sha256": "5d572d45882284a7f9d0f9467b7374cf20d1c5728e5819046413729ba33703cb",
+    "candidate_sha256": "5d572d45882284a7f9d0f9467b7374cf20d1c5728e5819046413729ba33703cb"
+  },
+  "notes": [
+    "Measurements isolate successive changes, so stage timings must not be added across different runs.",
+    "Rprofmem recorded allocation sizes are not peak process memory.",
+    "Entire report timings and browser results are maintained separately under validation/stress-reports."
+  ]
+}

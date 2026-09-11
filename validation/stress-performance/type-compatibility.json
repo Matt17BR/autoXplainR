@@ -1,0 +1,13 @@
+{
+  "baseline_version": "0.6.1",
+  "source_md5": {
+    "R/data_profile.R": "b07b82bc6a80ef5825a63d5db1bba56b",
+    "R/report_payload.R": "3575049a1a70467374475190be1502e0"
+  },
+  "columns": ["number", "integer", "flag", "category", "date", "time", "wrapped", "unsupported", "complex", "absent"],
+  "selected_positions": [3, null, 1, 6, 2, 4, 5],
+  "complete_R_export_identical": true,
+  "escaped_script_byte_identical": true,
+  "decoded_full_payload_identical": true,
+  "date_time_nonfinite": "Original numeric infinities remain in R; JSON nulls and separate markers are preserved."
+}

@@ -198,7 +198,9 @@
     if (!points.length) return;
     const categorical = figure.dataset.kind === 'category', cost = figure.dataset.kind === 'cost';
     const logCost = cost && state.costScale === 'log' && points.every(point => finite(point.x) && point.x > 0);
+    const logScore = cost && state.scoreScale === 'log' && points.every(point => finite(point.y) && point.y > 0);
     const xLabel = figure.dataset.xLabel + (logCost ? ' · log scale' : '');
+    const yLabel = figure.dataset.yLabel + (logScore ? ' · log scale' : '');
     const zero = figure.dataset.zero === 'true';
     const categories = [...new Set(points.map(point => point.category))];
     const models = [...new Set(points.map(point => point.model))];
@@ -218,10 +220,12 @@
       const minimum = Math.min(...points.map(point => point.x));
       xlimits = [Math.log10(Math.max(xlimits[0], minimum / 1.1)), Math.log10(xlimits[1])];
     }
-    const labelLines = wrap(categorical ? figure.dataset.xLabel : figure.dataset.yLabel, width - 20);
+    if (logScore) ylimits = range(points.map(point => Math.log10(point.y)), false, .001);
+    const yTicks = logScore ? logTicks(ylimits, 5) : ticks(ylimits, 5);
+    const labelLines = wrap(categorical ? figure.dataset.xLabel : yLabel, width - 20);
     const top = 20 + labelLines.length * 16;
     const left = categorical ? Math.min(155, Math.max(105, width * .36)) :
-      Math.max(width < 420 ? 48 : 58, ...ticks(ylimits, 5).map(value => context.measureText(number(value)).width + 12));
+      Math.max(width < 420 ? 48 : 58, ...yTicks.map(value => context.measureText(number(value)).width + 12));
     const labelColumn = cost && (reserveLabels === true || points.length > 5);
     const labelWidth = labelColumn ? Math.min(180, Math.max(116, width * .36)) : 0;
     const right = width - (labelColumn ? labelWidth + 24 : categorical && hasSupport ? 55 : 20);
@@ -237,21 +241,22 @@
     const supportHeight = hasSupport && !categorical ? 80 : 0;
     const height = bottom + 42 + bottomLabel.length * 16 + supportHeight;
     const svg = node('svg', {viewBox: `0 0 ${width} ${height}`, role: 'group',
-      'aria-label': `${figure.dataset.yLabel} by ${xLabel}. Arrow keys move between values. Values and support follow the chart.`,
+      'aria-label': `${yLabel} by ${xLabel}. Arrow keys move between values. Values and support follow the chart.`,
       'data-chart-layout': 'responsive', 'data-axis-type': categorical ? 'categorical' : 'numeric',
       'data-x-scale': logCost ? 'log' : 'linear',
+      'data-y-scale': logScore ? 'log' : 'linear',
       ...(cost ? {'data-label-layout': labelColumn ? 'column' : 'nearby'} : {})});
-    text(svg, categorical ? figure.dataset.xLabel : figure.dataset.yLabel, 2, 15, {width: width - 4});
+    text(svg, categorical ? figure.dataset.xLabel : yLabel, 2, 15, {width: width - 4});
     const px = value => left + ((logCost ? Math.log10(value) : value) - xlimits[0]) /
       (xlimits[1] - xlimits[0]) * (right - left);
-    const py = value => bottom - (value - ylimits[0]) / (ylimits[1] - ylimits[0]) * plotHeight;
+    const py = value => bottom - ((logScore ? Math.log10(value) : value) - ylimits[0]) / (ylimits[1] - ylimits[0]) * plotHeight;
     const xTickCount = Math.max(labelColumn ? 2 : 3, Math.floor((right - left) / 70));
     (logCost ? logTicks(xlimits, xTickCount) : ticks(xlimits, xTickCount)).forEach(value => {
       const x = px(value);
       if (categorical) svg.append(node('line', {x1: x, x2: x, y1: top, y2: bottom, class: 'axr-grid'}));
       text(svg, number(value), x, bottom + 20, {anchor: 'middle'});
     });
-    if (!categorical) ticks(ylimits, 5).forEach(value => {
+    if (!categorical) yTicks.forEach(value => {
       svg.append(node('line', {x1: left, x2: right, y1: py(value), y2: py(value), class: 'axr-grid'}));
       text(svg, number(value), left - 8, py(value) + 4, {anchor: 'end'});
     });

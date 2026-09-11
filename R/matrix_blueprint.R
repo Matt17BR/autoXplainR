@@ -3,7 +3,8 @@ fit_matrix_blueprint <- function(data,
                                  center = FALSE,
                                  scale = FALSE,
                                  intercept = FALSE,
-                                 categorical_encoding = c("treatment", "one_hot")) {
+                                 categorical_encoding = c("treatment", "one_hot"),
+                                 output = c("dense", "sparse")) {
   assert_data_frame(data, "data")
   if (anyDuplicated(names(data))) {
     stop("`data` must have unique column names.", call. = FALSE)
@@ -28,6 +29,13 @@ fit_matrix_blueprint <- function(data,
   assert_matrix_blueprint_flag(scale, "scale")
   assert_matrix_blueprint_flag(intercept, "intercept")
   categorical_encoding <- match.arg(categorical_encoding)
+  output <- match.arg(output)
+  if (identical(output, "sparse")) {
+    require_optional("Matrix", "encoding sparse model inputs")
+    if (isTRUE(center) || isTRUE(scale)) {
+      stop("Sparse encoding delegates centering and scaling to the learner.", call. = FALSE)
+    }
+  }
 
   training <- data[predictors]
   kinds <- vapply(training, matrix_blueprint_predictor_kind, character(1L))
@@ -98,7 +106,9 @@ fit_matrix_blueprint <- function(data,
   } else {
     NULL
   }
-  encoded <- if (length(encoding_contrasts)) {
+  encoded <- if (identical(output, "sparse")) {
+    sparse_blueprint_matrix(terms, frame, encoding_contrasts)
+  } else if (length(encoding_contrasts)) {
     stats::model.matrix(terms, frame, contrasts.arg = encoding_contrasts)
   } else {
     stats::model.matrix(terms, frame)
@@ -114,10 +124,14 @@ fit_matrix_blueprint <- function(data,
   if (!ncol(encoded)) {
     stop("Training predictors produced no encoded columns.", call. = FALSE)
   }
-  if (any(!is.finite(encoded))) {
+  if (!matrix_blueprint_values_finite(encoded)) {
     stop("Training predictors produced non-finite encoded values.", call. = FALSE)
   }
 
+  # A generated name such as segmentB can also be a literal numeric column.
+  # Preserve both inputs and their source mapping without sending duplicate
+  # column names to engines that identify inputs by name.
+  colnames(encoded) <- make.unique(colnames(encoded))
   columns <- colnames(encoded)
   term_predictors <- all.vars(terms)
   column_predictors <- rep(NA_character_, length(columns))
@@ -139,14 +153,30 @@ fit_matrix_blueprint <- function(data,
   center_values <- stats::setNames(rep(0, length(columns)), columns)
   if (isTRUE(center) && any(standardizable)) {
     center_values[standardizable] <- colMeans(encoded[, standardizable, drop = FALSE])
+    # On platforms without extended precision, a finite column's sum can
+    # overflow before colMeans divides by its length. Keep ordinary results,
+    # and recompute only those centers using bounded, unit-sized coordinates.
+    for (column in which(!is.finite(center_values))) {
+      values <- encoded[, column]
+      magnitude <- max(abs(values))
+      center_values[[column]] <- mean(values / magnitude) * magnitude
+    }
   }
   scale_values <- stats::setNames(rep(1, length(columns)), columns)
   zero_variance_columns <- character()
   if (isTRUE(scale) && any(standardizable)) {
-    learned_scale <- apply(encoded[, standardizable, drop = FALSE], 2L, stats::sd)
-    invalid_scale <- !is.finite(learned_scale) | learned_scale == 0
-    zero_variance_columns <- names(learned_scale)[invalid_scale]
-    learned_scale[invalid_scale] <- 1
+    learned_scale <- apply(
+      encoded[, standardizable, drop = FALSE], 2L, matrix_blueprint_sd
+    )
+    if (any(!is.finite(learned_scale))) {
+      stop(
+        "Predictor scales exceed the finite numeric range: ",
+        paste(names(learned_scale)[!is.finite(learned_scale)], collapse = ", "),
+        ". Rescale these input units before fitting.", call. = FALSE
+      )
+    }
+    zero_variance_columns <- names(learned_scale)[learned_scale == 0]
+    learned_scale[learned_scale == 0] <- 1
     scale_values[names(learned_scale)] <- learned_scale
   }
   if ("(Intercept)" %in% columns) {
@@ -164,6 +194,7 @@ fit_matrix_blueprint <- function(data,
       xlevels = lapply(training[categorical], levels),
       contrasts = contrasts,
       columns = columns,
+      unique_column_names = TRUE,
       column_predictors = column_predictors,
       intercept = isTRUE(intercept),
       categorical_encoding = categorical_encoding,
@@ -174,7 +205,7 @@ fit_matrix_blueprint <- function(data,
       standardized_columns = columns[standardizable],
       zero_variance_columns = zero_variance_columns,
       training_rows = nrow(training),
-      output = "dense"
+      output = output
     ),
     class = "autoxplain_matrix_blueprint"
   )
@@ -253,7 +284,10 @@ bake_matrix_blueprint <- function(blueprint, newdata) {
     xlev = blueprint$xlevels,
     na.action = stats::na.fail
   )
-  encoded <- if (length(blueprint$contrasts)) {
+  encoded <- if (identical(blueprint$output, "sparse")) {
+    require_optional("Matrix", "encoding sparse model inputs")
+    sparse_blueprint_matrix(blueprint$terms, frame, blueprint$contrasts)
+  } else if (length(blueprint$contrasts)) {
     stats::model.matrix(
       blueprint$terms,
       frame,
@@ -265,6 +299,9 @@ bake_matrix_blueprint <- function(blueprint, newdata) {
   if (!isTRUE(blueprint$intercept) && "(Intercept)" %in% colnames(encoded)) {
     encoded <- encoded[, colnames(encoded) != "(Intercept)", drop = FALSE]
   }
+  if (isTRUE(blueprint$unique_column_names)) {
+    colnames(encoded) <- make.unique(colnames(encoded))
+  }
   if (!identical(colnames(encoded), blueprint$columns)) {
     stop(
       "Encoded columns do not match the training blueprint. Expected: ",
@@ -273,14 +310,82 @@ bake_matrix_blueprint <- function(blueprint, newdata) {
       call. = FALSE
     )
   }
-  if (any(!is.finite(encoded))) {
+  if (!matrix_blueprint_values_finite(encoded)) {
     stop("New predictors produced non-finite encoded values.", call. = FALSE)
   }
 
+  if (identical(blueprint$output, "sparse")) return(encoded)
+  raw_encoded <- encoded
   encoded <- sweep(encoded, 2L, blueprint$center, "-")
   encoded <- sweep(encoded, 2L, blueprint$scale, "/")
+  # The subtraction can overflow even when the standardized result is finite.
+  # Dividing first is a fallback for those columns, preserving ordinary results.
+  overflow <- which(colSums(!is.finite(encoded)) > 0L)
+  for (column in overflow) {
+    encoded[, column] <- raw_encoded[, column] / blueprint$scale[[column]] -
+      blueprint$center[[column]] / blueprint$scale[[column]]
+  }
+  if (!matrix_blueprint_values_finite(encoded)) {
+    stop(
+      "Standardized predictor values exceed the finite numeric range. ",
+      "Check the input units against the training data.", call. = FALSE
+    )
+  }
   storage.mode(encoded) <- "double"
   encoded
+}
+
+matrix_blueprint_values_finite <- function(x) {
+  if (inherits(x, "sparseMatrix")) return(all(is.finite(x@x)))
+  all(is.finite(x))
+}
+
+sparse_blueprint_matrix <- function(terms, frame, contrasts) {
+  # Matrix's formula encoder interprets punctuation in literal predictor names.
+  # Encode the same additive columns using safe internal names, then restore the
+  # names stats::model.matrix would produce, including contrast suffixes.
+  original_names <- names(frame)
+  safe_names <- paste0(".ax_sparse", seq_along(frame))
+  names(frame) <- safe_names
+  safe_terms <- stats::terms(stats::as.formula("~ ."), data = frame)
+  attr(frame, "terms") <- safe_terms
+  if (length(contrasts)) {
+    names(contrasts) <- safe_names[match(names(contrasts), original_names)]
+  }
+  encoded <- Matrix::sparse.model.matrix(safe_terms, frame, contrasts.arg = contrasts)
+  assignment <- attr(encoded, "assign")
+  assigned <- which(assignment > 0L)
+  labels <- attr(terms, "term.labels")
+  colnames(encoded)[assigned] <- paste0(
+    labels[assignment[assigned]],
+    substring(colnames(encoded)[assigned], nchar(safe_names[assignment[assigned]]) + 1L)
+  )
+  restored_contrasts <- attr(encoded, "contrasts")
+  if (length(restored_contrasts)) {
+    names(restored_contrasts) <- original_names[match(names(restored_contrasts), safe_names)]
+    attr(encoded, "contrasts") <- restored_contrasts
+  }
+  encoded
+}
+
+matrix_blueprint_sd <- function(x) {
+  value <- stats::sd(x)
+  magnitude <- max(abs(x))
+  ordinary_units <- magnitude >= sqrt(.Machine$double.xmin) &&
+    magnitude <= sqrt(.Machine$double.xmax)
+  if (is.finite(value) && value > 0 && ordinary_units) return(value)
+  if (!is.finite(magnitude) || magnitude == 0 || length(x) < 2L) return(0)
+  # Squaring very large or small finite values can overflow or underflow in sd().
+  # Subtract a reference first to preserve small differences near a large offset.
+  # If that subtraction overflows, the inputs span a wide range, so normalize
+  # the original values instead. Both paths restore the original units.
+  differences <- x - x[[1L]]
+  if (all(is.finite(differences))) {
+    spread <- max(abs(differences))
+    if (spread == 0) return(0)
+    return(stats::sd(differences / spread) * spread)
+  }
+  stats::sd(x / magnitude) * magnitude
 }
 
 matrix_blueprint_predictor_kind <- function(column) {

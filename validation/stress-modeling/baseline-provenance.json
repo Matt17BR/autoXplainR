@@ -1,0 +1,193 @@
+{
+  "first": {
+    "prepared_at": "2026-09-11 23:05:01 UTC",
+    "folds": "Five fixed training-only folds, identical across portfolios and the native regularized reference.",
+    "package_variants": {
+      "core": "Default 15-configuration linear/tree/neural portfolio, one_se rule.",
+      "stronger": "15 configurations shared by explicit regularized/forest/boosting learners, one_se rule."
+    },
+    "reference_models": {
+      "xgboost": "400 rounds, eta .05, depth 3, min_child_weight 1, row/column fraction .8, lambda 1, alpha 0.",
+      "ranger": "500 trees, default mtry and node size, probability forests for classification.",
+      "glmnet": "Alpha 1, full default lambda path, fixed training folds, lambda.1se."
+    },
+    "exclusions": "No test-based hyperparameters, score thresholds, feature selection, resampling, or case filtering.",
+    "cases": [
+      {
+        "name": "friedman_noise",
+        "training_rows": 1200,
+        "evaluation_rows": 800,
+        "predictors": 30,
+        "task": "regression",
+        "training_prevalence": null,
+        "evaluation_prevalence": null,
+        "sha256": "d50cfa339fb54c2ab683dede09805879c321ff34d1addac3c919411452b273ea",
+        "metadata": {
+          "description": "Friedman 1 response, 5 useful and 25 irrelevant uniform inputs; Gaussian noise SD 1.",
+          "seed": 1001,
+          "source": "https://doi.org/10.1214/aos/1176347963"
+        }
+      },
+      {
+        "name": "sparse_wide",
+        "training_rows": 180,
+        "evaluation_rows": 600,
+        "predictors": 240,
+        "task": "regression",
+        "training_prevalence": null,
+        "evaluation_prevalence": null,
+        "sha256": "9d94898917d6898bf1c9108352b59f72723a7cf7e2a76118e661053fed3dfd2f",
+        "metadata": {
+          "description": "240 numeric inputs, 180 training rows, five nonzero linear coefficients; Gaussian noise SD 1.",
+          "seed": 1002,
+          "source": "Synthetic case defined in prepare.R"
+        }
+      },
+      {
+        "name": "rare_interaction",
+        "training_rows": 2500,
+        "evaluation_rows": 1500,
+        "predictors": 15,
+        "task": "binary",
+        "training_prevalence": 0.092799999999999994,
+        "evaluation_prevalence": 0.098000000000000004,
+        "sha256": "e712cf6a12b0d9651244d26d8170d4ace9152f5d55196c3de35a85cb51ac9091",
+        "metadata": {
+          "description": "Rare event with a two-input conjunction and a continuous effect, plus 12 irrelevant inputs.",
+          "seed": 1003,
+          "source": "Synthetic case defined in prepare.R"
+        }
+      },
+      {
+        "name": "bank_marketing",
+        "training_rows": 5000,
+        "evaluation_rows": 3000,
+        "predictors": 19,
+        "task": "binary",
+        "training_prevalence": 0.11260000000000001,
+        "evaluation_prevalence": 0.11266666666666666,
+        "sha256": "2c3bddd895159516f36b089df1f4bc552f23c754870cf3459bdd8bdf2cc1ef51",
+        "metadata": {
+          "description": "UCI bank-additional-full, stratified 5,000/3,000 contact-row subsamples, duration removed.",
+          "seed": 1004,
+          "source": "https://archive.ics.uci.edu/dataset/222/bank+marketing",
+          "citation": "Moro, S., Rita, P., and Cortez, P. (2014). Bank Marketing. DOI 10.24432/C5K306.",
+          "license": "CC BY 4.0",
+          "omitted_predictors": "duration",
+          "sampling_scope": "Random contact-row discrimination, not a future-period or independent-customer estimate. Customer IDs are unavailable; repeated customers cannot be excluded.",
+          "unknown_values": "The donor's literal unknown category is retained.",
+          "source_zip_sha256": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd"
+        }
+      }
+    ]
+  },
+  "replicate": {
+    "prepared_at": "2026-09-11 23:08:52 UTC",
+    "folds": "Five fixed training-only folds, identical across portfolios and the native regularized reference.",
+    "package_variants": {
+      "core": "Default 15-configuration linear/tree/neural portfolio, one_se rule.",
+      "stronger": "15 configurations shared by explicit regularized/forest/boosting learners, one_se rule."
+    },
+    "reference_models": {
+      "xgboost": "400 rounds, eta .05, depth 3, min_child_weight 1, row/column fraction .8, lambda 1, alpha 0.",
+      "ranger": "500 trees, default mtry and node size, probability forests for classification.",
+      "glmnet": "Alpha 1, full default lambda path, fixed training folds, lambda.1se."
+    },
+    "exclusions": "No test-based hyperparameters, score thresholds, feature selection, resampling, or case filtering.",
+    "cases": [
+      {
+        "name": "friedman_noise",
+        "training_rows": 1200,
+        "evaluation_rows": 800,
+        "predictors": 30,
+        "task": "regression",
+        "training_prevalence": null,
+        "evaluation_prevalence": null,
+        "sha256": "c87c97d216db6a6f387aec14d49c6cd71f2c7cbe5547a5022143e1ca67cc32b0",
+        "metadata": {
+          "description": "Friedman 1 response, 5 useful and 25 irrelevant uniform inputs; Gaussian noise SD 1.",
+          "seed": 2001,
+          "source": "https://doi.org/10.1214/aos/1176347963"
+        }
+      },
+      {
+        "name": "sparse_wide",
+        "training_rows": 180,
+        "evaluation_rows": 600,
+        "predictors": 240,
+        "task": "regression",
+        "training_prevalence": null,
+        "evaluation_prevalence": null,
+        "sha256": "24ae29c4175199b6252e2f7c635f8330563f8498892e6243d2370babad4db2c5",
+        "metadata": {
+          "description": "240 numeric inputs, 180 training rows, five nonzero linear coefficients; Gaussian noise SD 1.",
+          "seed": 2002,
+          "source": "Synthetic case defined in prepare.R"
+        }
+      },
+      {
+        "name": "rare_interaction",
+        "training_rows": 2500,
+        "evaluation_rows": 1500,
+        "predictors": 15,
+        "task": "binary",
+        "training_prevalence": 0.094,
+        "evaluation_prevalence": 0.091333333333333336,
+        "sha256": "31d10112eb01542b1eb40ecb008853acc4a2b33d698469c7f94c18bd3e096773",
+        "metadata": {
+          "description": "Rare event with a two-input conjunction and a continuous effect, plus 12 irrelevant inputs.",
+          "seed": 2003,
+          "source": "Synthetic case defined in prepare.R"
+        }
+      },
+      {
+        "name": "bank_marketing",
+        "training_rows": 5000,
+        "evaluation_rows": 3000,
+        "predictors": 19,
+        "task": "binary",
+        "training_prevalence": 0.11260000000000001,
+        "evaluation_prevalence": 0.11266666666666666,
+        "sha256": "08327f7f59c83cd6040a41fb09b6a11d3d89efe8719b7c6dd2e98747e48413c8",
+        "metadata": {
+          "description": "UCI bank-additional-full, stratified 5,000/3,000 contact-row subsamples, duration removed.",
+          "seed": 2004,
+          "source": "https://archive.ics.uci.edu/dataset/222/bank+marketing",
+          "citation": "Moro, S., Rita, P., and Cortez, P. (2014). Bank Marketing. DOI 10.24432/C5K306.",
+          "license": "CC BY 4.0",
+          "omitted_predictors": "duration",
+          "sampling_scope": "Random contact-row discrimination, not a future-period or independent-customer estimate. Customer IDs are unavailable; repeated customers cannot be excluded.",
+          "unknown_values": "The donor's literal unknown category is retained.",
+          "source_zip_sha256": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd"
+        }
+      }
+    ]
+  },
+  "published_archive_sha256": "d5a5e9097cb1c5d9469cee02a80f020df498026548ce801cb10492d8dbb9ca14",
+  "first_stronger_harness_recheck": {
+    "initial_exit_code": 1,
+    "cause": "Harness file was edited while Rscript parsed it; fit and predictions had already been saved successfully.",
+    "recheck_exit_code": 0,
+    "all_four_prediction_vectors_identical": true
+  },
+  "environment": {
+    "R": "R version 4.5.2 (2025-10-31)",
+    "platform": "x86_64-pc-linux-gnu",
+    "packages": {
+      "AutoXplainR": "0.6.1",
+      "nnet": "7.3.20",
+      "rpart": "4.1.27",
+      "glmnet": "5.0",
+      "ranger": "0.18.0",
+      "xgboost": "3.2.1.1",
+      "mgcv": "1.9.4",
+      "Matrix": "1.7.5"
+    },
+    "native_thread_limits": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    },
+    "note": "Optional engine versions were checked before the runs; session logs remain in each cache result directory."
+  }
+}

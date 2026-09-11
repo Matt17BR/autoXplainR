@@ -1,0 +1,26 @@
+[
+  {
+    "scenario": "bank_marketing",
+    "variant": "recommended",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 293.69899999999996,
+    "configuration_count": 30,
+    "failed_configurations": [],
+    "warnings": "Found 26 rows in `test_data` whose values exactly match a row in `data` (evaluation rows 232, 287, 422, 924, 1042, ...). This may indicate training/evaluation leakage, but coincident records can occur naturally; exact matches alone do not prove that the samples are non-independent. Check row provenance before interpreting the scores.",
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "friedman_noise",
+    "variant": "recommended",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 532.529,
+    "configuration_count": 30,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  }
+]

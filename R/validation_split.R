@@ -17,9 +17,12 @@
 #'   [autoxplain()] refers to groups or distinct time values; row fractions can
 #'   differ. `test_data` cannot be combined with this design.
 #'
-#'   Grouped tuning allocates entire training groups to inner validation folds,
-#'   balancing row counts. Each classification fold must contain all classes;
-#'   infeasible designs fail with an explanation. Temporal designs currently
+#'   Grouped tuning allocates entire training groups to inner validation folds.
+#'   Regression balances row counts; classification also balances class counts
+#'   and requires every class in every fold. This uses only outer-training
+#'   outcomes. Allocation is a bounded greedy search, not a guarantee of optimal
+#'   balance. If class coverage cannot be achieved, the call explains why and
+#'   suggests reducing `nfolds`. Temporal designs currently
 #'   support `model_set = "quick"` or `"comparison"`; random-fold tuning and H2O
 #'   are rejected. Use an external rolling-origin workflow for temporal tuning.
 #'
@@ -79,18 +82,6 @@ prepare_validation_design <- function(data, target, test_data, validation, fract
     selected <- with_preserved_seed(seed, values[sample.int(length(values), count)])
     evaluation <- which(as.character(value) %in% selected)
     training <- setdiff(seq_len(nrow(data)), evaluation)
-    if (model_set == "tuned") {
-      if (!is.null(control) && !inherits(control, "autoxplain_tuning_control")) {
-        stop("`tuning_control` must be created by `tuning_control()`.", call. = FALSE)
-      }
-      if (!is.null(control$fold_ids)) {
-        stop("Grouped validation creates its own fold IDs; remove supplied `fold_ids`.", call. = FALSE)
-      }
-      fold_ids <- grouped_fold_ids(as.character(value[training]), nfolds, seed)
-      fold_ids <- match(fold_ids, unique(fold_ids))
-      control <- control %||% tuning_control()
-      control$fold_ids <- fold_ids
-    }
   } else {
     if (!(is.numeric(value) || inherits(value, c("Date", "POSIXct")))) {
       stop("Temporal validation requires a numeric, Date, or POSIXct column.", call. = FALSE)
@@ -106,11 +97,26 @@ prepare_validation_design <- function(data, target, test_data, validation, fract
   if (length(training) < 10L || length(evaluation) < 2L) {
     stop("The design must leave at least ten training rows and two evaluation rows.", call. = FALSE)
   }
-  task <- if (task == "auto") detect_task(data[[target]]) else task
+  task <- if (task == "auto") detect_task(data[[target]][training]) else task
   validate_guided_target(data[[target]][training], task)
   if (task != "regression" &&
         length(setdiff(as.character(data[[target]][evaluation]), as.character(data[[target]][training])))) {
     stop("Evaluation classes must all occur in the training partition.", call. = FALSE)
+  }
+  if (validation$method == "group" && model_set == "tuned") {
+    if (!is.null(control) && !inherits(control, "autoxplain_tuning_control")) {
+      stop("`tuning_control` must be created by `tuning_control()`.", call. = FALSE)
+    }
+    if (!is.null(control$fold_ids)) {
+      stop("Grouped validation creates its own fold IDs; remove supplied `fold_ids`.", call. = FALSE)
+    }
+    fold_ids <- grouped_fold_ids(
+      as.character(value[training]), nfolds, seed,
+      outcome = if (task == "regression") NULL else data[[target]][training]
+    )
+    fold_ids <- match(fold_ids, unique(fold_ids))
+    control <- control %||% tuning_control()
+    control$fold_ids <- fold_ids
   }
   predictors <- setdiff(names(data), column)
   list(
@@ -133,10 +139,13 @@ prepare_validation_design <- function(data, target, test_data, validation, fract
   )
 }
 
-grouped_fold_ids <- function(groups, requested, seed) {
+grouped_fold_ids <- function(groups, requested, seed, outcome = NULL) {
   requested <- assert_count(requested, "nfolds", minimum = 2L)
   labels <- unique(groups)
   folds <- min(requested, length(labels))
+  if (!is.null(outcome)) {
+    return(with_preserved_seed(seed, grouped_class_fold_ids(groups, outcome, folds)))
+  }
   sizes <- tabulate(match(groups, labels), nbins = length(labels))
   order <- with_preserved_seed(seed, sample.int(length(labels)))
   order <- order[order(sizes[order], decreasing = TRUE)]
@@ -148,4 +157,59 @@ grouped_fold_ids <- function(groups, requested, seed) {
     totals[[fold]] <- totals[[fold]] + sizes[[index]]
   }
   assignment[match(groups, labels)]
+}
+
+grouped_class_fold_ids <- function(groups, outcome, folds) {
+  if (anyNA(outcome)) stop("The target contains missing values.", call. = FALSE)
+  labels <- unique(groups)
+  classes <- unique(as.character(outcome))
+  counts <- unclass(table(
+    factor(groups, levels = labels), factor(outcome, levels = classes)
+  ))
+  sizes <- rowSums(counts)
+  totals <- colSums(counts)
+  represented <- colSums(counts > 0)
+  limited <- which(represented < folds)
+  if (length(limited)) {
+    details <- paste0("`", classes[limited], "`: ", represented[limited], " groups")
+    stop(
+      "Cannot put every outcome class in each of ", folds,
+      " whole-group validation folds. Outer-training class coverage: ",
+      paste(details, collapse = "; "), ". Reduce `nfolds` or collect more groups ",
+      "containing these classes.", call. = FALSE
+    )
+  }
+  proportions <- sweep(counts, 2L, totals, "/")
+  priority <- apply(proportions, 1L, max)
+  rarity <- rowSums(sweep(counts > 0, 2L, represented, "/"))
+  for (attempt in seq_len(16L)) {
+    processing_order <- if (attempt == 1L) {
+      order(-rarity, -priority, stats::runif(length(labels)))
+    } else {
+      sample.int(length(labels), prob = rarity)
+    }
+    assignment <- integer(length(labels))
+    fold_counts <- matrix(0, folds, length(classes))
+    fold_rows <- numeric(folds)
+    tie_order <- sample.int(folds)
+    for (index in processing_order) {
+      # Cover missing classes first, then minimize the increase in normalized
+      # class imbalance. Entire groups move together, including mixed groups.
+      gains <- as.vector((fold_counts == 0) %*% ((counts[index, ] > 0) / represented))
+      current <- sweep(fold_counts, 2L, totals, "/")
+      added <- matrix(proportions[index, ], folds, length(classes), byrow = TRUE)
+      imbalance <- rowSums((current + added)^2 - current^2)
+      fold <- order(-gains, imbalance, fold_rows, match(seq_len(folds), tie_order))[[1L]]
+      assignment[[index]] <- fold
+      fold_counts[fold, ] <- fold_counts[fold, ] + counts[index, ]
+      fold_rows[[fold]] <- fold_rows[[fold]] + sizes[[index]]
+    }
+    if (all(fold_counts > 0)) return(assignment[match(groups, labels)])
+  }
+  stop(
+    "Could not construct ", folds, " whole-group folds with every outcome class. ",
+    "The class-balancing search is bounded; this does not prove no allocation exists. ",
+    "Reduce `nfolds` or inspect how classes are distributed across training groups.",
+    call. = FALSE
+  )
 }

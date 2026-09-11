@@ -1,0 +1,56 @@
+{
+  "run-plan.json": {
+    "scenarios": [
+      "friedman_noise",
+      "bank_marketing"
+    ],
+    "variants": [
+      "recommended"
+    ],
+    "library": "/home/mmazzarelli/.cache/autoxplain-stress-0.6.2/candidate-library",
+    "timeout_seconds": 600,
+    "budget": {
+      "core": 15,
+      "stronger": 15,
+      "recommended": 30
+    },
+    "notes": "Recommended uses the public six-family portfolio with its automatic 30-configuration budget. No custom grids or test-driven settings."
+  },
+  "installed-library-sha256.json": {
+    "DESCRIPTION": "3a5f53e751e7fa33696892f49237ee14d557ce57a06cd70a86b4ed083bea1f5a",
+    "R/AutoXplainR.rdb": "d7227f36ec15285db2b5b900bc4d4aa5c4afda7e02fdc31f89f89c9b96664af5",
+    "R/AutoXplainR.rdx": "a52077f5ae77c109815d2d9440aa34f3c45c7d7f2dfdc952099cdf99b185fb55"
+  },
+  "harness/sha256.json": {
+    "run-one.R": "c84552ba803b23575dc8d09cae36772ed110909c26d09642129f51fe86020b3e",
+    "common.R": "58a64c1f79778a6ca11c82fc16ce61a1e213684fbf5d82a8226a18228effc096"
+  },
+  "processes.json": [
+    {
+      "status": "finished",
+      "exit_code": 0,
+      "scenario": "friedman_noise",
+      "variant": "recommended",
+      "command": [
+        "Rscript",
+        "/home/mmazzarelli/.cache/autoxplain-stress-0.6.2/benchmark/candidate-recommended/harness/run-one.R",
+        "friedman_noise",
+        "recommended"
+      ],
+      "elapsed_seconds": 532.8138437759999
+    },
+    {
+      "status": "finished",
+      "exit_code": 0,
+      "scenario": "bank_marketing",
+      "variant": "recommended",
+      "command": [
+        "Rscript",
+        "/home/mmazzarelli/.cache/autoxplain-stress-0.6.2/benchmark/candidate-recommended/harness/run-one.R",
+        "bank_marketing",
+        "recommended"
+      ],
+      "elapsed_seconds": 293.94723257600026
+    }
+  ]
+}

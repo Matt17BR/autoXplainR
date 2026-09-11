@@ -96,3 +96,101 @@ test_that("outer test labels cannot change grouped tuning or preprocessing", {
     second$preprocessing_metadata$training_data$recipe
   )
 })
+
+grouped_class_fixture <- function() {
+  withr::with_seed(20260912, data.frame(
+    site = rep(sprintf("site_%02d", 1:32), each = 20),
+    feature = rnorm(640),
+    outcome = factor(rep(c(rep("yes", 10), rep("no", 22)), each = 20),
+                     levels = c("no", "yes"))
+  ))
+}
+
+test_that("grouped tuning covers classes concentrated in separate groups", {
+  data <- grouped_class_fixture()
+  for (seed in 1:30) {
+    design <- prepare_validation_design(
+      data, "outcome", NULL, validation_split(group = "site"),
+      0.2, seed, "base", "tuned", "binary", 5L, NULL
+    )
+    folds <- design$provenance$fold_ids
+    expect_true(all(table(folds, design$training$outcome) > 0), info = paste("seed", seed))
+    expect_true(all(vapply(split(folds, design$provenance$training_groups),
+                           function(x) length(unique(x)) == 1L, logical(1))))
+    expect_length(intersect(design$provenance$training_groups,
+                            design$provenance$evaluation_groups), 0)
+  }
+  # The published allocator failed this public call despite six positive
+  # training groups being available for five folds.
+  fit <- autoxplain(data, "outcome", validation = validation_split(group = "site"),
+                    learners = "tree", max_models = 1, nfolds = 5, seed = 1, explain = FALSE)
+  expect_true(all(is.finite(fit$tuning$fold_scores$score)))
+  probabilities <- predict(fit, data[fit$validation$evaluation_rows, ])
+  expect_true(all(is.finite(probabilities)))
+  expect_true(all(probabilities >= 0 & probabilities <= 1))
+})
+
+test_that("mixed-class groups are indivisible and seeded allocation preserves RNG", {
+  groups <- rep(letters[1:6], each = 2)
+  outcome <- c("A", "B", "A", "B", "A", "C", "A", "C", "B", "C", "B", "C")
+  set.seed(18)
+  before <- .Random.seed
+  first <- grouped_fold_ids(groups, 3, 7, outcome)
+  expect_identical(.Random.seed, before)
+  expect_identical(grouped_fold_ids(groups, 3, 7, outcome), first)
+  expect_true(all(table(first, outcome) > 0))
+  expect_true(all(vapply(split(first, groups), function(x) length(unique(x)) == 1L, logical(1))))
+  renamed <- c(A = "third", B = "first", C = "second")[outcome]
+  expect_identical(grouped_fold_ids(groups, 3, 7, renamed), first)
+})
+
+test_that("grouped class failures distinguish insufficient groups from bounded search", {
+  expect_error(
+    grouped_fold_ids(rep(letters[1:6], each = 2), 3, 1,
+                     c(rep("rare", 4), rep("common", 8))),
+    "rare.*2 groups.*Reduce.*nfolds"
+  )
+  # AB, AC, BC cannot be split into two partitions both containing ABC,
+  # although each class occurs in two groups.
+  expect_error(
+    grouped_fold_ids(rep(letters[1:3], each = 2), 2, 1, c("A", "B", "A", "C", "B", "C")),
+    "search is bounded; this does not prove no allocation exists"
+  )
+})
+
+test_that("outer test classes cannot influence grouped fold allocation or fitting", {
+  data <- grouped_class_fixture()
+  fit <- function(x) {
+    autoxplain(
+      x, "outcome", validation = validation_split(group = "site"), learners = "tree",
+      max_models = 2, nfolds = 5, seed = 1, explain = FALSE
+    )
+  }
+  first <- fit(data)
+  test_rows <- first$validation$evaluation_rows
+  data$outcome[test_rows] <- ifelse(data$outcome[test_rows] == "yes", "no", "yes")
+  second <- fit(data)
+  expect_identical(first$validation$fold_ids, second$validation$fold_ids)
+  expect_identical(first$tuning$selected_configuration, second$tuning$selected_configuration)
+  expect_identical(first$tuning$fold_scores$score, second$tuning$fold_scores$score)
+  expect_identical(first$preprocessing_metadata$training_data,
+                   second$preprocessing_metadata$training_data)
+  expect_identical(first$evaluation$predictions$primary_prediction,
+                   second$evaluation$predictions$primary_prediction)
+})
+
+test_that("grouped class retries explore feasible arrangements beyond priority ties", {
+  # This literal coverage matrix has a known valid partition, but repeating the
+  # same priority order with random tie breaks rejected it in all 16 attempts.
+  counts <- rbind(c(1L, 1L, 0L), c(0L, 0L, 1L), c(1L, 1L, 0L),
+                  c(1L, 0L, 2L), c(0L, 1L, 2L), c(0L, 1L, 2L))
+  example <- do.call(rbind, lapply(seq_len(nrow(counts)), function(group) {
+    data.frame(group = group, outcome = rep(c("A", "B", "C"), counts[group, ]))
+  }))
+  witness <- c(1L, 1L, 2L, 3L, 2L, 3L)[example$group]
+  expect_true(all(table(witness, example$outcome) > 0))
+  actual <- grouped_fold_ids(example$group, 3L, 7L, example$outcome)
+  expect_true(all(table(actual, example$outcome) > 0))
+  expect_true(all(vapply(split(actual, example$group),
+                         function(values) length(unique(values)) == 1L, logical(1))))
+})

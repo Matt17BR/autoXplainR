@@ -149,7 +149,11 @@ autoxplain_learner_registry <- function() {
       interactions = "not in the automatic default formula",
       scaling = "not required",
       strengths = "Shows smooth nonlinear effects while preserving an additive structure.",
-      cautions = "Automatic smooths need enough distinct values and can miss interactions.",
+      cautions = paste(
+        "Automatic smooths need enough distinct values and can miss interactions.",
+        "The automatic search requires fewer predictor terms than rows in each fitting fold",
+        "as a conservative capacity policy; externally fitted penalized GAMs can use other designs."
+      ),
       grid = additive_learner_grid,
       fit = fit_additive_learner,
       describe = describe_additive_parameters,
@@ -605,11 +609,25 @@ neural_learner_grid <- function(n, p, task, n_classes) {
 
 fit_linear_learner <- function(data, target, task, parameters, seed) {
   formula <- safe_reformulate(setdiff(names(data), target), response = target)
-  if (task == "regression") return(stats::lm(formula, data = data))
+  if (task == "regression") {
+    return(check_linear_rank(stats::lm(formula, data = data)))
+  }
   if (task == "binary") {
     return(stats::glm(formula, data = data, family = stats::binomial()))
   }
   nnet::multinom(formula, data = data, trace = FALSE)
+}
+
+check_linear_rank <- function(model) {
+  if (model$rank < length(stats::coef(model))) {
+    warning(
+      "Linear fit is rank deficient: ", model$rank, " independent coefficient directions for ",
+      length(stats::coef(model)), " design columns (including the intercept). ",
+      "Coefficients are not uniquely determined and predictions for new rows may be unstable. ",
+      "Consider regularized models or remove redundant predictors.", call. = FALSE
+    )
+  }
+  model
 }
 
 fit_tree_learner <- function(data, target, task, parameters, seed) {

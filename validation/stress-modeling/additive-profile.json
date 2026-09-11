@@ -1,0 +1,125 @@
+[
+  {
+    "configuration": 5,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "engine": "mgcv::bam",
+    "method": "fREML",
+    "discrete": false,
+    "nthreads": 1,
+    "parameters": {
+      "k": 10,
+      "gamma": 1.4,
+      "select": true
+    },
+    "scope": "Exploratory first training-fold comparison against mgcv::gam REML; no outer evaluation and no package engine change.",
+    "elapsed_seconds": 2.862,
+    "validation_rmse": 1.678795080255042,
+    "max_prediction_difference_from_gam": 0.00031541381230404397,
+    "mean_prediction_difference_from_gam": 0.00011516918599460228,
+    "coefficient_count": 271,
+    "total_edf": 23.84347858403866,
+    "status": "ok"
+  },
+  {
+    "configuration": 1,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "engine": "mgcv::bam",
+    "method": "fREML",
+    "discrete": true,
+    "nthreads": 1,
+    "parameters": {
+      "k": 5,
+      "gamma": 1,
+      "select": true
+    },
+    "scope": "Exploratory first training-fold comparison against mgcv::gam REML; no outer evaluation and no package engine change.",
+    "elapsed_seconds": 1.054,
+    "validation_rmse": 1.6878203046465132,
+    "max_prediction_difference_from_gam": 0.029943341151208003,
+    "mean_prediction_difference_from_gam": 0.012019736064926241,
+    "coefficient_count": 121,
+    "total_edf": 23.300570045362946,
+    "status": "ok"
+  },
+  {
+    "configuration": 5,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "engine": "mgcv::bam",
+    "method": "fREML",
+    "discrete": true,
+    "nthreads": 1,
+    "parameters": {
+      "k": 10,
+      "gamma": 1.4,
+      "select": true
+    },
+    "scope": "Exploratory first training-fold comparison against mgcv::gam REML; no outer evaluation and no package engine change.",
+    "elapsed_seconds": 1.12,
+    "validation_rmse": 1.6787948373309112,
+    "max_prediction_difference_from_gam": 0.0003040520475945385,
+    "mean_prediction_difference_from_gam": 0.00011623647768244372,
+    "coefficient_count": 271,
+    "total_edf": 23.84373269979455,
+    "status": "ok"
+  },
+  {
+    "configuration": 1,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "parameters": {
+      "k": 5,
+      "gamma": 1,
+      "select": true
+    },
+    "source_rows": "Only first declared training fold; final evaluation rows remain unopened.",
+    "package_version": "0.6.1",
+    "elapsed_seconds": 9.042,
+    "coefficient_count": 121,
+    "total_edf": 23.645870354730295,
+    "validation_rmse": 1.687909783946993,
+    "status": "ok"
+  },
+  {
+    "configuration": 2,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "parameters": {
+      "k": 8,
+      "gamma": 1,
+      "select": true
+    },
+    "source_rows": "Only first declared training fold; final evaluation rows remain unopened.",
+    "package_version": "0.6.1",
+    "elapsed_seconds": 25.829,
+    "coefficient_count": 211,
+    "total_edf": 26.561567372872776,
+    "validation_rmse": 1.690589682970272,
+    "status": "ok"
+  },
+  {
+    "configuration": 5,
+    "inputs": 30,
+    "training_rows": 960,
+    "validation_rows": 240,
+    "parameters": {
+      "k": 10,
+      "gamma": 1.4,
+      "select": true
+    },
+    "source_rows": "Only first declared training fold; final evaluation rows remain unopened.",
+    "package_version": "0.6.1",
+    "elapsed_seconds": 43.212,
+    "coefficient_count": 271,
+    "total_edf": 23.847056010058076,
+    "validation_rmse": 1.6788064789810089,
+    "status": "ok"
+  }
+]

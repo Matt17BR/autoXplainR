@@ -7,6 +7,8 @@
   const resourceControl = document.querySelector('#resource-select');
   const costScaleControl = document.querySelector('#cost-scale-select');
   const costScaleNote = document.querySelector('#cost-scale-note');
+  const scoreScaleControl = document.querySelector('#score-scale-select');
+  const scoreScaleNote = document.querySelector('#score-scale-note');
   const classControl = document.querySelector('#effect-class-select');
   const comparisonControl = document.querySelector('#comparison-model-select');
   const comparisonIdentity = document.createElement('div');
@@ -15,12 +17,13 @@
   const higher = new Set(['accuracy', 'auc', 'roc_auc', 'balanced_accuracy', 'r_squared', 'macro_recall']);
   const state = {modelId: modelControls[0]?.value, feature: null, page: pages[0]?.id,
     metric: metricControl?.value, resource: resourceControl?.value, costScale: costScaleControl?.value || 'linear',
+    scoreScale: scoreScaleControl?.value || 'linear',
     className: classControl?.value, comparisonModelId: comparisonControl?.value || ''};
   const emit = (name, detail) => document.dispatchEvent(new CustomEvent(`axr:${name}`, {detail, bubbles: true}));
   const options = control => control ? Array.from(control.options, option => option.value) : [];
   function saveState(replace = true) {
     const query = new URLSearchParams();
-    for (const key of ['modelId', 'feature', 'metric', 'resource', 'costScale', 'className', 'comparisonModelId']) {
+    for (const key of ['modelId', 'feature', 'metric', 'resource', 'costScale', 'scoreScale', 'className', 'comparisonModelId']) {
       if (state[key] != null && state[key] !== '') query.set(key, state[key]);
     }
     const hash = `#${state.page}${query.size ? `?${query}` : ''}`;
@@ -120,6 +123,22 @@
           'Log scale needs positive costs; this comparison contains a nonpositive measurement.';
       }
     }
+    if (scoreScaleControl) {
+      const plot = all('[data-cost-plot]').find(el => !el.hidden);
+      const scores = plot ? all('[data-chart-source]', plot).map(el => Number(el.dataset.y)) : [];
+      const loss = ['rmse', 'mae', 'mse', 'log_loss', 'brier', 'calibration_error'].includes(state.metric);
+      const positive = loss && scores.length > 0 && scores.every(value => Number.isFinite(value) && value > 0);
+      scoreScaleControl.disabled = !scores.length;
+      scoreScaleControl.querySelector('option[value="log"]').disabled = !positive;
+      if (!positive) scoreScaleControl.value = 'linear';
+      state.scoreScale = scoreScaleControl.value;
+      if (scoreScaleNote) {
+        scoreScaleNote.hidden = positive;
+        scoreScaleNote.textContent = positive ? '' : !scores.length ? 'Score scale is unavailable: no finite comparison.' :
+          !loss ? 'Log score scale is available for positive losses. This metric uses a linear axis.' :
+          'Log score scale needs strictly positive losses; this comparison includes a zero or negative score.';
+      }
+    }
     if (persist) saveState();
     emit('chart-change', {...state});
   }
@@ -183,7 +202,7 @@
   }
   function navigate(hash, {focus = true, persist = true} = {}) {
     const {id, params} = parseHash(hash);
-    for (const [key, control] of [['metric', metricControl], ['resource', resourceControl], ['costScale', costScaleControl],
+    for (const [key, control] of [['metric', metricControl], ['resource', resourceControl], ['costScale', costScaleControl], ['scoreScale', scoreScaleControl],
       ['className', classControl], ['comparisonModelId', comparisonControl]]) {
       if (params.has(key) && options(control).includes(params.get(key))) control.value = params.get(key);
     }
@@ -240,6 +259,7 @@
   metricControl?.addEventListener('change', () => chooseMetric());
   resourceControl?.addEventListener('change', () => chooseResource());
   costScaleControl?.addEventListener('change', () => chooseResource());
+  scoreScaleControl?.addEventListener('change', () => chooseResource());
   classControl?.addEventListener('change', () => chooseClass());
   comparisonControl?.addEventListener('change', () => {
     state.comparisonModelId = comparisonControl.value === state.modelId ? '' : comparisonControl.value;

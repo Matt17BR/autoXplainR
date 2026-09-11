@@ -155,6 +155,8 @@
 #checks #reliability-title {position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;}
 #checks section h2 {font-size: 18px; margin: 8px 0;}
 #checks .table-wrap {margin: 8px 0;}
+.finding-group th, .finding-group td {white-space: normal; overflow-wrap: anywhere;}
+.finding-group {break-inside: auto;}
 #checks .diagnostic-cards {gap: 12px; margin: 8px 0;}
 #checks .diagnostic-cards .metric {padding-left: 9px;}
 #checks .diagnostic-cards .metric strong {display: inline-block; margin: 2px 7px 0 0; font-size: 18px;}

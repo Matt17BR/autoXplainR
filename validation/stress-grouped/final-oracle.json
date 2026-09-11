@@ -1,0 +1,24 @@
+{
+  "seed": 51312,
+  "allocator_seed": 7,
+  "allocator_source_hash": "4f0d6ab7250bc193040cac5ed89098eb",
+  "package_version": "0.6.2",
+  "random": {
+    "cases": 2500,
+    "feasible": 2500,
+    "infeasible": 0,
+    "false_failures": 0,
+    "failures": []
+  },
+  "random_elapsed_seconds": 5.2060000000000004,
+  "exhaustive_support_multisets": {
+    "cases": 2940,
+    "feasible": 1364,
+    "infeasible": 1576,
+    "false_failures": 0,
+    "failures": []
+  },
+  "exhaustive_elapsed_seconds": 4.0629999999999997,
+  "class_renaming_checks": 25,
+  "contracts": "All returned allocations preserve groups, cover every class in every fold and preserve RNG state."
+}
