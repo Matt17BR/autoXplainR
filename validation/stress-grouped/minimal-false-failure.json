@@ -1,0 +1,16 @@
+{
+  "counts": [
+    [1, 1, 0],
+    [0, 0, 1],
+    [1, 1, 0],
+    [1, 0, 2],
+    [0, 1, 2],
+    [0, 1, 2]
+  ],
+  "folds": 3,
+  "witness": [1, 1, 2, 3, 2, 3],
+  "result": {
+    "ok": false,
+    "error": "Could not construct 3 whole-group folds with every outcome class. The class-balancing search is bounded; this does not prove no allocation exists. Reduce `nfolds` or inspect how classes are distributed across training groups."
+  }
+}

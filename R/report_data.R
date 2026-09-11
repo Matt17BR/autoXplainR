@@ -164,7 +164,7 @@ explorer_data <- function(result, export) {
     if (!is.null(manifest$seed)) paste0("; seed ", manifest$seed), "</p>",
     "<p>Aggregate profiles use all available rows. Pair summaries: ", profile$pair_coverage$included,
     " of ", profile$pair_coverage$total, ". ", html_escape(profile$pair_coverage$policy), "</p></details></div>",
-    report_json_script(export, "axr-data-payload"), "</section>"
+    report_json_script(report_data_payload(export), "axr-data-payload"), "</section>"
   )
 }
 

@@ -1,0 +1,210 @@
+{
+  "date": "2026-09-12",
+  "workload": {
+    "rows": 1200,
+    "training": 900,
+    "evaluation": 300,
+    "predictor_counts": [
+      100,
+      500
+    ],
+    "categorical_levels": 80,
+    "audit_features": 3,
+    "audit_repeats": 3
+  },
+  "before": {
+    "100": {
+      "fit_seconds": 1.3990000000000002,
+      "audit_seconds": 0.2669999999999999,
+      "reports": {
+        "summary": {
+          "seconds": 19.803,
+          "bytes": 17066606
+        },
+        "rows": {
+          "seconds": 39.331,
+          "bytes": 25636716
+        }
+      }
+    },
+    "500": {
+      "fit_seconds": 5.4680000000000035,
+      "audit_seconds": 1.1550000000000011,
+      "reports": {
+        "summary": {
+          "seconds": 26.748000000000005,
+          "bytes": 19438573
+        },
+        "rows": {
+          "seconds": 121.136,
+          "bytes": 59876115
+        }
+      }
+    }
+  },
+  "after": {
+    "100-summary": {
+      "seconds": 8.754,
+      "bytes": 17070718
+    },
+    "100-rows": {
+      "seconds": 9.525999999999998,
+      "bytes": 25640828
+    },
+    "500-summary": {
+      "seconds": 11.395,
+      "bytes": 19442685
+    },
+    "500-rows": {
+      "seconds": 20.724,
+      "bytes": 59879088
+    }
+  },
+  "data_payload_comparison": [
+    {
+      "predictors": 100,
+      "mode": "summary",
+      "identical_bytes": true,
+      "identical_decoded": true,
+      "bytes": 16081161,
+      "sha256": "dee2c0dd8bd9a66075d42583482d0dcc259c4b2cdcc41f7e4ed1b22ed717bb5a"
+    },
+    {
+      "predictors": 100,
+      "mode": "rows",
+      "identical_bytes": true,
+      "identical_decoded": true,
+      "bytes": 24478214,
+      "sha256": "237c0cc8c4c7b19407993528def3adf297dee275823e7845d4df466425511f2c"
+    },
+    {
+      "predictors": 500,
+      "mode": "summary",
+      "identical_bytes": true,
+      "identical_decoded": true,
+      "bytes": 16178567,
+      "sha256": "2a48377acd4aa75de9964bf1292a922625136bce9d916ce5ac50358f798e1d99"
+    },
+    {
+      "predictors": 500,
+      "mode": "rows",
+      "identical_bytes": true,
+      "identical_decoded": true,
+      "bytes": 56405308,
+      "sha256": "5d572d45882284a7f9d0f9467b7374cf20d1c5728e5819046413729ba33703cb"
+    }
+  ],
+  "browser_checks": {
+    "pairs": {
+      "passed": 155,
+      "failed": 0
+    },
+    "score_scales": {
+      "passed": 66,
+      "failed": 0
+    },
+    "grouped_findings": {
+      "passed": 10,
+      "failed": 0
+    }
+  },
+  "previous_cost_axis_checks": {
+    "passed": 96,
+    "failed": 0
+  },
+  "grouped_findings_R_assertions": 9,
+  "browser": [
+    {
+      "predictors": 100,
+      "mode": "summary",
+      "width": 1440,
+      "load_seconds": 0.6013770949998616,
+      "last_column_seconds": 0.09181771099974867,
+      "arbitrary_pair_seconds": 0.018762524999601737,
+      "errors": [],
+      "document_width": 1440,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 100,
+      "mode": "summary",
+      "width": 390,
+      "load_seconds": 0.40607323899985204,
+      "last_column_seconds": 0.023871867000252678,
+      "arbitrary_pair_seconds": 0.009356847999697493,
+      "errors": [],
+      "document_width": 390,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 100,
+      "mode": "rows",
+      "width": 1440,
+      "load_seconds": 0.5118485739999414,
+      "last_column_seconds": 0.1386017830000128,
+      "arbitrary_pair_seconds": 0.07366226700014522,
+      "errors": [],
+      "document_width": 1440,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 100,
+      "mode": "rows",
+      "width": 390,
+      "load_seconds": 0.5216378220002298,
+      "last_column_seconds": 0.06973543200001586,
+      "arbitrary_pair_seconds": 0.0674676950002322,
+      "errors": [],
+      "document_width": 390,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 500,
+      "mode": "summary",
+      "width": 1440,
+      "load_seconds": 0.4604918439999892,
+      "last_column_seconds": 0.10770822199992836,
+      "arbitrary_pair_seconds": 0.014028441999926144,
+      "errors": [],
+      "document_width": 1440,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 500,
+      "mode": "summary",
+      "width": 390,
+      "load_seconds": 0.4862848729999314,
+      "last_column_seconds": 0.027873679000094853,
+      "arbitrary_pair_seconds": 0.014600064000205748,
+      "errors": [],
+      "document_width": 390,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 500,
+      "mode": "rows",
+      "width": 1440,
+      "load_seconds": 1.5701575090001825,
+      "last_column_seconds": 0.17616753900028925,
+      "arbitrary_pair_seconds": 0.07829491300026348,
+      "errors": [],
+      "document_width": 1440,
+      "browser": "145.0.7632.6"
+    },
+    {
+      "predictors": 500,
+      "mode": "rows",
+      "width": 390,
+      "load_seconds": 1.529701427999953,
+      "last_column_seconds": 0.0848202920001313,
+      "arbitrary_pair_seconds": 0.09184328999981517,
+      "errors": [],
+      "document_width": 390,
+      "browser": "145.0.7632.6"
+    }
+  ],
+  "remaining_limits": [
+    "A 500-predictor row export is still about 60 MB. Serialization optimization preserves identical payload bytes.",
+    "Permutation screening still evaluates all input features before choosing displayed features; expensive models can dominate explanation time."
+  ]
+}

@@ -217,21 +217,22 @@ data_pair_profile <- function(x, y, x_axis, y_axis, rows, positive = NULL) {
   response <- data_numeric(y)
   if (!is.null(response) && any(ok)) {
     groups <- split(response[ok], a[ok])
-    conditional <- do.call(rbind, lapply(names(groups), function(bin) {
-      values <- groups[[bin]]
-      data.frame(
-        x = as.integer(bin), n = length(values), mean = mean(values),
-        median = stats::median(values), min = min(values), max = max(values)
-      )
-    }))
+    # Build columns once. One data frame per occupied bin is expensive when a
+    # report contains hundreds of pairs in both raw and processed partitions.
+    conditional <- data.frame(
+      x = as.integer(names(groups)), n = lengths(groups),
+      mean = vapply(groups, mean, numeric(1)),
+      median = vapply(groups, stats::median, numeric(1)),
+      min = vapply(groups, min, numeric(1)), max = vapply(groups, max, numeric(1))
+    )
     rownames(conditional) <- NULL
   }
   if (!is.null(positive) && any(ok)) {
     groups <- split(as.character(y[ok]) == positive, a[ok])
-    conditional_event <- do.call(rbind, lapply(names(groups), function(bin) {
-      event <- groups[[bin]]
-      data.frame(x = as.integer(bin), n = length(event), events = sum(event), rate = mean(event))
-    }))
+    conditional_event <- data.frame(
+      x = as.integer(names(groups)), n = lengths(groups),
+      events = vapply(groups, sum, integer(1)), rate = vapply(groups, mean, numeric(1))
+    )
     rownames(conditional_event) <- NULL
   }
   list(
@@ -376,32 +377,41 @@ data_sample_indices <- function(sizes, maximum, seed) {
   }))
 }
 
-data_export_value <- function(value, index) {
-  if (is.null(value) || is.na(index)) {
-    return(NULL)
+data_export_partition <- function(data, indices, variables) {
+  if (!length(indices)) return(list(values = list(), nonfinite = list()))
+  nonfinite <- matrix(FALSE, nrow = length(indices), ncol = length(variables))
+  columns <- vector("list", length(variables))
+  for (i in seq_along(variables)) {
+    value <- data[[variables[i]]]
+    kind <- data_column_kind(value)
+    if (is.null(value) || kind == "unsupported") {
+      columns[[i]] <- rep(NA, length(indices))
+      next
+    }
+    value <- value[indices]
+    number <- data_numeric(value)
+    if (!is.null(number)) {
+      nonfinite[, i] <- !is.na(number) & !is.finite(number)
+      if (kind == "numeric") value[!is.finite(value)] <- NA
+    }
+    columns[[i]] <- if (kind %in% c("date", "datetime")) {
+      as.numeric(value)
+    } else if (kind == "categorical") {
+      as.character(value)
+    } else {
+      value
+    }
   }
-  kind <- data_column_kind(value)
-  if (kind == "unsupported" || is.na(value[index])) {
-    return(NULL)
-  }
-  if (kind %in% c("date", "datetime")) {
-    return(as.numeric(value[index]))
-  }
-  if (kind == "categorical") {
-    return(as.character(value[index]))
-  }
-  if (!is.finite(value[index])) {
-    return(NULL)
-  }
-  unname(value[index])
-}
-
-data_nonfinite_columns <- function(data, index, variables) {
-  if (is.null(data) || is.na(index)) return(character())
-  variables[vapply(variables, function(name) {
-    value <- data_numeric(data[[name]])
-    !is.null(value) && !is.na(value[index]) && !is.finite(value[index])
-  }, logical(1))]
+  names(columns) <- variables
+  list(
+    values = lapply(seq_along(indices), function(row) {
+      lapply(columns, function(column) {
+        value <- column[row]
+        if (is.na(value)) NULL else unname(value)
+      })
+    }),
+    nonfinite = lapply(seq_along(indices), function(row) variables[nonfinite[row, ]])
+  )
 }
 
 prepare_data_explorer <- function(result, report_data = "summary") {
@@ -457,8 +467,14 @@ prepare_data_explorer <- function(result, report_data = "summary") {
     for (i in seq_along(selected)) {
       partition <- c("training", "evaluation")[i]
       mapping <- if (available) context$row_map[context$row_map$partition == partition, , drop = FALSE] else NULL
-      for (index in selected[[i]]) {
-        processed_index <- if (available) mapping$processed_position[index] else index
+      processed_indices <- if (available) mapping$processed_position[selected[[i]]] else selected[[i]]
+      # Classify and convert each selected column once, rather than once for
+      # every row. Excluded rows keep NA processed positions and null values.
+      raw_export <- if (available) data_export_partition(raw[[partition]], selected[[i]], variables) else NULL
+      processed_export <- data_export_partition(processed[[partition]], processed_indices, variables)
+      for (row in seq_along(selected[[i]])) {
+        index <- selected[[i]][row]
+        processed_index <- processed_indices[row]
         rows[[length(rows) + 1L]] <- list(
           row_key = if (available) mapping$row_key[index] else paste(partition, index, sep = ":"),
           partition = partition, source = if (available) mapping$source[index] else "processed position",
@@ -466,19 +482,11 @@ prepare_data_explorer <- function(result, report_data = "summary") {
           processed_position = processed_index,
           retained = !is.na(processed_index),
           nonfinite = list(
-            raw = if (available) data_nonfinite_columns(raw[[partition]], index, variables) else character(),
-            processed = data_nonfinite_columns(processed[[partition]], processed_index, variables)
+            raw = if (available) raw_export$nonfinite[[row]] else character(),
+            processed = processed_export$nonfinite[[row]]
           ),
-          raw = if (available) {
-            setNames(lapply(variables, function(name) {
-              data_export_value(raw[[partition]][[name]], index)
-            }), variables)
-          } else {
-            NULL
-          },
-          processed = setNames(lapply(variables, function(name) {
-            data_export_value(processed[[partition]][[name]], processed_index)
-          }), variables)
+          raw = if (available) raw_export$values[[row]] else NULL,
+          processed = processed_export$values[[row]]
         )
       }
     }

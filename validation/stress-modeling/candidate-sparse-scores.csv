@@ -1,0 +1,5 @@
+"scenario","variant","model","primary","primary_family","task","training_rows","evaluation_rows","predictors","elapsed_seconds","rmse","mae","r_squared"
+"sparse_wide","stronger","main_model",TRUE,"regularized","regression",180,600,240,49.265,1.12241058317382,0.906194046698197,0.929495815202853
+"sparse_wide","stronger","boosting_model",FALSE,"regularized","regression",180,600,240,49.265,1.85318860417969,1.42813610809777,0.807801217918013
+"sparse_wide","stronger","forest_model",FALSE,"regularized","regression",180,600,240,49.265,2.55284551131109,2.0217540828107,0.635279262907927
+"sparse_wide","stronger","simple_baseline",FALSE,"regularized","regression",180,600,240,49.265,4.23384791930683,3.39000522398499,-0.00318700429705321

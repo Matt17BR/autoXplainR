@@ -213,6 +213,32 @@ test_that("binary outcome relationships report independently counted empirical e
   expect_equal(pair$n_excluded, 2L)
 })
 
+test_that("conditional summaries preserve occupied bin order and exclude incomplete pairs", {
+  axis <- AutoXplainR:::data_axis(0:12, NULL, bins = 12L)
+  x <- c(-1, .1, .2, .9, 2, 2, 10, 10, 12, 13, Inf, NA, NaN, 11)
+  y <- c(2, 1, 9, 5, 4, 6, 8, NA, 7, 10, 11, 12, 13, Inf)
+  numeric_pair <- AutoXplainR:::data_pair_profile(x, y, axis, axis, length(x))
+  expect_identical(numeric_pair$conditional, data.frame(
+    x = c(1L, 2L, 4L, 12L, 13L, 14L), n = c(1L, 3L, 2L, 1L, 1L, 1L),
+    mean = c(2, 5, 5, 8, 7, 10), median = c(2, 5, 5, 8, 7, 10),
+    min = c(2, 1, 4, 8, 7, 10), max = c(2, 9, 6, 8, 7, 10)
+  ))
+  expect_identical(numeric_pair$n_complete, 9L)
+  expect_equal(numeric_pair$n_excluded, 5L)
+  event <- factor(c("no", "yes", "no", "yes", "no", "yes", "yes", NA,
+                    "no", "yes", "no", "no", "no", NA), levels = c("no", "yes"))
+  event_axis <- AutoXplainR:::data_axis(event, NULL)
+  event_pair <- AutoXplainR:::data_pair_profile(x, event, axis, event_axis, length(x), positive = "yes")
+  expect_identical(event_pair$conditional_event, data.frame(
+    x = c(1L, 2L, 4L, 12L, 13L, 14L), n = c(1L, 3L, 2L, 1L, 1L, 1L),
+    events = c(0L, 2L, 1L, 1L, 0L, 1L), rate = c(0, 2 / 3, .5, 1, 0, 1)
+  ))
+  empty <- AutoXplainR:::data_pair_profile(c(NA, Inf), c(1, 2), axis, axis, 2L)
+  expect_null(empty$conditional)
+  expect_equal(nrow(empty$cells), 0L)
+  expect_identical(empty$n_complete, 0L)
+})
+
 test_that("pair association retains direction and undefined states without category encodings", {
   association <- AutoXplainR:::data_pair_association(1:6, 6:1)
   expect_equal(association$value, -1)
@@ -252,6 +278,35 @@ test_that("exported non-finite values remain distinct from actual missing values
   expect_identical(export$rows[[3L]]$nonfinite$processed, "x")
   expect_equal(export$profile$stages$raw$columns$x$evaluation$n_missing, 1L)
   expect_equal(export$profile$stages$raw$columns$x$evaluation$n_nonfinite, 2L)
+})
+
+test_that("column export caching preserves selected positions, date values and nulls", {
+  day <- as.Date("2026-01-01")
+  stamp <- as.POSIXct("2026-01-01", tz = "UTC")
+  data <- data.frame(
+    x = c(1.25, Inf, NA, -Inf), flag = c(TRUE, FALSE, NA, TRUE),
+    label = ordered(c("b", NA, "a", "b")), date = day + c(0, NA, 2, 3),
+    stamp = stamp + c(0, 60, Inf, 180)
+  )
+  data$unsupported <- I(as.list(1:4))
+  variables <- c(names(data), "absent")
+  actual <- AutoXplainR:::data_export_partition(data, c(3L, 1L, NA_integer_, 2L), variables)
+  expect_identical(actual$values[[1L]], list(
+    x = NULL, flag = NULL, label = "a", date = as.numeric(day) + 2,
+    stamp = Inf, unsupported = NULL, absent = NULL
+  ))
+  expect_identical(actual$values[[2L]], list(
+    x = 1.25, flag = "TRUE", label = "b", date = as.numeric(day),
+    stamp = as.numeric(stamp), unsupported = NULL, absent = NULL
+  ))
+  expect_identical(actual$values[[3L]], setNames(rep(list(NULL), length(variables)), variables))
+  expect_identical(actual$values[[4L]], list(
+    x = NULL, flag = "FALSE", label = NULL, date = NULL,
+    stamp = as.numeric(stamp) + 60, unsupported = NULL, absent = NULL
+  ))
+  expect_identical(actual$nonfinite, list("stamp", character(), character(), "x"))
+  expect_identical(AutoXplainR:::data_export_partition(data, integer(), variables),
+                   list(values = list(), nonfinite = list()))
 })
 
 test_that("bounded pair generation agrees exhaustively with small full combinations", {

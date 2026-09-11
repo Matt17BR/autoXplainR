@@ -646,12 +646,43 @@ render_diagnostic_state <- function(label, status, reason = "") {
 report_anchor <- function(x) paste(as.character(charToRaw(enc2utf8(as.character(x)))), collapse = "")
 report_evidence_id <- function(model, feature) paste0("evidence-", report_anchor(model), "-", report_anchor(feature))
 
+render_shuffle_findings <- function(findings, result = NULL) {
+  rows <- vapply(seq_len(nrow(findings)), function(i) {
+    model <- findings$model[[i]]
+    feature <- findings$feature[[i]]
+    label <- if (is.null(result)) model else report_model_label(result, model)
+    paste0(
+      "<tr><td>", html_escape(label), "</td><td><a href=\"#", report_evidence_id(model, feature),
+      '" data-evidence-model="', html_escape(model), '" data-evidence-feature="', html_escape(feature),
+      '">', html_escape(feature), "</a></td><td>", html_escape(findings$evidence[[i]]), "</td></tr>"
+    )
+  }, character(1))
+  paste0(
+    '<article class="finding finding-note finding-group"><h3>Unresolved shuffle intervals</h3>',
+    "<p>For these ", nrow(findings), " model and feature pairs, the interval does not resolve the sign of the mean loss change.</p>",
+    '<div class="table-wrap" tabindex="0" role="region" aria-label="Unresolved shuffle intervals">',
+    "<table><caption>Permutation uncertainty conditional on the fitted models and evaluation rows</caption>",
+    '<thead><tr><th scope="col">Model</th><th scope="col">Feature</th><th scope="col">Evidence</th></tr></thead>',
+    "<tbody>", paste(rows, collapse = ""), "</tbody></table></div><p><strong>Next:</strong> ",
+    html_escape(paste(unique(findings$recommendation), collapse = " ")), "</p></article>"
+  )
+}
+
 render_findings <- function(findings, audit = NULL, result = NULL) {
   if (is.null(findings) || !nrow(findings)) {
     return("<p>No diagnostic findings were recorded. Review the coverage below; an absent finding is not a guarantee.</p>")
   }
+  grouped <- if (all(c("model", "feature") %in% names(findings))) {
+    which(findings$code == "shuffle_interval_unresolved" &
+            !is.na(findings$model) & !is.na(findings$feature))
+  } else {
+    integer()
+  }
   has_candidate_ranges <- !is.null(result) && nzchar(render_candidate_importance_ranges(audit, result))
   cards <- vapply(seq_len(nrow(findings)), function(i) {
+    if (length(grouped) > 1L && i %in% grouped) {
+      return(if (i == grouped[1L]) render_shuffle_findings(findings[grouped, , drop = FALSE], result) else "")
+    }
     links <- ""
     action <- html_escape(findings$recommendation[[i]])
     if (identical(findings$code[[i]], "rashomon_disagreement") && has_candidate_ranges) {

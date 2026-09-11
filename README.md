@@ -269,6 +269,28 @@ Explicit optimizer nonconvergence excludes a candidate by default. The optional
 status is never presented as proof of convergence.
 H2O AutoML remains available through `engine = "h2o"` and requires Java.
 
+### Does it handle harder problems?
+
+The optional learners matter. In a fixed-split stress comparison with 240 inputs
+and 180 training rows, the core search selected a tree with test RMSE 3.253;
+an equally sized regularized/forest/boosting search selected a regularized model
+with RMSE 1.122. Native cross-validated lasso scored 1.130. A nonlinear interaction
+problem also benefited substantially from boosting. On Bank Marketing the
+difference was small, and on rare outcomes better ranking did not always mean
+better probabilities. These are measured examples, not a general leaderboard.
+See the [results and reproducible protocol](https://github.com/Matt17BR/autoXplainR/blob/main/validation/stress-modeling/findings.md).
+
+For demanding tabular data, start with the optional portfolio and inspect both
+failed configurations and the retained alternatives. High-dimensional linear
+fits can complete while making very poor predictions. The report preserves
+their scores and flags rank-deficient fits; it does not quietly discard them.
+The [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
+explains how to separate model fitting from a bounded explanation and report.
+The broad `recommended` preset can be expensive: its 30-configuration search
+took 8 minutes 53 seconds on the nonlinear case, versus 58 seconds for the
+explicit three-family search, and selected the same fitted model. Choose the
+families deliberately when turnaround time matters.
+
 ## Inspect a question in more detail
 
 ```r

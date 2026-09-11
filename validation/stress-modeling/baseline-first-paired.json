@@ -1,0 +1,42 @@
+{
+  "bank_marketing": {
+    "metric": "log_loss",
+    "stronger_minus_core": -0.0040818320359219231,
+    "percentile_interval_95": {
+      "lower": -0.011550538648097028,
+      "upper": 0.0017734551241452403
+    },
+    "draws": 1000,
+    "scope": "Paired evaluation-row bootstrap conditional on these fixed fits; excludes training and selection variability. The bank contact rows may include repeated customers."
+  },
+  "friedman_noise": {
+    "metric": "rmse",
+    "stronger_minus_core": -1.0804937883335257,
+    "percentile_interval_95": {
+      "lower": -1.2027225533941601,
+      "upper": -0.94462933606451416
+    },
+    "draws": 1000,
+    "scope": "Paired evaluation-row bootstrap conditional on these fixed fits; excludes training and selection variability. The bank contact rows may include repeated customers."
+  },
+  "rare_interaction": {
+    "metric": "log_loss",
+    "stronger_minus_core": 0.00621373752667672,
+    "percentile_interval_95": {
+      "lower": -0.0045751350067976268,
+      "upper": 0.016943518905465429
+    },
+    "draws": 1000,
+    "scope": "Paired evaluation-row bootstrap conditional on these fixed fits; excludes training and selection variability. The bank contact rows may include repeated customers."
+  },
+  "sparse_wide": {
+    "metric": "rmse",
+    "stronger_minus_core": -2.130635190792824,
+    "percentile_interval_95": {
+      "lower": -2.3283832961479676,
+      "upper": -1.9350047445609684
+    },
+    "draws": 1000,
+    "scope": "Paired evaluation-row bootstrap conditional on these fixed fits; excludes training and selection variability. The bank contact rows may include repeated customers."
+  }
+}

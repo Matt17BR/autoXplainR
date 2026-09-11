@@ -546,7 +546,7 @@ fit_base_candidates <- function(data,
   if (task == "regression") {
     baseline <- timed_model_fit(function() stats::lm(baseline_formula, data = data))
     if (!identical(model_set, "tuned")) {
-      primary <- timed_model_fit(function() stats::lm(primary_formula, data = data))
+      primary <- timed_model_fit(function() check_linear_rank(stats::lm(primary_formula, data = data)))
     }
     label <- "linear regression"
   } else if (task == "binary") {
@@ -1314,7 +1314,11 @@ guided_evaluation_notes <- function(training,
       "caution",
       "few_rows_per_feature",
       paste0(nrow(training), " training rows were used with ", n_features, " input features."),
-      "Use fewer justified features or more training data, and expect unstable coefficients."
+      paste(
+        "Expect unstable unregularized coefficients. Consider fewer justified features,",
+        "more training data, or `portfolio = \"recommended\"` for regularized, forest and",
+        "boosting alternatives. Compare their training-CV results before interpreting the holdout."
+      )
     )
   }
   if (task %in% c("binary", "multiclass")) {

@@ -137,6 +137,10 @@
     return state.filters.length ? sampleDistribution(name, split) : stage().columns[name][split];
   }
   function population() {
+    if (state.view === 'relationships' && !state.filters.length && !storedPair() && records.length) {
+      $('data-population').textContent = exportedPairScope();
+      return;
+    }
     const basis = state.filters.length ? 'Filtered exported sample' : 'Full data';
     $('data-population').textContent = `${basis} · ${stage().population}`;
   }
@@ -277,12 +281,17 @@
       association: sampleAssociation(xName, yName, rows)};
   }
   function sampleAssociation(xName, yName, rows) {
+    const xAxis = axisFor(xName), yAxis = axisFor(yName);
+    if (xAxis?.status !== 'available' || yAxis?.status !== 'available') {
+      return {status: 'unavailable', n: 0, reason: 'A selected column has no usable display values.'};
+    }
+    const numericX = xAxis.kind !== 'categorical', numericY = yAxis.kind !== 'categorical';
     const data = rows.map(row => [rowValue(row, xName), rowValue(row, yName)])
-      .filter(pair => pair.every(value => !missing(value)));
+      .filter(pair => !missing(pair[0]) && !missing(pair[1]) &&
+        (!numericX || finite(pair[0])) && (!numericY || finite(pair[1])));
     const n = data.length, x = data.map(pair => pair[0]), y = data.map(pair => pair[1]);
     if (n < 3 || new Set(x).size < 2 || new Set(y).size < 2) return {status: 'unavailable', n,
       reason: 'At least three complete pairs and variation in both columns are needed.'};
-    const numericX = axisFor(xName).kind !== 'categorical', numericY = axisFor(yName).kind !== 'categorical';
     if (numericX && numericY) {
       const ranks = values => {
         const order = values.map((value, index) => ({value, index})).sort((a, b) => a.value - b.value), ranked = [];
@@ -316,13 +325,23 @@
     return {status: 'available', method: "Cramer's V (unsigned)", n,
       value: Math.sqrt(Math.max(0, chi) / (n * Math.min(a.size - 1, b.size - 1)))};
   }
-  function pairData() {
+  function storedPair() {
     const indices = [names.indexOf(state.column) + 1, names.indexOf(state.y) + 1].sort((a, b) => a - b);
-    const stored = stage().pairs[indices.join('_')];
-    if (state.filters.length) {
+    return stage().pairs[indices.join('_')];
+  }
+  function exportedPairScope() {
+    const rows = filteredRows();
+    const counts = splits().map(split => `${split}: ${number(rows.filter(row => row.partition === split).length)} of ` +
+      `${number(stage()[split + '_rows'])} rows`);
+    return `${state.filters.length ? 'Filtered exported sample' : 'Exported records'} · ` +
+      `${state.stage === 'raw' ? 'Raw supplied values' : 'Values used by models'} · ${counts.join('; ')}`;
+  }
+  function pairData() {
+    const stored = storedPair();
+    if (state.filters.length || (!stored && records.length)) {
       const x = state.column === profile.target ? state.y : state.column;
       const y = state.column === profile.target ? state.column : state.y;
-      return {x, y, ...Object.fromEntries(splits().map(split => [split, sampledPair(x, y, split)]))};
+      return {x, y, source: 'exported', ...Object.fromEntries(splits().map(split => [split, sampledPair(x, y, split)]))};
     }
     return stored;
   }
@@ -398,6 +417,9 @@
     }
     const xAxis = axisFor(state.column), yAxis = axisFor(state.y);
     const association = $('data-association');
+    if (pair.source === 'exported') {
+      association.append(element('p', exportedPairScope()));
+    }
     splits().forEach(split => {
       const reading = pair[split]?.association;
       association.append(element('p', reading?.status === 'available' ?

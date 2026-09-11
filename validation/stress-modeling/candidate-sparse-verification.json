@@ -1,0 +1,9 @@
+{
+  "max_absolute_prediction_difference": {
+    "main_model": 1.5987211554602254e-14,
+    "boosting_model": 0,
+    "forest_model": 0,
+    "simple_baseline": 0
+  },
+  "comparison": "Same immutable raw inputs and15configurations. Candidate adapter changes preserve all four retained prediction vectors within1e-10."
+}

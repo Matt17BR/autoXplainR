@@ -1,0 +1,110 @@
+[
+  {
+    "scenario": "friedman_noise",
+    "variant": "core",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 11.994,
+    "configuration_count": 15,
+    "failed_configurations": ["neural_07", "neural_04", "neural_05"],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "friedman_noise",
+    "variant": "references",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 2.7890000000000001,
+    "configuration_count": null,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "friedman_noise",
+    "variant": "stronger",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 55.711000000000006,
+    "configuration_count": 15,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "rare_interaction",
+    "variant": "core",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 6.7839999999999998,
+    "configuration_count": 15,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "rare_interaction",
+    "variant": "references",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 1.8410000000000002,
+    "configuration_count": null,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "rare_interaction",
+    "variant": "stronger",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 34.945,
+    "configuration_count": 15,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "sparse_wide",
+    "variant": "core",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 73.751999999999995,
+    "configuration_count": 15,
+    "failed_configurations": ["neural_02", "neural_06", "neural_03", "neural_07", "neural_04", "neural_05"],
+    "warnings": "prediction from rank-deficient fit; attr(*, \"non-estim\") has doubtful cases",
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "sparse_wide",
+    "variant": "references",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 2.4319999999999999,
+    "configuration_count": null,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  },
+  {
+    "scenario": "sparse_wide",
+    "variant": "stronger",
+    "status": "ok",
+    "error": null,
+    "elapsed_seconds": 42.329000000000001,
+    "configuration_count": 15,
+    "failed_configurations": [],
+    "warnings": [],
+    "process_status": "finished",
+    "process_exit_code": 0
+  }
+]

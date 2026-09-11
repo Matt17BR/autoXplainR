@@ -98,6 +98,17 @@ jobs:
           --case-dir /tmp/autoxplain-explorer-cases
           --output-dir "$RUNNER_TEMP/report-browser-results/supplied-models"
           --axe-path "$RUNNER_TEMP/report-browser-tools/node_modules/axe-core/axe.min.js"
+      - name: Verify wide-data relationships, score scales and grouped diagnostic links
+        env:
+          AXR_STRESS_REPORTS: ${{ runner.temp }}/report-browser-results/stress-regressions
+          OMP_NUM_THREADS: 1
+          OPENBLAS_NUM_THREADS: 1
+        run: |
+          Rscript validation/stress-reports/generate-pair-cases.R
+          Rscript validation/stress-reports/render-score-fixture.R
+          python validation/stress-reports/check-pairs.py
+          python validation/stress-reports/check-score-scale.py
+          python validation/stress-reports/check-grouped-findings.py
       - name: Upload compact browser evidence
         if: always()
         uses: actions/upload-artifact@v7

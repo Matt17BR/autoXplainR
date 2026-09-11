@@ -14,7 +14,7 @@ regularized_learner_grid <- function(n, p, task, n_classes) {
 fit_regularized_learner <- function(data, target, task, parameters, seed) {
   require_optional("glmnet", "fitting regularized models")
   features <- setdiff(names(data), target)
-  blueprint <- fit_matrix_blueprint(data, predictors = features)
+  blueprint <- fit_matrix_blueprint(data, predictors = features, output = "sparse")
   x <- bake_matrix_blueprint(blueprint, data)
   needs_dummy <- ncol(x) == 1L
   if (needs_dummy) {
@@ -144,6 +144,16 @@ effective_learner_parameters <- function(family, parameters, data, target) {
 fit_additive_learner <- function(data, target, task, parameters, seed) {
   require_optional("mgcv", "fitting generalized additive models")
   features <- setdiff(names(data), target)
+  if (length(features) >= nrow(data)) {
+    stop(
+      "The automatic additive search requires fewer predictor terms than fitting rows (",
+      length(features), " terms, ", nrow(data), " rows). ",
+      "This is a conservative capacity policy, not a limitation on all GAMs. ",
+      "Reduce inputs or use regularized, forest, or boosting learners. ",
+      "Use `evaluate_models()` for an externally fitted GAM.",
+      call. = FALSE
+    )
+  }
   safe_features <- paste0(".ax", seq_along(features))
   safe_data <- data[c(features, target)]
   names(safe_data) <- c(safe_features, ".outcome")

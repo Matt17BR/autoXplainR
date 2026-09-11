@@ -1,0 +1,42 @@
+{
+  "baseline_version": "0.6.1",
+  "candidate_version": "0.6.2",
+  "mode": "rows",
+  "predictors": 500,
+  "training_rows": 900,
+  "evaluation_rows": 300,
+  "fixture_sha256": "2646af958623c7033a979c78574c64e30d3aa9fc257da6f913b61822b6564485",
+  "source_md5": {
+    "R/data_profile.R": "b07b82bc6a80ef5825a63d5db1bba56b",
+    "R/report_payload.R": "3575049a1a70467374475190be1502e0"
+  },
+  "observations": {
+    "baseline": {
+      "timings": [
+        {
+          "prepare_seconds": 37.205999999999996,
+          "serialization_with_escaping_seconds": 77.578
+        }
+      ],
+      "entire_R_export_identical": true,
+      "escaped_script_byte_identical": true,
+      "decoded_full_payload_identical": true,
+      "R_export_bytes": 193331520,
+      "embedded_script_bytes": 56405371
+    },
+    "candidate": {
+      "timings": [
+        {
+          "prepare_seconds": 6.271999999999991,
+          "serialization_with_escaping_seconds": 12.218999999999994
+        }
+      ],
+      "entire_R_export_identical": true,
+      "escaped_script_byte_identical": true,
+      "decoded_full_payload_identical": true,
+      "R_export_bytes": 193331520,
+      "embedded_script_bytes": 56405371
+    }
+  },
+  "scope": "Same saved fitted result and host. These times cover preparation and embedded JSON, not model fitting, explanation computation, the rest of HTML generation or browser rendering. Timings can vary with other work on the host. Object and file sizes are not peak process memory."
+}

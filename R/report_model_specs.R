@@ -53,7 +53,13 @@ model_specification <- function(result, id) {
   if (inherits(fit, "lm") || inherits(fit, "multinom")) {
     coefficients <- stats::coef(fit)
     learned <- list(`Fitted coefficients` = sum(!is.na(coefficients)))
-    if (inherits(fit, "lm")) learned$`Residual degrees of freedom` <- fit$df.residual
+    if (inherits(fit, "lm")) {
+      learned$`Residual degrees of freedom` <- fit$df.residual
+      if (!wrapped) {
+        learned$`Design columns (including intercept)` <- length(coefficients)
+        learned$`Matrix rank` <- fit$rank
+      }
+    }
     if (inherits(fit, "glm")) learned$Converged <- fit$converged
     if (inherits(fit, "multinom")) learned$`Convergence code (0 = converged)` <- fit$convergence
   }
@@ -138,6 +144,9 @@ model_specification <- function(result, id) {
       vapply(utils::head(compact, 3), model_spec_value, character(1)), sep = " = "
     )
     paste(entries, collapse = " \u00b7 ")
+  }
+  if (!wrapped && inherits(fit, "lm") && !is.null(fit$rank) && fit$rank < length(coefficients)) {
+    summary <- paste0(summary, " \u00b7 rank deficient (", fit$rank, "/", length(coefficients), ")")
   }
   if (!nzchar(summary)) summary <- "Settings not recorded"
   list(
