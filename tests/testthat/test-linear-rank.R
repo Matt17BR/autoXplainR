@@ -31,3 +31,36 @@ test_that("full-rank linear fits do not receive a rank warning", {
   result <- autoxplain(data, "y", model_set = "quick", explain = FALSE)
   expect_false(any(grepl("rank deficient", result$model_diagnostics$fit_warning)))
 })
+
+test_that("supplied multiresponse models distinguish design width from coefficient count", {
+  data <- withr::with_seed(951, data.frame(
+    x = rnorm(60), z = rnorm(60), y = rnorm(60), second_outcome = rnorm(60)
+  ))
+  data$copy <- 2 * data$x
+  training <- data[1:40, ]
+  evaluation <- data[41:60, ]
+  for (aliased in c(FALSE, TRUE)) {
+    formula <- if (aliased) cbind(y, second_outcome) ~ x + z + copy else cbind(y, second_outcome) ~ x + z
+    model <- lm(formula, data = training)
+    features <- if (aliased) c("x", "z", "copy") else c("x", "z")
+    predict_first <- function(model, newdata) stats::predict(model, newdata)[, "y"]
+    result <- suppressWarnings(evaluate_models(
+      list(multiresponse = model), evaluation, "y", features = features,
+      predict_functions = list(multiresponse = predict_first), training_data = training
+    ))
+    spec <- model_specification(result, "multiresponse")
+    expect_equal(spec$learned$`Design columns (including intercept)`, if (aliased) 4L else 3L)
+    expect_equal(spec$learned$`Matrix rank`, 3L)
+    expect_equal(spec$learned$`Fitted coefficients`, 6L)
+    expect_equal(spec$learned$`Model responses`, 2L)
+    expect_match(spec$summary, "6 fitted coefficients across 2 responses", fixed = TRUE)
+    if (aliased) {
+      expect_match(spec$summary, "rank deficient (3/4)", fixed = TRUE)
+    } else {
+      expect_false(grepl("rank deficient", spec$summary, fixed = TRUE))
+    }
+    expect_identical(spec$coefficients, coef(model))
+    expect_equal(unname(suppressWarnings(predict(result, evaluation))),
+                 unname(suppressWarnings(predict_first(model, evaluation))))
+  }
+})

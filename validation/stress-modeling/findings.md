@@ -100,6 +100,20 @@ comparison that took 57.7 seconds. Its retained GAM had test RMSE 1.786. The
 larger portfolio provided more alternatives, but bought no predictive gain for
 the selected model on this case.
 
+On Bank Marketing, `recommended` completed in 293.7 seconds with all 30
+configurations and seven models. It again selected `regularized_01`, with log
+loss 0.271408 and average precision 0.489502. The 15-configuration optional run
+took 58.2 seconds and selected the same configuration; primary predictions
+differed by at most 7.5e-12. A retained boosted alternative scored 0.268159 on
+the holdout. That result is reported as an alternative, not used to replace the
+training-selected primary after the fact.
+
+Both public-portfolio runs finished within the fixed ten-minute process limit.
+See [all candidate model scores](candidate-recommended-scores.csv),
+[operational outcomes](candidate-recommended-operations.json),
+[selected-model comparisons](candidate-recommended-comparison.json), and
+[the installed-library and harness hashes](candidate-recommended-provenance.json).
+
 The candidate's sparse-data replay preserved the useful regularized fit: RMSE
 1.122410583173817. The maximum change in its held-out predictions was
 1.60e-14; the other three retained models had identical predictions. See

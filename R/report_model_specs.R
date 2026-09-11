@@ -50,14 +50,17 @@ model_specification <- function(result, id) {
   formula <- if (is.null(formula)) NULL else paste(trimws(deparse(formula)), collapse = " ")
   learned <- list()
   coefficients <- NULL
+  design_columns <- NULL
   if (inherits(fit, "lm") || inherits(fit, "multinom")) {
     coefficients <- stats::coef(fit)
     learned <- list(`Fitted coefficients` = sum(!is.na(coefficients)))
     if (inherits(fit, "lm")) {
+      design_columns <- if (is.matrix(coefficients)) nrow(coefficients) else length(coefficients)
       learned$`Residual degrees of freedom` <- fit$df.residual
       if (!wrapped) {
-        learned$`Design columns (including intercept)` <- length(coefficients)
+        learned$`Design columns (including intercept)` <- design_columns
         learned$`Matrix rank` <- fit$rank
+        if (is.matrix(coefficients)) learned$`Model responses` <- ncol(coefficients)
       }
     }
     if (inherits(fit, "glm")) learned$Converged <- fit$converged
@@ -127,7 +130,11 @@ model_specification <- function(result, id) {
     } else {
       paste0(
         sum(!is.na(coefficients)),
-        if (sum(!is.na(coefficients)) == 1L) " fitted coefficient \u00b7 " else " fitted coefficients \u00b7 ",
+        if (sum(!is.na(coefficients)) == 1L) " fitted coefficient" else " fitted coefficients",
+        if (inherits(fit, "lm") && is.matrix(coefficients)) {
+          paste0(" across ", ncol(coefficients), if (ncol(coefficients) == 1L) " response" else " responses")
+        },
+        " \u00b7 ",
         if (inherits(fit, "glm")) {
           paste(fit$family$link, "link")
         } else if (inherits(fit, "multinom")) {
@@ -145,8 +152,8 @@ model_specification <- function(result, id) {
     )
     paste(entries, collapse = " \u00b7 ")
   }
-  if (!wrapped && inherits(fit, "lm") && !is.null(fit$rank) && fit$rank < length(coefficients)) {
-    summary <- paste0(summary, " \u00b7 rank deficient (", fit$rank, "/", length(coefficients), ")")
+  if (!wrapped && inherits(fit, "lm") && !is.null(fit$rank) && fit$rank < design_columns) {
+    summary <- paste0(summary, " \u00b7 rank deficient (", fit$rank, "/", design_columns, ")")
   }
   if (!nzchar(summary)) summary <- "Settings not recorded"
   list(

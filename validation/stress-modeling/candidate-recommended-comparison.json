@@ -1,0 +1,16 @@
+{
+  "friedman_noise": {
+    "final_configuration": "boosting_02",
+    "maximum_primary_prediction_difference": 0,
+    "optional_configurations": 15,
+    "recommended_configurations": 30,
+    "scope": "The selected configuration agrees on this case; this is not equivalence of all retained candidates or the two search procedures."
+  },
+  "bank_marketing": {
+    "final_configuration": "regularized_01",
+    "maximum_primary_prediction_difference": 7.46458450606724e-12,
+    "optional_configurations": 15,
+    "recommended_configurations": 30,
+    "scope": "The selected configuration agrees on this case; this is not equivalence of all retained candidates or the two search procedures."
+  }
+}
