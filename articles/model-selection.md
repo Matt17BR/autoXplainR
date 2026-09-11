@@ -138,6 +138,94 @@ before changing these defaults. Chronological tuning is not implemented;
 temporal model selection requires an explicit rolling-origin design
 outside this workflow.
 
+## Harder data need a deliberate search
+
+The core portfolio keeps installation simple. It does not include
+regularization, random forests or boosting. With many predictors,
+nonlinear interactions or weak signals, try `portfolio = "recommended"`
+before concluding that useful prediction is impossible. It schedules 30
+configurations by default. You can also choose families and a budget
+explicitly:
+
+``` r
+
+install_model_engines("recommended")
+result <- autoxplain(
+  training, "outcome", test_data = final_test, evaluation_role = "test",
+  learners = c("regularized", "forest", "boosting"),
+  max_models = 30, nfolds = 5, explain = FALSE, seed = 2026
+)
+tuning_results(result)$candidates
+result$leaderboard
+result$model_diagnostics
+```
+
+Keep `final_test` separate before making modeling choices. Select the
+search and metric using the training problem, then inspect its held-out
+result once. Repeated choices based on the same test scores turn that
+set into development data.
+
+The [stress
+comparison](https://github.com/Matt17BR/autoXplainR/blob/main/validation/stress-modeling/findings.md)
+uses independent native fits, two synthetic replicates and a real
+mixed-data problem. Regularization was particularly useful when
+predictors outnumbered training rows. Boosting improved the nonlinear
+regression example. Neither guaranteed an improvement in every
+classification metric. Accuracy alone can be misleading for rare
+outcomes: inspect probability loss, ranking and mistakes at a decision
+cutoff appropriate to the intended use.
+
+Failed configurations remain in the search record. A model can also
+finish but be unsuitable. Rank-deficient linear fits now record that
+their coefficients are not uniquely determined and that new predictions
+may be unstable. Their actual scores stay in the comparison.
+
+The automatic GAM adapter excludes a fit when its number of predictor
+terms is at least its number of fitting rows. This conservative resource
+policy is checked inside each fold. It avoids an expensive search that
+was unproductive in the wide-data stress case; it is not a mathematical
+restriction on penalized GAMs. Use another family or bring an externally
+fitted GAM through
+[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md).
+Other engine-specific limitations, including extreme numerical units,
+can still exclude individual candidates. Inspect the recorded reason.
+
+The broad preset can be slow even when every fit succeeds. On the
+1,200-row, 30-input nonlinear stress case, `recommended` took 8 minutes
+53 seconds, compared with 58 seconds for the explicit 15-configuration
+regularized/forest/boosting search. Both selected the same boosted
+model. Individual GAM folds took 9 to 43 seconds as their basis limits
+increased. These timings describe one machine and one problem; they
+explain why the explicit family choice above can be more practical than
+searching every supported shape.
+
+## Budget explanations and the report separately
+
+Fitting, explaining and exporting are different costs. `explain = FALSE`
+lets you inspect the search first. Request a small report explicitly,
+then increase its explanation budget when the fitted models deserve
+closer investigation:
+
+``` r
+
+render_model_report(result, "first-look.html", top_features = 3, n_repeats = 5,
+                    report_data = "summary")
+```
+
+Even a small feature audit first screens inputs; expensive prediction
+functions and hundreds of columns can take time. Five permutations are a
+first look, not precise importance estimates. The report records the
+budget and warns about unstable Monte Carlo estimates.
+
+Use
+[`report_data_control()`](https://matt17br.github.io/autoXplainR/reference/report_data_control.md)
+to restrict exported columns or sample records if you need row
+filtering. Full records for hundreds of columns make a large HTML file.
+Aggregate mode keeps full-data profiles but does not allow row
+filtering. `max_models` bounds the number of attempted configurations,
+not elapsed time. `max_runtime_secs` is an H2O setting and does not
+impose a local-engine timeout.
+
 ## Compare fitted behavior
 
 ``` r

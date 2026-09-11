@@ -13,7 +13,7 @@ period. Neither design guarantees transport to a different population."></head><
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,9 +96,12 @@ excluded gap rows, and group fold membership where applicable.</p>
     <p>The split column is removed from predictors. <code>test_fraction</code> in
 <code><a href="autoxplain.html">autoxplain()</a></code> refers to groups or distinct time values; row fractions can
 differ. <code>test_data</code> cannot be combined with this design.</p>
-<p>Grouped tuning allocates entire training groups to inner validation folds,
-balancing row counts. Each classification fold must contain all classes;
-infeasible designs fail with an explanation. Temporal designs currently
+<p>Grouped tuning allocates entire training groups to inner validation folds.
+Regression balances row counts; classification also balances class counts
+and requires every class in every fold. This uses only outer-training
+outcomes. Allocation is a bounded greedy search, not a guarantee of optimal
+balance. If class coverage cannot be achieved, the call explains why and
+suggests reducing <code>nfolds</code>. Temporal designs currently
 support <code>model_set = "quick"</code> or <code>"comparison"</code>; random-fold tuning and H2O
 are rejected. Use an external rolling-origin workflow for temporal tuning.</p>
     </div>

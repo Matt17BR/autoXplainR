@@ -1,5 +1,43 @@
 # Changelog
 
+## AutoXplainR 0.6.2
+
+- Grouped classification tuning balances outcome coverage as well as
+  group sizes. It preserves whole groups and uses only training
+  outcomes. Bounded randomized retries handle mixed-class groups;
+  failures explain whether a class occurs in too few groups or the
+  search could not find an allocation.
+- Regularized models use sparse input encoding. Large categorical inputs
+  no longer require a dense one-hot matrix. Native prediction parity is
+  tested.
+- Numeric scaling handles extreme finite predictor units without
+  mistaking overflow or underflow for zero variance. Training centers
+  remain finite on platforms without extended-precision sums, and scales
+  preserve small differences between very large values. Encoded name
+  collisions no longer remove otherwise usable MARS candidates.
+- Automatic additive searches exclude folds with at least as many
+  predictor terms as fitting rows. This disclosed resource policy avoids
+  a reproduced expensive fit; externally fitted penalized GAMs remain
+  supported.
+- Rank-deficient linear fits record a fitting warning. Reports show rank
+  deficiency beside settings and retain the actual scores, coefficients
+  and design dimensions.
+- Positive loss metrics have an explicit logarithmic score axis, so an
+  unstable model need not flatten the other comparisons. Linear remains
+  the default; exact scores and all models remain available on either
+  scale.
+- Wide reports prepare pair summaries and serialize row records faster
+  without changing exported values. When an aggregate pair was not
+  retained, explicitly exported rows can supply its plot, with the
+  sample scope identified.
+- Repeated unresolved permutation-interval findings share a compact
+  evidence table while preserving every model, feature, claim and
+  diagnostic link.
+- Reproducible stress comparisons cover nonlinear interactions, more
+  predictors than rows, rare events and Bank Marketing. Documentation
+  separates the core defaults from optional learners and explains their
+  measured strengths and remaining limits.
+
 ## AutoXplainR 0.6.1
 
 - Cost charts draw the Pareto frontier: the best observed score

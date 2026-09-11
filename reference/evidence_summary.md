@@ -84,9 +84,9 @@ evidence$evaluation
 #>                                              message
 #> 1       Only 6 rows were available for test scoring.
 #> 2 26 training rows were used with 10 input features.
-#>                                                                          recommendation
-#> 1             Treat the scores as preliminary and validate on more representative rows.
-#> 2 Use fewer justified features or more training data, and expect unstable coefficients.
+#>                                                                                                                                                                                                                                            recommendation
+#> 1                                                                                                                                                                               Treat the scores as preliminary and validate on more representative rows.
+#> 2 Expect unstable unregularized coefficients. Consider fewer justified features, more training data, or `portfolio = "recommended"` for regularized, forest and boosting alternatives. Compare their training-CV results before interpreting the holdout.
 #> 
 # Optional JSON export:
 # jsonlite::write_json(evidence, "evidence.json", auto_unbox = TRUE, pretty = TRUE)

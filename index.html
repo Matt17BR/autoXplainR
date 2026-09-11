@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -283,6 +283,12 @@
 <span><span class="co"># install_model_engines("recommended")</span></span>
 <span><span class="co"># autoxplain(data, "outcome", model_set = "tuned", portfolio = "recommended")</span></span></code></pre></div>
 <p>Missing engines produce an installation instruction; the package does not change the requested portfolio based on what happens to be installed. Training recipes are learned again inside each fold. Candidate settings, fold scores, warnings, failures and out-of-fold predictions are retained by <code><a href="reference/tuning_results.html">tuning_results()</a></code>. Experienced users can specify <code>learners</code>, <code>max_models</code> and <code><a href="reference/tuning_control.html">tuning_control()</a></code>. Explicit optimizer nonconvergence excludes a candidate by default. The optional <code>optimization_policy = "warn"</code> retains it with its optimizer status; an unknown status is never presented as proof of convergence. H2O AutoML remains available through <code>engine = "h2o"</code> and requires Java.</p>
+<div class="section level3">
+<h3 id="does-it-handle-harder-problems">Does it handle harder problems?<a class="anchor" aria-label="anchor" href="#does-it-handle-harder-problems"></a>
+</h3>
+<p>The optional learners matter. In a fixed-split stress comparison with 240 inputs and 180 training rows, the core search selected a tree with test RMSE 3.253; an equally sized regularized/forest/boosting search selected a regularized model with RMSE 1.122. Native cross-validated lasso scored 1.130. A nonlinear interaction problem also benefited substantially from boosting. On Bank Marketing the difference was small, and on rare outcomes better ranking did not always mean better probabilities. These are measured examples, not a general leaderboard. See the <a href="https://github.com/Matt17BR/autoXplainR/blob/main/validation/stress-modeling/findings.md" class="external-link">results and reproducible protocol</a>.</p>
+<p>For demanding tabular data, start with the optional portfolio and inspect both failed configurations and the retained alternatives. High-dimensional linear fits can complete while making very poor predictions. The report preserves their scores and flags rank-deficient fits; it does not quietly discard them. The <a href="https://matt17br.github.io/autoXplainR/articles/model-selection.html">model-selection guide</a> explains how to separate model fitting from a bounded explanation and report. The broad <code>recommended</code> preset can be expensive: its 30-configuration search took 8 minutes 53 seconds on the nonlinear case, versus 58 seconds for the explicit three-family search, and selected the same fitted model. Choose the families deliberately when turnaround time matters.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="inspect-a-question-in-more-detail">Inspect a question in more detail<a class="anchor" aria-label="anchor" href="#inspect-a-question-in-more-detail"></a>
@@ -331,9 +337,9 @@
 </li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">document</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Live H2O integration is opt-in with <code>AUTOXPLAIN_RUN_H2O=true</code>. Hosted narrative providers are also opt-in; the default narrative renders retained evidence locally. Hosted output is checked for format and length, not numerical grounding. See <a href="LLM_PROVIDERS.html">provider setup</a>. Reports and aggregate exports can contain feature names and diagnostic messages; review them before sharing. Saved RDS results contain the training and evaluation data.</p>
 <p>MIT license. Copyright 2025–2026 Matteo Mazzarelli.</p>
 </div>

@@ -45,8 +45,11 @@ refers to groups or distinct time values; row fractions can differ.
 `test_data` cannot be combined with this design.
 
 Grouped tuning allocates entire training groups to inner validation
-folds, balancing row counts. Each classification fold must contain all
-classes; infeasible designs fail with an explanation. Temporal designs
+folds. Regression balances row counts; classification also balances
+class counts and requires every class in every fold. This uses only
+outer-training outcomes. Allocation is a bounded greedy search, not a
+guarantee of optimal balance. If class coverage cannot be achieved, the
+call explains why and suggests reducing `nfolds`. Temporal designs
 currently support `model_set = "quick"` or `"comparison"`; random-fold
 tuning and H2O are rejected. Use an external rolling-origin workflow for
 temporal tuning.

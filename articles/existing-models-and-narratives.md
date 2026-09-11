@@ -184,7 +184,7 @@ cat(memo)
 #> 
 #> ## Score cautions
 #> - **caution:** Only 6 rows were available for test scoring. Treat the scores as preliminary and validate on more representative rows.
-#> - **caution:** 26 training rows were used with 10 input features. Use fewer justified features or more training data, and expect unstable coefficients.
+#> - **caution:** 26 training rows were used with 10 input features. Expect unstable unregularized coefficients. Consider fewer justified features, more training data, or `portfolio = "recommended"` for regularized, forest and boosting alternatives. Compare their training-CV results before interpreting the holdout.
 #> 
 #> ## How automatic tuning selected the model
 #> 15 configurations across 3 model families were compared with 5 training-only folds. The selection metric was rmse.

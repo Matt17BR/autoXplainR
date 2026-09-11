@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,18 @@
       <small>Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.2" id="autoxplainr-062">AutoXplainR 0.6.2<a class="anchor" aria-label="anchor" href="#autoxplainr-062"></a></h2>
+<ul><li>Grouped classification tuning balances outcome coverage as well as group sizes. It preserves whole groups and uses only training outcomes. Bounded randomized retries handle mixed-class groups; failures explain whether a class occurs in too few groups or the search could not find an allocation.</li>
+<li>Regularized models use sparse input encoding. Large categorical inputs no longer require a dense one-hot matrix. Native prediction parity is tested.</li>
+<li>Numeric scaling handles extreme finite predictor units without mistaking overflow or underflow for zero variance. Training centers remain finite on platforms without extended-precision sums, and scales preserve small differences between very large values. Encoded name collisions no longer remove otherwise usable MARS candidates.</li>
+<li>Automatic additive searches exclude folds with at least as many predictor terms as fitting rows. This disclosed resource policy avoids a reproduced expensive fit; externally fitted penalized GAMs remain supported.</li>
+<li>Rank-deficient linear fits record a fitting warning. Reports show rank deficiency beside settings and retain the actual scores, coefficients and design dimensions.</li>
+<li>Positive loss metrics have an explicit logarithmic score axis, so an unstable model need not flatten the other comparisons. Linear remains the default; exact scores and all models remain available on either scale.</li>
+<li>Wide reports prepare pair summaries and serialize row records faster without changing exported values. When an aggregate pair was not retained, explicitly exported rows can supply its plot, with the sample scope identified.</li>
+<li>Repeated unresolved permutation-interval findings share a compact evidence table while preserving every model, feature, claim and diagnostic link.</li>
+<li>Reproducible stress comparisons cover nonlinear interactions, more predictors than rows, rare events and Bank Marketing. Documentation separates the core defaults from optional learners and explains their measured strengths and remaining limits.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.1" id="autoxplainr-061">AutoXplainR 0.6.1<a class="anchor" aria-label="anchor" href="#autoxplainr-061"></a></h2>
 <ul><li>Cost charts draw the Pareto frontier: the best observed score available at each measured cost budget. The line does not imply intermediate fits. An explicit logarithmic cost axis separates positive costs spanning several orders of magnitude.</li>
