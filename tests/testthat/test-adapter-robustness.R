@@ -29,6 +29,69 @@ test_that("standardization avoids overflowing a representable centered result", 
   expect_equal(as.numeric(actual), 2.2, tolerance = 1e-12)
 })
 
+test_that("training centers stay finite without extended-precision accumulation", {
+  # Some platforms accumulate colMeans() in ordinary double precision. Reproduce
+  # those additions on every platform so Linux cannot hide an overflowing sum.
+  double_col_means <- function(x) {
+    result <- vapply(seq_len(ncol(x)), function(column) {
+      total <- 0
+      for (value in x[, column]) total <- total + value
+      total / nrow(x)
+    }, numeric(1L))
+    stats::setNames(result, colnames(x))
+  }
+  fit <- AutoXplainR:::fit_matrix_blueprint
+  environment(fit) <- list2env(list(colMeans = double_col_means), parent = environment(fit))
+  unit_data <- data.frame(
+    negative = c(-1, -1, -1, 1), positive = c(1, 1, 1, -1),
+    balanced = c(1, 1, -1, -1), constant = rep(1, 4), ordinary = 1:4
+  )
+  units <- c(1e308, 1e308, 1e308, .Machine$double.xmax, 1)
+  training <- as.data.frame(sweep(as.matrix(unit_data), 2L, units, "*"))
+  expect_true(all(!is.finite(double_col_means(as.matrix(training))[1:4])))
+  blueprint <- fit(training, center = TRUE, scale = TRUE)
+  expect_equal(unname(blueprint$center / units), c(-0.5, 0.5, 0, 1, 2.5))
+  expected <- vapply(unit_data[c("negative", "positive", "balanced", "ordinary")],
+                     function(x) (x - mean(x)) / sd(x), numeric(4L))
+  baked <- AutoXplainR:::bake_matrix_blueprint(blueprint, training)
+  expect_equal(unname(baked[, colnames(expected)]), unname(expected), tolerance = 1e-12)
+  expect_identical(blueprint$zero_variance_columns, "constant")
+  expect_identical(unname(baked[, "constant"]), rep(0, 4))
+  restored <- unserialize(serialize(blueprint, NULL))
+  expect_equal(AutoXplainR:::bake_matrix_blueprint(restored, training[4:1, ]),
+               baked[4:1, , drop = FALSE])
+})
+
+test_that("ordinary training centers retain the base colMeans calculation", {
+  data <- data.frame(x = c(0.1, 1.3, -2.6, 4.1), z = c(14, -2, 0.5, 3))
+  blueprint <- AutoXplainR:::fit_matrix_blueprint(data, center = TRUE, scale = TRUE)
+  expect_identical(blueprint$center, colMeans(as.matrix(data)))
+  centered <- sweep(as.matrix(data), 2L, colMeans(as.matrix(data)), "-")
+  expected <- sweep(centered, 2L, vapply(data, sd, numeric(1L)), "/")
+  expect_identical(unname(AutoXplainR:::bake_matrix_blueprint(blueprint, data)), unname(expected))
+})
+
+test_that("nearby extreme values retain their representable separation", {
+  largest <- .Machine$double.xmax
+  step <- 2^971
+  for (separation in c(1, 3, 10) * step) {
+    values <- c(largest - separation, largest)
+    expected <- diff(values) / sqrt(2)
+    actual <- AutoXplainR:::matrix_blueprint_sd(values)
+    expect_equal(actual / expected, 1, tolerance = 1e-12)
+    expect_equal(AutoXplainR:::matrix_blueprint_sd(-values) / expected, 1,
+                 tolerance = 1e-12)
+  }
+})
+
+test_that("extreme scaling distinguishes finite and unrepresentable sample deviations", {
+  largest <- .Machine$double.xmax
+  expect_equal(AutoXplainR:::matrix_blueprint_sd(c(-1, -1, -1, 1) * largest), largest)
+  expect_error(AutoXplainR:::fit_matrix_blueprint(
+    data.frame(x = c(-largest, largest)), center = TRUE, scale = TRUE
+  ), "Predictor scales exceed the finite numeric range")
+})
+
 test_that("generated input names keep distinct original features", {
   data <- data.frame(x = factor(c("a", "b", "a", "b")), xb = c(2, 4, 6, 8))
   blueprint <- AutoXplainR:::fit_matrix_blueprint(data)

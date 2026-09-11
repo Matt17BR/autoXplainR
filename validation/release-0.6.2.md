@@ -1,7 +1,8 @@
 # AutoXplainR 0.6.2 validation record
 
-Status: release candidate. Local package and browser checks are in progress;
-publication and supported-platform CI have not yet been accepted.
+Status: release candidate. Local package and browser checks passed, but macOS
+CI exposed a numerical defect. Its repair requires a fresh archive and another
+supported-platform run before publication.
 
 ## What prompted this release
 
@@ -58,11 +59,26 @@ feature, prediction and Checks PDF pages were rendered to PNG and visually
 inspected for legibility, clipped content and orphaned charts. This is an agent
 task walkthrough, not a recruited-participant study.
 
-The final fresh source suite passes 4,150 assertions, with no failures, errors
+The second local candidate passes 4,166 assertions, with no failures, errors
 or warnings. Live H2O and hosted Gemini are separate opt-in integrations and
 were skipped in that run. Lint and spelling pass. Eleven numerical references
 agree within 5.68e-14. The imputation mutation check rejects leaked fold medians
 through the expected assertion failures, rather than a script error.
+
+That local pass was insufficient. On macOS ARM64, the new subtraction-overflow
+test failed because `colMeans()` accumulated huge finite values into an infinite
+sum. Linux's extended-precision accumulator concealed the defect. A portable
+regression reproduces the double-precision additions, while the original test
+continues to run on every platform. Independent review also found that the
+standard-deviation fallback overestimated a one-step difference near the numeric
+limit by 41.4%. Its regression uses the exact two-point answer, the difference
+divided by the square root of two. Neither failure was skipped or accepted as
+harmless platform variation.
+
+The standalone numerical CI job also omitted its direct `testthat` dependency.
+It failed in an empty library and later passed after another job populated the
+shared dependency cache. The workflow now installs that dependency explicitly;
+the cached pass was not treated as proof that the setup was complete.
 
 ## Remaining limits
 

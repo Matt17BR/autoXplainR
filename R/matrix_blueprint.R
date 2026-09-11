@@ -153,6 +153,14 @@ fit_matrix_blueprint <- function(data,
   center_values <- stats::setNames(rep(0, length(columns)), columns)
   if (isTRUE(center) && any(standardizable)) {
     center_values[standardizable] <- colMeans(encoded[, standardizable, drop = FALSE])
+    # On platforms without extended precision, a finite column's sum can
+    # overflow before colMeans divides by its length. Keep ordinary results,
+    # and recompute only those centers using bounded, unit-sized coordinates.
+    for (column in which(!is.finite(center_values))) {
+      values <- encoded[, column]
+      magnitude <- max(abs(values))
+      center_values[[column]] <- mean(values / magnitude) * magnitude
+    }
   }
   scale_values <- stats::setNames(rep(1, length(columns)), columns)
   zero_variance_columns <- character()
@@ -368,7 +376,15 @@ matrix_blueprint_sd <- function(x) {
   if (is.finite(value) && value > 0 && ordinary_units) return(value)
   if (!is.finite(magnitude) || magnitude == 0 || length(x) < 2L) return(0)
   # Squaring very large or small finite values can overflow or underflow in sd().
-  # Work in unit-sized coordinates, then restore the original units.
+  # Subtract a reference first to preserve small differences near a large offset.
+  # If that subtraction overflows, the inputs span a wide range, so normalize
+  # the original values instead. Both paths restore the original units.
+  differences <- x - x[[1L]]
+  if (all(is.finite(differences))) {
+    spread <- max(abs(differences))
+    if (spread == 0) return(0)
+    return(stats::sd(differences / spread) * spread)
+  }
   stats::sd(x / magnitude) * magnitude
 }
 

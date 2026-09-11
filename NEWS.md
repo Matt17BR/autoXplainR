@@ -7,7 +7,9 @@
 - Regularized models use sparse input encoding. Large categorical inputs no
   longer require a dense one-hot matrix. Native prediction parity is tested.
 - Numeric scaling handles extreme finite predictor units without mistaking
-  overflow or underflow for zero variance. Encoded name collisions no longer
+  overflow or underflow for zero variance. Training centers remain finite on
+  platforms without extended-precision sums, and scales preserve small
+  differences between very large values. Encoded name collisions no longer
   remove otherwise usable MARS candidates.
 - Automatic additive searches exclude folds with at least as many predictor
   terms as fitting rows. This disclosed resource policy avoids a reproduced

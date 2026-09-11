@@ -18,7 +18,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::pkgload, any::iml
+          extra-packages: any::pkgload, any::iml, any::testthat
       - name: Compare numerical output and record coverage simulation
         run: |
           Rscript validation/check-tuning-mutation.R
