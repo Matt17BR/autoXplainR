@@ -47,6 +47,10 @@
   exported sample. Large embedded scripts are assembled from smaller text blocks
   to avoid a reproduced WebKit parsing stall. Dense scatter plots show a
   disclosed subset of points.
+- Cost-chart help explains what R object sizes count: retained diagnostics can
+  dominate the estimate, shared data can be counted repeatedly, and native
+  engine allocations can be absent. These values are not deployment-memory or
+  saved-file sizes.
 - Default report explanations use at most 5,000 evaluation rows; pairwise data
   summaries use at most 10,000 rows per partition. Model scores, univariate
   distributions and missing-value counts still use all available rows. Reports

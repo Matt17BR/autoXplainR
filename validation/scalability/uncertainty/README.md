@@ -31,10 +31,42 @@ identical between variants; their serialized bytes also match.
 | Eight-class Brier, 20,000 rows | 5.183 s | 0.838 s | 162,548 KiB | 163,112 KiB |
 
 These are individual observations on one host. The Brier case has a substantial
-time reduction, while its process peak memory is slightly higher. Every call
-still uses 1,000 paired full-evaluation resamples. Larger cases and final
-cross-platform acceptance remain pending. Exact measurements, limits, hashes
-and session details are in [measurements.json](measurements.json).
+time reduction, while its process peak memory is slightly higher. Every completed
+call uses 1,000 paired full-evaluation resamples.
+
+## Larger evaluation sets
+
+The remaining eight calls used the coherent `candidate-library-v5` installation.
+Its source and installed-file hashes are recorded separately from the earlier
+20,000-row installation. Within each pair, only the bootstrap function changes.
+The installed files remained unchanged across all eight runs.
+
+| Evaluation problem | Before public call | After public call | Before peak RSS | After peak RSS |
+| --- | ---: | ---: | ---: | ---: |
+| Regression RMSE, 200,000 rows | 18.497 s | 6.549 s | 272,592 KiB | 272,136 KiB |
+| Eight-class Brier, 200,000 rows | 77.113 s | 7.222 s | 386,240 KiB | 389,148 KiB |
+| Regression RMSE, 1,000,000 rows | 135.608 s | 28.883 s | 613,564 KiB | 507,860 KiB |
+| Eight-class Brier, 1,000,000 rows | No result within the 180 s process bound | 34.852 s | Unavailable | 1,128,536 KiB |
+
+The first three pairs returned exactly identical complete interval objects and
+serialized bytes, including every draw, endpoint and note. The million-row Brier
+baseline was terminated after the 180-second whole-process limit; it had spent
+11.9 seconds preparing the evaluation result. It has no completed bootstrap time
+or interval object, so exact whole-object parity is not claimed for that pair.
+The candidate returned all 1,000 draws in 47.478 seconds including preparation
+and saving. The earlier 200,000-row Brier pair supplies the completed comparison
+for that metric.
+
+These supplied-prediction workloads measure evaluation and interval computation,
+not fitting quality or a complete report. They preserve all evaluation rows and
+the ordinary 1,000 draws. The Brier memory result at 200,000 rows remains slightly
+higher, so the time improvement should not be presented as a general memory
+reduction. Exact measurements, source cohorts, limits and session details are in
+[measurements.json](measurements.json); complete pair checks are in
+[large-parity-verdicts.json](large-parity-verdicts.json). Final cross-platform
+release acceptance remains a separate gate.
+Portable session text copies remove trailing whitespace only; raw session
+strings remain unchanged in each cached run's `measurement.json`.
 
 ## Reproduce the comparison
 
@@ -71,6 +103,11 @@ prediction fixtures isolate evaluation and interval computation; they say
 nothing about model fitting quality. Each process has one native thread and
 external 180-second/12-GiB limits, and shares the scaling harness lock. Schedule
 runs apart from other workloads. Timeouts remain timeouts, not completed timings.
+
+After two completed runs, `verify-pair.R BEFORE_DIRECTORY AFTER_DIRECTORY
+OUTPUT.json` compares the full R objects and their serialized bytes, and checks
+that both runs used the same library, rows and 1,000-draw budget. Do not run this
+paired check when a variant timed out without returning its interval.
 
 The public-call timer includes ordinary prediction/context validation but
 excludes creating the evaluation result and saving the interval. Both preceding

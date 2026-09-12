@@ -145,7 +145,10 @@ explorer_tradeoffs <- function(result, models) {
     explorer_help("Reading the cost chart", paste(
       "Left means lower measured cost. For a loss such as RMSE or log loss, lower is better;",
       "for accuracy or R-squared, higher is better. Outlined models are not beaten on both axes.",
-      "Single-fit millisecond timings are descriptive readings, not reliable speed rankings."
+      "Single-fit millisecond timings are descriptive readings, not reliable speed rankings.",
+      "R object size includes retained diagnostics, may count shared data repeatedly",
+      "and excludes native engine allocations.",
+      "It is not a saved-file or deployment-memory comparison."
     )), "</h3>",
     '<label class="control">Compare cost <select id="resource-select">',
     explorer_options(models$resources, resources[models$resources]), "</select></label>",
@@ -176,8 +179,11 @@ explorer_tradeoffs <- function(result, models) {
     if (identical(result$engine, "h2o")) {
       "H2O model size is reported by the engine when available; the native baseline uses R object size. "
     } else {
-      "Size is an approximate R object measurement, not a count of learned rules. "
+      "Size estimates the retained R model object. "
     },
+    "R object size includes retained diagnostics, may count shared data repeatedly ",
+    "and excludes native engine allocations. ",
+    "It is not a saved-file or deployment-memory comparison, or a count of learned rules. ",
     "These measurements are not hardware-independent benchmarks.</p></details></div>"
   )
 }

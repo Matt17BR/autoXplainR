@@ -1,8 +1,19 @@
 {
-  "scope": "Single-run observations on one Linux host, one native thread. Both variants use the same installed candidate; before substitutes only the frozen bootstrap function. Public-call timing includes context/prediction validation, excludes creating the supplied-model result and saving the interval. Peak RSS covers the complete fresh process.",
-  "source_manifest": "candidate-source-manifest.json",
-  "source_manifest_sha256": "046a0e66d1b57ba1753d4da9130f61fa2992f60aa723b32501c8f984709d145b",
-  "candidate_archive_sha256": "8fa69371d7ce1dfce8e886004a03e9797d21d1721938de35c57882758bc71272",
+  "scope": "Single-run observations on one Linux host, one native thread. Within each pair both variants use the same installed package; before substitutes only the frozen bootstrap function. The 20k and larger cohorts have separate source manifests. Public-call timing includes context/prediction validation and excludes evaluation-result construction and saving the interval. Peak RSS and timeout limits cover the whole fresh process.",
+  "source_cohorts": {
+    "initial_20k": {
+      "source_manifest": "candidate-source-manifest.json",
+      "source_manifest_sha256": "046a0e66d1b57ba1753d4da9130f61fa2992f60aa723b32501c8f984709d145b",
+      "candidate_archive_sha256": "8fa69371d7ce1dfce8e886004a03e9797d21d1721938de35c57882758bc71272"
+    },
+    "final_large": {
+      "source_manifest": "final-source-manifest.json",
+      "source_manifest_sha256": "4553dc181ac538dd26a75e741788c58807761384f5ae314f2509e0454657fff9",
+      "runtime_commit": "3ec44ad",
+      "installed_files": "final-installed-sha256.json",
+      "library": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5"
+    }
+  },
   "measurements": [
     {
       "variant": "before",
@@ -47,7 +58,9 @@
       "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
       "interval_sha256": "4d0caf46e00aee0c1f5646c50f12ebc3a5b05bd287b73c8cf672917712813b77",
       "whole_interval_object_identical": true,
-      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-20000-before"
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-20000-before",
+      "source_cohort": "initial_20k",
+      "status": "completed"
     },
     {
       "variant": "after",
@@ -92,7 +105,9 @@
       "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
       "interval_sha256": "4d0caf46e00aee0c1f5646c50f12ebc3a5b05bd287b73c8cf672917712813b77",
       "whole_interval_object_identical": true,
-      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-20000-after"
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-20000-after",
+      "source_cohort": "initial_20k",
+      "status": "completed"
     },
     {
       "variant": "before",
@@ -137,7 +152,9 @@
       "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
       "interval_sha256": "10c632a75017401736e583ae9d046c01e028e577e11bbc74b869d1b5c95ac77b",
       "whole_interval_object_identical": true,
-      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-20000-before"
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-20000-before",
+      "source_cohort": "initial_20k",
+      "status": "completed"
     },
     {
       "variant": "after",
@@ -182,10 +199,413 @@
       "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
       "interval_sha256": "10c632a75017401736e583ae9d046c01e028e577e11bbc74b869d1b5c95ac77b",
       "whole_interval_object_identical": true,
-      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-20000-after"
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-20000-after",
+      "source_cohort": "initial_20k",
+      "status": "completed"
+    },
+    {
+      "variant": "before",
+      "problem": "regression",
+      "rows": 200000,
+      "draws": 1000,
+      "public_call_seconds": 18.497,
+      "preparation_seconds": 1.024,
+      "metric": "rmse",
+      "unit": "observation",
+      "units": 200000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.624649623992274,
+          "lower": 0.623117931393164,
+          "upper": 0.626007581877636
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 1.5394472216484,
+          "lower": 1.53635698621703,
+          "upper": 1.54279938201975
+        },
+        {
+          "quantity": "difference",
+          "estimate": -0.914797597656125,
+          "lower": -0.917738419654549,
+          "upper": -0.912002339442476
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "49c77e50880a997ddaa38a72f13656af55a9e7935c2d3e3b672d2b577920d34f",
+      "wall_seconds": 19.811509749000834,
+      "peak_rss_kib": 272592,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-200000-before"
+    },
+    {
+      "variant": "after",
+      "problem": "regression",
+      "rows": 200000,
+      "draws": 1000,
+      "public_call_seconds": 6.549,
+      "preparation_seconds": 1.097,
+      "metric": "rmse",
+      "unit": "observation",
+      "units": 200000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.624649623992274,
+          "lower": 0.623117931393164,
+          "upper": 0.626007581877636
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 1.5394472216484,
+          "lower": 1.53635698621703,
+          "upper": 1.54279938201975
+        },
+        {
+          "quantity": "difference",
+          "estimate": -0.914797597656125,
+          "lower": -0.917738419654549,
+          "upper": -0.912002339442476
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "49c77e50880a997ddaa38a72f13656af55a9e7935c2d3e3b672d2b577920d34f",
+      "wall_seconds": 7.936472916000639,
+      "peak_rss_kib": 272136,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-200000-after"
+    },
+    {
+      "variant": "before",
+      "problem": "multiclass_brier",
+      "rows": 200000,
+      "draws": 1000,
+      "public_call_seconds": 77.113,
+      "preparation_seconds": 2.244,
+      "metric": "brier_score",
+      "unit": "observation",
+      "units": 200000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.972179195215692,
+          "lower": 0.97115524257204,
+          "upper": 0.973110217047609
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 0.875,
+          "lower": 0.875,
+          "upper": 0.875
+        },
+        {
+          "quantity": "difference",
+          "estimate": 0.097179195215692,
+          "lower": 0.0961552425720401,
+          "upper": 0.0981102170476095
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "99b47da21fc3b19fe3bf6d00f4cd8ce9bcd4dad6a097552aab54800253a76c7b",
+      "wall_seconds": 79.72877081700062,
+      "peak_rss_kib": 386240,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-200000-before"
+    },
+    {
+      "variant": "after",
+      "problem": "multiclass_brier",
+      "rows": 200000,
+      "draws": 1000,
+      "public_call_seconds": 7.222,
+      "preparation_seconds": 2.22,
+      "metric": "brier_score",
+      "unit": "observation",
+      "units": 200000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.972179195215692,
+          "lower": 0.97115524257204,
+          "upper": 0.973110217047609
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 0.875,
+          "lower": 0.875,
+          "upper": 0.875
+        },
+        {
+          "quantity": "difference",
+          "estimate": 0.097179195215692,
+          "lower": 0.0961552425720401,
+          "upper": 0.0981102170476095
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "99b47da21fc3b19fe3bf6d00f4cd8ce9bcd4dad6a097552aab54800253a76c7b",
+      "wall_seconds": 9.687898890002543,
+      "peak_rss_kib": 389148,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-200000-after"
+    },
+    {
+      "variant": "before",
+      "problem": "regression",
+      "rows": 1000000,
+      "draws": 1000,
+      "public_call_seconds": 135.608,
+      "preparation_seconds": 5.334,
+      "metric": "rmse",
+      "unit": "observation",
+      "units": 1000000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.624501601566449,
+          "lower": 0.623780951862942,
+          "upper": 0.625172656755798
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 1.5394974469352,
+          "lower": 1.53799562088271,
+          "upper": 1.54094250414569
+        },
+        {
+          "quantity": "difference",
+          "estimate": -0.914995845368756,
+          "lower": -0.916240235577931,
+          "upper": -0.913724706451465
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "d099cb6d6c354f577a4fde311a63e57a3c9f0ade5c572e9068059e30a27bb562",
+      "wall_seconds": 141.39612662099898,
+      "peak_rss_kib": 613564,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-1000000-before"
+    },
+    {
+      "variant": "after",
+      "problem": "regression",
+      "rows": 1000000,
+      "draws": 1000,
+      "public_call_seconds": 28.883,
+      "preparation_seconds": 4.923,
+      "metric": "rmse",
+      "unit": "observation",
+      "units": 1000000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.624501601566449,
+          "lower": 0.623780951862942,
+          "upper": 0.625172656755798
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 1.5394974469352,
+          "lower": 1.53799562088271,
+          "upper": 1.54094250414569
+        },
+        {
+          "quantity": "difference",
+          "estimate": -0.914995845368756,
+          "lower": -0.916240235577931,
+          "upper": -0.913724706451465
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "d099cb6d6c354f577a4fde311a63e57a3c9f0ade5c572e9068059e30a27bb562",
+      "wall_seconds": 34.248565199999575,
+      "peak_rss_kib": 507860,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": true,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/regression-1000000-after"
+    },
+    {
+      "variant": "before",
+      "problem": "multiclass_brier",
+      "rows": 1000000,
+      "status": "timed_out",
+      "requested_draws": 1000,
+      "draws": null,
+      "public_call_seconds": null,
+      "preparation_seconds": 11.9,
+      "metric": "brier_score",
+      "interval_sha256": null,
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "limit_scope": "180-second whole-process guard; no completed public-call time or interval object.",
+      "wall_seconds": 180.00473200499982,
+      "peak_rss_kib": null,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": true,
+      "returncode": -15,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": null,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-1000000-before"
+    },
+    {
+      "variant": "after",
+      "problem": "multiclass_brier",
+      "rows": 1000000,
+      "draws": 1000,
+      "public_call_seconds": 34.852,
+      "preparation_seconds": 12.07,
+      "metric": "brier_score",
+      "unit": "observation",
+      "units": 1000000,
+      "estimates": [
+        {
+          "quantity": "primary",
+          "estimate": 0.972193915922998,
+          "lower": 0.971753210778576,
+          "upper": 0.972604940770021
+        },
+        {
+          "quantity": "baseline",
+          "estimate": 0.875,
+          "lower": 0.875,
+          "upper": 0.875
+        },
+        {
+          "quantity": "difference",
+          "estimate": 0.0971939159229978,
+          "lower": 0.0967532107785757,
+          "upper": 0.097604940770021
+        }
+      ],
+      "package_version": "0.7.0",
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "status": "completed",
+      "interval_sha256": "04f75bbbb677b28b0853ed7c823641f3700245bb76a2cbab941059762c90aa05",
+      "wall_seconds": 47.47765002799861,
+      "peak_rss_kib": 1128536,
+      "time_limit_seconds": 180,
+      "address_space_limit_gib": 12,
+      "timed_out": false,
+      "returncode": 0,
+      "reference_sha256": "b0d94d406c57781221428c289f668438b4aa2ada702f64986251dec250fa10eb",
+      "runner_sha256": "2f5014c5130a93c51a9e52948f4923123e44cbe85969806b9458b195a378dc40",
+      "supervisor_sha256": "a23214324b1a7bbc2374d0f8dfe53f98ad83c4142c536bb5a55c15c4d09ea55e",
+      "source_cohort": "final_large",
+      "whole_interval_object_identical": null,
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/uncertainty/multiclass_brier-1000000-after"
     }
   ],
-  "session": [
+  "large_pair_verification": [
+    {
+      "problem": "regression",
+      "rows": 200000,
+      "draws": 1000,
+      "whole_interval_object_identical": true,
+      "serialized_interval_identical": true,
+      "interval_sha256": "49c77e50880a997ddaa38a72f13656af55a9e7935c2d3e3b672d2b577920d34f",
+      "before_seconds": 18.497,
+      "after_seconds": 6.549,
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "R_version": "R version 4.5.2 (2025-10-31)"
+    },
+    {
+      "problem": "multiclass_brier",
+      "rows": 200000,
+      "draws": 1000,
+      "whole_interval_object_identical": true,
+      "serialized_interval_identical": true,
+      "interval_sha256": "99b47da21fc3b19fe3bf6d00f4cd8ce9bcd4dad6a097552aab54800253a76c7b",
+      "before_seconds": 77.113,
+      "after_seconds": 7.222,
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "R_version": "R version 4.5.2 (2025-10-31)"
+    },
+    {
+      "problem": "regression",
+      "rows": 1000000,
+      "draws": 1000,
+      "whole_interval_object_identical": true,
+      "serialized_interval_identical": true,
+      "interval_sha256": "d099cb6d6c354f577a4fde311a63e57a3c9f0ade5c572e9068059e30a27bb562",
+      "before_seconds": 135.608,
+      "after_seconds": 28.883,
+      "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+      "R_version": "R version 4.5.2 (2025-10-31)"
+    },
+    {
+      "problem": "multiclass_brier",
+      "rows": 1000000,
+      "requested_draws": 1000,
+      "whole_interval_object_identical": null,
+      "serialized_interval_identical": null,
+      "reason": "The before process timed out at 180 seconds without returning an interval object. Candidate completed, but this pair has no exact whole-object parity result."
+    }
+  ],
+  "initial_cohort_session": [
     "R version 4.5.2 (2025-10-31)",
     "Platform: x86_64-pc-linux-gnu",
     "Running under: Ubuntu 26.04.1 LTS",

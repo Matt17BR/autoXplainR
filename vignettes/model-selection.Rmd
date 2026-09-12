@@ -223,6 +223,17 @@ case-level CV predictions; fold scores, candidate settings and selection remain
 available. Use the default `TRUE` when you need to inspect individual CV errors.
 This control does not reduce fitting rows or final evaluation rows.
 
+The measured million-row regression control used a smaller search: one
+regularized and one boosting configuration, two CV folds and `retain_oof = FALSE`.
+One call fitted all million training rows, scored all 20,000 independent
+evaluation rows and wrote a 3,891,782-byte summary report in 81.055 seconds.
+Default explanations used 5,000 rows; all 1,000 paired bootstrap draws used the
+full evaluation set. The shallow selected model had RMSE 1.6835. A separate
+three-configuration search selected 600 boosting rounds at depth 6 and reached
+RMSE 0.7491 in 109.012 seconds with explanations disabled. These single-host
+results measure different workloads; see the
+[measurements](https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md).
+
 Large result checks write complete model and data state to a temporary file,
 then remove it. The temporary file system needs space for that serialization.
 If you need disk-backed temporary storage, set `TMPDIR` to an existing, writable
@@ -245,8 +256,8 @@ PDP has its separate `sample_size` control: its curve and support distribution
 can use different row counts, both recorded in the result.
 
 Large reports store compressed column values and unpack them offline as needed.
-Compression does not remove exported values. Scatter plots cap displayed points
-at 1,500, but filters and record lookup use all exported rows. Exporting every
+Compression does not remove exported values. The Data tab's linked scatter shows
+at most 1,500 points; filters and record lookup use all exported rows. Exporting every
 row can still create a large file and considerable browser memory use; leave
 `report_data = "summary"` unless individual records serve a concrete purpose.
 

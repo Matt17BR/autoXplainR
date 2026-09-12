@@ -16,6 +16,11 @@
       "series": "candidate-v4",
       "source_manifest": "candidate-source-v4-manifest.json",
       "manifest_sha256": "d95d87b3db43789f0cecb29c8942459b3c225a3ac4388f795ed61f5e611daa87"
+    },
+    {
+      "series": "candidate-v5",
+      "source_manifest": "candidate-source-v5-manifest.json",
+      "manifest_sha256": "4553dc181ac538dd26a75e741788c58807761384f5ae314f2509e0454657fff9"
     }
   ],
   "runs": [
@@ -36,6 +41,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": null,
       "saved_bytes": null,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": "max(abs(rowSums(prediction) - 1)) < 1e-08 is not TRUE",
       "last_stage": "caught_error",
       "metrics": null,
@@ -46,6 +54,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -69,6 +78,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 26381524,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -101,6 +113,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -124,6 +137,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 112053396,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -156,6 +172,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -179,6 +196,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 970841120,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -211,6 +231,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.9219974637545261,
+        "regularized_model": 0.9449464198032337,
+        "simple_baseline": 1.253318740909807
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -250,6 +275,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": null,
       "saved_bytes": null,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": "No method asJSON S3 class: table",
       "last_stage": "caught_error",
       "metrics": null,
@@ -260,6 +288,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -283,6 +312,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 27905597,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -312,6 +344,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -335,6 +368,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 128991745,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -367,6 +403,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -390,6 +427,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 1140795555,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -422,6 +462,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.0699032756716819,
+        "regularized_model": 0.07116964040008336,
+        "simple_baseline": 0.10385933526256297
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -458,6 +503,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 24981112,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -487,6 +535,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -510,6 +559,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 25148456,
+      "report_bytes": 11251957,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -542,6 +594,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -565,6 +618,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 4,
       "saved_bytes": 39357524,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -637,6 +693,12 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.6987535679543357,
+        "tree_model": 1.7941026268530522,
+        "linear_model": 2.0348330055136294,
+        "simple_baseline": 2.520299398307012
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -673,6 +735,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 104717029,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -705,6 +770,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -728,6 +794,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 903015420,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -760,6 +829,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.6835292139974354,
+        "regularized_model": 2.0371672556822475,
+        "simple_baseline": 2.520283209082887
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -796,6 +870,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 135180197,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -825,6 +902,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -848,6 +926,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 568919930,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -880,6 +961,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -903,6 +985,9 @@
       "peak_rss_source": "last recorded VmHWM; lower bound if interrupted",
       "models": null,
       "saved_bytes": null,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "fit_regularized_learner",
       "metrics": null,
@@ -913,6 +998,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "baseline",
@@ -936,6 +1022,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 871494857,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -968,6 +1057,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.06869399741787643,
+        "regularized_model": 0.07116964040008336,
+        "simple_baseline": 0.10385933526256297
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1004,6 +1098,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 22433567,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1036,6 +1133,7 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "candidate-v1",
@@ -1059,6 +1157,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 654947875,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1091,6 +1192,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.6835292139974354,
+        "regularized_model": 2.0371672556822475,
+        "simple_baseline": 2.520283209082887
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1127,6 +1233,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 705542148,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1159,6 +1268,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.9050905588870083,
+        "regularized_model": 0.9449464198032337,
+        "simple_baseline": 1.253318740909807
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1198,6 +1312,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 4,
       "saved_bytes": 41768184,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1237,6 +1354,12 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.7474925059418155,
+        "tree_model": 1.7941026268530522,
+        "linear_model": 2.0348330055136294,
+        "simple_baseline": 2.520299398307012
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1273,6 +1396,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 22836171,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1305,6 +1431,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.910106534769578,
+        "regularized_model": 2.035263311369853,
+        "simple_baseline": 2.520299398307012
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1341,6 +1472,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 657678928,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1373,6 +1507,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 0.7490653528282153,
+        "regularized_model": 2.0371672556822475,
+        "simple_baseline": 2.520283209082887
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1409,6 +1548,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": 3,
       "saved_bytes": 412320401,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": null,
       "last_stage": "save_model",
       "metrics": [
@@ -1441,6 +1583,11 @@
       "cold_replay_status": "passed",
       "cold_replay_saved_raw_probe_rows": 64,
       "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.7453599719034432,
+        "regularized_model": 2.13673700379023,
+        "simple_baseline": 2.61801540810784
+      },
       "cold_replay_full_prediction_vectors": "not saved by the original runner",
       "cold_replay_original_result_fields": {
         "main_model": {
@@ -1477,6 +1624,9 @@
       "peak_rss_source": "process peak from /usr/bin/time",
       "models": null,
       "saved_bytes": null,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
       "error": "cannot allocate buffer",
       "last_stage": "caught_error",
       "metrics": null,
@@ -1487,11 +1637,193 @@
       "cold_replay_status": null,
       "cold_replay_saved_raw_probe_rows": null,
       "cold_replay_loss_rows_per_model": null,
+      "cold_replay_verified_loss_values": null,
       "cold_replay_full_prediction_vectors": null,
       "cold_replay_original_result_fields": null,
       "series": "candidate-v4",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v4/wide-1000000-controlled-fit",
       "library_role": "candidate-v4"
+    },
+    {
+      "run": "regression-1000000-controlled-full",
+      "problem": "regression",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_full",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 81.055,
+      "wall_seconds": 83.2075943939999,
+      "peak_rss_kib": 2455048,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 656589190,
+      "report_bytes": 3891782,
+      "explanation_sampling": {
+        "rows_available": 20000,
+        "rows_used": 5000,
+        "sampled": true,
+        "method": "Uniform sample without replacement",
+        "seed": 824
+      },
+      "explanation_details": {
+        "config": {
+          "top_features": 8,
+          "n_repeats": 20,
+          "max_models": 5,
+          "explanation_rows": 5000
+        },
+        "importance_models": [
+          "main_model",
+          "regularized_model",
+          "simple_baseline"
+        ],
+        "primary_effect_features": [
+          "x1",
+          "x2",
+          "x5",
+          "x3",
+          "x4",
+          "x6",
+          "x7",
+          "x8"
+        ],
+        "effect_failures": []
+      },
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6835,
+          "recorded_loss": 1.6835,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0372,
+          "recorded_loss": 2.0372,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.6835292139974354,
+        "regularized_model": 2.0371672556822475,
+        "simple_baseline": 2.520283209082887
+      },
+      "cold_replay_full_prediction_vectors": "passed",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
+      "series": "candidate-v5",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full",
+      "library_role": "candidate-v5"
+    },
+    {
+      "run": "wide-1000000-controlled-fit",
+      "problem": "wide",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 303.841,
+      "wall_seconds": 310.88339126700157,
+      "peak_rss_kib": 12261144,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 3341727020,
+      "report_bytes": null,
+      "explanation_sampling": null,
+      "explanation_details": null,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.7327,
+          "recorded_loss": 1.7327,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.1438,
+          "recorded_loss": 2.1438,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.6181,
+          "recorded_loss": 2.6181,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_verified_loss_values": {
+        "main_model": 1.7327060312215579,
+        "regularized_model": 2.143833989787595,
+        "simple_baseline": 2.618056467149924
+      },
+      "cold_replay_full_prediction_vectors": "passed",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
+      "series": "candidate-v5",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/wide-1000000-controlled-fit",
+      "library_role": "candidate-v5"
     }
   ]
 }

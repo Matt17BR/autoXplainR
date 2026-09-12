@@ -28,9 +28,10 @@ for (variant in c("baseline", "candidate", "candidate_binary_guard")) {
         stringsAsFactors = FALSE
       )
     }
-    stopifnot(file.copy(file.path(directory, "session-info.txt"),
-      file.path(destination, paste0("recommended-", variant, "-", scenario, "-session.txt")),
-      overwrite = TRUE))
+    # Keep raw cache logs unchanged; portable copies use LF and no trailing space.
+    session_lines <- readLines(file.path(directory, "session-info.txt"), warn = FALSE)
+    writeLines(sub("[[:blank:]]+$", "", session_lines),
+      file.path(destination, paste0("recommended-", variant, "-", scenario, "-session.txt")))
   }
 }
 records <- do.call(rbind, records)

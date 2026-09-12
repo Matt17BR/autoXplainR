@@ -1,0 +1,1004 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Cold process compares all original complete model prediction vectors",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "Full public default report completed",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "Aggregate data export includes all source rows",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "Data explorer exports summaries without individual data rows",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "raw: complete training/evaluation profile populations",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "raw/outcome/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/outcome/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x1/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x1/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x2/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x2/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x3/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 979906,
+        "n_missing": 20094,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x3/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 19626,
+        "n_missing": 374,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x4/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x4/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x5/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x5/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x6/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x6/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x7/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x7/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x8/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 980131,
+        "n_missing": 19869,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x8/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 19597,
+        "n_missing": 403,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x9/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x9/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x10/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x10/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x11/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x11/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x12/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x12/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x13/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x13/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x14/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x14/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x15/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x15/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x16/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x16/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x17/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x17/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x18/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x18/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x19/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x19/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x20/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "raw/x20/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed: complete training/evaluation profile populations",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "processed/outcome/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/outcome/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x1/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x1/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x2/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x2/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x3/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x3/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x4/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x4/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x5/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x5/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x6/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x6/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x7/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x7/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x8/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x8/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x9/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x9/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x10/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x10/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x11/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x11/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x12/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x12/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x13/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x13/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x14/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x14/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x15/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x15/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x16/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x16/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x17/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x17/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x18/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x18/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x19/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x19/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x20/training: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 1000000,
+        "n_used": 1000000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "processed/x20/evaluation: every univariate row counted",
+      "passed": true,
+      "evidence": {
+        "n_total": 20000,
+        "n_used": 20000,
+        "n_missing": 0,
+        "n_nonfinite": 0
+      }
+    },
+    {
+      "name": "main_model: complete official prediction and chart-summary populations",
+      "passed": true,
+      "evidence": {
+        "density": 20000,
+        "residual_histogram": 20000,
+        "bias": 20000
+      }
+    },
+    {
+      "name": "main_model: exact full-holdout RMSE in HTML",
+      "passed": true,
+      "evidence": [
+        1.6835292139974354,
+        1.6835292139974354
+      ]
+    },
+    {
+      "name": "regularized_model: complete official prediction and chart-summary populations",
+      "passed": true,
+      "evidence": {
+        "density": 20000,
+        "residual_histogram": 20000,
+        "bias": 20000
+      }
+    },
+    {
+      "name": "regularized_model: exact full-holdout RMSE in HTML",
+      "passed": true,
+      "evidence": [
+        2.0371672556822475,
+        2.0371672556822475
+      ]
+    },
+    {
+      "name": "simple_baseline: complete official prediction and chart-summary populations",
+      "passed": true,
+      "evidence": {
+        "density": 20000,
+        "residual_histogram": 20000,
+        "bias": 20000
+      }
+    },
+    {
+      "name": "simple_baseline: exact full-holdout RMSE in HTML",
+      "passed": true,
+      "evidence": [
+        2.520283209082887,
+        2.520283209082887
+      ]
+    },
+    {
+      "name": "Every retained model is present in the report",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "Default explanation settings and actual sampled rows retained",
+      "passed": true,
+      "evidence": null
+    },
+    {
+      "name": "All full-evaluation bootstrap draws executed",
+      "passed": true,
+      "evidence": null
+    }
+  ],
+  "models": [
+    {
+      "model_id": "main_model",
+      "evaluation_rows": 20000,
+      "rmse": 1.6835292139974354,
+      "embedded_case_rows": 0
+    },
+    {
+      "model_id": "regularized_model",
+      "evaluation_rows": 20000,
+      "rmse": 2.0371672556822475,
+      "embedded_case_rows": 0
+    },
+    {
+      "model_id": "simple_baseline",
+      "evaluation_rows": 20000,
+      "rmse": 2.520283209082887,
+      "embedded_case_rows": 0
+    }
+  ],
+  "data_manifest": {
+    "mode": "summary",
+    "columns": [
+      "outcome",
+      "x1",
+      "x2",
+      "x3",
+      "x4",
+      "x5",
+      "x6",
+      "x7",
+      "x8",
+      "x9",
+      "x10",
+      "x11",
+      "x12",
+      "x13",
+      "x14",
+      "x15",
+      "x16",
+      "x17",
+      "x18",
+      "x19",
+      "x20"
+    ],
+    "individual_records": 0,
+    "full_rows": 1020000,
+    "sampled": false,
+    "sampling": "No individual records exported",
+    "seed": null,
+    "raw_status": "available",
+    "training_available": true,
+    "scope": "Raw supplied rows and processed retained rows are distinct populations.",
+    "privacy": "Aggregate output is not anonymization. Anyone receiving row-mode HTML receives every embedded record."
+  },
+  "data_pair_sampling": {
+    "max_rows": 10000,
+    "seed": 824,
+    "method": "Uniform sample without replacement per partition; shared source rows across raw and processed views where retained",
+    "scope": "Relationship counts, conditional summaries and associations describe the analyzed sample. Individual-column summaries use all rows. Rare groups may be missed by sampling."
+  },
+  "html_sha256": "665f438dc288e3d99c02ea8916a640fc1f22d61c25c9eb8f5c3bd54a6e12b257",
+  "scope": "Independent Python decoding of the exact one-call HTML, compared with original full-row cold prediction losses and traced original-process scope. Browser interaction is checked separately."
+}

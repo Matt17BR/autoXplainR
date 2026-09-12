@@ -1,9 +1,8 @@
 # Development priorities
 
-AutoXplainR's purpose is a short, inspectable path from a tabular prediction
-question to a baseline comparison, fitted explanations and a report. Existing
-packages already provide the underlying estimators and much of the reporting
-infrastructure. Integration and reader comprehension are hypotheses to test.
+AutoXplainR should make it easy to fit models, see where they fail and understand
+a report. It uses established estimators. Its value depends on whether people
+can get useful answers from the workflow.
 
 ## 0.6.0: make exploration useful
 
@@ -39,6 +38,23 @@ tracks the repairs and rejected intermediate designs.
 See the [release checklist](.github/RELEASE_CHECKLIST.md). A participant study
 can add independent evidence, but ordinary task acceptance must happen now.
 
+## 0.7.0: measured scale and model quality
+
+The [scalability work](validation/scalability/findings.md) separates fitting,
+scoring, explanations, export and browser costs. It includes million-row
+training problems, complete holdout checks, saved-model reloads, wider inputs
+and comparisons with stronger model configurations. Exact computational repairs
+are checked separately from changes to model families, solver policies or
+explanation samples. Supported examples have measured budgets; they do not
+establish a universal capacity for every learner or dataset.
+
+A two-configuration, two-fold search on one million simulated training rows
+completed with explanations and a summary report in 81.055 seconds. Scores and
+1,000 bootstrap draws used all 20,000 evaluation rows; explanations used 5,000.
+A separate fit-only search reached RMSE 0.7491 with a larger boosting grid.
+The wide million-row fitting case also completed, but required nearly 12 GiB
+peak memory and a 3.34 GB saved result. Those costs still constrain practical use.
+
 ## Next: interoperability and demonstrated usefulness
 
 1. **Framework-specific adapters.** `evaluate_models()` accepts native models
@@ -53,10 +69,13 @@ can add independent evidence, but ordinary task acceptance must happen now.
 3. **Report accessibility.** Exercise keyboard order, contrast, table semantics,
    mobile layouts, print output and screen readers. Automated checks complement
    manual review; attractive screenshots do not establish accessibility.
-4. **Compatibility and performance.** Extend the retained schema and raw-data
-   tests with wide/tall memory profiles and old-result migration fixtures.
-   Report preparation and benchmarking have different scopes; test their call
-   counts and resource costs separately before adding parallel execution.
+4. **Compatibility and performance.** Extend the measured workloads to more
+   real datasets, hardware and evaluation sizes, alongside old-result migration
+   fixtures. Keep fitting, interval calculation, report export and browser
+   measurements separate. Establish their resource costs before adding parallel
+   execution. Assess a compact inference export separately from the evidence-rich
+   result, with native serialization sizes and cold prediction checks; R object
+   sizes alone cannot establish deployment memory requirements.
 
 ## Deferred until the current workflow meets those criteria
 

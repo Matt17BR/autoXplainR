@@ -23,3 +23,9 @@ bank_marketing,candidate,forest,21.143
 bank_marketing,candidate,linear,0.237
 bank_marketing,candidate,regularized,6.56
 bank_marketing,candidate,tree,0.298
+bank_marketing,candidate_binary_guard,additive,162.712
+bank_marketing,candidate_binary_guard,boosting,3.777
+bank_marketing,candidate_binary_guard,forest,21.799
+bank_marketing,candidate_binary_guard,linear,0.258
+bank_marketing,candidate_binary_guard,regularized,6.752
+bank_marketing,candidate_binary_guard,tree,0.485

@@ -42,6 +42,24 @@ procedure. Its changing smoothing criterion can cycle. See the
 [mgcv convergence explanation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gam.convergence.html)
 and [native implementation](https://github.com/cran/mgcv/blob/master/R/bam.r).
 
+The final binary-policy replay took **202.443 seconds**, compared with the
+published baseline's 209.985 seconds. All **30 configurations and 150 folds**
+succeeded. All 150 validation scores, the 30 configuration scores and selection
+outcomes, and the seven retained models' complete evaluation prediction arrays
+are identical to the published run. All five additive configurations were
+planned with GAM, and the retained additive model used GAM. These checks are
+recorded in `bank-policy-parity.json`; the initial policy's four failed folds
+remain in the evidence tables. This restores useful alternatives with a
+comparable runtime; one run does not establish a binary speed improvement.
+
+The Gaussian route is unaffected by this policy revision. A refit from the final
+installed snapshot reproduced the saved Friedman additive model's native fitted
+fields, effective parameters and training predictions exactly. The wrapper's
+task and policy-rationale metadata changed intentionally. The 65.154-second
+Friedman result remains its original full-search measurement, rather than a
+second timing of the final snapshot. `gaussian-policy-parity.json` records the
+scope of that separate check.
+
 This is one sequential run per case and version on an Intel Core Ultra 9 185H,
 Ubuntu 26.04.1, R 4.5.2 and OpenBLAS 0.3.32, with native thread counts set to one.
 Saved models record the same native versions in both runs: mgcv 1.9-4,
@@ -51,7 +69,10 @@ manifests record that provenance. There are no timing repetitions or universal
 speed claims. The older 532.5-second Friedman observation is a separate run;
 412.198 seconds is the paired baseline here.
 
-Both Bank runs warn about 26 coincident training/evaluation records. Source row
+Portable session-text copies use LF line endings and omit trailing whitespace.
+The raw session logs in the cache remain unchanged.
+
+All three Bank runs warn about 26 coincident training/evaluation records. Source row
 indices are disjoint, but repeated customers cannot be ruled out because customer
 identifiers are absent. This contact-row split does not establish independence
 between customers or future-period performance. The warning and original split
@@ -225,6 +246,8 @@ partway through. Use an external time limit and record timeouts as failures.
    run `python3 validation/scalability/search/run-recommended.py candidate_binary_guard bank_marketing`.
    This uses a separate directory and manifests. `verify-gaussian-policy.R`
    checks the unaffected Gaussian route against its saved native fit;
+   `verify-bank-policy.R` compares all saved validation scores and prediction
+   arrays with the published Bank run;
    `summarize-recommended-environment.R` reads the engine versions captured in
    all retained models. Neither script selects settings from evaluation scores.
 

@@ -1,0 +1,22 @@
+[
+  {
+    "case": "bank_marketing",
+    "variant": "candidate_binary_guard",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 204.74702545900072,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-candidate_binary_guard-5a5258745255.R",
+      "bank_marketing",
+      "candidate_binary_guard"
+    ],
+    "script_sha256": "5a5258745255170290a8a6fe6a6153566763c06e1dc928e3de2e65fcee38b9c8",
+    "native_threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  }
+]

@@ -8,6 +8,8 @@ million-row problem or every optional learner is practical.
 
 | Workload | Published 0.6.2 | Candidate | Scope |
 | --- | ---: | ---: | --- |
+| Recommended search on nonlinear regression, 1,200 rows and 30 inputs | 412.198 s | 65.154 s | All 30 configurations successful; same selected model, complete primary holdout predictions and RMSE |
+| Recommended search on Bank Marketing | 209.985 s | 202.443 s | Final binary policy; all 30 configurations and 150 folds successful; every retained holdout prediction unchanged |
 | Million-row nonlinear regression, two configurations and two folds | 145.331 s | 33.596 s | Fitting, tuning and scoring; explanations disabled |
 | Peak process memory for that workflow | 4,911,800 KiB | 2,814,432 KiB | Whole fresh R process, including verification and serialization |
 | Uncompressed saved result for that workflow | 903,015,420 bytes | 654,947,875 bytes | Complete retained result, including raw and processed data |
@@ -20,12 +22,27 @@ million-row problem or every optional learner is practical.
 | Wide 100,000-row workflow, two configurations and two folds | 126.832 s | 29.549 s | 128 numeric inputs plus factors with 1,000 and 5 levels; native category representation changes boosting |
 | Peak process memory for that wide workflow | 6,688,820 KiB | 2,368,584 KiB | Whole fresh R process |
 | Held-out RMSE for its primary model | 1.8239 | 1.7454 | All 20,000 fixed independent evaluation rows |
-| Wide million-row workflow under 420 s and 12 GiB address space | Timed out before returning a result | Failed during final fingerprint serialization | Intermediate candidate; complete acceptance awaits the fingerprint repair and full rerun |
-| Larger fixed grid on 10,000 nonlinear training rows | Not run | RMSE 0.9101; 4.129 s | Three configurations, two folds; CV chose 300 boosting rounds at depth 4 |
-| Same larger grid on one million nonlinear training rows | Not run | RMSE 0.7491; 109.012 s | CV chose 600 rounds at depth 6; full fitting and all 20,000 evaluation rows |
+| Initial wide million-row attempt under 420 s and 12 GiB address space | Timed out before returning a result | Failed during final fingerprint serialization | Both failures preserved; no accepted scores from those runs |
+| Wide million-row fitting rerun under the same bounds | No completed result | 303.841 s; RMSE 1.7327 | Explanations disabled; both configurations and full refits successful, all original holdout vectors verified after cold reload |
+| Peak process memory / uncompressed saved result for that rerun | Not available | 12,261,144 KiB / 3,341,727,020 bytes | Complete workflow remains expensive in memory and retained storage |
+| Larger fixed grid on 10,000 nonlinear training rows | Not run | RMSE 0.9101; 4.129 s | Fit-only; three configurations, two folds; CV chose 300 boosting rounds at depth 4 |
+| Same larger grid on one million nonlinear training rows | Not run | RMSE 0.7491; 109.012 s | Fit-only; CV chose 600 rounds at depth 6; full fitting and all 20,000 evaluation rows |
 | Ordinary core search on 10,000 nonlinear training rows | RMSE 1.6988; 49.104 s | RMSE 0.7475; 82.588 s | Fit-only, explanations disabled; same 20,000-row holdout; larger neural iteration budget |
+| One-call million-row regression with default report and explanations | Not run at this size | 81.055 s; 3,891,782-byte HTML | Two-configuration fitting control, full 20,000-row evaluation, 5,000 explanation rows, 1,000 full-evaluation bootstrap draws |
 | 200,100 explicitly exported records, three numeric columns | 121.66 MB, 85.319 s | 17.56 MB, 5.064 s | Full HTML rendering from the same supplied model |
 | Wide report, 500 inputs and all 1,200 records | 59.88 MB, 16.277 s | 15.85 MB, 15.094 s | Full HTML rendering from the same saved fit |
+
+The recommended searches use fixed training and evaluation fixtures and the same
+30-configuration budget. The regression improvement comes largely from additive
+fold fitting and scoring, which fell from 368.947 to 30.530 seconds. Its timed
+candidate predates the final binary-policy guard; a separate replay verifies that
+the guard leaves Gaussian routing and the native fitted model unchanged. The
+final Bank run uses the coherent release-candidate installation and restores GAM
+for all five smaller binary additive configurations. Every fold score, candidate
+score, selection and complete retained holdout prediction agrees with 0.6.2.
+Its seven-second difference is a single host observation, not strong evidence of
+a general binary-search speedup. The rejected 131.370-second Bank run lost three
+configurations and remains explicitly rejected in the [search evidence](search/README.md).
 
 The million-row fitting comparison uses the immutable `candidate-source-v1`
 installation. It fits all one million training rows and scores a separately
@@ -70,8 +87,20 @@ the regularized refit, and advanced through evaluation, but failed allocating
 the final serialized fingerprint buffer. Final per-family statuses were not saved.
 Its process ended after 271.114 seconds at a measured peak of 12,257,676 KiB.
 Neither run returned a public result, so neither has an accepted holdout score
-or cold replay. The exact fingerprint allocation is being repaired; the full
-workflow must be repeated under the same bounds before claiming success.
+or cold replay. Both failed attempts remain in the measurement index.
+
+The `candidate-source-v5` fitting rerun passed under the same 420-second and
+12 GiB address-space limits. The public call took 303.841 seconds and the whole
+process 310.883 seconds. Both configurations and both final refits succeeded,
+retaining boosting, regularized regression and the intercept baseline. Actual
+native counts establish 1,000,000 training rows for both learned models.
+Their holdout RMSEs were 1.732706 and 2.143834, versus 2.618056 for the baseline.
+A fresh process compared every value in every original 20,000-row prediction
+vector, including the alternate regularized model, and checked factor reordering
+and tested missing/new categories. This completes the bounded wide fitting workflow;
+it remains costly: peak RSS was 12,261,144 KiB and the saved result was
+3,341,727,020 bytes. The fingerprint repair removes the extra contiguous buffer,
+not the data and matrix costs of fitting the wide problem.
 
 The larger regression grid was declared before either evaluation. It adds
 300-round/depth-4 and 600-round/depth-6 boosting configurations at learning rate
@@ -98,6 +127,27 @@ original full probability matrices were not saved. The revised runner saves all
 models' complete holdout vectors before serialization for the final wide and
 one-call runs. Its small independent harness control passed a cold comparison
 and rejected one changed alternate-model probability outside the saved probes.
+
+The final one-call regression workflow used `candidate-source-v5`, two
+regularized/boosting configurations, two CV folds and `retain_oof = FALSE`.
+It completed under 420 seconds and 12 GiB. It fitted the million-row control,
+evaluated all 20,000 independent rows and produced the default report in one
+public call: 81.055 seconds,
+2,455,048 KiB peak RSS, a 656,589,190-byte result and 3,891,782-byte HTML.
+The report retained three models' importance and eight primary feature effects
+without failed effects. Explanation calculations used 5,000 recorded evaluation
+rows, while scores and all 1,000 paired bootstrap draws used the full evaluation
+sample. Data distributions counted every training and evaluation row;
+relationships used the disclosed 10,000-row limit per partition.
+
+A cold process matched every original prediction value for all three models.
+Independent Python decoding of the actual HTML passed 99 checks, including
+all 84 column/partition distribution totals, complete diagnostic summary counts
+and exact RMSEs against those original vectors. The report's default summary
+export embeds no individual records. This establishes the complete report
+workflow on the stated control, whose shallow fit still has RMSE 1.683529;
+the separate larger grid's 0.749065 is not attributed to this report run.
+Browser interaction is reviewed separately on the exact generated HTML.
 
 The report comparisons isolate export and browser work. Their large numeric
 fixture uses a supplied linear model fitted to 100 rows. It is separate from
@@ -139,6 +189,16 @@ and an 8 MB outcome vector. Forest and MARS calls had the same avoidable payload
 and now retain executable settings with symbolic input arguments. The neural
 adapter removes its duplicated encoded inputs and outcomes in the same way.
 
+Large fingerprints also avoid another contiguous serialization buffer. They
+write and hash the complete version-2 serialization through temporary storage,
+preserving the previous identity exactly. Under a 512 MiB address-space cap,
+the old function could not allocate its buffer; the repair hashed the same
+512 MiB serialization with 198,896 KiB peak process memory. An independent
+byte-level hash agreed, including an independently changed final value. This
+removes a particular allocation failure, while still requiring temporary space
+and time to process every byte. The [fingerprint evidence](fingerprinting/README.md)
+separates that targeted check from the complete wide-workflow acceptance.
+
 Reports store columns once, share exactly identical raw and processed values,
 compress large blocks and decode columns locally as needed. The wide report's
 largest gain is file size and allocation; its rendering time improved modestly.
@@ -156,11 +216,27 @@ The review also found repeated work in paired score intervals. Each bootstrap
 draw rebuilt row lists and recalculated the same individual losses. Caching
 those losses and drawing observation indices directly preserves the original
 resampling and arithmetic. Independent literal-row and frozen-function checks
-agree exactly. On 20,000 evaluation rows, the unchanged 1,000-draw eight-class
-Brier calculation fell from 5.183 to 0.838 seconds; regression fell from 1.039 to
-0.671 seconds. The Brier process used slightly more peak memory. Larger cases
-and the final one-call report are still pending; see the
-[interval computation evidence](uncertainty/README.md).
+agree exactly. The larger checks use the same final candidate installation for
+both variants, substituting only the old bootstrap function for the before run.
+Every completed call still uses 1,000 draws and every evaluation row:
+
+| Evaluation rows and metric | Before | After | Complete paired output |
+| --- | ---: | ---: | --- |
+| 200,000, regression RMSE | 18.497 s | 6.549 s | Exactly identical |
+| 200,000, eight-class Brier | 77.113 s | 7.222 s | Exactly identical |
+| 1,000,000, regression RMSE | 135.608 s | 28.883 s | Exactly identical |
+| 1,000,000, eight-class Brier | Stopped at 180 s process limit | 34.852 s | Unavailable; before returned no interval |
+
+Completed timings cover the public interval call, including context and
+prediction validation. The timeout is the whole-process bound, including 11.9
+seconds of preparation; it is not a completed bootstrap time. The last candidate
+took 47.478 seconds for its whole process. No exact million-row Brier pair parity
+is claimed. The completed pairs preserve every draw, endpoint and note, and their
+saved RDS bytes also match. Million-row regression peak RSS fell from 613,564 to
+507,860 KiB; Brier at 200,000 rows used slightly more peak memory. These results
+do not establish a general memory reduction or complete reporting time. See the
+[interval computation evidence](uncertainty/README.md) for source bindings,
+the earlier 20,000-row checks and the preserved timeout.
 
 ## Choices that can change results
 
@@ -177,8 +253,8 @@ overrides. The [solver comparison](search/README.md) retains counterexamples,
 including slower BAM fits and materially different discrete-BAM predictions.
 
 Default report explanations use a bounded uniform evaluation sample. Pairwise
-data summaries have a separate sample limit. Model scores and univariate
-summaries still use all available rows. A constructed ten-row rare cluster was
+data summaries have a separate sample limit. Official model scores and unfiltered
+individual-column summaries use their full partitions. A constructed ten-row rare cluster was
 missed by seven of thirty 10,000-row samples; exact counts still showed it.
 The [data study](data/README.md) records this limitation and the all-row control.
 PDP retains a separate curve-row limit, independently of its support sample.
@@ -215,7 +291,7 @@ and complete 20,000-row holdout losses. The uncompressed
 result grew from 39.36 to 41.77 MB because more configurations now have valid
 retained out-of-fold predictions, despite the smaller native fitting calls.
 
-## Independent review and remaining acceptance
+## Independent review and release checks
 
 The [independent review](independent-review/README.md) challenged sampling,
 prediction types, search/refit consistency and retained explanation scope.
@@ -229,8 +305,7 @@ before comparing the remaining metadata. Binary case
 losses have an explicitly verified correction to match CV clipping and
 arithmetic; that intended repair is separate from the execution optimization.
 
-Outstanding acceptance includes the final recommended-search timings,
-remaining large fitting cases, the complete three-browser CI gate, and the
-complete source/archive and publication gates. The ordinary result deliberately
+Browser, archive and publication checks are tracked separately in the
+[release verification](../release-0.7.0.md). The ordinary result deliberately
 retains training and evaluation evidence; it is larger than an inference-only
 model. Its memory and artifact sizes remain part of the practical limit.

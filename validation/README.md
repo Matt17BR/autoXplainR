@@ -2,8 +2,9 @@
 
 The [scalability work](scalability/README.md) separates recommended-search cost,
 report storage and browser behavior, and fits with a million training rows.
-Each measurement identifies its source and workload; the work record states
-which release gates remain open.
+Each measurement identifies its source and workload. The
+[0.7.0 release record](release-0.7.0.md) tracks archive acceptance, executed report
+tasks and publication status.
 
 The [harder-modeling comparison](stress-modeling/findings.md) tests predictive
 quality against independently fitted reference models. The accompanying

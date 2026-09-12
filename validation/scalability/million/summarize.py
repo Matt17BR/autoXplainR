@@ -69,6 +69,9 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
         "peak_rss_kib": int(match.group(1)) if match else supervisor.get("highest_recorded_rss_kib"),
         "peak_rss_source": "process peak from /usr/bin/time" if match else "last recorded VmHWM; lower bound if interrupted",
         "models": result.get("models"), "saved_bytes": result.get("saved_bytes"),
+        "report_bytes": result.get("report_bytes"),
+        "explanation_sampling": result.get("explanation_sampling"),
+        "explanation_details": result.get("explanation_details"),
         "error": result.get("message"), "last_stage": (supervisor.get("last_stage") or {}).get("stage"),
         "metrics": result.get("metrics"),
         "configurations_attempted": result.get("configurations_attempted", len(candidates) if candidates else None),
@@ -78,6 +81,7 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
         "cold_replay_status": cold.get("status"),
         "cold_replay_saved_raw_probe_rows": cold.get("saved_probe_rows_per_model"),
         "cold_replay_loss_rows_per_model": cold.get("full_holdout_rows_per_model"),
+        "cold_replay_verified_loss_values": cold.get("losses"),
         "cold_replay_full_prediction_vectors": cold.get("full_prediction_vector_check",
             "not saved by the original runner" if cold else None),
         "cold_replay_original_result_fields": cold.get("original_result_prediction_checks"),
@@ -86,7 +90,7 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
 (args.directory / "stage-profiles.json").write_text(json.dumps(stage_profiles, indent=2) + "\n")
 if rows:
     with (args.directory / "index.csv").open("w") as file:
-        fields = [key for key in rows[0] if key not in {"metrics", "configurations_failed", "families_resampling_failed", "families_refit_failed", "cold_replay_original_result_fields"}]
+        fields = [key for key in rows[0] if key not in {"metrics", "configurations_failed", "families_resampling_failed", "families_refit_failed", "cold_replay_original_result_fields", "cold_replay_verified_loss_values", "explanation_sampling", "explanation_details"}]
         writer = csv.DictWriter(file, fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)

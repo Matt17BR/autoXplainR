@@ -89,6 +89,16 @@ Monte Carlo settings are recorded. The original one-call `controlled_full`
 benchmark uses the package's default report settings instead. Schedule and bound
 large replay/report processes just as you would fitting runs.
 
+For the final `controlled_full` case, decode the HTML after the cold check:
+
+```sh
+python3 validation/scalability/million/check-final-report.py /path/to/evidence/case
+```
+
+This compares the actual report's full-row counts and scores with the original
+predictions verified by the cold process. Browser interaction remains a separate
+check of that same HTML file.
+
 `render-saved.R` provides a separate review report with six top features, up to
 four models, five permutation repeats, 5,000 explanation rows and 1,000 exported
 data rows. It records the chosen limits beside the HTML. That report helps
@@ -231,8 +241,19 @@ through evaluation, then failed while allocating the final fingerprint
 serialization buffer. Final per-family statuses were not saved.
 The process ended after 271.114 seconds with peak RSS 12,257,676 KiB.
 No complete result or accepted holdout score exists for that failed run.
-The full wide workflow remains pending a bounded-memory fingerprint repair
-and a fresh run under the same limits.
+The failed attempt remains evidence; its status is not overwritten by a rerun.
+
+After the exact fingerprint repair, the complete wide million-row workflow
+finished under the same 420-second and 12 GiB limits. The public call took
+303.841 seconds and the process 310.883 seconds, retaining all three models with
+no failed configurations or refits. The actual final boosting matrix had
+1,000,000 rows and 130 columns, and native regularized `nobs` was 1,000,000.
+Boosting RMSE was 1.732706, regularized RMSE 2.143834 and baseline RMSE 2.618056.
+The cold process compared every original 20,000-row prediction vector, including
+the alternate model, and passed the reordered-factor and tested new/missing
+input checks. Peak RSS was still 12,261,144 KiB and the uncompressed result
+3,341,727,020 bytes. Completion within this stated budget is useful evidence;
+it does not make the wide workflow inexpensive on a smaller machine.
 
 The declared larger regression grid completed at both training sizes. At
 10,000 rows, the existing one-standard-error selection rule preferred 300
@@ -246,10 +267,31 @@ Both larger-grid results passed cold checks of 64 saved raw probes per model
 and full 20,000-row losses. Their grid was fixed before observing either
 holdout result; it is a capacity experiment separate from the timing control.
 
-The raw evidence is kept outside the source package at
-`~/.cache/autoxplain-scale-0.7.0/`. Findings and final before/after measurements
-will be added after the staged runs finish. Until then, these scripts establish
-a measurement protocol rather than a claim of million-row readiness.
+The final one-call regression control fitted all 1,000,000 training rows,
+scored the fixed 20,000-row holdout and produced its default report in 81.055
+seconds under the unchanged 420-second / 12 GiB bounds. Peak RSS was 2,455,048
+KiB; the retained result occupied 656,589,190 bytes and HTML 3,891,782 bytes.
+All three models had importance results, with eight primary effects and no
+failed effects. The normal 20 permutation repeats and 8-feature/5-model display
+limits were preserved. Explanations used 5,000 recorded evaluation rows;
+scores and all 1,000 paired bootstrap draws used the complete evaluation set.
+
+All original prediction values survived a fresh-process reload. The portable
+`check-final-report.py` then decoded that exact HTML independently in Python:
+99 checks passed, including all 84 raw/processed column-partition totals,
+complete 20,000-row diagnostic summaries and exact model RMSEs. Individual
+column distributions use every row; data relationships use the disclosed
+10,000-row limit per partition. The default summary report exports no individual
+records. Its shallow model still has RMSE 1.683529; the larger-grid quality
+result is a separate case. This verifies a complete bounded workflow, not a
+claim that every optional learner or default search is practical on a million
+rows. Desktop/mobile interaction is checked separately on the generated HTML.
+
+The raw evidence remains outside the source package at
+`~/.cache/autoxplain-scale-0.7.0/`. The [combined index](completed-results.json)
+preserves every attempt, including the original failures. Final source binding,
+whole-workflow results and cold scope are in [final-workflows.json](final-workflows.json);
+the exact HTML decoding checks are in [final-report-payload.json](final-report-payload.json).
 
 ## Retained native call regression
 
