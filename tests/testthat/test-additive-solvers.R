@@ -133,6 +133,7 @@ test_that("binary work estimates retain nested GAM below the large-data boundary
 })
 
 test_that("binary large-data planning stays fixed in smaller fitting partitions", {
+  skip_if_package_unavailable("mgcv")
   data <- data.frame(x = seq_len(10000L), y = factor(rep(c("no", "yes"), 5000L)))
   plan <- AutoXplainR:::local_tuning_plan(1L, nrow(data), 1L, "binary", 1L,
     learners = "additive", additive_planning_data = data, additive_target = "y"
