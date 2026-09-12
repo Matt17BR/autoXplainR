@@ -5,6 +5,58 @@ quietly removing difficult models or deciding settings from the final test set.
 The test cases include nonlinear interactions, irrelevant predictors, a skewed
 numeric predictor, unusual factor labels, and imbalanced classification.
 
+## Full recommended searches and a rejected policy
+
+The fresh paired runs below use the same training rows, five folds, seed and
+30-configuration budget, with `explain = FALSE`. Times cover the public
+`autoxplain()` call; they exclude HTML generation and this investigation's result
+serialization. Every run retained seven models. Scores are computed separately
+on the original, untouched evaluation rows.
+
+| Problem | Published 0.6.2 seconds | Initial candidate seconds | Successful configurations, before / after | Selected evaluation score, before / after |
+| --- | ---: | ---: | --- | --- |
+| Friedman regression | 412.198 | 65.154 | 30 / 30 | RMSE 1.553636 / 1.553636 |
+| Bank classification | 209.985 | 131.370 | 30 / 27 | Log loss 0.271408 / 0.271408 |
+
+Friedman's training selection chose `boosting_02`; Bank chose `regularized_01`.
+Their evaluation metrics stayed exactly unchanged. All other retained models'
+metrics also stayed unchanged except the additive alternatives. The full tables
+retain those differences, every configuration and every failed fold. Family
+timings include fitting and validation scoring; they are not native-engine-only
+measurements.
+
+The initial automatic rule is not accepted as the final default. It routed
+moderate-size binary fits to BAM based on coefficient work, and lost three
+otherwise usable Bank configurations: `additive_01` failed in folds 2 and 5,
+`additive_02` in fold 5, and `additive_03` in fold 1. Each failure was final PIRLS
+nonconvergence. Faster fitting and unchanged selection do not justify losing
+valid alternatives. These results remain labeled `candidate` in the raw tables;
+the revised policy's Bank replay has the distinct name `candidate_binary_guard`.
+
+The revision keeps the coefficient-work shortcut for Gaussian regression and
+uses nested GAM for binary problems below 10,000 outer-training rows. It follows
+the native algorithm distinction and the training-fold failures, without using
+final evaluation scores to select a policy. mgcv routes Gaussian identity models
+through `bam.fit`, while binary models use the iteratively reweighted `bgam.fit`
+procedure. Its changing smoothing criterion can cycle. See the
+[mgcv convergence explanation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/gam.convergence.html)
+and [native implementation](https://github.com/cran/mgcv/blob/master/R/bam.r).
+
+This is one sequential run per case and version on an Intel Core Ultra 9 185H,
+Ubuntu 26.04.1, R 4.5.2 and OpenBLAS 0.3.32, with native thread counts set to one.
+Saved models record the same native versions in both runs: mgcv 1.9-4,
+XGBoost 3.2.1.1, ranger 0.18.0, glmnet 5.0 and rpart 4.1.27.
+`recommended-engine-versions.csv`, per-run session files and installed-file
+manifests record that provenance. There are no timing repetitions or universal
+speed claims. The older 532.5-second Friedman observation is a separate run;
+412.198 seconds is the paired baseline here.
+
+Both Bank runs warn about 26 coincident training/evaluation records. Source row
+indices are disjoint, but repeated customers cannot be ruled out because customer
+identifiers are absent. This contact-row split does not establish independence
+between customers or future-period performance. The warning and original split
+are preserved rather than changing the benchmark after seeing its results.
+
 ## What the first comparison found
 
 `solver-comparison.csv` retains every result from 14 fixed training folds and
@@ -59,8 +111,8 @@ fits, and both better and worse scores, remain in the table. None of the results
 establishes that an additive formula is adequate for an interaction problem.
 
 The eight higher-basis rare-event checks in `rare-bases-comparison.csv` cover
-`k = 8` and `k = 10`, which cross the automatic work threshold on these 2,000
-outer-training rows. They ran alongside report generation, so their times are
+`k = 8` and `k = 10`, which crossed the initial task-agnostic work threshold on
+these 2,000 outer-training rows. They ran alongside report generation, so their times are
 not a solver-speed comparison. Both better and worse validation losses remain
 recorded. More seriously, two BAM fits reached their 200-iteration PIRLS limit
 and emitted `algorithm did not converge`, while mgcv also returned generic
@@ -81,12 +133,14 @@ optimization policy.
 
 ## Automatic choice and explicit control
 
-The default plans each configuration's solver from outer-training inputs. It
-uses continuous BAM at 10,000 rows or when `rows * estimated_coefficients^2`
-reaches 10 million, and GAM otherwise. The coefficient estimate includes smooth
+The default plans each configuration's solver from the task and outer-training
+inputs. It uses continuous BAM at 10,000 rows. Gaussian regression also uses BAM
+when `rows * estimated_coefficients^2` reaches 10 million; binary problems below
+10,000 rows retain nested GAM. The coefficient estimate includes smooth
 basis columns and observed factor levels. The threshold is an overridable
 computational policy informed by these measurements, not a statistically optimal
-cutoff or a universal prediction of runtime. The quadratic work term follows
+cutoff, a convergence guarantee, or a universal prediction of runtime. The
+quadratic work term follows
 mgcv's documented computational structure. Large factor expansions can still
 make either solver expensive.
 
@@ -167,6 +221,12 @@ partway through. Use an external time limit and record timeouts as failures.
 5. `python3 validation/scalability/search/summarize-recommended.py` verifies
    matching fixture hashes, seeds and timer checkpoints, then exports the
    comparison, every retained score, every configuration and failed-fold reasons.
+6. After installing the revised policy in `search/candidate-binary-guard-library`,
+   run `python3 validation/scalability/search/run-recommended.py candidate_binary_guard bank_marketing`.
+   This uses a separate directory and manifests. `verify-gaussian-policy.R`
+   checks the unaffected Gaussian route against its saved native fit;
+   `summarize-recommended-environment.R` reads the engine versions captured in
+   all retained models. Neither script selects settings from evaluation scores.
 
 The full public comparison measures the combined release changes. Both versions
 search 30 configurations, but the candidate's automatic additive procedure
@@ -182,6 +242,8 @@ The driver verifies the installed candidate against
 `candidate-final-installed-sha256.json` before fitting and records the worker's
 SHA-256. `candidate-final-source-sha256.json` identifies its corresponding source
 snapshot. Later changes to the checkout do not alter these installed runs.
+The revised binary-policy replay uses `candidate-binary-guard-library` and
+separate source/installed manifests, leaving the rejected candidate intact.
 
 Preprocessing learns from each fitting fold. Validation rows score the fit;
 none of these scripts opens the final evaluation data to choose the solver.
@@ -194,7 +256,8 @@ summary writer because a contingency table was not converted to a plain list.
 Those failures are retained in `recommended-initial-candidate-operations.json`
 and the cache's `recommended/candidate-initial-jsonfailure` directory. Their
 exact fitting timers were lost. They are excluded from comparative fitting-time
-claims and the stable runner reruns both cases. A serialization-only replay
+claims. The stable runner completed both paired cases in the table above. A
+serialization-only replay
 checked the corrected writer before repeating the expensive fits; its timing is
 not benchmark evidence.
 

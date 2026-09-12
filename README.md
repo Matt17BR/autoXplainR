@@ -109,9 +109,10 @@ claimed from the literature.
 
 **Explore data** shows outcome and input distributions, missing values and joint
 patterns across training and evaluation. Switch between supplied values and the
-values used by models to see what preprocessing changed. Distributions and
-missing-value counts use all available rows. Pairwise plots and associations use
-up to 10,000 rows per partition by default, with the sample size shown.
+values used by models to see what preprocessing changed. Before filtering,
+distributions and missing-value counts use all available rows. Pairwise plots
+and associations use up to 10,000 rows per partition by default, with the sample
+size shown.
 
 [![Parcel-weight distributions and missing values in the training and evaluation data](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
 
@@ -298,6 +299,8 @@ the full evaluation set. Use `explanation_rows = NULL` to remove that cap, or
 `tuning_control(retain_oof = FALSE)` to keep aggregate CV evidence without the
 case-level predictions. The [larger-data guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html#larger-data)
 explains the controls, the separate PDP curve limit and what each changes.
+Large result checks also need temporary space for serialized model and data
+state; the guide explains how to choose a temporary directory on disk.
 
 ## Inspect a question in more detail
 

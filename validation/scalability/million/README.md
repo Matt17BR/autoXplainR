@@ -73,6 +73,8 @@ cross-validation row coverage, finite predictions and independently calculated
 losses on every evaluation row. Complete results and tuning tables are saved.
 The runner records explanation sample sizes when that API is available, and
 checks that reported full-data scores still use all evaluation rows.
+The final full-workflow runner also traces the paired uncertainty result and
+checks all 1,000 bootstrap draws use the full 20,000 evaluation sampling units.
 
 For a separate-process reload check:
 
@@ -105,6 +107,27 @@ The comparison re-predicts every held-out row with every retained model. For
 legacy matrix fits it recognizes one intentional metadata change: the new
 version explicitly records `encoding = "matrix"`. Any native encoding, changed
 numerical setting, prediction, score, row count or fit seed still fails parity.
+The original cold replays compare 64 saved raw prediction probes per model and
+recompute each model's loss over the full 20,000-row holdout. The final wide and
+one-call full runner additionally saves every model's complete holdout prediction
+vector before serialization, then checks all values after a cold reload. Its
+JSON result states whether those full saved vectors were available; an older
+64-probe artifact does not acquire stronger claims retrospectively.
+
+Eleven historical cases also passed a stronger check against columns retained
+by their original public call, without generating a new warm reference. Cold
+predictions matched every original primary and baseline prediction or binary
+probability on all 20,000 rows. For multiclass results, the original columns
+contain class labels and primary maximum probability; all those values matched,
+but the complete original class-probability matrices were not retained. Alternate
+models still have the stated 64 raw probes and full-loss checks. The portable
+index records the exact verified original fields for each model.
+
+A separate 200-row multiclass harness control checked the new full-vector
+contract: all three original 20,000-row probability matrices survived cold
+reload. Altering one alternate-model probability at row 500, outside the 64
+probes, correctly failed the complete-vector comparison. This tests the harness,
+not model performance; its [verdict](replay-contract.json) records the scope.
 `inspect-object.R` inventories retained components and native call arguments.
 Its `object.size()` results count shared vectors repeatedly and should not be
 mistaken for measured resident-memory attribution. `summarize.py` produces both
@@ -157,8 +180,9 @@ diagnostic reference only and was never used for fitting or selecting a model.
 That quality improvement has a cost: the public call increased from 49.104 to
 82.588 seconds. Peak RSS was 277,316 versus 257,500 KiB. Retaining OOF evidence
 for the recovered configurations increased the uncompressed result from
-39,357,524 to 41,768,184 bytes. Both versions passed fresh-process prediction
-checks for every retained model. Actual native neural fitted-value arrays and
+39,357,524 to 41,768,184 bytes. Both versions passed fresh-process checks of
+64 saved raw predictions per model and complete 20,000-row holdout losses.
+Actual native neural fitted-value arrays and
 the tree root independently confirm all 10,000 training rows were used.
 These observations support the new configurable iteration budget; they do not
 establish that 2,000 iterations will converge on every dataset.
@@ -180,12 +204,47 @@ These boosting losses are deliberately not presented as prediction parity:
 native category partitions are a different model representation from numeric
 contrasts. Both versions selected using CV only; the regularized and intercept
 baseline holdout losses remained identical. Fresh processes reloaded all three
-models, predicted every holdout row, preserved predictions when factor levels
-were reordered, and returned finite predictions for the tested missing values
-and previously unseen category. The candidate saved results still occupied
+models, matched 64 saved raw prediction probes per model and recomputed losses
+on every holdout row. Reversing factor levels on those probes preserved
+predictions; the tested missing values and previously unseen category gave
+finite predictions. The candidate saved results still occupied
 871,494,857 and 705,542,148 bytes respectively because they retain the full data
 and evaluation evidence. These fit-only controls do not establish full-report
 latency or the cost of the unrestricted default search on a million rows.
+
+At 100,000 rows, the wider problem completed in 29.549 seconds in the candidate
+versus 126.832 seconds in the published package. Peak RSS fell from 6,688,820 to
+2,368,584 KiB. Boosting used 130 native inputs instead of 1,131 matrix columns,
+and its holdout RMSE was 1.7454 versus 1.8239. Both configurations succeeded.
+
+The published million-row wide workflow reached its 420-second guard without
+returning a result. Row-overlap serialization took 370.742 seconds. Tuning then
+began and entered the first regularized fit attempt; no boosting training matrix
+was reached. The last recorded process high-water mark was 12,274,016 KiB,
+a lower bound because termination prevented the final GNU `time` record.
+This is a failure to finish the stated whole workflow within the external
+limits, not proof that a native engine cannot fit those inputs on another budget.
+
+The intermediate candidate reached both tuning folds and completed the actual
+million-row boosting fit. It attempted the regularized refit and advanced
+through evaluation, then failed while allocating the final fingerprint
+serialization buffer. Final per-family statuses were not saved.
+The process ended after 271.114 seconds with peak RSS 12,257,676 KiB.
+No complete result or accepted holdout score exists for that failed run.
+The full wide workflow remains pending a bounded-memory fingerprint repair
+and a fresh run under the same limits.
+
+The declared larger regression grid completed at both training sizes. At
+10,000 rows, the existing one-standard-error selection rule preferred 300
+boosting rounds at depth 4; holdout RMSE was 0.910107 and the public call took
+4.129 seconds. At one million rows, CV chose 600 rounds at depth 6, whose
+holdout RMSE was 0.749065, compared with 1.683529 in the shallow control.
+All three configurations completed, and traces verified the actual full
+million-row refit. That public call took 109.012 seconds, process peak RSS
+was 2,895,452 KiB, and the saved result occupied 657,678,928 bytes.
+Both larger-grid results passed cold checks of 64 saved raw probes per model
+and full 20,000-row losses. Their grid was fixed before observing either
+holdout result; it is a capacity experiment separate from the timing control.
 
 The raw evidence is kept outside the source package at
 `~/.cache/autoxplain-scale-0.7.0/`. Findings and final before/after measurements

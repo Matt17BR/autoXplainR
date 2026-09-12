@@ -15,8 +15,11 @@
 #' `bam` uses fREML and builds its design in blocks; `bam_discrete` discretizes numeric
 #' covariates at the recorded resolution. The final fit and each training fold
 #' record their actual method. `auto` plans each configuration's solver once
-#' from outer-training inputs: continuous BAM at 10,000 rows or when rows times
-#' estimated coefficients squared reaches 10 million, otherwise GAM. That solver
+#' from the task and outer-training inputs: continuous BAM at 10,000 rows;
+#' Gaussian regression also uses BAM when rows times estimated coefficients squared
+#' reaches 10 million. Binary classification below 10,000 rows retains nested GAM
+#' because iteratively weighted BAM fitting can fail to converge on smaller samples.
+#' That solver
 #' stays fixed through validation and refitting; preprocessing and smoothing are
 #' still learned separately within each fitting partition.
 #' This is a computational policy, not a guarantee of

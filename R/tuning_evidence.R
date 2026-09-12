@@ -236,8 +236,9 @@ tuning_parameter_meaning <- function(family, parameter) {
       gamma = "Larger values favor stronger smoothing.",
       select = "Adds penalties that can shrink whole smooth terms.",
       solver = paste(
-        "Auto uses continuous bam at 10,000 fitting rows or a rows-times-coefficients-squared",
-        "work estimate of 10 million. Smaller fits use gam. Explicit choices override this policy."
+        "Auto uses continuous bam at 10,000 outer-training rows. Gaussian regression also uses bam",
+        "when rows times estimated coefficients squared reaches 10 million.",
+        "Smaller binary fits retain nested gam for stability. Explicit choices override this policy."
       ),
       discrete_bins = "Discretization resolution for bam_discrete; unused by continuous solvers."
     ),

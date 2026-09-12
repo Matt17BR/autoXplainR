@@ -4,6 +4,16 @@
   batch. Disabling retained out-of-fold predictions also avoids constructing
   their case records. Fold scores, selection and final evaluation remain
   available.
+- Paired score intervals reuse fixed row contributions and draw observation
+  indices directly. The full-evaluation resamples, paired comparisons and
+  interval results remain unchanged.
+- Large evidence fingerprints stream serialized values through a temporary file
+  instead of allocating another complete raw copy. Hashes still cover every
+  value and retain their previous format. Temporary files are removed after
+  hashing, including when an operation fails.
+- `evidence_summary()` exports explanation class counts as ordinary named values,
+  so its documented JSON export also works with sampled classification audits.
+  The audit retains its original class-count tables.
 - Binary out-of-fold case losses now use the same probability clipping as fold
   scoring, so their pooled loss reproduces the reported CV score. A probability
   of 0.5 now selects the positive class in both out-of-fold records and public
@@ -11,8 +21,10 @@
   CV scores and model selection are unchanged.
 - Additive grids expose GAM, BAM and discrete BAM fitting, including the actual
   solver, smoothing method and discretization resolution. Automatic computation
-  choices are recorded separately from model selection. Final BAM fitting
-  failures override a successful smoothing-optimizer status; the original
+  choices are recorded separately from model selection. Smaller binary problems
+  retain GAM; Gaussian regression can use BAM earlier when its estimated
+  coefficient work is large. Final BAM fitting failures override a successful
+  smoothing-optimizer status; the original
   warning and fitting stage are retained.
 - Neural grids expose `maxit`, with a default allowance of 2,000 iterations
   instead of 500. Fits still stop earlier when they converge. The larger budget

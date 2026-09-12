@@ -1,7 +1,82 @@
 # Identities bind evidence to serializable model state and ordered evaluation
 # content. They are compatibility checks, not signatures or security credentials.
 content_fingerprint <- function(value) {
-  paste0("axr-", digest::digest(value, algo = "sha256", serializeVersion = 2L))
+  if (fingerprint_needs_file(value)) return(fingerprint_from_file(value))
+  tryCatch(
+    paste0("axr-", digest::digest(value, algo = "sha256", serializeVersion = 2L)),
+    error = function(error) {
+      # The size estimate is not a serialized-length guarantee. This fallback
+      # recognizes standard English R allocation errors; proactive routing below
+      # does not depend on the session's language or an attempted large allocation.
+      allocation <- grepl(
+        "^(cannot allocate (buffer|vector|memory)|vector memory (exhausted|limit))",
+        conditionMessage(error)
+      )
+      if (!allocation) stop(error)
+      fingerprint_from_file(value)
+    }
+  )
+}
+
+fingerprint_needs_file <- function(value) {
+  # object.size() excludes environment contents. Never traverse reference state
+  # here: serialize() owns its alias/cycle semantics. Bound the structural scan
+  # too, and inspect atomic vectors as single objects rather than visiting values.
+  pending <- list(value)
+  remaining <- 2048L
+  while (length(pending)) {
+    remaining <- remaining - 1L
+    if (remaining < 0L) return(TRUE)
+    # Missing function arguments are real serialized values. Test them before
+    # assigning one to a local binding whose later evaluation would signal an error.
+    if (identical(.subset2(pending, length(pending)), quote(expr = ))) {
+      pending[length(pending)] <- NULL
+      next
+    }
+    current <- .subset2(pending, length(pending))
+    pending[length(pending)] <- NULL
+    if (is.environment(current) || is.function(current) || isS4(current) ||
+          typeof(current) %in% c("externalptr", "weakref")) return(TRUE)
+    metadata <- attributes(current)
+    # Inspect underlying structure, never caller-defined length methods (POSIXlt,
+    # for example, reports observations instead of its internal list components).
+    count <- if (typeof(current) %in% c("list", "pairlist", "language", "expression")) {
+      length(unclass(current))
+    } else {
+      0L
+    }
+    if (count + length(metadata) + length(pending) > remaining) return(TRUE)
+    parts <- if (count) lapply(seq_len(count), function(index) .subset2(current, index)) else list()
+    pending <- c(pending, parts, unname(metadata))
+  }
+  as.numeric(utils::object.size(value)) >= 64 * 1024^2
+}
+
+fingerprint_serialize <- function(value, connection) {
+  arguments <- list(object = value, connection = connection, ascii = FALSE, xdr = TRUE, version = 2L)
+  # Match digest's optional pqR serialization setting when that R variant offers it.
+  if ("nosharing" %in% names(formals(base::serialize))) arguments$nosharing <- TRUE
+  do.call(base::serialize, arguments, quote = TRUE)
+}
+
+fingerprint_from_file <- function(value) {
+  directory <- tempfile("autoxplain-fingerprint-")
+  if (!dir.create(directory, mode = "0700")) {
+    stop("Could not create a temporary directory for evidence fingerprinting.", call. = FALSE)
+  }
+  connection <- NULL
+  on.exit({
+    if (!is.null(connection)) try(close(connection), silent = TRUE)
+    try(unlink(directory, recursive = TRUE), silent = TRUE)
+  }, add = TRUE)
+  path <- file.path(directory, "serialized.bin")
+  connection <- file(path, open = "wb")
+  fingerprint_serialize(value, connection)
+  close(connection)
+  connection <- NULL
+  # digest's binary serializeVersion=2 contract omits the 14-byte XDR header.
+  # File mode streams bytes; serialize=FALSE prevents hashing the path as an R value.
+  paste0("axr-", digest::digest(file = path, algo = "sha256", serialize = FALSE, skip = 14L))
 }
 
 model_identity_payload <- function(value, data_variables = character()) {

@@ -131,13 +131,28 @@ Use another family or bring an externally fitted GAM through `evaluate_models()`
 Other engine-specific limitations, including extreme numerical units, can still
 exclude individual candidates. Inspect the recorded reason.
 
-The broad preset can be slow even when every fit succeeds. In version 0.6.2, on the 1,200-row,
-30-input nonlinear stress case, `recommended` took 8 minutes 53 seconds, compared
-with 58 seconds for the explicit 15-configuration regularized/forest/boosting
-search. Both selected the same boosted model. Individual GAM folds took 9 to 43
-seconds as their basis limits increased. These timings describe one machine and
-one problem; they explain why the explicit family choice above can be more
-practical than searching every supported shape.
+The broad preset can be slow even when every fit succeeds. A fresh paired run
+on the 1,200-row, 30-input nonlinear stress case took 412 seconds in version 0.6.2
+and 65 seconds in the candidate, with all 30 configurations successful. Both
+selected the same boosted model and had the same evaluation RMSE. These are
+single runs on one machine, not a general speed guarantee. An earlier, separate
+0.6.2 run took 533 seconds; it is not the paired baseline for the 65-second result.
+
+Automatic additive fitting uses continuous BAM at 10,000 outer-training rows.
+Gaussian regression also uses BAM when the estimated work, rows times the
+number of coefficients squared, reaches 10 million. Smaller binary problems
+retain nested GAM: BAM uses a different iteratively weighted procedure that
+failed on several training folds where GAM converged. The choice stays fixed
+across folds and the final refit, while each fitting partition learns its own
+preprocessing and smoothing penalties. This rule uses the task and training
+input size, not validation or final-test scores.
+
+The row threshold is a computational policy, not a guarantee of convergence or
+better predictions. Pin `solver = "gam"` or `solver = "bam"` in an additive
+grid when a particular fitting procedure matters. Covariate discretization
+requires the explicit `"bam_discrete"` choice. The smaller family set above
+remains useful when the broader search costs more than the additional models
+are worth.
 
 ## Budget explanations and the report separately
 
@@ -147,13 +162,26 @@ explanation budget when the fitted models deserve closer investigation:
 
 ```{r bounded-report, eval=FALSE}
 render_model_report(result, "first-look.html", top_features = 3, n_repeats = 5,
-                    explanation_rows = 2000, report_data = "summary")
+                    explanation_rows = 2000, report_data = "summary",
+                    uncertainty = FALSE)
 ```
 
 Even a small feature audit first screens inputs; expensive prediction functions
 and hundreds of columns can take time. Five permutations are a first look, not
 precise importance estimates. The report records the budget and warns about
 unstable Monte Carlo estimates.
+
+This first report also omits paired score intervals. By default, those intervals
+use 1,000 bootstrap resamples of the complete evaluation set, independently of
+the explanation and export limits. `uncertainty = FALSE` skips that calculation;
+model scores still use the complete evaluation set. Omit this argument to
+include the intervals when the validation design supports them.
+
+Rendering returns the HTML path and leaves `result` unchanged. If the result was
+fitted with `explain = FALSE`, repeat the explanation settings in later renders:
+the first report does not save its evidence or budget back into `result`.
+Omitting those settings computes default explanations unless the result already
+contains retained explanations.
 
 ## Larger data
 
@@ -164,8 +192,11 @@ by an explicit preprocessing rule remain recorded as omissions.
 
 The report's default importance and effect calculations use at most 5,000
 evaluation rows. Pairwise plots and associations use at most 10,000 rows per
-partition. Univariate distributions, missing counts and official model scores
-use all available rows. Each sampled view gives its own denominator. A rare
+partition. Unfiltered distributions and missing counts use all available rows.
+Filtered charts and their counts describe only matching exported records;
+sidebar counts keep the full population.
+Official model scores always use the complete evaluation partition and are
+unchanged by filters. Each sampled view gives its own denominator. A rare
 class or small cluster can be absent from a uniform sample even when its full
 count is visible elsewhere. Increasing permutation repeats does not resolve
 that absence, and shuffle intervals do not measure row-sampling uncertainty.
@@ -191,6 +222,12 @@ enough for a difficult problem. `retain_oof = FALSE` saves memory by omitting
 case-level CV predictions; fold scores, candidate settings and selection remain
 available. Use the default `TRUE` when you need to inspect individual CV errors.
 This control does not reduce fitting rows or final evaluation rows.
+
+Large result checks write complete model and data state to a temporary file,
+then remove it. The temporary file system needs space for that serialization.
+If you need disk-backed temporary storage, set `TMPDIR` to an existing, writable
+directory on disk before starting R. Changing it after R starts does not move
+the session's temporary directory.
 
 Neural configurations now allow up to 2,000 optimizer iterations, and stop
 earlier when they converge. The former 500-iteration ceiling excluded wider

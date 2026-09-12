@@ -110,7 +110,7 @@ additive_learner_grid <- function(n, p, task, n_classes) {
   )
 }
 
-effective_learner_parameters <- function(family, parameters, data, target) {
+effective_learner_parameters <- function(family, parameters, data, target, task = NULL) {
   features <- setdiff(names(data), target)
   switch(family,
     additive = {
@@ -125,7 +125,7 @@ effective_learner_parameters <- function(family, parameters, data, target) {
         unique_values <- distinct[[feature]]
         max(3L, min(parameters$k, unique_values - 1L))
       }, integer(1))
-      computation <- resolve_additive_solver(parameters, data, target, smooth_k)
+      computation <- resolve_additive_solver(parameters, data, target, smooth_k, task = task)
       list(
         smooth_k = smooth_k,
         gamma = parameters$gamma,
@@ -188,7 +188,7 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
   safe_features <- paste0(".ax", seq_along(features))
   safe_data <- data[c(features, target)]
   names(safe_data) <- c(safe_features, ".outcome")
-  effective <- effective_learner_parameters("additive", parameters, data, target)
+  effective <- effective_learner_parameters("additive", parameters, data, target, task = task)
   smooth_features <- names(effective$smooth_k)
   smooth <- safe_features[match(smooth_features, features)]
   if (!length(smooth)) {
@@ -209,7 +209,7 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
     env = asNamespace("mgcv")
   )
   family <- if (task == "regression") stats::gaussian() else stats::binomial()
-  computation <- resolve_additive_solver(parameters, data, target, effective$smooth_k)
+  computation <- resolve_additive_solver(parameters, data, target, effective$smooth_k, task = task)
   captured <- capture_additive_fit(if (identical(computation$solver, "gam")) {
     mgcv::gam(formula,
       data = safe_data, family = family, method = "REML",
@@ -292,8 +292,11 @@ describe_additive_parameters <- function(parameters) {
   )
 }
 
-resolve_additive_solver <- function(parameters, data, target, smooth_k) {
+resolve_additive_solver <- function(parameters, data, target, smooth_k, task = NULL) {
   planning <- attr(parameters, "autoxplain_additive_policy")
+  # Guided classification outcomes are factors. Retain this inference for
+  # internal callers predating the explicit task argument; no outcomes are scored.
+  task <- task %||% planning$task %||% if (is.factor(data[[target]])) "binary" else "regression"
   requested <- if (!is.null(planning)) "auto" else parameters$solver %||% "auto"
   bins <- parameters$discrete_bins %||% 10000L
   parametric <- setdiff(setdiff(names(data), target), names(smooth_k))
@@ -310,8 +313,11 @@ resolve_additive_solver <- function(parameters, data, target, smooth_k) {
   work <- nrow(data) * estimated_coefficients^2
   # This computational policy is deliberately independent of outcome values
   # and validation losses. See validation/scalability/search for its measured
-  # benefits and counterexamples. It never enables covariate discretization.
-  large <- nrow(data) >= 10000L || work >= 1e7
+  # benefits and counterexamples. Unlike Gaussian BAM, binary BAM uses a
+  # performance-oriented PIRLS iteration that can cycle on smaller samples.
+  # Keep those fits on nested GAM even when their coefficient count is high.
+  # This policy never enables covariate discretization.
+  large <- nrow(data) >= 10000L || (identical(task, "regression") && work >= 1e7)
   solver <- if (!is.null(planning)) {
     planning$solver
   } else if (identical(requested, "auto")) {
@@ -326,12 +332,20 @@ resolve_additive_solver <- function(parameters, data, target, smooth_k) {
   } else if (nrow(data) >= 10000L) {
     "Automatic BAM: at least 10,000 fitting rows; covariates are not discretized."
   } else if (large) {
-    "Automatic BAM: rows times estimated coefficients squared reaches 10 million; covariates are not discretized."
+    paste(
+      "Automatic BAM: Gaussian regression work (rows times estimated coefficients squared)",
+      "reaches 10 million; covariates are not discretized."
+    )
+  } else if (identical(task, "binary")) {
+    paste(
+      "Automatic GAM: binary classification below 10,000 fitting rows retains nested REML",
+      "for stability of the iteratively weighted fit."
+    )
   } else {
     "Automatic GAM: fewer than 10,000 fitting rows and work index below 10 million."
   }
   list(
-    requested_solver = requested, solver = solver,
+    requested_solver = requested, solver = solver, task = task,
     method = if (identical(solver, "gam")) "REML" else "fREML",
     discrete = identical(solver, "bam_discrete"),
     discrete_bins = if (identical(solver, "bam_discrete")) bins else NULL,

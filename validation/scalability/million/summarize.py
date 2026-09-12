@@ -76,12 +76,17 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
         "families_resampling_failed": result.get("families_resampling_failed"),
         "families_refit_failed": result.get("families_refit_failed"),
         "cold_replay_status": cold.get("status"),
+        "cold_replay_saved_raw_probe_rows": cold.get("saved_probe_rows_per_model"),
+        "cold_replay_loss_rows_per_model": cold.get("full_holdout_rows_per_model"),
+        "cold_replay_full_prediction_vectors": cold.get("full_prediction_vector_check",
+            "not saved by the original runner" if cold else None),
+        "cold_replay_original_result_fields": cold.get("original_result_prediction_checks"),
     })
 (args.directory / "index.json").write_text(json.dumps(rows, indent=2) + "\n")
 (args.directory / "stage-profiles.json").write_text(json.dumps(stage_profiles, indent=2) + "\n")
 if rows:
     with (args.directory / "index.csv").open("w") as file:
-        fields = [key for key in rows[0] if key not in {"metrics", "configurations_failed", "families_resampling_failed", "families_refit_failed"}]
+        fields = [key for key in rows[0] if key not in {"metrics", "configurations_failed", "families_resampling_failed", "families_refit_failed", "cold_replay_original_result_fields"}]
         writer = csv.DictWriter(file, fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)

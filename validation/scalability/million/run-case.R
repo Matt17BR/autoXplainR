@@ -42,11 +42,27 @@ tracked <- c(
   "fit_regularized_learner", "fit_boosting_learner", "fit_linear_learner",
   "fit_tree_learner", "fit_neural_learner", "evaluate_candidates", "capture_data_context",
   "finalize_autoxplain", "prepare_model_report_data", "prepare_report_context",
-  "render_model_report", "report_data_payload", "prepare_report_rows"
+  "render_model_report", "report_data_payload", "prepare_report_rows",
+  "performance_uncertainty"
 )
 namespace <- asNamespace("AutoXplainR")
 tracked <- tracked[vapply(tracked, exists, logical(1L), envir = namespace, inherits = FALSE)]
 for (name in tracked) {
+  if (name == "performance_uncertainty") {
+    trace(name, where = namespace, print = FALSE,
+      tracer = quote(.GlobalEnv$stage_event("performance_uncertainty", "enter",
+        list(requested_bootstrap_draws = n_boot, evaluation_rows = nrow(result$test_data)))),
+      exit = quote({
+        .scale_probe_uncertainty <- returnValue()
+        .GlobalEnv$stage_event("performance_uncertainty", "exit", list(
+          bootstrap_draws = .scale_probe_uncertainty$n_boot,
+          retained_draws = nrow(.scale_probe_uncertainty$draws),
+          sampling_units = .scale_probe_uncertainty$units,
+          unit = .scale_probe_uncertainty$unit,
+          metric = .scale_probe_uncertainty$metric))
+      }))
+    next
+  }
   trace(name, where = namespace, print = FALSE,
     tracer = bquote(.GlobalEnv$stage_event(.(name), "enter")),
     exit = bquote(.GlobalEnv$stage_event(.(name), "exit")))
@@ -149,6 +165,16 @@ run <- function() {
     actual_rows <- vapply(training_matrices, function(event) event$training_rows, numeric(1L))
     stopifnot(length(actual_rows) > 0L, any(actual_rows == n))
   }
+  uncertainty_events <- Filter(function(event) {
+    event$stage == "performance_uncertainty" && event$boundary == "exit"
+  }, stage_records)
+  if (full) {
+    stopifnot(length(uncertainty_events) == 1L,
+      uncertainty_events[[1L]]$bootstrap_draws == 1000L,
+      uncertainty_events[[1L]]$retained_draws == 1000L,
+      uncertainty_events[[1L]]$sampling_units == 20000L,
+      uncertainty_events[[1L]]$unit == "observation")
+  }
   if (!is.null(result$tuning)) {
     candidates <- result$tuning$candidates
     successful <- candidates$configuration_id[candidates$status == "ok"]
@@ -171,8 +197,10 @@ run <- function() {
       pretty = TRUE, auto_unbox = TRUE, null = "null", na = "null")
   }
   stage_event("verify_full_holdout", "enter")
+  full_predictions <- stats::setNames(vector("list", length(result$models)), names(result$models))
   metrics <- lapply(names(result$models), function(id) {
     prediction <- predict(result, evaluation$data, model = id)
+    full_predictions[[id]] <<- prediction
     stopifnot(NROW(prediction) == 20000L, all(is.finite(prediction)))
     # XGBoost returns float32 probabilities. Enforce the public probability
     # contract (1e-6), while retaining the actual normalization error.
@@ -186,6 +214,16 @@ run <- function() {
          maximum_probability_sum_error = sum_error)
   })
   sampling <- if (full) result$explanations$audit$config$sampling else NULL
+  if (full) {
+    stopifnot(file.exists(file.path(output, "report.html")),
+      file.info(file.path(output, "report.html"))$size > 10000,
+      length(result$explanations$audit$importance_objects) > 0L,
+      result$provenance$primary_model_id %in% names(result$explanations$audit$importance_objects),
+      length(result$explanations$effects) > 0L)
+    if ("explanation_rows" %in% names(formals(autoxplain))) {
+      stopifnot(!is.null(sampling), identical(result$explanations$config$explanation_rows, 5000L))
+    }
+  }
   if (!is.null(sampling)) {
     stopifnot(sampling$rows_available == 20000L,
       sampling$rows_used == length(sampling$row_indices),
@@ -209,7 +247,8 @@ run <- function() {
   probe <- evaluation$data[unique(c(1:32, seq(1000, 20000, length.out = 32))), , drop = FALSE]
   expected <- lapply(names(result$models), function(id) predict(result, probe, model = id))
   names(expected) <- names(result$models)
-  saveRDS(list(probe = probe, expected = expected, task = result$task), file.path(output, "replay.rds"))
+  saveRDS(list(probe = probe, expected = expected, full_expected = full_predictions,
+    task = result$task), file.path(output, "replay.rds"))
   saveRDS(result, file.path(output, "result.rds"), compress = FALSE)
   stage_event("save_model", "exit")
   list(status = "passed", public_call_seconds = elapsed, metrics = metrics,
@@ -220,6 +259,11 @@ run <- function() {
     report_bytes = if (full) file.info(file.path(output, "report.html"))$size else NULL,
     full_training_and_holdout_verified = TRUE,
     native_training_rows = native_rows, explanation_sampling = sampling,
+    paired_uncertainty = uncertainty_events,
+    explanation_details = if (full) list(config = result$explanations$config,
+      importance_models = names(result$explanations$audit$importance_objects),
+      primary_effect_features = names(result$explanations$effects),
+      effect_failures = result$explanations$failures) else NULL,
     fitted_model_configuration = lapply(result$models, function(model) {
       if (inherits(model, "autoxplain_tuned_nnet")) {
         return(list(family = "neural", backend = "nnet", size = model$size,

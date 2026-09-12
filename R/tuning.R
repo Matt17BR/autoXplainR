@@ -493,11 +493,13 @@ local_tuning_plan <- function(max_models,
       if (identical(parameters$solver, "auto")) {
         effective <- effective_learner_parameters(
           "additive", parameters,
-          additive_planning_data, additive_target
+          additive_planning_data, additive_target,
+          task = task
         )
         policy <- resolve_additive_solver(
           parameters, additive_planning_data,
-          additive_target, effective$smooth_k
+          additive_target, effective$smooth_k,
+          task = task
         )
         parameters$solver <- policy$solver
         # Carry the automatic decision through fitting without adding a tuning
@@ -588,9 +590,10 @@ local_tuning_plan <- function(max_models,
     attr(output, "additive_policy") <- list(
       solver = paste(unique(vapply(additive_policy, `[[`, character(1), "solver")), collapse = ", "),
       reason = paste(
-        "Automatic solvers are fixed per configuration from outer-training input size:",
-        "BAM at 10,000 rows or a rows-times-coefficients-squared work index of 10 million;",
-        "GAM otherwise. No automatic discretization."
+        "Automatic solvers are fixed per configuration from task and outer-training input size:",
+        "BAM at 10,000 rows; Gaussian regression also uses BAM when its work index",
+        "(rows times estimated coefficients squared) reaches 10 million.",
+        "Smaller binary fits retain nested GAM for stability. No automatic discretization."
       ),
       scope = paste(
         "The same solver is used in every validation fold and the final refit.",

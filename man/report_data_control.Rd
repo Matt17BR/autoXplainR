@@ -39,8 +39,11 @@ conditional summaries and pairwise associations. The default is 10,000;
 processed samples retain the same source rows where possible. Counts and
 associations describe that sample, with its size shown in the report.
 Rare groups can be missed; increase this limit or use \code{NULL} to inspect them.
-Individual-column distributions, missing counts and model scores always
-use all available rows. This limit is independent of \code{max_rows}.}
+Unfiltered individual-column distributions and missing counts use all
+available rows. Filtered charts and their counts describe only matching
+exported records; sidebar counts keep the full population. Model scores
+always use the complete evaluation partition and are unchanged by filters.
+This limit is independent of \code{max_rows}.}
 }
 \value{
 An \code{autoxplain_report_data_control} object.

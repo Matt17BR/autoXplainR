@@ -9,13 +9,12 @@ cache = Path(os.environ.get(
 )).expanduser()
 destination = Path(__file__).resolve().parent
 cases = ("friedman_noise", "bank_marketing")
-variants = ("baseline", "candidate")
-if all((cache / "recommended" / "candidate_fixed_gam" / case /
-        "summary.json").exists() for case in cases):
-    variants += ("candidate_fixed_gam",)
 summaries, models, families, candidates, failures = [], [], [], [], []
 for case in cases:
     identity = None
+    variants = ("baseline", "candidate") + tuple(
+        variant for variant in ("candidate_binary_guard", "candidate_fixed_gam")
+        if (cache / "recommended" / variant / case / "summary.json").exists())
     for variant in variants:
         folder = cache / "recommended" / variant / case
         record = json.loads((folder / "summary.json").read_text())

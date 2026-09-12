@@ -11,6 +11,11 @@
       "series": "candidate-v3",
       "source_manifest": "candidate-source-v3-manifest.json",
       "manifest_sha256": "cce2f82ff6f7a8eaf67eb4a03322ec9323c1c0ae1316edb6b41aaa4cde65b50c"
+    },
+    {
+      "series": "candidate-v4",
+      "source_manifest": "candidate-source-v4-manifest.json",
+      "manifest_sha256": "d95d87b3db43789f0cecb29c8942459b3c225a3ac4388f795ed61f5e611daa87"
     }
   ],
   "runs": [
@@ -39,6 +44,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-10000-controlled-fit",
       "library_role": "published0.6.2"
@@ -90,6 +99,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-10000-controlled-fit-v2",
       "library_role": "published0.6.2"
@@ -141,6 +154,10 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-100000-controlled-fit",
       "library_role": "published0.6.2"
@@ -192,6 +209,26 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": [
+            "primary_prediction",
+            "primary_confidence"
+          ],
+          "full_numeric_or_binary_probability_vector": false
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": false
+        }
+      },
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-1000000-controlled-fit",
       "library_role": "published0.6.2"
@@ -221,6 +258,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-10000-controlled-fit",
       "library_role": "published0.6.2"
@@ -269,6 +310,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-10000-controlled-fit-v2",
       "library_role": "published0.6.2"
@@ -320,6 +365,10 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-100000-controlled-fit",
       "library_role": "published0.6.2"
@@ -371,6 +420,23 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_probability",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_probability",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-1000000-controlled-fit",
       "library_role": "published0.6.2"
@@ -419,6 +485,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-controlled-fit",
       "library_role": "published0.6.2"
@@ -470,6 +540,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-controlled-full",
       "library_role": "published0.6.2"
@@ -561,6 +635,23 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-default-fit",
       "library_role": "published0.6.2"
@@ -612,6 +703,10 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-100000-controlled-fit",
       "library_role": "published0.6.2"
@@ -663,6 +758,23 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-1000000-controlled-fit",
       "library_role": "published0.6.2"
@@ -711,6 +823,10 @@
       "families_resampling_failed": null,
       "families_refit_failed": null,
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/wide-10000-controlled-fit",
       "library_role": "published0.6.2"
@@ -762,8 +878,45 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "baseline",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/wide-100000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "wide-1000000-controlled-fit",
+      "problem": "wide",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "timeout",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": false,
+      "public_call_seconds": null,
+      "wall_seconds": 420.003301757999,
+      "peak_rss_kib": 12274016,
+      "peak_rss_source": "last recorded VmHWM; lower bound if interrupted",
+      "models": null,
+      "saved_bytes": null,
+      "error": null,
+      "last_stage": "fit_regularized_learner",
+      "metrics": null,
+      "configurations_attempted": null,
+      "configurations_failed": null,
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/wide-1000000-controlled-fit",
       "library_role": "published0.6.2"
     },
     {
@@ -813,6 +966,23 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_probability",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_probability",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "candidate-v1",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/rare_binary-1000000-controlled-fit",
       "library_role": "candidate-v1"
@@ -864,6 +1034,10 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
       "series": "candidate-v1",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/regression-10000-controlled-fit",
       "library_role": "candidate-v1"
@@ -915,6 +1089,23 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "candidate-v1",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/regression-1000000-controlled-fit",
       "library_role": "candidate-v1"
@@ -966,6 +1157,26 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": [
+            "primary_prediction",
+            "primary_confidence"
+          ],
+          "full_numeric_or_binary_probability_vector": false
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": false
+        }
+      },
       "series": "candidate-v3",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v3/multiclass-1000000-controlled-fit",
       "library_role": "candidate-v3"
@@ -1024,9 +1235,263 @@
       "families_resampling_failed": [],
       "families_refit_failed": [],
       "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
       "series": "candidate-v3",
       "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v3/regression-10000-default-fit",
       "library_role": "candidate-v3"
+    },
+    {
+      "run": "regression-10000-stronger-fit",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "stronger_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 4.129,
+      "wall_seconds": 4.778445083999031,
+      "peak_rss_kib": 340592,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 22836171,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 0.9101,
+          "recorded_loss": 0.9101,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0353,
+          "recorded_loss": 2.0353,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 3,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
+      "series": "candidate-v4",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v4/regression-10000-stronger-fit",
+      "library_role": "candidate-v4"
+    },
+    {
+      "run": "regression-1000000-stronger-fit",
+      "problem": "regression",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "stronger_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 109.012,
+      "wall_seconds": 111.22858870799973,
+      "peak_rss_kib": 2895452,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 657678928,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 0.7491,
+          "recorded_loss": 0.7491,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0372,
+          "recorded_loss": 2.0372,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 3,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
+      "series": "candidate-v4",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v4/regression-1000000-stronger-fit",
+      "library_role": "candidate-v4"
+    },
+    {
+      "run": "wide-100000-controlled-fit",
+      "problem": "wide",
+      "rows": 100000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 29.549,
+      "wall_seconds": 31.33665993499926,
+      "peak_rss_kib": 2368584,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 412320401,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.7454,
+          "recorded_loss": 1.7454,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.1367,
+          "recorded_loss": 2.1367,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.618,
+          "recorded_loss": 2.618,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "cold_replay_saved_raw_probe_rows": 64,
+      "cold_replay_loss_rows_per_model": 20000,
+      "cold_replay_full_prediction_vectors": "not saved by the original runner",
+      "cold_replay_original_result_fields": {
+        "main_model": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "primary_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        },
+        "simple_baseline": {
+          "source": "original result$evaluation$predictions",
+          "rows": 20000,
+          "fields": "baseline_prediction",
+          "full_numeric_or_binary_probability_vector": true
+        }
+      },
+      "series": "candidate-v4",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v4/wide-100000-controlled-fit",
+      "library_role": "candidate-v4"
+    },
+    {
+      "run": "wide-1000000-controlled-fit",
+      "problem": "wide",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "error",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": false,
+      "public_call_seconds": null,
+      "wall_seconds": 271.11383498299983,
+      "peak_rss_kib": 12257676,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": null,
+      "saved_bytes": null,
+      "error": "cannot allocate buffer",
+      "last_stage": "caught_error",
+      "metrics": null,
+      "configurations_attempted": null,
+      "configurations_failed": null,
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "cold_replay_saved_raw_probe_rows": null,
+      "cold_replay_loss_rows_per_model": null,
+      "cold_replay_full_prediction_vectors": null,
+      "cold_replay_original_result_fields": null,
+      "series": "candidate-v4",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v4/wide-1000000-controlled-fit",
+      "library_role": "candidate-v4"
     }
   ]
 }

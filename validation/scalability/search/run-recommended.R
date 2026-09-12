@@ -3,9 +3,10 @@
 arguments <- commandArgs(TRUE)
 stopifnot(length(arguments) == 2L)
 scenario <- match.arg(arguments[[1L]], c("friedman_noise", "bank_marketing"))
-variant <- match.arg(arguments[[2L]], c("baseline", "candidate", "candidate_fixed_gam"))
+variant <- match.arg(arguments[[2L]], c("baseline", "candidate", "candidate_binary_guard", "candidate_fixed_gam"))
 output <- Sys.getenv("AXR_SEARCH_DIR", path.expand("~/.cache/autoxplain-scale-0.7.0/search"))
-library_path <- file.path(output, if (variant == "baseline") "baseline-library" else "candidate-library")
+library_path <- file.path(output, if (variant == "baseline") "baseline-library" else if
+  (variant == "candidate_binary_guard") "candidate-binary-guard-library" else "candidate-library")
 .libPaths(c(library_path, .libPaths()))
 library(AutoXplainR)
 stopifnot(as.character(packageVersion("AutoXplainR")) == if (variant == "baseline") "0.6.2" else "0.7.0")

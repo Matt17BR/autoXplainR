@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": 28,
+  "checked": ["posixlt ordinary parity", "posixlt file parity", "omitted ordinary parity", "omitted file parity", "missing_pairlist ordinary parity", "missing_pairlist file parity", "references ordinary parity", "references file parity", "flat ordinary parity", "flat file parity", "unicode_rows ordinary parity", "unicode_rows file parity", "flat list takes bounded path", "cyclic references take bounded path", "last row changes hash", "row order changes hash", "private directory mode 0700", "success removes owned directory", "success closes owned connection", "unrelated file retained after success", "file-open error identity preserved", "open failure removes owned directory", "unrelated file retained after open failure", "private directory mode 0700", "partial-write error identity preserved", "partial-write failure removes owned directory", "partial-write failure closes owned connection", "unrelated file retained after partial failure"],
+  "source_sha256": "634095cfa0c0ac64eb6a50483964430efbc7541fe66ba28fd134d9da458432eb",
+  "r_version": "R version 4.5.2 (2025-10-31)",
+  "digest_version": "0.6.39"
+}

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "original_training_rows": 200,
+  "task": "multiclass",
+  "holdout_rows_per_model": 20000,
+  "models": 3,
+  "cold_positive_exit": 0,
+  "full_prediction_vector_check": "passed",
+  "negative_exit": 1,
+  "mutation": "regularized_model full probability matrix row500,column1 +1; original64 probes and all native models unchanged",
+  "negative_failure": "Error: isTRUE(all.equal(full, saved$full_expected[[id]], tolerance = 1e-12)) is not TRUE\nExecution halted",
+  "timeout_seconds_per_process": 60,
+  "address_space_gib": 12,
+  "scope": "Harness contract correctness, not a performance experiment",
+  "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/replay-contract",
+  "historical_original_column_replays_passed": 11
+}

@@ -99,6 +99,56 @@ test_that("search planning freezes auto solvers while fitting learns local bases
   expect_equal(model$fit$smooth[[1L]]$bs.dim, 3)
 })
 
+test_that("binary work estimates retain nested GAM below the large-data boundary", {
+  parameters <- list(k = 5L, gamma = 1, select = TRUE, solver = "auto")
+  wide <- as.data.frame(matrix(seq_len(1000L * 31L), 1000L, 31L))
+  names(wide)[31L] <- "y"
+  gaussian <- AutoXplainR:::effective_learner_parameters("additive", parameters, wide, "y")
+  expect_identical(AutoXplainR:::effective_learner_parameters(
+    "additive", parameters, wide, "y",
+    task = "binary"
+  )$solver, "gam")
+  wide$y <- factor(rep(c("no", "yes"), 500L))
+  binary <- AutoXplainR:::effective_learner_parameters("additive", parameters, wide, "y")
+  expect_identical(gaussian$solver, "bam")
+  expect_identical(binary$solver, "gam")
+  policy <- AutoXplainR:::resolve_additive_solver(parameters, wide, "y", binary$smooth_k)
+  expect_identical(policy$task, "binary")
+  expect_gt(policy$work_index, 1e7)
+  expect_match(policy$reason, "nested REML", fixed = TRUE)
+  wide$y <- rev(wide$y)
+  expect_identical(binary, AutoXplainR:::effective_learner_parameters("additive", parameters, wide, "y"))
+
+  tall <- data.frame(x = seq_len(10000L), y = factor(rep(c("no", "yes"), 5000L)))
+  expect_identical(AutoXplainR:::effective_learner_parameters(
+    "additive", parameters, tall[-1L, ], "y"
+  )$solver, "gam")
+  expect_identical(AutoXplainR:::effective_learner_parameters(
+    "additive", parameters, tall, "y"
+  )$solver, "bam")
+  parameters$solver <- "bam"
+  expect_identical(AutoXplainR:::effective_learner_parameters(
+    "additive", parameters, wide, "y"
+  )$solver, "bam")
+})
+
+test_that("binary large-data planning stays fixed in smaller fitting partitions", {
+  data <- data.frame(x = seq_len(10000L), y = factor(rep(c("no", "yes"), 5000L)))
+  plan <- AutoXplainR:::local_tuning_plan(1L, nrow(data), 1L, "binary", 1L,
+    learners = "additive", additive_planning_data = data, additive_target = "y"
+  )
+  parameters <- plan$parameters[[1L]]
+  expect_identical(parameters$solver, "bam")
+  expect_identical(attr(parameters, "autoxplain_additive_policy")$task, "binary")
+  fold <- data[1:80, ]
+  effective <- AutoXplainR:::effective_learner_parameters("additive", parameters, fold, "y")
+  expect_identical(effective$solver, "bam")
+  policy <- AutoXplainR:::resolve_additive_solver(parameters, fold, "y", effective$smooth_k)
+  expect_identical(policy$planning_rows, 10000L)
+  expect_identical(policy$fitting_rows, 80L)
+  expect_match(policy$reason, "Fixed during outer-training", fixed = TRUE)
+})
+
 test_that("BAM predictions and metadata agree with the actual fitted engine", {
   skip_if_package_unavailable("mgcv")
   data <- solver_fixture()
