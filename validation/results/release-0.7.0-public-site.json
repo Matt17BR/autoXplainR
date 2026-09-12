@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "scope": "Post-publication source and HTTP-byte verification. Public browser interactions and accessibility are recorded separately.",
+  "passed": true,
+  "release": {
+    "id": 387458528,
+    "tag_name": "v0.7.0",
+    "html_url": "https://github.com/Matt17BR/autoXplainR/releases/tag/v0.7.0",
+    "published_at": "2026-09-12T04:52:22Z",
+    "draft": false,
+    "prerelease": false
+  },
+  "tag_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+  "reviewed_source_commit": "99de419c82b36fab09d8de6d0171120781c0fc6c",
+  "main_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+  "deployed_source_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+  "gh_pages_commit": "f8ef53894afcc8247fec6c2a1697cdb8fb8a23bb",
+  "site_url": "https://matt17br.github.io/autoXplainR/",
+  "verified_at_utc": "2026-09-12T04:54:03.561070+00:00",
+  "gallery_manifest_sha256": "e7957291eb7786e83f7fa119871f41d937aef3abef9ea80a778f2e14223b95d7",
+  "verifier_sha256": "de1274e9a9098fef73e3b0d44a094efeedbf51e346b93d65ec4904e36cd1c839",
+  "raw_verdict_sha256": "fd8f85f23531f24c39da976baefb94c90e871cb9a765b332950f7e4cb76a5e9d",
+  "checks": {
+    "main_is_expected": true,
+    "deployed_source_is_expected": true,
+    "pages_build_complete_for_deployed_commit": true,
+    "expected_pkgdown_run_succeeded": true,
+    "reviewed_source_and_gallery_match_main": true,
+    "branches_unchanged_during_verification": true,
+    "verified_after_publication": true,
+    "tag_matches_main": true,
+    "same_asset_bytes_as_prepublication": true
+  },
+  "source_binding": {
+    "paths_checked": 84,
+    "all_equal": true,
+    "scope": "All manifest source paths, all gallery assets and the manifest itself have identical Git blobs in reviewed source and main."
+  },
+  "deployment": {
+    "pages_build": {
+      "url": "https://api.github.com/repos/Matt17BR/autoXplainR/pages/builds/1209987819",
+      "status": "built",
+      "commit": "f8ef53894afcc8247fec6c2a1697cdb8fb8a23bb",
+      "created_at": "2026-09-12T04:27:37Z",
+      "updated_at": "2026-09-12T04:31:44Z"
+    },
+    "successful_pkgdown_runs": [
+      {
+        "id": 34672941936,
+        "head_sha": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+        "head_branch": "main",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672941936",
+        "created_at": "2026-09-12T04:25:01Z",
+        "updated_at": "2026-09-12T04:27:40Z"
+      }
+    ]
+  },
+  "assets": [
+    {
+      "source_path": "man/figures/explanation-reliability.png",
+      "published_path": "reference/figures/explanation-reliability.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/explanation-reliability.png",
+      "status": 200,
+      "bytes": 176416,
+      "sha256": "a05714f9ac22fba01614a1a6a663c6d7f5539da1c3f1c5ede0003ed1434705fd",
+      "git_blob": "980b9724101dbf35e16427198ce43493cb922bea",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/guided-overview.png",
+      "published_path": "reference/figures/guided-overview.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/guided-overview.png",
+      "status": 200,
+      "bytes": 299551,
+      "sha256": "11397c97763f3de70e68377f173aceab7d384905f0c06be828ca3a91ea652afd",
+      "git_blob": "0ea76e83e77ce37b7d40f9a5ab92dc834a502afa",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-comparison.png",
+      "published_path": "reference/figures/model-comparison.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-comparison.png",
+      "status": 200,
+      "bytes": 299551,
+      "sha256": "11397c97763f3de70e68377f173aceab7d384905f0c06be828ca3a91ea652afd",
+      "git_blob": "0ea76e83e77ce37b7d40f9a5ab92dc834a502afa",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-data.png",
+      "published_path": "reference/figures/model-data.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-data.png",
+      "status": 200,
+      "bytes": 206650,
+      "sha256": "1d64ad20b13a1b420fd33a84f32a92a7894c4bed5d15f86d917c0f7c473ce52e",
+      "git_blob": "95f0b3ef9ea97d8b7d183f2702862b2b546bea4e",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-details.png",
+      "published_path": "reference/figures/model-details.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-details.png",
+      "status": 200,
+      "bytes": 154496,
+      "sha256": "bc9007b584f672668857a89ad3dc1ae87c47716c14b7a16bc0bc65b59d433a71",
+      "git_blob": "3e9f4019e3315876ee109d5caacc102496b01638",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-patterns.png",
+      "published_path": "reference/figures/model-patterns.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-patterns.png",
+      "status": 200,
+      "bytes": 230207,
+      "sha256": "ddb702f2ad5bf394dff9021cfd830d432502ff098e5b7696df6611e6f4beca1d",
+      "git_blob": "650d1517d0d4784bd57e6b218ef20fd55217d2c3",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-predictions.png",
+      "published_path": "reference/figures/model-predictions.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-predictions.png",
+      "status": 200,
+      "bytes": 198604,
+      "sha256": "bc6a2c33c551bad8184e2f9216b74307e0329d02496b1bb721d4eca6cdc77c4f",
+      "git_blob": "bcb282f9dcd3c0a5f5c83953de2122202ed1843f",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "man/figures/model-selection.png",
+      "published_path": "reference/figures/model-selection.png",
+      "url": "https://matt17br.github.io/autoXplainR/reference/figures/model-selection.png",
+      "status": 200,
+      "bytes": 250359,
+      "sha256": "498d0eb7c05988ac508027cc83d1c61b4acad9c92666af8727cb250a31542a11",
+      "git_blob": "b474e3448aba501ae4ad252d1b308701a1018351",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "pkgdown/assets/binary-report.html",
+      "published_path": "binary-report.html",
+      "url": "https://matt17br.github.io/autoXplainR/binary-report.html",
+      "status": 200,
+      "bytes": 1095964,
+      "sha256": "fb9cff3459ec475a7d9916361f6d80059e25a31a50b3e4151fd6d454e57b317f",
+      "git_blob": "40df736e0649ce54b0db944211481bf33f45fa0f",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "pkgdown/assets/model-report.html",
+      "published_path": "model-report.html",
+      "url": "https://matt17br.github.io/autoXplainR/model-report.html",
+      "status": 200,
+      "bytes": 1691479,
+      "sha256": "c656e4c4aa83005183c647e60e7b06f466d5552eba311b292ade4b4e89a56ec2",
+      "git_blob": "dfb12e4797730894eb4fe3cbe898d1c9c6fc54cb",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    },
+    {
+      "source_path": "pkgdown/assets/multiclass-report.html",
+      "published_path": "multiclass-report.html",
+      "url": "https://matt17br.github.io/autoXplainR/multiclass-report.html",
+      "status": 200,
+      "bytes": 1642427,
+      "sha256": "d6ab040922102d21b89bb76da1d8fcbcb8fe476e59bcf10588c6a7414e0cf9b4",
+      "git_blob": "d864fe203dc9fd9818bbae675d074e55cc8e7b4b",
+      "passed": true,
+      "matches_reviewed_manifest": true,
+      "matches_deployed_git_blob": true
+    }
+  ],
+  "method": "Published paths were discovered by unique basename in the actual gh-pages Git tree. Each canonical URL was streamed with Accept-Encoding: identity and cache revalidation. HTTP 200, exact length, manifest SHA-256 and deployed Git blob were required; main and gh-pages were checked again after fetching.",
+  "prior_observations": [
+    {
+      "stage": "Deployment still queued; HTTP-byte preflight only",
+      "completed_at_utc": "2026-09-12T04:31:41.178931+00:00",
+      "candidate_assets_match": false,
+      "pages_status": "building",
+      "mismatched_paths": [
+        "man/figures/guided-overview.png",
+        "man/figures/model-comparison.png",
+        "pkgdown/assets/binary-report.html",
+        "pkgdown/assets/model-report.html",
+        "pkgdown/assets/multiclass-report.html"
+      ],
+      "interpretation": "The three HTML files and two changed overview PNGs still matched the earlier 34813b11 site. This was not accepted for the final source.",
+      "raw_record_sha256": "6cf49e42e0418c1d16c92be91b13afe576e012a54c661c6d6461f736aa7c5df1"
+    },
+    {
+      "stage": "Completed final-source deployment before release publication",
+      "completed_at_utc": "2026-09-12T04:33:33.825847+00:00",
+      "passed": true,
+      "assets_checked": 11,
+      "main_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+      "gh_pages_commit": "f8ef53894afcc8247fec6c2a1697cdb8fb8a23bb",
+      "raw_record_sha256": "f744213ca73253b75c7e99c9cbf9f642decfa8d1abd22313e52da59b9c855972"
+    }
+  ]
+}

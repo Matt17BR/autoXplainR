@@ -1,0 +1,562 @@
+{
+  "outcome": "No unresolved accessibility defect identified in the reviewed final PR artifact targets.",
+  "scope": "Read-only review of downloaded final PR explorer and prediction axe incomplete diagnostics, existing CI screenshots and unchanged source colors. No new browser tests, rendering, fitting or repository changes. This is not blanket accessibility certification or a participant/screen-reader study.",
+  "run": {
+    "id": 34672423731,
+    "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672423731",
+    "job_id": 103496185151,
+    "job_conclusion": "success",
+    "pr_head": "99de419c82b36fab09d8de6d0171120781c0fc6c",
+    "tested_merge_ref_from_artifact_name": "7b5a2e3b0deb637a6065d90bce86d185ae57b1ad",
+    "merged_tag_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d"
+  },
+  "artifact": {
+    "id": 10290359762,
+    "name": "AutoXplainR-report-browser-7b5a2e3b0deb637a6065d90bce86d185ae57b1ad",
+    "bytes": 61665928,
+    "github_reported_digest": "sha256:0142b455f1fc8bbcf5fe6138b68c0401123060783fd05ac6305a53108c43ebd0",
+    "cache_directory": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/browser-pr7-99de419c",
+    "file_hashes": [
+      {
+        "path": "explorer-checks.json",
+        "sha256": "82b1625f8bdd8fabc95e19aac3398aa9a45de7cd1f133074ae57797bf0886a8f"
+      },
+      {
+        "path": "predictions/prediction-checks.json",
+        "sha256": "19a522fab476867e3227f227205ff42f70a41484b031ad23b6f5186e04757d4d"
+      },
+      {
+        "path": "patterns-320.png",
+        "sha256": "17d5de689c019f3b75dbc0cabd09ad9adbf4864febefa3825be2845c52c41a01"
+      },
+      {
+        "path": "patterns-390.png",
+        "sha256": "7f8ebb21fbc3708958611675967e788a2c68e33f3d6ad0d5364e0e791f5b7299"
+      },
+      {
+        "path": "patterns-768.png",
+        "sha256": "b26f24280f8f8befaf0d3f3ab6aae5f66ca3beb38c13aee7f74c8e6c14b248f0"
+      },
+      {
+        "path": "patterns-1440.png",
+        "sha256": "09a3160570b771301bf4d90211b301d03d4b7029922609f8a3f660b467eb18a3"
+      }
+    ]
+  },
+  "runtime": {
+    "explorer": {
+      "python": "3.12.14",
+      "playwright": "1.58.0",
+      "browser": "145.0.7632.6"
+    },
+    "prediction": {
+      "python": "3.12.14",
+      "playwright": "1.58.0",
+      "chromium": "145.0.7632.6",
+      "axe_core": "4.13.0"
+    }
+  },
+  "acceptance": {
+    "explorer_checks": 1382,
+    "prediction_checks": 1923,
+    "passed_named_group_checks": [
+      "regression: reference comparison has an accessible group name and values",
+      "regression/main_model: feature controls have an accessible group name",
+      "regression/neural_model: feature controls have an accessible group name",
+      "regression/tree_model: feature controls have an accessible group name",
+      "regression/simple_baseline: feature controls have an accessible group name",
+      "binary: reference comparison has an accessible group name and values",
+      "binary/main_model: feature controls have an accessible group name",
+      "binary/neural_model: feature controls have an accessible group name",
+      "binary/tree_model: feature controls have an accessible group name",
+      "binary/simple_baseline: feature controls have an accessible group name",
+      "multiclass: reference comparison has an accessible group name and values",
+      "multiclass/main_model: feature controls have an accessible group name",
+      "multiclass/simple_baseline: feature controls have an accessible group name",
+      "multiclass/tree_model: feature controls have an accessible group name",
+      "quick: reference comparison has an accessible group name and values",
+      "quick/main_model: feature controls have an accessible group name",
+      "quick/simple_baseline: feature controls have an accessible group name"
+    ],
+    "exploration_scan_count": 28,
+    "prediction_scan_count": 4,
+    "aria_incomplete_count": 0,
+    "failed_assertions": 0,
+    "browser_errors": 0,
+    "prediction_violations": 0
+  },
+  "remaining_rule": "color-contrast",
+  "message_key_occurrences": {
+    "elmPartiallyObscured": 55,
+    "imgNode": 261,
+    "shortTextContent": 115,
+    "nonBmp": 12
+  },
+  "disposition_occurrences": {
+    "Inactive horizontally scrolled navigation tabs": 43,
+    "SVG text and short axis labels": 376,
+    "Decorative legend glyphs with separate text labels": 12,
+    "Importance numeric values at their own button background boundary": 12
+  },
+  "scans": [
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "overview",
+      "incomplete_nodes": 19
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "selection",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "data",
+      "incomplete_nodes": 15
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "patterns",
+      "incomplete_nodes": 17
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "evaluation",
+      "incomplete_nodes": 28
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "checks",
+      "incomplete_nodes": 2
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 320,
+      "tab": "provenance",
+      "incomplete_nodes": 1
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "overview",
+      "incomplete_nodes": 18
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "selection",
+      "incomplete_nodes": 13
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "data",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "patterns",
+      "incomplete_nodes": 19
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "evaluation",
+      "incomplete_nodes": 32
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "checks",
+      "incomplete_nodes": 2
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 390,
+      "tab": "provenance",
+      "incomplete_nodes": 1
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "overview",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "selection",
+      "incomplete_nodes": 9
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "data",
+      "incomplete_nodes": 10
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "patterns",
+      "incomplete_nodes": 13
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "evaluation",
+      "incomplete_nodes": 33
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "checks",
+      "incomplete_nodes": 0
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 768,
+      "tab": "provenance",
+      "incomplete_nodes": 0
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "overview",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "selection",
+      "incomplete_nodes": 11
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "data",
+      "incomplete_nodes": 12
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "patterns",
+      "incomplete_nodes": 17
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete_nodes": 30
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "checks",
+      "incomplete_nodes": 0
+    },
+    {
+      "suite": "exploration",
+      "case": "regression",
+      "width": 1440,
+      "tab": "provenance",
+      "incomplete_nodes": 0
+    },
+    {
+      "suite": "predictions",
+      "case": "regression",
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete_nodes": 30
+    },
+    {
+      "suite": "predictions",
+      "case": "binary",
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "predictions",
+      "case": "multiclass",
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete_nodes": 14
+    },
+    {
+      "suite": "predictions",
+      "case": "quick",
+      "width": 1440,
+      "tab": "evaluation",
+      "incomplete_nodes": 27
+    }
+  ],
+  "reviewed_existing_dispositions": {
+    "SVG_text": "376 occurrences fit the prior SVG-image/short-text cases. Source colors are unchanged; the original representative computed-background review found a minimum 6.68:1 for these ordinary text styles.",
+    "navigation": "43 inactive-tab occurrences name the sidebar as the obscurer. The original keyboard review and final CI active-tab visibility checks cover their horizontal scrolling; text color has 10.25:1 contrast.",
+    "legend": "12 aria-hidden shape-key occurrences fit the prior glyph case. The weakest open-circle graphic is 3.17:1, with its separate label 5.97:1."
+  },
+  "additional_final_CI_disposition": {
+    "occurrences": [
+      {
+        "width": 320,
+        "tab": "patterns",
+        "target": [
+          ".is-selected[data-pick-feature=\"distance_km\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+2.305</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row is-selected\" type=\"button\" data-pick-feature=\"distance_km\" data-for-model=\"main_model\" title=\"distance_km: 2.305; shuffle interval 2.187 to 2.423. This is shuffle variation, not population uncertainty.\" aria-pressed=\"true\">",
+            "target": [
+              ".is-selected[data-pick-feature=\"distance_km\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"planned_route_hours\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+2.112</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"planned_route_hours\" data-for-model=\"main_model\" title=\"planned_route_hours: 2.112; shuffle interval 1.977 to 2.247. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"planned_route_hours\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"service\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+1.982</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"service\" data-for-model=\"main_model\" title=\"service: 1.982; shuffle interval 1.903 to 2.062. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"service\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.4067</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"dispatch_backlog\" data-for-model=\"main_model\" title=\"dispatch_backlog: 0.4067; shuffle interval 0.3485 to 0.465. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 320,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"parcel_kg\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.177</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"parcel_kg\" data-for-model=\"main_model\" title=\"parcel_kg: 0.177; shuffle interval 0.1446 to 0.2094. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"parcel_kg\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "target": [
+          ".is-selected[data-pick-feature=\"distance_km\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+2.305</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row is-selected\" type=\"button\" data-pick-feature=\"distance_km\" data-for-model=\"main_model\" title=\"distance_km: 2.305; shuffle interval 2.187 to 2.423. This is shuffle variation, not population uncertainty.\" aria-pressed=\"true\">",
+            "target": [
+              ".is-selected[data-pick-feature=\"distance_km\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"planned_route_hours\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+2.112</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"planned_route_hours\" data-for-model=\"main_model\" title=\"planned_route_hours: 2.112; shuffle interval 1.977 to 2.247. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"planned_route_hours\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"service\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+1.982</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"service\" data-for-model=\"main_model\" title=\"service: 1.982; shuffle interval 1.903 to 2.062. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"service\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.4067</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"dispatch_backlog\" data-for-model=\"main_model\" title=\"dispatch_backlog: 0.4067; shuffle interval 0.3485 to 0.465. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 390,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"parcel_kg\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.177</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"parcel_kg\" data-for-model=\"main_model\" title=\"parcel_kg: 0.177; shuffle interval 0.1446 to 0.2094. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"parcel_kg\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 768,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.4067</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"dispatch_backlog\" data-for-model=\"main_model\" title=\"dispatch_backlog: 0.4067; shuffle interval 0.3485 to 0.465. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      },
+      {
+        "width": 1440,
+        "tab": "patterns",
+        "target": [
+          ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"] > strong"
+        ],
+        "html": "<strong>+0.4067</strong>",
+        "related_nodes": [
+          {
+            "html": "<button class=\"importance-row\" type=\"button\" data-pick-feature=\"dispatch_backlog\" data-for-model=\"main_model\" title=\"dispatch_backlog: 0.4067; shuffle interval 0.3485 to 0.465. This is shuffle variation, not population uncertainty.\" aria-pressed=\"false\">",
+            "target": [
+              ".importance-row[data-pick-feature=\"dispatch_backlog\"][data-for-model=\"main_model\"]"
+            ]
+          }
+        ]
+      }
+    ],
+    "scope": "These 12 occurrences were not among the 177 nodes in the original representative local review. They are explicitly reviewed here rather than attributed to that earlier sample.",
+    "finding": "Axe could not determine the background of five importance-value strong elements, naming each containing button as the obscurer. The actual CI 320/390/768/1440 screenshots were inspected: complete values remain visible and readable, including +0.4067 at the right edge. No occluded digit or contrast failure was identified.",
+    "specified_color_contrast": [
+      {
+        "foreground": "#253e2d",
+        "background": "#ffffff",
+        "ratio": 11.630450515420693
+      },
+      {
+        "foreground": "#253e2d",
+        "background": "#edf3e5",
+        "ratio": 10.274988179134196
+      }
+    ],
+    "ratio_method": "WCAG sRGB relative-luminance formula applied to the unchanged authored foreground and actual white/selected-row background colors. No new computed-style browser measurement is claimed.",
+    "disposition": "Manual background-boundary review accepted for these targets; no markup or color change warranted by this evidence."
+  },
+  "style_source_binding": [
+    {
+      "path": "inst/report/explorer.css",
+      "sha256": "c5390c82acab0c19d87ee1a460a79d4d0afd3b0706c39e0eb6a7d01fa38cc945",
+      "identical_to_original_reviewed_source_5163fb1": true
+    },
+    {
+      "path": "inst/report/selection.css",
+      "sha256": "ec48a948d48dbed9a876822c9f3a0bba1ec61d911ce81c4ec9137fb8038245ed",
+      "identical_to_original_reviewed_source_5163fb1": true
+    },
+    {
+      "path": "inst/report/data-explorer.css",
+      "sha256": "e5992df8697938429995ebd59f55e4c1f178fdd77617bcd4516c0b89c8176ecc",
+      "identical_to_original_reviewed_source_5163fb1": true
+    }
+  ],
+  "original_portable_review": "validation/scalability/reports/accessibility-review.json"
+}

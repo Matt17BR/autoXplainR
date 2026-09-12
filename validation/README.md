@@ -3,8 +3,8 @@
 The [scalability work](scalability/README.md) separates recommended-search cost,
 report storage and browser behavior, and fits with a million training rows.
 Each measurement identifies its source and workload. The
-[0.7.0 release record](release-0.7.0.md) tracks archive acceptance, executed report
-tasks and publication status.
+[0.7.0 release record](release-0.7.0.md) records the published archive, fresh
+installation, saved-model reloads and executed public-report tasks.
 
 The [harder-modeling comparison](stress-modeling/findings.md) tests predictive
 quality against independently fitted reference models. The accompanying
@@ -14,7 +14,7 @@ quality against independently fitted reference models. The accompanying
 remaining limits. These challenge behavior beyond the smaller teaching examples.
 
 The [product review of the 0.4.0 report](product-review-0.4.0.md) records the
-maintainer’s feedback and the regressions from 0.1. Current acceptance tasks are
+maintainer’s feedback and the regressions from 0.1. Earlier acceptance tasks are
 in the [product walkthrough](product-walkthrough.md) and the 0.6.0 work record.
 The [critical 0.3.0 audit](audit-0.3.0.md) records reproduced correctness bugs,
 report-design findings and repair acceptance criteria. Its counterexamples

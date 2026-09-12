@@ -1,0 +1,73 @@
+{
+  "identity": {
+    "run_id": 34672967338,
+    "job_id": 103497699142,
+    "run_url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338",
+    "head_sha": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "tag": "v0.7.0",
+    "artifact_id": 10291433002,
+    "artifact_name": "AutoXplainR-report-browser-61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "artifact_bytes": 61657282,
+    "github_reported_artifact_digest": "sha256:01316fe3a3a5e43637506c9fd5b50179b5b7db7f7dc046894938b18993af7f7a"
+  },
+  "scope": "Read-only disposition of the final-tag 181-versus-184 supplied-model browser count using actual artifact screenshot/PDF, recorded assertions and tagged source. No benchmark rerun or model execution.",
+  "outcome": "Legitimate conservative withholding of an unreliable measured-cost summary; no demonstrated model-fitting or reporting defect.",
+  "model_id": "current",
+  "visible_model_label": "Current logistic model",
+  "visible_status": "resolution_limited",
+  "visible_reason": "A measured block was at or near the observed clock step; raw timings are retained without a summary cost.",
+  "completed_repetitions": 3,
+  "requested_repetitions": 3,
+  "visible_summary_costs": "Unavailable for median ms/row, median ms/batch and interquartile batch range; model score and identity remain visible.",
+  "cost_plot_behavior": "The unavailable current-model cost is omitted from the numeric cost plot; the two other models retain finite measured per-row medians.",
+  "fixture_settings": {
+    "batch_size": 32,
+    "n_repeats": 3,
+    "min_duration_seconds": 0.01,
+    "max_seconds": 2,
+    "seed": 6102
+  },
+  "source_policy": {
+    "definition": "Withhold summary costs if any successful measurement block has elapsed_ms <=0 or is below 20*observed_clock_step*1000. The status is resolution_limited only when no prediction errors were recorded. Calibration targets the larger of min_duration and 20 observed clock steps, but subsequent measured blocks are checked independently.",
+    "location": "R/benchmark_predictions.R:238",
+    "source_sha256": "409ef169a4a84f82352b5be5398b03220547dc9147c932be6c4af0ade84b92d5",
+    "fixture_sha256": "c0c396627fc088a78fd3bf333c928c96d17b8a7c5007944cb569e687d23deade"
+  },
+  "check_count_delta": {
+    "PR_checks": 184,
+    "final_tag_checks": 181,
+    "all_passed": true,
+    "removed_finite_summary_checks": [
+      "displayed costs preserve significant digits 1440current",
+      "displayed costs preserve significant digits 390current",
+      "independent repeated per-row median current",
+      "independent repeated quantile current median_ms_per_batch",
+      "independent repeated quantile current p25_ms_per_batch",
+      "independent repeated quantile current p75_ms_per_batch"
+    ],
+    "added_withholding_checks": [
+      "withheld benchmark explains its state current",
+      "withheld costs remain unavailable 1440current",
+      "withheld costs remain unavailable 390current"
+    ]
+  },
+  "evidence_limit": "The uploaded artifact contains no benchmark oracle JSON, raw measurement rows, measured clock-step value or generated HTML. Exact elapsed durations and the threshold comparison cannot be independently recalculated from this artifact. No particular duration, timing-jitter mechanism or budget exhaustion is inferred.",
+  "evidence": [
+    {
+      "path": "supplied-models/report-costs-checks.json",
+      "sha256": "4256248b67d23a7ca22e8f6089ddc409eebe8240c10b7bf14e2108893995d15b"
+    },
+    {
+      "path": "supplied-models/benchmark-1440.png",
+      "sha256": "53e25b3c8d8f23c6a4dda87d9172b53f1cfc836400240844f283e5edfee8a03a"
+    },
+    {
+      "path": "supplied-models/benchmark-390.png",
+      "sha256": "0c928af90df6886a9416d7efa1b74864db08846490260ef710ea6663f36664be"
+    },
+    {
+      "path": "supplied-models/benchmark.pdf",
+      "sha256": "c1c7b7af84c6404154ddb03f1c420d5a1856c5511264f472bd7658166b787963"
+    }
+  ]
+}

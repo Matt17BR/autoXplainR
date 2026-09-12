@@ -1,0 +1,130 @@
+{
+  "identity": {
+    "run_id": 34672967338,
+    "job_id": 103497699142,
+    "run_url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338",
+    "head_sha": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "tag": "v0.7.0",
+    "artifact_id": 10291433002,
+    "artifact_name": "AutoXplainR-report-browser-61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "artifact_bytes": 61657282,
+    "github_reported_artifact_digest": "sha256:01316fe3a3a5e43637506c9fd5b50179b5b7db7f7dc046894938b18993af7f7a"
+  },
+  "scope": "Read-only final-tag target-delta review against the accepted PR artifact, using retained axe records, source CSS and the actual final-tag screenshot. No new browser/test/render execution and no repository edits. Not blanket accessibility certification.",
+  "outcome": "No concrete unresolved accessibility defect identified in this bounded final-tag delta.",
+  "prior_pr_verdict": {
+    "path": "browser-pr7-accessibility-review/verdict.json",
+    "sha256": "395137912403299bcc51ed4202c2f14018d101509b32c3772617ee215afac755"
+  },
+  "prior_pr": {
+    "checks": {
+      "explorer-checks.json": 1382,
+      "predictions/prediction-checks.json": 1923
+    },
+    "named_group_checks": 17,
+    "aria_incomplete_count": 0,
+    "reason_counts": {
+      "elmPartiallyObscured": 55,
+      "imgNode": 261,
+      "shortTextContent": 115,
+      "nonBmp": 12
+    },
+    "target_class_counts": {
+      "Inactive horizontal navigation tabs": 43,
+      "SVG text and labels": 376,
+      "Decorative legend glyphs": 12,
+      "Importance numeric values at their button boundary": 12
+    },
+    "total_occurrences": 443,
+    "new_overlap_reason_nodes": []
+  },
+  "final_tag": {
+    "checks": {
+      "explorer-checks.json": 1382,
+      "predictions/prediction-checks.json": 1923
+    },
+    "named_group_checks": 17,
+    "aria_incomplete_count": 0,
+    "reason_counts": {
+      "elmPartiallyObscured": 55,
+      "imgNode": 262,
+      "shortTextContent": 119,
+      "nonBmp": 12,
+      "bgOverlap": 1
+    },
+    "target_class_counts": {
+      "Inactive horizontal navigation tabs": 43,
+      "SVG text and labels": 382,
+      "Decorative legend glyphs": 12,
+      "Importance numeric values at their button boundary": 12
+    },
+    "total_occurrences": 449,
+    "new_overlap_reason_nodes": [
+      {
+        "width": 390,
+        "tab": "overview",
+        "node": {
+          "any": [
+            {
+              "id": "color-contrast",
+              "data": {
+                "fgColor": null,
+                "bgColor": null,
+                "contrastRatio": 0,
+                "fontSize": "9.0pt (12px)",
+                "fontWeight": "normal",
+                "messageKey": "bgOverlap",
+                "expectedContrastRatio": "4.5:1",
+                "shadowColor": null,
+                "colorParse": null
+              },
+              "relatedNodes": [],
+              "impact": "serious",
+              "message": "Element's background color could not be determined because it is overlapped by another element"
+            }
+          ],
+          "all": [],
+          "none": [],
+          "impact": "serious",
+          "html": "<tspan x=\"166.5234375\" dy=\"0\">Linear regression</tspan>",
+          "target": [
+            "tspan[x=\"166.5234375\"][dy=\"0\"]"
+          ],
+          "failureSummary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+        }
+      }
+    ]
+  },
+  "new_target_classes": [],
+  "new_reason": "One bgOverlap reason on an existing SVG cost-chart model label; this was not present in the PR target review.",
+  "new_label_disposition": {
+    "target": [
+      "tspan[x=\"166.5234375\"][dy=\"0\"]"
+    ],
+    "text": "Linear regression",
+    "screenshot": "overview-390.png",
+    "inspection": "The actual screenshot shows the complete label, separated from the Neural network label, with readable dark text. The unchanged source uses fill #304739 and a 4px white paint-order outline for model labels.",
+    "specified_text_on_white_contrast": 10.0669,
+    "geometry_limit": "The axe record identifies an overlap but no related node. The later retained screenshot and source styles do not prove the exact geometry or background at the instant axe scanned. No causal claim or reproduction of that transient scan state is made.",
+    "decision": "No source change or additional test warranted by this readable-label evidence."
+  },
+  "source_style_binding": {
+    "path": "inst/report/explorer.css",
+    "sha256": "c5390c82acab0c19d87ee1a460a79d4d0afd3b0706c39e0eb6a7d01fa38cc945",
+    "identical_to_reviewed_PR": true
+  },
+  "evidence": [
+    {
+      "path": "explorer-checks.json",
+      "sha256": "7afd6a1e8dde7e3685b0a294a4b0c6272b771a7f75236a73648ef872b1991f41"
+    },
+    {
+      "path": "predictions/prediction-checks.json",
+      "sha256": "de4e4668ea1b0fe328ce7f1c1c414057719b0912d39bf367547ca1e04481477f"
+    },
+    {
+      "path": "overview-390.png",
+      "sha256": "ebc7f37d2abb890fad28a473eb5b371dd40ce951f22064fc9315afc2ddeabd36"
+    }
+  ]
+}

@@ -1,0 +1,738 @@
+{
+  "schema_version": 2,
+  "status": "published_and_independently_verified",
+  "version": "0.7.0",
+  "verified_at_utc": "2026-09-12T04:54:06.287070+00:00",
+  "source": {
+    "reviewed_commit": "99de419c82b36fab09d8de6d0171120781c0fc6c",
+    "tagged_commit": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "complete_tree": "641272ce31a276c91461ddb7640caa60c58adfe0",
+    "reviewed_and_merged_trees_identical": true,
+    "tag": "v0.7.0",
+    "annotated_tag_object": "7725cc1a107eab6d57dd87f115be51872da137ee",
+    "inventory": {
+      "file": "release-0.7.0-source-inventory.json",
+      "sha256": "33b42dd911db97ab3208c2d3348929a4b6c1ba4ab9504fce8890fc072fe047a4"
+    },
+    "matched_authored_files": 217,
+    "release_controls": 12,
+    "additional_validation_controls": 7,
+    "total_archive_files": 233,
+    "DESCRIPTION_rule": "All source fields must survive with equal DCF values; only known R-generated fields may be added. Every source and archive raw SHA is retained.",
+    "archive_generated_file_count": 16,
+    "no_missing_unexpected_or_mismatched_authored_files": true
+  },
+  "publication": {
+    "id": 387458528,
+    "url": "https://github.com/Matt17BR/autoXplainR/releases/tag/v0.7.0",
+    "published_at_utc": "2026-09-12T04:52:22Z",
+    "asset_id": 558635277,
+    "asset_download_url": "https://github.com/Matt17BR/autoXplainR/releases/download/v0.7.0/AutoXplainR_0.7.0.tar.gz",
+    "archive_sha256": "bc6ad22bee49a9a3fee2ba7a092d975372815e07629295b3a012871782ac2532",
+    "archive_bytes": 2331983,
+    "matches_downloaded_checksum": true,
+    "matches_advertised_asset_digest": true,
+    "matches_staged_archive": true,
+    "run_url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338"
+  },
+  "final_ci": {
+    "run": {
+      "databaseId": 34672967338,
+      "headSha": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+      "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "event": "push"
+    },
+    "jobs": [
+      {
+        "name": "quality-gates",
+        "job_id": 103497699055,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699055",
+        "raw_job_log_sha256": "637b7b9bdc9ac7e874450956fb0be92b2bff56087dacc62e380d8579f7264eed",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 2,
+            "passed_assertions": 5293
+          }
+        ]
+      },
+      {
+        "name": "browser-gate / generated-report",
+        "job_id": 103497699142,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699142",
+        "raw_job_log_sha256": "922c48d562a42727892e3bc3c5694c5766418964ffe78c5dd6d17a560ca903a0"
+      },
+      {
+        "name": "platform-gate / Ubuntu R-devel (exact source archive)",
+        "job_id": 103497699156,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699156",
+        "raw_job_log_sha256": "3ef904a66123bd732851a6b2eed96e0ea3346e8f988c0f489b6447c0ac4f0104",
+        "check_status": [
+          "Status: 1 NOTE"
+        ],
+        "check_notes": [
+          {
+            "check": "* checking CRAN incoming feasibility ... [4s/11s] NOTE",
+            "details": [
+              "Maintainer: \u2018Matteo Mazzarelli <matteo.mazzarelli@gmail.com>\u2019",
+              "New submission"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "platform-gate / macos-latest (R release)",
+        "job_id": 103497699168,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699168",
+        "raw_job_log_sha256": "95a04c2fc286cca1800cd659b185c59a8c8378ad5446b99b8cf52d678ed2779e",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 52,
+            "passed_assertions": 4587
+          }
+        ],
+        "check_status": [
+          "Status: OK"
+        ]
+      },
+      {
+        "name": "engine-gate / ubuntu-latest (R release)",
+        "job_id": 103497699201,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699201",
+        "raw_job_log_sha256": "0ee8c07a652e76c7e35bfba5c26a7a17a74e1c974dec56b04be853e28b8cb2bc",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 0,
+            "passed_assertions": 941
+          }
+        ]
+      },
+      {
+        "name": "engine-gate / Declared engine minima (Ubuntu, R release)",
+        "job_id": 103497699206,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699206",
+        "raw_job_log_sha256": "97125abba753a6a6324bdf7d18a37f94ede1a04dd851bf371340cdb84e9c22ab",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 0,
+            "passed_assertions": 993
+          }
+        ]
+      },
+      {
+        "name": "h2o-gate / h2o",
+        "job_id": 103497699223,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699223",
+        "raw_job_log_sha256": "e96c67e820fb8e85bcd45ac4d75fdbd370452dbae55a168bc28feba017873e24",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 0,
+            "passed_assertions": 95
+          }
+        ]
+      },
+      {
+        "name": "engine-gate / windows-latest (R release)",
+        "job_id": 103497699226,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699226",
+        "raw_job_log_sha256": "20ef63224604f6ac2bd65d1a037ac3850ee61655e975a70cc164c29019a4a0cb",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 0,
+            "passed_assertions": 941
+          }
+        ]
+      },
+      {
+        "name": "platform-gate / ubuntu-latest (R devel)",
+        "job_id": 103497699236,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699236",
+        "raw_job_log_sha256": "5360dd11439b05490f6fa882fbedd32651f5628b0caf2204f6404ce02dc00c15",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 52,
+            "passed_assertions": 4587
+          }
+        ],
+        "check_status": [
+          "Status: OK"
+        ]
+      },
+      {
+        "name": "platform-gate / ubuntu-22.04 (R 4.1)",
+        "job_id": 103497699261,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699261",
+        "raw_job_log_sha256": "6b628b5dd697d89669cbad8c90f5e36eec40710bcf7fdf727de041c33689344a",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 698,
+            "skips": 69,
+            "passed_assertions": 4403
+          }
+        ],
+        "check_status": [
+          "Status: 1 NOTE"
+        ],
+        "check_notes": [
+          {
+            "check": "* checking package dependencies ... NOTE",
+            "details": [
+              "Packages suggested but not available for checking:",
+              "'e1071', 'earth', 'glmnet', 'h2o', 'httr', 'kknn', 'plotly',",
+              "'ranger', 'xgboost'"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "platform-gate / ubuntu-latest (R release)",
+        "job_id": 103497699271,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699271",
+        "raw_job_log_sha256": "587c377598bfb2c6d8f1ad86ec7e239d8515a5ef9abee06cf5e8724ddf5d651c",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 15,
+            "passed_assertions": 5132
+          }
+        ],
+        "check_status": [
+          "Status: OK"
+        ]
+      },
+      {
+        "name": "platform-gate / windows-latest (R release)",
+        "job_id": 103497699315,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699315",
+        "raw_job_log_sha256": "eacd70cedca01cc18595f05e29d188534f7dad21525d1c76be7beb45b688b8b2",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 5,
+            "passed_assertions": 5268
+          }
+        ],
+        "check_status": [
+          "Status: OK"
+        ]
+      },
+      {
+        "name": "platform-gate / ubuntu-latest (R oldrel-1)",
+        "job_id": 103497699328,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103497699328",
+        "raw_job_log_sha256": "82114470fba91869cc61cca617713be031c9eaed04ac119429a407726e21c548",
+        "test_summaries": [
+          {
+            "failures": 0,
+            "warnings": 0,
+            "skips": 52,
+            "passed_assertions": 4587
+          }
+        ],
+        "check_status": [
+          "Status: OK"
+        ]
+      },
+      {
+        "name": "source-package",
+        "job_id": 103499156493,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103499156493",
+        "raw_job_log_sha256": "a628a4c081ecc54a5e2e011e9a7a324c512343869e119af090a8d3e04027a3d9",
+        "check_status": [
+          "Status: 1 NOTE"
+        ],
+        "check_notes": [
+          {
+            "check": "* checking CRAN incoming feasibility ... [4s/16s] NOTE",
+            "details": [
+              "Maintainer: \u2018Matteo Mazzarelli <matteo.mazzarelli@gmail.com>\u2019",
+              "New submission"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "r-devel-source-check",
+        "job_id": 103500240697,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103500240697",
+        "raw_job_log_sha256": "f15b3e16b05fb504161c2db337a7c73bd0180ab000a7f2eb5216b9945eb47f93",
+        "check_status": [
+          "Status: 1 NOTE"
+        ],
+        "check_notes": [
+          {
+            "check": "* checking CRAN incoming feasibility ... [3s/15s] NOTE",
+            "details": [
+              "Maintainer: \u2018Matteo Mazzarelli <matteo.mazzarelli@gmail.com>\u2019",
+              "New submission"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "github-release",
+        "job_id": 103500806755,
+        "conclusion": "success",
+        "url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338/job/103500806755",
+        "raw_job_log_sha256": "c5444df101b231632dbcc9dca642d3e05db3dc656020979481be4079ec914356"
+      }
+    ],
+    "pr_7": {
+      "url": "https://github.com/Matt17BR/autoXplainR/pull/7",
+      "head": "99de419c82b36fab09d8de6d0171120781c0fc6c",
+      "all_14_checks_passed_before_merge": true
+    },
+    "coverage_percent": 92.59,
+    "coverage_threshold_percent": 80,
+    "exact_optional_engine_minima": {
+      "e1071": "1.7-17",
+      "earth": "5.3.6",
+      "glmnet": "5.0",
+      "h2o": "3.44.0.3",
+      "kknn": "1.4.1",
+      "mgcv": "1.9-4",
+      "ranger": "0.18.0",
+      "xgboost": "3.2.1.1"
+    },
+    "count_scope": "Assertions are reported per job; overlapping suites and multiple platforms are not summed as unique tests."
+  },
+  "published_archive_checks": {
+    "R_release": {
+      "version": "4.6.1",
+      "errors": 0,
+      "warnings": 0,
+      "notes": 1,
+      "note": "New submission",
+      "manuals": [
+        "PDF",
+        "HTML"
+      ],
+      "vignettes_built_and_rebuilt": true,
+      "log": "release-0.7.0-r-check.txt"
+    },
+    "R_devel": {
+      "version": "2026-09-10 r90519",
+      "errors": 0,
+      "warnings": 0,
+      "notes": 1,
+      "note": "New submission",
+      "same_archive_SHA256": true,
+      "manuals": false,
+      "vignettes_rebuilt": true,
+      "log": "release-0.7.0-r-devel-check.txt"
+    },
+    "old_R_test_warning_scope": {
+      "version": "4.1",
+      "warnings": 698,
+      "upstream_rpart_partial_match": 692,
+      "rank_deficient_predict_lm": 6,
+      "new_suppression_added": false,
+      "note": "These are test warnings in the older dependency environment, distinct from the canonical archive check warning count. Its dependency NOTE and 69 skips remain visible in the job record."
+    }
+  },
+  "published_installation": {
+    "local_platform": "Linux x86_64",
+    "R_version": "4.5.2",
+    "workflows": 7,
+    "models": {
+      "regression": 4,
+      "binary": 4,
+      "multiclass": 3,
+      "recipe": 4,
+      "existing_binary": 2,
+      "native_boosting": 2,
+      "auto_bam_compact": 2
+    },
+    "total_models": 21,
+    "fresh_session_passed": true,
+    "compressed_blocks_checked": 9,
+    "fresh_private_library_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-library",
+    "downloaded_archive_used": true,
+    "source_and_archive_unchanged_after_tests": true,
+    "scope": "Regression, binary, multiclass, missing/novel recipe, supplied first-level event models, native categorical XGBoost and automatically planned BAM. Fresh --vanilla child checks every retained model against saved outputs, reloads evidence and rerenders reports; engine namespaces are absent before package load."
+  },
+  "published_million_cold_replays": [
+    {
+      "case": "regression-1000000-controlled-full",
+      "passed": true,
+      "models": 3,
+      "full_holdout_rows_per_model": 20000,
+      "full_original_prediction_vectors_match": true,
+      "original_RDS_files_unchanged": true,
+      "original_input_files": {
+        "input.json": {
+          "sha256": "804baef177d90394ca598d1a7bbba54b59e728c4a2c3031c58de9ee5adcacd84",
+          "bytes": 1774
+        },
+        "result.rds": {
+          "sha256": "7891d5886d55dd447aeb372bdf18401938114e64a9ff79be549fc18f2f095500",
+          "bytes": 656589190
+        },
+        "replay.rds": {
+          "sha256": "2d7c1493d1efdec02fe151a1a68eb24fd3ff16bb6b4aa09af44f7d7bf04e86b8",
+          "bytes": 251886
+        }
+      },
+      "losses": {
+        "main_model": 1.6835292139974354,
+        "regularized_model": 2.0371672556822475,
+        "simple_baseline": 2.520283209082887
+      },
+      "wall_seconds": 2.5214482150004187,
+      "maximum_RSS_KiB": 1049972,
+      "timeout_seconds": 180,
+      "address_space_guard_GiB": 12,
+      "exit_code": 0,
+      "missing_and_novel_input_checks": true,
+      "factor_level_reordering": {},
+      "scope": "Fresh R process, no refit and no report rendering. Time and RSS describe this cold replay, not training."
+    },
+    {
+      "case": "wide-1000000-controlled-fit",
+      "passed": true,
+      "models": 3,
+      "full_holdout_rows_per_model": 20000,
+      "full_original_prediction_vectors_match": true,
+      "original_RDS_files_unchanged": true,
+      "original_input_files": {
+        "input.json": {
+          "sha256": "335e4be062a92ed043f39da7a31b929b295925c3479616b74679e11aafcb60b9",
+          "bytes": 1767
+        },
+        "result.rds": {
+          "sha256": "5d36a666c8289523d6460c1c6fa82304c486745e4c207c291052f933729831b8",
+          "bytes": 3341727020
+        },
+        "replay.rds": {
+          "sha256": "35d9b296df10d30f224b84c0cdec3b8e95175a8640f3e11f91fe7f3a2e719fb3",
+          "bytes": 317057
+        }
+      },
+      "losses": {
+        "main_model": 1.7327060312215579,
+        "regularized_model": 2.143833989787595,
+        "simple_baseline": 2.618056467149924
+      },
+      "wall_seconds": 6.278973184998904,
+      "maximum_RSS_KiB": 4663012,
+      "timeout_seconds": 180,
+      "address_space_guard_GiB": 12,
+      "exit_code": 0,
+      "missing_and_novel_input_checks": true,
+      "factor_level_reordering": true,
+      "scope": "Fresh R process, no refit and no report rendering. Time and RSS describe this cold replay, not training."
+    }
+  ],
+  "browser_acceptance": {
+    "head": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+    "run": 34672967338,
+    "job": 103497699142,
+    "suites": [
+      {
+        "suite": "gallery/gallery-browser-checks.json",
+        "checks": 118,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "765b9c5ecd83edf2520c112c650f8138aec1526e31ca9cb182e7a5c0dd8ebcc7"
+      },
+      {
+        "suite": "layout-tasks/layout-task-checks.json",
+        "checks": 128,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "f85df35331b0f63c5d40cfacb7e8e8593dccebdcadf6a73afd49efa0c5a86b7c"
+      },
+      {
+        "suite": "explorer-checks.json",
+        "checks": 1382,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "7afd6a1e8dde7e3685b0a294a4b0c6272b771a7f75236a73648ef872b1991f41"
+      },
+      {
+        "suite": "predictions/prediction-checks.json",
+        "checks": 1923,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "de4e4668ea1b0fe328ce7f1c1c414057719b0912d39bf367547ca1e04481477f"
+      },
+      {
+        "suite": "data/data-explorer-checks.json",
+        "checks": 253,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "683efab5a70c3fcf802bd05221bbeda0a1af3667a1bea17cf0e7061738d76e0b"
+      },
+      {
+        "suite": "cutoff-cases/cutoff-cases-checks.json",
+        "checks": 35,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "3c2fc3112f72fa7745a258eee802c0147811cc377d4b0b7375887bbf2a924f50"
+      },
+      {
+        "suite": "selection/selection-checks.json",
+        "checks": 223,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "bd1cb4fb722bb4bc2be29a228a8dd003a883a83978e71ba5f11a1bb91c918f9f"
+      },
+      {
+        "suite": "supplied-models/report-costs-checks.json",
+        "checks": 181,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "4256248b67d23a7ca22e8f6089ddc409eebe8240c10b7bf14e2108893995d15b"
+      },
+      {
+        "suite": "stress-regressions/pair-cases/browser-pairs.json",
+        "checks": 155,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "e2459d0e41e6a6a498408528998e835e83b98d4f36a7b3ea1ba7d293c74c373c"
+      },
+      {
+        "suite": "stress-regressions/score-scale/verification.json",
+        "checks": 63,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "a838cfbbf981a4030a80c7459570d8e8353d2dc5af5eea3bdf54f694fb388080"
+      },
+      {
+        "suite": "stress-regressions/pair-cases/grouped-findings.json",
+        "checks": 10,
+        "failures": 0,
+        "per_browser": {},
+        "sha256": "04698db5a5e7a5f907811eab29976a48c05a96d9afe8031de606f2533ec15316"
+      },
+      {
+        "suite": "compact-data/chunks/checks.json",
+        "checks": 86,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 26,
+          "firefox": 26,
+          "webkit": 26
+        },
+        "sha256": "e7bc7a7081debc1307c33dcfaa9af09a8b34ddf40daf149860ca0ca6b2f28e3e"
+      },
+      {
+        "suite": "compact-data/candidate/50000/browser/checks.json",
+        "checks": 218,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 72,
+          "firefox": 72,
+          "webkit": 72
+        },
+        "sha256": "13ccbe745fd024eb7d82ac78f45c40c396aaa4269bee1242134a8cfaa717b66c"
+      },
+      {
+        "suite": "compact-data/candidate/2500/browser/checks.json",
+        "checks": 218,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 72,
+          "firefox": 72,
+          "webkit": 72
+        },
+        "sha256": "3837c51568054fd15848b2727c922e7d224e0d8ab404077d064ff7f514a2ba38"
+      },
+      {
+        "suite": "compact-data/candidate/2500/codec/checks.json",
+        "checks": 78,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 26,
+          "firefox": 26,
+          "webkit": 26
+        },
+        "sha256": "5d8bf9f18d661725545169b645cc2782aa4db67bbefd97d093220d99639b304c"
+      },
+      {
+        "suite": "compact-data/compatibility/category-checks.json",
+        "checks": 90,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 30,
+          "firefox": 30,
+          "webkit": 30
+        },
+        "sha256": "a5bd23ba539d73cf9c336518630559586debdaf98f8a254e5d15a68846336352"
+      },
+      {
+        "suite": "compact-data/compatibility/sampled-pair-checks.json",
+        "checks": 40,
+        "failures": 0,
+        "per_browser": {
+          "chromium": 13,
+          "firefox": 13,
+          "webkit": 13
+        },
+        "sha256": "0d89ec21df9caf489e16518fd10cab566a323a29701b4e41be5603aa5b3e04a7"
+      }
+    ],
+    "browser_versions": {
+      "chromium": "145.0.7632.6",
+      "firefox": "146.0.1",
+      "webkit": "26.0"
+    },
+    "count_scope": "Counts are per runner; no sum is treated as unique tests. R oracle and browser assertions are distinguished in each runner. Automated accessibility incompletes receive a separate target review.",
+    "supplied_benchmark_disposition": {
+      "final_checks": 181,
+      "previous_finite_case_checks": 184,
+      "status": "resolution_limited",
+      "reason": "A measured block was at or near the observed clock step; raw timings are retained without a summary cost.",
+      "completed_repetitions": 3,
+      "requested_repetitions": 3,
+      "outcome": "Legitimate conservative withholding of an unreliable measured-cost summary; no demonstrated model-fitting or reporting defect.",
+      "evidence_limit": "The uploaded artifact contains no benchmark oracle JSON, raw measurement rows, measured clock-step value or generated HTML. Exact elapsed durations and the threshold comparison cannot be independently recalculated from this artifact. No particular duration, timing-jitter mechanism or budget exhaustion is inferred.",
+      "raw_verdict_sha256": "4085576effdce8e9e4df1a75dd26153347f65ceeeb6b4b4736fe856e0eca551f",
+      "portable_review": "release-0.7.0-cost-withholding.json"
+    },
+    "accessibility_review": {
+      "named_group_checks_passed": 17,
+      "ARIA_incomplete_items": 0,
+      "remaining_rule": "color-contrast",
+      "incomplete_target_occurrences": 449,
+      "component_counts": {
+        "Inactive horizontal navigation tabs": 43,
+        "SVG text and labels": 382,
+        "Decorative legend glyphs": 12,
+        "Importance numeric values at their button boundary": 12
+      },
+      "new_component_classes": [],
+      "new_reason": "One bgOverlap reason on an existing SVG cost-chart model label; this was not present in the PR target review.",
+      "new_label_disposition": {
+        "target": [
+          "tspan[x=\"166.5234375\"][dy=\"0\"]"
+        ],
+        "text": "Linear regression",
+        "screenshot": "overview-390.png",
+        "inspection": "The actual screenshot shows the complete label, separated from the Neural network label, with readable dark text. The unchanged source uses fill #304739 and a 4px white paint-order outline for model labels.",
+        "specified_text_on_white_contrast": 10.0669,
+        "geometry_limit": "The axe record identifies an overlap but no related node. The later retained screenshot and source styles do not prove the exact geometry or background at the instant axe scanned. No causal claim or reproduction of that transient scan state is made.",
+        "decision": "No source change or additional test warranted by this readable-label evidence."
+      },
+      "outcome": "No concrete unresolved accessibility defect identified in this bounded final-tag delta.",
+      "scope": "Read-only final-tag target-delta review against the accepted PR artifact, using retained axe records, source CSS and the actual final-tag screenshot. No new browser/test/render execution and no repository edits. Not blanket accessibility certification.",
+      "raw_verdict_sha256": "f19d1dcc3c7eca849b42e66072e627a2483926c53c14d5c628725399cd9f243b",
+      "prior_PR_target_review_sha256": "395137912403299bcc51ed4202c2f14018d101509b32c3772617ee215afac755",
+      "original_portable_review": "../scalability/reports/accessibility-review.json",
+      "portable_final_tag_review": "release-0.7.0-tag-accessibility.json",
+      "portable_prior_PR_review": "release-0.7.0-pr-accessibility.json"
+    },
+    "artifact": {
+      "run_id": 34672967338,
+      "job_id": 103497699142,
+      "run_url": "https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338",
+      "head_sha": "61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+      "tag": "v0.7.0",
+      "artifact_id": 10291433002,
+      "artifact_name": "AutoXplainR-report-browser-61aaa8f9ddca445b6938da9183b308fc1d69c02d",
+      "artifact_bytes": 61657282,
+      "github_reported_artifact_digest": "sha256:01316fe3a3a5e43637506c9fd5b50179b5b7db7f7dc046894938b18993af7f7a"
+    }
+  },
+  "logs": {
+    "normalization": "Portable text copies remove trailing line whitespace and normalize line endings to LF for git review. Raw downloaded/local logs are preserved in the local cache; both hashes are recorded. No substantive log text is edited.",
+    "files": {
+      "release-0.7.0-r-check.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/final-release-check/AutoXplainR.Rcheck/00check.log",
+        "raw_sha256": "a06dfc57da8d79f7d629a01b5f0e57415e5273c2c156c961143d12520cb846c1",
+        "portable_sha256": "a06dfc57da8d79f7d629a01b5f0e57415e5273c2c156c961143d12520cb846c1"
+      },
+      "release-0.7.0-r-devel-check.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/final-r-devel-check/AutoXplainR.Rcheck/00check.log",
+        "raw_sha256": "f13605fcc3f51a7daf8c24b2d2f0a0925a2426dbe456e598d5967c98a9dbbe61",
+        "portable_sha256": "f13605fcc3f51a7daf8c24b2d2f0a0925a2426dbe456e598d5967c98a9dbbe61"
+      },
+      "release-0.7.0-ci-installed.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/final-ci-installed/installed-smoke.log",
+        "raw_sha256": "918c18d058b493b3eed6a80cd5fb8482e72b58f093eed2264385a90ace3a9913",
+        "portable_sha256": "f8f669229f1ce5384b71fe45eb033d6d686e5f314cefe600cfdc46330e3ab267"
+      },
+      "release-0.7.0-published-installed.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-smoke.log",
+        "raw_sha256": "034cb9762c0e2d85cbae88409f3a36d01d975cefda64ddbb349a3de29bd105e4",
+        "portable_sha256": "618706e6f3d554171141e77380cd3d762b04a1dfb449b4cd193aa26111b8866d"
+      },
+      "release-0.7.0-published-fresh-session.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-smoke/fresh-session.log",
+        "raw_sha256": "b523c5c893d28ea7f2ae24309221063c71d400d545da94c10738994582bcd3d4",
+        "portable_sha256": "2d24cd9b649808e8323949d308f3a068aa1a12d61c64eec7256cba0727800af5"
+      },
+      "release-0.7.0-published-session-info.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-smoke/fresh-session-info.txt",
+        "raw_sha256": "2b9c4d2cec0062ab6eccd94b85be4af60ae935d8d18245ce3bc63cbee7f7a71d",
+        "portable_sha256": "5f2955d192a7b33c7a601d7955f9cd9d78594fbb5f0ec67e0f7681185ccd204a"
+      },
+      "release-0.7.0-million-regression-replay.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/million-cold/regression-1000000-controlled-full/cold-replay.log",
+        "raw_sha256": "6551f35ed4c072b333a742765ee2351ccc9e31d0d43f4a1e4eeaecfc88e0b03c",
+        "portable_sha256": "6551f35ed4c072b333a742765ee2351ccc9e31d0d43f4a1e4eeaecfc88e0b03c"
+      },
+      "release-0.7.0-million-wide-replay.txt": {
+        "raw_local_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/million-cold/wide-1000000-controlled-fit/cold-replay.log",
+        "raw_sha256": "6551f35ed4c072b333a742765ee2351ccc9e31d0d43f4a1e4eeaecfc88e0b03c",
+        "portable_sha256": "6551f35ed4c072b333a742765ee2351ccc9e31d0d43f4a1e4eeaecfc88e0b03c"
+      }
+    }
+  },
+  "local_raw_evidence": {
+    "scope": "These absolute cache paths identify machine-local evidence, not portable repository links.",
+    "root": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification",
+    "published_result": "published-release-0.7.0/result.json",
+    "million_result": "published-release-0.7.0/million-cold/result.json",
+    "job_logs": "job-logs/",
+    "browser_artifact": "browser-final-tag-61aaa8f/",
+    "source_comparison": "published-release-0.7.0/authored-comparison.json"
+  },
+  "scope_limits": [
+    "The paid live Gemini API was not called. Live H2O is covered by its separate successful 95-assertion gate.",
+    "Browser assertions and independent implementer reviews are not recruited-participant or screen-reader studies; automated contrast incompletes retain the reviewed uncertainty.",
+    "Million-row cold replay verifies two saved analyses. It does not claim that all model portfolios, search budgets or memory sizes scale identically.",
+    "CRAN submission is separate from passing CRAN-style checks and publishing the GitHub release."
+  ],
+  "related_records": {
+    "human_release_record": "../release-0.7.0.md",
+    "scalability_findings": "../scalability/findings.md",
+    "public_site": "release-0.7.0-public-site.json",
+    "public_task_walkthrough": "release-0.7.0-public-walkthrough.md"
+  },
+  "evidence_commit_scope": "Only validation records are added after publication. Packaged source and tag are unchanged."
+}

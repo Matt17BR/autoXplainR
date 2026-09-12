@@ -1,8 +1,9 @@
 # AutoXplainR 0.7.0 validation record
 
-Status: candidate verification is in progress. No 0.7.0 release has been
-published by this work yet. The final archive and public site must pass their
-own checks before this record can claim publication.
+Status: [0.7.0 is published](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.7.0).
+All 16 release jobs passed. The actual download, fresh installation, saved-model
+reloads and post-publication public site are verified. The package source and
+tag are unchanged by the later validation-record commit.
 
 ## What this release addresses
 
@@ -55,9 +56,10 @@ final evidence fingerprint tried to allocate another complete serialized copy.
 The repair streams that same serialization through temporary storage. Under a
 512 MiB address-space cap, the old function failed and the repair succeeded;
 independent whole-byte hashing verified the exact identity and a changed final
-value. The complete wide workflow subsequently passed in 303.841 seconds,
-including both selected full-training refits and final fingerprinting, under the
-unchanged 420-second and 12 GiB bounds. Its uncompressed saved result still
+value. The wide fit-only public call subsequently passed in 303.841 seconds,
+including both selected full-training refits, full evaluation and final
+fingerprinting, under the unchanged 420-second and 12 GiB bounds. It did not
+render a report or compute explanations. Its uncompressed saved result still
 occupies 3.34 GB, so this is not a low-memory workflow.
 
 The installed-package gate caught a separate JSON export failure in classification
@@ -79,6 +81,16 @@ The final repair gives them explicit group semantics and checks their accessible
 names and content through actual browser roles. A separate contrast review
 covered the undecided chart text and decorative keys; the report styles did not
 need changing. Browser evidence now retains the undecided targets for review.
+
+The [actual final PR artifact](results/release-0.7.0-pr-accessibility.json)
+exposes all 17 tested group names and has no remaining ARIA items. Its 443
+undecided contrast occurrences were reviewed, including 12 importance values
+whose containing buttons confused background detection. The
+[final tag artifact](results/release-0.7.0-tag-accessibility.json) has 449
+contrast occurrences and one additional overlap flag on a cost-chart label.
+The actual label remains complete and readable; the scan-time overlap mechanism
+was not reproduced. These are scoped reviews, not a claim that every
+accessibility requirement has been exhaustively verified.
 
 ## Product inspection
 
@@ -104,15 +116,58 @@ are not deployment memory or file sizes. The final report derivative adds those
 two help passages and explicit comparison and importance group roles. All
 embedded data payloads remain byte-identical to the original timed report.
 
-## Pending release acceptance
+## Publication evidence
 
-The full final-source platform, native-engine, numerical, browser, documentation
-and coverage gates must pass. The checked archive must then be freshly installed
-and reloaded, including categorical boosting, automatic BAM, complete evaluation
-scores, sampled explanation identities and exact exported values. The
-[archive acceptance protocol](scalability/release-acceptance.md) defines that work.
+[PR #6](https://github.com/Matt17BR/autoXplainR/pull/6) contains the scale work.
+[PR #7](https://github.com/Matt17BR/autoXplainR/pull/7) passed all 14 checks on
+`99de419c82b36fab09d8de6d0171120781c0fc6c` and was merged as
+`61aaa8f9ddca445b6938da9183b308fc1d69c02d`, with an identical source tree.
+The annotated `v0.7.0` tag points to that merge. All 16 jobs in the
+[release workflow](https://github.com/Matt17BR/autoXplainR/actions/runs/34672967338)
+passed, and publication completed at 2026-09-12 04:52:22 UTC.
 
-After publication, the actual downloaded archive must match its asset digest,
-checksum file and reviewed source inventory. The deployed reports and screenshots
-must match the accepted assets and pass public-site tasks. CRAN submission is
-outside this release.
+The published archive is `AutoXplainR_0.7.0.tar.gz`, 2,331,983 bytes, with SHA-256
+`bc6ad22bee49a9a3fee2ba7a092d975372815e07629295b3a012871782ac2532`.
+Its 217 authored files match the reviewed source; R adds build metadata and
+generated files to make 233 archive files. The full source-package check passed
+with zero errors, zero warnings and one "New submission" note. The same archive
+passed R-devel before publication. CI freshly installed it and reloaded all 21
+models across seven workflows, including native categorical boosting and
+automatic BAM. The [acceptance protocol](scalability/release-acceptance.md)
+specifies the original-data, prediction, explanation and export checks.
+
+The final quality gate passed 5,293 assertions with no failures or warnings,
+and measured 92.59% statement coverage. The two opt-in tests were skipped in
+that run; live H2O passed separately, and the paid hosted Gemini test was not
+run. R 4.1 compatibility retains known upstream test warnings and optional
+dependency skips, recorded separately from the release archive's check result.
+
+Browser runners passed 1,382 explorer checks, 1,923 prediction checks, 118
+gallery checks and 128 layout/print checks. These counts are per runner and
+must not be summed as unique tests. The final supplied-model runner passed
+181 checks. Its [timing review](results/release-0.7.0-cost-withholding.json)
+confirmed a legitimate `resolution_limited` result: all three repeats completed,
+but a measured block was too close to the observed clock step. Three applicable
+withholding checks replaced six finite-cost checks, explaining the difference
+from the earlier 184-check run. The report retains the reason instead of
+presenting a numeric cost; the CI artifact does not preserve raw durations.
+
+The [final public walkthrough](results/release-0.7.0-public-walkthrough.md)
+uses the served reports after their bytes matched the reviewed gallery. It
+covers actual model settings, missing-input records, phone-width cutoff changes
+and multiclass comparison curves. The [post-publication site verdict](results/release-0.7.0-public-site.json)
+confirms HTTP 200 and exact reviewed bytes for all three reports and eight
+screenshots, bound to the completed main deployment.
+
+A fresh private installation of the actual public download passed all seven
+workflows, all 21 models and nine compressed export blocks. Separate processes
+also reloaded both original final million-row results using that installation.
+Each replay checked all three models against all 20,000 original holdout
+predictions, within the recorded 1e-12 tolerance. The saved source results
+remained unchanged. The [portable release record](results/release-0.7.0.json)
+retains the source inventory, actual asset digest, checksum verification,
+individual CI jobs and complete acceptance scope.
+
+The original measurement cohorts retain their source identities; later report
+help and accessibility repairs do not turn them into new timing measurements.
+CRAN submission is outside this GitHub release.

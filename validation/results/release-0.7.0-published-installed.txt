@@ -1,0 +1,21 @@
+regression : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+binary : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+multiclass : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+Missing values and novel categories: saved recipe prediction passed
+Existing models: first-level event, benchmark, row/summary reports and RDS reuse passed
+Native multiclass boosting: categorical blueprint, ordered probabilities and fold encoding passed
+Automatic BAM: fixed solver, full evaluation score and bounded explanations passed
+Namespaces before loading AutoXplainR: compiler, graphics, utils, grDevices, stats, datasets, methods, base
+Fresh-session installed library: /home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-library/AutoXplainR
+Fresh-session AutoXplainR version: 0.7.0
+regression : restored 4 models; raw responses/classes match saved outputs; report rendered
+binary : restored 4 models; raw responses/classes match saved outputs; report rendered
+multiclass : restored 3 models; raw responses/classes match saved outputs; report rendered
+recipe : restored 4 models; raw responses/classes match saved outputs; saved recipe reapplied
+existing_binary : restored 2 models; raw responses/classes match saved outputs; report rendered
+Installed native report: decoded class probabilities and original evaluation identities match
+native_boosting : restored 2 models; raw responses/classes match saved outputs; report rendered
+Installed compact report: decoded source values, row identities and full/pair denominators match; 9 compressed blocks checked
+auto_bam_compact : restored 2 models; raw responses/classes match saved outputs; report rendered
+Fresh-session installed artifact replay passed.
+Installed artifact smoke passed from /home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/published-release-0.7.0/installed-library/AutoXplainR
