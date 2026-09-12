@@ -105,7 +105,7 @@ result$leaderboard
 #> 4    4 simple_baseline intercept-only baseline  baseline baseline   stats
 #>       rmse      mae     r_squared training_time_ms model_size_kb complexity
 #> 1 2.003144 1.662172  9.339624e-01                1      67.79688          3
-#> 2 2.241207 1.837860  9.173332e-01                1      52.28125         20
+#> 2 2.241207 1.837860  9.173332e-01                2      52.28125         20
 #> 3 4.319412 3.508486  6.929447e-01                3      47.83594          4
 #> 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1
 #>   fit_warning prediction_time_ms
