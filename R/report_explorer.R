@@ -312,7 +312,7 @@ explorer_importance <- function(rows, metric, model_id) {
     )
   }, character(1))
   paste0(
-    '<div class="importance-bars" aria-label="Feature importance for ', html_escape(model_id), '">',
+    '<div class="importance-bars" role="group" aria-label="Feature importance for ', html_escape(model_id), '">',
     '<div class="importance-key">Change in ', html_escape(pretty_metric(metric)),
     " when shuffled ",
     explorer_help(

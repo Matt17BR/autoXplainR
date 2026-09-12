@@ -25,6 +25,16 @@ retain those differences, every configuration and every failed fold. Family
 timings include fitting and validation scoring; they are not native-engine-only
 measurements.
 
+The [Friedman primary-prediction verdict](friedman-primary-parity.json) compares
+all **800 original held-out predictions** saved by those two timed workers.
+Both the complete vectors and their serialized bytes are identical, with a
+maximum absolute difference of zero. It retains the input, prediction-artifact
+and summary hashes, selected configuration and original call times. The
+[read-only comparison script](verify-friedman-primary-parity.R) reads those
+original cache artifacts; it does not reload a model, regenerate predictions
+or fit anything. This check concerns the selected primary model, not identity
+of additive alternatives or later report metadata.
+
 The initial automatic rule is not accepted as the final default. It routed
 moderate-size binary fits to BAM based on coefficient work, and lost three
 otherwise usable Bank configurations: `additive_01` failed in folds 2 and 5,

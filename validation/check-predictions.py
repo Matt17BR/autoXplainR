@@ -448,7 +448,9 @@ def main():
                 axe = page.evaluate("async()=>await axe.run('#evaluation',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})")
                 runtime["axe_core"] = axe["testEngine"]["version"]
                 compact = lambda items: [{"id": item["id"], "nodes": len(item["nodes"])} for item in items]
-                accessibility.append({"case": case, "violations": compact(axe["violations"]), "incomplete": compact(axe["incomplete"])})
+                accessibility.append({"case": case, "violations": compact(axe["violations"]),
+                                      "incomplete": compact(axe["incomplete"]),
+                                      "incomplete_details": axe["incomplete"]})
                 check(case + ": Predictions WCAG A/AA automated rules", not axe["violations"], compact(axe["violations"]))
                 if oracle["task"] == "binary":
                     nojs = browser.new_page(java_script_enabled=False, viewport={"width": 390, "height": 1000})

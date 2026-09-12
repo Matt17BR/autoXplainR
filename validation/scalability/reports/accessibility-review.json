@@ -1,0 +1,529 @@
+{
+  "source_commit": "5163fb1",
+  "scope": "Read-only reproduction of the original components, followed by fresh rendering from saved model results with two group roles added. Local fixtures are not byte-identical CI artifacts.",
+  "tools": {
+    "playwright": "1.58.0",
+    "chromium": "145.0.7632.6",
+    "axe": "4.13.0"
+  },
+  "scans": [
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "overview",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "aria-prohibited-attr",
+          "nodes": 1
+        },
+        {
+          "rule": "color-contrast",
+          "nodes": 18
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "selection",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 13
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "data",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "patterns",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "aria-prohibited-attr",
+          "nodes": 1
+        },
+        {
+          "rule": "color-contrast",
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "evaluation",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 32
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 390,
+      "tab": "checks",
+      "context": "document",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "case": "regression",
+      "width": 1440,
+      "tab": "evaluation",
+      "context": "#evaluation",
+      "source_sha256": "48d0fd039dedad4de6d47dfa055bb344d7de0fc0812d8291a0c9d1e92f25be60",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 30
+        }
+      ]
+    },
+    {
+      "case": "binary",
+      "width": 1440,
+      "tab": "evaluation",
+      "context": "#evaluation",
+      "source_sha256": "9d4ed5c78cb173b1baaed104643a5e8dda822b9243821b3c4a8d2c5411f047c0",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "case": "multiclass",
+      "width": 1440,
+      "tab": "evaluation",
+      "context": "#evaluation",
+      "source_sha256": "ed275864cbfd4767ff4144c06bcf36c751dc1e38a9122f1a20dd2f2fe43cb832",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 14
+        }
+      ]
+    },
+    {
+      "case": "quick",
+      "width": 1440,
+      "tab": "evaluation",
+      "context": "#evaluation",
+      "source_sha256": "c68b0dd5499ce62d86298521ad41b32769506472dcbe2157441c1f89fe8925b7",
+      "violations": 0,
+      "incomplete": [
+        {
+          "rule": "color-contrast",
+          "nodes": 27
+        }
+      ]
+    }
+  ],
+  "contrast_message_keys": {
+    "elmPartiallyObscured": 19,
+    "imgNode": 109,
+    "shortTextContent": 46,
+    "nonBmp": 3
+  },
+  "contrast_pairs": [
+    {
+      "foreground": "rgb(225, 235, 228)",
+      "background": "rgb(28, 57, 49)",
+      "contrast": 10.247392002923004
+    },
+    {
+      "foreground": "rgb(48, 71, 57)",
+      "background": "rgb(255, 255, 255)",
+      "contrast": 10.066860748456385
+    },
+    {
+      "foreground": "rgb(41, 93, 131)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 6.532341654632718
+    },
+    {
+      "foreground": "rgb(120, 144, 139)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 3.167980678168461
+    },
+    {
+      "foreground": "rgb(145, 99, 33)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 4.866319934145842
+    },
+    {
+      "foreground": "rgb(51, 68, 59)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 9.610711721302826
+    },
+    {
+      "foreground": "rgb(25, 91, 137)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 6.732356826280439
+    },
+    {
+      "foreground": "rgb(67, 93, 80)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 6.683392794802473
+    },
+    {
+      "foreground": "rgb(38, 62, 48)",
+      "background": "rgb(255, 255, 255)",
+      "contrast": 11.575709618625721
+    },
+    {
+      "foreground": "rgb(48, 71, 57)",
+      "background": "rgb(246, 247, 243)",
+      "contrast": 9.355989241216445
+    }
+  ],
+  "minimum_svg_text_contrast": 6.683392794802473,
+  "mobile_keyboard_tabs": [
+    {
+      "id": "tab-overview",
+      "focused": true,
+      "scrollLeft": 0,
+      "rect": {
+        "x": 10,
+        "y": 39,
+        "width": 118.65625,
+        "height": 30.1875,
+        "top": 39,
+        "right": 128.65625,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-selection",
+      "focused": true,
+      "scrollLeft": 0,
+      "rect": {
+        "x": 127.265625,
+        "y": 39,
+        "width": 112.375,
+        "height": 30.1875,
+        "top": 39,
+        "right": 239.640625,
+        "bottom": 69.1875,
+        "left": 127.265625
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-data",
+      "focused": true,
+      "scrollLeft": 0,
+      "rect": {
+        "x": 237.03125,
+        "y": 39,
+        "width": 93.0625,
+        "height": 30.1875,
+        "top": 39,
+        "right": 330.09375,
+        "bottom": 69.1875,
+        "left": 237.03125
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-patterns",
+      "focused": true,
+      "scrollLeft": 57,
+      "rect": {
+        "x": 271.578125,
+        "y": 39,
+        "width": 108.265625,
+        "height": 30.1875,
+        "top": 39,
+        "right": 379.84375,
+        "bottom": 69.1875,
+        "left": 271.578125
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-evaluation",
+      "focused": true,
+      "scrollLeft": 139,
+      "rect": {
+        "x": 294.296875,
+        "y": 39,
+        "width": 85.40625,
+        "height": 30.1875,
+        "top": 39,
+        "right": 379.703125,
+        "bottom": 69.1875,
+        "left": 294.296875
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-checks",
+      "focused": true,
+      "scrollLeft": 197,
+      "rect": {
+        "x": 320.140625,
+        "y": 39,
+        "width": 60.203125,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380.34375,
+        "bottom": 69.1875,
+        "left": 320.140625
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    },
+    {
+      "id": "tab-provenance",
+      "focused": true,
+      "scrollLeft": 323,
+      "rect": {
+        "x": 254.828125,
+        "y": 39,
+        "width": 125.203125,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380.03125,
+        "bottom": 69.1875,
+        "left": 254.828125
+      },
+      "navRect": {
+        "x": 10,
+        "y": 39,
+        "width": 370,
+        "height": 30.1875,
+        "top": 39,
+        "right": 380,
+        "bottom": 69.1875,
+        "left": 10
+      },
+      "fullyVisible": true
+    }
+  ],
+  "named_group_control": [
+    {
+      "version": "original",
+      "group": "Primary model compared with reference",
+      "count": 0,
+      "tree": null
+    },
+    {
+      "version": "original",
+      "group": "Feature importance for main_model",
+      "count": 0,
+      "tree": null
+    },
+    {
+      "version": "repaired",
+      "group": "Primary model compared with reference",
+      "count": 1,
+      "tree": "- group \"Primary model compared with reference\":\n  - term: Training-selected primary\n  - definition:\n    - text: Linear regression\n    - strong: \"3.00\"\n    - text: RMSE hours\n  - term: Intercept-only baseline\n  - definition:\n    - strong: \"7.565\"\n    - text: RMSE hours\n  - term: Primary minus reference\n  - definition:\n    - strong: \"-4.564\"\n    - text: Negative favors the model\n  - paragraph:\n    - text: \"95.0% paired interval: -5.621 to -3.465; 72 independent observations assumed.\"\n    - button \"Scope of the paired interval\""
+    },
+    {
+      "version": "repaired",
+      "group": "Feature importance for main_model",
+      "count": 1,
+      "tree": "- group \"Feature importance for main_model\":\n  - text: Change in RMSE when shuffled\n  - button \"Reading feature importance for main_model\"\n  - text: \u2190 improves \u00b7 worsens \u2192\n  - button \"distance_km +2.305\" [pressed]:\n    - text: distance_km\n    - strong: \"+2.305\"\n  - button \"planned_route_hours +2.112\":\n    - text: planned_route_hours\n    - strong: \"+2.112\"\n  - button \"service +1.982\":\n    - text: service\n    - strong: \"+1.982\"\n  - button \"dispatch_backlog +0.4067\":\n    - text: dispatch_backlog\n    - strong: \"+0.4067\"\n  - button \"parcel_kg +0.177\":\n    - text: parcel_kg\n    - strong: \"+0.177\""
+    }
+  ],
+  "cache_directory": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/accessibility-incomplete-review",
+  "artifacts": [
+    {
+      "path": "review-incomplete.py",
+      "sha256": "ecd27e477a1c1cdeda9bafbbdd2a48466dfb697576cb1818b3513d2d4511873c"
+    },
+    {
+      "path": "incomplete-details.json",
+      "sha256": "c3c5a35c4a4bb494da719f08c71aea0efba69e34ce6821df682457b61a9533ca"
+    },
+    {
+      "path": "verify-colors.py",
+      "sha256": "1fa285eaabfc559d58ec9e307ef5894cb2740c6e36ca0bf44c67ff044c8ab393"
+    },
+    {
+      "path": "color-review.json",
+      "sha256": "74f58a5e7429ad3f25ee30a9cffb0d99307e73c17d32011502c943c7d704793b"
+    },
+    {
+      "path": "verify-groups.py",
+      "sha256": "248adb75956c0f3f32fca6c32be5cd447005b976b51b1fec6237e197dc09c5e8"
+    },
+    {
+      "path": "named-group-control.json",
+      "sha256": "985badc9b34096ec27ef401755dbf0b8a9997a8ed9c7668854a14f1717594563"
+    },
+    {
+      "path": "render-fixed.R",
+      "sha256": "0b479ce7577e4219724e4887b783005bc667d9848f6e0a2cebdf98addb3985f2"
+    },
+    {
+      "path": "fixed-checks/explorer-checks.json",
+      "sha256": "ad0c0b54fee62981a1e5b0e67bc13599034c67482ff24bbd462d8810374e2585"
+    },
+    {
+      "path": "chart-checks/chart-fixture-checks.json",
+      "sha256": "e68686339990eeabca8546a337b1c825ab25a06f4a40a67e83ea3f71ec489d95"
+    },
+    {
+      "path": "prediction-checks/prediction-checks.json",
+      "sha256": "d1e610c6b1c67b573f4a50ab329a6674af1e9ea3b12eef9e756d8702cda51e97"
+    },
+    {
+      "path": "prediction-complete/prediction-checks.json",
+      "sha256": "16bc135cd21f5f9bb4136bcab4aea941452107054f0067269cc07a426eeca0f6"
+    },
+    {
+      "path": "render-modes.R",
+      "sha256": "016a68a5ef43627a1d9d7c12a49ac448babff68a0e7c1ee2e1d1c455686d47f4"
+    },
+    {
+      "path": "explorer-complete/explorer-checks.json",
+      "sha256": "dee4fadaf09caf4f1a090b5531c240e0ef95caded593c90032d4da1a31a5ae83"
+    }
+  ],
+  "acceptance": {
+    "report_checks_passed": 1382,
+    "report_checks_failed": [],
+    "named_group_checks_passed": 17,
+    "aria_incomplete_after_repair": 0,
+    "exploration_scans": 28,
+    "browser_page_errors": [],
+    "separate_chart_checks_passed": 219,
+    "chart_fixture_r_checks_passed": 24,
+    "explanation": "The complete explorer replay passed all 1,382 checks, including the independent chart checker. Two earlier attempts with incomplete cache fixture setup are retained separately; neither had a failed product assertion.",
+    "prediction_checks_passed": 1923,
+    "prediction_violations": 0,
+    "prediction_full_incomplete_details_retained": true
+  },
+  "setup_attempts": [
+    {
+      "path": "fixed-checks/explorer-checks.json",
+      "report_checks_passed": 1381,
+      "uncompleted_gate": "Separate independent chart fixture had not been generated in the new cache folder."
+    },
+    {
+      "path": "prediction-checks/prediction-checks.json",
+      "checks_passed": 1434,
+      "errors": [
+        "Error: Page.goto: net::ERR_FILE_NOT_FOUND at file:///home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/accessibility-incomplete-review/fixed-cases/binary-summary.html\nCall log:\n  - navigating to \"file:///home/mmazzarelli/.cache/autoxplain-scale-0.7.0/release-verification/accessibility-incomplete-review/fixed-cases/binary-summary.html\", waiting until \"load\"\n"
+      ]
+    }
+  ],
+  "repaired_source_files": [
+    {
+      "path": "R/report_summary.R",
+      "sha256": "1a42c76600bce1201931600e7f07e4d7c46fe77fa05b268abd1d767724de2ad4"
+    },
+    {
+      "path": "R/report_explorer.R",
+      "sha256": "4730c6f98cea608247f8bd80f56c31965385f557fc407d3870f3101a2b30cc77"
+    },
+    {
+      "path": "validation/check-explorer.py",
+      "sha256": "e5d8c1e7fb20cf8999f86ac6281b701d815074b0a7951ca18f0afe8d71660f8d"
+    },
+    {
+      "path": "validation/check-predictions.py",
+      "sha256": "910494be6179c8d53fa330e40e226be0e64013867390dd6841301f792fbef5db"
+    }
+  ]
+}

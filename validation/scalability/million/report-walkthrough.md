@@ -44,3 +44,13 @@ Whole-file comparison found only the two intended help replacements, with all
 three JSON payloads byte-identical. Both help passages were opened in the browser
 and the tooltip was inspected visually. This derivative has no new fitting or
 workflow timing claim.
+
+The final accessibility derivative, `report-accessible-final.html`, adds named
+group roles to the baseline comparison and three importance containers. Its
+[derivative verdict](../model-size-review/accessible-derivative-report.json)
+confirms that these attributes are the only changes and all three payloads remain
+byte-identical. In the actual browser, “Primary model compared with reference”
+exposes 1.684, 2.52, -0.837 and the full paired interval. After selecting Feature
+effects, “Feature importance for main_model” exposes all eight controls and the
+sampling context of 5,000 evaluation rows out of 20,000. Prior artifacts and
+timings are preserved; there was no refit or numerical change.

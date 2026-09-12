@@ -72,6 +72,14 @@ CI-fixture replay passed 184 checks, and axe still rejected deliberately tiny
 adjacent controls. The original intermittent CI violation did not reproduce
 locally, so scrolling is a supported explanation rather than a proven cause.
 
+The [review of undecided accessibility items](scalability/reports/accessibility-review.md)
+found two genuine naming defects:
+comparison and feature-importance containers had labels without grouping roles.
+The final repair gives them explicit group semantics and checks their accessible
+names and content through actual browser roles. A separate contrast review
+covered the undecided chart text and decorative keys; the report styles did not
+need changing. Browser evidence now retains the undecided targets for review.
+
 ## Product inspection
 
 The [difficult regression walkthrough](scalability/report-walkthrough.md) follows
@@ -92,8 +100,9 @@ million-row fit-only result of RMSE 0.7491.
 The walkthrough also challenged the model-size comparison. The baseline retains
 large R diagnostic arrays, while native XGBoost allocation is hidden behind a
 pointer. Chart help and the R documentation now explain that these estimates
-are not deployment memory or file sizes. The final report derivative differs
-only in those two help passages; all embedded data payloads remain identical.
+are not deployment memory or file sizes. The final report derivative adds those
+two help passages and explicit comparison and importance group roles. All
+embedded data payloads remain byte-identical to the original timed report.
 
 ## Pending release acceptance
 

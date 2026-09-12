@@ -51,6 +51,9 @@
   dominate the estimate, shared data can be counted repeatedly, and native
   engine allocations can be absent. These values are not deployment-memory or
   saved-file sizes.
+- Comparison summaries and feature-importance lists expose their group names
+  to assistive technology. Browser checks retain undecided accessibility items
+  for explicit review instead of discarding their targets.
 - Default report explanations use at most 5,000 evaluation rows; pairwise data
   summaries use at most 10,000 rows per partition. Model scores, univariate
   distributions and missing-value counts still use all available rows. Reports
