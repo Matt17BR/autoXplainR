@@ -125,11 +125,19 @@ prediction_exported_cases <- function(result, observed, probability, labels = NU
     return(NULL)
   }
   if (is.matrix(probability)) probability <- probability[, labels, drop = FALSE]
-  rows <- Filter(function(row) {
-    identical(row$partition, "evaluation") && isTRUE(row$retained) &&
-      length(row$processed_position) == 1L && !is.na(row$processed_position)
-  }, export$rows %||% list())
-  lapply(rows, function(row) {
+  if (identical(export$rows$layout, "columns-v1")) {
+    meta <- export$rows$meta
+    rows <- which(meta$partition == "evaluation" & meta$retained & !is.na(meta$processed_position))
+    return(prediction_case_columns(meta, rows, observed, probability, labels, positive))
+  } else {
+    rows <- Filter(function(row) {
+      identical(row$partition, "evaluation") && isTRUE(row$retained) &&
+        length(row$processed_position) == 1L && !is.na(row$processed_position)
+    }, export$rows %||% list())
+    read_row <- identity
+  }
+  lapply(rows, function(record) {
+    row <- read_row(record)
     i <- row$processed_position
     if (i < 1 || i > length(observed)) stop("Exported evaluation row is not aligned with predictions.", call. = FALSE)
     prediction <- if (is.null(labels)) {
@@ -164,6 +172,44 @@ prediction_exported_cases <- function(result, observed, probability, labels = NU
     )
   })
 }
+
+prediction_case_columns <- function(meta, rows, observed, probability, labels, positive) {
+  position <- meta$processed_position[rows]
+  if (any(position < 1L | position > length(observed))) {
+    stop("Exported evaluation row is not aligned with predictions.", call. = FALSE)
+  }
+  n <- length(rows)
+  truth <- if (is.null(labels)) observed[position] else as.character(observed[position])
+  probabilities <- if (is.matrix(probability)) probability[position, labels, drop = FALSE] else probability[position]
+  predicted <- if (is.null(labels)) {
+    probabilities
+  } else if (is.matrix(probabilities)) {
+    labels[max.col(probabilities, ties.method = "first")]
+  } else {
+    ifelse(probabilities >= .5, positive, setdiff(labels, positive)[[1L]])
+  }
+  class_probability <- function(label) {
+    if (is.null(labels)) return(rep(NA_real_, n))
+    if (is.matrix(probabilities)) return(unname(probabilities[cbind(seq_len(n), match(label, labels))]))
+    ifelse(label == positive, probabilities, 1 - probabilities)
+  }
+  columns <- list(
+    row_key = meta$row_key[rows], source = meta$source[rows], source_row = meta$source_row[rows],
+    processed_position = position, observed = truth, predicted = unname(predicted),
+    observed_probability = class_probability(truth), predicted_probability = class_probability(predicted),
+    residual = if (is.null(labels)) truth - probabilities else rep(NA_real_, n),
+    probability = if (is.null(labels)) {
+      rep(NA_real_, n)
+    } else if (is.matrix(probabilities)) {
+      as.data.frame(probabilities, row.names = seq_len(n), check.names = FALSE)
+    } else {
+      probabilities
+    }
+  )
+  structure(columns, class = "data.frame", row.names = seq_len(n))
+}
+
+prediction_case_count <- function(cases) if (is.data.frame(cases)) nrow(cases) else length(cases)
 
 prepare_prediction_view <- function(result, model_ids) {
   explainers <- report_explainers(result, models = model_ids)
@@ -420,9 +466,18 @@ prediction_classification_html <- function(model, result) {
   )
 }
 
-prediction_ordered_cases <- function(cases, task) {
-  if (!length(cases)) {
+prediction_ordered_cases <- function(cases, task, limit = NULL) {
+  if (!prediction_case_count(cases)) {
     return(cases)
+  }
+  if (is.data.frame(cases)) {
+    index <- if (task == "regression") {
+      order(-abs(cases$residual))
+    } else {
+      order(cases$observed == cases$predicted, cases$observed_probability)
+    }
+    if (!is.null(limit)) index <- head(index, limit)
+    return(cases[index, , drop = FALSE])
   }
   index <- if (task == "regression") {
     order(-vapply(cases, function(row) abs(row$residual), numeric(1)))
@@ -432,14 +487,18 @@ prediction_ordered_cases <- function(cases, task) {
       vapply(cases, function(row) row$observed_probability, numeric(1))
     )
   }
+  if (!is.null(limit)) index <- head(index, limit)
   cases[index]
 }
 
 prediction_case_table <- function(cases, task) {
-  if (!length(cases)) {
+  if (!prediction_case_count(cases)) {
     return("<p>No retained evaluation records are present in the exported row sample.</p>")
   }
-  rows <- head(prediction_ordered_cases(cases, task), 10L)
+  rows <- prediction_ordered_cases(cases, task, limit = 10L)
+  if (is.data.frame(rows)) rows <- lapply(seq_len(nrow(rows)), function(i) {
+    lapply(rows, function(column) if (is.data.frame(column)) column[i, , drop = FALSE] else column[i])
+  })
   case_value <- function(value) {
     if (task != "regression") return(html_escape(as.character(value)))
     paste0(
@@ -501,7 +560,8 @@ explorer_predictions <- function(result, models) {
       if (identical(view$mode, "rows")) {
         paste0(
           '<details class="prediction-records"><summary>Inspect exported evaluation records (',
-          length(model$cases), " of ", model$n, ")</summary><p>These records are the explicitly exported sample. ",
+          prediction_case_count(model$cases), " of ", model$n, ")</summary><p>",
+          "These are the explicitly exported evaluation records. ",
           "The diagnostics above use every evaluation row. Select a source record to inspect it in Explore data.</p>",
           prediction_case_table(model$cases, model$task), "</details>"
         )
@@ -522,6 +582,6 @@ explorer_predictions <- function(result, models) {
     '<div class="task-controls">',
     explorer_model_control(models, result$provenance$primary_model_id, "prediction-model-select"),
     "</div>", paste(panels, collapse = ""), explorer_disagreement(result),
-    report_json_script(view, "axr-predictions-payload"), "</section>"
+    report_json_script(report_predictions_payload(view), "axr-predictions-payload"), "</section>"
   )
 }

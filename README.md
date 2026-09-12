@@ -109,8 +109,10 @@ claimed from the literature.
 
 **Explore data** shows outcome and input distributions, missing values and joint
 patterns across training and evaluation. Switch between supplied values and the
-values used by models to see what preprocessing changed. Aggregate profiles use
-the full available data.
+values used by models to see what preprocessing changed. Before filtering,
+distributions and missing-value counts use all available rows. Pairwise plots
+and associations use up to 10,000 rows per partition by default, with the sample
+size shown.
 
 [![Parcel-weight distributions and missing values in the training and evaluation data](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
 
@@ -123,8 +125,8 @@ render_model_report(result, "report-with-rows.html", report_data = "rows")
 That adds row filters, linked scatter points and source-record inspection.
 A record keeps its original input-table position after splitting and row removal.
 Use `report_data_control()` to select explorer columns and bound the exported
-row sample. Profiles describe all available rows until a row filter is applied;
-filtered views describe only the exported sample. Model scores stay unchanged.
+row sample. Univariate profiles describe all available rows until a row filter
+is applied; filtered views describe only the exported sample. Model scores stay unchanged.
 Anyone receiving the HTML receives every embedded record, including hidden rows.
 The default `"summary"` mode embeds aggregates; aggregates are not an anonymity
 guarantee. `"none"` omits data exploration and per-record predictions. These
@@ -286,10 +288,32 @@ fits can complete while making very poor predictions. The report preserves
 their scores and flags rank-deficient fits; it does not quietly discard them.
 The [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
 explains how to separate model fitting from a bounded explanation and report.
-The broad `recommended` preset can be expensive: its 30-configuration search
-took 8 minutes 53 seconds on the nonlinear case, versus 58 seconds for the
-explicit three-family search, and selected the same fitted model. Choose the
-families deliberately when turnaround time matters.
+A fresh comparison of the broad `recommended` search on the nonlinear case
+fell from 412 seconds in 0.6.2 to 65 seconds in the measured 0.7.0 candidate.
+All 30 configurations completed, with the same primary model and its complete
+holdout predictions. Bank Marketing retained all 30 configurations and every model's
+predictions with little timing change. These are single-host measurements;
+the [measurements](https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md)
+identify the exact sources, budgets and limitations. Choose families
+deliberately when turnaround time matters.
+
+On a simulated problem with one million training rows and 20 inputs, one call
+fitted a two-configuration regularized/boosting search with two CV folds and
+`retain_oof = FALSE`, then wrote a 3,891,782-byte summary report. The complete
+call took 81.055 seconds.
+Scores and 1,000 paired bootstrap draws used all 20,000 evaluation rows;
+explanations used 5,000. That small search had RMSE 1.6835. A separate
+three-configuration, fit-only search reached RMSE 0.7491 in 109.012 seconds.
+The better fit and the complete report timing come from different runs.
+
+Larger data also need separate fitting, explanation and export budgets. The
+default explanation uses up to 5,000 evaluation rows, while scores still use
+the full evaluation set. Use `explanation_rows = NULL` to remove that cap, or
+`tuning_control(retain_oof = FALSE)` to keep aggregate CV evidence without the
+case-level predictions. The [larger-data guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html#larger-data)
+explains the controls, the separate PDP curve limit and what each changes.
+Large result checks also need temporary space for serialized model and data
+state; the guide explains how to choose a temporary directory on disk.
 
 ## Inspect a question in more detail
 

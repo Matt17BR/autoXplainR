@@ -19,7 +19,8 @@ render_model_report(
   uncertainty = "auto",
   target_units = NULL,
   report_data = "summary",
-  benchmark = NULL
+  benchmark = NULL,
+  explanation_rows = 5000L
 )
 }
 \arguments{
@@ -68,6 +69,12 @@ panels remain accessible to anyone receiving the file.}
 \item{benchmark}{Optional result of \code{\link[=benchmark_predictions]{benchmark_predictions()}} made from the
 same unchanged models and evaluation data. Adds repeated prediction costs
 and their measurement protocol; rendering does not run a benchmark.}
+
+\item{explanation_rows}{Maximum evaluation rows for newly computed
+explanations, as in \code{\link[=autoxplain]{autoxplain()}}. Defaults to 5000. \code{NULL} removes this cap;
+PDP curves retain their separate 1000-row limit (see \code{\link[=explain_effect]{explain_effect()}}).
+Supplying this explicitly recomputes default explanations with that scope;
+it does not replace a supplied \code{audit} or \code{effects} object.}
 }
 \value{
 The normalized output path, invisibly. Its \code{diagnostic_status}

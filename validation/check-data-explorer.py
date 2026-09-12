@@ -12,6 +12,7 @@ import re
 from playwright.sync_api import sync_playwright
 from pathlib import Path
 import json, math, bisect
+from report_payload import decode_data_payload, read_json_payload, replace_json_payload
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--case-dir", type=Path, required=True)
@@ -244,15 +245,9 @@ def mobile_column_tasks(browser, path, prefix):
 
 def mutation_checks(browser):
     oracle = json.loads((folder / "messy-regression-oracle.json").read_text())
-    pattern = re.compile(
-        r'(<script[^>]*id="axr-data-payload"[^>]*>)(.*?)(</script>)', re.S
-    )
     for label, mode in [("missing-count", "summary"), ("source-mapping", "rows")]:
         html = (folder / ("messy-regression-" + mode + ".html")).read_text()
-        match = pattern.search(html)
-        if match is None:
-            raise ValueError("Missing fixture payload")
-        data = json.loads(match.group(2))
+        data = decode_data_payload(read_json_payload(html, "axr-data-payload"))
         if label == "missing-count":
             data["profile"]["stages"]["raw"]["columns"]["weight_kg"]["training"][
                 "n_missing"
@@ -261,13 +256,7 @@ def mutation_checks(browser):
             a = next(r for r in data["rows"] if r["row_key"] == "test_data:1")
             b = next(r for r in data["rows"] if r["row_key"] == "test_data:21")
             a["row_key"], b["row_key"] = b["row_key"], a["row_key"]
-        encoded = (
-            json.dumps(data, ensure_ascii=True)
-            .replace("<", r"\u003c")
-            .replace(">", r"\u003e")
-            .replace("&", r"\u0026")
-        )
-        altered = html[: match.start(2)] + encoded + html[match.end(2) :]
+        altered = replace_json_payload(html, "axr-data-payload", data)
         path = out / ("mutated-" + label + ".html")
         path.write_text(altered)
         page = browser.new_page(viewport={"width": 1440, "height": 1000})
@@ -330,9 +319,9 @@ with sync_playwright() as p:
                 )
                 page.close()
                 continue
-            payload = page.evaluate(
+            payload = decode_data_payload(page.evaluate(
                 'JSON.parse(document.getElementById("axr-data-payload").textContent)'
-            )
+            ))
             if mode == "summary":
                 check(
                     prefix + ": summary contains no row payload",
@@ -572,12 +561,53 @@ with sync_playwright() as p:
                         == oracle["training_weight_missing"]
                         + oracle["evaluation_weight_missing"],
                     )
+                    def badge_uses_full_population():
+                        return (
+                            f"{total_missing} missing in all rows" in weight_button.inner_text()
+                            and "Full available rows" in weight_button.get_attribute("aria-description")
+                            and "selected chart follows active filters" in weight_button.get_attribute("aria-description")
+                        )
+
                     check(
-                        prefix + ": column badge describes filtered sample",
-                        f"{total_missing} missing" in weight_button.inner_text()
-                        and "Filtered exported sample"
-                        in weight_button.get_attribute("aria-description"),
+                        prefix + ": column badge explicitly keeps the full available population",
+                        badge_uses_full_population(), weight_button.get_attribute("aria-description"),
                     )
+                    full_scope = weight_button.get_attribute("aria-description")
+                    weight_button.evaluate('(node)=>node.setAttribute("aria-description", "Filtered exported rows")')
+                    check(prefix + ": rejects a badge claiming filtered scope", not badge_uses_full_population())
+                    weight_button.evaluate('(node, scope)=>node.setAttribute("aria-description", scope)', full_scope)
+                    # The old missing-only filter had the same missing count as
+                    # the full dataset, so it could not distinguish denominators.
+                    # Keep every usable weight and require the chart and badge
+                    # to state their different, independently known populations.
+                    page.locator("#data-filter-reset").click()
+                    page.locator("#data-filter-op").select_option("present")
+                    page.locator("#data-filter-form button[type=submit]").click()
+                    check(
+                        prefix + ": usable-value filter excludes every original missing weight",
+                        page.evaluate("AutoXplainRData.getState().matchingRows")
+                        == oracle["training_rows"] + oracle["evaluation_rows"] - total_missing,
+                    )
+                    weight_button.click()
+                    page.locator("[data-data-view=distribution]").click()
+                    def chart_uses_filtered_population():
+                        summary = page.locator("#data-summary").inner_text()
+                        return summary.count("0 missing") == 2 and all(
+                            f'{oracle[split + "_rows"] - oracle[split + "_weight_missing"]:,} {split} rows' in summary
+                            for split in ("training", "evaluation")
+                        )
+
+                    check(
+                        prefix + ": filtered chart has no missing weights while badge retains full missing count",
+                        chart_uses_filtered_population() and badge_uses_full_population(),
+                        dict(chart=page.locator("#data-summary").inner_text(), badge=weight_button.inner_text()),
+                    )
+                    first_stat = page.locator("#data-summary .data-stat span").first
+                    original_stat = first_stat.inner_text()
+                    first_stat.evaluate('(node, count)=>node.textContent=count + " missing"',
+                                        oracle["training_weight_missing"])
+                    check(prefix + ": rejects a chart retaining all-row missingness", not chart_uses_filtered_population())
+                    first_stat.evaluate('(node, text)=>node.textContent=text', original_stat)
                     page.evaluate(
                         """()=>{
                         window.selectedSourceEvents=[];

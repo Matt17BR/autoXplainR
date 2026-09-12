@@ -1,0 +1,609 @@
+{
+  "source": "candidate-source-v5",
+  "package": "0.7.0",
+  "source_manifest_sha256": "4553dc181ac538dd26a75e741788c58807761384f5ae314f2509e0454657fff9",
+  "source_manifest_evidence": "~/.cache/autoxplain-scale-0.7.0/candidate-source-v5-manifest.json",
+  "exact_source_commit": "3ec44adb010160e54460d96616fd3d1c2dc44560",
+  "post_snapshot_test_and_documentation_delta": "~/.cache/autoxplain-scale-0.7.0/candidate-v5-ci-test-delta.json",
+  "scope": "Two final complete public workflows under unchanged 420-second / 12 GiB address-space guards. No trained or scored rows sampled. Explanation and relationship samples are explicitly separate. Single Linux process per case, one native thread. Cold checks compare original complete prediction vectors for every model.",
+  "cases": {
+    "wide-1000000-controlled-fit": {
+      "public_result": {
+        "status": "passed",
+        "public_call_seconds": 303.841,
+        "metrics": [
+          {
+            "model_id": "main_model",
+            "metric": "rmse",
+            "loss": 1.7327,
+            "recorded_loss": 1.7327,
+            "maximum_probability_sum_error": null
+          },
+          {
+            "model_id": "regularized_model",
+            "metric": "rmse",
+            "loss": 2.1438,
+            "recorded_loss": 2.1438,
+            "maximum_probability_sum_error": null
+          },
+          {
+            "model_id": "simple_baseline",
+            "metric": "rmse",
+            "loss": 2.6181,
+            "recorded_loss": 2.6181,
+            "maximum_probability_sum_error": null
+          }
+        ],
+        "oracle_loss_before_missingness": 0.6993,
+        "training_rows": 1000000,
+        "evaluation_rows": 20000,
+        "predictors": 130,
+        "models": 3,
+        "object_bytes": 3644877320,
+        "saved_bytes": 3341727020,
+        "report_bytes": null,
+        "full_training_and_holdout_verified": true,
+        "native_training_rows": {
+          "main_model": {
+            "blueprint_rows": 1000000,
+            "native_nobs": null
+          },
+          "regularized_model": {
+            "blueprint_rows": 1000000,
+            "native_nobs": 1000000
+          },
+          "simple_baseline": {
+            "native_nobs": 1000000
+          }
+        },
+        "explanation_sampling": null,
+        "paired_uncertainty": [],
+        "explanation_details": null,
+        "fitted_model_configuration": {
+          "main_model": {
+            "family": "boosting",
+            "backend": "xgboost",
+            "parameters": {
+              "nrounds": 100,
+              "eta": 0.1,
+              "max_depth": 2,
+              "min_child_weight": 1,
+              "subsample": 1,
+              "colsample_bytree": 1,
+              "reg_alpha": 0,
+              "reg_lambda": 1,
+              "encoding": "native"
+            },
+            "computation": {
+              "requested": "native",
+              "encoding": "native",
+              "matrix_columns_estimate": 1131,
+              "matrix_cells_estimate": 1131000000,
+              "rows": 1000000,
+              "input_columns": 130,
+              "reason": "Explicit input encoding.",
+              "matrix_type": "QuantileDMatrix",
+              "max_bin": 256,
+              "scope": "Native encoding uses category partitions instead of numeric contrasts and can change predictions. This is a computation policy, not a guarantee of memory use or predictive quality."
+            },
+            "native_call_inputs": null
+          },
+          "regularized_model": {
+            "family": "regularized",
+            "backend": "glmnet",
+            "parameters": {
+              "alpha": 1,
+              "path_fraction": 0.55
+            },
+            "computation": null,
+            "native_call_inputs": [
+              "Training matrix from the saved blueprint, including any excluded dummy column.",
+              "Training outcome; binary outcomes use 1 for the second recorded class and 0 for the first."
+            ]
+          },
+          "simple_baseline": null
+        },
+        "actual_xgboost_training_matrices": [
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 85.59,
+            "rss_kib": 9119484,
+            "peak_rss_kib": 9969872,
+            "vsize_kib": 9420000,
+            "training_rows": 500000,
+            "training_columns": 130,
+            "training_matrix_class": [
+              "xgb.DMatrix",
+              "xgb.QuantileDMatrix"
+            ]
+          },
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 157.894,
+            "rss_kib": 11861480,
+            "peak_rss_kib": 12261144,
+            "vsize_kib": 12161032,
+            "training_rows": 500000,
+            "training_columns": 130,
+            "training_matrix_class": [
+              "xgb.DMatrix",
+              "xgb.QuantileDMatrix"
+            ]
+          },
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 182.39,
+            "rss_kib": 8872028,
+            "peak_rss_kib": 12261144,
+            "vsize_kib": 9171580,
+            "training_rows": 1000000,
+            "training_columns": 130,
+            "training_matrix_class": [
+              "xgb.DMatrix",
+              "xgb.QuantileDMatrix"
+            ]
+          }
+        ],
+        "tuning_input_policy": {
+          "boosting": {
+            "requested": "auto",
+            "encoding": "native",
+            "matrix_columns_estimate": 1132,
+            "matrix_cells_estimate": 1132000000,
+            "rows": 1000000,
+            "input_columns": 130,
+            "reason": "Categorical expansion exceeds twice the input width and 50 million matrix cells; native categorical splits avoid constructing that dense expansion.",
+            "matrix_type": "QuantileDMatrix",
+            "max_bin": 256,
+            "scope": "Automatic input representation is planned once from outer-training row count and predictor cardinality, without outcomes or holdout rows. That representation is fixed across all folds and refits; category levels, contrasts and imputation are still learned separately within each training fold. Explicit encoding choices are unchanged."
+          }
+        },
+        "configurations_attempted": 2,
+        "configurations_failed": [],
+        "selected_configuration": "boosting_01",
+        "final_configuration": "boosting_01",
+        "families_resampling_failed": [],
+        "families_refit_failed": []
+      },
+      "process": {
+        "began_at_utc": "2026-09-12T03:24:29.975532+00:00",
+        "wall_seconds": 310.88339126700157,
+        "returncode": 0,
+        "timed_out": false,
+        "time_limit_seconds": 420,
+        "address_space_limit_gib": 12,
+        "command": [
+          "/usr/bin/time",
+          "-v",
+          "-o",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/wide-1000000-controlled-fit/time.txt",
+          "Rscript",
+          "--vanilla",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/wide-1000000-controlled-fit/source/run-case.R",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-library-v5",
+          "wide",
+          "1000000",
+          "controlled_fit",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/wide-1000000-controlled-fit"
+        ],
+        "last_stage": {
+          "stage": "save_model",
+          "boundary": "exit",
+          "elapsed": 309.99,
+          "rss_kib": 8868448,
+          "peak_rss_kib": 12261144,
+          "vsize_kib": 9298844
+        },
+        "highest_recorded_rss_kib": 12261144,
+        "supervisor_sha256": "17334b377fde674c277ede149b5164c27b63168b282ec9476919206b26608363"
+      },
+      "cold": {
+        "status": "passed",
+        "library": "~/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+        "version": "0.7.0",
+        "script_md5": "970352528d986b704d9afbc1b09f10dc",
+        "models": 3,
+        "full_holdout_rows_per_model": 20000,
+        "losses": {
+          "main_model": 1.7327060312215579,
+          "regularized_model": 2.143833989787595,
+          "simple_baseline": 2.618056467149924
+        },
+        "saved_probe_rows_per_model": 64,
+        "full_prediction_vector_check": "passed",
+        "original_result_prediction_checks": {
+          "main_model": {
+            "source": "original result$evaluation$predictions",
+            "rows": 20000,
+            "fields": "primary_prediction",
+            "full_numeric_or_binary_probability_vector": true
+          },
+          "simple_baseline": {
+            "source": "original result$evaluation$predictions",
+            "rows": 20000,
+            "fields": "baseline_prediction",
+            "full_numeric_or_binary_probability_vector": true
+          }
+        },
+        "reordered_factor_predictors": [
+          "segment",
+          "channel"
+        ],
+        "reordered_factor_levels_preserve_predictions": true,
+        "numeric_missing_predictors": "x1",
+        "novel_level_predictors": "segment",
+        "predictions_with_tested_missing_and_novel_inputs_are_finite": true,
+        "report_rendered": false,
+        "report_controls": {}
+      },
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/wide-1000000-controlled-fit",
+      "source_inputs": {
+        "package": "0.7.0",
+        "R": "R version 4.5.2 (2025-10-31)",
+        "platform": "x86_64-pc-linux-gnu",
+        "rng": [
+          "Mersenne-Twister",
+          "Inversion",
+          "Rejection"
+        ],
+        "engines": [
+          {
+            "package": "glmnet",
+            "version": "5.0"
+          },
+          {
+            "package": "xgboost",
+            "version": "3.2.1.1"
+          },
+          {
+            "package": "Matrix",
+            "version": "1.7.5"
+          },
+          {
+            "package": "nnet",
+            "version": "7.3.20"
+          },
+          {
+            "package": "rpart",
+            "version": "4.1.27"
+          }
+        ],
+        "fixture_source_md5": "770d2c15e8d58d7742d23d0b7fbee79e",
+        "runner_source_md5": "18800c2178e6dcf51bfdb3f7a778a3be",
+        "native_threads": 1
+      },
+      "evidence_sha256": {
+        "input.json": "335e4be062a92ed043f39da7a31b929b295925c3479616b74679e11aafcb60b9",
+        "data.json": "4db6344767d95e2b5d7a949e767c84807d094cca3c985a22965bf76ecfe515a8",
+        "result.json": "5f9c431409c87f7a049f638a51dd2e0525fa7d87838fc75629cc414444faceca",
+        "public-call.json": "d3b6de6fc50aa0e70fe6793c4e36bda58197b4e91b399c5c923afd15117650a7",
+        "supervisor.json": "ccf343068e471a7a9513175f973ad1449cd81e81d6a306bbad044d93f93337d1",
+        "stages.jsonl": "7f2f6d1fcc621e824732519ec6788794b9f84d2ca005984c9d0c98e99189ea22",
+        "cold-replay.json": "c4f969aab8078e6d3766dd7549536f05f670b4729fd74d5d4a9571be7364c04f",
+        "source/run-case.R": "63823564a93e92658357b02d47eff4b4c9b23287c64ae950da0c7686236d9641",
+        "source/fixtures.R": "0288d6d71f8eb28ee8ef41211db9e0df0653023f75a7f538fe85124f3ffed12f"
+      }
+    },
+    "regression-1000000-controlled-full": {
+      "public_result": {
+        "status": "passed",
+        "public_call_seconds": 81.055,
+        "metrics": [
+          {
+            "model_id": "main_model",
+            "metric": "rmse",
+            "loss": 1.6835,
+            "recorded_loss": 1.6835,
+            "maximum_probability_sum_error": null
+          },
+          {
+            "model_id": "regularized_model",
+            "metric": "rmse",
+            "loss": 2.0372,
+            "recorded_loss": 2.0372,
+            "maximum_probability_sum_error": null
+          },
+          {
+            "model_id": "simple_baseline",
+            "metric": "rmse",
+            "loss": 2.5203,
+            "recorded_loss": 2.5203,
+            "maximum_probability_sum_error": null
+          }
+        ],
+        "oracle_loss_before_missingness": 0.6993,
+        "training_rows": 1000000,
+        "evaluation_rows": 20000,
+        "predictors": 20,
+        "models": 3,
+        "object_bytes": 958993680,
+        "saved_bytes": 656589190,
+        "report_bytes": 3891782,
+        "full_training_and_holdout_verified": true,
+        "native_training_rows": {
+          "main_model": {
+            "blueprint_rows": 1000000,
+            "native_nobs": null
+          },
+          "regularized_model": {
+            "blueprint_rows": 1000000,
+            "native_nobs": 1000000
+          },
+          "simple_baseline": {
+            "native_nobs": 1000000
+          }
+        },
+        "explanation_sampling": {
+          "rows_available": 20000,
+          "rows_used": 5000,
+          "sampled": true,
+          "method": "Uniform sample without replacement",
+          "seed": 824
+        },
+        "paired_uncertainty": [
+          {
+            "stage": "performance_uncertainty",
+            "boundary": "exit",
+            "elapsed": 68.048,
+            "rss_kib": 1851220,
+            "peak_rss_kib": 2455048,
+            "vsize_kib": 2281932,
+            "bootstrap_draws": 1000,
+            "retained_draws": 1000,
+            "sampling_units": 20000,
+            "unit": "observation",
+            "metric": "rmse"
+          }
+        ],
+        "explanation_details": {
+          "config": {
+            "top_features": 8,
+            "n_repeats": 20,
+            "max_models": 5,
+            "explanation_rows": 5000
+          },
+          "importance_models": [
+            "main_model",
+            "regularized_model",
+            "simple_baseline"
+          ],
+          "primary_effect_features": [
+            "x1",
+            "x2",
+            "x5",
+            "x3",
+            "x4",
+            "x6",
+            "x7",
+            "x8"
+          ],
+          "effect_failures": []
+        },
+        "fitted_model_configuration": {
+          "main_model": {
+            "family": "boosting",
+            "backend": "xgboost",
+            "parameters": {
+              "nrounds": 100,
+              "eta": 0.1,
+              "max_depth": 2,
+              "min_child_weight": 1,
+              "subsample": 1,
+              "colsample_bytree": 1,
+              "reg_alpha": 0,
+              "reg_lambda": 1,
+              "encoding": "matrix"
+            },
+            "computation": {
+              "requested": "matrix",
+              "encoding": "matrix",
+              "matrix_columns_estimate": 20,
+              "matrix_cells_estimate": 20000000,
+              "rows": 1000000,
+              "input_columns": 20,
+              "reason": "Explicit input encoding.",
+              "matrix_type": "DMatrix",
+              "max_bin": 256,
+              "scope": "Native encoding uses category partitions instead of numeric contrasts and can change predictions. This is a computation policy, not a guarantee of memory use or predictive quality."
+            },
+            "native_call_inputs": null
+          },
+          "regularized_model": {
+            "family": "regularized",
+            "backend": "glmnet",
+            "parameters": {
+              "alpha": 1,
+              "path_fraction": 0.55
+            },
+            "computation": null,
+            "native_call_inputs": [
+              "Training matrix from the saved blueprint, including any excluded dummy column.",
+              "Training outcome; binary outcomes use 1 for the second recorded class and 0 for the first."
+            ]
+          },
+          "simple_baseline": null
+        },
+        "actual_xgboost_training_matrices": [
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 7.657,
+            "rss_kib": 1919500,
+            "peak_rss_kib": 1919500,
+            "vsize_kib": 2221188,
+            "training_rows": 500000,
+            "training_columns": 20,
+            "training_matrix_class": "xgb.DMatrix"
+          },
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 14.518,
+            "rss_kib": 1745280,
+            "peak_rss_kib": 2142668,
+            "vsize_kib": 2045008,
+            "training_rows": 500000,
+            "training_columns": 20,
+            "training_matrix_class": "xgb.DMatrix"
+          },
+          {
+            "stage": "xgb.train",
+            "boundary": "enter",
+            "elapsed": 18.953,
+            "rss_kib": 2370292,
+            "peak_rss_kib": 2455048,
+            "vsize_kib": 2670020,
+            "training_rows": 1000000,
+            "training_columns": 20,
+            "training_matrix_class": "xgb.DMatrix"
+          }
+        ],
+        "tuning_input_policy": {
+          "boosting": {
+            "requested": "auto",
+            "encoding": "matrix",
+            "matrix_columns_estimate": 20,
+            "matrix_cells_estimate": 20000000,
+            "rows": 1000000,
+            "input_columns": 20,
+            "reason": "The estimated categorical expansion fits below the automatic native-encoding threshold.",
+            "matrix_type": "DMatrix",
+            "max_bin": 256,
+            "scope": "Automatic input representation is planned once from outer-training row count and predictor cardinality, without outcomes or holdout rows. That representation is fixed across all folds and refits; category levels, contrasts and imputation are still learned separately within each training fold. Explicit encoding choices are unchanged."
+          }
+        },
+        "configurations_attempted": 2,
+        "configurations_failed": [],
+        "selected_configuration": "boosting_01",
+        "final_configuration": "boosting_01",
+        "families_resampling_failed": [],
+        "families_refit_failed": []
+      },
+      "process": {
+        "began_at_utc": "2026-09-12T03:30:16.858693+00:00",
+        "wall_seconds": 83.2075943939999,
+        "returncode": 0,
+        "timed_out": false,
+        "time_limit_seconds": 420,
+        "address_space_limit_gib": 12,
+        "command": [
+          "/usr/bin/time",
+          "-v",
+          "-o",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full/time.txt",
+          "Rscript",
+          "--vanilla",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full/source/run-case.R",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-library-v5",
+          "regression",
+          "1000000",
+          "controlled_full",
+          "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full"
+        ],
+        "last_stage": {
+          "stage": "save_model",
+          "boundary": "exit",
+          "elapsed": 82.568,
+          "rss_kib": 2132148,
+          "peak_rss_kib": 2455048,
+          "vsize_kib": 2562840
+        },
+        "highest_recorded_rss_kib": 2455048,
+        "supervisor_sha256": "17334b377fde674c277ede149b5164c27b63168b282ec9476919206b26608363"
+      },
+      "cold": {
+        "status": "passed",
+        "library": "~/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+        "version": "0.7.0",
+        "script_md5": "970352528d986b704d9afbc1b09f10dc",
+        "models": 3,
+        "full_holdout_rows_per_model": 20000,
+        "losses": {
+          "main_model": 1.6835292139974354,
+          "regularized_model": 2.0371672556822475,
+          "simple_baseline": 2.520283209082887
+        },
+        "saved_probe_rows_per_model": 64,
+        "full_prediction_vector_check": "passed",
+        "original_result_prediction_checks": {
+          "main_model": {
+            "source": "original result$evaluation$predictions",
+            "rows": 20000,
+            "fields": "primary_prediction",
+            "full_numeric_or_binary_probability_vector": true
+          },
+          "simple_baseline": {
+            "source": "original result$evaluation$predictions",
+            "rows": 20000,
+            "fields": "baseline_prediction",
+            "full_numeric_or_binary_probability_vector": true
+          }
+        },
+        "reordered_factor_predictors": [],
+        "reordered_factor_levels_preserve_predictions": {},
+        "numeric_missing_predictors": "x1",
+        "novel_level_predictors": [],
+        "predictions_with_tested_missing_and_novel_inputs_are_finite": true,
+        "report_rendered": false,
+        "report_controls": {}
+      },
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full",
+      "source_inputs": {
+        "package": "0.7.0",
+        "R": "R version 4.5.2 (2025-10-31)",
+        "platform": "x86_64-pc-linux-gnu",
+        "rng": [
+          "Mersenne-Twister",
+          "Inversion",
+          "Rejection"
+        ],
+        "engines": [
+          {
+            "package": "glmnet",
+            "version": "5.0"
+          },
+          {
+            "package": "xgboost",
+            "version": "3.2.1.1"
+          },
+          {
+            "package": "Matrix",
+            "version": "1.7.5"
+          },
+          {
+            "package": "nnet",
+            "version": "7.3.20"
+          },
+          {
+            "package": "rpart",
+            "version": "4.1.27"
+          }
+        ],
+        "fixture_source_md5": "770d2c15e8d58d7742d23d0b7fbee79e",
+        "runner_source_md5": "18800c2178e6dcf51bfdb3f7a778a3be",
+        "native_threads": 1
+      },
+      "evidence_sha256": {
+        "input.json": "804baef177d90394ca598d1a7bbba54b59e728c4a2c3031c58de9ee5adcacd84",
+        "data.json": "9cd987c35b04f3a25e26e9be94dce8ee69accd2a5b793817c4c3d53ed0e360e6",
+        "result.json": "8c6627ab76ebbe4475aa10409e407ff57fdf1df6073e13ef4d8356152db30149",
+        "public-call.json": "08260a1e851e20fef35e730d266a0fff6e28ce23174ff2ea4a1b89ababcfed24",
+        "supervisor.json": "77f5c55e538b821d6a545fe228b1708f2020a7222339348aaa0ca801139eb867",
+        "stages.jsonl": "3840bd9e39e4728396d4d978aaaac4715b914a728d737c0f6639ca7502071b0c",
+        "cold-replay.json": "75eff81e84b4a030d08430848630471fa05f5c80a87743f0c4b31c8a1bfb9e5a",
+        "source/run-case.R": "63823564a93e92658357b02d47eff4b4c9b23287c64ae950da0c7686236d9641",
+        "source/fixtures.R": "0288d6d71f8eb28ee8ef41211db9e0df0653023f75a7f538fe85124f3ffed12f"
+      }
+    }
+  },
+  "verification_scripts_sha256": {
+    "run-case.R": "63823564a93e92658357b02d47eff4b4c9b23287c64ae950da0c7686236d9641",
+    "replay-case.R": "03b1193f4004492894a706202bd015100d0a814d628bc3496865a89f781d39c6",
+    "check-final-report.py": "e7f0201e6650695de2f899d546ef725259bd56e38c1d2ee739556e67ba34e9b0",
+    "fixtures.R": "0288d6d71f8eb28ee8ef41211db9e0df0653023f75a7f538fe85124f3ffed12f",
+    "supervise.py": "17334b377fde674c277ede149b5164c27b63168b282ec9476919206b26608363"
+  }
+}

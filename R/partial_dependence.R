@@ -16,7 +16,9 @@
 #'   first lower boundary and each upper boundary.
 #' @param quantile_range Numeric length-two range used for a numeric PDP grid.
 #' @param sample_size Maximum number of reference rows used by PDP. `NULL` uses
-#'   all rows. ALE always uses all rows that fall inside its bins.
+#'   all rows unless `max_rows` is set. The curve uses the smaller of these
+#'   limits, drawn once from the original reference population. Grid support
+#'   uses the separate `max_rows` sample; both row counts are recorded.
 #' @param seed Sampling seed; the caller's random-number state is restored.
 #' @param predict_function Optional prediction function for a fitted model.
 #' @param task Prediction task for a fitted model.
@@ -27,6 +29,11 @@
 #' @param return_all_classes Retained for compatibility. Multiclass callers
 #'   should make separate class-specific explainers; `TRUE` is not supported by
 #'   ALE.
+#' @param max_rows Optional cap on reference rows for either method. `NULL`
+#'   preserves the full reference data. A finite cap selects a uniform sample
+#'   without replacement before computing bins, support, and effects. The
+#'   returned `sampling` attribute records this scope; descriptive bands do
+#'   not include uncertainty from selecting these rows.
 #'
 #' @return A data frame of class `autoxplain_effect`. Both methods return the
 #'   effect estimate, relative empirical support, a descriptive standard error,
@@ -63,7 +70,8 @@ explain_effect <- function(model,
                            positive = NULL,
                            class = NULL,
                            grid_size = NULL,
-                           return_all_classes = FALSE) {
+                           return_all_classes = FALSE,
+                           max_rows = NULL) {
   method <- match.arg(method)
   if (!is.null(grid_size)) {
     warning("`grid_size` is deprecated; use `n_points`.", call. = FALSE)
@@ -80,14 +88,26 @@ explain_effect <- function(model,
     stop("ALE supports one prediction target at a time; set `class` explicitly.",
          call. = FALSE)
   }
+  sampling <- explanation_row_sample(nrow(input$data), max_rows, seed)
+  reference <- input$data[sampling$row_indices, , drop = FALSE]
+  curve_rows <- NULL
+  if (method == "pdp" && sampling$sampled) {
+    count <- min(nrow(reference), sample_size %||% nrow(reference))
+    # Draw directly from the original population. Resetting the same PRNG
+    # inside a sorted outer sample biases the second draw toward its ends.
+    curve_rows <- with_preserved_seed(seed, sample.int(nrow(input$data), count))
+  }
   effect <- if (method == "ale") {
-    calculate_ale_impl(input$predict, input$data, input$feature, n_points)
+    calculate_ale_impl(input$predict, reference, input$feature, n_points)
   } else {
     calculate_pdp_impl(
-      input$predict, input$data, input$feature, n_points, quantile_range,
-      sample_size, seed
+      input$predict, reference, input$feature, n_points, quantile_range,
+      if (is.null(curve_rows)) sample_size else NULL, seed,
+      reference_data = if (!is.null(curve_rows)) input$data[curve_rows, , drop = FALSE] else NULL
     )
   }
+  attr(effect, "reference_rows") <- curve_rows %||% sampling$row_indices[attr(effect, "reference_rows")]
+  attr(effect, "sampling") <- sampling
   attr(effect, "task") <- input$task
   attr(effect, "prediction_target") <- input$prediction_target
   attr(effect, "prediction_class") <- input$prediction_class
@@ -438,10 +458,11 @@ calculate_pdp_impl <- function(predict_function,
                                n_points,
                                quantile_range,
                                sample_size,
-                               seed) {
+                               seed,
+                               reference_data = NULL) {
   grid <- get_feature_grid(data[[feature]], n_points, quantile_range)
-  reference <- data
-  reference_rows <- seq_len(nrow(data))
+  reference <- reference_data %||% data
+  reference_rows <- seq_len(nrow(reference))
   if (!is.null(sample_size) && nrow(reference) > sample_size) {
     indices <- with_preserved_seed(seed, sample.int(nrow(reference), sample_size))
     reference <- reference[indices, , drop = FALSE]
@@ -583,19 +604,21 @@ ale_centered_standard_error <- function(bin_se, weights = NULL, coefficients = N
 
 finalize_effect <- function(result, data, feature, method, n_reference) {
   associations <- feature_associations(data, feature)
-  max_association <- if (length(associations)) max(associations, na.rm = TRUE) else 0
-  if (!is.finite(max_association)) max_association <- 0
+  usable <- associations[is.finite(associations)]
+  max_association <- if (length(usable)) max(usable) else if (length(associations)) NA_real_ else 0
   class(result) <- c("autoxplain_effect", "data.frame")
   attr(result, "method") <- method
   attr(result, "feature") <- feature
   attr(result, "n_reference") <- n_reference
+  attr(result, "n_support") <- nrow(data)
   attr(result, "max_association") <- max_association
-  attr(result, "associated_feature") <- if (length(associations)) {
-    names(associations)[which.max(associations)]
+  attr(result, "associated_feature") <- if (length(usable)) {
+    names(usable)[which.max(usable)]
   } else {
     NA_character_
   }
-  attr(result, "dependence_warning") <- method == "pdp" && max_association >= 0.7
+  attr(result, "dependence_warning") <- method == "pdp" && is.finite(max_association) && max_association >= 0.7
+  attr(result, "associations_unavailable") <- names(associations)[!is.finite(associations)]
   attr(result, "association_scope") <- association_screen_scope()
   attr(result, "support_note") <- "Support is relative local empirical density on a 0-1 scale."
   result

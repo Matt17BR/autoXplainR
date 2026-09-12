@@ -1,0 +1,42 @@
+[
+  {
+    "case": "friedman_noise",
+    "variant": "baseline",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 413.8868120850002,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-baseline-964072921ca6.R",
+      "friedman_noise",
+      "baseline"
+    ],
+    "script_sha256": "964072921ca6d308e081ca71dc5765c46072b6678506f6c3955c1ede35abca4f",
+    "native_threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  },
+  {
+    "case": "bank_marketing",
+    "variant": "baseline",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 212.4585363620008,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-baseline-964072921ca6.R",
+      "bank_marketing",
+      "baseline"
+    ],
+    "script_sha256": "964072921ca6d308e081ca71dc5765c46072b6678506f6c3955c1ede35abca4f",
+    "native_threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  }
+]

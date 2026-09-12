@@ -1,0 +1,190 @@
+{
+  "models": {
+    "main_model": {
+      "class": "autoxplain_fitted_model",
+      "total_bytes": 57120,
+      "components": {
+        "blueprint": 35768,
+        "fit": 4424,
+        "fit_details": 2512,
+        "parameters": 1616,
+        "features": 1328,
+        "family": 120,
+        "task": 120,
+        "backend": 112,
+        "package_version": 112,
+        "seed": 56,
+        "class_levels": 0
+      },
+      "native_class": "xgb.Booster",
+      "native_type": "list",
+      "native_bytes": 4424,
+      "native_attributes": {
+        "params": 2280,
+        "call": 1344,
+        "class": 120,
+        "names": 112
+      },
+      "native_components": {
+        "ptr": 64
+      }
+    },
+    "regularized_model": {
+      "class": "autoxplain_fitted_model",
+      "total_bytes": 64440,
+      "components": {
+        "blueprint": 35928,
+        "fit": 17816,
+        "fit_details": 1352,
+        "features": 1328,
+        "parameters": 472,
+        "family": 120,
+        "task": 120,
+        "backend": 112,
+        "package_version": 112,
+        "seed": 56,
+        "class_levels": 0
+      },
+      "native_class": [
+        "elnet",
+        "glmnet"
+      ],
+      "native_type": "list",
+      "native_bytes": 17816,
+      "native_attributes": {
+        "names": 856,
+        "class": 176
+      },
+      "native_components": {
+        "beta": 8376,
+        "a0": 4528,
+        "call": 1800,
+        "lambda": 528,
+        "dev.ratio": 528,
+        "df": 288,
+        "dim": 56,
+        "nulldev": 56,
+        "npasses": 56,
+        "jerr": 56,
+        "offset": 56,
+        "nobs": 56
+      }
+    },
+    "simple_baseline": {
+      "class": "lm",
+      "total_bytes": 240011320,
+      "components": {
+        "qr": 72001760,
+        "residuals": 72000208,
+        "fitted.values": 72000208,
+        "effects": 16000328,
+        "model": 8003568,
+        "terms": 2728,
+        "call": 728,
+        "coefficients": 288,
+        "rank": 56,
+        "assign": 56,
+        "df.residual": 56
+      },
+      "native_class": "lm",
+      "native_type": "list",
+      "native_bytes": 240011320,
+      "native_attributes": {
+        "names": 824,
+        "class": 112
+      },
+      "native_components": {
+        "qr": 72001760,
+        "residuals": 72000208,
+        "fitted.values": 72000208,
+        "effects": 16000328,
+        "model": 8003568,
+        "terms": 2728,
+        "call": 728,
+        "coefficients": 288,
+        "rank": 56,
+        "assign": 56,
+        "df.residual": 56
+      }
+    }
+  },
+  "baseline_fields": {
+    "residuals": {
+      "type": "double",
+      "length": 1000000,
+      "total_bytes": 72000208,
+      "plain_vector_bytes": 8000048,
+      "attribute_bytes": {
+        "names": 64000048
+      }
+    },
+    "fitted.values": {
+      "type": "double",
+      "length": 1000000,
+      "total_bytes": 72000208,
+      "plain_vector_bytes": 8000048,
+      "attribute_bytes": {
+        "names": 64000048
+      }
+    },
+    "effects": {
+      "type": "double",
+      "length": 1000000,
+      "total_bytes": 16000328,
+      "plain_vector_bytes": 8000048,
+      "attribute_bytes": {
+        "names": 8000168
+      }
+    },
+    "qr": {
+      "total_bytes": 72001760,
+      "components": {
+        "qr": 72000728,
+        "qraux": 56,
+        "pivot": 56,
+        "tol": 56,
+        "rank": 56
+      }
+    },
+    "model": {
+      "total_bytes": 8003568,
+      "components": {
+        "outcome": 8000048
+      }
+    },
+    "terms": {
+      "type": "language",
+      "bytes": 2728
+    }
+  },
+  "leaderboard": [
+    {
+      "model_id": "main_model",
+      "model_size_kb": 55.78125
+    },
+    {
+      "model_id": "regularized_model",
+      "model_size_kb": 62.9296875
+    },
+    {
+      "model_id": "simple_baseline",
+      "model_size_kb": 234386.0546875
+    }
+  ],
+  "caveat": "Component object.size totals count shared attributes repeatedly. Not live allocation or deployment footprint.",
+  "audit": {
+    "scope": "Read-only inventory of an existing saved million-training-row regression result. No fitting or mutation of model objects. Values describe R object.size only; native engine heap and deployment footprint were not measured.",
+    "fixture": "candidate-v5/regression-1000000-controlled-full",
+    "package_version": "0.7.0",
+    "training_rows": 1000000,
+    "evaluation_rows": 20000,
+    "source_snapshot": "candidate-source-v5",
+    "source_commit": "3ec44adb010160e54460d96616fd3d1c2dc44560",
+    "report_sha256": "665f438dc288e3d99c02ea8916a640fc1f22d61c25c9eb8f5c3bd54a6e12b257",
+    "raw_evidence_directory": "~/.cache/autoxplain-scale-0.7.0/model-size-review",
+    "inspection_script_sha256": "48eb7e3584a02157a91fcdad6fa736b7ce2c61249daf07af6d8e8532433d5899",
+    "measurement": "as.numeric(utils::object.size(model)) / 1024, reported in KiB",
+    "conclusion": "The values reproduce the leaderboard. Differences reflect retained diagnostics and representation; shared data can be counted repeatedly, while native engine allocation is excluded. They are not comparable saved-file or deployment-memory measurements.",
+    "repair": "Qualify chart help, measurement disclosure and model_tradeoffs documentation. Preserve numeric measurements, API, choices, retained diagnostics and computations."
+  }
+}

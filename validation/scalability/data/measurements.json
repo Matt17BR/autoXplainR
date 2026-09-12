@@ -1,0 +1,276 @@
+{
+  "measurements": [
+    {
+      "variant": "baseline",
+      "total_rows": 100000,
+      "training_rows": 80000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "records-full",
+      "capture_elapsed_seconds": 0.23300000000000004,
+      "prepare_elapsed_seconds": 4.601,
+      "retained_export_size_bytes": 452128528,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": null,
+      "rows_exported": 100000,
+      "exact_distributions_verified": true,
+      "baseline_package_version": "0.6.2",
+      "source_hashes": null,
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 514756
+    },
+    {
+      "variant": "baseline",
+      "total_rows": 100000,
+      "training_rows": 80000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "summary",
+      "capture_elapsed_seconds": 0.2,
+      "prepare_elapsed_seconds": 1.459,
+      "retained_export_size_bytes": 769120,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": null,
+      "rows_exported": 0,
+      "exact_distributions_verified": true,
+      "source_hashes": null,
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 146976,
+      "baseline_package_version": "0.6.2"
+    },
+    {
+      "variant": "baseline",
+      "total_rows": 1000000,
+      "training_rows": 800000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "summary",
+      "capture_elapsed_seconds": 2.468,
+      "prepare_elapsed_seconds": 20.243000000000002,
+      "retained_export_size_bytes": 780144,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": null,
+      "rows_exported": 0,
+      "exact_distributions_verified": true,
+      "source_hashes": null,
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 725032,
+      "baseline_package_version": "0.6.2"
+    },
+    {
+      "variant": "candidate",
+      "total_rows": 100000,
+      "training_rows": 80000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "columns-full",
+      "capture_elapsed_seconds": 0.37699999999999995,
+      "prepare_elapsed_seconds": 1.059,
+      "retained_export_size_bytes": 22062872,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": {
+        "training": {
+          "n_population": 80000,
+          "n_sample": 10000,
+          "sampled": true
+        },
+        "evaluation": {
+          "n_population": 20000,
+          "n_sample": 10000,
+          "sampled": true
+        }
+      },
+      "rows_exported": 100000,
+      "exact_distributions_verified": true,
+      "baseline_package_version": "0.6.2",
+      "source_hashes": {
+        "R/data_profile.R": "562b8fb1ca6f5985d96aa33528c22ada",
+        "R/data_context.R": "d72ee20cd5abb1dd35fd2c4d179b8aa1"
+      },
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 168324
+    },
+    {
+      "variant": "candidate",
+      "total_rows": 100000,
+      "training_rows": 80000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "summary",
+      "capture_elapsed_seconds": 0.19699999999999998,
+      "prepare_elapsed_seconds": 0.538,
+      "retained_export_size_bytes": 856104,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": {
+        "training": {
+          "n_population": 80000,
+          "n_sample": 10000,
+          "sampled": true
+        },
+        "evaluation": {
+          "n_population": 20000,
+          "n_sample": 10000,
+          "sampled": true
+        }
+      },
+      "rows_exported": 0,
+      "exact_distributions_verified": true,
+      "source_hashes": {
+        "R/data_profile.R": "562b8fb1ca6f5985d96aa33528c22ada",
+        "R/data_context.R": "d72ee20cd5abb1dd35fd2c4d179b8aa1"
+      },
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 158760,
+      "baseline_package_version": "0.6.2"
+    },
+    {
+      "variant": "candidate",
+      "total_rows": 1000000,
+      "training_rows": 800000,
+      "columns": 8,
+      "high_cardinality": true,
+      "layout": "summary",
+      "capture_elapsed_seconds": 2.9840000000000004,
+      "prepare_elapsed_seconds": 6.519,
+      "retained_export_size_bytes": 71372888,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": {
+        "training": {
+          "n_population": 800000,
+          "n_sample": 10000,
+          "sampled": true
+        },
+        "evaluation": {
+          "n_population": 200000,
+          "n_sample": 10000,
+          "sampled": true
+        }
+      },
+      "rows_exported": 0,
+      "exact_distributions_verified": true,
+      "baseline_package_version": "0.6.2",
+      "source_hashes": {
+        "R/data_profile.R": "562b8fb1ca6f5985d96aa33528c22ada",
+        "R/data_context.R": "d72ee20cd5abb1dd35fd2c4d179b8aa1"
+      },
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 874416
+    },
+    {
+      "variant": "candidate",
+      "total_rows": 1000000,
+      "training_rows": 800000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "columns-full",
+      "capture_elapsed_seconds": 3.099,
+      "prepare_elapsed_seconds": 2.9520000000000004,
+      "retained_export_size_bytes": 214433976,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": {
+        "training": {
+          "n_population": 800000,
+          "n_sample": 10000,
+          "sampled": true
+        },
+        "evaluation": {
+          "n_population": 200000,
+          "n_sample": 10000,
+          "sampled": true
+        }
+      },
+      "rows_exported": 1000000,
+      "exact_distributions_verified": true,
+      "baseline_package_version": "0.6.2",
+      "source_hashes": {
+        "R/data_profile.R": "562b8fb1ca6f5985d96aa33528c22ada",
+        "R/data_context.R": "d72ee20cd5abb1dd35fd2c4d179b8aa1"
+      },
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 733720
+    },
+    {
+      "variant": "candidate",
+      "total_rows": 1000000,
+      "training_rows": 800000,
+      "columns": 7,
+      "high_cardinality": false,
+      "layout": "summary",
+      "capture_elapsed_seconds": 2.353,
+      "prepare_elapsed_seconds": 2.384,
+      "retained_export_size_bytes": 827192,
+      "shared_object_sizes_bytes": null,
+      "raw_processed_training_share_numeric_columns": {
+        "x": true,
+        "skew": true,
+        "noise": true,
+        "periodic": true
+      },
+      "pair_sample": {
+        "training": {
+          "n_population": 800000,
+          "n_sample": 10000,
+          "sampled": true
+        },
+        "evaluation": {
+          "n_population": 200000,
+          "n_sample": 10000,
+          "sampled": true
+        }
+      },
+      "rows_exported": 0,
+      "exact_distributions_verified": true,
+      "baseline_package_version": "0.6.2",
+      "source_hashes": {
+        "R/data_profile.R": "562b8fb1ca6f5985d96aa33528c22ada",
+        "R/data_context.R": "d72ee20cd5abb1dd35fd2c4d179b8aa1"
+      },
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 733392
+    }
+  ],
+  "timing_scope": "One fresh R process per case; preparation elapsed excludes fixture construction and data capture. Peak process RSS includes package load, fixture, capture, preparation and independent checks. Measurements are single runs, not confidence intervals.",
+  "source": "Published0.6.2 library plus candidate R/data_profile.R and R/data_context.R only; no model fitting or HTML serialization."
+}

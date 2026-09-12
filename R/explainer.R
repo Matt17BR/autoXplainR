@@ -85,7 +85,7 @@ explain_model <- function(model,
     stop("`metadata` must be a named list.", call. = FALSE)
   }
 
-  resolved_task <- if (identical(task, "auto")) detect_task(outcome) else task
+  resolved_task <- if (identical(task, "auto")) detect_task(outcome, declared_levels = TRUE) else task
   if (resolved_task == "regression") {
     validate_guided_target(outcome, resolved_task)
   } else if (!is.factor(outcome)) {
@@ -209,7 +209,13 @@ predict.autoxplain_explainer <- function(object, newdata, ...) {
   out
 }
 
-detect_task <- function(y) {
+detect_task <- function(y, declared_levels = FALSE) {
+  # Evaluation data may omit a class that the fitted model still predicts.
+  # Training callers keep inferring from observed classes, so unused factor
+  # levels do not introduce classes that the model cannot learn.
+  if (isTRUE(declared_levels) && is.factor(y)) {
+    return(if (nlevels(y) == 2L) "binary" else "multiclass")
+  }
   values <- unique(y[!is.na(y)])
   if (is.logical(y) || is.factor(y) || is.character(y)) {
     return(if (length(values) == 2L) "binary" else "multiclass")
@@ -306,6 +312,11 @@ normalize_predictions <- function(x,
                                   class_levels = NULL,
                                   n = NULL,
                                   probability_class = NULL) {
+  # mgcv can return one prediction per row as a one-dimensional array.
+  # Flatten only that unambiguous shape; matrices still need named columns.
+  if (task %in% c("regression", "binary") && is.numeric(x) && length(dim(x)) == 1L) {
+    x <- as.numeric(x)
+  }
   if (task == "regression") {
     if (is.data.frame(x) || is.matrix(x)) {
       if ("predict" %in% colnames(x)) {

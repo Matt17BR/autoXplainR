@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   generated-report:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
       - name: Install pinned browser and accessibility tools
         run: |
           python -m pip install playwright==1.58.0
-          python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium firefox webkit
           npm install --prefix "$RUNNER_TEMP/report-browser-tools" --no-audit --no-fund axe-core@4.13.0
           sudo apt-get install --yes poppler-utils
       - name: Verify committed gallery before regenerating any reports
@@ -109,6 +109,24 @@ jobs:
           python validation/stress-reports/check-pairs.py
           python validation/stress-reports/check-score-scale.py
           python validation/stress-reports/check-grouped-findings.py
+      - name: Verify compact offline data and full-row tasks in three browsers
+        env:
+          AXR_SCALE_OUTPUT: ${{ runner.temp }}/report-browser-results/compact-data
+          OMP_NUM_THREADS: 1
+          OPENBLAS_NUM_THREADS: 1
+        run: |
+          python validation/scalability/reports/check-vendor.py
+          Rscript validation/scalability/reports/benchmark.R candidate 2500
+          Rscript validation/scalability/reports/generate-compatibility.R
+          Rscript validation/scalability/reports/generate-chunk-fixtures.R
+          Rscript validation/scalability/reports/benchmark.R candidate 50000
+          python validation/scalability/reports/check-json-chunks.py --folder "$AXR_SCALE_OUTPUT/chunks" --report "$AXR_SCALE_OUTPUT/candidate/50000/report.html" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/50000" --require-chunks --browsers chromium firefox webkit
+          python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-codec.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-categories.py --folder "$AXR_SCALE_OUTPUT/compatibility" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-sampled-relationships.py --folder "$AXR_SCALE_OUTPUT/compatibility" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-negative-controls.py --folder "$AXR_SCALE_OUTPUT"
       - name: Upload compact browser evidence
         if: always()
         uses: actions/upload-artifact@v7

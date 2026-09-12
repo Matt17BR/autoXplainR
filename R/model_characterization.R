@@ -58,7 +58,8 @@ extract_model_characteristics <- function(autoxplain_result,
       },
       size_bytes = if (h2o_model) {
         tryCatch(as.numeric(model@model$output$model_size_in_bytes),
-                 error = function(error) NA_real_)
+          error = function(error) NA_real_
+        )
       } else {
         diagnostic$model_size_kb * 1024
       },
@@ -82,11 +83,14 @@ extract_model_characteristics <- function(autoxplain_result,
     }
     if (include_varimp) {
       info$native_variable_importance <- if (h2o_model) {
-        tryCatch({
-          require_optional("h2o", "extracting native H2O variable importance")
-          value <- h2o::h2o.varimp(model, use_pandas = FALSE)
-          if (is.null(value)) NULL else head(as.data.frame(value), 10L)
-        }, error = function(error) NULL)
+        tryCatch(
+          {
+            require_optional("h2o", "extracting native H2O variable importance")
+            value <- h2o::h2o.varimp(model, use_pandas = FALSE)
+            if (is.null(value)) NULL else head(as.data.frame(value), 10L)
+          },
+          error = function(error) NULL
+        )
       } else {
         NULL
       }
@@ -135,12 +139,25 @@ friendly_model_type <- function(model) {
   if (inherits(model, "autoxplain_fitted_model")) {
     return(learner_model_label(learner_definition(model$family), model$task))
   }
-  if (inherits(model, "autoxplain_tuned_nnet")) return("tuned neural network")
+  if (inherits(model, "autoxplain_tuned_nnet")) {
+    return("tuned neural network")
+  }
+  if (inherits(model, "gam")) {
+    return(if (identical(model$family$family, "binomial")) {
+      "generalized additive logistic model"
+    } else {
+      "generalized additive model"
+    })
+  }
   if (inherits(model, "glm") && !is.null(model$family) && model$family$family == "binomial") {
     return("logistic regression")
   }
-  if (inherits(model, "lm")) return("linear regression")
-  if (inherits(model, "multinom")) return("multinomial logistic regression")
+  if (inherits(model, "lm")) {
+    return("linear regression")
+  }
+  if (inherits(model, "multinom")) {
+    return("multinomial logistic regression")
+  }
   paste(class(model), collapse = "/")
 }
 
@@ -171,6 +188,16 @@ base_model_hyperparameters <- function(model) {
     error = function(error) NA_character_
   )
   output <- list(formula = formula)
+  if (inherits(model, "gam")) {
+    call <- as.list(model$call)
+    controls <- call[intersect(names(call), c("gamma", "select"))]
+    controls <- Filter(function(value) is.atomic(value) && length(value) == 1L, controls)
+    solver <- if (!inherits(model, "bam")) "gam" else if (!is.null(model$dinfo)) "bam_discrete" else "bam"
+    return(c(output, list(
+      family = model$family$family, link = model$family$link,
+      solver = solver, method = model$method
+    ), controls))
+  }
   if (inherits(model, "rpart")) {
     output <- c(output, list(method = model$method), model$control, model$parms)
   }
@@ -224,7 +251,8 @@ calculate_weighted_efficiency <- function(performance_scores,
   if (!is.numeric(performance_scores) || !is.numeric(training_times) ||
         length(performance_scores) != length(training_times) || length(performance_scores) < 2L) {
     stop("Scores and times must be numeric vectors of equal length with at least two models.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (any(!is.finite(performance_scores)) || any(!is.finite(training_times)) ||
         any(training_times < 0)) {
@@ -260,7 +288,8 @@ create_model_comparison_report <- function(model_characteristics,
                                            include_plots = FALSE) {
   if (!inherits(model_characteristics, "autoxplainr_model_characteristics")) {
     stop("`model_characteristics` must be returned by `extract_model_characteristics()`.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (!is.character(output_file) || length(output_file) != 1L ||
         tolower(tools::file_ext(output_file)) != "html") {
@@ -293,8 +322,7 @@ create_model_comparison_report <- function(model_characteristics,
 }
 
 compact_hyperparameters <- function(parameters, algorithm) {
-  preferred <- switch(
-    tolower(algorithm),
+  preferred <- switch(tolower(algorithm),
     glm = c("family", "alpha", "lambda", "solver", "standardize"),
     gbm = c("ntrees", "max_depth", "learn_rate", "sample_rate", "min_rows"),
     drf = c("ntrees", "max_depth", "sample_rate", "mtries", "min_rows"),
@@ -324,6 +352,8 @@ model_characteristics_table <- function(x) {
 
 minmax <- function(x) {
   range <- range(x)
-  if (range[[1L]] == range[[2L]]) return(rep(0.5, length(x)))
+  if (range[[1L]] == range[[2L]]) {
+    return(rep(0.5, length(x)))
+  }
   (x - range[[1L]]) / diff(range)
 }

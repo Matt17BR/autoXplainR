@@ -1,0 +1,20 @@
+[
+  {
+    "seed": 913,
+    "k": 8,
+    "status": "finished",
+    "exit_code": 1,
+    "process_seconds": 32.99921233299938,
+    "expected_status": "check_convergence",
+    "actual_status": "check_convergence",
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-diagnostics-frozen.R",
+      "rare_1pct",
+      "bam",
+      "8",
+      "913"
+    ],
+    "timing_context": "functional convergence replay; not comparative timing evidence"
+  }
+]

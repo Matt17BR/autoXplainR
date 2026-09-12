@@ -50,7 +50,7 @@ test_that("real iteration-limit neural fits are excluded unless explicitly retai
   data <- as.data.frame(matrix(rnorm(160 * 12), 160, 12))
   data$y <- rnorm(160)
   control <- tuning_control(
-    grids = list(neural = list(size = 8L, decay = .001)),
+    grids = list(neural = list(size = 8L, decay = .001, maxit = 1L)),
     family_budgets = c(linear = 1L, neural = 1L)
   )
   result <- autoxplain(data, "y",

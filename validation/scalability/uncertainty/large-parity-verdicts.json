@@ -1,0 +1,46 @@
+[
+  {
+    "problem": "regression",
+    "rows": 200000,
+    "draws": 1000,
+    "whole_interval_object_identical": true,
+    "serialized_interval_identical": true,
+    "interval_sha256": "49c77e50880a997ddaa38a72f13656af55a9e7935c2d3e3b672d2b577920d34f",
+    "before_seconds": 18.497,
+    "after_seconds": 6.549,
+    "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+    "R_version": "R version 4.5.2 (2025-10-31)"
+  },
+  {
+    "problem": "multiclass_brier",
+    "rows": 200000,
+    "draws": 1000,
+    "whole_interval_object_identical": true,
+    "serialized_interval_identical": true,
+    "interval_sha256": "99b47da21fc3b19fe3bf6d00f4cd8ce9bcd4dad6a097552aab54800253a76c7b",
+    "before_seconds": 77.113,
+    "after_seconds": 7.222,
+    "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+    "R_version": "R version 4.5.2 (2025-10-31)"
+  },
+  {
+    "problem": "regression",
+    "rows": 1000000,
+    "draws": 1000,
+    "whole_interval_object_identical": true,
+    "serialized_interval_identical": true,
+    "interval_sha256": "d099cb6d6c354f577a4fde311a63e57a3c9f0ade5c572e9068059e30a27bb562",
+    "before_seconds": 135.608,
+    "after_seconds": 28.883,
+    "package_path": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/candidate-library-v5/AutoXplainR",
+    "R_version": "R version 4.5.2 (2025-10-31)"
+  },
+  {
+    "problem": "multiclass_brier",
+    "rows": 1000000,
+    "requested_draws": 1000,
+    "whole_interval_object_identical": null,
+    "serialized_interval_identical": null,
+    "reason": "The before process timed out at 180 seconds without returning an interval object. Candidate completed, but this pair has no exact whole-object parity result."
+  }
+]

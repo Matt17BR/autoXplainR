@@ -1,0 +1,42 @@
+[
+  {
+    "case": "friedman_noise",
+    "variant": "candidate",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 66.60876306200043,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-candidate-964072921ca6.R",
+      "friedman_noise",
+      "candidate"
+    ],
+    "script_sha256": "964072921ca6d308e081ca71dc5765c46072b6678506f6c3955c1ede35abca4f",
+    "native_threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  },
+  {
+    "case": "bank_marketing",
+    "variant": "candidate",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 133.45687937599905,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-candidate-964072921ca6.R",
+      "bank_marketing",
+      "candidate"
+    ],
+    "script_sha256": "964072921ca6d308e081ca71dc5765c46072b6678506f6c3955c1ede35abca4f",
+    "native_threads": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    }
+  }
+]

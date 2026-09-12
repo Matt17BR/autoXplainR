@@ -1,0 +1,28 @@
+{
+  "verdict": "All comparisons passed with explicitly checked binary case_loss correction.",
+  "workflows": 6,
+  "retained_rows": 252,
+  "changes": {
+    "binary/TRUE": {
+      "field": "case_loss",
+      "rows": 17,
+      "maximum_absolute_change": 0.000799597430194865,
+      "configurations": [
+        "linear_01",
+        "tree_02"
+      ]
+    }
+  },
+  "intentional_parity_exceptions": {
+    "binary_case_loss": "Uses the fold-score clipping rule for log loss and Brier score; probabilities and CV scores unchanged.",
+    "binary_predicted_class_at_one_half": "Chooses the declared positive class, matching public prediction. Multiclass tie handling unchanged."
+  },
+  "pre_fix": "The six replay outputs matched 0.6.2 exactly before the two evidence corrections, including the old inconsistency.",
+  "balanced_stump": {
+    "rows": 48,
+    "probability": 0.5,
+    "old_oof_label": "negative",
+    "public_label": "positive",
+    "corrected_oof_label": "positive"
+  }
+}

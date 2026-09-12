@@ -97,7 +97,16 @@ test_that("classification tuning evidence preserves complete probability vectors
     match(evidence$truth, levels(training$event))
   )]
   expect_equal(evidence$truth_probability, recorded_truth_probability)
-  expect_equal(evidence$case_loss, -log(pmax(recorded_truth_probability, 1e-15)))
+  for (id in unique(evidence$configuration_id)) {
+    rows <- evidence[evidence$configuration_id == id, ]
+    folds <- result$tuning$fold_scores[result$tuning$fold_scores$configuration_id == id, ]
+    candidate <- result$tuning$candidates[result$tuning$candidates$configuration_id == id, ]
+    # Each retained case contributes once. Fold sizes count only predictions,
+    # so rows omitted by preprocessing cannot add weight to the pooled loss.
+    expect_equal(nrow(rows), sum(folds$validation_rows))
+    expect_equal(mean(rows$case_loss), weighted.mean(folds$score, folds$validation_rows), tolerance = 1e-14)
+    expect_equal(mean(rows$case_loss), candidate$cv_score, tolerance = 1e-14)
+  }
   expect_identical(result$tuning$prediction_schema$class_levels, c("no", "yes"))
   expect_identical(result$tuning$prediction_schema$positive_class, "yes")
 })

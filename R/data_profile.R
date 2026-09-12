@@ -140,10 +140,23 @@ data_distribution <- function(value, axis, rows) {
   )
 }
 
+categorical_replication_summary <- function(x) {
+  x <- x[!is.na(x)]
+  observed <- unique(x)
+  counts <- tabulate(match(x, observed), nbins = length(observed))
+  singletons <- sum(counts == 1L)
+  list(n_categories = length(counts), n_singleton_rows = singletons,
+       singleton_fraction = if (length(x)) singletons / length(x) else 0,
+       n_replicated_rows = length(x) - singletons,
+       n_repeated_categories = sum(counts > 1L))
+}
+
 data_pair_association <- function(x, y) {
   kinds <- vapply(list(x, y), data_column_kind, character(1))
+  categorical <- list(x = NULL, y = NULL)
   unavailable <- function(reason, n = 0L) {
-    list(status = "unavailable", method = NULL, value = NA_real_, n = n, reason = reason)
+    list(status = "unavailable", method = NULL, value = NA_real_, n = n, reason = reason,
+         categorical = categorical)
   }
   if (is.null(x) || is.null(y) || any(kinds == "unsupported")) {
     return(unavailable("A column is unavailable or has an unsupported type."))
@@ -158,8 +171,16 @@ data_pair_association <- function(x, y) {
   x <- x[complete]
   y <- y[complete]
   n <- length(x)
+  if (!x_numeric) categorical$x <- categorical_replication_summary(x)
+  if (!y_numeric) categorical$y <- categorical_replication_summary(y)
   if (n < 3L || length(unique(x)) < 2L || length(unique(y)) < 2L) {
     return(unavailable("At least three complete pairs and variation in both columns are needed.", n))
+  }
+  if (any(vapply(categorical, function(value) {
+    !is.null(value) && value$n_repeated_categories == 0L
+  }, logical(1)))) {
+    return(unavailable(paste("A categorical column has no repeated categories among complete pairs;",
+                             "association cannot separate group structure from individual identifiers."), n))
   }
   method <- if (x_numeric && y_numeric) {
     "Spearman correlation (signed)"
@@ -185,6 +206,7 @@ data_pair_association <- function(x, y) {
   }
   list(
     status = "available", method = method, value = unname(value), n = n,
+    categorical = categorical,
     scope = paste("Unbinned complete pairs. Small association does not establish independence",
                   "or exclude nonlinear or joint dependence.")
   )
@@ -277,17 +299,58 @@ data_pair_indices <- function(n_columns, target_position, max_pairs = 512L) {
   data.frame(x = x, y = y)
 }
 
+data_pair_samples <- function(raw, processed, row_map, maximum, seed) {
+  # Keep selected source rows in both views. Filling from the remaining retained
+  # rows gives a uniform sample of the processed population even after exclusions.
+  draw <- function(n, size) {
+    if (size >= n) return(seq_len(n))
+    sort(sample.int(n, size, useHash = size <= n / 2))
+  }
+  with_preserved_seed(seed, {
+    selected <- list(raw = list(), processed = list())
+    for (partition in c("training", "evaluation")) {
+      raw_n <- nrow(raw[[partition]]) %||% 0L
+      processed_n <- nrow(processed[[partition]]) %||% 0L
+      raw_size <- min(raw_n, maximum %||% raw_n)
+      processed_size <- min(processed_n, maximum %||% processed_n)
+      chosen <- draw(raw_n, raw_size)
+      selected$raw[[partition]] <- chosen
+      mapping <- if (is.null(row_map)) NULL else row_map$processed_position[row_map$partition == partition]
+      if (!is.null(mapping) && length(mapping) == raw_n && raw_n > 0L) {
+        retained <- mapping[chosen]
+        retained <- retained[!is.na(retained)]
+        if (length(retained) < processed_size) {
+          remaining <- setdiff(seq_len(processed_n), retained)
+          retained <- c(retained, remaining[draw(length(remaining), processed_size - length(retained))])
+        }
+        selected$processed[[partition]] <- sort(retained)
+      } else {
+        selected$processed[[partition]] <- draw(processed_n, processed_size)
+      }
+    }
+    selected
+  })
+}
+
 build_data_profile <- function(raw, processed, row_map, columns, target, bins = 24L,
-                               max_pairs = 512L, positive = NULL) {
+                               max_pairs = 512L, positive = NULL, max_pair_rows = 10000L,
+                               seed = 2026L) {
   bins <- assert_count(bins, "bins", minimum = 2L)
   variables <- columns$name
   stages <- list()
   inputs <- list(raw = raw, processed = processed)
+  selected <- data_pair_samples(raw, processed, row_map, max_pair_rows, seed)
   pair_indices <- data_pair_indices(length(variables), match(target, variables), max_pairs)
   for (stage in names(inputs)) {
     data <- inputs[[stage]]
     if (is.null(data$training) && is.null(data$evaluation)) next
     profiles <- setNames(lapply(variables, function(name) {
+      if (stage == "processed" && !is.null(stages$raw) &&
+            identical(data$training[[name]], raw$training[[name]]) &&
+            identical(data$evaluation[[name]], raw$evaluation[[name]]) &&
+            !(is.null(data$training[[name]]) && is.null(data$evaluation[[name]]))) {
+        return(stages$raw$columns[[name]])
+      }
       axis <- data_axis(data$training[[name]], data$evaluation[[name]], bins)
       if (stage == "processed" && is.null(data$training[[name]]) && is.null(data$evaluation[[name]])) {
         axis <- list(
@@ -300,6 +363,28 @@ build_data_profile <- function(raw, processed, row_map, columns, target, bins = 
         evaluation = data_distribution(data$evaluation[[name]], axis, nrow(data$evaluation) %||% 0L)
       )
     }), variables)
+    sampling <- lapply(c("training", "evaluation"), function(partition) {
+      n <- nrow(data[[partition]]) %||% 0L
+      size <- length(selected[[stage]][[partition]])
+      list(n_population = n, n_sample = size, sampled = size < n)
+    })
+    names(sampling) <- c("training", "evaluation")
+    pair_data <- lapply(names(sampling), function(partition) {
+      indices <- selected[[stage]][[partition]]
+      setNames(lapply(variables, function(name) {
+        value <- data[[partition]][[name]]
+        if (length(indices) == length(value)) value else value[indices]
+      }), variables)
+    })
+    names(pair_data) <- names(sampling)
+    pair_profile <- function(x, y, partition) {
+      value <- data_pair_profile(
+        pair_data[[partition]][[x]], pair_data[[partition]][[y]],
+        profiles[[x]]$axis, profiles[[y]]$axis, sampling[[partition]]$n_sample,
+        positive = if (y == target) positive else NULL
+      )
+      c(value, sampling[[partition]])
+    }
     pairs <- list()
     if (nrow(pair_indices)) {
       for (i in seq_len(nrow(pair_indices))) {
@@ -315,16 +400,8 @@ build_data_profile <- function(raw, processed, row_map, columns, target, bins = 
         y <- variables[b]
         pairs[[paste(sort(c(a, b)), collapse = "_")]] <- list(
           x = x, y = y,
-          training = data_pair_profile(
-            data$training[[x]], data$training[[y]],
-            profiles[[x]]$axis, profiles[[y]]$axis, nrow(data$training) %||% 0L,
-            positive = if (y == target) positive else NULL
-          ),
-          evaluation = data_pair_profile(
-            data$evaluation[[x]], data$evaluation[[y]],
-            profiles[[x]]$axis, profiles[[y]]$axis, nrow(data$evaluation) %||% 0L,
-            positive = if (y == target) positive else NULL
-          )
+          training = pair_profile(x, y, "training"),
+          evaluation = pair_profile(x, y, "evaluation")
         )
       }
     }
@@ -332,6 +409,7 @@ build_data_profile <- function(raw, processed, row_map, columns, target, bins = 
       columns = profiles, pairs = pairs,
       population = if (stage == "raw") "All supplied rows before preprocessing" else "Retained model rows",
       training_rows = nrow(data$training), evaluation_rows = nrow(data$evaluation),
+      pair_sampling = sampling,
       training_available = !is.null(data$training), evaluation_available = !is.null(data$evaluation)
     )
   }
@@ -339,10 +417,10 @@ build_data_profile <- function(raw, processed, row_map, columns, target, bins = 
     NULL
   } else {
     do.call(rbind, lapply(unique(row_map$partition), function(partition) {
-      rows <- row_map[row_map$partition == partition, , drop = FALSE]
+      retained <- row_map$retained[row_map$partition == partition]
       data.frame(
-        partition = partition, supplied = nrow(rows), retained = sum(rows$retained),
-        excluded = sum(!rows$retained)
+        partition = partition, supplied = length(retained), retained = sum(retained),
+        excluded = sum(!retained)
       )
     }))
   }
@@ -351,6 +429,13 @@ build_data_profile <- function(raw, processed, row_map, columns, target, bins = 
     pair_coverage = list(
       included = nrow(pair_indices), total = choose(length(variables), 2L),
       policy = "Target pairs first, then original column order; all individual profiles are retained"
+    ),
+    pair_sampling = list(
+      max_rows = max_pair_rows, seed = seed,
+      method = paste("Uniform sample without replacement per partition;",
+                     "shared source rows across raw and processed views where retained"),
+      scope = paste("Relationship counts, conditional summaries and associations describe the analyzed sample.",
+                    "Individual-column summaries use all rows. Rare groups may be missed by sampling.")
     ),
     scope = "Descriptive summaries of the supplied partitions. Aggregate output is not anonymization."
   )
@@ -377,21 +462,21 @@ data_sample_indices <- function(sizes, maximum, seed) {
   }))
 }
 
-data_export_partition <- function(data, indices, variables) {
-  if (!length(indices)) return(list(values = list(), nonfinite = list()))
-  nonfinite <- matrix(FALSE, nrow = length(indices), ncol = length(variables))
+data_export_columns <- function(data, indices, variables) {
+  nonfinite <- setNames(vector("list", length(variables)), variables)
   columns <- vector("list", length(variables))
   for (i in seq_along(variables)) {
     value <- data[[variables[i]]]
     kind <- data_column_kind(value)
     if (is.null(value) || kind == "unsupported") {
       columns[[i]] <- rep(NA, length(indices))
+      nonfinite[[i]] <- integer()
       next
     }
     value <- value[indices]
     number <- data_numeric(value)
     if (!is.null(number)) {
-      nonfinite[, i] <- !is.na(number) & !is.finite(number)
+      nonfinite[[i]] <- which(!is.na(number) & !is.finite(number))
       if (kind == "numeric") value[!is.finite(value)] <- NA
     }
     columns[[i]] <- if (kind %in% c("date", "datetime")) {
@@ -403,18 +488,51 @@ data_export_partition <- function(data, indices, variables) {
     }
   }
   names(columns) <- variables
+  list(values = columns, nonfinite = nonfinite)
+}
+
+data_export_partition <- function(data, indices, variables) {
+  if (!length(indices)) return(list(values = list(), nonfinite = list()))
+  exported <- data_export_columns(data, indices, variables)
+  nonfinite <- rep(list(character()), length(indices))
+  for (name in variables) {
+    for (row in exported$nonfinite[[name]]) nonfinite[[row]] <- c(nonfinite[[row]], name)
+  }
   list(
     values = lapply(seq_along(indices), function(row) {
-      lapply(columns, function(column) {
+      lapply(exported$values, function(column) {
         value <- column[row]
         if (is.na(value)) NULL else unname(value)
       })
     }),
-    nonfinite = lapply(seq_along(indices), function(row) variables[nonfinite[row, ]])
+    nonfinite = nonfinite
   )
 }
 
-prepare_data_explorer <- function(result, report_data = "summary") {
+data_combine_export_columns <- function(partitions, variables, sizes) {
+  values <- setNames(lapply(variables, function(name) {
+    columns <- lapply(partitions, function(partition) partition$values[[name]])
+    columns <- columns[lengths(columns) > 0L]
+    if (!length(columns)) return(logical())
+    kinds <- unique(vapply(columns, typeof, character(1)))
+    # Raw training and evaluation may have different types. A list preserves
+    # individual values instead of coercing numeric observations to text.
+    if (length(kinds) > 1L) {
+      columns <- lapply(columns, as.list)
+    }
+    do.call(c, unname(columns))
+  }), variables)
+  offsets <- c(0L, head(cumsum(sizes), -1L))
+  nonfinite <- setNames(lapply(variables, function(name) {
+    unlist(lapply(seq_along(partitions), function(i) {
+      (partitions[[i]]$nonfinite[[name]] %||% integer()) + offsets[i]
+    }), use.names = FALSE)
+  }), variables)
+  list(values = values, nonfinite = nonfinite)
+}
+
+prepare_data_explorer <- function(result, report_data = "summary", row_layout = c("records", "columns")) {
+  row_layout <- match.arg(row_layout)
   control <- normalize_report_data_control(report_data)
   if (control$mode == "none") {
     return(list(
@@ -451,23 +569,46 @@ prepare_data_explorer <- function(result, report_data = "summary") {
   } else {
     NULL
   }
+  seed <- control$seed %||% result$provenance$seed %||% 2026L
   profile <- build_data_profile(
     raw, processed, if (available) context$row_map else NULL,
-    columns, result$target_column, positive = positive
+    columns, result$target_column, positive = positive,
+    max_pair_rows = control$max_pair_rows, seed = seed
   )
   profile$task <- result$task %||% "unknown"
   profile$positive <- positive
   rows <- NULL
-  seed <- control$seed %||% result$provenance$seed %||% 2026L
   if (control$mode == "rows") {
     reference <- if (available) raw else processed
     sizes <- vapply(reference[c("training", "evaluation")], function(data) nrow(data) %||% 0L, integer(1))
     selected <- data_sample_indices(sizes, control$max_rows, seed)
     rows <- list()
+    column_partitions <- list(raw = list(), processed = list(), meta = list())
     for (i in seq_along(selected)) {
       partition <- c("training", "evaluation")[i]
-      mapping <- if (available) context$row_map[context$row_map$partition == partition, , drop = FALSE] else NULL
-      processed_indices <- if (available) mapping$processed_position[selected[[i]]] else selected[[i]]
+      mapping <- if (available) {
+        context$row_map[which(context$row_map$partition == partition)[selected[[i]]], , drop = FALSE]
+      } else {
+        NULL
+      }
+      processed_indices <- if (available) mapping$processed_position else selected[[i]]
+      if (row_layout == "columns") {
+        if (available) column_partitions$raw[[i]] <- data_export_columns(raw[[partition]], selected[[i]], variables)
+        column_partitions$processed[[i]] <- data_export_columns(processed[[partition]], processed_indices, variables)
+        count <- length(selected[[i]])
+        column_partitions$meta[[i]] <- list(
+          row_key = if (available) mapping$row_key else if (count) {
+            paste(partition, selected[[i]], sep = ":")
+          } else {
+            character()
+          },
+          partition = rep(partition, count),
+          source = if (available) mapping$source else rep("processed position", count),
+          source_row = if (available) mapping$source_row else selected[[i]],
+          processed_position = processed_indices, retained = !is.na(processed_indices)
+        )
+        next
+      }
       # Classify and convert each selected column once, rather than once for
       # every row. Excluded rows keep NA processed positions and null values.
       raw_export <- if (available) data_export_partition(raw[[partition]], selected[[i]], variables) else NULL
@@ -476,9 +617,9 @@ prepare_data_explorer <- function(result, report_data = "summary") {
         index <- selected[[i]][row]
         processed_index <- processed_indices[row]
         rows[[length(rows) + 1L]] <- list(
-          row_key = if (available) mapping$row_key[index] else paste(partition, index, sep = ":"),
-          partition = partition, source = if (available) mapping$source[index] else "processed position",
-          source_row = if (available) mapping$source_row[index] else index,
+          row_key = if (available) mapping$row_key[row] else paste(partition, index, sep = ":"),
+          partition = partition, source = if (available) mapping$source[row] else "processed position",
+          source_row = if (available) mapping$source_row[row] else index,
           processed_position = processed_index,
           retained = !is.na(processed_index),
           nonfinite = list(
@@ -490,17 +631,32 @@ prepare_data_explorer <- function(result, report_data = "summary") {
         )
       }
     }
+    if (row_layout == "columns") {
+      sizes <- lengths(selected)
+      raw_columns <- if (available) data_combine_export_columns(column_partitions$raw, variables, sizes) else NULL
+      processed_columns <- data_combine_export_columns(column_partitions$processed, variables, sizes)
+      meta <- lapply(names(column_partitions$meta[[1L]]), function(name) {
+        unlist(lapply(column_partitions$meta, `[[`, name), use.names = FALSE)
+      })
+      names(meta) <- names(column_partitions$meta[[1L]])
+      rows <- list(
+        layout = "columns-v1", length = sum(sizes), meta = meta,
+        raw = raw_columns$values, processed = processed_columns$values,
+        nonfinite = list(raw = raw_columns$nonfinite, processed = processed_columns$nonfinite)
+      )
+    }
   }
   n_supplied <- if (available) {
     (nrow(raw$training) %||% 0L) + (nrow(raw$evaluation) %||% 0L)
   } else {
     (nrow(processed$training) %||% 0L) + (nrow(processed$evaluation) %||% 0L)
   }
+  n_exported <- if (identical(rows$layout, "columns-v1")) rows$length else length(rows)
   list(
     mode = control$mode, profile = profile, rows = rows,
     manifest = list(
-      mode = control$mode, columns = variables, individual_records = length(rows),
-      full_rows = n_supplied, sampled = length(rows) > 0 && length(rows) < n_supplied,
+      mode = control$mode, columns = variables, individual_records = n_exported,
+      full_rows = n_supplied, sampled = n_exported > 0 && n_exported < n_supplied,
       sampling = if (control$mode == "rows") {
         "Proportional split allocation; uniform sample without replacement within each split"
       } else {

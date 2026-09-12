@@ -112,7 +112,10 @@ write_engine_report <- function(scope) {
 write_engine_report(scope)
 if (run_tests) {
   testthat::test_local(
-    ".", filter = "native-engines|kernel-geometry|matrix-blueprint|audit-data-contracts|gam-model-settings",
+    ".", filter = paste(
+      "native-engines|kernel-geometry|matrix-blueprint|audit-data-contracts|gam-model-settings",
+      "boosting-native|additive-solvers|forest-call|mars-call|regularized-call", sep = "|"
+    ),
     stop_on_failure = TRUE
   )
   scope <- paste(

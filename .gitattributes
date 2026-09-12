@@ -1,2 +1,5 @@
 # Generated standalone example reports.
 pkgdown/assets/*-report.html linguist-generated=true
+
+# Pinned third-party decoder bundled for offline reports.
+inst/report/fflate-0.8.3.js linguist-vendored=true

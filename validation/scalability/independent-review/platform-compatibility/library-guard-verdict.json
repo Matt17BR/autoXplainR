@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "scope": "Each actual script prefix through its exact-library assertion runs in a fresh process. No fitted results or model predictions were recomputed.",
+  "cases": [
+    {
+      "script": "replay-case.R",
+      "case": "missing",
+      "exit_status": 1,
+      "expectation": "wrong library rejected",
+      "passed": true
+    },
+    {
+      "script": "replay-case.R",
+      "case": "installed",
+      "exit_status": 0,
+      "expectation": "exact library accepted",
+      "passed": true
+    },
+    {
+      "script": "compare-cases.R",
+      "case": "missing",
+      "exit_status": 1,
+      "expectation": "wrong library rejected",
+      "passed": true
+    },
+    {
+      "script": "compare-cases.R",
+      "case": "installed",
+      "exit_status": 0,
+      "expectation": "exact library accepted",
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "replay-case.R": "fb1070fe43fb251b7dfe83d96b3c08322470dd7eb162853988431c1747bd3808",
+    "compare-cases.R": "0d13f95afe0fc03d8b80408557efabed38ed39984b40cd4645bd16af8c711d19"
+  }
+}

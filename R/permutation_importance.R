@@ -42,6 +42,13 @@
 #' @param task Task type passed to [explain_model()].
 #' @param positive Positive class passed to [explain_model()].
 #' @param n_permutations Deprecated alias for `n_repeats`.
+#' @param max_rows Maximum evaluation rows used for shuffling. `NULL` uses all
+#'   rows. A smaller value selects a reproducible uniform sample without
+#'   replacement. The baseline and shuffled losses use the same sample; the
+#'   `full_baseline_score` attribute keeps the score on all supplied rows.
+#'   Monte Carlo intervals exclude uncertainty from sampling rows.
+#' @param sample_seed Seed selecting evaluation rows, separate from the shuffle
+#'   seed so different models can use the same rows.
 #'
 #' @return A data frame of class `autoxplain_importance` with repeat-level
 #'   values stored in the `repeat_scores` attribute.
@@ -66,7 +73,9 @@ calculate_permutation_importance <- function(model,
                                              predict_function = NULL,
                                              task = "auto",
                                              positive = NULL,
-                                             n_permutations = NULL) {
+                                             n_permutations = NULL,
+                                             max_rows = NULL,
+                                             sample_seed = seed) {
   if (!is.null(n_permutations)) {
     warning("`n_permutations` is deprecated; use `n_repeats`.", call. = FALSE)
     n_repeats <- n_permutations
@@ -84,6 +93,10 @@ calculate_permutation_importance <- function(model,
   }
   x <- replacement$data
   y <- replacement$y
+  evaluation_explainer <- explainer
+  evaluation_explainer$data <- x
+  evaluation_explainer$y <- y
+  sampling <- explanation_row_sample(nrow(x), max_rows, sample_seed)
 
   groups <- normalize_feature_groups(features, feature_groups, names(x))
   strata <- normalize_strata(within, x)
@@ -93,26 +106,56 @@ calculate_permutation_importance <- function(model,
     primary_metric = explainer$metadata$primary_metric %||% NULL
   )
   baseline_prediction <- predict(explainer, x)
-  baseline <- metric_score(y, baseline_prediction, metric, explainer)
+  full_baseline <- metric_score(y, baseline_prediction, metric, explainer)
+  if (sampling$sampled) {
+    indices <- sampling$row_indices
+    x <- x[indices, , drop = FALSE]
+    y <- y[indices]
+    if (!is.null(strata)) strata <- strata[indices]
+    baseline_prediction <- if (is.matrix(baseline_prediction)) {
+      baseline_prediction[indices, , drop = FALSE]
+    } else {
+      baseline_prediction[indices]
+    }
+  }
+  unavailable_reason <- if (metric == "auc" && length(unique(as.character(y))) < 2L) {
+    paste(
+      "AUC importance is unavailable because the sampled explanation rows do not contain both outcome classes.",
+      "Increase max_rows or use all rows."
+    )
+  } else {
+    ""
+  }
+  baseline <- if (nzchar(unavailable_reason)) NA_real_ else metric_score(y, baseline_prediction, metric, explainer)
+  if (explainer$task != "regression") {
+    sampling$full_class_counts <- table(factor(as.character(replacement$y), levels = explainer$class_levels))
+    sampling$class_counts <- table(factor(as.character(y), levels = explainer$class_levels))
+    sampling$missing_classes <- names(sampling$class_counts)[sampling$class_counts == 0L]
+    sampling$absent_evaluation_classes <- names(sampling$full_class_counts)[sampling$full_class_counts == 0L]
+    sampling$missed_classes <- setdiff(sampling$missing_classes, sampling$absent_evaluation_classes)
+  }
 
   repeat_scores <- matrix(
-    NA_real_, nrow = length(groups), ncol = n_repeats,
+    NA_real_,
+    nrow = length(groups), ncol = n_repeats,
     dimnames = list(names(groups), paste0("repeat_", seq_len(n_repeats)))
   )
   permuted_metric <- repeat_scores
 
   with_preserved_seed(seed, {
-    for (group_index in seq_along(groups)) {
-      group <- groups[[group_index]]
-      for (repeat_index in seq_len(n_repeats)) {
-        permutation <- stratified_permutation(nrow(x), strata)
-        permuted <- x
-        permuted[group] <- x[permutation, group, drop = FALSE]
-        score <- metric_score(y, predict(explainer, permuted), metric, explainer)
-        permuted_metric[group_index, repeat_index] <- score
-        repeat_scores[group_index, repeat_index] <- importance_delta(
-          baseline, score, metric
-        )
+    if (!nzchar(unavailable_reason)) {
+      for (group_index in seq_along(groups)) {
+        group <- groups[[group_index]]
+        for (repeat_index in seq_len(n_repeats)) {
+          permutation <- stratified_permutation(nrow(x), strata)
+          permuted <- x
+          permuted[group] <- x[permutation, group, drop = FALSE]
+          score <- metric_score(y, predict(explainer, permuted), metric, explainer)
+          permuted_metric[group_index, repeat_index] <- score
+          repeat_scores[group_index, repeat_index] <- importance_delta(
+            baseline, score, metric
+          )
+        }
       }
     }
   })
@@ -153,14 +196,14 @@ calculate_permutation_importance <- function(model,
   attr(out, "permuted_metric") <- permuted_metric
   attr(out, "metric") <- metric
   attr(out, "baseline_score") <- baseline
+  attr(out, "full_baseline_score") <- full_baseline
+  attr(out, "sampling") <- sampling
+  attr(out, "unavailable_reason") <- unavailable_reason
   attr(out, "n_repeats") <- n_repeats
   attr(out, "confidence") <- confidence
   attr(out, "interval_type") <- "Monte Carlo t interval across permutations"
   attr(out, "feature_groups") <- groups
   attr(out, "blocked_within") <- if (is.null(within)) NULL else within
-  evaluation_explainer <- explainer
-  evaluation_explainer$data <- x
-  evaluation_explainer$y <- y
   attr(out, "explainer_fingerprint") <- current_explainer_fingerprint(evaluation_explainer)
   out
 }
@@ -169,9 +212,16 @@ calculate_permutation_importance <- function(model,
 print.autoxplain_importance <- function(x, ...) {
   cat("<AutoXplainR permutation importance>\n")
   cat("  metric: ", attr(x, "metric"), " | repeats: ", attr(x, "n_repeats"),
-      " | baseline: ", format(attr(x, "baseline_score"), digits = 5), "\n", sep = "")
-  print.data.frame(x[c("feature", "importance", "std_error", "conf_low", "conf_high",
-                       "sign_stability")], row.names = FALSE, ...)
+    " | baseline: ", format(attr(x, "baseline_score"), digits = 5), "\n",
+    sep = ""
+  )
+  if (isTRUE(attr(x, "sampling")$sampled)) {
+    cat("  ", explanation_sampling_note(attr(x, "sampling")), "\n", sep = "")
+  }
+  print.data.frame(x[c(
+    "feature", "importance", "std_error", "conf_low", "conf_high",
+    "sign_stability"
+  )], row.names = FALSE, ...)
   cat("  intervals describe permutation Monte Carlo variation, not population inference\n")
   invisible(x)
 }
@@ -182,11 +232,14 @@ coerce_to_explainer <- function(model,
                                 predict_function,
                                 task,
                                 positive) {
-  if (inherits(model, "autoxplain_explainer")) return(model)
+  if (inherits(model, "autoxplain_explainer")) {
+    return(model)
+  }
   assert_data_frame(data, "data")
   if (is.null(target_column) || !is.character(target_column) || length(target_column) != 1L) {
     stop("`target_column` is required when `model` is not an AutoXplainR explainer.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   explain_model(
     model = model,
@@ -221,7 +274,8 @@ replacement_explainer_data <- function(explainer, data, target_column = NULL) {
   } else {
     if (nrow(data) != length(explainer$y)) {
       stop("Replacement `data` without an outcome must have the same number of rows as the explainer.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     y <- explainer$y
     x <- data
@@ -229,7 +283,8 @@ replacement_explainer_data <- function(explainer, data, target_column = NULL) {
   missing_features <- setdiff(names(explainer$data), names(x))
   if (length(missing_features)) {
     stop("Replacement `data` is missing: ", paste(missing_features, collapse = ", "),
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   list(data = x[names(explainer$data)], y = y)
 }
@@ -240,8 +295,11 @@ normalize_feature_groups <- function(features, feature_groups, available) {
       stop("`features` must be a non-empty character vector.", call. = FALSE)
     }
     missing <- setdiff(features, available)
-    if (length(missing)) stop("Unknown features: ", paste(missing, collapse = ", "),
-                              call. = FALSE)
+    if (length(missing)) {
+      stop("Unknown features: ", paste(missing, collapse = ", "),
+        call. = FALSE
+      )
+    }
   } else {
     features <- available
   }
@@ -264,7 +322,9 @@ normalize_feature_groups <- function(features, feature_groups, available) {
 }
 
 normalize_strata <- function(within, data) {
-  if (is.null(within)) return(NULL)
+  if (is.null(within)) {
+    return(NULL)
+  }
   if (is.character(within) && length(within) <= ncol(data) && all(within %in% names(data))) {
     values <- lapply(data[within], function(x) {
       if (is.numeric(x) && length(unique(x)) > 10L) {
@@ -283,7 +343,9 @@ normalize_strata <- function(within, data) {
 }
 
 stratified_permutation <- function(n, strata = NULL) {
-  if (is.null(strata)) return(sample.int(n))
+  if (is.null(strata)) {
+    return(sample.int(n))
+  }
   permutation <- seq_len(n)
   split_indices <- split(seq_len(n), strata, drop = TRUE)
   for (indices in split_indices) {
@@ -299,11 +361,16 @@ resolve_metric <- function(metric, task, primary_metric = NULL) {
   )
   if (!is.character(metric) || length(metric) != 1L || !metric %in% choices) {
     stop("`metric` must be one of: ", paste(choices, collapse = ", "), ".",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   if (metric == "auto") {
     metric <- importance_metric_from_primary(primary_metric) %||%
-      switch(task, regression = "rmse", binary = "logloss", multiclass = "logloss")
+      switch(task,
+        regression = "rmse",
+        binary = "logloss",
+        multiclass = "logloss"
+      )
   }
   metric <- importance_metric_from_primary(metric) %||% metric
   if (task == "regression" && !metric %in% c("rmse", "mae")) {
@@ -322,8 +389,12 @@ resolve_metric <- function(metric, task, primary_metric = NULL) {
 }
 
 importance_metric_from_primary <- function(metric) {
-  if (is.null(metric)) return(NULL)
-  if (!is.character(metric) || length(metric) != 1L || is.na(metric)) return(NULL)
+  if (is.null(metric)) {
+    return(NULL)
+  }
+  if (!is.character(metric) || length(metric) != 1L || is.na(metric)) {
+    return(NULL)
+  }
   mapped <- unname(c(
     rmse = "rmse",
     mae = "mae",
@@ -341,14 +412,21 @@ importance_metric_from_primary <- function(metric) {
 metric_score <- function(y, prediction, metric, explainer) {
   if (is.factor(prediction) && metric != "accuracy") {
     stop("This metric requires probabilities; the prediction adapter supplies class labels. ",
-         "Use `metric = \"accuracy\"`.",
-         call. = FALSE)
+      "Use `metric = \"accuracy\"`.",
+      call. = FALSE
+    )
   }
-  if (metric == "rmse") return(sqrt(mean((as.numeric(y) - prediction)^2)))
-  if (metric == "mae") return(mean(abs(as.numeric(y) - prediction)))
+  if (metric == "rmse") {
+    return(sqrt(mean((as.numeric(y) - prediction)^2)))
+  }
+  if (metric == "mae") {
+    return(mean(abs(as.numeric(y) - prediction)))
+  }
   if (metric == "accuracy") {
     if (explainer$task == "binary") {
-      if (is.factor(prediction)) return(mean(as.character(y) == as.character(prediction)))
+      if (is.factor(prediction)) {
+        return(mean(as.character(y) == as.character(prediction)))
+      }
       observed <- as.character(y) == explainer$positive
       return(mean(observed == (prediction >= 0.5)))
     }
@@ -370,13 +448,15 @@ metric_score <- function(y, prediction, metric, explainer) {
     }
     if (!is.matrix(prediction)) {
       stop("Multiclass Brier score requires class-probability predictions.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     classes <- explainer$class_levels
     indices <- match(as.character(y), classes)
     if (anyNA(indices) || !all(classes %in% colnames(prediction))) {
       stop("Multiclass prediction columns must be named with every outcome class.",
-           call. = FALSE)
+        call. = FALSE
+      )
     }
     probability <- prediction[, classes, drop = FALSE]
     one_hot <- matrix(0, nrow(probability), ncol(probability))
@@ -415,7 +495,9 @@ importance_delta <- function(baseline, permuted, metric) {
 }
 
 sign_stability <- function(x) {
-  if (!length(x)) return(NA_real_)
+  if (!length(x)) {
+    return(NA_real_)
+  }
   max(mean(x >= 0), mean(x <= 0))
 }
 
@@ -427,6 +509,8 @@ calculate_metric_score <- function(model, h2o_data, target_column, metric) {
   require_optional("h2o", "scoring an H2O model")
   frame <- as.data.frame(h2o_data)
   explainer <- explain_model(model, frame, y = target_column)
-  metric_score(explainer$y, predict(explainer, explainer$data),
-               resolve_metric(metric, explainer$task), explainer)
+  metric_score(
+    explainer$y, predict(explainer, explainer$data),
+    resolve_metric(metric, explainer$task), explainer
+  )
 }

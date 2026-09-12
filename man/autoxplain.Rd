@@ -35,7 +35,8 @@ autoxplain(
   validation = NULL,
   explain = TRUE,
   report = NULL,
-  report_data = "summary"
+  report_data = "summary",
+  explanation_rows = 5000L
 )
 }
 \arguments{
@@ -159,6 +160,13 @@ aggregate exploration, \code{"rows"} also exports individual observations and
 predictions, and \code{"none"} omits data exploration and individual records.
 Use \code{\link[=report_data_control]{report_data_control()}} to choose columns and limit exported rows.
 These settings govern HTML, not the raw data retained in the R result.}
+
+\item{explanation_rows}{Maximum evaluation rows for default permutation
+importance, dependence checks and fitted effects. Defaults to 5000;
+\code{NULL} removes this cap. PDP curves retain their separate 1000-row limit;
+\code{\link[=explain_effect]{explain_effect()}} exposes \code{sample_size} for explicit curve calculations.
+Explanations record the uniform sample and its scope. Fitting, selection,
+model scores and prediction diagnostics still use their complete partitions.}
 }
 \value{
 An \code{autoxplain_result} containing fitted models, a leaderboard,

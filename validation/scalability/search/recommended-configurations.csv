@@ -1,0 +1,151 @@
+case,variant,configuration_id,family,hyperparameters,cv_score,folds_completed,selected,status
+friedman_noise,baseline,boosting_02,boosting,"rounds = 200, learning rate = 0.05, depth = 3, child weight = 1, row/column sample = 0.8/1",1.4484461438478837,5,True,ok
+friedman_noise,baseline,boosting_03,boosting,"rounds = 300, learning rate = 0.03, depth = 4, child weight = 1, row/column sample = 0.8/0.8",1.4412519002708135,5,False,ok
+friedman_noise,baseline,boosting_06,boosting,"rounds = 300, learning rate = 0.05, depth = 2, child weight = 3, row/column sample = 0.7/1",1.4766916864057487,5,False,ok
+friedman_noise,baseline,boosting_04,boosting,"rounds = 500, learning rate = 0.02, depth = 5, child weight = 2, row/column sample = 0.8/0.8",1.495057683543212,5,False,ok
+friedman_noise,baseline,boosting_05,boosting,"rounds = 150, learning rate = 0.1, depth = 5, child weight = 1, row/column sample = 1/0.8",1.5743548963580885,5,False,ok
+friedman_noise,baseline,additive_03,additive,"smooth basis limit = 5, gamma = 1.4, shrinkage selection = on",1.6166331867736712,5,False,ok
+friedman_noise,baseline,additive_05,additive,"smooth basis limit = 10, gamma = 1.4, shrinkage selection = on",1.6173846881270217,5,False,ok
+friedman_noise,baseline,additive_01,additive,"smooth basis limit = 5, gamma = 1, shrinkage selection = on",1.619946101033575,5,False,ok
+friedman_noise,baseline,additive_02,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = on",1.6223537811589546,5,False,ok
+friedman_noise,baseline,additive_04,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = off",1.649528963810675,5,False,ok
+friedman_noise,baseline,boosting_01,boosting,"rounds = 100, learning rate = 0.1, depth = 2, child weight = 1, row/column sample = 1/1",1.6497730955353,5,False,ok
+friedman_noise,baseline,forest_02,forest,"trees = 500, mtry = 30, minimum node = 5, sample fraction = 0.8, split rule = default",2.174787304862987,5,False,ok
+friedman_noise,baseline,forest_06,forest,"trees = 500, mtry = 10, minimum node = 5, sample fraction = 0.632, split rule = default",2.3178840340136553,5,False,ok
+friedman_noise,baseline,forest_03,forest,"trees = 500, mtry = 10, minimum node = 20, sample fraction = 0.632, split rule = default",2.391788056104507,5,False,ok
+friedman_noise,baseline,regularized_01,regularized,"lasso, lambda-path position = 0.55",2.597234929834495,5,False,ok
+friedman_noise,baseline,regularized_03,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.55",2.603064425353982,5,False,ok
+friedman_noise,baseline,regularized_04,regularized,"lasso, lambda-path position = 0.75",2.610441830746325,5,False,ok
+friedman_noise,baseline,regularized_05,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.75",2.6116250753517565,5,False,ok
+friedman_noise,baseline,linear_01,linear,default statistical fit,2.6275537148774717,5,False,ok
+friedman_noise,baseline,forest_05,forest,"trees = 500, mtry = 5, minimum node = 5, sample fraction = 0.632, split rule = default",2.7595716789896696,5,False,ok
+friedman_noise,baseline,forest_01,forest,"trees = 500, mtry = 5, minimum node = 10, sample fraction = 0.632, split rule = default",2.7846732100314715,5,False,ok
+friedman_noise,baseline,forest_04,forest,"trees = 500, mtry = 5, minimum node = 5, sample fraction = 0.8, split rule = extratrees",2.8504290843838866,5,False,ok
+friedman_noise,baseline,tree_04,tree,"max depth = 10, pruning cp = 5e-04, minimum split = 60",2.927977833295529,5,False,ok
+friedman_noise,baseline,tree_03,tree,"max depth = 6, pruning cp = 0.003, minimum split = 96",3.0755854855739972,5,False,ok
+friedman_noise,baseline,tree_06,tree,"max depth = 5, pruning cp = 0.003, minimum split = 96",3.0849835203692284,5,False,ok
+friedman_noise,baseline,tree_02,tree,"max depth = 4, pruning cp = 0.01, minimum split = 144",3.2588809930729967,5,False,ok
+friedman_noise,baseline,tree_05,tree,"max depth = 3, pruning cp = 0.01, minimum split = 240",3.3915739597773187,5,False,ok
+friedman_noise,baseline,tree_01,tree,"max depth = 2, pruning cp = 0.03, minimum split = 240",3.8336068422544227,5,False,ok
+friedman_noise,baseline,regularized_06,regularized,"ridge, lambda-path position = 0.75",4.1688861014498375,5,False,ok
+friedman_noise,baseline,regularized_02,regularized,"ridge, lambda-path position = 0.55",4.714224704538947,5,False,ok
+friedman_noise,candidate,boosting_02,boosting,"rounds = 200, learning rate = 0.05, depth = 3, child weight = 1, row/column sample = 0.8/1, input encoding = matrix",1.4484461438478837,5,True,ok
+friedman_noise,candidate,boosting_03,boosting,"rounds = 300, learning rate = 0.03, depth = 4, child weight = 1, row/column sample = 0.8/0.8, input encoding = matrix",1.4412519002708135,5,False,ok
+friedman_noise,candidate,boosting_06,boosting,"rounds = 300, learning rate = 0.05, depth = 2, child weight = 3, row/column sample = 0.7/1, input encoding = matrix",1.4766916864057487,5,False,ok
+friedman_noise,candidate,boosting_04,boosting,"rounds = 500, learning rate = 0.02, depth = 5, child weight = 2, row/column sample = 0.8/0.8, input encoding = matrix",1.495057683543212,5,False,ok
+friedman_noise,candidate,boosting_05,boosting,"rounds = 150, learning rate = 0.1, depth = 5, child weight = 1, row/column sample = 1/0.8, input encoding = matrix",1.5743548963580885,5,False,ok
+friedman_noise,candidate,additive_03,additive,"smooth basis limit = 5, gamma = 1.4, shrinkage selection = on; solver = bam (fREML)",1.616333516712694,5,False,ok
+friedman_noise,candidate,additive_05,additive,"smooth basis limit = 10, gamma = 1.4, shrinkage selection = on; solver = bam (fREML)",1.6176491557972819,5,False,ok
+friedman_noise,candidate,additive_01,additive,"smooth basis limit = 5, gamma = 1, shrinkage selection = on; solver = bam (fREML)",1.6195226848155768,5,False,ok
+friedman_noise,candidate,additive_02,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = on; solver = bam (fREML)",1.6222974634336926,5,False,ok
+friedman_noise,candidate,additive_04,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = off; solver = bam (fREML)",1.648905281645215,5,False,ok
+friedman_noise,candidate,boosting_01,boosting,"rounds = 100, learning rate = 0.1, depth = 2, child weight = 1, row/column sample = 1/1, input encoding = matrix",1.6497730955353,5,False,ok
+friedman_noise,candidate,forest_02,forest,"trees = 500, mtry = 30, minimum node = 5, sample fraction = 0.8, split rule = default",2.174787304862987,5,False,ok
+friedman_noise,candidate,forest_06,forest,"trees = 500, mtry = 10, minimum node = 5, sample fraction = 0.632, split rule = default",2.3178840340136553,5,False,ok
+friedman_noise,candidate,forest_03,forest,"trees = 500, mtry = 10, minimum node = 20, sample fraction = 0.632, split rule = default",2.391788056104507,5,False,ok
+friedman_noise,candidate,regularized_01,regularized,"lasso, lambda-path position = 0.55",2.597234929834495,5,False,ok
+friedman_noise,candidate,regularized_03,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.55",2.603064425353982,5,False,ok
+friedman_noise,candidate,regularized_04,regularized,"lasso, lambda-path position = 0.75",2.610441830746325,5,False,ok
+friedman_noise,candidate,regularized_05,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.75",2.6116250753517565,5,False,ok
+friedman_noise,candidate,linear_01,linear,default statistical fit,2.6275537148774717,5,False,ok
+friedman_noise,candidate,forest_05,forest,"trees = 500, mtry = 5, minimum node = 5, sample fraction = 0.632, split rule = default",2.7595716789896696,5,False,ok
+friedman_noise,candidate,forest_01,forest,"trees = 500, mtry = 5, minimum node = 10, sample fraction = 0.632, split rule = default",2.7846732100314715,5,False,ok
+friedman_noise,candidate,forest_04,forest,"trees = 500, mtry = 5, minimum node = 5, sample fraction = 0.8, split rule = extratrees",2.8504290843838866,5,False,ok
+friedman_noise,candidate,tree_04,tree,"max depth = 10, pruning cp = 5e-04, minimum split = 60",2.927977833295529,5,False,ok
+friedman_noise,candidate,tree_03,tree,"max depth = 6, pruning cp = 0.003, minimum split = 96",3.0755854855739972,5,False,ok
+friedman_noise,candidate,tree_06,tree,"max depth = 5, pruning cp = 0.003, minimum split = 96",3.0849835203692284,5,False,ok
+friedman_noise,candidate,tree_02,tree,"max depth = 4, pruning cp = 0.01, minimum split = 144",3.2588809930729967,5,False,ok
+friedman_noise,candidate,tree_05,tree,"max depth = 3, pruning cp = 0.01, minimum split = 240",3.3915739597773187,5,False,ok
+friedman_noise,candidate,tree_01,tree,"max depth = 2, pruning cp = 0.03, minimum split = 240",3.8336068422544227,5,False,ok
+friedman_noise,candidate,regularized_06,regularized,"ridge, lambda-path position = 0.75",4.1688861014498375,5,False,ok
+friedman_noise,candidate,regularized_02,regularized,"ridge, lambda-path position = 0.55",4.714224704538947,5,False,ok
+bank_marketing,baseline,regularized_01,regularized,"lasso, lambda-path position = 0.55",0.2693910966787302,5,True,ok
+bank_marketing,baseline,boosting_01,boosting,"rounds = 100, learning rate = 0.1, depth = 2, child weight = 1, row/column sample = 1/1",0.26624816071362367,5,False,ok
+bank_marketing,baseline,boosting_06,boosting,"rounds = 300, learning rate = 0.05, depth = 2, child weight = 3, row/column sample = 0.7/1",0.268667415206856,5,False,ok
+bank_marketing,baseline,boosting_02,boosting,"rounds = 200, learning rate = 0.05, depth = 3, child weight = 1, row/column sample = 0.8/1",0.26900232542921626,5,False,ok
+bank_marketing,baseline,additive_04,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = off",0.2693592823996227,5,False,ok
+bank_marketing,baseline,regularized_03,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.55",0.2694401459266529,5,False,ok
+bank_marketing,baseline,regularized_04,regularized,"lasso, lambda-path position = 0.75",0.27007313039106207,5,False,ok
+bank_marketing,baseline,regularized_05,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.75",0.2703624609908208,5,False,ok
+bank_marketing,baseline,additive_02,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = on",0.27049009084968684,5,False,ok
+bank_marketing,baseline,boosting_03,boosting,"rounds = 300, learning rate = 0.03, depth = 4, child weight = 1, row/column sample = 0.8/0.8",0.27057656122873197,5,False,ok
+bank_marketing,baseline,linear_01,linear,default statistical fit,0.27067051435387035,5,False,ok
+bank_marketing,baseline,additive_01,additive,"smooth basis limit = 5, gamma = 1, shrinkage selection = on",0.27069101387299704,5,False,ok
+bank_marketing,baseline,additive_05,additive,"smooth basis limit = 10, gamma = 1.4, shrinkage selection = on",0.27114876778457403,5,False,ok
+bank_marketing,baseline,additive_03,additive,"smooth basis limit = 5, gamma = 1.4, shrinkage selection = on",0.2714291659416504,5,False,ok
+bank_marketing,baseline,forest_01,forest,"trees = 500, mtry = 4, minimum node = 5, sample fraction = 0.632, split rule = default",0.27557060080019774,5,False,ok
+bank_marketing,baseline,boosting_04,boosting,"rounds = 500, learning rate = 0.02, depth = 5, child weight = 2, row/column sample = 0.8/0.8",0.27570668982888924,5,False,ok
+bank_marketing,baseline,forest_03,forest,"trees = 500, mtry = 6, minimum node = 10, sample fraction = 0.632, split rule = default",0.2766513307214489,5,False,ok
+bank_marketing,baseline,forest_05,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.632, split rule = default",0.2797906440607859,5,False,ok
+bank_marketing,baseline,forest_04,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.8, split rule = extratrees",0.28014790475944484,5,False,ok
+bank_marketing,baseline,tree_03,tree,"max depth = 6, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,baseline,tree_06,tree,"max depth = 5, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,baseline,tree_04,tree,"max depth = 10, pruning cp = 5e-04, minimum split = 250",0.2828270431168442,5,False,ok
+bank_marketing,baseline,boosting_05,boosting,"rounds = 150, learning rate = 0.1, depth = 5, child weight = 1, row/column sample = 1/0.8",0.2845374050418237,5,False,ok
+bank_marketing,baseline,forest_06,forest,"trees = 500, mtry = 6, minimum node = 1, sample fraction = 0.632, split rule = default",0.287538216974257,5,False,ok
+bank_marketing,baseline,regularized_06,regularized,"ridge, lambda-path position = 0.75",0.29727276615601556,5,False,ok
+bank_marketing,baseline,forest_02,forest,"trees = 500, mtry = 19, minimum node = 1, sample fraction = 0.8, split rule = default",0.3199942096717566,5,False,ok
+bank_marketing,baseline,regularized_02,regularized,"ridge, lambda-path position = 0.55",0.3270781019332281,5,False,ok
+bank_marketing,baseline,tree_01,tree,"max depth = 2, pruning cp = 0.03, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,baseline,tree_05,tree,"max depth = 3, pruning cp = 0.01, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,baseline,tree_02,tree,"max depth = 4, pruning cp = 0.01, minimum split = 600",0.35191742471059584,5,False,ok
+bank_marketing,candidate,regularized_01,regularized,"lasso, lambda-path position = 0.55",0.2693910966787302,5,True,ok
+bank_marketing,candidate,boosting_01,boosting,"rounds = 100, learning rate = 0.1, depth = 2, child weight = 1, row/column sample = 1/1, input encoding = matrix",0.26624816071362367,5,False,ok
+bank_marketing,candidate,boosting_06,boosting,"rounds = 300, learning rate = 0.05, depth = 2, child weight = 3, row/column sample = 0.7/1, input encoding = matrix",0.268667415206856,5,False,ok
+bank_marketing,candidate,boosting_02,boosting,"rounds = 200, learning rate = 0.05, depth = 3, child weight = 1, row/column sample = 0.8/1, input encoding = matrix",0.26900232542921626,5,False,ok
+bank_marketing,candidate,additive_04,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = off; solver = bam (fREML)",0.2694118431374358,5,False,ok
+bank_marketing,candidate,regularized_03,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.55",0.2694401459266529,5,False,ok
+bank_marketing,candidate,regularized_04,regularized,"lasso, lambda-path position = 0.75",0.27007313039106207,5,False,ok
+bank_marketing,candidate,regularized_05,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.75",0.2703624609908208,5,False,ok
+bank_marketing,candidate,boosting_03,boosting,"rounds = 300, learning rate = 0.03, depth = 4, child weight = 1, row/column sample = 0.8/0.8, input encoding = matrix",0.27057656122873197,5,False,ok
+bank_marketing,candidate,linear_01,linear,default statistical fit,0.27067051435387035,5,False,ok
+bank_marketing,candidate,additive_05,additive,"smooth basis limit = 10, gamma = 1.4, shrinkage selection = on; solver = bam (fREML)",0.2712785151092666,5,False,ok
+bank_marketing,candidate,forest_01,forest,"trees = 500, mtry = 4, minimum node = 5, sample fraction = 0.632, split rule = default",0.27557060080019774,5,False,ok
+bank_marketing,candidate,boosting_04,boosting,"rounds = 500, learning rate = 0.02, depth = 5, child weight = 2, row/column sample = 0.8/0.8, input encoding = matrix",0.27570668982888924,5,False,ok
+bank_marketing,candidate,forest_03,forest,"trees = 500, mtry = 6, minimum node = 10, sample fraction = 0.632, split rule = default",0.2766513307214489,5,False,ok
+bank_marketing,candidate,forest_05,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.632, split rule = default",0.2797906440607859,5,False,ok
+bank_marketing,candidate,forest_04,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.8, split rule = extratrees",0.28014790475944484,5,False,ok
+bank_marketing,candidate,tree_03,tree,"max depth = 6, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,candidate,tree_06,tree,"max depth = 5, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,candidate,tree_04,tree,"max depth = 10, pruning cp = 5e-04, minimum split = 250",0.2828270431168442,5,False,ok
+bank_marketing,candidate,boosting_05,boosting,"rounds = 150, learning rate = 0.1, depth = 5, child weight = 1, row/column sample = 1/0.8, input encoding = matrix",0.2845374050418237,5,False,ok
+bank_marketing,candidate,forest_06,forest,"trees = 500, mtry = 6, minimum node = 1, sample fraction = 0.632, split rule = default",0.287538216974257,5,False,ok
+bank_marketing,candidate,regularized_06,regularized,"ridge, lambda-path position = 0.75",0.29727276615601556,5,False,ok
+bank_marketing,candidate,forest_02,forest,"trees = 500, mtry = 19, minimum node = 1, sample fraction = 0.8, split rule = default",0.3199942096717566,5,False,ok
+bank_marketing,candidate,regularized_02,regularized,"ridge, lambda-path position = 0.55",0.3270781019332281,5,False,ok
+bank_marketing,candidate,tree_01,tree,"max depth = 2, pruning cp = 0.03, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,candidate,tree_05,tree,"max depth = 3, pruning cp = 0.01, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,candidate,tree_02,tree,"max depth = 4, pruning cp = 0.01, minimum split = 600",0.35191742471059584,5,False,ok
+bank_marketing,candidate,additive_01,additive,"smooth basis limit = 5, gamma = 1, shrinkage selection = on; solver = bam (fREML)",,3,False,failed
+bank_marketing,candidate,additive_03,additive,"smooth basis limit = 5, gamma = 1.4, shrinkage selection = on; solver = bam (fREML)",,4,False,failed
+bank_marketing,candidate,additive_02,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = on; solver = bam (fREML)",,4,False,failed
+bank_marketing,candidate_binary_guard,regularized_01,regularized,"lasso, lambda-path position = 0.55",0.2693910966787302,5,True,ok
+bank_marketing,candidate_binary_guard,boosting_01,boosting,"rounds = 100, learning rate = 0.1, depth = 2, child weight = 1, row/column sample = 1/1, input encoding = matrix",0.26624816071362367,5,False,ok
+bank_marketing,candidate_binary_guard,boosting_06,boosting,"rounds = 300, learning rate = 0.05, depth = 2, child weight = 3, row/column sample = 0.7/1, input encoding = matrix",0.268667415206856,5,False,ok
+bank_marketing,candidate_binary_guard,boosting_02,boosting,"rounds = 200, learning rate = 0.05, depth = 3, child weight = 1, row/column sample = 0.8/1, input encoding = matrix",0.26900232542921626,5,False,ok
+bank_marketing,candidate_binary_guard,additive_04,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = off; solver = gam",0.2693592823996227,5,False,ok
+bank_marketing,candidate_binary_guard,regularized_03,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.55",0.2694401459266529,5,False,ok
+bank_marketing,candidate_binary_guard,regularized_04,regularized,"lasso, lambda-path position = 0.75",0.27007313039106207,5,False,ok
+bank_marketing,candidate_binary_guard,regularized_05,regularized,"elastic net (alpha = 0.5), lambda-path position = 0.75",0.2703624609908208,5,False,ok
+bank_marketing,candidate_binary_guard,additive_02,additive,"smooth basis limit = 8, gamma = 1, shrinkage selection = on; solver = gam",0.27049009084968684,5,False,ok
+bank_marketing,candidate_binary_guard,boosting_03,boosting,"rounds = 300, learning rate = 0.03, depth = 4, child weight = 1, row/column sample = 0.8/0.8, input encoding = matrix",0.27057656122873197,5,False,ok
+bank_marketing,candidate_binary_guard,linear_01,linear,default statistical fit,0.27067051435387035,5,False,ok
+bank_marketing,candidate_binary_guard,additive_01,additive,"smooth basis limit = 5, gamma = 1, shrinkage selection = on; solver = gam",0.27069101387299704,5,False,ok
+bank_marketing,candidate_binary_guard,additive_05,additive,"smooth basis limit = 10, gamma = 1.4, shrinkage selection = on; solver = gam",0.27114876778457403,5,False,ok
+bank_marketing,candidate_binary_guard,additive_03,additive,"smooth basis limit = 5, gamma = 1.4, shrinkage selection = on; solver = gam",0.2714291659416504,5,False,ok
+bank_marketing,candidate_binary_guard,forest_01,forest,"trees = 500, mtry = 4, minimum node = 5, sample fraction = 0.632, split rule = default",0.27557060080019774,5,False,ok
+bank_marketing,candidate_binary_guard,boosting_04,boosting,"rounds = 500, learning rate = 0.02, depth = 5, child weight = 2, row/column sample = 0.8/0.8, input encoding = matrix",0.27570668982888924,5,False,ok
+bank_marketing,candidate_binary_guard,forest_03,forest,"trees = 500, mtry = 6, minimum node = 10, sample fraction = 0.632, split rule = default",0.2766513307214489,5,False,ok
+bank_marketing,candidate_binary_guard,forest_05,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.632, split rule = default",0.2797906440607859,5,False,ok
+bank_marketing,candidate_binary_guard,forest_04,forest,"trees = 500, mtry = 4, minimum node = 1, sample fraction = 0.8, split rule = extratrees",0.28014790475944484,5,False,ok
+bank_marketing,candidate_binary_guard,tree_03,tree,"max depth = 6, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,candidate_binary_guard,tree_06,tree,"max depth = 5, pruning cp = 0.003, minimum split = 400",0.2828270431168442,5,False,ok
+bank_marketing,candidate_binary_guard,tree_04,tree,"max depth = 10, pruning cp = 5e-04, minimum split = 250",0.2828270431168442,5,False,ok
+bank_marketing,candidate_binary_guard,boosting_05,boosting,"rounds = 150, learning rate = 0.1, depth = 5, child weight = 1, row/column sample = 1/0.8, input encoding = matrix",0.2845374050418237,5,False,ok
+bank_marketing,candidate_binary_guard,forest_06,forest,"trees = 500, mtry = 6, minimum node = 1, sample fraction = 0.632, split rule = default",0.287538216974257,5,False,ok
+bank_marketing,candidate_binary_guard,regularized_06,regularized,"ridge, lambda-path position = 0.75",0.29727276615601556,5,False,ok
+bank_marketing,candidate_binary_guard,forest_02,forest,"trees = 500, mtry = 19, minimum node = 1, sample fraction = 0.8, split rule = default",0.3199942096717566,5,False,ok
+bank_marketing,candidate_binary_guard,regularized_02,regularized,"ridge, lambda-path position = 0.55",0.3270781019332281,5,False,ok
+bank_marketing,candidate_binary_guard,tree_01,tree,"max depth = 2, pruning cp = 0.03, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,candidate_binary_guard,tree_05,tree,"max depth = 3, pruning cp = 0.01, minimum split = 1000",0.35191742471059584,5,False,ok
+bank_marketing,candidate_binary_guard,tree_02,tree,"max depth = 4, pruning cp = 0.01, minimum split = 600",0.35191742471059584,5,False,ok

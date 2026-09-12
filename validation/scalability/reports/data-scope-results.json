@@ -1,0 +1,898 @@
+{
+  "scope": "Only messy-regression: summary/none/rows, original numerical and source identity oracles, added full-sidebar-versus-filtered-chart scope checks. Not the full multi-fixture CI suite.",
+  "results": {
+    "browser": "145.0.7632.6",
+    "checks": [
+      {
+        "name": "messy-regression/summary: artifact recorded",
+        "passed": true,
+        "evidence": "dd444c18ec90badaf5e47407b78a5815e4020039c01e4cd5d564316b7cc77d58"
+      },
+      {
+        "name": "messy-regression/summary: summary contains no row payload",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: one initial workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: starts with outcome",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: keyboard opens relationships and hides irrelevant bars",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: keyboard opens records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: raw missing counts visible",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: column badge uses current raw populations",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: column badge follows selected evaluation split",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: percent histogram geometry matches original counts and visible axis",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: percent ticks have readable precision and a consistent scale",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: percent numeric ticks retain the original input coordinates",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: count histogram geometry matches original counts and visible axis",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: count ticks have readable precision and a consistent scale",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: count numeric ticks retain the original input coordinates",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: unbinned training signed association",
+        "passed": true,
+        "evidence": "training: Spearman correlation (signed) 0.09348 \u00b7 n = 236"
+      },
+      {
+        "name": "messy-regression/summary: unbinned evaluation signed association",
+        "passed": true,
+        "evidence": "evaluation: Spearman correlation (signed) 0.04415 \u00b7 n = 60"
+      },
+      {
+        "name": "messy-regression/summary: imputed counts visible",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: processed column badge does not retain raw missingness",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: novel raw categories counted",
+        "passed": true,
+        "evidence": "New in evaluation\t0\t9"
+      },
+      {
+        "name": "messy-regression/summary: mapped categories counted",
+        "passed": true,
+        "evidence": "New in evaluation\t0\t0"
+      },
+      {
+        "name": "messy-regression/summary: removed IDs not embedded",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: one distribution workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: distribution readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: distribution no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: distribution readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: distribution no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: distribution readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: distribution no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: distribution readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: distribution no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: one relationships workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: relationships readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: relationships no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: relationships readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: relationships no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: relationships readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: relationships no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: relationships readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: relationships no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: one records workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: records readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: records no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: records readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: records no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: records readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: records no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: records readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/summary: records no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: distribution automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": [
+            "color-contrast"
+          ]
+        }
+      },
+      {
+        "name": "messy-regression/summary: relationships automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": [
+            "color-contrast"
+          ]
+        }
+      },
+      {
+        "name": "messy-regression/summary: records automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": []
+        }
+      },
+      {
+        "name": "messy-regression/summary: browser errors",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "messy-regression/summary: compact mobile column control is available",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: mobile column choice updates heading and distribution",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: mobile column choice can return to the outcome",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: histogram help is readable by keyboard at 390px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: histogram help can be dismissed at 390px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: histogram help is readable by keyboard at 320px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: histogram help can be dismissed at 320px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: desktop selection synchronizes the mobile control",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: selected column survives a viewport change",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/summary: negative control rejects a visibly clipped tooltip",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: artifact recorded",
+        "passed": true,
+        "evidence": "5fa4da100d9febc8f2ed7c342a1184f52f32a5297d72a81a2df308894d4b9caf"
+      },
+      {
+        "name": "messy-regression/rows: one initial workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: starts with outcome",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: keyboard opens relationships and hides irrelevant bars",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: keyboard opens records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: raw missing counts visible",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: column badge uses current raw populations",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: column badge follows selected evaluation split",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: percent histogram geometry matches original counts and visible axis",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: percent ticks have readable precision and a consistent scale",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: percent numeric ticks retain the original input coordinates",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: count histogram geometry matches original counts and visible axis",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: count ticks have readable precision and a consistent scale",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: count numeric ticks retain the original input coordinates",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: unbinned training signed association",
+        "passed": true,
+        "evidence": "training: Spearman correlation (signed) 0.09348 \u00b7 n = 236"
+      },
+      {
+        "name": "messy-regression/rows: unbinned evaluation signed association",
+        "passed": true,
+        "evidence": "evaluation: Spearman correlation (signed) 0.04415 \u00b7 n = 60"
+      },
+      {
+        "name": "messy-regression/rows: imputed counts visible",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: processed column badge does not retain raw missingness",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: novel raw categories counted",
+        "passed": true,
+        "evidence": "New in evaluation\t0\t9"
+      },
+      {
+        "name": "messy-regression/rows: mapped categories counted",
+        "passed": true,
+        "evidence": "New in evaluation\t0\t0"
+      },
+      {
+        "name": "messy-regression/rows: removed IDs not embedded",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: missing filter independent count",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: column badge explicitly keeps the full available population",
+        "passed": true,
+        "evidence": "Full available rows \u00b7 All supplied rows before preprocessing \u00b7 training and evaluation. Column-list missing counts describe all available rows; the selected chart follows active filters."
+      },
+      {
+        "name": "messy-regression/rows: rejects a badge claiming filtered scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: usable-value filter excludes every original missing weight",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: filtered chart has no missing weights while badge retains full missing count",
+        "passed": true,
+        "evidence": {
+          "chart": "236 training rows\n0 missing \u00b7 175 distinct\nMean 2.012\n60 evaluation rows\n0 missing \u00b7 56 distinct\nMean 2.23",
+          "badge": "weight_kg\npredictor \u00b7 numeric \u00b7 24 missing in all rows"
+        }
+      },
+      {
+        "name": "messy-regression/rows: rejects a chart retaining all-row missingness",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: source selection announces one completed row identity",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: source selection opens records and clears filters",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: selected original missing and fitted imputation",
+        "passed": true,
+        "evidence": "weight_kg\tMissing\t1.57"
+      },
+      {
+        "name": "messy-regression/rows: selected source values match original row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: ten row page",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: arrow and enter inspect another source point",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: one distribution workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: distribution readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: distribution no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: distribution readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: distribution no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: distribution readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: distribution no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: distribution readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: distribution no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: one relationships workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: relationships readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: relationships no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: relationships readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: relationships no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: relationships readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: relationships no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: relationships readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: relationships no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: one records workspace",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: records readable chart layout 1440",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: records no page overflow 1440",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: records readable chart layout 768",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: records no page overflow 768",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: records readable chart layout 390",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: records no page overflow 390",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: records readable chart layout 320",
+        "passed": true,
+        "evidence": {
+          "overflow": [],
+          "clipped": [],
+          "small": [],
+          "elementOverflow": [],
+          "pageOverflow": false
+        }
+      },
+      {
+        "name": "messy-regression/rows: records no page overflow 320",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: distribution automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": [
+            "color-contrast"
+          ]
+        }
+      },
+      {
+        "name": "messy-regression/rows: relationships automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": [
+            "color-contrast"
+          ]
+        }
+      },
+      {
+        "name": "messy-regression/rows: records automatic component accessibility",
+        "passed": true,
+        "evidence": {
+          "violations": [],
+          "incomplete": [
+            "color-contrast"
+          ]
+        }
+      },
+      {
+        "name": "messy-regression/rows: browser errors",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "messy-regression/rows: compact mobile column control is available",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: mobile column choice updates heading and distribution",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: mobile column choice can return to the outcome",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: histogram help is readable by keyboard at 390px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: histogram help can be dismissed at 390px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: histogram help is readable by keyboard at 320px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: histogram help can be dismissed at 320px",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: desktop selection synchronizes the mobile control",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: selected column survives a viewport change",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/rows: negative control rejects a visibly clipped tooltip",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/none: artifact recorded",
+        "passed": true,
+        "evidence": "87f2a0050dbfaa3a354a0400fae1f4304f4fdf4c2dce073697e3991812318903"
+      },
+      {
+        "name": "messy-regression/none: no data workspace or data payload",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "messy-regression/none: no individual case links",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "negative control: rejects missing-count",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "negative control: rejects source-mapping",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "negative control: rejects displayed scale without changing bars",
+        "passed": true,
+        "evidence": null
+      }
+    ]
+  }
+}

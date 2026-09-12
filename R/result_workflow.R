@@ -5,7 +5,8 @@ assert_flag <- function(value, name) {
   invisible(value)
 }
 
-finalize_autoxplain <- function(result, design, explain, report, report_data = "summary") {
+finalize_autoxplain <- function(result, design, explain, report, report_data = "summary",
+                                explanation_rows = 5000L) {
   result$schema_version <- "2.0"
   result$provenance$package_version <- package_version_or_development()
   result$provenance$r_version <- paste(R.version$major, R.version$minor, sep = ".")
@@ -37,7 +38,7 @@ finalize_autoxplain <- function(result, design, explain, report, report_data = "
   }
   result <- seal_evaluation_result(result)
   if (isTRUE(explain) || !is.null(report)) {
-    result$explanations <- prepare_model_report_data(result)
+    result$explanations <- prepare_model_report_data(result, explanation_rows = explanation_rows)
   }
   if (!is.null(report)) {
     result$report_file <- render_model_report(result, report, report_data = report_data)

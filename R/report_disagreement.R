@@ -15,28 +15,47 @@ report_disagreement_view <- function(result) {
   pairs$model_b_label <- vapply(pairs$model_b, function(id) explorer_label(result, id), character(1))
   performance <- behavior$models[, c("model_id", "performance_score"), drop = FALSE]
   performance$model <- vapply(performance$model_id, function(id) explorer_label(result, id), character(1))
-  cases <- NULL
-  if (identical(result$.report_export$mode, "rows")) {
-    exported <- Filter(function(row) {
-      identical(row$partition, "evaluation") && isTRUE(row$retained) &&
-        length(row$processed_position) == 1L && !is.na(row$processed_position)
-    }, result$.report_export$rows %||% list())
-    cases <- lapply(exported, function(row) {
-      index <- match(row$processed_position, behavior$ambiguity$rows$evaluation_row)
-      if (is.na(index)) stop("Disagreement records do not match exported evaluation positions.", call. = FALSE)
-      evidence <- behavior$ambiguity$rows[index, , drop = FALSE]
-      list(
-        row_key = row$row_key, source = row$source, source_row = row$source_row,
-        gap = if (result$task == "regression") evidence$prediction_range else evidence$probability_distance
-      )
-    })
-    if (length(cases)) cases <- cases[order(-vapply(cases, `[[`, numeric(1), "gap"))]
-  }
+  cases <- report_disagreement_cases(result$.report_export, behavior$ambiguity$rows, result$task)
   list(
     status = "computed", task = result$task, n = behavior$n_evaluation_rows,
     metric = behavior$performance_metric, performance = performance,
     pairs = pairs, cases = cases, distance = behavior$distance_definition
   )
+}
+
+# Keep the full comparison population, but only construct the five displayed
+# record links. Column exports may contain millions of source positions.
+report_disagreement_cases <- function(export, ambiguity, task) {
+  if (!identical(export$mode, "rows")) {
+    return(NULL)
+  }
+  if (identical(export$rows$layout, "columns-v1")) {
+    meta <- export$rows$meta
+    selected <- which(meta$partition == "evaluation" & meta$retained & !is.na(meta$processed_position))
+    position <- meta$processed_position[selected]
+    read_meta <- function(name, indices) meta[[name]][selected[indices]]
+  } else {
+    records <- Filter(function(row) {
+      identical(row$partition, "evaluation") && isTRUE(row$retained) &&
+        length(row$processed_position) == 1L && !is.na(row$processed_position)
+    }, export$rows %||% list())
+    position <- vapply(records, `[[`, numeric(1), "processed_position")
+    read_meta <- function(name, indices) {
+      vapply(records[indices], `[[`, if (name == "source_row") numeric(1) else character(1), name)
+    }
+  }
+  index <- match(position, ambiguity$evaluation_row)
+  if (anyNA(index)) {
+    stop("Disagreement records do not match exported evaluation positions.", call. = FALSE)
+  }
+  gap <- ambiguity[[if (task == "regression") "prediction_range" else "probability_distance"]][index]
+  top <- head(order(-gap), 5L)
+  row_key <- read_meta("row_key", top)
+  source <- read_meta("source", top)
+  source_row <- read_meta("source_row", top)
+  lapply(seq_along(top), function(i) {
+    list(row_key = row_key[i], source = source[i], source_row = source_row[i], gap = gap[top[i]])
+  })
 }
 
 explorer_disagreement <- function(result) {

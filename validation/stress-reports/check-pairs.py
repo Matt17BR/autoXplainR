@@ -4,7 +4,11 @@ import collections
 import json
 import math
 import os
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from report_payload import decode_data_payload
 
 from playwright.sync_api import sync_playwright
 
@@ -85,7 +89,7 @@ with sync_playwright() as p:
             page.goto((folder / f"{mode}.html").as_uri())
             # Exported identities and bin definitions describe which source rows
             # to inspect. No aggregate count or correlation is used as an oracle.
-            payload = json.loads(page.locator("#axr-data-payload").text_content())
+            payload = decode_data_payload(json.loads(page.locator("#axr-data-payload").text_content()))
             exported = payload.get("rows", [])
             if isinstance(exported, dict):
                 exported = [exported]

@@ -33,9 +33,11 @@ Builds a two-objective comparison from an \code{\link[=autoxplain]{autoxplain()}
 result. Predictive
 performance is taken from the evaluation leaderboard and the secondary axis
 defaults to approximate model-object size. For local models this is R's
-in-memory \code{object.size()} estimate; H2O uses an engine-reported size when
-available. Size and runtime are operational resource proxies, not structural
-model complexity. A model is Pareto-efficient when no other supplied model
+in-memory \code{object.size()} estimate. It includes retained diagnostics, may
+count shared data repeatedly and excludes native engine allocations. H2O uses
+an engine-reported size when available. These values are not a saved-file or
+deployment-memory comparison. Size and runtime are resource proxies, not
+structural model complexity. A model is Pareto-efficient when no other supplied model
 is at least as good on both dimensions and strictly better on one.
 }
 \details{

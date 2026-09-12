@@ -1,0 +1,12 @@
+{
+  "case": "friedman_noise",
+  "training_rows": 1200,
+  "mode": "installed",
+  "source_md5": {},
+  "source_model": "recommended/candidate/friedman_noise/result.rds:additive_model",
+  "source_result_sha256": "ee2e6689285d373360e63ebf6fea6126429e2a205f335013c22ddb51bc2b055e",
+  "solver": "bam",
+  "predictions_identical": true,
+  "native_fields_identical": true,
+  "metadata_scope": "Task and policy rationale were added; full wrapper metadata is not asserted identical."
+}

@@ -1,0 +1,363 @@
+{
+  "original_failure": "GitHub report-browser at44d6372,390px:target-size on #metric-select",
+  "conclusion": "The old wait demonstrably allows a geometry scan during smooth scrolling. The original intermittent axe failure was not reproduced locally; its attribution to moving geometry remains an inference.",
+  "playwright": "1.58.0",
+  "axe": "4.13.0",
+  "chromium": "145.0.7632.6",
+  "checked_script_sha256": "fa8b8bb86490701491f59ebc1dacd6f0ec5b8094ab105530bfb430e76dab65b0",
+  "diagnostic_runs": [
+    {
+      "source": "diagnostic.json",
+      "repetition": 0,
+      "start_scroll": 417,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic.json",
+      "repetition": 1,
+      "start_scroll": 281,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic.json",
+      "repetition": 2,
+      "start_scroll": 417,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 0,
+      "start_scroll": 10,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 30,
+      "start_scroll": 10,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 50,
+      "start_scroll": 52,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 70,
+      "start_scroll": 96,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 85,
+      "start_scroll": 168,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 100,
+      "start_scroll": 281,
+      "end_scroll": 417,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 120,
+      "start_scroll": 417,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    },
+    {
+      "source": "diagnostic-phases.json",
+      "repetition": 145,
+      "start_scroll": 622,
+      "end_scroll": 1029,
+      "initial_violations": [],
+      "stable_violations": [],
+      "focused_violations": [],
+      "usable_hit_points": 9,
+      "focused_width": 204,
+      "focused_height": 36
+    }
+  ],
+  "regenerated_ci_fixture_checks": 184,
+  "regenerated_ci_fixture_failures": 0,
+  "stable_scan_records": [
+    {
+      "check": "benchmark accessibility scan has stable geometry 1440",
+      "passed": true,
+      "detail": {
+        "before": {
+          "geometry": {
+            "scrollX": 0,
+            "scrollY": 211,
+            "width": 1440,
+            "height": 900,
+            "elements": [
+              {
+                "selector": "#metric-select",
+                "rect": {
+                  "x": 1210,
+                  "y": -71.875,
+                  "width": 204,
+                  "height": 36,
+                  "top": -71.875,
+                  "right": 1414,
+                  "bottom": -35.875,
+                  "left": 1210
+                }
+              },
+              {
+                "selector": ".sidebar",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 192,
+                  "height": 900,
+                  "top": 0,
+                  "right": 192,
+                  "bottom": 900,
+                  "left": 0
+                }
+              },
+              {
+                "selector": ".prediction-benchmark > summary",
+                "rect": {
+                  "x": 218,
+                  "y": 786.90625,
+                  "width": 1196,
+                  "height": 37.5,
+                  "top": 786.90625,
+                  "right": 1414,
+                  "bottom": 824.40625,
+                  "left": 218
+                }
+              }
+            ]
+          },
+          "frames": 16,
+          "elapsed": 254.30000000149016,
+          "stable_ms": 150.00000000000006
+        },
+        "after": {
+          "scrollX": 0,
+          "scrollY": 211,
+          "width": 1440,
+          "height": 900,
+          "elements": [
+            {
+              "selector": "#metric-select",
+              "rect": {
+                "x": 1210,
+                "y": -71.875,
+                "width": 204,
+                "height": 36,
+                "top": -71.875,
+                "right": 1414,
+                "bottom": -35.875,
+                "left": 1210
+              }
+            },
+            {
+              "selector": ".sidebar",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 192,
+                "height": 900,
+                "top": 0,
+                "right": 192,
+                "bottom": 900,
+                "left": 0
+              }
+            },
+            {
+              "selector": ".prediction-benchmark > summary",
+              "rect": {
+                "x": 218,
+                "y": 786.90625,
+                "width": 1196,
+                "height": 37.5,
+                "top": 786.90625,
+                "right": 1414,
+                "bottom": 824.40625,
+                "left": 218
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "check": "benchmark accessibility scan has stable geometry 390",
+      "passed": true,
+      "detail": {
+        "before": {
+          "geometry": {
+            "scrollX": 0,
+            "scrollY": 1029,
+            "width": 390,
+            "height": 900,
+            "elements": [
+              {
+                "selector": "#metric-select",
+                "rect": {
+                  "x": 57.21875,
+                  "y": -756.1875,
+                  "width": 204,
+                  "height": 36,
+                  "top": -756.1875,
+                  "right": 261.21875,
+                  "bottom": -720.1875,
+                  "left": 57.21875
+                }
+              },
+              {
+                "selector": ".sidebar",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 390,
+                  "height": 77.1875,
+                  "top": 0,
+                  "right": 390,
+                  "bottom": 77.1875,
+                  "left": 0
+                }
+              },
+              {
+                "selector": ".prediction-benchmark > summary",
+                "rect": {
+                  "x": 14,
+                  "y": 796.875,
+                  "width": 362,
+                  "height": 37.5,
+                  "top": 796.875,
+                  "right": 376,
+                  "bottom": 834.375,
+                  "left": 14
+                }
+              }
+            ]
+          },
+          "frames": 33,
+          "elapsed": 531.100000000745,
+          "stable_ms": 150
+        },
+        "after": {
+          "scrollX": 0,
+          "scrollY": 1029,
+          "width": 390,
+          "height": 900,
+          "elements": [
+            {
+              "selector": "#metric-select",
+              "rect": {
+                "x": 57.21875,
+                "y": -756.1875,
+                "width": 204,
+                "height": 36,
+                "top": -756.1875,
+                "right": 261.21875,
+                "bottom": -720.1875,
+                "left": 57.21875
+              }
+            },
+            {
+              "selector": ".sidebar",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 390,
+                "height": 77.1875,
+                "top": 0,
+                "right": 390,
+                "bottom": 77.1875,
+                "left": 0
+              }
+            },
+            {
+              "selector": ".prediction-benchmark > summary",
+              "rect": {
+                "x": 14,
+                "y": 796.875,
+                "width": 362,
+                "height": 37.5,
+                "top": 796.875,
+                "right": 376,
+                "bottom": 834.375,
+                "left": 14
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "independent_tiny_control_rejected": true,
+  "fixture_sha256": {
+    "supplied-binary-benchmark.html": "66b7607f1eee906552f9b7a0b848ba2e85ac1966a844f1050d2270ddf2d45582",
+    "supplied-benchmark-oracle.json": "d983ad1586fc96fa2809a10e7040f68eb7d2ef66b1107667129531ef98d48a8f",
+    "supplied-models-oracle.json": "1cc6391abd1fc6d6adfc8256360b79242cfb79a7f6f6311f16c6eaeec80f93a7"
+  },
+  "raw_evidence": "~/.cache/autoxplain-scale-0.7.0/release-verification/mobile-axe-diagnostic"
+}

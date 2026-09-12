@@ -1,5 +1,6 @@
 """Run after render-cutoff-cases.R. Expected scores/classes are literal source values, not report payload answers."""
 from playwright.sync_api import sync_playwright
+from report_payload import decode_prediction_payload
 from pathlib import Path
 import json,math,argparse,os,hashlib,platform,importlib.metadata
 parser=argparse.ArgumentParser(description="Check literal cutoff case decisions, row links and privacy against independent hand values.")
@@ -16,7 +17,7 @@ with sync_playwright() as p:
  browser_version=b.version
  page=b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
  page.goto((base/'cutoff-cases-rows.html').as_uri()+'#evaluation')
- payload=json.loads(page.locator('#axr-predictions-payload').text_content())
+ payload=decode_prediction_payload(json.loads(page.locator('#axr-predictions-payload').text_content()))
  page.evaluate("window.__selected=[];addEventListener('axr:row-selected',e=>__selected.push(e.detail.row_key))")
  for model in payload['models']:
   id=model['model_id'];page.evaluate('(id)=>AutoXplainRReport.selectModel(id)',id)

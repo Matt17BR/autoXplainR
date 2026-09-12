@@ -294,6 +294,17 @@ effect_chart <- function(effect, feature, result = NULL, model_id = NULL, compar
     data.frame(Model = report_chart_label(result, id), item, check.names = FALSE)
   }))
   note <- "Fitted associations do not establish intervention effects."
+  sampling <- attr(effect, "sampling")
+  n_support <- attr(effect, "n_support") %||% sampling$rows_used %||% attr(effect, "n_reference")
+  if (isTRUE(sampling$sampled) || isTRUE(n_support > attr(effect, "n_reference"))) {
+    note <- paste(note, paste0(
+      "Curve uses ", report_count(attr(effect, "n_reference")),
+      " reference rows; support uses ", report_count(n_support), " rows.",
+      if (isTRUE(sampling$sampled)) {
+        paste0(" Sampled from ", report_count(sampling$rows_available), " available evaluation rows.")
+      }
+    ))
+  }
   population <- if (is.null(result)) "reference" else "evaluation reference"
   if (method == "ale" && any(vapply(points, function(point) is.finite(point$n), logical(1)))) {
     note <- paste(note, paste0(

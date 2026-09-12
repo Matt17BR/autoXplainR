@@ -50,7 +50,7 @@ jobs:
       - name: Exercise every native learner adapter and portfolio
         run: >-
           devtools::test(
-            filter = "native-engines|kernel-geometry|matrix-blueprint|gam-model-settings",
+            filter = "native-engines|kernel-geometry|matrix-blueprint|gam-model-settings|boosting-native|additive-solvers|forest-call|mars-call|regularized-call",
             stop_on_failure = TRUE
           )
         shell: Rscript {0}

@@ -131,14 +131,25 @@ validate_data_context <- function(context, training, evaluation) {
 #'   such as a site or time column excluded from fitting. Empty by default.
 #' @param max_rows Maximum exported records across training and evaluation.
 #'   Sampling allocates rows proportionally between splits and samples uniformly
-#'   within each split. Unfiltered aggregate profiles use the full available
-#'   data for each stage; browser row filters describe only the exported sample
+#'   within each split. Browser row filters describe only this exported sample
 #'   and leave model scores unchanged.
 #' @param seed Optional sampling seed. `NULL` uses the analysis seed, or 2026.
+#' @param max_pair_rows Maximum rows per partition used for relationship plots,
+#'   conditional summaries and pairwise associations. The default is 10,000;
+#'   `NULL` uses all rows. One uniform sample is shared by all pairs. Raw and
+#'   processed samples retain the same source rows where possible. Counts and
+#'   associations describe that sample, with its size shown in the report.
+#'   Rare groups can be missed; increase this limit or use `NULL` to inspect them.
+#'   Unfiltered individual-column distributions and missing counts use all
+#'   available rows. Filtered charts and their counts describe only matching
+#'   exported records; sidebar counts keep the full population. Model scores
+#'   always use the complete evaluation partition and are unchanged by filters.
+#'   This limit is independent of `max_rows`.
 #' @return An `autoxplain_report_data_control` object.
 #' @export
 report_data_control <- function(mode = c("summary", "rows", "none"), columns = NULL,
-                                context_columns = character(), max_rows = 5000L, seed = NULL) {
+                                context_columns = character(), max_rows = 5000L, seed = NULL,
+                                max_pair_rows = 10000L) {
   mode <- match.arg(mode)
   check_columns <- function(value, name) {
     if (!is.null(value) && (!is.character(value) || anyNA(value) ||
@@ -149,10 +160,11 @@ report_data_control <- function(mode = c("summary", "rows", "none"), columns = N
   check_columns(columns, "columns")
   check_columns(context_columns, "context_columns")
   max_rows <- assert_count(max_rows, "max_rows", minimum = 2L)
+  if (!is.null(max_pair_rows)) max_pair_rows <- assert_count(max_pair_rows, "max_pair_rows", minimum = 3L)
   if (!is.null(seed)) seed <- assert_count(seed, "seed", minimum = 0L)
   structure(list(
     mode = mode, columns = columns, context_columns = context_columns,
-    max_rows = max_rows, seed = seed
+    max_rows = max_rows, seed = seed, max_pair_rows = max_pair_rows
   ), class = "autoxplain_report_data_control")
 }
 

@@ -1,0 +1,9 @@
+"case","seed","k","solver","training_rows","validation_rows","event_count","coefficients","fit_seconds","log_loss","max_probability_difference","mean_probability_difference","optimization","status","warning_count","final_nonconvergence_warning_count","timing_context","error"
+"rare_1pct",912,8,"gam",1599,401,27,73,2.275,0.0927715325749145,0,0,"converged","ok",0,0,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",912,8,"bam",1599,401,27,73,9.713,0.0962820036242889,0.0608787396385396,0.00340941509344924,"converged","ok",17,0,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",912,10,"gam",1599,401,27,93,2.344,0.0905596429919138,0,0,"converged","ok",0,0,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",912,10,"bam",1599,401,27,93,31.988,0.0824660930316139,0.0561670292775674,0.00643655547464441,"converged","ok",88,1,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",913,8,"gam",1599,401,18,73,2.138,0.0749036631715416,0,0,"converged","ok",0,0,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",913,8,"bam",1599,401,18,73,32.648,0.0710817021504545,0.0914566361714069,0.00255119353581851,"converged","ok",1,1,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",913,10,"gam",1599,401,18,93,2.275,0.0692937585626253,0,0,"converged","ok",0,0,"functional check alongside gallery; not comparative timing evidence",NA
+"rare_1pct",913,10,"bam",1599,401,18,93,3.304,0.0676000288511518,0.0455483959069569,0.000698870605324841,"converged","ok",0,0,"functional check alongside gallery; not comparative timing evidence",NA

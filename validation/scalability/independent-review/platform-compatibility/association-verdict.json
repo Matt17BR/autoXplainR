@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "R": "R version 4.5.2 (2025-10-31)",
+  "platform": "x86_64-pc-linux-gnu",
+  "seed": 945,
+  "n": 3600,
+  "table_dimensions": [
+    1200,
+    1100
+  ],
+  "normalizer": 3956400,
+  "scaled_sum": 19005120000,
+  "integer_chi_square": 1319800,
+  "exact_reference": 0.5775691199875201,
+  "sparse": 0.5775691199875201,
+  "sparse_transposed": 0.5775691199875201,
+  "original_dense_platform": 0.5775691199875225,
+  "original_dense_sequential_double": 0.5775691199794077,
+  "original_dense_sequential_double_chi_square": 1319799.9999629247,
+  "sequential_double_reference_error": -8.112399640936019e-12,
+  "scaled_sequential_double_equals_platform_sum": true,
+  "tolerance": 1e-13,
+  "production_changed": false,
+  "observed_ci": {
+    "R": "4.6.1 macOS ARM",
+    "sparse_printed": 0.5775691199875,
+    "old_dense_printed": 0.5775691199794
+  },
+  "oracle_derivation": "Multiply each Pearson residual term by 14400; all terms are integers, sum 19005120000 < 2^53.",
+  "source_sha256": {
+    "R/audit.R": "1e0179f289baa802c98d2b246a11d776b42ef03a2445b07b7a85f446bf56bac9",
+    "tests/testthat/test-association-cardinality.R": "57bf03db94b94c13ab303fef245a435c22259489534c3cced89871d974293171"
+  }
+}

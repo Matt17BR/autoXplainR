@@ -42,11 +42,11 @@ predict.autoxplain_fitted_model <- function(object, newdata, ...) {
   missing <- setdiff(object$features, names(newdata))
   if (length(missing)) {
     stop("`newdata` is missing model features: ", paste(missing, collapse = ", "), ".",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   data <- newdata[object$features]
-  prediction <- switch(
-    object$backend,
+  prediction <- switch(object$backend,
     ranger = predict_ranger_backend(object, data),
     mgcv = predict_mgcv_backend(object, data),
     glmnet = predict_glmnet_backend(object, data),
@@ -94,7 +94,11 @@ predict_glmnet_backend <- function(object, newdata) {
 
 predict_xgboost_backend <- function(object, newdata) {
   require_optional("xgboost", "predicting with boosted trees")
-  matrix <- bake_matrix_blueprint(object$blueprint, newdata)
+  matrix <- if (inherits(object$blueprint, "autoxplain_boosting_blueprint")) {
+    bake_boosting_native_blueprint(object$blueprint, newdata)
+  } else {
+    bake_matrix_blueprint(object$blueprint, newdata)
+  }
   stats::predict(object$fit, newdata = matrix)
 }
 
@@ -134,7 +138,9 @@ predict_kknn_backend <- function(object, newdata) {
 }
 
 normalize_fitted_model_prediction <- function(prediction, object, n) {
-  if (object$task == "regression") return(as.numeric(prediction))
+  if (object$task == "regression") {
+    return(as.numeric(prediction))
+  }
   levels <- object$class_levels
   if (object$task == "binary") {
     if (is.array(prediction) && length(dim(prediction)) > 2L) {
@@ -142,7 +148,9 @@ normalize_fitted_model_prediction <- function(prediction, object, n) {
     }
     if (is.matrix(prediction) || is.data.frame(prediction)) {
       prediction <- as.matrix(prediction)
-      if (ncol(prediction) == 1L) return(as.numeric(prediction[, 1L]))
+      if (ncol(prediction) == 1L) {
+        return(as.numeric(prediction[, 1L]))
+      }
       index <- match(levels[[2L]], colnames(prediction))
       if (is.na(index)) index <- ncol(prediction)
       return(as.numeric(prediction[, index]))
@@ -165,7 +173,9 @@ normalize_fitted_model_prediction <- function(prediction, object, n) {
     missing <- setdiff(levels, colnames(prediction))
     if (length(missing)) {
       stop("The backend omitted multiclass probabilities for: ",
-           paste(missing, collapse = ", "), ".", call. = FALSE)
+        paste(missing, collapse = ", "), ".",
+        call. = FALSE
+      )
     }
     prediction <- prediction[, levels, drop = FALSE]
   }
@@ -173,8 +183,7 @@ normalize_fitted_model_prediction <- function(prediction, object, n) {
 }
 
 backend_package_version <- function(backend) {
-  package <- switch(
-    backend,
+  package <- switch(backend,
     ranger = "ranger",
     mgcv = "mgcv",
     glmnet = "glmnet",
@@ -187,13 +196,14 @@ backend_package_version <- function(backend) {
     nnet = "nnet",
     NA_character_
   )
-  if (is.na(package) || !requireNamespace(package, quietly = TRUE)) return(NA_character_)
+  if (is.na(package) || !requireNamespace(package, quietly = TRUE)) {
+    return(NA_character_)
+  }
   as.character(utils::packageVersion(package))
 }
 
 fitted_model_complexity <- function(model) {
-  switch(
-    model$backend,
+  switch(model$backend,
     ranger = as.numeric(model$fit$num.trees %||% model$parameters$num.trees),
     mgcv = sum(model$fit$edf, na.rm = TRUE),
     glmnet = glmnet_nonzero_coefficients(model),

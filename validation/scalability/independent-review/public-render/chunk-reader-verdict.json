@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "status": "passed",
+  "scope": "Public R render HTML and independent text extraction; does not execute the browser assembler.",
+  "maintained_public_render_cases": 3,
+  "assertions": 41,
+  "forced_multiclass_chunk_characters": 127,
+  "independent_reader_checks": {
+    "readers": 4,
+    "transports": [
+      "plain",
+      "chunks"
+    ],
+    "values": "Hostile Unicode, script delimiters, vector shape and NA"
+  },
+  "compact_review": {
+    "cases": 8,
+    "original_raw_processed_cells": 1162,
+    "all_source_values_and_category_classifications_preserved": true
+  },
+  "source_sha256": {
+    "tests/testthat/test-report-public-payload.R": "5f2286b665de15fdf9a228d1917f883862a54320682638fa5f9ef58774ccb7db",
+    "validation/check-reloaded-artifact.R": "254697e61fe420efa26ef6d51d55f0a9b30545397096212a2ab5f0ae20184aa3",
+    "validation/scalability/independent-review/public-render/public-render.R": "ee8315bc9e66fdd8a9cad867638f0322819817f8afdfb84b0e40fb7386448650",
+    "validation/scalability/reports/independent-review/generate.R": "d8f73c96117669499aeb372e23a371ea8e6db09888ba857fc35fd6bf6f521007"
+  }
+}

@@ -24,6 +24,15 @@ evidence_summary <- function(result) {
   validate_evaluation_snapshot(result)
   audit <- result$explanations$audit
   view <- report_view_model(result)
+  # Preserve R's count tables in the audit; export labelled scalar values.
+  if (!is.null(audit$config$sampling)) {
+    audit$config$sampling <- evidence_sampling_summary(audit$config$sampling)
+  }
+  if (!is.null(audit$diagnostic_status$permutation$evidence$sampling)) {
+    audit$diagnostic_status$permutation$evidence$sampling <- evidence_sampling_summary(
+      audit$diagnostic_status$permutation$evidence$sampling
+    )
+  }
   list(
     schema_version = "2.0",
     package_version = result$provenance$package_version %||% package_version_or_development(),
@@ -68,4 +77,14 @@ evidence_summary <- function(result) {
       "No fairness, safety, or deployment certification is provided."
     )
   )
+}
+
+evidence_sampling_summary <- function(sampling) {
+  for (name in c("full_class_counts", "class_counts")) {
+    counts <- sampling[[name]]
+    if (!is.null(counts)) {
+      sampling[[name]] <- stats::setNames(as.list(as.integer(counts)), names(counts))
+    }
+  }
+  sampling
 }

@@ -41,7 +41,9 @@ ALE.}
 \item{grid_size}{Deprecated alias for \code{n_points}.}
 
 \item{sample_size}{Maximum number of reference rows used by PDP. \code{NULL} uses
-all rows. ALE always uses all rows that fall inside its bins.}
+all rows unless \code{max_rows} is set. The curve uses the smaller of these
+limits, drawn once from the original reference population. Grid support
+uses the separate \code{max_rows} sample; both row counts are recorded.}
 
 \item{seed}{Sampling seed; the caller's random-number state is restored.}
 

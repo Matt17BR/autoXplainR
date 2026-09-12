@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "scope": "Derivative review HTML from original saved v5 result using current renderer; no refit. Original timed HTML and the 81.055-second observation preserved.",
+  "original_report": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full/report.html",
+  "derivative_report": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full/report-review-final.html",
+  "original_sha256": "665f438dc288e3d99c02ea8916a640fc1f22d61c25c9eb8f5c3bd54a6e12b257",
+  "derivative_sha256": "b09ce22b6f3d739bf635f0f5c19aa3708feb05e7cad6c7d0afc8ecceca5c4f79",
+  "original_bytes": 3891782,
+  "derivative_bytes": 3892128,
+  "only_two_intended_help_text_replacements": true,
+  "unchanged_json_payloads": {
+    "axr-data-payload": true,
+    "axr-predictions-payload": true,
+    "selection-evidence": true
+  },
+  "renderer_source_sha256": "d68ff012353ad1e64716dabded927c88df8aa668f1fed53c4c0f57064fbef6a2",
+  "render_script_sha256": "fe51287431fce98b11330a20594f875110a02ed40862a2b3ade6db5997476a59"
+}

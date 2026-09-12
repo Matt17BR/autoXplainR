@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "semantic_comparison": {
+    "checks": 1005,
+    "all_passed": true,
+    "scope": "All exported rows, whole-column summaries and complete prediction payloads. Pair metadata intentionally changed to expose sampling and category replication, so it is tested separately.",
+    "source_verdict_sha256": "550a19ca468e27f191aef47dd858bbdbc362fa50178cbfcc7ecc0977a6bb69f3",
+    "core_checks": [
+      {
+        "name": "Every exported source identity, raw value, processed value and nonfinite flag",
+        "passed": true,
+        "baseline_sha256": "fa297cf686cccf9ddbe070396999fb6e02e0ffe3116ce95968b313f00734c49e",
+        "candidate_sha256": "fa297cf686cccf9ddbe070396999fb6e02e0ffe3116ce95968b313f00734c49e"
+      },
+      {
+        "name": "Complete export manifest",
+        "passed": true,
+        "baseline_sha256": "6aca7122dad308c94ed6130d320a810061a33cc98012e3061319466c66d4a74c",
+        "candidate_sha256": "6aca7122dad308c94ed6130d320a810061a33cc98012e3061319466c66d4a74c"
+      },
+      {
+        "name": "All prediction diagnostics, cutoff counts, linked cases and exact model outputs",
+        "passed": true,
+        "baseline_sha256": "c33706910f7428fe42624b2611ab520ca673e960c59da976d0fcb0c6866fb942",
+        "candidate_sha256": "c33706910f7428fe42624b2611ab520ca673e960c59da976d0fcb0c6866fb942"
+      }
+    ],
+    "whole_column_checks": 1002
+  },
+  "initial_to_final_byte_identity": [
+    {
+      "payload": "axr-data-payload",
+      "identical": true,
+      "initial_sha256": "a3a1cc4d478b49fe89149a425761419758ea49abbf1dcb59aea547f492e086d4",
+      "final_sha256": "a3a1cc4d478b49fe89149a425761419758ea49abbf1dcb59aea547f492e086d4"
+    },
+    {
+      "payload": "axr-predictions-payload",
+      "identical": true,
+      "initial_sha256": "8a836d91cd34f3782804dd429da9d1a3923d1d22f9f966600ce90da29ab1e002",
+      "final_sha256": "8a836d91cd34f3782804dd429da9d1a3923d1d22f9f966600ce90da29ab1e002"
+    }
+  ],
+  "replay": "validation/scalability/reports/compare-payloads.py compares original 0.6.2 and final 0.7.0 HTML directly; payload-stability hashes provide a transitive proof for this final artifact."
+}

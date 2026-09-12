@@ -145,7 +145,10 @@ explorer_tradeoffs <- function(result, models) {
     explorer_help("Reading the cost chart", paste(
       "Left means lower measured cost. For a loss such as RMSE or log loss, lower is better;",
       "for accuracy or R-squared, higher is better. Outlined models are not beaten on both axes.",
-      "Single-fit millisecond timings are descriptive readings, not reliable speed rankings."
+      "Single-fit millisecond timings are descriptive readings, not reliable speed rankings.",
+      "R object size includes retained diagnostics, may count shared data repeatedly",
+      "and excludes native engine allocations.",
+      "It is not a saved-file or deployment-memory comparison."
     )), "</h3>",
     '<label class="control">Compare cost <select id="resource-select">',
     explorer_options(models$resources, resources[models$resources]), "</select></label>",
@@ -176,8 +179,11 @@ explorer_tradeoffs <- function(result, models) {
     if (identical(result$engine, "h2o")) {
       "H2O model size is reported by the engine when available; the native baseline uses R object size. "
     } else {
-      "Size is an approximate R object measurement, not a count of learned rules. "
+      "Size estimates the retained R model object. "
     },
+    "R object size includes retained diagnostics, may count shared data repeatedly ",
+    "and excludes native engine allocations. ",
+    "It is not a saved-file or deployment-memory comparison, or a count of learned rules. ",
     "These measurements are not hardware-independent benchmarks.</p></details></div>"
   )
 }
@@ -223,7 +229,7 @@ explorer_overview <- function(result, audit, models) {
     ), "</select></label></div>",
     '<p class="task-intro" id="score-summary" data-rows="', view$identity$evaluation_rows,
     '" data-role="', html_escape(view$identity$evaluation_role), '">', html_escape(paste0(
-      view$identity$evaluation_rows, " ", view$identity$evaluation_role, " rows \u00b7 ",
+      report_count(view$identity$evaluation_rows), " ", view$identity$evaluation_role, " rows \u00b7 ",
       pretty_metric(metric), ": ", if (higher) "higher" else "lower", " is better. ",
       "Table order is descriptive; the primary model is unchanged."
     )), "</p>",
@@ -259,6 +265,13 @@ explorer_overview <- function(result, audit, models) {
 explorer_importance <- function(rows, metric, model_id) {
   if (is.null(rows) || !nrow(rows)) {
     return(render_diagnostic_state("Feature importance", "not_run", "This model was outside the explanation budget."))
+  }
+  if (!any(is.finite(rows$importance))) {
+    reason <- unique(rows$unavailable_reason[nzchar(rows$unavailable_reason)])
+    return(render_diagnostic_state(
+      "Feature importance", "unavailable",
+      if (length(reason)) paste(reason, collapse = " ") else "No finite permutation importance was available."
+    ))
   }
   rows <- rows[order(-rows$importance), , drop = FALSE]
   limits <- unlist(rows[intersect(c("importance", "conf_low", "conf_high"), names(rows))], use.names = FALSE)
@@ -360,6 +373,7 @@ explorer_model_effects <- function(result, audit, effects, class = NULL) {
         explain_effect(explainers[[id]], feature,
           method = if (is.numeric(explainers[[id]]$data[[feature]])) "ale" else "pdp",
           n_points = 16L, seed = result$provenance$seed,
+          max_rows = result$explanations$config$explanation_rows,
           class = class
         ),
         error = function(e) structure(conditionMessage(e), class = "effect_failure")
@@ -459,10 +473,15 @@ explorer_features <- function(result, audit, effects, models) {
         "ALE follows local changes in predictions and centers the effect at zero.",
         "Negative effects mean below this reference, not negative probabilities.",
         "PDP averages predictions with an input set to each displayed value.",
+        "A flat average curve can hide interactions, even for an important feature.",
         "These describe fitted associations, not the consequences of an intervention."
       )
     ),
-    "</h2><div class=\"feature-controls\">",
+    "</h2>",
+    if (isTRUE(audit$config$sampling$sampled)) paste0(
+      '<p class="data-chart-note">', html_escape(explanation_sampling_note(audit$config$sampling)), "</p>"
+    ),
+    "<div class=\"feature-controls\">",
     explorer_model_control(models, result$provenance$primary_model_id, "feature-model-select"),
     '<label class="control">Compare with <select id="comparison-model-select">',
     explorer_options(c("", models$table$model_id), c("No comparison", models$table$model), ""),
@@ -604,13 +623,14 @@ model_explorer_html <- function(result, audit, effects, narrative, subgroup_chec
     '<div class="report-body"><header class="workspace-header"><div><p class="eyebrow">',
     html_escape(identity$task), " \u00b7 ", html_escape(identity$evaluation_role),
     if (!identical(identity$evaluation_role, "evaluation")) " evaluation" else "", "</p>",
-    "<h1>", html_escape(title), '</h1><p class="run-context">', nrow(models$table), " retained models \u00b7 ",
+    "<h1>", html_escape(title), '</h1><p class="run-context">', report_count(nrow(models$table)),
+    if (nrow(models$table) == 1L) " retained model \u00b7 " else " retained models \u00b7 ",
     if (length(identity$training_rows) && !is.na(identity$training_rows)) {
-      paste0(identity$training_rows, " training rows \u00b7 ")
+      paste0(report_count(identity$training_rows), " training rows \u00b7 ")
     } else {
       "Training rows not supplied \u00b7 "
     },
-    identity$evaluation_rows, " evaluation rows",
+    report_count(identity$evaluation_rows), " evaluation rows",
     if (!is.null(identity$target_units)) paste0(" \u00b7 ", html_escape(identity$target_units)) else "",
     if (!is.null(identity$positive)) paste0(" \u00b7 Probability event: ", html_escape(identity$positive)) else "",
     '</p></div><button type="button" id="print-report" class="quiet-button" title="Print this view">',
@@ -621,6 +641,7 @@ model_explorer_html <- function(result, audit, effects, narrative, subgroup_chec
     " \u00b7 ", html_escape(identity$split_method), "</footer></div>",
     "<script>", report_asset("explorer.js"), "</script><script>", report_asset("charts.js"),
     "</script><script>", report_asset("selection.js"), "</script><script>",
+    report_asset("fflate-0.8.3.js"), "</script><script>", report_asset("payload.js"), "</script><script>",
     report_asset("data-explorer.js"), "</script><script>", report_asset("predictions.js"),
     "</script></body></html>"
   )

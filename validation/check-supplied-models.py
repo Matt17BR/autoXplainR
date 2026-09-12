@@ -9,6 +9,7 @@ import os
 import subprocess
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright
+from report_payload import decode_data_payload, decode_prediction_payload
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -25,8 +26,43 @@ def quantile(values, fraction):
     return values[i] + (values[min(i+1, len(values)-1)]-values[i])*(h-i)
 def settled(page):
     page.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
+
+geometry_script = '''()=>({
+  scrollX,scrollY,width:innerWidth,height:innerHeight,
+  elements:['#metric-select','.sidebar','.prediction-benchmark > summary'].map(selector=>({
+    selector,rect:document.querySelector(selector)?.getBoundingClientRect().toJSON()??null
+  }))
+})'''
+
+def stable_geometry(page):
+    # Focus can start CSS smooth scrolling. Two paint frames do not establish
+    # stable hit targets for axe's geometry checks. Keep the user's final view.
+    return page.evaluate('''()=>{
+      const geometry='''+geometry_script+''';
+      const started=performance.now();let previous=null,unchanged=started,frames=0;
+      return new Promise((resolve,reject)=>{
+        function tick(now){
+          const current=geometry(),key=JSON.stringify(current);frames++;
+          if(key!==previous){previous=key;unchanged=now;}
+          if(now-unchanged>=150)return resolve({geometry:current,frames,elapsed:now-started,stable_ms:now-unchanged});
+          if(now-started>4000)return reject(new Error('Report geometry did not settle before accessibility scan'));
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }''')
+
+def accessibility_violations(page):
+    # Preserve failure summaries, measured areas and related nodes for diagnosis.
+    return page.evaluate("async()=> (await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}})).violations")
+
 def payload(page, ident):
-    return json.loads(page.locator('#'+ident).text_content())
+    value = json.loads(page.locator('#'+ident).text_content())
+    if ident == 'axr-data-payload':
+        return decode_data_payload(value)
+    if ident == 'axr-predictions-payload':
+        return decode_prediction_payload(value)
+    return value
 
 bench = json.loads((args.case_dir/'supplied-benchmark-oracle.json').read_text())
 source = json.loads((args.case_dir/'supplied-models-oracle.json').read_text())['binary']
@@ -113,7 +149,14 @@ with sync_playwright() as p:
         check('benchmark details keyboard access '+str(width),page.locator('.prediction-benchmark').get_attribute('open') is not None)
         if args.axe_path:
             page.add_script_tag(path=str(args.axe_path))
-            violations=page.evaluate("async()=> (await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa','wcag22aa']}})).violations.map(x=>({id:x.id,nodes:x.nodes.map(n=>n.target)}))")
+            stable=stable_geometry(page)
+            violations=accessibility_violations(page)
+            after=page.evaluate(geometry_script)
+            check('benchmark accessibility scan has stable geometry '+str(width),stable['geometry']==after,
+                  dict(before=stable,after=after))
+            check('accessibility settling preserves keyboard details '+str(width),
+                  page.locator('.prediction-benchmark').get_attribute('open') is not None and
+                  page.locator('.prediction-benchmark > summary').evaluate('node=>document.activeElement===node'))
             check('benchmark accessibility '+str(width),not violations,violations)
         page.screenshot(path=str(args.output_dir/f'benchmark-{width}.png'),full_page=True)
         if width==1440:
@@ -155,6 +198,37 @@ with sync_playwright() as p:
               window.printLinkObserved.citation==='https://doi.org/10.1214/aos/1176344136' &&
               window.printExternalLinks.every(({link,href})=>link.getAttribute('href')===href)'''))
             page.locator('#print-link-probe').evaluate('node=>node.remove()')
+        page.locator('#metric-select').focus();stable_geometry(page)
+        hits=page.locator('#metric-select').evaluate('''node=>{
+          const r=node.getBoundingClientRect();
+          return {width:r.width,height:r.height,focused:document.activeElement===node,
+            hits:[.25,.5,.75].flatMap(x=>[.25,.5,.75].map(y=>
+              document.elementFromPoint(r.x+r.width*x,r.y+r.height*y)===node))};
+        }''')
+        check('score selector has usable focused target '+str(width),
+              hits['focused'] and hits['width']>=24 and hits['height']>=24 and all(hits['hits']),hits)
+        before=page.input_value('#metric-select')
+        page.keyboard.press('ArrowDown');page.keyboard.press('Enter');settled(page)
+        check('score selector keyboard changes report metric '+str(width),
+              page.input_value('#metric-select')!=before and
+              page.evaluate('window.AutoXplainRReport.getState().metric')==page.input_value('#metric-select'))
+        page.close()
+    if args.axe_path:
+        # An independent HTML fixture proves that stable-state scanning still
+        # rejects genuinely small, closely spaced targets. No report CSS is changed.
+        page=browser.new_page(viewport={'width':390,'height':900})
+        page.set_content('''<!doctype html><html lang="en"><head><title>Target-size check</title>
+          <style>.controls{display:flex;gap:1px}.controls>*{box-sizing:border-box;width:44px;height:36px;padding:0;font-size:10px}</style>
+          </head><body><main><h1>Choose a score</h1><div class="controls">
+          <select aria-label="Score"><option>Loss</option></select><button>Next</button>
+          </div></main></body></html>''')
+        page.add_script_tag(path=str(args.axe_path));stable_geometry(page)
+        violations=accessibility_violations(page)
+        check('independent target fixture is accessible before mutation',not violations,violations)
+        page.locator('.controls > *').evaluate_all("nodes=>nodes.forEach(node=>{node.style.width='18px';node.style.height='18px'})")
+        stable_geometry(page);violations=accessibility_violations(page)
+        check('stable accessibility scan rejects genuinely small adjacent targets',
+              any(row['id']=='target-size' for row in violations),violations)
         page.close()
     for mode in ['none','summary']:
         page=browser.new_page();page.goto((args.case_dir/f'supplied-binary-{mode}.html').resolve().as_uri());settled(page)

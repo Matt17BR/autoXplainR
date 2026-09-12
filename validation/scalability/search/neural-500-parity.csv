@@ -1,0 +1,6 @@
+"configuration","fold","seed","maxit","predictions_identical","native_fields_except_call_identical","serialized_call_bytes_before","serialized_call_bytes_after"
+"neural_02",2,906524673,500,TRUE,TRUE,1376738,363
+"neural_03",2,502517407,500,TRUE,TRUE,1376738,363
+"neural_04",2,2000731987,500,TRUE,TRUE,1376738,363
+"neural_05",2,1351462921,500,TRUE,TRUE,1376738,363
+"neural_07",2,502517408,500,TRUE,TRUE,1376738,363

@@ -175,7 +175,7 @@ test_that("model details expose effective controls and learned values from the r
   expect_equal(AutoXplainR:::model_specification(result, tree_id)$parameters$cp, .123)
   neural <- AutoXplainR:::model_specification(result, neural_id)
   expect_equal(neural$parameters$size, result$models[[neural_id]]$model$n[2])
-  expect_equal(neural$parameters$maxit, 500L)
+  expect_equal(neural$parameters$maxit, result$models[[neural_id]]$maxit)
   expect_equal(neural$learned$`Fitted weights`, length(result$models[[neural_id]]$model$wts))
   linear <- AutoXplainR:::model_specification(result, linear_id)
   expect_equal(linear$coefficients, coef(result$models[[linear_id]]))

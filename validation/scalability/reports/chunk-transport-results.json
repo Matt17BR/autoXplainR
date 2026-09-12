@@ -1,0 +1,3318 @@
+{
+  "scope": "Same unchanged one-million-evaluation-row supplied linear-model report. Unsplit and cache-only exact-text chunk parser experiment; WebKit WPE compatibility runtime, not Safari hardware.",
+  "unsplit_load_diagnosis": [
+    {
+      "file": "200000-instrumented.html",
+      "html_bytes": 17557521,
+      "javascript": false,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "loaded",
+      "elapsed_seconds": 3.166494084000078,
+      "events": [
+        {
+          "event": "load",
+          "seconds": 3.1661468100010097
+        }
+      ],
+      "errors": [],
+      "console": [],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing."
+    },
+    {
+      "file": "200000-instrumented.html",
+      "html_bytes": 17557521,
+      "javascript": true,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "loaded",
+      "elapsed_seconds": 2.949325259000034,
+      "events": [
+        {
+          "event": "load",
+          "seconds": 2.9492559129994333
+        },
+        {
+          "event": "domcontentloaded",
+          "seconds": 2.949702497000544
+        }
+      ],
+      "errors": [],
+      "console": [
+        {
+          "text": "AXR probe: head reached",
+          "seconds": 0.00864191300024686
+        },
+        {
+          "text": "AXR probe: before axr-data-payload",
+          "seconds": 0.014179760999468272
+        },
+        {
+          "text": "AXR probe: after axr-data-payload",
+          "seconds": 1.580578016999425
+        },
+        {
+          "text": "AXR probe: before axr-predictions-payload",
+          "seconds": 1.5832443090002926
+        },
+        {
+          "text": "AXR probe: after axr-predictions-payload",
+          "seconds": 1.921392530999583
+        },
+        {
+          "text": "AXR probe: JSON.parse begin 8594548",
+          "seconds": 2.901223492999634
+        },
+        {
+          "text": "AXR probe: JSON.parse end 9",
+          "seconds": 2.9099499179992563
+        },
+        {
+          "text": "AXR probe: JSON.parse begin 8617301",
+          "seconds": 2.940986528999929
+        },
+        {
+          "text": "AXR probe: JSON.parse end 8",
+          "seconds": 2.9491548820005846
+        }
+      ],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing.",
+      "initialized": {
+        "data": true,
+        "report": true
+      }
+    },
+    {
+      "file": "1000000-instrumented.html",
+      "html_bytes": 83339697,
+      "javascript": false,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "initial_navigation_timeout",
+      "elapsed_seconds": 15.002658173998498,
+      "events": [],
+      "errors": [],
+      "console": [],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing."
+    },
+    {
+      "file": "1000000-instrumented.html",
+      "html_bytes": 83339697,
+      "javascript": true,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "initial_navigation_timeout",
+      "elapsed_seconds": 15.000711488000888,
+      "events": [],
+      "errors": [],
+      "console": [
+        {
+          "text": "AXR probe: head reached",
+          "seconds": 0.010222040000371635
+        },
+        {
+          "text": "AXR probe: before axr-data-payload",
+          "seconds": 0.024645883999255602
+        }
+      ],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing."
+    }
+  ],
+  "prototype_load_diagnosis": [
+    {
+      "file": "1000000-chunked.html",
+      "html_bytes": 83346615,
+      "javascript": false,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "loaded",
+      "elapsed_seconds": 4.3031948169991665,
+      "events": [
+        {
+          "event": "load",
+          "seconds": 4.302945427998566
+        }
+      ],
+      "errors": [],
+      "console": [],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing."
+    },
+    {
+      "file": "1000000-chunked.html",
+      "html_bytes": 83346615,
+      "javascript": true,
+      "browser": "26.0",
+      "timeout_ms": 15000,
+      "status": "loaded",
+      "elapsed_seconds": 4.489972942999884,
+      "events": [
+        {
+          "event": "load",
+          "seconds": 4.489867115000379
+        },
+        {
+          "event": "domcontentloaded",
+          "seconds": 4.490186951999931
+        }
+      ],
+      "errors": [],
+      "console": [],
+      "runtime_scope": "Pinned Playwright WebKit WPE port using isolated Ubuntu24 compatibility libraries on Ubuntu26. This is not a Safari or physical-device timing.",
+      "initialized": {
+        "data": true,
+        "report": true
+      }
+    }
+  ],
+  "exact_original_payload_hashes": [
+    {
+      "id": "axr-data-payload",
+      "characters": 41365450,
+      "chunks": 40,
+      "sha256": "83590c0cf61b8082becf1924507ec043a26607a7b1cbad38b74ad10c032f6f5b"
+    },
+    {
+      "id": "axr-predictions-payload",
+      "characters": 41646252,
+      "chunks": 40,
+      "sha256": "fca28d705318df12c90c0e51e4c31bd0bb919b54b39f7cdfaa8c2000b318e948"
+    }
+  ],
+  "prototype_million_tasks": {
+    "checks": [
+      {
+        "name": "Official RMSE agrees with predictions computed independently in R",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "Prediction summaries retain every evaluation row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "webkit/1440: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/1440: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "webkit/390: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      }
+    ],
+    "observations": [
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 1440,
+        "load_seconds": 3.420780673999616,
+        "open_data_seconds": 0.2151104540007509,
+        "open_records_seconds": 1.5460097730010602,
+        "source_lookup_seconds": [
+          0.6508971269995527,
+          0.33491857400076697,
+          0.15308757099955983,
+          0.1807352150008228,
+          0.19976037699962035
+        ],
+        "next_page_seconds": 0.05816141700051958,
+        "filter_seconds": 0.1173294239997631,
+        "scatter_seconds": 0.26284812400081137
+      },
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 390,
+        "load_seconds": 3.224429292999048,
+        "open_data_seconds": 0.172860340000625,
+        "open_records_seconds": 1.4652222620006796,
+        "source_lookup_seconds": [
+          0.6306691150002735,
+          0.3250577609996981,
+          0.133921286000259,
+          0.16674226599934627,
+          0.16899967999961518
+        ],
+        "next_page_seconds": 0.049385967999114655,
+        "filter_seconds": 0.11842607600010524,
+        "scatter_seconds": 0.24702212299962412
+      }
+    ],
+    "passed": true,
+    "memory_scope": "Observed V8 JavaScript heap after tasks, not peak browser RSS or total machine memory."
+  },
+  "unchanged_wide_report_tasks": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "webkit/1440: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/1440: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/1440: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: no runtime error",
+        "passed": true,
+        "observed": []
+      },
+      {
+        "name": "webkit/390: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/390: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/390: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: no runtime error",
+        "passed": true,
+        "observed": []
+      }
+    ],
+    "observations": [
+      {
+        "engine": "webkit",
+        "width": 1440,
+        "load_seconds": 5.248961514000257
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "load_seconds": 5.152196547998756
+      }
+    ]
+  },
+  "production_boundary_checks": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "Python: exact escaped text at boundary 1",
+        "passed": true
+      },
+      {
+        "name": "Python: exact escaped text at boundary 7",
+        "passed": true
+      },
+      {
+        "name": "Python: exact escaped text at boundary 13",
+        "passed": true
+      },
+      {
+        "name": "Python: exact escaped text at boundary 32",
+        "passed": true
+      },
+      {
+        "name": "Python: rejects owner mismatch",
+        "passed": true
+      },
+      {
+        "name": "Python: rejects order mismatch",
+        "passed": true
+      },
+      {
+        "name": "Python: rejects missing mismatch",
+        "passed": true
+      },
+      {
+        "name": "Python: replacement removes old chunks and preserves deliberate mutation",
+        "passed": true
+      },
+      {
+        "name": "chromium: exact Unicode/escaped-text boundary 1",
+        "passed": true
+      },
+      {
+        "name": "chromium: successful chunks 1 removed",
+        "passed": true
+      },
+      {
+        "name": "chromium: exact Unicode/escaped-text boundary 7",
+        "passed": true
+      },
+      {
+        "name": "chromium: successful chunks 7 removed",
+        "passed": true
+      },
+      {
+        "name": "chromium: exact Unicode/escaped-text boundary 13",
+        "passed": true
+      },
+      {
+        "name": "chromium: successful chunks 13 removed",
+        "passed": true
+      },
+      {
+        "name": "chromium: exact Unicode/escaped-text boundary 32",
+        "passed": true
+      },
+      {
+        "name": "chromium: successful chunks 32 removed",
+        "passed": true
+      },
+      {
+        "name": "chromium: rejects owner mismatch",
+        "passed": true
+      },
+      {
+        "name": "chromium: rejects order mismatch",
+        "passed": true
+      },
+      {
+        "name": "chromium: rejects missing mismatch",
+        "passed": true
+      },
+      {
+        "name": "chromium: hostile text stays inert",
+        "passed": true
+      },
+      {
+        "name": "chromium: no runtime error",
+        "passed": true
+      },
+      {
+        "name": "chromium: deliberate mutation survives old assembler",
+        "passed": true
+      },
+      {
+        "name": "chromium: replacement leaves another payload unchanged",
+        "passed": true
+      },
+      {
+        "name": "chromium: owner mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "chromium: owner mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "chromium: owner mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "chromium: order mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "chromium: order mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "chromium: order mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "chromium: missing mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "chromium: missing mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "chromium: missing mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "chromium: corrupted transport has no uncaught errors",
+        "passed": true
+      },
+      {
+        "name": "chromium: chunked report works as static evidence without JavaScript",
+        "passed": true
+      },
+      {
+        "name": "webkit: exact Unicode/escaped-text boundary 1",
+        "passed": true
+      },
+      {
+        "name": "webkit: successful chunks 1 removed",
+        "passed": true
+      },
+      {
+        "name": "webkit: exact Unicode/escaped-text boundary 7",
+        "passed": true
+      },
+      {
+        "name": "webkit: successful chunks 7 removed",
+        "passed": true
+      },
+      {
+        "name": "webkit: exact Unicode/escaped-text boundary 13",
+        "passed": true
+      },
+      {
+        "name": "webkit: successful chunks 13 removed",
+        "passed": true
+      },
+      {
+        "name": "webkit: exact Unicode/escaped-text boundary 32",
+        "passed": true
+      },
+      {
+        "name": "webkit: successful chunks 32 removed",
+        "passed": true
+      },
+      {
+        "name": "webkit: rejects owner mismatch",
+        "passed": true
+      },
+      {
+        "name": "webkit: rejects order mismatch",
+        "passed": true
+      },
+      {
+        "name": "webkit: rejects missing mismatch",
+        "passed": true
+      },
+      {
+        "name": "webkit: hostile text stays inert",
+        "passed": true
+      },
+      {
+        "name": "webkit: no runtime error",
+        "passed": true
+      },
+      {
+        "name": "webkit: deliberate mutation survives old assembler",
+        "passed": true
+      },
+      {
+        "name": "webkit: replacement leaves another payload unchanged",
+        "passed": true
+      },
+      {
+        "name": "webkit: owner mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "webkit: owner mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "webkit: owner mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "webkit: order mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "webkit: order mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "webkit: order mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "webkit: missing mismatch shows visible data fallback",
+        "passed": true
+      },
+      {
+        "name": "webkit: missing mismatch retains full distribution counts",
+        "passed": true
+      },
+      {
+        "name": "webkit: missing mismatch leaves prediction payload and scores unchanged",
+        "passed": true
+      },
+      {
+        "name": "webkit: corrupted transport has no uncaught errors",
+        "passed": true
+      },
+      {
+        "name": "webkit: chunked report works as static evidence without JavaScript",
+        "passed": true
+      }
+    ]
+  },
+  "production_natural_50000_tasks": {
+    "checks": [
+      {
+        "name": "Official RMSE agrees with predictions computed independently in R",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "Prediction summaries retain every evaluation row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.7972336234524846,
+          0.7972336234524846
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          -0.18578986816504675,
+          -0.18578986816504675
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.09274642122909427,
+          0.09274642122909427
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3913035985230207,
+          -3.3913035985230207
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:25000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:25000/x",
+        "passed": true,
+        "evidence": [
+          0.06782398480551424,
+          0.06782398480551424
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:25000/z",
+        "passed": true,
+        "evidence": [
+          0.5645914736669511,
+          0.5645914736669511
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:25000/response",
+        "passed": true,
+        "evidence": [
+          -0.05956656964448988,
+          -0.05956656964448988
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:49999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:49999/x",
+        "passed": true,
+        "evidence": [
+          -0.47664357333285695,
+          -0.47664357333285695
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:49999/z",
+        "passed": true,
+        "evidence": [
+          0.782094859983772,
+          0.782094859983772
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:49999/response",
+        "passed": true,
+        "evidence": [
+          -1.8582144080324654,
+          -1.8582144080324654
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:50000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:50000/x",
+        "passed": true,
+        "evidence": [
+          0.7370246753417453,
+          0.7370246753417453
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:50000/z",
+        "passed": true,
+        "evidence": [
+          0.2531369519419968,
+          0.2531369519419968
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:50000/response",
+        "passed": true,
+        "evidence": [
+          2.0853349206317864,
+          2.0853349206317864
+        ]
+      },
+      {
+        "name": "chromium/1440: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/1440: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/390: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.7972336234524846,
+          0.7972336234524846
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          -0.18578986816504675,
+          -0.18578986816504675
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.09274642122909427,
+          0.09274642122909427
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3913035985230207,
+          -3.3913035985230207
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:25000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:25000/x",
+        "passed": true,
+        "evidence": [
+          0.06782398480551424,
+          0.06782398480551424
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:25000/z",
+        "passed": true,
+        "evidence": [
+          0.5645914736669511,
+          0.5645914736669511
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:25000/response",
+        "passed": true,
+        "evidence": [
+          -0.05956656964448988,
+          -0.05956656964448988
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:49999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:49999/x",
+        "passed": true,
+        "evidence": [
+          -0.47664357333285695,
+          -0.47664357333285695
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:49999/z",
+        "passed": true,
+        "evidence": [
+          0.782094859983772,
+          0.782094859983772
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:49999/response",
+        "passed": true,
+        "evidence": [
+          -1.8582144080324654,
+          -1.8582144080324654
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:50000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:50000/x",
+        "passed": true,
+        "evidence": [
+          0.7370246753417453,
+          0.7370246753417453
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:50000/z",
+        "passed": true,
+        "evidence": [
+          0.2531369519419968,
+          0.2531369519419968
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:50000/response",
+        "passed": true,
+        "evidence": [
+          2.0853349206317864,
+          2.0853349206317864
+        ]
+      },
+      {
+        "name": "chromium/390: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/390: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/1440: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.7972336234524846,
+          0.7972336234524846
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          -0.18578986816504675,
+          -0.18578986816504675
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.09274642122909427,
+          0.09274642122909427
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3913035985230207,
+          -3.3913035985230207
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:25000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:25000/x",
+        "passed": true,
+        "evidence": [
+          0.06782398480551424,
+          0.06782398480551424
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:25000/z",
+        "passed": true,
+        "evidence": [
+          0.5645914736669511,
+          0.5645914736669511
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:25000/response",
+        "passed": true,
+        "evidence": [
+          -0.05956656964448988,
+          -0.05956656964448988
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:49999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:49999/x",
+        "passed": true,
+        "evidence": [
+          -0.47664357333285695,
+          -0.47664357333285695
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:49999/z",
+        "passed": true,
+        "evidence": [
+          0.782094859983772,
+          0.782094859983772
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:49999/response",
+        "passed": true,
+        "evidence": [
+          -1.8582144080324654,
+          -1.8582144080324654
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:50000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:50000/x",
+        "passed": true,
+        "evidence": [
+          0.7370246753417453,
+          0.7370246753417453
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:50000/z",
+        "passed": true,
+        "evidence": [
+          0.2531369519419968,
+          0.2531369519419968
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:50000/response",
+        "passed": true,
+        "evidence": [
+          2.0853349206317864,
+          2.0853349206317864
+        ]
+      },
+      {
+        "name": "webkit/1440: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/1440: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.7972336234524846,
+          0.7972336234524846
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          -0.18578986816504675,
+          -0.18578986816504675
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.09274642122909427,
+          0.09274642122909427
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3913035985230207,
+          -3.3913035985230207
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:25000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:25000/x",
+        "passed": true,
+        "evidence": [
+          0.06782398480551424,
+          0.06782398480551424
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:25000/z",
+        "passed": true,
+        "evidence": [
+          0.5645914736669511,
+          0.5645914736669511
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:25000/response",
+        "passed": true,
+        "evidence": [
+          -0.05956656964448988,
+          -0.05956656964448988
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:49999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:49999/x",
+        "passed": true,
+        "evidence": [
+          -0.47664357333285695,
+          -0.47664357333285695
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:49999/z",
+        "passed": true,
+        "evidence": [
+          0.782094859983772,
+          0.782094859983772
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:49999/response",
+        "passed": true,
+        "evidence": [
+          -1.8582144080324654,
+          -1.8582144080324654
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:50000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:50000/x",
+        "passed": true,
+        "evidence": [
+          0.7370246753417453,
+          0.7370246753417453
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:50000/z",
+        "passed": true,
+        "evidence": [
+          0.2531369519419968,
+          0.2531369519419968
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:50000/response",
+        "passed": true,
+        "evidence": [
+          2.0853349206317864,
+          2.0853349206317864
+        ]
+      },
+      {
+        "name": "webkit/390: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      }
+    ],
+    "observations": [
+      {
+        "browser": "chromium",
+        "version": "145.0.7632.6",
+        "width": 1440,
+        "load_seconds": 0.22339312500116648,
+        "open_data_seconds": 0.08270971199999622,
+        "open_records_seconds": 0.19887368499985314,
+        "source_lookup_seconds": [
+          0.09070719199917221,
+          0.4215832789996057,
+          0.05594464599926141,
+          0.06823487799920258,
+          0.06947493599909649
+        ],
+        "next_page_seconds": 0.05604481100090197,
+        "filter_seconds": 0.30422354900110804,
+        "scatter_seconds": 0.10144793099971139,
+        "observed_js_heap_bytes": 15888856
+      },
+      {
+        "browser": "chromium",
+        "version": "145.0.7632.6",
+        "width": 390,
+        "load_seconds": 0.15704731599907973,
+        "open_data_seconds": 0.047434370000701165,
+        "open_records_seconds": 0.16359582599943678,
+        "source_lookup_seconds": [
+          0.31572061099905113,
+          0.9223939139992581,
+          0.9226600000001781,
+          0.9334322409995366,
+          0.9223955329998716
+        ],
+        "next_page_seconds": 1.4394516599986673,
+        "filter_seconds": 0.40293930799998634,
+        "scatter_seconds": 0.12285823199999868,
+        "observed_js_heap_bytes": 11322388
+      },
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 1440,
+        "load_seconds": 0.8559085810011311,
+        "open_data_seconds": 0.22336241300035908,
+        "open_records_seconds": 0.25677268599974923,
+        "source_lookup_seconds": [
+          0.10943504100032442,
+          0.2822739040002489,
+          0.06388368399893807,
+          0.06934651899973687,
+          0.07653473599930294
+        ],
+        "next_page_seconds": 0.05632962200070324,
+        "filter_seconds": 0.07107328799975221,
+        "scatter_seconds": 0.23376637200090045
+      },
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 390,
+        "load_seconds": 0.747515981000106,
+        "open_data_seconds": 0.17929859600008058,
+        "open_records_seconds": 0.1795134579988371,
+        "source_lookup_seconds": [
+          0.09373333799885586,
+          0.26387143400097557,
+          0.056128853999325656,
+          0.05611531899921829,
+          0.06132881499979703
+        ],
+        "next_page_seconds": 0.08854261400119867,
+        "filter_seconds": 0.28564601200014295,
+        "scatter_seconds": 0.20676272499986226
+      }
+    ],
+    "passed": true,
+    "memory_scope": "Observed V8 JavaScript heap after tasks, not peak browser RSS or total machine memory."
+  },
+  "final_payload_identity": [
+    {
+      "case": "wide-500",
+      "before_html_sha256": "066c76b5fd532835310f49e28ff9aaa5f7d9190f137022d80ee8c0abd5f28281",
+      "after_html_sha256": "4545671434093e127842308a292bb4eefb4a9e75c1136d95970c54667eb1d4d6",
+      "payloads": [
+        {
+          "id": "axr-data-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 12257249,
+          "sha256": "a3a1cc4d478b49fe89149a425761419758ea49abbf1dcb59aea547f492e086d4"
+        },
+        {
+          "id": "axr-predictions-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 71758,
+          "sha256": "8a836d91cd34f3782804dd429da9d1a3923d1d22f9f966600ce90da29ab1e002"
+        }
+      ]
+    },
+    {
+      "case": "200000",
+      "before_html_sha256": "69f271cdc23a89da6e49dd16c5f670a2dc70226800b18927278abb9fda83f297",
+      "after_html_sha256": "929d4208695a173c00f83463e5ea9e78b39d42b95060512c216c7943bc725ab0",
+      "payloads": [
+        {
+          "id": "axr-data-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 8594548,
+          "sha256": "c7bfcb264bbf72f117e3ebde1c7dd61814bc3e3230a2123f7697e4179ba7e886"
+        },
+        {
+          "id": "axr-predictions-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 8617301,
+          "sha256": "9e7a8fd8131a78703594b94efe3b4440f637a1ca681a4cb006ada1039cc74444"
+        }
+      ]
+    },
+    {
+      "case": "1000000",
+      "before_html_sha256": "0e65120f9db3e8e9332e5b2e6f8abc66934174929483dcd1927da321fd12c629",
+      "after_html_sha256": "1d2c3ea54e2afa645b8140ad849de0497ff7c8ebe065d13bf6c546583eb2c65a",
+      "payloads": [
+        {
+          "id": "axr-data-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 41365450,
+          "sha256": "83590c0cf61b8082becf1924507ec043a26607a7b1cbad38b74ad10c032f6f5b"
+        },
+        {
+          "id": "axr-predictions-payload",
+          "exact_same_text": true,
+          "utf8_bytes": 41646252,
+          "sha256": "fca28d705318df12c90c0e51e4c31bd0bb919b54b39f7cdfaa8c2000b318e948"
+        }
+      ]
+    }
+  ],
+  "final_million_tasks": {
+    "checks": [
+      {
+        "name": "Official RMSE agrees with predictions computed independently in R",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "Prediction summaries retain every evaluation row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "chromium/1440: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "chromium/1440: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "chromium/1440: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/1440: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/1440: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/390: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "chromium/390: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "chromium/390: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "chromium/390: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "chromium/390: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "chromium/390: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/1440: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "webkit/1440: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "webkit/1440: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "webkit/1440: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/1440: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/1440: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: full scores visible before opening records",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: row values decode lazily",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: distributions do not decode row columns",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: initial sort control matches the visible source-order table",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: closed scatter creates no points",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: complete requested export retained",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: exact source identity data:1",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:1/x",
+        "passed": true,
+        "evidence": [
+          0.07681871599396277,
+          0.07681871599396277
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/z",
+        "passed": true,
+        "evidence": [
+          0.2786758625879884,
+          0.2786758625879884
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1/response",
+        "passed": true,
+        "evidence": [
+          0.0349108783890249,
+          0.0349108783890249
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:2",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:2/x",
+        "passed": true,
+        "evidence": [
+          -1.0445103783211052,
+          -1.0445103783211052
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/z",
+        "passed": true,
+        "evidence": [
+          0.017995565431192517,
+          0.017995565431192517
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:2/response",
+        "passed": true,
+        "evidence": [
+          -3.3150061003511415,
+          -3.3150061003511415
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:500000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/x",
+        "passed": true,
+        "evidence": [
+          0.9316385295691646,
+          0.9316385295691646
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/z",
+        "passed": true,
+        "evidence": [
+          0.39315235475078225,
+          0.39315235475078225
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:500000/response",
+        "passed": true,
+        "evidence": [
+          2.759282301755292,
+          2.759282301755292
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:999999",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/x",
+        "passed": true,
+        "evidence": [
+          -0.19705212735775499,
+          -0.19705212735775499
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/z",
+        "passed": true,
+        "evidence": [
+          0.13926561595872045,
+          0.13926561595872045
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:999999/response",
+        "passed": true,
+        "evidence": [
+          -0.5139595927832866,
+          -0.5139595927832866
+        ]
+      },
+      {
+        "name": "webkit/390: exact source identity data:1000000",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/x",
+        "passed": true,
+        "evidence": [
+          0.04929427935296146,
+          0.04929427935296146
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/z",
+        "passed": true,
+        "evidence": [
+          0.14834304223768413,
+          0.14834304223768413
+        ]
+      },
+      {
+        "name": "webkit/390: visible source value data:1000000/response",
+        "passed": true,
+        "evidence": [
+          -0.2499106072061352,
+          -0.2499106072061352
+        ]
+      },
+      {
+        "name": "webkit/390: paging reaches actual next rows",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: filter counts every exported row",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: bounded scatter discloses displayed and full counts",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: full export note uses readable exact counts and accurate scope",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter sampling leaves official scores unchanged",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: scatter axes retain full-data extents, including unplotted extremes",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: no horizontal page overflow",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: last record remains selectable after sampling",
+        "passed": true,
+        "evidence": null
+      },
+      {
+        "name": "webkit/390: offline interaction has no network dependency",
+        "passed": true,
+        "evidence": []
+      },
+      {
+        "name": "webkit/390: no runtime or data-decoder failure",
+        "passed": true,
+        "evidence": []
+      }
+    ],
+    "observations": [
+      {
+        "browser": "chromium",
+        "version": "145.0.7632.6",
+        "width": 1440,
+        "load_seconds": 0.7391978880004899,
+        "open_data_seconds": 0.09234756499972718,
+        "open_records_seconds": 1.295292390999748,
+        "source_lookup_seconds": [
+          0.5693892529998266,
+          0.4282906339994952,
+          0.08901925200007099,
+          0.12055887599854032,
+          0.10465514499992423
+        ],
+        "next_page_seconds": 0.06497865799974534,
+        "filter_seconds": 0.3414629920007428,
+        "scatter_seconds": 0.1951558839991776,
+        "observed_js_heap_bytes": 218977592
+      },
+      {
+        "browser": "chromium",
+        "version": "145.0.7632.6",
+        "width": 390,
+        "load_seconds": 0.6706499350002559,
+        "open_data_seconds": 0.0524119099991367,
+        "open_records_seconds": 1.229560384999786,
+        "source_lookup_seconds": [
+          0.762919217999297,
+          0.9669109779988503,
+          0.9746648809996259,
+          0.9853666270009853,
+          0.9905519830008416
+        ],
+        "next_page_seconds": 1.4487831930000539,
+        "filter_seconds": 0.3611516450000636,
+        "scatter_seconds": 0.18556001700017077,
+        "observed_js_heap_bytes": 208126716
+      },
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 1440,
+        "load_seconds": 3.2169334830014122,
+        "open_data_seconds": 0.19702009399952658,
+        "open_records_seconds": 1.5703815090000717,
+        "source_lookup_seconds": [
+          0.6913221279992285,
+          0.325060842998937,
+          0.13785424399975454,
+          0.18453835299987986,
+          0.20129674500094552
+        ],
+        "next_page_seconds": 0.050616279999303515,
+        "filter_seconds": 0.1172385520003445,
+        "scatter_seconds": 0.23012360699976853
+      },
+      {
+        "browser": "webkit",
+        "version": "26.0",
+        "width": 390,
+        "load_seconds": 3.2419357920007315,
+        "open_data_seconds": 0.16749421499844175,
+        "open_records_seconds": 1.6099878920012998,
+        "source_lookup_seconds": [
+          0.6435521799994603,
+          0.31394369000008737,
+          0.13548450500093168,
+          0.16988054099965666,
+          0.1699809000001551
+        ],
+        "next_page_seconds": 0.05368956900019839,
+        "filter_seconds": 0.10427622299903305,
+        "scatter_seconds": 0.27782106199992995
+      }
+    ],
+    "passed": true,
+    "memory_scope": "Observed V8 JavaScript heap after tasks, not peak browser RSS or total machine memory."
+  },
+  "final_wide_tasks": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "chromium/1440: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\n\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\n\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\n\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence."
+      },
+      {
+        "name": "chromium/1440: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\n\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\n\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\n\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence."
+      },
+      {
+        "name": "chromium/1440: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/1440: no runtime error",
+        "passed": true,
+        "observed": []
+      },
+      {
+        "name": "chromium/390: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\n\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\n\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\n\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence."
+      },
+      {
+        "name": "chromium/390: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\n\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\n\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\n\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence."
+      },
+      {
+        "name": "chromium/390: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "chromium/390: no runtime error",
+        "passed": true,
+        "observed": []
+      },
+      {
+        "name": "webkit/1440: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/1440: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/1440: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/1440: no runtime error",
+        "passed": true,
+        "observed": []
+      },
+      {
+        "name": "webkit/390: a late input remains discoverable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: arbitrary training relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/390: arbitrary evaluation relationship agrees with original values",
+        "passed": true,
+        "observed": "Exported records \u00b7 Raw supplied values \u00b7 training: 900 of 900 rows; evaluation: 300 of 300 rows\ntraining: Spearman correlation (signed) 0.03125 \u00b7 n = 900\nevaluation: Spearman correlation (signed) 0.006087 \u00b7 n = 300\nComputed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.\n"
+      },
+      {
+        "name": "webkit/390: original evaluation record is selectable",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for sensor_499",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for sensor_498",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: exact original value for response",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: no horizontal overflow",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: official scores are unchanged",
+        "passed": true,
+        "observed": null
+      },
+      {
+        "name": "webkit/390: no runtime error",
+        "passed": true,
+        "observed": []
+      }
+    ],
+    "observations": [
+      {
+        "engine": "chromium",
+        "width": 1440,
+        "load_seconds": 0.5126128600004449
+      },
+      {
+        "engine": "chromium",
+        "width": 390,
+        "load_seconds": 0.4694651489990065
+      },
+      {
+        "engine": "webkit",
+        "width": 1440,
+        "load_seconds": 1.5260747449992778
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "load_seconds": 1.4172278490004828
+      }
+    ]
+  },
+  "final_source_snapshot": "source-final-20260912T020856Z"
+}

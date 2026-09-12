@@ -1,0 +1,95 @@
+{
+  "scope": "Function elapsed times; peak RSS covers each fresh process including fixture creation, both scenarios, and independent candidate assertions.",
+  "measurements": [
+    {
+      "variant": "baseline",
+      "training_rows": 100000,
+      "evaluation_rows": 20000,
+      "columns": 21,
+      "baseline_version": "0.6.2",
+      "source_function_hash": "825584e743331dd9673f78e1ae005725",
+      "measurements": [
+        {
+          "scenario": "disjoint",
+          "elapsed_seconds": 11.311,
+          "matching_evaluation_rows": [],
+          "expected_matches_verified": true
+        },
+        {
+          "scenario": "injected",
+          "elapsed_seconds": 11.207,
+          "matching_evaluation_rows": [
+            1,
+            5000,
+            10000,
+            15000,
+            20000
+          ],
+          "expected_matches_verified": true
+        }
+      ],
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 305216
+    },
+    {
+      "variant": "candidate",
+      "training_rows": 100000,
+      "evaluation_rows": 20000,
+      "columns": 21,
+      "baseline_version": "0.6.2",
+      "source_function_hash": "bf97e8e726f73c3d9c9f51d809905611",
+      "measurements": [
+        {
+          "scenario": "disjoint",
+          "elapsed_seconds": 0.023,
+          "matching_evaluation_rows": [],
+          "expected_matches_verified": true
+        },
+        {
+          "scenario": "injected",
+          "elapsed_seconds": 0.027,
+          "matching_evaluation_rows": [
+            1,
+            5000,
+            10000,
+            15000,
+            20000
+          ],
+          "expected_matches_verified": true
+        }
+      ],
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 134096
+    },
+    {
+      "variant": "candidate",
+      "training_rows": 1000000,
+      "evaluation_rows": 20000,
+      "columns": 21,
+      "baseline_version": "0.6.2",
+      "source_function_hash": "bf97e8e726f73c3d9c9f51d809905611",
+      "measurements": [
+        {
+          "scenario": "disjoint",
+          "elapsed_seconds": 0.236,
+          "matching_evaluation_rows": [],
+          "expected_matches_verified": true
+        },
+        {
+          "scenario": "injected",
+          "elapsed_seconds": 0.181,
+          "matching_evaluation_rows": [
+            1,
+            5000,
+            10000,
+            15000,
+            20000
+          ],
+          "expected_matches_verified": true
+        }
+      ],
+      "r_version": "R version 4.5.2 (2025-10-31)",
+      "peak_process_rss_kib": 440508
+    }
+  ]
+}

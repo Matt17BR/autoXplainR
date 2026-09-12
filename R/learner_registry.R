@@ -151,6 +151,8 @@ autoxplain_learner_registry <- function() {
       strengths = "Shows smooth nonlinear effects while preserving an additive structure.",
       cautions = paste(
         "Automatic smooths need enough distinct values and can miss interactions.",
+        "Larger fits use continuous BAM; the method is recorded and can change predictions.",
+        "Many smooths or factor levels can remain expensive.",
         "The automatic search requires fewer predictor terms than rows in each fitting fold",
         "as a conservative capacity policy; externally fitted penalized GAMs can use other designs."
       ),
@@ -405,10 +407,14 @@ learner_dependency_status <- function(definition) {
       reason = paste0(
         "Package `", package, "` ", installed_version,
         " is installed; AutoXplainR requires >= ", minimum, ".",
-        if (current_r_blocked) paste0(
-          " The supported engine version requires R >= ", current_r_minimum,
-          "; this session uses R ", as.character(getRversion()), "."
-        ) else ""
+        if (current_r_blocked) {
+          paste0(
+            " The supported engine version requires R >= ", current_r_minimum,
+            "; this session uses R ", as.character(getRversion()), "."
+          )
+        } else {
+          ""
+        }
       ),
       current_r_blocked = current_r_blocked
     ))
@@ -624,7 +630,8 @@ check_linear_rank <- function(model) {
       "Linear fit is rank deficient: ", model$rank, " independent coefficient directions for ",
       length(stats::coef(model)), " design columns (including the intercept). ",
       "Coefficients are not uniquely determined and predictions for new rows may be unstable. ",
-      "Consider regularized models or remove redundant predictors.", call. = FALSE
+      "Consider regularized models or remove redundant predictors.",
+      call. = FALSE
     )
   }
   model
@@ -651,7 +658,8 @@ fit_neural_learner <- function(data, target, task, parameters, seed) {
     target = target,
     task = task,
     size = parameters$size,
-    decay = parameters$decay
+    decay = parameters$decay,
+    maxit = parameters$maxit %||% 2000L
   )
 }
 
@@ -666,7 +674,8 @@ describe_tree_parameters <- function(parameters) {
 describe_neural_parameters <- function(parameters) {
   paste0(
     "hidden units = ", parameters$size,
-    ", weight decay = ", format(parameters$decay, trim = TRUE)
+    ", weight decay = ", format(parameters$decay, trim = TRUE),
+    ", iteration limit = ", parameters$maxit %||% 2000L
   )
 }
 

@@ -145,6 +145,22 @@ tune_supervised_candidates <- function(raw_data,
   if (!inherits(control, "autoxplain_resolved_tuning_control")) {
     stop("Internal tuning control was not resolved before fitting.", call. = FALSE)
   }
+  automatic_boosting <- "boosting" %in% learners && (is.null(control$grids$boosting) ||
+    any(vapply(control$grids$boosting, function(parameters) {
+      identical(parameters$encoding %||% "auto", "auto")
+    }, logical(1))))
+  input_policy <- if (automatic_boosting) {
+    policy <- resolve_boosting_encoding(list(), raw_data, target)
+    policy$scope <- paste(
+      "Automatic input representation is planned once from outer-training row count and predictor cardinality,",
+      "without outcomes or holdout rows. That representation is fixed across all folds and refits;",
+      "category levels, contrasts and imputation are still learned separately within each training fold.",
+      "Explicit encoding choices are unchanged."
+    )
+    list(boosting = policy)
+  } else {
+    NULL
+  }
   plan <- local_tuning_plan(
     max_models = max_models,
     n = nrow(raw_data),
@@ -154,8 +170,14 @@ tune_supervised_candidates <- function(raw_data,
     learners = learners,
     seed = seed,
     custom_grids = control$grids,
-    family_budgets = control$family_budgets
+    family_budgets = control$family_budgets,
+    boosting_encoding = input_policy$boosting$encoding,
+    additive_planning_data = if ("additive" %in% learners) raw_data else NULL,
+    additive_target = target
   )
+  if (!is.null(attr(plan, "additive_policy"))) {
+    input_policy$additive <- attr(plan, "additive_policy")
+  }
   plan$optimization_policy <- control$optimization_policy %||% "exclude"
   if (!is.null(control$family_priority)) {
     plan$simplicity_rank <- match(plan$family, control$family_priority)
@@ -167,8 +189,16 @@ tune_supervised_candidates <- function(raw_data,
     supplied_ids = control$fold_ids,
     supplied_labels = control$fold_labels
   )
-  folds <- lapply(seq_len(fold_assignment$folds), function(fold) {
-    prepare_tuning_fold(
+  # Prepare one fold at a time. Keeping every prepared training split alive
+  # multiplies the data footprint by the fold count without changing any fit.
+  fold_count <- fold_assignment$folds
+  fold_preprocessing <- vector("list", fold_count)
+  fold_omissions <- vector("list", fold_count)
+  rows_evaluated <- 0L
+  fold_rows <- vector("list", nrow(plan) * fold_count)
+  prediction_rows <- if (control$retain_oof) vector("list", length(fold_rows)) else NULL
+  for (fold in seq_len(fold_count)) {
+    prepared <- prepare_tuning_fold(
       raw_data = raw_data,
       target = target,
       task = task,
@@ -178,35 +208,31 @@ tune_supervised_candidates <- function(raw_data,
       enable_preprocessing = enable_preprocessing,
       preprocessing_config = preprocessing_config
     )
-  })
-  fold_preprocessing <- lapply(seq_along(folds), function(fold) {
-    list(
+    fold_preprocessing[[fold]] <- list(
       fold = as.integer(fold),
       fold_label = fold_assignment$labels[[fold]],
       predictors_received = setdiff(names(raw_data), target),
-      predictors_retained = folds[[fold]]$retained_features,
-      predictors_removed = folds[[fold]]$removed_features
+      predictors_retained = prepared$retained_features,
+      predictors_removed = prepared$removed_features
     )
-  })
-  omitted_rows <- combine_tuning_omissions(folds)
-  rows_evaluated <- sum(vapply(folds, function(fold) nrow(fold$validation), integer(1)))
-
-  fold_rows <- list()
-  prediction_rows <- list()
-  row_index <- 0L
-  for (configuration in seq_len(nrow(plan))) {
-    for (fold in seq_along(folds)) {
-      row_index <- row_index + 1L
+    fold_omissions[[fold]] <- prepared[c("omitted_validation_row", "omitted_source_row")]
+    rows_evaluated <- rows_evaluated + nrow(prepared$validation)
+    for (configuration in seq_len(nrow(plan))) {
+      # Keep the public configuration-then-fold evidence order. Fit seeds
+      # already depend on effective settings and fold identity, not loop order.
+      row_index <- (configuration - 1L) * fold_count + fold
       scored <- score_tuning_configuration(
-        plan[configuration, , drop = FALSE], folds[[fold]], target, task, fold,
+        plan[configuration, , drop = FALSE], prepared, target, task, fold,
         metric = control$metric,
         retain_oof = control$retain_oof,
         failure_policy = control$failure_policy
       )
       fold_rows[[row_index]] <- scored$score
-      prediction_rows[[row_index]] <- scored$predictions
+      if (control$retain_oof) prediction_rows[[row_index]] <- scored$predictions
     }
+    rm(prepared, scored)
   }
+  omitted_rows <- combine_tuning_omissions(fold_omissions)
   fold_scores <- do.call(rbind, fold_rows)
   out_of_fold_predictions <- if (control$retain_oof) {
     combine_tuning_predictions(prediction_rows, task)
@@ -274,6 +300,7 @@ tune_supervised_candidates <- function(raw_data,
     list(
       schema_version = 5L,
       search_space = attr(plan, "search_space"),
+      input_policy = input_policy,
       selection = selection_record,
       method = if (identical(control$fold_source, "supplied_vfold")) {
         "User-supplied V-fold resampling with fold-specific preprocessing"
@@ -384,7 +411,10 @@ local_tuning_plan <- function(max_models,
                               learners = c("linear", "tree", "neural"),
                               seed = 123L,
                               custom_grids = NULL,
-                              family_budgets = NULL) {
+                              family_budgets = NULL,
+                              boosting_encoding = NULL,
+                              additive_planning_data = NULL,
+                              additive_target = NULL) {
   max_models <- assert_count(max_models, "max_models")
   seed <- assert_count(seed, "seed", minimum = 0L)
   if (!is.character(learners) || !length(learners) || anyNA(learners) ||
@@ -450,6 +480,36 @@ local_tuning_plan <- function(max_models,
     normalize_family_grid(grids[[family]], family, allow_duplicates = TRUE)
   })
   names(grids) <- learners
+  if (!is.null(boosting_encoding) && "boosting" %in% learners) {
+    grids$boosting <- lapply(grids$boosting, function(parameters) {
+      if (identical(parameters$encoding, "auto")) parameters$encoding <- boosting_encoding
+      parameters
+    })
+  }
+  additive_policy <- list()
+  if (!is.null(additive_planning_data) && "additive" %in% learners) {
+    grids$additive <- lapply(seq_along(grids$additive), function(index) {
+      parameters <- grids$additive[[index]]
+      if (identical(parameters$solver, "auto")) {
+        effective <- effective_learner_parameters(
+          "additive", parameters,
+          additive_planning_data, additive_target,
+          task = task
+        )
+        policy <- resolve_additive_solver(
+          parameters, additive_planning_data,
+          additive_target, effective$smooth_k,
+          task = task
+        )
+        parameters$solver <- policy$solver
+        # Carry the automatic decision through fitting without adding a tuning
+        # parameter or retaining any outer-training data in the configuration.
+        attr(parameters, "autoxplain_additive_policy") <- policy
+        additive_policy[[paste0("additive_", sprintf("%02d", index))]] <<- policy
+      }
+      parameters
+    })
+  }
   grids <- canonicalize_task_specific_grids(
     grids,
     task = task,
@@ -525,6 +585,25 @@ local_tuning_plan <- function(max_models,
   attr(output, "search_space") <- tuning_search_space(
     grids, output, n, p, task, names(custom_grids %||% list())
   )
+  additive_policy <- additive_policy[intersect(names(additive_policy), output$configuration_id)]
+  if (length(additive_policy)) {
+    attr(output, "additive_policy") <- list(
+      solver = paste(unique(vapply(additive_policy, `[[`, character(1), "solver")), collapse = ", "),
+      reason = paste(
+        "Automatic solvers are fixed per configuration from task and outer-training input size:",
+        "BAM at 10,000 rows; Gaussian regression also uses BAM when its work index",
+        "(rows times estimated coefficients squared) reaches 10 million.",
+        "Smaller binary fits retain nested GAM for stability. No automatic discretization."
+      ),
+      scope = paste(
+        "The same solver is used in every validation fold and the final refit.",
+        "Imputation, factor levels, smooth dimensions and smoothing penalties are learned",
+        "within each fitting partition. Neither outcome values nor holdout rows choose the solver.",
+        "This policy can change predictions and is not a guarantee of faster fitting."
+      ),
+      configurations = additive_policy
+    )
+  }
   output
 }
 
@@ -559,6 +638,14 @@ canonicalize_task_specific_grids <- function(grids, task, custom_families = char
 }
 
 stable_configuration_seed <- function(seed, family, parameters) {
+  # Optimizer budgets share initialization for the same network architecture
+  # and weight penalty. This also preserves seeds from the two-parameter grid.
+  if (family == "neural") parameters$maxit <- NULL
+  # The matrix path preserves seeds from before input encoding was configurable.
+  # Native categorical splits are a different fit and receive a distinct seed.
+  if (family == "boosting" && (parameters$encoding %||% "auto") %in% c("auto", "matrix")) {
+    parameters$encoding <- NULL
+  }
   signature <- canonical_tuning_parameter_key(parameters)
   key <- utf8ToInt(paste(seed, family, signature, sep = "|"))
   hash <- 0
@@ -827,16 +914,26 @@ score_tuning_configuration <- function(configuration,
         )
         optimization <- attr(model, "autoxplain_tuning_fit")$optimization %||% optimization
         learned <- attr(model, "autoxplain_tuning_fit")$learned %||% list()
-        explainer <- explain_model(
-          model,
-          fold$validation,
-          target,
-          task = task,
-          label = configuration$model[[1L]]
+        # These native fold fits are consumed here and then discarded. They
+        # need the same prediction contract, but no reusable explainer identity
+        # or repeated prediction of the same validation rows.
+        if (ncol(fold$validation) < 2L) {
+          stop("At least one predictor column is required.", call. = FALSE)
+        }
+        observed <- fold$validation[[target]]
+        class_levels <- if (task == "regression") NULL else levels(observed)
+        explainer <- list(
+          y = observed, task = task, class_levels = class_levels,
+          positive = if (task == "binary") class_levels[[2L]] else NULL
         )
-        predictions <- predict(explainer, explainer$data)
+        adapter <- make_prediction_adapter(
+          model, task, explainer$positive, class_levels,
+          predict_function = NULL
+        )
+        predictions <- adapter(fold$validation[setdiff(names(fold$validation), target)])
+        validate_predictions(predictions, length(observed), task, class_levels)
         list(
-          score = evaluate_predictions(explainer$y, predictions, explainer)[[metric]],
+          score = tuning_prediction_loss(observed, predictions, metric, explainer),
           predictions = if (retain_oof) {
             format_tuning_predictions(
               configuration = configuration,
@@ -902,6 +999,36 @@ score_tuning_configuration <- function(configuration,
   )
 }
 
+tuning_prediction_loss <- function(observed, predicted, metric, contract) {
+  # Match the published evaluation loss, including its probability clipping.
+  # Avoid sorting predictions for AUC or calculating other unused metrics for
+  # every candidate and fold.
+  if (contract$task == "regression") {
+    residual <- as.numeric(observed) - as.numeric(predicted)
+    return(if (metric == "mae") mean(abs(residual)) else sqrt(mean(residual^2)))
+  }
+  if (is.factor(predicted) || is.character(predicted) || is.logical(predicted)) {
+    stop("Tuning losses require class probabilities, not hard class labels.", call. = FALSE)
+  }
+  if (contract$task == "binary") {
+    truth <- as.character(observed) == contract$positive
+    probability <- pmin(pmax(as.numeric(predicted), 1e-15), 1 - 1e-15)
+    return(if (metric == "brier_score") {
+      mean((probability - as.numeric(truth))^2)
+    } else {
+      -mean(ifelse(truth, log(probability), log1p(-probability)))
+    })
+  }
+  probability <- as.matrix(predicted)[, contract$class_levels, drop = FALSE]
+  indices <- cbind(seq_along(observed), match(as.character(observed), contract$class_levels))
+  if (metric == "brier_score") {
+    one_hot <- matrix(0, nrow(probability), ncol(probability))
+    one_hot[indices] <- 1
+    return(mean(rowSums((probability - one_hot)^2)))
+  }
+  -mean(log(pmax(probability[indices], 1e-15)))
+}
+
 format_tuning_predictions <- function(configuration,
                                       fold,
                                       explainer,
@@ -951,18 +1078,27 @@ format_tuning_predictions <- function(configuration,
   } else {
     probability <- as.matrix(predictions)[, class_levels, drop = FALSE]
   }
-  output$predicted_class <- class_levels[max.col(probability, ties.method = "first")]
+  output$predicted_class <- if (task == "binary") {
+    ifelse(positive_probability >= 0.5, positive, negative)
+  } else {
+    class_levels[max.col(probability, ties.method = "first")]
+  }
   truth_column <- match(output$truth, class_levels)
   output$truth_probability <- probability[cbind(seq_len(rows), truth_column)]
-  output$case_loss <- if (identical(metric, "brier_score")) {
-    if (task == "binary") {
-      positive <- explainer$positive
-      (probability[, positive] - as.numeric(output$truth == positive))^2
+  output$case_loss <- if (task == "binary") {
+    # Keep native probabilities intact, but apply the same clipping convention
+    # as fold scoring so these row losses reproduce the reported CV loss.
+    clipped <- pmin(pmax(positive_probability, 1e-15), 1 - 1e-15)
+    truth <- output$truth == explainer$positive
+    if (identical(metric, "brier_score")) {
+      (clipped - as.numeric(truth))^2
     } else {
-      one_hot <- matrix(0, nrow = rows, ncol = length(class_levels))
-      one_hot[cbind(seq_len(rows), truth_column)] <- 1
-      rowSums((probability - one_hot)^2)
+      -ifelse(truth, log(clipped), log1p(-clipped))
     }
+  } else if (identical(metric, "brier_score")) {
+    one_hot <- matrix(0, nrow = rows, ncol = length(class_levels))
+    one_hot[cbind(seq_len(rows), truth_column)] <- 1
+    rowSums((probability - one_hot)^2)
   } else {
     -log(pmax(output$truth_probability, 1e-15))
   }
@@ -1279,7 +1415,34 @@ tuning_configuration_fit_spec <- function(configuration, data, target) {
   )
 }
 
-fit_tuned_neural_network <- function(data, target, task, size, decay) {
+tuning_computation_change <- function(tuning, configuration_id, effective) {
+  fields <- intersect(c("encoding", "solver"), names(effective))
+  folds <- tuning$fold_scores
+  if (!length(fields) || is.null(folds) || !"effective_parameters" %in% names(folds)) {
+    return("")
+  }
+  folds <- folds[folds$configuration_id == configuration_id & is.finite(folds$score), , drop = FALSE]
+  changes <- vapply(fields, function(field) {
+    observed <- unique(vapply(folds$effective_parameters, function(parameters) {
+      as.character(parameters[[field]] %||% "not recorded")
+    }, character(1)))
+    if (!length(observed) || all(observed == effective[[field]])) {
+      return("")
+    }
+    paste0(field, ": ", paste(observed, collapse = "/"), " in CV; ", effective[[field]], " at refit")
+  }, character(1))
+  changes <- changes[nzchar(changes)]
+  if (!length(changes)) {
+    return("")
+  }
+  paste0(
+    "Automatic computation changed on full-training refit (", paste(changes, collapse = "; "),
+    "). Cross-validation evaluated the adaptive procedure on smaller training folds. ",
+    "Set an explicit encoding or solver to compare a fixed computation method."
+  )
+}
+
+fit_tuned_neural_network <- function(data, target, task, size, decay, maxit = 2000L) {
   features <- setdiff(names(data), target)
   blueprint <- fit_matrix_blueprint(data, predictors = features, center = TRUE, scale = TRUE)
   x <- bake_matrix_blueprint(blueprint, data)
@@ -1291,7 +1454,7 @@ fit_tuned_neural_network <- function(data, target, task, size, decay) {
     x = x,
     size = size,
     decay = decay,
-    maxit = 500L,
+    maxit = maxit,
     trace = FALSE,
     rang = 0.1
   )
@@ -1316,6 +1479,13 @@ fit_tuned_neural_network <- function(data, target, task, size, decay) {
     as.integer((ncol(x) + 1L) * size + (size + 1L) * outputs + 100L)
   )
   fitted <- do.call(nnet::nnet, arguments)
+  # do.call() embeds encoded x/y in the recorded native call. Prediction does
+  # not use them, and the blueprint and response transform already describe
+  # how to reconstruct those inputs from the same fitting rows.
+  recorded <- arguments
+  recorded$x <- quote(x)
+  recorded$y <- quote(y)
+  fitted$call <- as.call(c(list(quote(nnet::nnet)), recorded))
   structure(
     list(
       model = fitted,
@@ -1330,7 +1500,14 @@ fit_tuned_neural_network <- function(data, target, task, size, decay) {
       task = task,
       class_levels = levels,
       size = size,
-      decay = decay
+      decay = decay,
+      maxit = maxit,
+      call_reconstruction = paste(
+        "Use the same preprocessed fitting rows. Bake x with the stored blueprint.",
+        "For regression, y = (outcome - y_center) / y_scale; for binary, y marks",
+        "the second class level; for multiclass, y = nnet::class.ind(outcome).",
+        "Reset the recorded fit_seed before evaluating model$call with x and y."
+      )
     ),
     class = "autoxplain_tuned_nnet"
   )

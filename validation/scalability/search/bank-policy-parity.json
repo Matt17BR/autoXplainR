@@ -1,0 +1,54 @@
+{
+  "case": "bank_marketing",
+  "training_rows": 5000,
+  "selected_configuration_identical": true,
+  "configuration_scores_and_statuses_identical": true,
+  "all_fold_scores_identical": true,
+  "configurations": 30,
+  "completed_folds": 150,
+  "failed_folds": 0,
+  "planned_additive_solver": "gam",
+  "retained_additive_solver": "gam",
+  "models": [
+    {
+      "model": "main_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "boosting_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "additive_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "linear_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "forest_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "tree_model",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    },
+    {
+      "model": "simple_baseline",
+      "predictions_identical": true,
+      "maximum_absolute_difference": 0
+    }
+  ],
+  "source_result_sha256": {
+    "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/recommended/baseline/bank_marketing": "2d4e7c967f8cbce70b0d79cb4765583f1bf9d1b84eb74308975aa02ebc7cb6e3",
+    "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/recommended/candidate_binary_guard/bank_marketing": "383615f088cbd79bbaac23111c8c5dd288f8dd2d1a396fd78e191d0093d897da"
+  },
+  "scope": "Full native prediction arrays and all CV scores are checked. Timing, metadata and unrelated serialized fields are not asserted identical."
+}
