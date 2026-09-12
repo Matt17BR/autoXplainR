@@ -1,0 +1,13 @@
+"case","family","fold_fit_seconds"
+"friedman_noise","additive",470.793
+"friedman_noise","boosting",10.391
+"friedman_noise","forest",32.881
+"friedman_noise","linear",0.056
+"friedman_noise","regularized",1.016
+"friedman_noise","tree",0.465
+"bank_marketing","additive",213.942
+"bank_marketing","boosting",5.319
+"bank_marketing","forest",51.75
+"bank_marketing","linear",0.574
+"bank_marketing","regularized",10.326
+"bank_marketing","tree",0.7

@@ -17,6 +17,7 @@ import platform
 import re
 
 from playwright.sync_api import sync_playwright
+from report_payload import decode_data_payload, decode_prediction_payload
 
 
 def close(actual, expected, tolerance=1e-10):
@@ -38,7 +39,12 @@ def select_model(page, model_id):
 
 
 def payload(page, identifier):
-    return json.loads(page.locator(f"#{identifier}").text_content())
+    value = json.loads(page.locator(f"#{identifier}").text_content())
+    if identifier == "axr-data-payload":
+        return decode_data_payload(value)
+    if identifier == "axr-predictions-payload":
+        return decode_prediction_payload(value)
+    return value
 
 
 def counts_at(source, cutoff):

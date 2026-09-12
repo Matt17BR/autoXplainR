@@ -18,7 +18,8 @@ explain_effect(
   positive = NULL,
   class = NULL,
   grid_size = NULL,
-  return_all_classes = FALSE
+  return_all_classes = FALSE,
+  max_rows = NULL
 )
 }
 \arguments{
@@ -38,7 +39,9 @@ first lower boundary and each upper boundary.}
 \item{quantile_range}{Numeric length-two range used for a numeric PDP grid.}
 
 \item{sample_size}{Maximum number of reference rows used by PDP. \code{NULL} uses
-all rows. ALE always uses all rows that fall inside its bins.}
+all rows unless \code{max_rows} is set. The curve uses the smaller of these
+limits, drawn once from the original reference population. Grid support
+uses the separate \code{max_rows} sample; both row counts are recorded.}
 
 \item{seed}{Sampling seed; the caller's random-number state is restored.}
 
@@ -56,6 +59,12 @@ explained. By default the first prediction column is used.}
 \item{return_all_classes}{Retained for compatibility. Multiclass callers
 should make separate class-specific explainers; \code{TRUE} is not supported by
 ALE.}
+
+\item{max_rows}{Optional cap on reference rows for either method. \code{NULL}
+preserves the full reference data. A finite cap selects a uniform sample
+without replacement before computing bins, support, and effects. The
+returned \code{sampling} attribute records this scope; descriptive bands do
+not include uncertainty from selecting these rows.}
 }
 \value{
 A data frame of class \code{autoxplain_effect}. Both methods return the

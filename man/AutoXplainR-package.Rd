@@ -66,5 +66,10 @@ Authors:
   \item Matteo Mazzarelli \email{matteo.mazzarelli@gmail.com}
 }
 
+Other contributors:
+\itemize{
+  \item Arjun Barrett (fflate library for offline report decompression) [copyright holder]
+}
+
 }
 \keyword{internal}

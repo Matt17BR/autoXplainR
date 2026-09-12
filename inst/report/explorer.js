@@ -150,7 +150,7 @@
     if (sort) sortTable(state.metric, higher.has(state.metric) ? -1 : 1);
     const summary = document.querySelector('#score-summary');
     if (summary && summary.dataset.dynamicSummary !== 'false') {
-      summary.textContent = `${summary.dataset.rows} ${summary.dataset.role} rows · ` +
+      summary.textContent = `${Number(summary.dataset.rows).toLocaleString('en-US')} ${summary.dataset.role} rows · ` +
         `${metricControl?.selectedOptions[0]?.textContent || state.metric}: ` +
         `${higher.has(state.metric) ? 'higher' : 'lower'} is better. ` +
         'Table order is descriptive; the primary model is unchanged.';

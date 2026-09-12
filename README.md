@@ -109,8 +109,9 @@ claimed from the literature.
 
 **Explore data** shows outcome and input distributions, missing values and joint
 patterns across training and evaluation. Switch between supplied values and the
-values used by models to see what preprocessing changed. Aggregate profiles use
-the full available data.
+values used by models to see what preprocessing changed. Distributions and
+missing-value counts use all available rows. Pairwise plots and associations use
+up to 10,000 rows per partition by default, with the sample size shown.
 
 [![Parcel-weight distributions and missing values in the training and evaluation data](man/figures/model-data.png)](https://matt17br.github.io/autoXplainR/model-report.html#data)
 
@@ -123,8 +124,8 @@ render_model_report(result, "report-with-rows.html", report_data = "rows")
 That adds row filters, linked scatter points and source-record inspection.
 A record keeps its original input-table position after splitting and row removal.
 Use `report_data_control()` to select explorer columns and bound the exported
-row sample. Profiles describe all available rows until a row filter is applied;
-filtered views describe only the exported sample. Model scores stay unchanged.
+row sample. Univariate profiles describe all available rows until a row filter
+is applied; filtered views describe only the exported sample. Model scores stay unchanged.
 Anyone receiving the HTML receives every embedded record, including hidden rows.
 The default `"summary"` mode embeds aggregates; aggregates are not an anonymity
 guarantee. `"none"` omits data exploration and per-record predictions. These
@@ -286,10 +287,17 @@ fits can complete while making very poor predictions. The report preserves
 their scores and flags rank-deficient fits; it does not quietly discard them.
 The [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
 explains how to separate model fitting from a bounded explanation and report.
-The broad `recommended` preset can be expensive: its 30-configuration search
+In version 0.6.2, the broad `recommended` preset searched 30 configurations and
 took 8 minutes 53 seconds on the nonlinear case, versus 58 seconds for the
 explicit three-family search, and selected the same fitted model. Choose the
 families deliberately when turnaround time matters.
+
+Larger data also need separate fitting, explanation and export budgets. The
+default explanation uses up to 5,000 evaluation rows, while scores still use
+the full evaluation set. Use `explanation_rows = NULL` to remove that cap, or
+`tuning_control(retain_oof = FALSE)` to keep aggregate CV evidence without the
+case-level predictions. The [larger-data guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html#larger-data)
+explains the controls, the separate PDP curve limit and what each changes.
 
 ## Inspect a question in more detail
 

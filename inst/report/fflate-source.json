@@ -1,0 +1,11 @@
+{
+  "name": "fflate",
+  "version": "0.8.3",
+  "source": "https://github.com/101arrowz/fflate/tree/v0.8.3",
+  "distribution": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz",
+  "upstream_file": "package/umd/index.js",
+  "upstream_file_sha256": "462ef8041fc970e3615a20a9dd2b2e3047a073b2da729ef4f02b634bba8b7b83",
+  "distribution_sha256": "38c2cd824402407b43153c782274aec2ea83ea688e4aa0b743c5f2c305857d92",
+  "license": "MIT",
+  "usage": "Offline decompression of embedded report data. The distributed UMD build is unchanged except for the attribution header."
+}

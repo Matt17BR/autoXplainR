@@ -12,6 +12,7 @@ import re
 from playwright.sync_api import sync_playwright
 from pathlib import Path
 import json, math, bisect
+from report_payload import decode_data_payload
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--case-dir", type=Path, required=True)
@@ -252,7 +253,7 @@ def mutation_checks(browser):
         match = pattern.search(html)
         if match is None:
             raise ValueError("Missing fixture payload")
-        data = json.loads(match.group(2))
+        data = decode_data_payload(json.loads(match.group(2)))
         if label == "missing-count":
             data["profile"]["stages"]["raw"]["columns"]["weight_kg"]["training"][
                 "n_missing"
@@ -330,9 +331,9 @@ with sync_playwright() as p:
                 )
                 page.close()
                 continue
-            payload = page.evaluate(
+            payload = decode_data_payload(page.evaluate(
                 'JSON.parse(document.getElementById("axr-data-payload").textContent)'
-            )
+            ))
             if mode == "summary":
                 check(
                     prefix + ": summary contains no row payload",

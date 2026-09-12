@@ -1,0 +1,5 @@
+"seed","k","predictions_identical","serialized_native_fields_except_call_identical","optimizer_status","warning_count","final_pirls_warning_stage","final_pirls_warning_call"
+912,10,TRUE,TRUE,"not_converged",88,"bgam.fit","bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method, coef = coef, control = control, cl = cluster,      npt = nthreads[1], gc.level = gc.level, use.chol = use.chol, in.out = in.out, ...)"
+912,8,TRUE,TRUE,"converged",17,NA,NA
+913,10,TRUE,TRUE,"converged",0,NA,NA
+913,8,TRUE,TRUE,"not_converged",1,"bgam.fit","bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method, coef = coef, control = control, cl = cluster,      npt = nthreads[1], gc.level = gc.level, use.chol = use.chol, in.out = in.out, ...)"

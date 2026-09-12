@@ -57,12 +57,35 @@ Custom grids must be a named list keyed by learner family. Each family value
 may be a data frame (one configuration per row), a list of named parameter
 lists, or one named parameter list. Parameter names are exact adapter
 contracts: \code{linear} has no parameters; \code{regularized} uses \code{alpha} and
-\code{path_fraction}; \code{additive} uses \code{k}, \code{gamma}, and \code{select}; \code{tree} uses
+\code{path_fraction}; \code{additive} uses \code{k}, \code{gamma}, and \code{select}, with optional
+\code{solver} (\code{"auto"}, \code{"gam"}, \code{"bam"}, or \code{"bam_discrete"}) and
+\code{discrete_bins} (default 10000). \code{gam} uses nested REML optimization;
+\code{bam} uses fREML and builds its design in blocks; \code{bam_discrete} discretizes numeric
+covariates at the recorded resolution. The final fit and each training fold
+record their actual method. \code{auto} plans each configuration's solver once
+from outer-training inputs: continuous BAM at 10,000 rows or when rows times
+estimated coefficients squared reaches 10 million, otherwise GAM. That solver
+stays fixed through validation and refitting; preprocessing and smoothing are
+still learned separately within each fitting partition.
+This is a computational policy, not a guarantee of
+faster fitting or equivalent predictions. Discretization is never automatic.
+Omitting the new controls preserves valid older
+custom grids. \code{tree} uses
 \code{maxdepth}, \code{cp}, and \code{minsplit}; \code{forest} uses \code{num.trees}, \code{mtry},
 \code{min.node.size}, \code{sample.fraction}, and \code{splitrule}; \code{boosting} uses
 \code{nrounds}, \code{eta}, \code{max_depth}, \code{min_child_weight}, \code{subsample},
-\code{colsample_bytree}, \code{reg_alpha}, and \code{reg_lambda}; \code{neural} uses \code{size} and
-\code{decay}; \code{kernel} uses \code{cost}, \code{gamma_multiplier}, and \code{epsilon} (fixed at
+\code{colsample_bytree}, \code{reg_alpha}, and \code{reg_lambda}, with optional \code{encoding}
+(\code{"auto"}, \code{"matrix"}, or \code{"native"}). Native encoding uses categorical
+partitions and a quantized training matrix; it can change predictions.
+Auto switches when categorical expansion exceeds twice the input width and
+50 million estimated matrix cells. This choice is planned once from the
+outer-training inputs and fixed across folds and refits; category levels and
+preprocessing are still learned within each fold. Each fit records the choice.
+\code{neural} uses \code{size} and \code{decay}, with optional \code{maxit} (default 2,000).
+This is the optimizer iteration limit, not a promise of convergence.
+Changing only this limit preserves the initialization seed; earlier
+two-parameter grids remain valid. Set \code{maxit = 500} to retain the former
+iteration budget. \code{kernel} uses \code{cost}, \code{gamma_multiplier}, and \code{epsilon} (fixed at
 \code{0.1} for classification because that backend ignores it);
 \code{neighbors} uses \code{k}, \code{distance}, and \code{kernel}; and \code{mars} uses \code{degree} and
 \code{nprune}.

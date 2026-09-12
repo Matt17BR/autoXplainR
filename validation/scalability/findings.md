@@ -1,0 +1,140 @@
+# Scalability findings for 0.7.0
+
+Release verification is still in progress. These measurements identify the
+tested workload and candidate snapshot; they do not establish that every
+million-row problem or every optional learner is practical.
+
+## What has been measured
+
+| Workload | Published 0.6.2 | Candidate | Scope |
+| --- | ---: | ---: | --- |
+| Million-row nonlinear regression, two configurations and two folds | 145.331 s | 33.596 s | Fitting, tuning and scoring; explanations disabled |
+| Peak process memory for that workflow | 4,911,800 KiB | 2,814,432 KiB | Whole fresh R process, including verification and serialization |
+| Uncompressed saved result for that workflow | 903,015,420 bytes | 654,947,875 bytes | Complete retained result, including raw and processed data |
+| Million-row rare-event classification, two configurations and two folds | 188.882 s | 70.777 s | Same search budget; automatic native categories change the boosting fit |
+| Peak process memory for that classification workflow | 6,125,976 KiB | 3,503,424 KiB | Whole fresh R process |
+| Held-out log loss for its primary model | 0.0699033 | 0.0686940 | All 20,000 fixed independent evaluation rows; lower is better |
+| Ordinary core defaults on 10,000 nonlinear training rows | RMSE 1.6988; 49.104 s | RMSE 0.7475; 82.588 s | Same 20,000-row holdout; larger neural iteration budget |
+| 200,100 explicitly exported records, three numeric columns | 121.66 MB, 85.319 s | 17.55 MB, 5.266 s | Full HTML rendering from the same supplied model |
+| Wide report, 500 inputs and all 1,200 records | 59.88 MB, 16.277 s | 15.69 MB, 14.929 s | Full HTML rendering from the same saved fit |
+
+The million-row fitting comparison uses the immutable `candidate-source-v1`
+installation. It fits all one million training rows and scores a separately
+generated 20,000-row holdout. A trace of the actual XGBoost training calls records
+500,000 rows in each fold and 1,000,000 at refit. Every holdout prediction from
+all three retained models agrees with 0.6.2, as do fold losses, fit seeds,
+preprocessing and selection. New computation metadata is compared separately.
+A fresh R session also reproduced all three models' predictions.
+
+The rare-event comparison also fits all one million training rows. The new
+categorical policy uses 22 native input columns in both 500,000-row folds and
+the million-row refit; the previous numeric expansion used 55 columns. Its
+boosting predictions change, while the regularized and intercept-only losses
+remain identical. Both versions passed fresh-session reload and complete
+holdout scoring, including reversed factor-level order and new/missing categories.
+
+The report comparisons isolate export and browser work. Their large numeric
+fixture uses a supplied linear model fitted to 100 rows. It is separate from
+the million-training-row experiment. A complete export of 1,000,100 records
+rendered in 20.451 seconds and produced an 83.33 MB HTML file. Compression makes
+large exports cheaper; it does not make their information or browser-memory
+cost disappear. The default report exports aggregate summaries, and explicit
+record export defaults to a 5,000-row limit.
+
+These are individual runs on one machine, not estimates of a universal speedup.
+The report measurements precede subsequent browser correctness improvements.
+Full-render timings also include the new default explanation row cap. They do
+not isolate compression or serialization alone; preparation and payload sizes
+are recorded separately in the [report measurements](reports/README.md).
+Final release acceptance must repeat functional checks on the released files.
+
+## Why it became cheaper
+
+The published overlap check serialized every complete training and evaluation
+row. On the million-row fitting control it consumed 97.343 seconds. The new
+check refines exact shared groups one column at a time and removes impossible
+matches early. It agrees with the published equality behavior on 307 independent
+mixed-type cases. Isolated candidate million-row checks took 0.236 seconds for
+disjoint partitions and 0.181 seconds with five injected overlaps. Those short
+component timings are distinct from the whole-workflow comparison above.
+
+Tuning now keeps one prepared fold at a time and requests one validated
+prediction batch per fit. It avoids computing unrelated metrics and avoids
+constructing case records when `retain_oof = FALSE`. Redundant native fitting
+calls previously embedded complete inputs and outcomes in saved models.
+Removing that payload preserves the native fits and predictions; on the
+million-row regularized fixture the old call contained a 304 MB sparse matrix
+and an 8 MB outcome vector. Forest and MARS calls had the same avoidable payload
+and now retain executable settings with symbolic input arguments. The neural
+adapter removes its duplicated encoded inputs and outcomes in the same way.
+
+Reports store columns once, share exactly identical raw and processed values,
+compress large blocks and decode columns locally as needed. The wide report's
+largest gain is file size and allocation; its rendering time improved modestly.
+The tall, full-record report previously paid much more to construct and serialize
+one R object per row, so its rendering improvement is larger.
+
+## Choices that can change results
+
+Exact implementation changes are separate from new computation policies.
+Automatic additive fitting can choose continuous BAM instead of GAM, with its
+solver fixed for each candidate throughout cross-validation and refitting.
+Automatic boosting can use native categorical splits for large contrast
+expansions. Both choices are recorded, can change predictions, and have explicit
+overrides. The [solver comparison](search/README.md) retains counterexamples,
+including slower BAM fits and materially different discrete-BAM predictions.
+
+Default report explanations use a bounded uniform evaluation sample. Pairwise
+data summaries have a separate sample limit. Model scores and univariate
+summaries still use all available rows. A constructed ten-row rare cluster was
+missed by seven of thirty 10,000-row samples; exact counts still showed it.
+The [data study](data/README.md) records this limitation and the all-row control.
+PDP retains a separate curve-row limit, independently of its support sample.
+
+The two-configuration million-row control underfits the nonlinear generating
+process: test RMSE is about 1.68, with generating noise SD 0.7 before missingness.
+More training rows alone did not repair insufficient model capacity. Larger
+boosting configurations, rare outcomes, multiclass outcomes, width and category
+count are separate acceptance cases under the [million-row protocol](million/README.md).
+
+The ordinary core search had another, distinct problem. In a fixed five-fold
+training-only check, only six of 25 neural fits converged within the old 500
+iterations. All 25 converged with 2,000, including wider networks with much
+lower validation error. Individual fold losses could still worsen. The new
+default exposes that larger allowance as `maxit`, stops early on convergence,
+and continues to exclude unsuccessful fits. Changing this budget can change
+the selected model. A separate 500-iteration replay preserves native weights
+and predictions exactly; the [neural evidence](search/README.md) records both
+the modeling change and that compatibility control.
+
+The complete default `autoxplain()` workflow on the same 10,000 training rows
+then selected six hidden units with weight decay 0.01. All 15 configurations
+completed across every fold, compared with four neural configurations failing
+under the former limit. Independent scoring on the untouched 20,000-row holdout
+gave RMSE 0.7475 instead of 1.6988; the generating mean before missing inputs
+scored 0.6993. Runtime increased from 49.104 to 82.588 seconds. This is evidence
+of better fitting on this problem at a higher cost, not a neural speedup or a
+claim that the core search is practical at one million rows.
+Both versions passed complete cold-session prediction replay. The uncompressed
+result grew from 39.36 to 41.77 MB because more configurations now have valid
+retained out-of-fold predictions, despite the smaller native fitting calls.
+
+## Independent review and remaining acceptance
+
+The [independent review](independent-review/README.md) challenged sampling,
+prediction types, search/refit consistency and retained explanation scope.
+It found defects that the initial passing tests missed. Repairs are tied to
+reproducing examples rather than only implementation-shaped assertions.
+The [streaming replay](streaming-verdict.json) covers 4,320 out-of-fold records
+across six task/metric workflows. Settings, fold scores, selections, probabilities
+and final predictions agree exactly with the published version when both use
+the former 500-iteration neural budget. Its new explicit setting is checked
+before comparing the remaining metadata. Binary case
+losses have an explicitly verified correction to match CV clipping and
+arithmetic; that intended repair is separate from the execution optimization.
+
+Outstanding acceptance includes the final recommended-search timings,
+remaining large fitting cases, browser checks after the last changes, and the
+complete source/archive and publication gates. The ordinary result deliberately
+retains training and evaluation evidence; it is larger than an inference-only
+model. Its memory and artifact sizes remain part of the practical limit.

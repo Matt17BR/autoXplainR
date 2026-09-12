@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "workflows": 6,
+  "out_of_fold_rows": 4320,
+  "unchanged": "Exact equality for settings, selection, fold scores, fit seeds, omissions, preprocessing, all out-of-fold probabilities and every final holdout prediction.",
+  "intentional_repairs": "Binary case losses use the same probability clipping and arithmetic as CV scoring; binary 0.5 probabilities select the positive class. Each candidate value is checked against an independent explicit formula; no general numeric tolerance or normalization is used.",
+  "metadata_comparison": "Both versions use the former 500-iteration neural budget. Require that exact value in requested/effective settings and learned evidence, then remove only its new redundant parameter-key/display annotation and the new call-reconstruction prose. The default 2,000-iteration search is measured separately.",
+  "metadata": {
+    "regression/rmse": {
+      "explicit_500_iteration_fold_records": 6
+    },
+    "regression/mae": {
+      "explicit_500_iteration_fold_records": 6
+    },
+    "binary/log_loss": {
+      "explicit_500_iteration_fold_records": 6
+    },
+    "binary/brier": {
+      "explicit_500_iteration_fold_records": 6
+    },
+    "multiclass/log_loss": {
+      "explicit_500_iteration_fold_records": 6
+    },
+    "multiclass/brier": {
+      "explicit_500_iteration_fold_records": 6
+    }
+  },
+  "changes": {
+    "binary/log_loss": {
+      "case_losses_changed": 185,
+      "max_absolute_case_loss_change": 0.00079959743019486496,
+      "half_probability_labels_corrected": 0
+    },
+    "binary/brier": {
+      "case_losses_changed": 21,
+      "max_absolute_case_loss_change": 1.9984014443252818e-15,
+      "half_probability_labels_corrected": 0
+    }
+  }
+}

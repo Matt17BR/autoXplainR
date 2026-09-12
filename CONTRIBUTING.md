@@ -44,7 +44,11 @@ then exercise every advertised family/task combination:
 devtools::load_all()
 install_model_engines("extended", dry_run = TRUE)
 devtools::test(
-  filter = "native-engines|kernel-geometry|matrix-blueprint",
+  filter = paste(
+    "native-engines|kernel-geometry|matrix-blueprint|gam-model-settings",
+    "boosting-native|additive-solvers|forest-call|mars-call|regularized-call",
+    sep = "|"
+  ),
   stop_on_failure = TRUE
 )
 ```

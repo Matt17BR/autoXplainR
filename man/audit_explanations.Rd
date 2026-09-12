@@ -12,7 +12,8 @@ audit_explanations(
   seed = 123L,
   confidence = 0.95,
   performance_tolerance = 0.05,
-  dependence_threshold = 0.7
+  dependence_threshold = 0.7,
+  max_rows = NULL
 )
 }
 \arguments{
@@ -41,6 +42,12 @@ importance receives a warning. Numeric pairs use absolute Spearman
 correlation, mixed pairs use a correlation ratio, and categorical pairs
 use Cramer's V. Small values do not establish independence or rule out
 nonlinear or joint dependence.}
+
+\item{max_rows}{Maximum evaluation rows for permutation importance and
+feature-dependence checks. \code{NULL} uses all rows. Model performance and
+prediction comparisons still use the complete evaluation set. Sampling
+is uniform without replacement and shared across models; its uncertainty
+is not included in shuffle intervals.}
 }
 \value{
 An object of class \code{autoxplain_audit}.

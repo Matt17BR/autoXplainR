@@ -1,0 +1,382 @@
+[
+  {
+    "case": "friedman",
+    "solver": "gam",
+    "k": 8,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 25.424903807999726,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "friedman",
+      "gam",
+      "8",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/friedman-912-k8-gam.log"
+  },
+  {
+    "case": "friedman",
+    "solver": "bam",
+    "k": 8,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.1207713870007865,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "friedman",
+      "bam",
+      "8",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/friedman-912-k8-bam.log"
+  },
+  {
+    "case": "friedman",
+    "solver": "gam",
+    "k": 10,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 39.25631826800054,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "friedman",
+      "gam",
+      "10",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/friedman-912-k10-gam.log"
+  },
+  {
+    "case": "friedman",
+    "solver": "bam",
+    "k": 10,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.5723185049992026,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "friedman",
+      "bam",
+      "10",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/friedman-912-k10-bam.log"
+  },
+  {
+    "case": "bank",
+    "solver": "gam",
+    "k": 8,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 7.232002597000246,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "bank",
+      "gam",
+      "8",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/bank-912-k8-gam.log"
+  },
+  {
+    "case": "bank",
+    "solver": "bam",
+    "k": 8,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 26.625970860999587,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "bank",
+      "bam",
+      "8",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/bank-912-k8-bam.log"
+  },
+  {
+    "case": "bank",
+    "solver": "gam",
+    "k": 10,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 11.241934267998658,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "bank",
+      "gam",
+      "10",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/bank-912-k10-gam.log"
+  },
+  {
+    "case": "bank",
+    "solver": "bam",
+    "k": 10,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.1707170520003274,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "bank",
+      "bam",
+      "10",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/bank-912-k10-bam.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "gam",
+    "k": 5,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 1.417134948000239,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "gam",
+      "5",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-912-k5-gam.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "bam",
+    "k": 5,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 4.324975192999773,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "bam",
+      "5",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-912-k5-bam.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "bam_discrete",
+    "k": 5,
+    "seed": 912,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 1.9184385319986177,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "bam_discrete",
+      "5",
+      "912"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-912-k5-bam_discrete.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "gam",
+    "k": 5,
+    "seed": 913,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.418939467999735,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "gam",
+      "5",
+      "913"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-913-k5-gam.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "bam",
+    "k": 5,
+    "seed": 913,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 4.071966135999901,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "bam",
+      "5",
+      "913"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-913-k5-bam.log"
+  },
+  {
+    "case": "rare_1pct",
+    "solver": "bam_discrete",
+    "k": 5,
+    "seed": 913,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 1.8680613619999349,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "rare_1pct",
+      "bam_discrete",
+      "5",
+      "913"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/rare_1pct-913-k5-bam_discrete.log"
+  },
+  {
+    "case": "regression_10000",
+    "solver": "gam",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.7741557829995145,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "regression_10000",
+      "gam",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/regression_10000-914-k5-gam.log"
+  },
+  {
+    "case": "regression_10000",
+    "solver": "bam",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.3198014509998757,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "regression_10000",
+      "bam",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/regression_10000-914-k5-bam.log"
+  },
+  {
+    "case": "regression_10000",
+    "solver": "bam_discrete",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.1191919020002388,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "regression_10000",
+      "bam_discrete",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/regression_10000-914-k5-bam_discrete.log"
+  },
+  {
+    "case": "binary_10000",
+    "solver": "gam",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.8710858929989627,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "binary_10000",
+      "gam",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/binary_10000-914-k5-gam.log"
+  },
+  {
+    "case": "binary_10000",
+    "solver": "bam",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.8236361120016227,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "binary_10000",
+      "bam",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/binary_10000-914-k5-bam.log"
+  },
+  {
+    "case": "binary_10000",
+    "solver": "bam_discrete",
+    "k": 5,
+    "seed": 914,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 1.9185178439984156,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-one-frozen.R",
+      "binary_10000",
+      "bam_discrete",
+      "5",
+      "914"
+    ],
+    "log": "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/binary_10000-914-k5-bam_discrete.log"
+  }
+]

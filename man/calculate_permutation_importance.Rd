@@ -18,7 +18,9 @@ calculate_permutation_importance(
   predict_function = NULL,
   task = "auto",
   positive = NULL,
-  n_permutations = NULL
+  n_permutations = NULL,
+  max_rows = NULL,
+  sample_seed = seed
 )
 }
 \arguments{
@@ -60,6 +62,15 @@ permutation importance estimator.}
 \item{positive}{Positive class passed to \code{\link[=explain_model]{explain_model()}}.}
 
 \item{n_permutations}{Deprecated alias for \code{n_repeats}.}
+
+\item{max_rows}{Maximum evaluation rows used for shuffling. \code{NULL} uses all
+rows. A smaller value selects a reproducible uniform sample without
+replacement. The baseline and shuffled losses use the same sample; the
+\code{full_baseline_score} attribute keeps the score on all supplied rows.
+Monte Carlo intervals exclude uncertainty from sampling rows.}
+
+\item{sample_seed}{Seed selecting evaluation rows, separate from the shuffle
+seed so different models can use the same rows.}
 }
 \value{
 A data frame of class \code{autoxplain_importance} with repeat-level

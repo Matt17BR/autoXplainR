@@ -28,20 +28,43 @@ model_optimization_record <- function(model) {
     ))
   }
   if (inherits(fit, "gam")) {
-    outer <- fit$outer.info$conv %||% NULL
+    warnings <- if (wrapped) model$fit_details$optimizer_warnings else NULL
+    pirls_failed <- any(vapply(warnings, function(warning) {
+      warning$stage %in% c("bgam.fit", "bgam.fitd") &&
+        grepl("^algorithm did not converge[.]?$", warning$message, ignore.case = TRUE)
+    }, logical(1)))
+    at_pirls_limit <- inherits(fit, "bam") && is.numeric(fit$control$maxit) &&
+      length(fit$control$maxit) == 1L && is.numeric(fit$iter) && length(fit$iter) == 1L &&
+      is.finite(fit$iter) && is.finite(fit$control$maxit) && fit$iter >= fit$control$maxit
+    pirls_unknown <- at_pirls_limit && !(wrapped && isTRUE(model$fit_details$optimizer_warnings_captured))
+    outer <- if (is.list(fit$outer.info)) fit$outer.info$conv else NULL
+    mgcv_converged <- if (is.list(fit$mgcv.conv)) {
+      fit$mgcv.conv$fully.converged
+    } else if (is.logical(fit$mgcv.conv) && length(fit$mgcv.conv) == 1L) {
+      fit$mgcv.conv
+    } else {
+      NULL
+    }
     outer_failed <- is.character(outer) && length(outer) == 1L &&
       !identical(outer, "full convergence")
-    failed <- identical(fit$converged, FALSE) || outer_failed ||
-      identical(fit$mgcv.conv$fully.converged, FALSE)
-    known <- failed || identical(fit$converged, TRUE)
+    failed <- pirls_failed || identical(fit$converged, FALSE) || outer_failed ||
+      identical(mgcv_converged, FALSE)
+    known <- failed || (!inherits(fit, "bam") && identical(fit$converged, TRUE)) ||
+      identical(mgcv_converged, TRUE) ||
+      identical(outer, "full convergence")
     return(optimization_record(
-      if (failed) "not_converged" else if (known) "converged" else "unknown",
-      outer %||% as.character(fit$converged %||% NA),
-      if (failed) {
+      if (failed) "not_converged" else if (known && !pirls_unknown) "converged" else "unknown",
+      if (pirls_failed) "pirls_iteration_failure" else if (pirls_unknown) "pirls_unverified" else
+        outer %||% as.character(mgcv_converged %||% fit$converged %||% NA),
+      if (pirls_failed) {
+        "The final BAM PIRLS procedure reported nonconvergence; smoothing-parameter convergence cannot override it."
+      } else if (pirls_unknown) {
+        "BAM reached its recorded PIRLS iteration limit without captured diagnostics; outer convergence is unverified."
+      } else if (failed) {
         paste("GAM fitting did not report complete convergence:", outer %||% "iteration failure")
       } else {
         "GAM convergence fields were checked; convergence is not a model adequacy test."
-      }, fit$iter %||% NA_integer_, "mgcv convergence fields"
+      }, fit$iter %||% NA_integer_, "mgcv convergence fields and recorded warning stages"
     ))
   }
   if (inherits(fit, "glm")) {
@@ -85,10 +108,14 @@ tuning_learned_settings <- function(model) {
   neural <- inherits(model, "autoxplain_tuned_nnet")
   wrapped <- inherits(model, "autoxplain_fitted_model")
   fit <- if (neural) model$model else if (wrapped) model$fit else model
+  if (wrapped && model$backend == "xgboost") {
+    return(list(computation = model$fit_details$computation))
+  }
   if (neural) {
     return(list(
       encoded_inputs = fit$n[[1L]], fitted_weights = length(fit$wts),
-      maxit = 500L, convergence = fit$convergence
+      maxit = model$maxit %||% 500L, convergence = fit$convergence,
+      call_reconstruction = model$call_reconstruction
     ))
   }
   if (inherits(fit, "glmnet")) {
@@ -101,7 +128,8 @@ tuning_learned_settings <- function(model) {
   if (inherits(fit, "gam")) {
     return(list(
       effective_degrees_of_freedom = sum(fit$edf),
-      smoothing_parameters = fit$sp, method = fit$method
+      smoothing_parameters = fit$sp, method = fit$method,
+      computation = if (wrapped) model$fit_details$computation else NULL
     ))
   }
   if (inherits(fit, "svm")) {
@@ -160,7 +188,8 @@ tuning_family_rationale <- function(family) {
     ),
     additive = paste(
       "Small basis limits bound coefficients per smooth; gamma and term selection",
-      "offer stronger smoothing. REML learns smoothing penalties inside training folds."
+      "offer stronger smoothing. Each fit learns smoothing penalties inside its training fold.",
+      "Its recorded solver distinguishes nested REML from BAM fREML and optional discretization."
     ),
     tree = paste(
       "Preset tuples move from shallow trees and larger minimum splits toward deeper trees.",
@@ -172,11 +201,15 @@ tuning_family_rationale <- function(family) {
     ),
     boosting = paste(
       "Presets jointly vary rounds, step size and tree capacity, then sampling controls.",
-      "These are fixed-round fits, without an early-stopping search."
+      "These are fixed-round fits, without an early-stopping search.",
+      "Automatic input encoding uses native categorical splits when dense categorical expansion exceeds",
+      "twice the input width and 50 million cells; smaller designs retain numeric contrasts."
     ),
     neural = paste(
       "Small single-layer networks and several weight penalties bound the search cost.",
-      "Numeric inputs and regression outcomes are standardized using each training fold."
+      "Numeric inputs and regression outcomes are standardized using each training fold.",
+      "The default 2,000-iteration cap gives difficult fits more time; converged fits stop early.",
+      "Changing only maxit preserves initialization, and nonconverged fits remain excluded by default."
     ),
     kernel = paste(
       "Early presets vary cost and radial width; regression epsilon uses standardized outcome units.",
@@ -201,7 +234,12 @@ tuning_parameter_meaning <- function(family, parameter) {
     additive = c(
       k = "Maximum smooth basis size, not fitted degrees of freedom.",
       gamma = "Larger values favor stronger smoothing.",
-      select = "Adds penalties that can shrink whole smooth terms."
+      select = "Adds penalties that can shrink whole smooth terms.",
+      solver = paste(
+        "Auto uses continuous bam at 10,000 fitting rows or a rows-times-coefficients-squared",
+        "work estimate of 10 million. Smaller fits use gam. Explicit choices override this policy."
+      ),
+      discrete_bins = "Discretization resolution for bam_discrete; unused by continuous solvers."
     ),
     tree = c(
       maxdepth = "Maximum permitted tree depth, not observed depth.",
@@ -217,11 +255,16 @@ tuning_parameter_meaning <- function(family, parameter) {
       nrounds = "Number of sequential boosting rounds.", eta = "Contribution of each new tree.",
       max_depth = "Maximum depth of each tree.", min_child_weight = "Minimum child Hessian weight.",
       subsample = "Fraction of rows sampled per round.", colsample_bytree = "Fraction of inputs per tree.",
-      reg_alpha = "L1 leaf-weight penalty.", reg_lambda = "L2 leaf-weight penalty."
+      reg_alpha = "L1 leaf-weight penalty.", reg_lambda = "L2 leaf-weight penalty.",
+      encoding = paste(
+        "Input representation: matrix uses numeric contrasts; native uses category partitions",
+        "and a quantized training matrix. Auto switches only for large categorical expansions."
+      )
     ),
     neural = c(
       size = "Hidden units in one layer; more units permit more patterns.",
-      decay = "Weight penalty; larger values discourage large weights."
+      decay = "Weight penalty; larger values discourage large weights.",
+      maxit = "Optimizer iteration limit. It can stop earlier; a larger limit does not guarantee convergence."
     ),
     kernel = c(
       cost = "Penalty for errors or margin violations.",
@@ -349,6 +392,7 @@ tuning_evidence <- function(result) {
   list(
     schema_version = 1L, status = "computed", task = result$task, metric = tuning$metric,
     folds_used = tuning$folds_used, scope = tuning$scope_note,
+    input_policy = tuning[["input_policy", exact = TRUE]],
     search_space = tuning$search_space %||% list(
       status = "not_recorded",
       limitation = paste(

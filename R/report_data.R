@@ -11,7 +11,7 @@ data_profile_table <- function(profile, stage, name) {
     Value = column$axis$labels, Training = counts("training"),
     Evaluation = counts("evaluation"), check.names = FALSE
   )
-  html_table(rows, 0L, caption = paste(name, "\u2014", profile$stages[[stage]]$population))
+  html_table(rows, 0L, caption = paste(name, "\u00b7", profile$stages[[stage]]$population))
 }
 
 data_profile_inventory <- function(profile) {
@@ -49,7 +49,7 @@ explorer_data <- function(result, export) {
       '<button type="button" class="data-column" data-column-name="', html_escape(name),
       '" aria-pressed="', if (name == target) "true" else "false", '"><strong>', html_escape(name),
       "</strong><span>", html_escape(profile$columns$role[index]), " \u00b7 ", html_escape(info$axis$kind),
-      if (missing > 0) paste0(" \u00b7 ", missing, " missing") else "", "</span></button>"
+      if (missing > 0) paste0(" \u00b7 ", report_count(missing), " missing") else "", "</span></button>"
     )
   }, character(1)), collapse = "")
   modes <- names(profile$stages)
@@ -57,7 +57,7 @@ explorer_data <- function(result, export) {
   training_available <- isTRUE(profile$stages[[initial_stage]]$training_available)
   disclosure <- if (export$mode == "rows") {
     paste0(
-      "This HTML includes ", manifest$individual_records, " individual records across ",
+      "This HTML includes ", report_count(manifest$individual_records), " individual records across ",
       length(manifest$columns), " columns, including rows hidden by filters."
     )
   } else {
@@ -67,7 +67,7 @@ explorer_data <- function(result, export) {
     )
   }
   notice <- if (export$mode == "rows") {
-    paste(manifest$individual_records, "individual records embedded")
+    paste(report_count(manifest$individual_records), "individual records embedded")
   } else {
     paste("Aggregate summaries for", length(manifest$columns), "columns")
   }
@@ -162,9 +162,11 @@ explorer_data <- function(result, export) {
     "<p>Columns: ", html_escape(paste(manifest$columns, collapse = ", ")), "</p><p>",
     html_escape(manifest$scope), "</p><p>", html_escape(manifest$sampling),
     if (!is.null(manifest$seed)) paste0("; seed ", manifest$seed), "</p>",
-    "<p>Aggregate profiles use all available rows. Pair summaries: ", profile$pair_coverage$included,
+    "<p>Individual-column summaries use all available rows. ",
+    html_escape(profile$pair_sampling$scope %||% "Pair summaries use all available rows."),
+    " Pair summaries: ", profile$pair_coverage$included,
     " of ", profile$pair_coverage$total, ". ", html_escape(profile$pair_coverage$policy), "</p></details></div>",
-    report_json_script(report_data_payload(export), "axr-data-payload"), "</section>"
+    report_json_script(report_data_payload(export, compact = TRUE), "axr-data-payload"), "</section>"
   )
 }
 
@@ -180,12 +182,18 @@ data_row_controls <- function(variables) {
     '<option value="missing">Is missing</option><option value="nonfinite">Is non-finite</option>',
     '<option value="present">Has a usable value</option>',
     '</select></label><label>Value <input id="data-filter-value" type="text"></label>',
+    '<label id="data-filter-level-search-label" hidden>Find categories ',
+    '<input id="data-filter-level-search" type="search" autocomplete="off"></label>',
     '<label id="data-filter-level-label" hidden>Category values ',
-    '<select id="data-filter-levels" multiple size="4"></select></label>',
+    '<select id="data-filter-levels" multiple size="4" aria-describedby="data-filter-level-count"></select>',
+    '<span id="data-filter-level-count" role="status"></span></label>',
     '<button type="submit">Add filter</button>',
     '<button type="button" id="data-filter-reset">Reset filters</button></form>',
     '<div id="data-filter-chips" class="data-filter-chips" role="group" aria-label="Active filters"></div>',
     '<p id="data-filter-status" role="status"></p>',
+    '<form id="data-record-lookup" class="data-row-toolbar"><label>Find a source record ',
+    '<input id="data-record-key" type="text" placeholder="Exact record key" autocomplete="off"></label>',
+    '<button type="submit">Find record</button><span id="data-record-status" role="status"></span></form>',
     '<details id="data-scatter-details"><summary>Linked scatter of exported records</summary>',
     '<div id="data-row-scatter" class="data-chart" tabindex="0" role="region" ',
     'aria-label="Exported row scatter"></div></details>',
@@ -196,7 +204,7 @@ data_row_controls <- function(variables) {
     '<span id="data-row-page"></span><button id="data-row-next" type="button">Next rows</button></div>',
     '<div id="data-row-table" class="table-wrap" tabindex="0" role="region" aria-label="Exported records"></div>',
     '<div id="data-selected-row" class="data-selected-row" role="status" tabindex="0">',
-    "Select a table row or plotted point to inspect it.</div>",
+    "Select a table row or plotted point to inspect it and see its source record key.</div>",
     '<p class="data-chart-note">Filters describe the exported sample. ',
     "They do not refit models or change official scores. ",
     "Subgroups chosen after looking at outcomes are exploratory.</p></div>"

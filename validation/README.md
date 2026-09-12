@@ -1,5 +1,10 @@
 # Validation evidence
 
+The [scalability work](scalability/README.md) separates recommended-search cost,
+report storage and browser behavior, and fits with a million training rows.
+Each measurement identifies its source and workload; the work record states
+which release gates remain open.
+
 The [harder-modeling comparison](stress-modeling/findings.md) tests predictive
 quality against independently fitted reference models. The accompanying
 [adapter probes](stress-adapters/README.md),

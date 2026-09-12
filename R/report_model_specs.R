@@ -39,6 +39,8 @@ model_specification <- function(result, id) {
     "rpart"
   } else if (inherits(fit, "nnet")) {
     "nnet"
+  } else if (inherits(fit, "gam")) {
+    "mgcv"
   } else if (inherits(fit, "lm")) {
     "stats"
   } else {
@@ -78,6 +80,19 @@ model_specification <- function(result, id) {
       `Encoded inputs` = fit$n[1], `Hidden units` = fit$n[2], Outputs = fit$n[3],
       `Fitted weights` = length(fit$wts), `Convergence code (0 = converged)` = fit$convergence
     )
+    learned$`Rebuilding the native call` <- model$call_reconstruction
+  }
+  if (inherits(fit, "gam")) learned$Converged <- NULL
+  if (!wrapped && inherits(fit, "gam")) {
+    learned <- c(learned, list(
+      `Smooth basis dimensions (when exposed)` = stats::setNames(
+        lapply(fit$smooth, function(smooth) smooth$bs.dim),
+        vapply(fit$smooth, function(smooth) smooth$label, character(1))
+      ),
+      `Total effective degrees of freedom` = sum(fit$edf),
+      `Smoothing parameters` = fit$sp,
+      `Checked optimization status` = model_optimization_record(fit)$status
+    ))
   }
   if (wrapped) {
     learned <- switch(model$backend,
@@ -96,9 +111,12 @@ model_specification <- function(result, id) {
             if (length(feature) == 1L && !is.na(feature)) feature else smooth$label
           }, character(1))
         ),
-        `Total effective degrees of freedom` = sum(fit$edf)
+        `Total effective degrees of freedom` = sum(fit$edf),
+        `Checked optimization status` = model_optimization_record(model)$status,
+        `Fitting procedure` = model$fit_details$computation
       )),
       e1071 = list(`Support vectors` = fit$tot.nSV),
+      xgboost = list(`Input encoding and memory policy` = model$fit_details$computation),
       earth = list(`Retained terms` = length(fit$selected.terms)),
       kknn = list(`Training rows retained` = model$fit_details$training_rows),
       list()
@@ -113,12 +131,23 @@ model_specification <- function(result, id) {
     paste0(
       parameters$size, if (parameters$size == 1) " hidden unit" else " hidden units",
       " \u00b7 decay ", model_spec_value(parameters$decay),
+      if (!is.null(parameters$maxit)) {
+        paste0(
+          " \u00b7 at most ", parameters$maxit, if (parameters$maxit == 1) " iteration" else " iterations"
+        )
+      },
       " \u00b7 ", length(fit$wts), " weights"
     )
   } else if (wrapped) {
     paste0(
       learner_definition(model$family)$describe(parameters),
       if (model$backend == "glmnet") paste0("; lambda = ", model_spec_value(model$fit_details$lambda))
+    )
+  } else if (inherits(fit, "gam")) {
+    paste0(
+      parameters$solver, " \u00b7 ", fit$method, " \u00b7 ", length(fit$smooth),
+      if (length(fit$smooth) == 1L) " smooth term" else " smooth terms",
+      " \u00b7 effective degrees of freedom = ", model_spec_value(sum(fit$edf))
     )
   } else if (!is.null(coefficients)) {
     if (intercept_baseline) {
@@ -148,7 +177,8 @@ model_specification <- function(result, id) {
     compact <- compact_hyperparameters(parameters, if (h2o) model@algorithm else engine)
     entries <- paste(
       names(utils::head(compact, 3)),
-      vapply(utils::head(compact, 3), model_spec_value, character(1)), sep = " = "
+      vapply(utils::head(compact, 3), model_spec_value, character(1)),
+      sep = " = "
     )
     paste(entries, collapse = " \u00b7 ")
   }
@@ -204,7 +234,10 @@ model_spec_settings_help <- function(spec) {
     mgcv = paste(
       "smooth_k records the basis dimension used for each numeric input; requested k can be reduced",
       "when an input has few distinct values. These dimensions limit flexibility; effective degrees of freedom",
-      "describe the fitted smooths after penalization. gamma and select control smoothing and shrinkage."
+      "describe the fitted smooths after penalization. gamma and select control smoothing and shrinkage.",
+      "gam uses nested REML optimization; bam uses fREML iteration and processes the design in blocks.",
+      "bam_discrete also discretizes covariates at the recorded resolution, so numerical results can differ.",
+      "The fitting procedure records the actual method and reason for the choice."
     ),
     stats = if (identical(spec$parameters$family, "binomial")) {
       "family defines the outcome distribution; link connects the linear predictor to probability."

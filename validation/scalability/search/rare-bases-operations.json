@@ -1,0 +1,154 @@
+[
+  {
+    "case": "rare_1pct",
+    "seed": 912,
+    "k": 8,
+    "solver": "gam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.5707169260003866,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "gam",
+      "8",
+      "912"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 912,
+    "k": 8,
+    "solver": "bam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 9.988487128000997,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "bam",
+      "8",
+      "912"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 912,
+    "k": 10,
+    "solver": "gam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.619970415998978,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "gam",
+      "10",
+      "912"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 912,
+    "k": 10,
+    "solver": "bam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 32.23322368399931,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "bam",
+      "10",
+      "912"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 913,
+    "k": 8,
+    "solver": "gam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.4699822510010563,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "gam",
+      "8",
+      "913"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 913,
+    "k": 8,
+    "solver": "bam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 32.934764177000034,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "bam",
+      "8",
+      "913"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 913,
+    "k": 10,
+    "solver": "gam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 2.5699191910007357,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "gam",
+      "10",
+      "913"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  },
+  {
+    "case": "rare_1pct",
+    "seed": 913,
+    "k": 10,
+    "solver": "bam",
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.5721014060000016,
+    "timeout_seconds": 120,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-bases-frozen.R",
+      "rare_1pct",
+      "bam",
+      "10",
+      "913"
+    ],
+    "timing_context": "functional check alongside gallery; not comparative timing evidence"
+  }
+]

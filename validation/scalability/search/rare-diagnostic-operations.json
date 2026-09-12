@@ -1,0 +1,56 @@
+[
+  {
+    "seed": 912,
+    "k": 10,
+    "status": "finished",
+    "exit_code": 1,
+    "process_seconds": 33.18751674499981,
+    "expected_status": "check_convergence",
+    "actual_status": "check_convergence",
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-diagnostics-frozen.R",
+      "rare_1pct",
+      "bam",
+      "10",
+      "912"
+    ],
+    "timing_context": "functional convergence replay; not comparative timing evidence"
+  },
+  {
+    "seed": 912,
+    "k": 8,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 9.134112648000155,
+    "expected_status": "ok",
+    "actual_status": "ok",
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-diagnostics-frozen.R",
+      "rare_1pct",
+      "bam",
+      "8",
+      "912"
+    ],
+    "timing_context": "functional convergence replay; not comparative timing evidence"
+  },
+  {
+    "seed": 913,
+    "k": 10,
+    "status": "finished",
+    "exit_code": 0,
+    "process_seconds": 3.923317061000489,
+    "expected_status": "ok",
+    "actual_status": "ok",
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/profile-rare-diagnostics-frozen.R",
+      "rare_1pct",
+      "bam",
+      "10",
+      "913"
+    ],
+    "timing_context": "functional convergence replay; not comparative timing evidence"
+  }
+]

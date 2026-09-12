@@ -17,14 +17,132 @@ report_json_script <- function(payload, id) {
 # jsonlite encodes data-frame columns together instead of dispatching once per
 # scalar. Nested frames retain the same row objects in JSON. Only the temporary
 # serialization copy changes; callers keep the original list of row records.
-report_data_payload <- function(export) {
+report_data_payload <- function(export, compact = FALSE) {
+  if (isTRUE(compact)) return(report_compact_data_payload(export))
   if (identical(export$mode, "rows") && length(export$rows)) {
     export$rows <- report_row_records(export$rows)
   }
   export
 }
 
+# Keep large vectors separate so the browser can open one column without
+# allocating the rest of the dataset. Small blocks remain readable JSON.
+report_payload_block <- function(value, vector = FALSE) {
+  if (isTRUE(vector)) {
+    # AsIs protects an R column, not an additional array dimension per cell.
+    # Keeping scalar AsIs wrappers produced [value] cells that could not be
+    # plotted or numerically filtered by the report.
+    if (inherits(value, "AsIs")) value <- unclass(value)
+    if (is.list(value) && !is.data.frame(value)) {
+      value <- lapply(value, function(cell) if (inherits(cell, "AsIs") && length(cell) == 1L) unclass(cell) else cell)
+    }
+  }
+  json <- as.character(jsonlite::toJSON(
+    if (vector) I(value) else value, auto_unbox = TRUE, null = "null", na = "null", digits = 16,
+    dataframe = "rows", POSIXt = "ISO8601", force = TRUE
+  ))
+  bytes <- nchar(json, type = "bytes")
+  if (bytes >= 16384L) {
+    compressed <- jsonlite::base64_enc(memCompress(charToRaw(enc2utf8(json)), "gzip"))
+    if (nchar(compressed, type = "bytes") < bytes * 0.9) {
+      # R calls this gzip, but memCompress emits a zlib-wrapped DEFLATE stream.
+      return(list(encoding = "zlib-json-v1", bytes = bytes, data = compressed))
+    }
+  }
+  list(encoding = "json", value = if (vector) I(value) else value)
+}
+
+report_columns_from_records <- function(records) {
+  if (identical(records$layout, "columns-v1")) return(records)
+  n <- length(records)
+  metadata <- c("row_key", "partition", "source", "source_row", "processed_position", "retained")
+  get_column <- function(field, stage = NULL) {
+    values <- lapply(records, function(row) if (is.null(stage)) row[[field]] else row[[stage]][[field]])
+    # Reuse the type-preserving transpose for mixed raw/processed data.
+    if (!length(values)) return(list())
+    report_row_records(lapply(values, function(value) list(value = value)))$value
+  }
+  values <- lapply(c("raw", "processed"), function(stage) {
+    fields <- unique(unlist(lapply(records, function(row) names(row[[stage]])), use.names = FALSE))
+    if (!length(fields)) return(NULL)
+    setNames(lapply(fields, get_column, stage = stage), fields)
+  })
+  names(values) <- c("raw", "processed")
+  nonfinite <- lapply(c("raw", "processed"), function(stage) {
+    fields <- names(values[[stage]])
+    setNames(lapply(fields, function(field) {
+      which(vapply(records, function(row) field %in% row$nonfinite[[stage]], logical(1)))
+    }), fields)
+  })
+  names(nonfinite) <- c("raw", "processed")
+  list(
+    layout = "columns-v1", length = n,
+    meta = setNames(lapply(metadata, get_column), metadata),
+    raw = values$raw, processed = values$processed, nonfinite = nonfinite
+  )
+}
+
+report_compact_data_payload <- function(export) {
+  rows <- NULL
+  columns <- NULL
+  if (identical(export$mode, "rows")) {
+    columns <- report_columns_from_records(export$rows)
+    values <- lapply(c("raw", "processed"), function(stage) {
+      if (is.null(columns[[stage]])) return(NULL)
+      setNames(lapply(names(columns[[stage]]), function(name) {
+        value <- columns[[stage]][[name]]
+        if (stage == "processed" && name %in% names(columns$raw) && identical(value, columns$raw[[name]])) {
+          return(list(encoding = "reference", stage = "raw", column = name))
+        }
+        report_payload_block(value, vector = TRUE)
+      }), names(columns[[stage]]))
+    })
+    names(values) <- c("raw", "processed")
+    rows <- list(
+      layout = "columns-v1", length = columns$length,
+      meta = lapply(columns$meta, report_payload_block, vector = TRUE),
+      raw = values$raw, processed = values$processed,
+      nonfinite = lapply(columns$nonfinite, function(stage) lapply(stage, function(indices) I(indices)))
+    )
+  }
+  profile <- export$profile
+  for (stage in names(profile$stages)) {
+    for (name in names(profile$stages[[stage]]$columns)) {
+      axis <- profile$stages[[stage]]$columns[[name]]$axis
+      if (is.null(axis$known_levels)) next
+      # Known levels are used only to classify exported row values as existing
+      # or novel. Counts and displayed bins already contain full-data results.
+      used <- if (!is.null(columns[[stage]][[name]])) {
+        unique(as.character(unlist(columns[[stage]][[name]], use.names = FALSE)))
+      } else {
+        character()
+      }
+      axis$known_levels <- intersect(axis$known_levels, used)
+      profile$stages[[stage]]$columns[[name]]$axis <- axis
+    }
+  }
+  list(
+    schema_version = 2L, mode = export$mode,
+    profile = report_payload_block(profile), rows = rows, manifest = export$manifest
+  )
+}
+
+report_predictions_payload <- function(view) {
+  view$schema_version <- 2L
+  view$models <- lapply(view$models, function(model) {
+    if (is.null(model$cases)) return(model)
+    columns <- if (is.data.frame(model$cases)) model$cases else report_row_records(model$cases)
+    model$cases <- list(
+      layout = "case-columns-v1", length = nrow(columns) %||% 0L,
+      columns = lapply(columns, function(column) report_payload_block(column, vector = !is.data.frame(column)))
+    )
+    model
+  })
+  view
+}
+
 report_row_records <- function(records) {
+  if (!length(records)) return(structure(list(), class = "data.frame", row.names = integer()))
   fields <- names(records[[1L]])
   same_fields <- vapply(records, function(record) identical(names(record), fields), logical(1))
   if (is.null(fields) || anyNA(fields) || any(!nzchar(fields)) || anyDuplicated(fields) || !all(same_fields)) {

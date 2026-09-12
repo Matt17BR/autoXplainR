@@ -33,7 +33,8 @@ render_model_selection <- function(result) {
   agreed <- identical(best$configuration_id, picked$configuration_id) &&
     identical(picked$configuration_id, final$configuration_id)
   cards <- if (agreed) {
-    settings <- paste(selection_family_label(final$family, evidence$task), "\u00b7",
+    settings <- paste(
+      selection_family_label(final$family, evidence$task), "\u00b7",
       selection_short_parameters(final, evidence)
     )
     paste0(
@@ -119,7 +120,7 @@ render_model_selection <- function(result) {
     "<p>Preprocessing was learned again inside every fold. The evaluation partition was not used ",
     "to choose hyperparameters. Full fold assignments and any retained out-of-fold predictions ",
     "remain in <code>tuning_results(result)</code>.</p></details>",
-    selection_search_details(evidence), selection_refit_details(evidence),
+    selection_input_policy(evidence), selection_search_details(evidence), selection_refit_details(evidence),
     '<details class="advanced"><summary>Copy and change this search grid in R</summary>',
     "<p>This executable control reproduces the scheduled tuples and budgets. Edit a tuple to test a ",
     "specific hypothesis. Refit using your original data, preprocessing, validation design and seed. ",
@@ -132,6 +133,45 @@ render_model_selection <- function(result) {
       list(schema_version = 1L, candidates = candidates[c("configuration_id", "family")]),
       "selection-evidence"
     ), "</section>"
+  )
+}
+
+selection_input_policy <- function(evidence) {
+  policies <- evidence$input_policy
+  if (!length(policies)) {
+    return("")
+  }
+  entries <- vapply(names(policies), function(family) {
+    policy <- policies[[family]]
+    value <- policy$encoding %||% policy$solver
+    dimensions <- if (identical(family, "boosting")) {
+      data.frame(
+        `Training rows` = policy$rows, `Input columns` = policy$input_columns,
+        `Estimated contrast columns` = policy$matrix_columns_estimate,
+        `Estimated matrix cells` = policy$matrix_cells_estimate, check.names = FALSE
+      )
+    } else if (length(policy$configurations)) {
+      do.call(rbind, lapply(names(policy$configurations), function(id) {
+        decision <- policy$configurations[[id]]
+        data.frame(
+          Configuration = id, Solver = decision$solver, `Training rows` = decision$fitting_rows,
+          `Estimated coefficients` = decision$estimated_coefficients,
+          `Work index` = decision$work_index, check.names = FALSE
+        )
+      }))
+    } else {
+      NULL
+    }
+    paste0(
+      "<p><strong>", html_escape(selection_family_label(family, evidence$task)), ": ",
+      html_escape(value), "</strong>. ", html_escape(policy$reason), "</p>",
+      if (!is.null(dimensions)) html_table(dimensions, digits = 0), "<p>",
+      html_escape(policy$scope), "</p>"
+    )
+  }, character(1))
+  paste0(
+    '<details class="advanced"><summary>Computation choices for this search</summary>',
+    paste(entries, collapse = ""), "</details>"
   )
 }
 
@@ -393,9 +433,15 @@ selection_candidate_plot <- function(candidates, evidence) {
       "failed"
     } else {
       paste(c(
-        if (isTRUE(candidate$final_fit)) "primary" else if (isTRUE(candidate$selected)) "policy choice" else
-          if (isTRUE(candidate$lowest_cv)) "lowest CV" else
-            if (!is.na(candidate$retained_model_id %||% NA_character_)) "retained",
+        if (isTRUE(candidate$final_fit)) {
+          "primary"
+        } else if (isTRUE(candidate$selected)) {
+          "policy choice"
+        } else if (isTRUE(candidate$lowest_cv)) {
+          "lowest CV"
+        } else if (!is.na(candidate$retained_model_id %||% NA_character_)) {
+          "retained"
+        },
         if (isTRUE(candidate$within_threshold)) "eligible" else "outside limit"
       ), collapse = " \u00b7 ")
     }

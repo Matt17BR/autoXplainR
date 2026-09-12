@@ -9,6 +9,7 @@ import os
 import subprocess
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright
+from report_payload import decode_data_payload, decode_prediction_payload
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -26,7 +27,12 @@ def quantile(values, fraction):
 def settled(page):
     page.evaluate('()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))')
 def payload(page, ident):
-    return json.loads(page.locator('#'+ident).text_content())
+    value = json.loads(page.locator('#'+ident).text_content())
+    if ident == 'axr-data-payload':
+        return decode_data_payload(value)
+    if ident == 'axr-predictions-payload':
+        return decode_prediction_payload(value)
+    return value
 
 bench = json.loads((args.case_dir/'supplied-benchmark-oracle.json').read_text())
 source = json.loads((args.case_dir/'supplied-models-oracle.json').read_text())['binary']

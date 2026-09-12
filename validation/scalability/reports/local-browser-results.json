@@ -1,0 +1,3021 @@
+{
+  "recorded_at_utc": "2026-09-12T01:35:53.326466+00:00",
+  "playwright_version": "1.58.0",
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "local_webkit": {
+    "version": "26.0",
+    "bundle": "webkit-2248",
+    "launch": "Pinned binary with isolated Ubuntu 24.04 ABI libraries; no system library replacements."
+  },
+  "local_chromium": {
+    "version": "145.0.7632.6",
+    "bundle": "chromium-1208"
+  },
+  "firefox": {
+    "local_status": "not validated",
+    "reason": "Pinned Firefox launch did not complete on Ubuntu 26.04; its GL probe child segfaulted in a traced launch. This is an environment failure, not evidence of report incompatibility.",
+    "ci_requirement": "Unmodified Playwright 1.58 Firefox gate on supported Ubuntu runner is mandatory and pending."
+  },
+  "fixture_sha256": {
+    "row_tasks": "5c8b7e14948c54bacefbda3911f2535ccca8d6678a1de76ffea3605c68c24ab1",
+    "category_tasks": "4c559c173169cde199d92e92778cef7c7b1575cc789a3d3efe6149a01844077e",
+    "unlimited_relationships": "bc24de0ff665096ff80c120269758c67d5abd5904a9f75315dcf54137a0efeef"
+  },
+  "current_source_sha256": {
+    "R/report_payload.R": "a999b4c0798a6fd6fe1ac248619a6a2c10b1dec3fec121f6b731701d2a4af19c",
+    "R/report_predictions.R": "bd9bb16794babfd7f989dccf49c461ac4627fce414b2c6fa4a00c76c5ac8f302",
+    "R/report_disagreement.R": "cff99e789060b59ea677644fd74988c20102622fdb247b0f458a10b23a567579",
+    "inst/report/payload.js": "d09357a2f6c1001a4f44b4502d87b3e37415f4d308de415fd74b4cbba47f668d",
+    "inst/report/data-explorer.js": "27435c10251e5c51dcfecee7168a94b7464e8475473cfa85754e2b59ff752035",
+    "inst/report/predictions.js": "e0b64ee8aeb34044251f681191306d258b8345f677fbfee0ab1862b7b4ff3773"
+  },
+  "gates": {
+    "row_tasks": {
+      "passed": true,
+      "assertions": 146,
+      "sha256": "e5ec10e98ab2868b8b4661429670ac8017977fa93dc19f4bf3b199329cf5afa2",
+      "details": [
+        {
+          "name": "Official RMSE agrees with predictions computed independently in R",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "Prediction summaries retain every evaluation row",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: full scores visible before opening records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: row values decode lazily",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: distributions do not decode row columns",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: initial sort control matches the visible source-order table",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: closed scatter creates no points",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: complete requested export retained",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: exact source identity data:1",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: visible source value data:1/x",
+          "passed": true,
+          "evidence": [
+            0.07681871599396277,
+            0.07681871599396277
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:1/z",
+          "passed": true,
+          "evidence": [
+            0.45402284851297736,
+            0.45402284851297736
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:1/response",
+          "passed": true,
+          "evidence": [
+            0.12224066413923847,
+            0.12224066413923847
+          ]
+        },
+        {
+          "name": "chromium/1440: exact source identity data:2",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: visible source value data:2/x",
+          "passed": true,
+          "evidence": [
+            -1.0445103783211052,
+            -1.0445103783211052
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2/z",
+          "passed": true,
+          "evidence": [
+            0.7816396665293723,
+            0.7816396665293723
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2/response",
+          "passed": true,
+          "evidence": [
+            -3.3878604241351047,
+            -3.3878604241351047
+          ]
+        },
+        {
+          "name": "chromium/1440: exact source identity data:1250",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: visible source value data:1250/x",
+          "passed": true,
+          "evidence": [
+            0.505826202559415,
+            0.505826202559415
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:1250/z",
+          "passed": true,
+          "evidence": [
+            0.1307874454651028,
+            0.1307874454651028
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:1250/response",
+          "passed": true,
+          "evidence": [
+            1.4621766726120005,
+            1.4621766726120005
+          ]
+        },
+        {
+          "name": "chromium/1440: exact source identity data:2499",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: visible source value data:2499/x",
+          "passed": true,
+          "evidence": [
+            -1.1145561287329424,
+            -1.1145561287329424
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2499/z",
+          "passed": true,
+          "evidence": [
+            0.8294369850773364,
+            0.8294369850773364
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2499/response",
+          "passed": true,
+          "evidence": [
+            -3.656209687764356,
+            -3.656209687764356
+          ]
+        },
+        {
+          "name": "chromium/1440: exact source identity data:2500",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: visible source value data:2500/x",
+          "passed": true,
+          "evidence": [
+            0.4925380999183456,
+            0.4925380999183456
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2500/z",
+          "passed": true,
+          "evidence": [
+            0.7108620754443109,
+            0.7108620754443109
+          ]
+        },
+        {
+          "name": "chromium/1440: visible source value data:2500/response",
+          "passed": true,
+          "evidence": [
+            1.1211665860571935,
+            1.1211665860571935
+          ]
+        },
+        {
+          "name": "chromium/1440: paging reaches actual next rows",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: filter counts every exported row",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: bounded scatter discloses displayed and full counts",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: full export note uses readable exact counts and accurate scope",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: scatter sampling leaves official scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: scatter axes retain full-data extents, including unplotted extremes",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: last record remains selectable after sampling",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: offline interaction has no network dependency",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium/1440: no runtime or data-decoder failure",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium/390: full scores visible before opening records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: row values decode lazily",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: distributions do not decode row columns",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: initial sort control matches the visible source-order table",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: closed scatter creates no points",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: complete requested export retained",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: exact source identity data:1",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: visible source value data:1/x",
+          "passed": true,
+          "evidence": [
+            0.07681871599396277,
+            0.07681871599396277
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:1/z",
+          "passed": true,
+          "evidence": [
+            0.45402284851297736,
+            0.45402284851297736
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:1/response",
+          "passed": true,
+          "evidence": [
+            0.12224066413923847,
+            0.12224066413923847
+          ]
+        },
+        {
+          "name": "chromium/390: exact source identity data:2",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: visible source value data:2/x",
+          "passed": true,
+          "evidence": [
+            -1.0445103783211052,
+            -1.0445103783211052
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2/z",
+          "passed": true,
+          "evidence": [
+            0.7816396665293723,
+            0.7816396665293723
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2/response",
+          "passed": true,
+          "evidence": [
+            -3.3878604241351047,
+            -3.3878604241351047
+          ]
+        },
+        {
+          "name": "chromium/390: exact source identity data:1250",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: visible source value data:1250/x",
+          "passed": true,
+          "evidence": [
+            0.505826202559415,
+            0.505826202559415
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:1250/z",
+          "passed": true,
+          "evidence": [
+            0.1307874454651028,
+            0.1307874454651028
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:1250/response",
+          "passed": true,
+          "evidence": [
+            1.4621766726120005,
+            1.4621766726120005
+          ]
+        },
+        {
+          "name": "chromium/390: exact source identity data:2499",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: visible source value data:2499/x",
+          "passed": true,
+          "evidence": [
+            -1.1145561287329424,
+            -1.1145561287329424
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2499/z",
+          "passed": true,
+          "evidence": [
+            0.8294369850773364,
+            0.8294369850773364
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2499/response",
+          "passed": true,
+          "evidence": [
+            -3.656209687764356,
+            -3.656209687764356
+          ]
+        },
+        {
+          "name": "chromium/390: exact source identity data:2500",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: visible source value data:2500/x",
+          "passed": true,
+          "evidence": [
+            0.4925380999183456,
+            0.4925380999183456
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2500/z",
+          "passed": true,
+          "evidence": [
+            0.7108620754443109,
+            0.7108620754443109
+          ]
+        },
+        {
+          "name": "chromium/390: visible source value data:2500/response",
+          "passed": true,
+          "evidence": [
+            1.1211665860571935,
+            1.1211665860571935
+          ]
+        },
+        {
+          "name": "chromium/390: paging reaches actual next rows",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: filter counts every exported row",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: bounded scatter discloses displayed and full counts",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: full export note uses readable exact counts and accurate scope",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: scatter sampling leaves official scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: scatter axes retain full-data extents, including unplotted extremes",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: last record remains selectable after sampling",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: offline interaction has no network dependency",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium/390: no runtime or data-decoder failure",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/1440: full scores visible before opening records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: row values decode lazily",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: distributions do not decode row columns",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: initial sort control matches the visible source-order table",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: closed scatter creates no points",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: complete requested export retained",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: exact source identity data:1",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: visible source value data:1/x",
+          "passed": true,
+          "evidence": [
+            0.07681871599396277,
+            0.07681871599396277
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:1/z",
+          "passed": true,
+          "evidence": [
+            0.45402284851297736,
+            0.45402284851297736
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:1/response",
+          "passed": true,
+          "evidence": [
+            0.12224066413923847,
+            0.12224066413923847
+          ]
+        },
+        {
+          "name": "webkit/1440: exact source identity data:2",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: visible source value data:2/x",
+          "passed": true,
+          "evidence": [
+            -1.0445103783211052,
+            -1.0445103783211052
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2/z",
+          "passed": true,
+          "evidence": [
+            0.7816396665293723,
+            0.7816396665293723
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2/response",
+          "passed": true,
+          "evidence": [
+            -3.3878604241351047,
+            -3.3878604241351047
+          ]
+        },
+        {
+          "name": "webkit/1440: exact source identity data:1250",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: visible source value data:1250/x",
+          "passed": true,
+          "evidence": [
+            0.505826202559415,
+            0.505826202559415
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:1250/z",
+          "passed": true,
+          "evidence": [
+            0.1307874454651028,
+            0.1307874454651028
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:1250/response",
+          "passed": true,
+          "evidence": [
+            1.4621766726120005,
+            1.4621766726120005
+          ]
+        },
+        {
+          "name": "webkit/1440: exact source identity data:2499",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: visible source value data:2499/x",
+          "passed": true,
+          "evidence": [
+            -1.1145561287329424,
+            -1.1145561287329424
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2499/z",
+          "passed": true,
+          "evidence": [
+            0.8294369850773364,
+            0.8294369850773364
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2499/response",
+          "passed": true,
+          "evidence": [
+            -3.656209687764356,
+            -3.656209687764356
+          ]
+        },
+        {
+          "name": "webkit/1440: exact source identity data:2500",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: visible source value data:2500/x",
+          "passed": true,
+          "evidence": [
+            0.4925380999183456,
+            0.4925380999183456
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2500/z",
+          "passed": true,
+          "evidence": [
+            0.7108620754443109,
+            0.7108620754443109
+          ]
+        },
+        {
+          "name": "webkit/1440: visible source value data:2500/response",
+          "passed": true,
+          "evidence": [
+            1.1211665860571935,
+            1.1211665860571935
+          ]
+        },
+        {
+          "name": "webkit/1440: paging reaches actual next rows",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: filter counts every exported row",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: bounded scatter discloses displayed and full counts",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: full export note uses readable exact counts and accurate scope",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: scatter sampling leaves official scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: scatter axes retain full-data extents, including unplotted extremes",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: last record remains selectable after sampling",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: offline interaction has no network dependency",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/1440: no runtime or data-decoder failure",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/390: full scores visible before opening records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: row values decode lazily",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: distributions do not decode row columns",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: initial sort control matches the visible source-order table",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: closed scatter creates no points",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: complete requested export retained",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: exact source identity data:1",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: visible source value data:1/x",
+          "passed": true,
+          "evidence": [
+            0.07681871599396277,
+            0.07681871599396277
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:1/z",
+          "passed": true,
+          "evidence": [
+            0.45402284851297736,
+            0.45402284851297736
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:1/response",
+          "passed": true,
+          "evidence": [
+            0.12224066413923847,
+            0.12224066413923847
+          ]
+        },
+        {
+          "name": "webkit/390: exact source identity data:2",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: visible source value data:2/x",
+          "passed": true,
+          "evidence": [
+            -1.0445103783211052,
+            -1.0445103783211052
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2/z",
+          "passed": true,
+          "evidence": [
+            0.7816396665293723,
+            0.7816396665293723
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2/response",
+          "passed": true,
+          "evidence": [
+            -3.3878604241351047,
+            -3.3878604241351047
+          ]
+        },
+        {
+          "name": "webkit/390: exact source identity data:1250",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: visible source value data:1250/x",
+          "passed": true,
+          "evidence": [
+            0.505826202559415,
+            0.505826202559415
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:1250/z",
+          "passed": true,
+          "evidence": [
+            0.1307874454651028,
+            0.1307874454651028
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:1250/response",
+          "passed": true,
+          "evidence": [
+            1.4621766726120005,
+            1.4621766726120005
+          ]
+        },
+        {
+          "name": "webkit/390: exact source identity data:2499",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: visible source value data:2499/x",
+          "passed": true,
+          "evidence": [
+            -1.1145561287329424,
+            -1.1145561287329424
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2499/z",
+          "passed": true,
+          "evidence": [
+            0.8294369850773364,
+            0.8294369850773364
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2499/response",
+          "passed": true,
+          "evidence": [
+            -3.656209687764356,
+            -3.656209687764356
+          ]
+        },
+        {
+          "name": "webkit/390: exact source identity data:2500",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: visible source value data:2500/x",
+          "passed": true,
+          "evidence": [
+            0.4925380999183456,
+            0.4925380999183456
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2500/z",
+          "passed": true,
+          "evidence": [
+            0.7108620754443109,
+            0.7108620754443109
+          ]
+        },
+        {
+          "name": "webkit/390: visible source value data:2500/response",
+          "passed": true,
+          "evidence": [
+            1.1211665860571935,
+            1.1211665860571935
+          ]
+        },
+        {
+          "name": "webkit/390: paging reaches actual next rows",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: filter counts every exported row",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: bounded scatter discloses displayed and full counts",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: full export note uses readable exact counts and accurate scope",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: scatter sampling leaves official scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: scatter axes retain full-data extents, including unplotted extremes",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: last record remains selectable after sampling",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: offline interaction has no network dependency",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/390: no runtime or data-decoder failure",
+          "passed": true,
+          "evidence": []
+        }
+      ]
+    },
+    "codec_and_fallback": {
+      "passed": true,
+      "assertions": 52,
+      "sha256": "8453dc90666362893c399caa3137b87441d2ad96e53c645ea2eed85da89855da",
+      "details": [
+        {
+          "name": "chromium: every decoded source value and alias matches independent Python zlib",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: initial model scores render without decoder errors",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: old row-object reports remain interactive",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: old row-object record identities remain selectable",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: legacy has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium: missing-codec gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: missing-codec offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: missing-codec fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "chromium: missing-codec leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: missing-codec has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium: incomplete-profile gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-profile offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-profile fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "chromium: incomplete-profile leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-profile has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium: damaged-checksum gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: damaged-checksum offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: damaged-checksum fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "chromium: damaged-checksum leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: damaged-checksum has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium: incomplete-column gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-column offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-column fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "chromium: incomplete-column leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: incomplete-column has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium: JavaScript-disabled reports retain model scores and distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: every decoded source value and alias matches independent Python zlib",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: initial model scores render without decoder errors",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: old row-object reports remain interactive",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: old row-object record identities remain selectable",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: legacy has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit: missing-codec gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: missing-codec offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: missing-codec fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "webkit: missing-codec leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: missing-codec has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit: incomplete-profile gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-profile offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-profile fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "webkit: incomplete-profile leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-profile has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit: damaged-checksum gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: damaged-checksum offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: damaged-checksum fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "webkit: damaged-checksum leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: damaged-checksum has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit: incomplete-column gives a visible data failure",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-column offers actual static distribution tables",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-column fallback preserves full distribution counts",
+          "passed": true,
+          "evidence": 2600
+        },
+        {
+          "name": "webkit: incomplete-column leaves model scores unchanged",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: incomplete-column has no uncaught runtime errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit: JavaScript-disabled reports retain model scores and distribution tables",
+          "passed": true,
+          "evidence": null
+        }
+      ]
+    },
+    "category_tasks": {
+      "passed": true,
+      "assertions": 60,
+      "sha256": "8a8c38a4dabee61b41f6df14bbd65fe42be6b0933abba31369f59b7213f34f66",
+      "details": [
+        {
+          "name": "chromium/1440: category control bounds actual option creation",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: category control discloses full search space",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: exact category can be found person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: exact category can be found person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: multi-category filter retains selections across searches",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: selected IDs correspond to distinct original source records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: category lookup preserves the source numeric value person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: category lookup preserves the source numeric value person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: filtered rows contain exactly the requested original IDs",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: AsIs numbers remain usable numeric cells",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: sampled pair scope distinguishes all-row summaries",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: identifiers do not claim perfect group association",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: filtered pairs retain the identifier safeguard",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/1440: no browser errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium/390: category control bounds actual option creation",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: category control discloses full search space",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: exact category can be found person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: exact category can be found person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: multi-category filter retains selections across searches",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: selected IDs correspond to distinct original source records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: category lookup preserves the source numeric value person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: category lookup preserves the source numeric value person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: filtered rows contain exactly the requested original IDs",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: AsIs numbers remain usable numeric cells",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: sampled pair scope distinguishes all-row summaries",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: identifiers do not claim perfect group association",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: filtered pairs retain the identifier safeguard",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/390: no browser errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/1440: category control bounds actual option creation",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: category control discloses full search space",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: exact category can be found person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: exact category can be found person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: multi-category filter retains selections across searches",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: selected IDs correspond to distinct original source records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: category lookup preserves the source numeric value person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: category lookup preserves the source numeric value person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: filtered rows contain exactly the requested original IDs",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: AsIs numbers remain usable numeric cells",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: sampled pair scope distinguishes all-row summaries",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: identifiers do not claim perfect group association",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: filtered pairs retain the identifier safeguard",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/1440: no browser errors",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/390: category control bounds actual option creation",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: category control discloses full search space",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: exact category can be found person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: exact category can be found person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: multi-category filter retains selections across searches",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: selected IDs correspond to distinct original source records",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: category lookup preserves the source numeric value person_000017",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: category lookup preserves the source numeric value person_002699",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: filtered rows contain exactly the requested original IDs",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: AsIs numbers remain usable numeric cells",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: sampled pair scope distinguishes all-row summaries",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: identifiers do not claim perfect group association",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: filtered pairs retain the identifier safeguard",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: no horizontal page overflow",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/390: no browser errors",
+          "passed": true,
+          "evidence": []
+        }
+      ]
+    },
+    "sampled_relationships": {
+      "passed": true,
+      "assertions": 27,
+      "sha256": "186d4ea9fbfb1b18f033cdd398758d79ac7b3070e64f23e438be37040a478183",
+      "details": [
+        {
+          "name": "Rare final record is absent from this fixed sample, making disclosure consequential",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/report.html: filter still includes every original record",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/report.html: training association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 200,
+              "rho": 0.036150903772594334
+            },
+            "displayed": [
+              "0.03615",
+              "200"
+            ]
+          }
+        },
+        {
+          "name": "chromium/report.html: evaluation association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 300,
+              "rho": -0.02716163512927916
+            },
+            "displayed": [
+              "-0.02716",
+              "300"
+            ]
+          }
+        },
+        {
+          "name": "chromium: browser discloses sample and matching population",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: exact filtered distribution still shows the rare record omitted by pair sampling",
+          "passed": true,
+          "evidence": [
+            "New in evaluation",
+            "0",
+            "1"
+          ]
+        },
+        {
+          "name": "chromium: sampled joint counts do not invent an unobserved rare group",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium: revisiting a pair reuses the same source-independent sample",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/report.html: no runtime error",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "chromium/all-pairs.html: filter still includes every original record",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/all-pairs.html: training association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 200,
+              "rho": 0.03615090377259432
+            },
+            "displayed": [
+              "0.03615",
+              "200"
+            ]
+          }
+        },
+        {
+          "name": "chromium/all-pairs.html: evaluation association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 2500,
+              "rho": 0.011384327709492435
+            },
+            "displayed": [
+              "0.01138",
+              "2,500"
+            ]
+          }
+        },
+        {
+          "name": "chromium: explicit unlimited pair mode has no sampling claim",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "chromium/all-pairs.html: no runtime error",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/report.html: filter still includes every original record",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/report.html: training association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 200,
+              "rho": 0.036150903772594334
+            },
+            "displayed": [
+              "0.03615",
+              "200"
+            ]
+          }
+        },
+        {
+          "name": "webkit/report.html: evaluation association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 300,
+              "rho": -0.02716163512927916
+            },
+            "displayed": [
+              "-0.02716",
+              "300"
+            ]
+          }
+        },
+        {
+          "name": "webkit: browser discloses sample and matching population",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: exact filtered distribution still shows the rare record omitted by pair sampling",
+          "passed": true,
+          "evidence": [
+            "New in evaluation",
+            "0",
+            "1"
+          ]
+        },
+        {
+          "name": "webkit: sampled joint counts do not invent an unobserved rare group",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit: revisiting a pair reuses the same source-independent sample",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/report.html: no runtime error",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "name": "webkit/all-pairs.html: filter still includes every original record",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/all-pairs.html: training association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 200,
+              "rho": 0.03615090377259432
+            },
+            "displayed": [
+              "0.03615",
+              "200"
+            ]
+          }
+        },
+        {
+          "name": "webkit/all-pairs.html: evaluation association agrees with the independent source oracle",
+          "passed": true,
+          "evidence": {
+            "expected": {
+              "n": 2500,
+              "rho": 0.011384327709492435
+            },
+            "displayed": [
+              "0.01138",
+              "2,500"
+            ]
+          }
+        },
+        {
+          "name": "webkit: explicit unlimited pair mode has no sampling claim",
+          "passed": true,
+          "evidence": null
+        },
+        {
+          "name": "webkit/all-pairs.html: no runtime error",
+          "passed": true,
+          "evidence": []
+        }
+      ]
+    },
+    "negative_controls": {
+      "passed": true,
+      "assertions": 3,
+      "sha256": "d389c26bf399e53978e485dba6d213bd5a9c984d3aece69abf304f52fe8bf5d0",
+      "details": [
+        {
+          "name": "no-checksum",
+          "rejected_for_expected_reason": true,
+          "failures": [
+            "chromium: damaged-checksum gives a visible data failure",
+            "chromium: damaged-checksum offers actual static distribution tables",
+            "chromium: damaged-checksum fallback preserves full distribution counts"
+          ]
+        },
+        {
+          "name": "unbounded-categories",
+          "rejected_for_expected_reason": true,
+          "failures": [
+            "chromium/1440: category control bounds actual option creation",
+            "chromium/390: category control bounds actual option creation"
+          ]
+        },
+        {
+          "name": "ignored-pair-cap",
+          "rejected_for_expected_reason": true,
+          "failures": [
+            "chromium/report.html: evaluation association agrees with the independent source oracle",
+            "chromium: browser discloses sample and matching population",
+            "chromium: sampled joint counts do not invent an unobserved rare group"
+          ]
+        }
+      ]
+    },
+    "cutoff_cases": {
+      "passed": true,
+      "assertions": 35,
+      "sha256": "d2d44b4f74c255872718d2777cb69abbb1a61de133531b80e2678e0d51a44c9b",
+      "details": [
+        {
+          "name": "inverse: source row positions retained",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: literal source answers and wrong-first order at 0",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: caption at 0",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: R decision rule at 0",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"inverse\")\npredicted_class <- factor(ifelse(probability >= 0.00, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "inverse: literal source answers and wrong-first order at 0.5",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: caption at 0.5",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: R decision rule at 0.5",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"inverse\")\npredicted_class <- factor(ifelse(probability >= 0.50, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "inverse: literal source answers and wrong-first order at 0.57",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: caption at 0.57",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: R decision rule at 0.57",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"inverse\")\npredicted_class <- factor(ifelse(probability >= 0.57, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "inverse: literal source answers and wrong-first order at 1",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: caption at 1",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: R decision rule at 1",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"inverse\")\npredicted_class <- factor(ifelse(probability >= 1.00, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "inverse: dynamic source link dispatches selected row",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: dynamic source link opens data workspace",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "inverse: selected row survives cutoff reordering",
+          "pass": true,
+          "evidence": {
+            "selected": "data:2",
+            "events": [
+              "data:2"
+            ],
+            "rows": [
+              [
+                "data:2",
+                "is-selected"
+              ],
+              [
+                "data:7",
+                ""
+              ],
+              [
+                "data:10",
+                ""
+              ],
+              [
+                "data:15",
+                ""
+              ],
+              [
+                "data:5",
+                ""
+              ],
+              [
+                "data:13",
+                ""
+              ],
+              [
+                "data:3",
+                ""
+              ],
+              [
+                "data:11",
+                ""
+              ],
+              [
+                "data:4",
+                ""
+              ],
+              [
+                "data:12",
+                ""
+              ]
+            ]
+          }
+        },
+        {
+          "name": "direct \"score\": source row positions retained",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": literal source answers and wrong-first order at 0",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": caption at 0",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": R decision rule at 0",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"direct \\\"score\\\"\")\npredicted_class <- factor(ifelse(probability >= 0.00, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "direct \"score\": literal source answers and wrong-first order at 0.5",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": caption at 0.5",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": R decision rule at 0.5",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"direct \\\"score\\\"\")\npredicted_class <- factor(ifelse(probability >= 0.50, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "direct \"score\": literal source answers and wrong-first order at 0.57",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": caption at 0.57",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": R decision rule at 0.57",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"direct \\\"score\\\"\")\npredicted_class <- factor(ifelse(probability >= 0.57, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "direct \"score\": literal source answers and wrong-first order at 1",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": caption at 1",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": R decision rule at 1",
+          "pass": true,
+          "evidence": "probability <- predict(result, new_data, model = \"direct \\\"score\\\"\")\npredicted_class <- factor(ifelse(probability >= 1.00, \"yes\", \"no\"), levels = c(\"yes\", \"no\"))"
+        },
+        {
+          "name": "direct \"score\": dynamic source link dispatches selected row",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": dynamic source link opens data workspace",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "direct \"score\": selected row survives cutoff reordering",
+          "pass": true,
+          "evidence": {
+            "selected": "data:1",
+            "events": [
+              "data:2",
+              "data:1"
+            ],
+            "rows": [
+              [
+                "data:1",
+                "is-selected"
+              ],
+              [
+                "data:8",
+                ""
+              ],
+              [
+                "data:9",
+                ""
+              ],
+              [
+                "data:16",
+                ""
+              ],
+              [
+                "data:6",
+                ""
+              ],
+              [
+                "data:14",
+                ""
+              ],
+              [
+                "data:3",
+                ""
+              ],
+              [
+                "data:11",
+                ""
+              ],
+              [
+                "data:4",
+                ""
+              ],
+              [
+                "data:12",
+                ""
+              ]
+            ]
+          }
+        },
+        {
+          "name": "zero runtime errors",
+          "pass": true,
+          "evidence": []
+        },
+        {
+          "name": "summary: no individual case nodes created",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "name": "none: no individual case nodes created",
+          "pass": true,
+          "evidence": null
+        }
+      ]
+    },
+    "supplied_models": {
+      "passed": true,
+      "assertions": 169,
+      "sha256": "d3993b289cf4b343eef69586919b75d5ef467eb2786ae33dbaee853dc19aa40c",
+      "details": [
+        {
+          "check": "raw block/batch/row arithmetic current 0",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic current 1",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic current 2",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile current p25_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile current median_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile current p75_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated per-row median current",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic challenger 0",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic challenger 1",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic challenger 2",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile challenger p25_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile challenger median_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated quantile challenger p75_ms_per_batch",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent repeated per-row median challenger",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic historical 0",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic historical 1",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "raw block/batch/row arithmetic historical 2",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "withheld benchmark explains its state historical",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "reference excluded from disagreement 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent absolute pairwise distance 1440",
+          "passed": true,
+          "detail": [
+            "Current logistic model",
+            "Shallow tree",
+            "0.1211",
+            "0.2552",
+            "20.0%"
+          ]
+        },
+        {
+          "check": "largest gaps restricted to exported records 1440",
+          "passed": true,
+          "detail": [
+            "data:42",
+            "data:2",
+            "data:63",
+            "data:64",
+            "data:31"
+          ]
+        },
+        {
+          "check": "disagreement link is inside handler workspace 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "actual disagreement link selects exact source record 1440",
+          "passed": true,
+          "detail": "data:42"
+        },
+        {
+          "check": "benchmark units and scope are explicit 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark summary exports no individual records 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark private sampling indices absent 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "cost source uses finite repeated per-row medians 1440",
+          "passed": true,
+          "detail": [
+            {
+              "id": "current",
+              "value": 0.009664948453608328
+            },
+            {
+              "id": "challenger",
+              "value": 0.015899122807017496
+            }
+          ]
+        },
+        {
+          "check": "visible repeated-cost axis has correct unit 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "compact five-column cost table 1440",
+          "passed": true,
+          "detail": [
+            "Model",
+            "Median ms / row",
+            "Median ms / batch",
+            "25th\u201375th percentile ms / batch",
+            "Repeats"
+          ]
+        },
+        {
+          "check": "displayed costs preserve significant digits 1440current",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 1440current",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "displayed costs preserve significant digits 1440challenger",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 1440challenger",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "withheld costs remain unavailable 1440historical",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 1440historical",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "only incomplete or annotated measurements have issue rows 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark statuses reasons warnings retained 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark details keyboard access 1440",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "print removes fragment destinations including later SVG redraws",
+          "passed": true,
+          "detail": {
+            "fragments": 0,
+            "lateText": "Printed model shortcut",
+            "citation": "https://doi.org/10.1214/aos/1176344136",
+            "state": {
+              "modelId": "challenger",
+              "feature": "monthly_bill",
+              "page": "overview",
+              "metric": "log_loss",
+              "resource": "repeated_prediction_ms_per_row",
+              "costScale": "linear",
+              "scoreScale": "linear",
+              "className": null,
+              "comparisonModelId": ""
+            }
+          }
+        },
+        {
+          "check": "print preserves selected model and views",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "print restores original fragment links and later SVG links",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "external citations keep their destinations during and after print",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "reference excluded from disagreement 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "independent absolute pairwise distance 390",
+          "passed": true,
+          "detail": [
+            "Current logistic model",
+            "Shallow tree",
+            "0.1211",
+            "0.2552",
+            "20.0%"
+          ]
+        },
+        {
+          "check": "largest gaps restricted to exported records 390",
+          "passed": true,
+          "detail": [
+            "data:42",
+            "data:2",
+            "data:63",
+            "data:64",
+            "data:31"
+          ]
+        },
+        {
+          "check": "disagreement link is inside handler workspace 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "actual disagreement link selects exact source record 390",
+          "passed": true,
+          "detail": "data:42"
+        },
+        {
+          "check": "benchmark units and scope are explicit 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark summary exports no individual records 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark private sampling indices absent 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "cost source uses finite repeated per-row medians 390",
+          "passed": true,
+          "detail": [
+            {
+              "id": "current",
+              "value": 0.009664948453608328
+            },
+            {
+              "id": "challenger",
+              "value": 0.015899122807017496
+            }
+          ]
+        },
+        {
+          "check": "visible repeated-cost axis has correct unit 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "compact five-column cost table 390",
+          "passed": true,
+          "detail": [
+            "Model",
+            "Median ms / row",
+            "Median ms / batch",
+            "25th\u201375th percentile ms / batch",
+            "Repeats"
+          ]
+        },
+        {
+          "check": "displayed costs preserve significant digits 390current",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 390current",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "displayed costs preserve significant digits 390challenger",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 390challenger",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "withheld costs remain unavailable 390historical",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "repeat completion stays explicit 390historical",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "only incomplete or annotated measurements have issue rows 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark statuses reasons warnings retained 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "benchmark details keyboard access 390",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "disagreement has no source links in none",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "disagreement has no source links in summary",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 0",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 1",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 2",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 3",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 4",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 5",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 6",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 7",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 8",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 9",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 10",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 11",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 12",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 13",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 14",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 15",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 16",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 17",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 18",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 19",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 20",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 21",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 22",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 23",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 24",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 25",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 26",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 27",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 28",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 29",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 30",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 31",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 32",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 33",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 34",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 35",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 36",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 37",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 38",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 39",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 40",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 41",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 42",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 43",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 44",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 45",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 46",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 47",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 48",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 49",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 50",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 51",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 52",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 53",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 54",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 55",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 56",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 57",
+          "passed": true,
+          "detail": [
+            {
+              "observed": "yes",
+              "predicted": "yes",
+              "count": 1
+            },
+            {
+              "observed": "yes",
+              "predicted": "no",
+              "count": 0
+            },
+            {
+              "observed": "no",
+              "predicted": "yes",
+              "count": 1
+            },
+            {
+              "observed": "no",
+              "predicted": "no",
+              "count": 0
+            }
+          ]
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 58",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 59",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 60",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 61",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 62",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 63",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 64",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 65",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 66",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 67",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 68",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 69",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 70",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 71",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 72",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 73",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 74",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 75",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 76",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 77",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 78",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 79",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 80",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 81",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 82",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 83",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 84",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 85",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 86",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 87",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 88",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 89",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 90",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 91",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 92",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 93",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 94",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 95",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 96",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 97",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 98",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 99",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "literal0.57 probability at displayed cutoff 100",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "keyboard reaches exact0.57 boundary",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "printed report has no broken named destinations",
+          "passed": true,
+          "detail": ""
+        },
+        {
+          "check": "printed PDF preserves a usable external citation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "check": "actual benchmark print cost labels at least8pt",
+          "passed": true,
+          "detail": [
+            [
+              "Repeated prediction (ms / row)",
+              10.0
+            ],
+            [
+              "Repeated prediction (ms / row)",
+              21.0
+            ],
+            [
+              "Repeated prediction measurements",
+              10.0
+            ],
+            [
+              "Median ms / row",
+              9.0
+            ],
+            [
+              "Median ms / batch",
+              9.0
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "counting_note": "Gate counts are reported separately. Repeated runs and negative controls are not added to a combined unique assertion count."
+}

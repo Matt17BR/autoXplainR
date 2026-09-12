@@ -1,0 +1,19 @@
+{
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "cpu": {
+    "Architecture": "x86_64",
+    "CPU(s)": "22",
+    "Model name": "Intel(R) Core(TM) Ultra 9 185H",
+    "Thread(s) per core": "2",
+    "Core(s) per socket": "16",
+    "Socket(s)": "1",
+    "CPU max MHz": "5100.0000",
+    "L3 cache": "24 MiB (1 instance)"
+  },
+  "native_threads": 1,
+  "case_order": [
+    "friedman_noise",
+    "bank_marketing"
+  ],
+  "timing_design": "Sequential processes on the same host; one full recommended call per case and version; no timing replication."
+}

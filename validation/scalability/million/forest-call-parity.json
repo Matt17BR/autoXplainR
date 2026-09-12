@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "training_rows": 180,
+  "forest": [
+    {
+      "task": "regression",
+      "native_fields_except_call_identical": true,
+      "predictions_identical": true,
+      "before_call_bytes": 202977,
+      "after_call_bytes": 494,
+      "before_native_bytes": 280571,
+      "after_native_bytes": 78114
+    },
+    {
+      "task": "binary",
+      "native_fields_except_call_identical": true,
+      "predictions_identical": true,
+      "before_call_bytes": 202332,
+      "after_call_bytes": 494,
+      "before_native_bytes": 262693,
+      "after_native_bytes": 60897
+    },
+    {
+      "task": "multiclass",
+      "native_fields_except_call_identical": true,
+      "predictions_identical": true,
+      "before_call_bytes": 202334,
+      "after_call_bytes": 494,
+      "before_native_bytes": 220563,
+      "after_native_bytes": 18765
+    }
+  ],
+  "other_calls": {
+    "mars": {
+      "call_head_type": "symbol",
+      "call_serialized_bytes": 9485,
+      "call_argument_names": [
+        "",
+        "x",
+        "y",
+        "pmethod",
+        "trace",
+        "degree",
+        "nprune",
+        "nk"
+      ],
+      "x_type": "double",
+      "y_type": "double"
+    },
+    "neural": {
+      "call_head_type": "symbol",
+      "call_serialized_bytes": 1720738,
+      "call_argument_names": [
+        "",
+        "x",
+        "y",
+        "size",
+        "linout",
+        "rang",
+        "decay",
+        "maxit",
+        "trace",
+        "MaxNWts"
+      ],
+      "x_type": "double",
+      "y_type": "double"
+    }
+  },
+  "source_md5": "7c0c9761380107ea55a100217b1f3ae8",
+  "raw_evidence_directory": "~/.cache/autoxplain-scale-0.7.0/forest-call"
+}

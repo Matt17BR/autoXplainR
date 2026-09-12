@@ -9,7 +9,8 @@ report_data_control(
   columns = NULL,
   context_columns = character(),
   max_rows = 5000L,
-  seed = NULL
+  seed = NULL,
+  max_pair_rows = 10000L
 )
 }
 \arguments{
@@ -27,11 +28,19 @@ such as a site or time column excluded from fitting. Empty by default.}
 
 \item{max_rows}{Maximum exported records across training and evaluation.
 Sampling allocates rows proportionally between splits and samples uniformly
-within each split. Unfiltered aggregate profiles use the full available
-data for each stage; browser row filters describe only the exported sample
+within each split. Browser row filters describe only this exported sample
 and leave model scores unchanged.}
 
 \item{seed}{Optional sampling seed. \code{NULL} uses the analysis seed, or 2026.}
+
+\item{max_pair_rows}{Maximum rows per partition used for relationship plots,
+conditional summaries and pairwise associations. The default is 10,000;
+\code{NULL} uses all rows. One uniform sample is shared by all pairs. Raw and
+processed samples retain the same source rows where possible. Counts and
+associations describe that sample, with its size shown in the report.
+Rare groups can be missed; increase this limit or use \code{NULL} to inspect them.
+Individual-column distributions, missing counts and model scores always
+use all available rows. This limit is independent of \code{max_rows}.}
 }
 \value{
 An \code{autoxplain_report_data_control} object.

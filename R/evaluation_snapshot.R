@@ -2,8 +2,44 @@
 # do not imply equal behavior on shuffled rows or feature-effect grids.
 standard_prediction_model <- function(model) {
   inherits(model, "H2OModel") || class(model)[[1L]] %in% c(
-    "lm", "glm", "multinom", "rpart", "autoxplain_tuned_nnet", "autoxplain_fitted_model"
+    "lm", "glm", "gam", "bam", "multinom", "rpart", "autoxplain_tuned_nnet", "autoxplain_fitted_model"
   )
+}
+
+gam_smooth_prediction_context <- function(model, data_variables = character()) {
+  if (!inherits(model, "gam")) return(NULL)
+  contexts <- list()
+  methods_seen <- list()
+  registry <- get(".__S3MethodsTable__.", envir = asNamespace("mgcv"))
+  inspect <- function(smooth) {
+    for (class in class(smooth)) {
+      name <- paste0("Predict.matrix.", class)
+      if (exists(name, globalenv(), inherits = FALSE) && bindingIsActive(name, globalenv())) {
+        stop("Custom GAM smooth prediction uses an active method binding: ", name, call. = FALSE)
+      }
+      if (exists(name, registry, inherits = FALSE) && bindingIsActive(name, registry)) {
+        stop("Custom GAM smooth prediction uses an active registered method: ", name, call. = FALSE)
+      }
+      candidates <- list(
+        get0(name, envir = globalenv(), mode = "function", inherits = TRUE),
+        utils::getS3method("Predict.matrix", class, optional = TRUE, envir = asNamespace("mgcv"))
+      )
+      for (method in candidates) {
+        if (is.null(method) || identical(environment(method), asNamespace("mgcv")) ||
+              any(vapply(methods_seen, identical, logical(1), method))) next
+        methods_seen[[length(methods_seen) + 1L]] <<- method
+        contexts[[paste0(name, "_", length(contexts) + 1L)]] <<-
+          prediction_function_context(method, data_variables)
+      }
+    }
+    # Tensor-product smooths dispatch prediction again for each marginal basis.
+    if (is.list(smooth$margin)) {
+      for (margin in smooth$margin) if (is.list(margin)) inspect(margin)
+    }
+    invisible(NULL)
+  }
+  for (smooth in model$smooth) inspect(smooth)
+  if (length(contexts)) contexts else NULL
 }
 
 resolved_custom_prediction_method <- function(model) {

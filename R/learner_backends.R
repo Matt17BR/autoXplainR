@@ -31,8 +31,7 @@ fit_regularized_learner <- function(data, target, task, parameters, seed) {
   } else {
     data[[target]]
   }
-  family <- switch(
-    task,
+  family <- switch(task,
     regression = "gaussian",
     binary = "binomial",
     multiclass = "multinomial"
@@ -49,6 +48,12 @@ fit_regularized_learner <- function(data, target, task, parameters, seed) {
   )
   if (needs_dummy) arguments$exclude <- ncol(x)
   fit <- do.call(glmnet::glmnet, arguments)
+  # do.call() otherwise retains the full matrix, outcome and function body in
+  # glmnet's recorded call. Keep literal settings and symbolic data arguments;
+  # the saved blueprint reconstructs x from supplied training data.
+  arguments$x <- quote(x)
+  arguments$y <- quote(y)
+  fit$call <- as.call(c(list(quote(glmnet::glmnet)), arguments))
   index <- max(1L, min(
     length(fit$lambda),
     as.integer(round(1 + parameters$path_fraction * (length(fit$lambda) - 1L)))
@@ -65,7 +70,11 @@ fit_regularized_learner <- function(data, target, task, parameters, seed) {
     fit_details = list(
       lambda = fit$lambda[[index]],
       lambda_index = index,
-      dummy_column = dummy_name
+      dummy_column = dummy_name,
+      native_call_inputs = c(
+        x = "Training matrix from the saved blueprint, including any excluded dummy column.",
+        y = "Training outcome; binary outcomes use 1 for the second recorded class and 0 for the first."
+      )
     ),
     seed = seed
   )
@@ -103,25 +112,36 @@ additive_learner_grid <- function(n, p, task, n_classes) {
 
 effective_learner_parameters <- function(family, parameters, data, target) {
   features <- setdiff(names(data), target)
-  switch(
-    family,
+  switch(family,
     additive = {
-      smooth <- features[vapply(data[features], function(x) {
-        is.numeric(x) && !is.logical(x) && length(unique(x)) >= 4L
+      numeric <- features[vapply(data[features], function(x) {
+        is.numeric(x) && !is.logical(x)
       }, logical(1))]
+      distinct <- vapply(data[numeric], additive_distinct_count, integer(1),
+        limit = max(4, parameters$k + 1)
+      )
+      smooth <- numeric[distinct >= 4L]
       smooth_k <- vapply(smooth, function(feature) {
-        unique_values <- length(unique(data[[feature]]))
+        unique_values <- distinct[[feature]]
         max(3L, min(parameters$k, unique_values - 1L))
       }, integer(1))
+      computation <- resolve_additive_solver(parameters, data, target, smooth_k)
       list(
         smooth_k = smooth_k,
         gamma = parameters$gamma,
-        select = parameters$select
+        select = parameters$select,
+        solver = computation$solver,
+        discrete_bins = computation$discrete_bins
       )
     },
     forest = {
       effective <- parameters
       effective$mtry <- as.integer(min(parameters$mtry, length(features)))
+      effective
+    },
+    boosting = {
+      effective <- parameters
+      effective$encoding <- resolve_boosting_encoding(parameters, data, target)$encoding
       effective
     },
     neighbors = {
@@ -139,6 +159,17 @@ effective_learner_parameters <- function(family, parameters, data, target) {
     },
     parameters
   )
+}
+
+additive_distinct_count <- function(column, limit) {
+  # Only counts up to k + 1 affect the basis. A prefix often establishes that
+  # bound without allocating a million-value unique vector. If it does not,
+  # inspect the whole column so rare values near the end cannot be missed.
+  observed <- sum(is.finite(unique(utils::head(column, 4096L))))
+  if (observed >= limit || length(column) <= 4096L) {
+    return(as.integer(min(observed, limit)))
+  }
+  as.integer(min(sum(is.finite(unique(column))), limit))
 }
 
 fit_additive_learner <- function(data, target, task, parameters, seed) {
@@ -162,7 +193,8 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
   smooth <- safe_features[match(smooth_features, features)]
   if (!length(smooth)) {
     stop("The additive learner needs a numeric predictor with at least four values.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   parametric <- setdiff(safe_features, smooth)
   smooth_terms <- vapply(seq_along(smooth), function(index) {
@@ -177,14 +209,21 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
     env = asNamespace("mgcv")
   )
   family <- if (task == "regression") stats::gaussian() else stats::binomial()
-  fit <- mgcv::gam(
-    formula,
-    data = safe_data,
-    family = family,
-    method = "REML",
-    select = parameters$select,
-    gamma = parameters$gamma
-  )
+  computation <- resolve_additive_solver(parameters, data, target, effective$smooth_k)
+  captured <- capture_additive_fit(if (identical(computation$solver, "gam")) {
+    mgcv::gam(formula,
+      data = safe_data, family = family, method = "REML",
+      select = parameters$select, gamma = parameters$gamma,
+      control = mgcv::gam.control(nthreads = 1L)
+    )
+  } else {
+    mgcv::bam(formula,
+      data = safe_data, family = family, method = "fREML",
+      discrete = if (identical(computation$solver, "bam_discrete")) computation$discrete_bins else FALSE,
+      nthreads = 1L, select = parameters$select, gamma = parameters$gamma
+    )
+  })
+  fit <- captured$fit
   new_autoxplain_fitted_model(
     family = "additive",
     backend = "mgcv",
@@ -196,10 +235,28 @@ fit_additive_learner <- function(data, target, task, parameters, seed) {
     fit_details = list(
       feature_map = stats::setNames(safe_features, features),
       requested_parameters = parameters,
-      effective_parameters = effective
+      effective_parameters = effective,
+      computation = computation,
+      optimizer_warnings = captured$warnings,
+      optimizer_warnings_captured = TRUE
     ),
     seed = seed
   )
+}
+
+capture_additive_fit <- function(expression) {
+  warnings <- list()
+  fitted <- withCallingHandlers(force(expression), warning = function(condition) {
+    call <- conditionCall(condition)
+    stage <- if (is.call(call) && is.symbol(call[[1L]])) as.character(call[[1L]]) else "unidentified"
+    warnings[[length(warnings) + 1L]] <<- list(
+      message = conditionMessage(condition), stage = stage,
+      call = if (is.null(call)) NULL else paste(deparse(call, width.cutoff = 100L), collapse = " ")
+    )
+    # Keep normal warning propagation so the public tuning evidence also
+    # records it. Only final PIRLS nonconvergence overrides smoothing success.
+  })
+  list(fit = fitted, warnings = warnings)
 }
 
 describe_additive_parameters <- function(parameters) {
@@ -217,7 +274,71 @@ describe_additive_parameters <- function(parameters) {
   paste0(
     basis,
     ", gamma = ", format(parameters$gamma, trim = TRUE),
-    ", shrinkage selection = ", if (parameters$select) "on" else "off"
+    ", shrinkage selection = ", if (parameters$select) "on" else "off",
+    if (!is.null(parameters$solver)) {
+      paste0(
+        "; solver = ", parameters$solver,
+        if (identical(parameters$solver, "bam_discrete")) {
+          paste0(" (fREML, ", parameters$discrete_bins %||% 10000L, " bins)")
+        } else if (identical(parameters$solver, "bam")) {
+          " (fREML)"
+        } else {
+          ""
+        }
+      )
+    } else {
+      ""
+    }
+  )
+}
+
+resolve_additive_solver <- function(parameters, data, target, smooth_k) {
+  planning <- attr(parameters, "autoxplain_additive_policy")
+  requested <- if (!is.null(planning)) "auto" else parameters$solver %||% "auto"
+  bins <- parameters$discrete_bins %||% 10000L
+  parametric <- setdiff(setdiff(names(data), target), names(smooth_k))
+  parametric_columns <- vapply(data[parametric], function(column) {
+    if (is.factor(column)) {
+      return(max(1L, sum(tabulate(column, nbins = nlevels(column)) > 0L) - 1L))
+    }
+    if (is.character(column)) {
+      return(max(1L, sum(!is.na(unique(column))) - 1L))
+    }
+    1L
+  }, integer(1))
+  estimated_coefficients <- 1 + sum(smooth_k - 1L) + sum(parametric_columns)
+  work <- nrow(data) * estimated_coefficients^2
+  # This computational policy is deliberately independent of outcome values
+  # and validation losses. See validation/scalability/search for its measured
+  # benefits and counterexamples. It never enables covariate discretization.
+  large <- nrow(data) >= 10000L || work >= 1e7
+  solver <- if (!is.null(planning)) {
+    planning$solver
+  } else if (identical(requested, "auto")) {
+    if (large) "bam" else "gam"
+  } else {
+    requested
+  }
+  reason <- if (!is.null(planning)) {
+    paste("Fixed during outer-training search planning.", planning$reason)
+  } else if (!identical(requested, "auto")) {
+    "Explicit solver choice."
+  } else if (nrow(data) >= 10000L) {
+    "Automatic BAM: at least 10,000 fitting rows; covariates are not discretized."
+  } else if (large) {
+    "Automatic BAM: rows times estimated coefficients squared reaches 10 million; covariates are not discretized."
+  } else {
+    "Automatic GAM: fewer than 10,000 fitting rows and work index below 10 million."
+  }
+  list(
+    requested_solver = requested, solver = solver,
+    method = if (identical(solver, "gam")) "REML" else "fREML",
+    discrete = identical(solver, "bam_discrete"),
+    discrete_bins = if (identical(solver, "bam_discrete")) bins else NULL,
+    threads = 1L, fitting_rows = nrow(data), estimated_coefficients = estimated_coefficients,
+    work_index = work, reason = reason,
+    planning_rows = if (!is.null(planning)) planning$fitting_rows else NULL,
+    planning_work_index = if (!is.null(planning)) planning$work_index else NULL
   )
 }
 
@@ -251,8 +372,10 @@ forest_learner_grid <- function(n, p, task, n_classes) {
   # Put space-filling anchors first so even a modest shared portfolio budget
   # explores every important forest control instead of only walking `mtry`.
   anchors <- data.frame(
-    mtry = c(base_mtry[[1L]], utils::tail(base_mtry, 1L),
-             base_mtry[[ceiling(length(base_mtry) / 2)]], base_mtry[[1L]]),
+    mtry = c(
+      base_mtry[[1L]], utils::tail(base_mtry, 1L),
+      base_mtry[[ceiling(length(base_mtry) / 2)]], base_mtry[[1L]]
+    ),
     min_node_size = c(node[[2L]], node[[1L]], node[[3L]], node[[1L]]),
     sample_fraction = c(0.632, 0.8, 0.632, 0.8),
     splitrule = c("default", "default", "default", "extratrees"),
@@ -295,6 +418,11 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
     }
   }
   fit <- do.call(ranger::ranger, arguments)
+  # Keep the native call reproducible with supplied predictors and outcomes,
+  # without retaining another copy of their values or the ranger function body.
+  arguments$x <- quote(x)
+  arguments$y <- quote(y)
+  fit$call <- as.call(c(list(quote(ranger::ranger)), arguments))
   new_autoxplain_fitted_model(
     family = "forest",
     backend = "ranger",
@@ -308,7 +436,11 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
       effective_mtry = effective_mtry,
       training_predictors = length(features),
       requested_parameters = parameters,
-      effective_parameters = effective
+      effective_parameters = effective,
+      native_call_inputs = c(
+        x = "Processed training predictors, with their fitted factor levels.",
+        y = "Training outcome; classification uses the recorded outcome factor levels."
+      )
     ),
     seed = seed
   )
@@ -354,21 +486,34 @@ boosting_learner_grid <- function(n, p, task, n_classes) {
 fit_boosting_learner <- function(data, target, task, parameters, seed) {
   require_optional("xgboost", "fitting gradient-boosted trees")
   features <- setdiff(names(data), target)
-  blueprint <- fit_matrix_blueprint(data, predictors = features)
-  x <- bake_matrix_blueprint(blueprint, data)
+  computation <- resolve_boosting_encoding(parameters, data, target)
+  native <- computation$encoding == "native"
+  blueprint <- if (native) {
+    fit_boosting_native_blueprint(data, features)
+  } else {
+    fit_matrix_blueprint(data, predictors = features)
+  }
+  x <- if (native) {
+    bake_boosting_native_blueprint(blueprint, data)
+  } else {
+    bake_matrix_blueprint(blueprint, data)
+  }
   class_levels <- if (task == "regression") NULL else levels(data[[target]])
   label <- if (task == "regression") {
     data[[target]]
   } else {
     as.numeric(data[[target]]) - 1L
   }
-  objective <- switch(
-    task,
+  objective <- switch(task,
     regression = "reg:squarederror",
     binary = "binary:logistic",
     multiclass = "multi:softprob"
   )
-  metric <- switch(task, regression = "rmse", binary = "logloss", multiclass = "mlogloss")
+  metric <- switch(task,
+    regression = "rmse",
+    binary = "logloss",
+    multiclass = "mlogloss"
+  )
   xgb_parameters <- list(
     objective = objective,
     eval_metric = metric,
@@ -384,13 +529,20 @@ fit_boosting_learner <- function(data, target, task, parameters, seed) {
     verbosity = 0L
   )
   if (task == "multiclass") xgb_parameters$num_class <- length(class_levels)
-  matrix <- xgboost::xgb.DMatrix(data = x, label = label)
+  matrix <- if (native) {
+    xgb_parameters$tree_method <- "hist"
+    xgb_parameters$max_bin <- computation$max_bin
+    xgboost::xgb.QuantileDMatrix(data = x, label = label, nthread = 1L, max_bin = computation$max_bin)
+  } else {
+    xgboost::xgb.DMatrix(data = x, label = label, nthread = 1L)
+  }
   fit <- xgboost::xgb.train(
     params = xgb_parameters,
     data = matrix,
     nrounds = parameters$nrounds,
     verbose = 0L
   )
+  parameters$encoding <- computation$encoding
   new_autoxplain_fitted_model(
     family = "boosting",
     backend = "xgboost",
@@ -400,6 +552,10 @@ fit_boosting_learner <- function(data, target, task, parameters, seed) {
     parameters = parameters,
     class_levels = class_levels,
     blueprint = blueprint,
+    fit_details = list(
+      computation = computation,
+      feature_map = if (native) blueprint$feature_map else NULL
+    ),
     seed = seed
   )
 }
@@ -411,7 +567,8 @@ describe_boosting_parameters <- function(parameters) {
     ", depth = ", parameters$max_depth,
     ", child weight = ", parameters$min_child_weight,
     ", row/column sample = ", format(parameters$subsample, trim = TRUE),
-    "/", format(parameters$colsample_bytree, trim = TRUE)
+    "/", format(parameters$colsample_bytree, trim = TRUE),
+    if (!is.null(parameters$encoding)) paste0(", input encoding = ", parameters$encoding)
   )
 }
 
@@ -539,6 +696,11 @@ fit_mars_learner <- function(data, target, task, parameters, seed) {
   )
   if (task == "binary") arguments$glm <- list(family = stats::binomial())
   fit <- do.call(earth::earth, arguments)
+  # Preserve an executable record without embedding the encoded data again.
+  arguments$x <- quote(x)
+  arguments$y <- quote(y)
+  if (task == "binary") arguments$glm <- quote(list(family = stats::binomial()))
+  fit$call <- as.call(c(list(quote(earth::earth)), arguments))
   new_autoxplain_fitted_model(
     family = "mars",
     backend = "earth",
@@ -551,7 +713,14 @@ fit_mars_learner <- function(data, target, task, parameters, seed) {
     fit_details = list(
       requested_parameters = parameters,
       effective_parameters = effective,
-      nk = arguments$nk
+      nk = arguments$nk,
+      native_call_inputs = c(
+        x = "Training matrix produced by the fitted blueprint.",
+        y = paste(
+          "Training outcome; for binary models encode the second recorded",
+          "outcome level as 1 and the first as 0."
+        )
+      )
     ),
     seed = seed
   )

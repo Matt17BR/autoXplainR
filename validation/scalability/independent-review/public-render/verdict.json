@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "recorded_utc": "2026-09-12T01:37:46.255028+00:00",
+  "verdict": "One additional public-path defect reproduced and fixed; maintained tests pass.",
+  "prior_matrix": {
+    "regression-summary": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "regression-none": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "regression-rows": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 105
+    },
+    "binary-summary": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "binary-none": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "binary-rows": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 105
+    },
+    "multiclass-summary": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "multiclass-none": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 0
+    },
+    "multiclass-rows": {
+      "status": "passed",
+      "evaluation_rows": 19,
+      "explanation_rows": 7,
+      "individual_rows": 105
+    }
+  },
+  "attached_matrix": {
+    "regression-prepare": {
+      "status": "passed"
+    },
+    "regression-retained": {
+      "status": "passed"
+    },
+    "regression-supplied-audit-all-curve-rows": {
+      "status": "passed"
+    },
+    "regression-supplied-audit-and-effects": {
+      "status": "passed"
+    },
+    "regression-omitted-only-evaluation-sample": {
+      "status": "passed"
+    },
+    "binary-prepare": {
+      "status": "passed"
+    },
+    "binary-retained": {
+      "status": "passed"
+    },
+    "binary-supplied-audit-all-curve-rows": {
+      "status": "passed"
+    },
+    "binary-supplied-audit-and-effects": {
+      "status": "passed"
+    },
+    "binary-omitted-only-evaluation-sample": {
+      "status": "passed"
+    },
+    "multiclass-prepare": {
+      "status": "passed"
+    },
+    "multiclass-retained": {
+      "status": "passed"
+    },
+    "multiclass-supplied-audit-all-curve-rows": {
+      "status": "passed"
+    },
+    "multiclass-supplied-audit-and-effects": {
+      "status": "passed"
+    },
+    "multiclass-omitted-only-evaluation-sample": {
+      "status": "passed"
+    }
+  },
+  "maintained_checks": {
+    "path": "tests/testthat/test-report-public-payload.R",
+    "tests": 3,
+    "assertions_passed": 40,
+    "failures": 0,
+    "warnings": 0,
+    "skips": 0
+  },
+  "reproduced_defect": {
+    "trigger": "Supplied multiclass probability matrix with non-default row names.",
+    "observed": "An incidental _row field was emitted inside each probability record, adding a field beyond the declared classes.",
+    "fix": "Give the nested probability data frame sequential row names; preserve all actual class columns, including a legitimate _row class.",
+    "before": "Two class-matrix assertions failed in the first maintained fixture.",
+    "after": "All three maintained tests pass with an actual _row class and custom input row names."
+  },
+  "scope_limits": [
+    "Public R rendering and decoded HTML evidence only, not browser interactions.",
+    "The separate model-disagreement defect and its fix are reviewed by the report owner.",
+    "Small deterministic workflows, not timing or large-data acceptance.",
+    "Source checkout checks are separate from the final installed-archive release gate."
+  ],
+  "source_provenance": {
+    "kind": "Post-test source and test file SHA256, not an immutable pre-run archive snapshot.",
+    "head": "d7eab1c1d577ac698ac44cd8d7d90022af911b59",
+    "sha256": {
+      "R/reporting.R": "f850e6fb8929f1f466aaeea741fff77fb5bab64f19e5faee0a206a0262a30e90",
+      "R/report_predictions.R": "bd9bb16794babfd7f989dccf49c461ac4627fce414b2c6fa4a00c76c5ac8f302",
+      "R/report_payload.R": "a999b4c0798a6fd6fe1ac248619a6a2c10b1dec3fec121f6b731701d2a4af19c",
+      "R/data_profile.R": "2fdc804068b899b1ac23ba3a78e906b5c02252b6dae39e5dd279e91f11b44c56",
+      "R/report_preparation.R": "7469275d13ec723ad05b6fe3f7dfa739c890b3868c62bbf9ba4b9f4d08845b3f",
+      "tests/testthat/test-report-public-payload.R": "11c96350a22b923c1e3e12a5d21b0cb2dba13756da2f6e3578d38a2f058311a6",
+      "validation/check-installed-artifact.R": "4e7167fdaf285840b5cefa73a4266c63b380e5d566cde8840fc31a53c2a03c48",
+      "validation/check-reloaded-artifact.R": "920019e3c3614c4f8c8d7705622f79508b9ae6a5d4806d9455b7d4bdd25e722a"
+    }
+  },
+  "reproducer_provenance": {
+    "note": "Portable copies add configurable output paths, formatting, and a final nonzero exit on any recorded failed case. Numerical/render checks are retained from the completed cache scripts.",
+    "sha256": {
+      "validation/scalability/independent-review/public-render/public-render.R": "fa5a19340446f68f3f396deccd4c0551ad06fe46d70a1d915ef09dca511ed2e3",
+      "validation/scalability/independent-review/public-render/attached-render.R": "e7868f715c6ff94623821d1b3feb93609fe05bfed8b7413ce7cc96ef3179a7f5"
+    }
+  }
+}

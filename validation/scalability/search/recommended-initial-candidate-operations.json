@@ -1,0 +1,30 @@
+[
+  {
+    "case": "friedman_noise",
+    "variant": "candidate",
+    "status": "finished",
+    "exit_code": 1,
+    "process_seconds": 71.92341217000103,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-candidate-frozen.R",
+      "friedman_noise",
+      "candidate"
+    ]
+  },
+  {
+    "case": "bank_marketing",
+    "variant": "candidate",
+    "status": "finished",
+    "exit_code": 1,
+    "process_seconds": 142.7300452090003,
+    "timeout_seconds": 600,
+    "command": [
+      "Rscript",
+      "/home/mmazzarelli/.cache/autoxplain-scale-0.7.0/search/run-recommended-candidate-frozen.R",
+      "bank_marketing",
+      "candidate"
+    ]
+  }
+]

@@ -108,6 +108,12 @@
 #'   predictions, and `"none"` omits data exploration and individual records.
 #'   Use [report_data_control()] to choose columns and limit exported rows.
 #'   These settings govern HTML, not the raw data retained in the R result.
+#' @param explanation_rows Maximum evaluation rows for default permutation
+#'   importance, dependence checks and fitted effects. Defaults to 5000;
+#'   `NULL` removes this cap. PDP curves retain their separate 1000-row limit;
+#'   [explain_effect()] exposes `sample_size` for explicit curve calculations.
+#'   Explanations record the uniform sample and its scope. Fitting, selection,
+#'   model scores and prediction diagnostics still use their complete partitions.
 #'
 #' @return An `autoxplain_result` containing fitted models, a leaderboard,
 #'   evaluation predictions, preprocessing provenance, and (by default)
@@ -156,7 +162,8 @@ autoxplain <- function(data,
                        validation = NULL,
                        explain = TRUE,
                        report = NULL,
-                       report_data = "summary") {
+                       report_data = "summary",
+                       explanation_rows = 5000L) {
   engine <- match.arg(engine)
   resolved_engine <- if (engine == "auto") "base" else engine
   model_set <- match.arg(model_set)
@@ -175,6 +182,7 @@ autoxplain <- function(data,
     )
   }
   assert_flag(explain, "explain")
+  if (!is.null(explanation_rows)) explanation_rows <- assert_count(explanation_rows, "explanation_rows", 2L)
   assert_flag(enable_preprocessing, "enable_preprocessing")
   report_data <- normalize_report_data_control(report_data)
   if (!is.null(report)) validate_html_destination(report, FALSE)
@@ -239,7 +247,7 @@ autoxplain <- function(data,
       evaluation_role = evaluation_role,
       overlap_action = overlap_action
     )
-    return(finalize_autoxplain(result, design, explain, report, report_data))
+    return(finalize_autoxplain(result, design, explain, report, report_data, explanation_rows))
   }
 
   if (is.null(max_models)) max_models <- 24L
@@ -457,7 +465,7 @@ autoxplain <- function(data,
     extract_model_characteristics(result),
     error = function(error) structure(list(), class = "autoxplainr_model_characteristics")
   )
-  finalize_autoxplain(result, design, explain, report, report_data)
+  finalize_autoxplain(result, design, explain, report, report_data, explanation_rows)
 }
 
 default_local_tuning_budget <- function(portfolio, learners = NULL) {

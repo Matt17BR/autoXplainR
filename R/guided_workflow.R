@@ -282,9 +282,7 @@ check_evaluation_row_overlap <- function(training,
     # The schema validator supplies the more useful missing-column diagnosis.
     return(invisible(TRUE))
   }
-  training_keys <- split_row_keys(training[required])
-  evaluation_keys <- split_row_keys(evaluation[required])
-  overlapping <- which(evaluation_keys %in% training_keys)
+  overlapping <- split_row_overlap(training[required], evaluation[required])
   if (length(overlapping)) {
     preview <- paste(utils::head(overlapping, 5L), collapse = ", ")
     message <- paste0(
@@ -303,9 +301,76 @@ check_evaluation_row_overlap <- function(training,
   invisible(TRUE)
 }
 
-split_row_keys <- function(data) {
+split_row_overlap <- function(training, evaluation) {
+  training_rows <- seq_len(nrow(training))
+  evaluation_rows <- seq_len(nrow(evaluation))
+  if (!length(training_rows) || !length(evaluation_rows)) return(integer())
+  training_group <- rep.int(1L, length(training_rows))
+  evaluation_group <- rep.int(1L, length(evaluation_rows))
+  fallback <- FALSE
+  primitive <- function(value, type) {
+    length(type) == 1L && !is.object(value) &&
+      identical(typeof(value), switch(type, numeric = "double", text = "character", logical = "logical", NULL))
+  }
+  refine <- function(group, value) {
+    code <- match(value, value)
+    radix <- max(code)
+    # Integer pairs are represented exactly below 2^53. match() resolves hash
+    # collisions by equality; the packed number is not a probabilistic hash.
+    key <- if (as.double(max(group)) * radix <= 2^53) {
+      (as.double(group) - 1) * radix + code
+    } else {
+      paste(group, code, sep = ":")
+    }
+    match(key, key)
+  }
+  for (name in names(training)) {
+    first <- normalize_split_column(training[[name]])
+    second <- normalize_split_column(evaluation[[name]])
+    first_type <- attr(first, "split_type")
+    second_type <- attr(second, "split_type")
+    if (!primitive(first, first_type) || !primitive(second, second_type)) {
+      # Unusual column classes may define their own scalar extraction or share
+      # references across cells. Preserve their full-row serialization semantics.
+      fallback <- TRUE
+      next
+    }
+    if (!identical(first_type, second_type)) return(integer())
+    value <- c(first[training_rows], second[evaluation_rows])
+    group <- c(training_group, evaluation_group)
+    if (first_type == "numeric") {
+      # Comparing both binary64 words preserves the existing distinctions
+      # between signed zeros, NA, NaN and different NaN representations.
+      words <- readBin(
+        writeBin(value, raw(), size = 8L, endian = "little"),
+        integer(), n = 2 * length(value), size = 4L, endian = "little"
+      )
+      group <- refine(refine(group, words[c(TRUE, FALSE)]), words[c(FALSE, TRUE)])
+    } else {
+      group <- refine(group, value)
+      if (first_type == "text") group <- refine(group, Encoding(value))
+    }
+    training_group <- group[seq_along(training_rows)]
+    evaluation_group <- group[length(training_rows) + seq_along(evaluation_rows)]
+    keep_training <- training_group %in% evaluation_group
+    keep_evaluation <- evaluation_group %in% training_group
+    training_rows <- training_rows[keep_training]
+    evaluation_rows <- evaluation_rows[keep_evaluation]
+    if (!length(evaluation_rows)) return(integer())
+    training_group <- training_group[keep_training]
+    evaluation_group <- evaluation_group[keep_evaluation]
+  }
+  if (fallback) {
+    training_keys <- split_row_keys(training, training_rows)
+    evaluation_keys <- split_row_keys(evaluation, evaluation_rows)
+    evaluation_rows <- evaluation_rows[evaluation_keys %in% training_keys]
+  }
+  evaluation_rows
+}
+
+split_row_keys <- function(data, rows = seq_len(nrow(data))) {
   normalized <- lapply(data, normalize_split_column)
-  vapply(seq_len(nrow(data)), function(index) {
+  vapply(rows, function(index) {
     raw <- serialize(lapply(normalized, `[[`, index), NULL, version = 2L)
     paste(format(raw), collapse = "")
   }, character(1))
@@ -727,6 +792,13 @@ refit_tuned_candidates <- function(tuning,
     result <- safely_timed_model_fit(function() {
       fitter(configuration, data, target, task)
     })
+    if (result$ok) {
+      change <- tuning_computation_change(tuning, row$configuration_id[[1L]], fit_spec$effective_parameters)
+      if (nzchar(change)) {
+        result$warnings <- unique(c(result$warnings, change))
+        attr(result$model, "autoxplain_tuning_fit")$computation_change <- change
+      }
+    }
     record_attempt(row, role, model_id, result, fit_spec)
     failure_policy <- tuning$control$failure_policy %||% "continue"
     if (!result$ok && identical(failure_policy, "stop")) {
@@ -1051,6 +1123,7 @@ model_family_name <- function(model) {
   }
   if (inherits(model, "rpart")) return("tree")
   if (inherits(model, "autoxplain_tuned_nnet")) return("neural")
+  if (inherits(model, "gam")) return("additive")
   if (inherits(model, c("lm", "glm", "multinom"))) return("linear")
   class(model)[[1L]]
 }
@@ -1061,6 +1134,7 @@ model_backend_name <- function(model) {
   if (inherits(model, "rpart")) return("rpart")
   if (inherits(model, "autoxplain_tuned_nnet")) return("nnet")
   if (inherits(model, "multinom")) return("nnet")
+  if (inherits(model, "gam")) return("mgcv")
   if (inherits(model, c("lm", "glm"))) return("stats")
   class(model)[[1L]]
 }

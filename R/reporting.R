@@ -38,6 +38,11 @@
 #' @param benchmark Optional result of [benchmark_predictions()] made from the
 #'   same unchanged models and evaluation data. Adds repeated prediction costs
 #'   and their measurement protocol; rendering does not run a benchmark.
+#' @param explanation_rows Maximum evaluation rows for newly computed
+#'   explanations, as in [autoxplain()]. Defaults to 5000. `NULL` removes this cap;
+#'   PDP curves retain their separate 1000-row limit (see [explain_effect()]).
+#'   Supplying this explicitly recomputes default explanations with that scope;
+#'   it does not replace a supplied `audit` or `effects` object.
 #'
 #' @return The normalized output path, invisibly. Its `diagnostic_status`
 #'   attribute records optional checks performed for this report. The input
@@ -63,7 +68,8 @@ render_model_report <- function(result,
                                 uncertainty = "auto",
                                 target_units = NULL,
                                 report_data = "summary",
-                                benchmark = NULL) {
+                                benchmark = NULL,
+                                explanation_rows = 5000L) {
   if (!inherits(result, "autoxplain_result")) {
     stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
   }
@@ -75,7 +81,8 @@ render_model_report <- function(result,
     }
     result$provenance$target_units <- target_units
   }
-  use_retained <- missing(top_features) && missing(n_repeats) && missing(max_models)
+  use_retained <- missing(top_features) && missing(n_repeats) && missing(max_models) && missing(explanation_rows)
+  if (!is.null(explanation_rows)) explanation_rows <- assert_count(explanation_rows, "explanation_rows", 2L)
   top_features <- assert_count(top_features, "top_features")
   n_repeats <- assert_count(n_repeats, "n_repeats")
   max_models <- assert_count(max_models, "max_models")
@@ -87,11 +94,20 @@ render_model_report <- function(result,
   result$.report_context <- prepare_report_context(result)
   result <- prepare_report_benchmark(result, benchmark)
   result <- prepare_report_uncertainty(result, uncertainty)
+  if (!missing(explanation_rows) && !is.null(audit)) {
+    # Keep the caller's audit and explicit primary effects. Implicit retained
+    # curves must not survive a requested change to the explanation population.
+    result$explanations$effects_by_model <- NULL
+    result$explanations$effects_by_class <- NULL
+    result$explanations$effect_status <- NULL
+    result$explanations$failures <- NULL
+    if (!explicit_effects) result$explanations$effects <- NULL
+  }
   if (is.null(audit)) {
     prepared <- if (!is.null(result$explanations) && use_retained) {
       result$explanations
     } else {
-      prepare_model_report_data(result, top_features, n_repeats, max_models)
+      prepare_model_report_data(result, top_features, n_repeats, max_models, explanation_rows)
     }
     result$explanations <- prepared
     audit <- prepared$audit
@@ -99,6 +115,12 @@ render_model_report <- function(result,
   }
   if (!inherits(audit, "autoxplain_audit")) {
     stop("`audit` must be returned by `audit_explanations()`.", call. = FALSE)
+  }
+  # A supplied audit can still require new curves. Its presence must not make
+  # those curves bypass the requested explanation row budget.
+  if (is.null(result$explanations$config)) result$explanations$config <- list(top_features = top_features)
+  if (!use_retained || !"explanation_rows" %in% names(result$explanations$config)) {
+    result$explanations$config["explanation_rows"] <- list(explanation_rows)
   }
   ids <- names(audit$importance_objects)
   if (!length(ids) || any(!ids %in% names(result$models))) {
@@ -126,7 +148,8 @@ render_model_report <- function(result,
     }
   }
   result <- prepare_report_effects(result, audit, effects, explicit_effects)
-  result$.report_export <- prepare_data_explorer(result, report_data)
+  if (!explicit_effects) effects <- result$explanations$effects
+  result$.report_export <- prepare_data_explorer(result, report_data, row_layout = "columns")
   if (!is.null(narrative) &&
         (!is.character(narrative) || length(narrative) != 1L || is.na(narrative))) {
     stop("`narrative` must be a single string or NULL.", call. = FALSE)
@@ -806,6 +829,10 @@ report_axis_number <- function(x) {
   if (!is.finite(x)) return("n/a")
   scientific <- x != 0 && (abs(x) < .001 || abs(x) >= 1e6)
   format(signif(x, 4L), trim = TRUE, scientific = scientific)
+}
+
+report_count <- function(x) {
+  ifelse(is.finite(x), format(x, big.mark = ",", trim = TRUE, scientific = FALSE), "Unavailable")
 }
 
 report_number <- function(x, digits = 3L) {

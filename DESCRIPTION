@@ -1,14 +1,20 @@
 Package: AutoXplainR
 Title: Guided Model Fitting, Evaluation, and Explanation
-Version: 0.6.2
+Version: 0.7.0
 Authors@R:
-    person(
+    c(person(
       given = "Matteo",
       family = "Mazzarelli",
       email = "matteo.mazzarelli@gmail.com",
       role = c("aut", "cre")
-    )
-Copyright: 2025-2026 Matteo Mazzarelli
+    ), person(
+      given = "Arjun",
+      family = "Barrett",
+      role = "cph",
+      comment = "fflate library for offline report decompression"
+    ))
+Copyright: 2025-2026 Matteo Mazzarelli;
+    2026 Arjun Barrett (bundled fflate library)
 Description: Guides first-time modelers through fitting, held-out evaluation,
     explanation, and communication for tabular prediction problems. Local
     defaults compare linear, tree and neural model families with training-only

@@ -1,0 +1,102 @@
+{
+  "review_version": 1,
+  "release_target": "0.7.0",
+  "date": "2026-09-12",
+  "verdict": "All nine reproduced issues corrected in reviewed source; bounded independent review, not a claim of exhaustive correctness.",
+  "issues": [
+    {
+      "id": "supplied-audit-cap",
+      "original_failure": "New curves ignored explicit explanation_rows when an audit was supplied.",
+      "status": "fixed",
+      "correction": "New curves obey the explicit cap while the supplied audit remains unchanged."
+    },
+    {
+      "id": "sampled-auc-single-class",
+      "original_failure": "One-class explanation samples aborted an audit despite valid full-evaluation AUC.",
+      "status": "fixed",
+      "correction": "Full AUC remains available; sampled AUC importance is explicitly unavailable."
+    },
+    {
+      "id": "nested-pdp-sampling",
+      "original_failure": "Reusing the seed inside a sorted outer sample biased the final PDP row sample.",
+      "status": "fixed",
+      "correction": "The final curve sample is drawn directly from the original population; support has its own recorded rows."
+    },
+    {
+      "id": "cv-refit-representation",
+      "original_failure": "Automatic boosting encoding could switch from contrasts in CV to categorical partitions at refit.",
+      "status": "fixed",
+      "correction": "One outer-training resource plan fixes encoding across folds and refits; levels and preprocessing remain fold-local."
+    },
+    {
+      "id": "native-predictor-types",
+      "original_failure": "Native boosting accepted changed numeric, logical or categorical predictor kinds.",
+      "status": "fixed",
+      "correction": "Prediction rejects changed kinds before coercion."
+    },
+    {
+      "id": "pdp-support-scope",
+      "original_failure": "The report claimed curve and support used the same row count when they did not.",
+      "status": "fixed",
+      "correction": "Curve and support row counts are recorded and displayed separately."
+    },
+    {
+      "id": "absent-class-advice",
+      "original_failure": "An entirely absent evaluation class received advice to increase the sample cap.",
+      "status": "fixed",
+      "correction": "Missing sampled classes and missing full-evaluation classes receive distinct advice."
+    },
+    {
+      "id": "retained-curves-explicit-cap",
+      "original_failure": "A supplied audit could cause old implicit curves to survive an explicitly changed cap.",
+      "status": "fixed",
+      "correction": "Explicit caps regenerate implicit curves; explicit effects and supplied audits are preserved."
+    },
+    {
+      "id": "evaluation-task-inference",
+      "original_failure": "Automatic factor task inference failed when a declared evaluation class was unobserved.",
+      "status": "fixed",
+      "correction": "Evaluation inference respects declared levels; training inference still uses observed classes."
+    }
+  ],
+  "independent_replay": {
+    "pdp_seeds": 100,
+    "checked": [
+      "original source row identities",
+      "analytic prediction means and descriptive standard errors",
+      "separate support counts and values",
+      "full explainer identity",
+      "caller RNG preservation",
+      "sampled versus full AUC availability",
+      "absent versus missed class advice",
+      "explicit retained-curve cap",
+      "native type rejection"
+    ],
+    "task_inference_focused_assertions": 22
+  },
+  "scope_limits": [
+    "The 100-seed PDP exercise checks actual row identities against a direct uniform draw; its empirical frequencies are descriptive and are not a statistical acceptance threshold.",
+    "CV/refit encoding fix assessed by production data-flow review plus the separately authored actual threshold-crossing workflow test; reviewer did not repeat that timed workflow.",
+    "No full-suite or million-row workflow verdict is implied by these small adversarial cases.",
+    "Fixed-model bands remain descriptive and exclude row-sampling, fitting and selection uncertainty."
+  ],
+  "reviewed_source_sha256": {
+    "R/explanation_sampling.R": "1bb848e6a85e0cbd8b3d0f06138d921631ee955a951804b44e8b6b5fc43c3788",
+    "R/partial_dependence.R": "0bb8b09b4e5eceaab975043fea0268b8c6bd8f4d095ecd25ef2088da57cfc7a9",
+    "R/permutation_importance.R": "c86e6df7cef27a997dce495d1155f90e29a6e0c48c8a27afe1450a336f01e006",
+    "R/audit.R": "1e0179f289baa802c98d2b246a11d776b42ef03a2445b07b7a85f446bf56bac9",
+    "R/reporting.R": "f850e6fb8929f1f466aaeea741fff77fb5bab64f19e5faee0a206a0262a30e90",
+    "R/report_preparation.R": "7469275d13ec723ad05b6fe3f7dfa739c890b3868c62bbf9ba4b9f4d08845b3f",
+    "R/report_charts.R": "6e100196626365771f659bcb483a8dab68c357bcd3feed851b37a7ea8b88d0d5",
+    "R/boosting_inputs.R": "beb86b9ec60e2cd948f5d4b854e340c87165bd3863f3ba1188e721033ed9c4fc",
+    "R/tuning.R": "72c1db35d2fc84f22b7a2585898b73c8c2676a6fc033819e50dc0eba60522e3d",
+    "R/explainer.R": "60605cd2372192cac163d0da824dd86f1cd1adc1fd3fc5dfc5047005e8aa4e84"
+  },
+  "cache_replays": [
+    "explanations.R",
+    "boosting-types.R",
+    "retained-cap.R",
+    "final-explanations.R"
+  ],
+  "compact_wire_review": "../reports/independent-review/verdict.json"
+}

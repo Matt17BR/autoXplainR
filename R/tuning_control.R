@@ -9,12 +9,35 @@
 #' may be a data frame (one configuration per row), a list of named parameter
 #' lists, or one named parameter list. Parameter names are exact adapter
 #' contracts: `linear` has no parameters; `regularized` uses `alpha` and
-#' `path_fraction`; `additive` uses `k`, `gamma`, and `select`; `tree` uses
+#' `path_fraction`; `additive` uses `k`, `gamma`, and `select`, with optional
+#' `solver` (`"auto"`, `"gam"`, `"bam"`, or `"bam_discrete"`) and
+#' `discrete_bins` (default 10000). `gam` uses nested REML optimization;
+#' `bam` uses fREML and builds its design in blocks; `bam_discrete` discretizes numeric
+#' covariates at the recorded resolution. The final fit and each training fold
+#' record their actual method. `auto` plans each configuration's solver once
+#' from outer-training inputs: continuous BAM at 10,000 rows or when rows times
+#' estimated coefficients squared reaches 10 million, otherwise GAM. That solver
+#' stays fixed through validation and refitting; preprocessing and smoothing are
+#' still learned separately within each fitting partition.
+#' This is a computational policy, not a guarantee of
+#' faster fitting or equivalent predictions. Discretization is never automatic.
+#' Omitting the new controls preserves valid older
+#' custom grids. `tree` uses
 #' `maxdepth`, `cp`, and `minsplit`; `forest` uses `num.trees`, `mtry`,
 #' `min.node.size`, `sample.fraction`, and `splitrule`; `boosting` uses
 #' `nrounds`, `eta`, `max_depth`, `min_child_weight`, `subsample`,
-#' `colsample_bytree`, `reg_alpha`, and `reg_lambda`; `neural` uses `size` and
-#' `decay`; `kernel` uses `cost`, `gamma_multiplier`, and `epsilon` (fixed at
+#' `colsample_bytree`, `reg_alpha`, and `reg_lambda`, with optional `encoding`
+#' (`"auto"`, `"matrix"`, or `"native"`). Native encoding uses categorical
+#' partitions and a quantized training matrix; it can change predictions.
+#' Auto switches when categorical expansion exceeds twice the input width and
+#' 50 million estimated matrix cells. This choice is planned once from the
+#' outer-training inputs and fixed across folds and refits; category levels and
+#' preprocessing are still learned within each fold. Each fit records the choice.
+#' `neural` uses `size` and `decay`, with optional `maxit` (default 2,000).
+#' This is the optimizer iteration limit, not a promise of convergence.
+#' Changing only this limit preserves the initialization seed; earlier
+#' two-parameter grids remain valid. Set `maxit = 500` to retain the former
+#' iteration budget. `kernel` uses `cost`, `gamma_multiplier`, and `epsilon` (fixed at
 #' `0.1` for classification because that backend ignores it);
 #' `neighbors` uses `k`, `distance`, and `kernel`; and `mars` uses `degree` and
 #' `nprune`.
@@ -205,12 +228,19 @@ normalize_tuning_grids <- function(grids) {
 
 normalize_family_grid <- function(grid, family, allow_duplicates = FALSE) {
   contract <- tuning_parameter_contracts()[[family]]
+  optional <- switch(family,
+    additive = c("solver", "discrete_bins"),
+    boosting = "encoding",
+    neural = "maxit",
+    character()
+  )
   configurations <- if (is.data.frame(grid)) {
     if (!nrow(grid)) {
       stop("Custom grid `", family, "` must contain at least one row.", call. = FALSE)
     }
     lapply(seq_len(nrow(grid)), function(index) as.list(grid[index, , drop = FALSE]))
-  } else if (is.list(grid) && identical(sort(names(grid)), sort(names(contract))) &&
+  } else if (is.list(grid) && all(setdiff(names(contract), optional) %in% names(grid)) &&
+               all(names(grid) %in% names(contract)) &&
                (!length(grid) || !all(vapply(grid, is.list, logical(1))))) {
     list(grid)
   } else if (is.list(grid) && length(grid) && all(vapply(grid, is.list, logical(1)))) {
@@ -246,6 +276,12 @@ validate_tuning_parameters <- function(parameters, family, index, contract) {
       call. = FALSE
     )
   }
+  if (identical(family, "additive")) {
+    if (is.null(parameters$solver)) parameters$solver <- "auto"
+    if (is.null(parameters$discrete_bins)) parameters$discrete_bins <- 10000L
+  }
+  if (identical(family, "boosting") && is.null(parameters$encoding)) parameters$encoding <- "auto"
+  if (identical(family, "neural") && is.null(parameters$maxit)) parameters$maxit <- 2000L
   missing <- setdiff(names(contract), names(parameters))
   extra <- setdiff(names(parameters), names(contract))
   if (length(missing) || length(extra)) {
@@ -277,7 +313,9 @@ tuning_parameter_contracts <- function() {
     additive = list(
       k = tuning_integer(3L),
       gamma = tuning_numeric(0, Inf, lower_open = TRUE),
-      select = tuning_logical()
+      select = tuning_logical(),
+      solver = tuning_choice(c("auto", "gam", "bam", "bam_discrete")),
+      discrete_bins = tuning_integer(1000L)
     ),
     tree = list(
       maxdepth = tuning_integer(1L, 30L),
@@ -299,11 +337,13 @@ tuning_parameter_contracts <- function() {
       subsample = tuning_numeric(0, 1, lower_open = TRUE),
       colsample_bytree = tuning_numeric(0, 1, lower_open = TRUE),
       reg_alpha = tuning_numeric(0, Inf),
-      reg_lambda = tuning_numeric(0, Inf)
+      reg_lambda = tuning_numeric(0, Inf),
+      encoding = tuning_choice(c("auto", "matrix", "native"))
     ),
     neural = list(
       size = tuning_integer(1L),
-      decay = tuning_numeric(0, Inf)
+      decay = tuning_numeric(0, Inf),
+      maxit = tuning_integer(1L)
     ),
     kernel = list(
       cost = tuning_numeric(0, Inf, lower_open = TRUE),

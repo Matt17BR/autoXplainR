@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "training_rows": 10000,
+  "evaluation_rows": 20000,
+  "native_fields_except_call_identical": true,
+  "prediction_values_identical": true,
+  "before_native_object_bytes": 4211856,
+  "after_native_object_bytes": 25104,
+  "before_native_serialized_bytes": 2565520,
+  "after_native_serialized_bytes": 11565,
+  "before_call_serialized_bytes": 2554410,
+  "after_call_serialized_bytes": 367,
+  "source_md5": "e3172e8e5b46896bdf74c21ec321f9d8",
+  "raw_evidence_directory": "~/.cache/autoxplain-scale-0.7.0/native-call"
+}

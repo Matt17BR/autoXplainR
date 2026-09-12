@@ -200,7 +200,7 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
       effects
     }
     previous_primary <- saved[[primary]]
-    if (length(primary_effects) || explicit_effects || !multiclass || identical(class, classes[[1L]])) {
+    if (length(primary_effects) || explicit_effects) {
       saved[[primary]] <- primary_effects
     }
     if ((!multiclass || identical(class, classes[[1L]])) && !explicit_effects &&
@@ -230,6 +230,7 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
           explain_effect(explainers[[id]], feature,
             method = method,
             n_points = 16L, seed = result$provenance$seed,
+            max_rows = result$explanations$config$explanation_rows,
             class = if (multiclass) class else NULL
           ),
           error = function(error) structure(conditionMessage(error), class = "effect_failure", method = method)
@@ -240,6 +241,9 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
   })
   result$explanations$effects_by_model <- output[[1L]]
   result$explanations$effects_by_class <- if (multiclass) stats::setNames(output, classes) else NULL
+  if (!explicit_effects && !length(effects)) {
+    result$explanations$effects <- Filter(function(effect) !inherits(effect, "effect_failure"), output[[1L]][[primary]])
+  }
   result$explanations$effect_status <- report_effect_status(result)
   result
 }

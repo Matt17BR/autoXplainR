@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "training_rows": 180,
+  "checks": [
+    {
+      "task": "regression",
+      "native_fields_except_call_equal": true,
+      "native_environment_identity_excluded": true,
+      "predictions_identical": true,
+      "before_call_bytes": 9485,
+      "after_call_bytes": 306,
+      "before_native_bytes": 23813,
+      "after_native_bytes": 14661
+    },
+    {
+      "task": "binary",
+      "native_fields_except_call_equal": true,
+      "native_environment_identity_excluded": true,
+      "predictions_identical": true,
+      "before_call_bytes": 41153,
+      "after_call_bytes": 436,
+      "before_native_bytes": 886045,
+      "after_native_bytes": 874506
+    }
+  ],
+  "source_md5": "cb43c68651a3d876df0a508136af7831",
+  "raw_evidence_directory": "~/.cache/autoxplain-scale-0.7.0/mars-call"
+}

@@ -131,7 +131,7 @@ Use another family or bring an externally fitted GAM through `evaluate_models()`
 Other engine-specific limitations, including extreme numerical units, can still
 exclude individual candidates. Inspect the recorded reason.
 
-The broad preset can be slow even when every fit succeeds. On the 1,200-row,
+The broad preset can be slow even when every fit succeeds. In version 0.6.2, on the 1,200-row,
 30-input nonlinear stress case, `recommended` took 8 minutes 53 seconds, compared
 with 58 seconds for the explicit 15-configuration regularized/forest/boosting
 search. Both selected the same boosted model. Individual GAM folds took 9 to 43
@@ -147,7 +147,7 @@ explanation budget when the fitted models deserve closer investigation:
 
 ```{r bounded-report, eval=FALSE}
 render_model_report(result, "first-look.html", top_features = 3, n_repeats = 5,
-                    report_data = "summary")
+                    explanation_rows = 2000, report_data = "summary")
 ```
 
 Even a small feature audit first screens inputs; expensive prediction functions
@@ -155,9 +155,77 @@ and hundreds of columns can take time. Five permutations are a first look, not
 precise importance estimates. The report records the budget and warns about
 unstable Monte Carlo estimates.
 
+## Larger data
+
+The rows used to fit and score models are distinct from the rows used to explain
+them or included in HTML. `autoxplain()` fits on the complete processed training
+partition and scores the complete processed evaluation partition. Rows removed
+by an explicit preprocessing rule remain recorded as omissions.
+
+The report's default importance and effect calculations use at most 5,000
+evaluation rows. Pairwise plots and associations use at most 10,000 rows per
+partition. Univariate distributions, missing counts and official model scores
+use all available rows. Each sampled view gives its own denominator. A rare
+class or small cluster can be absent from a uniform sample even when its full
+count is visible elsewhere. Increasing permutation repeats does not resolve
+that absence, and shuffle intervals do not measure row-sampling uncertainty.
+
+```{r larger-data-controls, eval=FALSE}
+result <- autoxplain(
+  training, "outcome", test_data = final_test,
+  learners = c("regularized", "boosting"), max_models = 12, nfolds = 3,
+  tuning_control = tuning_control(retain_oof = FALSE),
+  explanation_rows = 5000, report = "model-report.html"
+)
+
+# Include a bounded sample for record inspection and browser filters.
+render_model_report(
+  result, "records.html",
+  report_data = report_data_control(mode = "rows", max_rows = 20000, max_pair_rows = 10000)
+)
+```
+
+Choose the search and validation design before looking at the final test scores.
+The example budget is a starting point, not a claim that twelve settings are
+enough for a difficult problem. `retain_oof = FALSE` saves memory by omitting
+case-level CV predictions; fold scores, candidate settings and selection remain
+available. Use the default `TRUE` when you need to inspect individual CV errors.
+This control does not reduce fitting rows or final evaluation rows.
+
+Neural configurations now allow up to 2,000 optimizer iterations, and stop
+earlier when they converge. The former 500-iteration ceiling excluded wider
+networks on the nonlinear stress problem even when more iterations produced
+useful fits. `maxit` is an explicit neural grid setting, so you can retain the
+former budget or choose another allowance. Inspect convergence and failed
+configurations alongside scores. A larger allowance can improve model selection
+but also increases fitting time; it does not guarantee convergence.
+
+Use `explanation_rows = NULL` to remove the report explanation cap and
+`report_data_control(max_pair_rows = NULL)` for all-row pair summaries.
+The lower-level `calculate_permutation_importance()`, `audit_explanations()` and
+`explain_effect()` have no shared row cap by default and accept `max_rows` explicitly.
+PDP has its separate `sample_size` control: its curve and support distribution
+can use different row counts, both recorded in the result.
+
+Large reports store compressed column values and unpack them offline as needed.
+Compression does not remove exported values. Scatter plots cap displayed points
+at 1,500, but filters and record lookup use all exported rows. Exporting every
+row can still create a large file and considerable browser memory use; leave
+`report_data = "summary"` unless individual records serve a concrete purpose.
+
+For large categorical expansions, automatic boosting encoding uses native
+categorical splits instead of a numeric contrast matrix. The threshold is an
+estimated matrix with more than 50 million cells and more than twice the input
+width. The representation is fixed for a search from outer-training inputs;
+category mappings and preprocessing stay inside each fold. The two
+representations are different models, not interchangeable numerical shortcuts.
+Set `encoding = "matrix"` or `"native"` in an explicit boosting grid to control
+this choice. The search record and report show what was used and why.
+
 Use `report_data_control()` to restrict exported columns or sample records if
 you need row filtering. Full records for hundreds of columns make a large HTML
-file. Aggregate mode keeps full-data profiles but does not allow row filtering.
+file. Aggregate mode keeps full univariate summaries and bounded pair summaries
+but does not allow row filtering.
 `max_models` bounds the number of attempted configurations, not elapsed time.
 `max_runtime_secs` is an H2O setting and does not impose a local-engine timeout.
 

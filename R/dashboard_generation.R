@@ -105,7 +105,8 @@ generate_dashboard_impl <- function(autoxplain_result,
 prepare_model_report_data <- function(autoxplain_result,
                                       top_features = 8L,
                                       n_repeats = 20L,
-                                      max_models = 5L) {
+                                      max_models = 5L,
+                                      explanation_rows = 5000L) {
   primary <- autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
   selected <- head(c(primary, setdiff(names(autoxplain_result$models), primary)), max_models)
   if (is.null(autoxplain_result$.report_context)) {
@@ -118,7 +119,8 @@ prepare_model_report_data <- function(autoxplain_result,
     calculate_permutation_importance(
       explainer,
       metric = importance_metric, n_repeats = screen_repeats,
-      seed = autoxplain_result$provenance$seed %||% 123L
+      seed = autoxplain_result$provenance$seed %||% 123L,
+      max_rows = explanation_rows
     )
   })
   screening <- screening_by_model[[1L]]
@@ -131,7 +133,8 @@ prepare_model_report_data <- function(autoxplain_result,
     features = features,
     metric = importance_metric,
     n_repeats = n_repeats,
-    seed = autoxplain_result$provenance$seed %||% 123L
+    seed = autoxplain_result$provenance$seed %||% 123L,
+    max_rows = explanation_rows
   )
   audit$provenance$automl_created_at <- autoxplain_result$provenance$created_at
   audit$provenance$automl_target <- autoxplain_result$target_column
@@ -146,6 +149,7 @@ prepare_model_report_data <- function(autoxplain_result,
         feature = feature,
         method = method,
         n_points = 16L,
+        max_rows = explanation_rows,
         seed = autoxplain_result$provenance$seed %||% 123L,
         class = if (autoxplain_result$task == "multiclass") {
           explainers[[1L]]$class_levels[[1L]]
@@ -169,7 +173,10 @@ prepare_model_report_data <- function(autoxplain_result,
     screening = screening, screening_by_model = screening_by_model,
     audit = audit, effects = effects, failures = failures,
     effects_by_model = stats::setNames(list(all_primary_effects), primary),
-    config = list(top_features = top_features, n_repeats = n_repeats, max_models = max_models)
+    config = list(
+      top_features = top_features, n_repeats = n_repeats, max_models = max_models,
+      explanation_rows = explanation_rows
+    )
   )
   prepared <- autoxplain_result
   prepared$explanations <- output

@@ -3,14 +3,37 @@
   const node = document.getElementById('axr-data-payload');
   const root = document.getElementById('data');
   if (!node || !root) return;
-  let payload;
-  try { payload = JSON.parse(node.textContent); } catch (_) { return; }
-  const profile = payload.profile;
+  let payload, store;
+  const showDataError = error => {
+    if (root.querySelector('[data-decode-error]')) return;
+    root.classList.remove('data-enhanced');
+    const message = document.createElement('p');
+    message.setAttribute('role', 'alert');
+    message.dataset.decodeError = '';
+    message.textContent = 'The embedded data could not be opened. Model scores and the printed report remain available. ' + error.message;
+    root.prepend(message);
+    root.querySelector('.data-workspace')?.setAttribute('hidden', '');
+    const source = root.querySelector('noscript');
+    if (source) {
+      // This is the server-rendered, HTML-escaped no-JavaScript fallback, never
+      // content read from an encoded row or supplied dataset string.
+      const fallback = document.createElement('div');
+      fallback.innerHTML = source.textContent;
+      root.append(fallback);
+    }
+  };
+  const protect = action => (...args) => {
+    try { return action(...args); } catch (error) { showDataError(error); }
+  };
+  try { payload = JSON.parse(node.textContent); store = window.AutoXplainRPayload.dataStore(payload); }
+  catch (error) { showDataError(error); return; }
+  const profile = store.profile;
   const arr = value => value == null ? [] : Array.isArray(value) ? value : [value];
   const columns = arr(profile.columns);
   const columnsByName = new Map(columns.map(column => [column.name, column]));
   const names = columns.map(column => column.name);
-  const records = arr(payload.rows);
+  const records = store.indices;
+  const rowMeta = (row, field) => store.meta(field, row);
   const $ = id => document.getElementById(id);
   const colors = {training: '#17654e', evaluation: '#9a481b'};
   const initialStage = profile.stages.raw ? 'raw' : 'processed';
@@ -23,6 +46,8 @@
   const number = value => missing(value) ? 'Unavailable' : finite(value) ?
     value !== 0 && (Math.abs(value) < .001 || Math.abs(value) >= 1e6) ? value.toExponential(2) :
       new Intl.NumberFormat('en', {maximumSignificantDigits: 4}).format(value) : String(value);
+  const countFormatter = new Intl.NumberFormat('en', {maximumFractionDigits: 0});
+  const formatCount = value => finite(value) ? countFormatter.format(value) : 'Unavailable';
   const element = (tag, text, className) => {
     const result = document.createElement(tag);
     if (text != null) result.textContent = text;
@@ -52,7 +77,7 @@
     const power = 10 ** Math.floor(Math.log10(desired));
     return Math.max(minimum, [1, 2, 5, 10].find(value => value * power >= desired) * power);
   }
-  function table(headers, rows, caption) {
+  function table(headers, rows, caption, countColumns = []) {
     const result = element('table');
     if (caption) result.append(element('caption', caption));
     const head = element('thead'), heading = element('tr');
@@ -61,7 +86,7 @@
     const body = element('tbody');
     rows.forEach(values => {
       const row = element('tr');
-      values.forEach(value => row.append(element('td', number(value))));
+      values.forEach((value, index) => row.append(element('td', countColumns.includes(index) ? formatCount(value) : number(value))));
       body.append(row);
     });
     result.append(body);
@@ -71,10 +96,13 @@
     .filter(split => stage()[split + '_available']);
   const stage = () => profile.stages[state.stage];
   const axisFor = name => stage().columns[name]?.axis;
-  const rowValue = (row, name, basis = state.stage) => row[basis]?.[name];
-  const nonfinite = (row, name, basis = state.stage) => arr(row.nonfinite?.[basis]).includes(name);
-  const formatRowValue = (row, name, basis = state.stage) => nonfinite(row, name, basis) ? 'Non-finite' :
-    formatValue(rowValue(row, name, basis), profile.stages[basis]?.columns[name]?.axis);
+  const rowValue = (row, name, basis = state.stage) => store.value(row, name, basis);
+  const nonfinite = (row, name, basis = state.stage) => store.nonfinite(row, name, basis);
+  const formatRowValue = (row, name, basis = state.stage, exact = false) => {
+    if (nonfinite(row, name, basis)) return 'Non-finite';
+    const value = rowValue(row, name, basis), axis = profile.stages[basis]?.columns[name]?.axis;
+    return exact && finite(value) && axis?.kind === 'numeric' ? String(value) : formatValue(value, axis);
+  };
   function formatValue(value, axis) {
     if (missing(value)) return 'Missing';
     if (finite(value) && ['date', 'datetime'].includes(axis?.kind)) {
@@ -83,12 +111,17 @@
     }
     return number(value);
   }
+  const categoricalCodes = new WeakMap();
   function code(value, axis) {
     if (missing(value) || !axis || axis.status !== 'available') return null;
     if (axis.kind === 'categorical') {
-      const levels = arr(axis.levels), index = levels.indexOf(String(value));
-      if (index >= 0) return index + 1;
-      return arr(axis.known_levels).includes(String(value)) ? axis.other_code : axis.novel_code;
+      if (!categoricalCodes.has(axis)) categoricalCodes.set(axis, {
+        levels: new Map(arr(axis.levels).map((level, index) => [String(level), index + 1])),
+        known: new Set(arr(axis.known_levels).map(String))
+      });
+      const codes = categoricalCodes.get(axis), label = String(value);
+      if (codes.levels.has(label)) return codes.levels.get(label);
+      return codes.known.has(label) ? axis.other_code : axis.novel_code;
     }
     if (!finite(value)) return null;
     const breaks = arr(axis.breaks);
@@ -114,12 +147,22 @@
     if (!finite(value) || !Number.isFinite(Number(filter.value))) return false;
     return filter.op === 'ge' ? value >= Number(filter.value) : value <= Number(filter.value);
   }
+  let filterKey, matchingRows = [], sortedKey, orderedRows = [];
+  const filteredDistributions = new Map();
+  const pairRowsBySplit = new Map(), derivedPairs = new Map();
   function filteredRows() {
-    return records.filter(row => (state.split === 'both' || row.partition === state.split) &&
-      (state.stage !== 'processed' || row.retained) && state.filters.every(filter => matches(row, filter)));
+    const key = JSON.stringify([state.stage, state.split, state.filters]);
+    if (key !== filterKey) {
+      matchingRows = records.filter(row => (state.split === 'both' || rowMeta(row, 'partition') === state.split) &&
+        (state.stage !== 'processed' || rowMeta(row, 'retained')) && state.filters.every(filter => matches(row, filter)));
+      filterKey = key;
+      filteredDistributions.clear();
+      pairRowsBySplit.clear(); derivedPairs.clear();
+    }
+    return matchingRows;
   }
   function sampleDistribution(name, split) {
-    const axis = axisFor(name), rows = filteredRows().filter(row => row.partition === split);
+    const axis = axisFor(name), rows = filteredRows().filter(row => rowMeta(row, 'partition') === split);
     if (axis.status !== 'available') return {status: axis.status, reason: axis.reason, n_total: rows.length};
     const counts = arr(axis.labels).map(() => 0), values = [], distinct = new Set();
     let missingCount = 0, nonfiniteCount = 0;
@@ -134,15 +177,31 @@
       mean: values.length ? values.reduce((a, b) => a + b, 0) / values.length : null};
   }
   function distribution(name, split) {
-    return state.filters.length ? sampleDistribution(name, split) : stage().columns[name][split];
+    if (!state.filters.length) return stage().columns[name][split];
+    filteredRows();
+    const key = JSON.stringify([name, split]);
+    if (!filteredDistributions.has(key)) filteredDistributions.set(key, sampleDistribution(name, split));
+    return filteredDistributions.get(key);
   }
   function population() {
-    if (state.view === 'relationships' && !state.filters.length && !storedPair() && records.length) {
+    if (state.view === 'relationships' && records.length && (state.filters.length || !storedPair())) {
       $('data-population').textContent = exportedPairScope();
       return;
     }
-    const basis = state.filters.length ? 'Filtered exported sample' : 'Full data';
+    if (state.view === 'relationships' && !state.filters.length) {
+      const pair = storedPair();
+      if (pair && splits().some(split => pair[split]?.sampled)) {
+        $('data-population').textContent = pairSampleScope(pair);
+        return;
+      }
+    }
+    const basis = state.filters.length ? 'Filtered exported rows' : 'Full data';
     $('data-population').textContent = `${basis} · ${stage().population}`;
+  }
+  function pairSampleScope(pair) {
+    const counts = splits().map(split => `${split}: ${formatCount(pair[split]?.n_sample ?? pair[split]?.n_total)} of ` +
+      `${formatCount(pair[split]?.n_population ?? stage()[split + '_rows'])} rows`);
+    return `Sampled relationships · ${stage().population} · ${counts.join('; ')}. Individual-column summaries use all available rows.`;
   }
   function renderDistribution() {
     const axis = axisFor(state.column), selected = splits();
@@ -153,12 +212,12 @@
     selected.forEach(split => {
       const data = distribution(state.column, split);
       const item = element('div', null, 'data-stat');
-      item.append(element('strong', `${number(data.n_total)} ${split} rows`));
+      item.append(element('strong', `${formatCount(data.n_total)} ${split} rows`));
       const details = [];
-      if (data.n_missing != null) details.push(`${number(data.n_missing)} missing`);
-      if (data.n_unique != null) details.push(`${number(data.n_unique)} distinct`);
+      if (data.n_missing != null) details.push(`${formatCount(data.n_missing)} missing`);
+      if (data.n_unique != null) details.push(`${formatCount(data.n_unique)} distinct`);
       item.append(element('span', details.join(' · ') || data.reason || 'Column unavailable'));
-      if (data.n_nonfinite > 0) item.append(element('span', `${number(data.n_nonfinite)} non-finite`));
+      if (data.n_nonfinite > 0) item.append(element('span', `${formatCount(data.n_nonfinite)} non-finite`));
       if (finite(data.mean)) item.append(element('span', `Mean ${formatValue(data.mean, axis)}`));
       if (data.quantiles?.median != null) item.append(element('span', `Median ${formatValue(data.quantiles.median, axis)}`));
       summary.append(item);
@@ -240,7 +299,7 @@
             width: usable * value / maximum, height: 10, fill: colors[item.split]});
           bar.append(svgElement('title', {}, `${labels[i]} · ${item.split}: ${arr(item.data.counts)[i]} rows`));
           plot.append(bar, svgElement('text', {x: width - 55, y: y + s * 12 + 10},
-            state.scale === 'count' ? number(value) : value.toFixed(1) + '%'));
+            state.scale === 'count' ? formatCount(value) : value.toFixed(1) + '%'));
         });
       });
     }
@@ -254,10 +313,40 @@
     const rows = labels.map((label, i) => [label, ...selected.map(split => arr(distribution(state.column, split).counts)[i] ?? null)]);
     rows.push(['Missing', ...selected.map(split => distribution(state.column, split).n_missing)]);
     rows.push(['Non-finite', ...selected.map(split => distribution(state.column, split).n_nonfinite)]);
-    $('data-distribution-table').replaceChildren(table(['Value/bin', ...selected], rows, 'Exact counts in displayed populations'));
+    $('data-distribution-table').replaceChildren(table(['Value/bin', ...selected], rows, 'Exact counts in displayed populations', [1, 2]));
+  }
+  function pairSampleRows(split) {
+    filteredRows();
+    if (pairRowsBySplit.has(split)) return pairRowsBySplit.get(split);
+    const population = matchingRows.filter(row => rowMeta(row, 'partition') === split);
+    const limit = profile.pair_sampling?.max_rows;
+    const sampled = Number.isInteger(limit) && limit > 0 && population.length > limit;
+    let rows = population;
+    if (sampled) {
+      // Uniform reservoir sampling, independent of column values. A separate
+      // seeded stream per split keeps every pair on the same selected rows.
+      let randomState = ((Number(profile.pair_sampling?.seed ?? payload.manifest.seed) >>> 0) ^
+        (split === 'training' ? 0x9e3779b9 : 0x85ebca6b)) >>> 0;
+      const uniform = () => {
+        randomState = (randomState + 0x6d2b79f5) >>> 0;
+        let value = randomState;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+      };
+      rows = population.slice(0, limit);
+      for (let i = limit; i < population.length; i++) {
+        const selected = Math.floor(uniform() * (i + 1));
+        if (selected < limit) rows[selected] = population[i];
+      }
+      rows.sort((a, b) => a - b);
+    }
+    const result = {rows, n_population: population.length, n_sample: rows.length, sampled};
+    pairRowsBySplit.set(split, result);
+    return result;
   }
   function sampledPair(xName, yName, split) {
-    const xAxis = axisFor(xName), yAxis = axisFor(yName), rows = filteredRows().filter(row => row.partition === split);
+    const xAxis = axisFor(xName), yAxis = axisFor(yName), sample = pairSampleRows(split), rows = sample.rows;
     const counts = new Map(); let complete = 0;
     rows.forEach(row => {
       const x = code(rowValue(row, xName), xAxis), y = code(rowValue(row, yName), yAxis);
@@ -276,6 +365,7 @@
       });
     }
     return {status: 'available', n_total: rows.length, n_complete: complete, n_excluded: rows.length - complete,
+      n_population: sample.n_population, n_sample: sample.n_sample, sampled: sample.sampled,
       cells: Array.from(counts, ([key, n]) => ({x: Number(key.split(':')[0]), y: Number(key.split(':')[1]), n})),
       conditional_event: Array.from(eventBins.values(), bin => ({...bin, rate: bin.events / bin.n})),
       association: sampleAssociation(xName, yName, rows)};
@@ -292,6 +382,18 @@
     const n = data.length, x = data.map(pair => pair[0]), y = data.map(pair => pair[1]);
     if (n < 3 || new Set(x).size < 2 || new Set(y).size < 2) return {status: 'unavailable', n,
       reason: 'At least three complete pairs and variation in both columns are needed.'};
+    const categoryReplication = values => {
+      const counts = new Map();
+      values.forEach(value => counts.set(value, (counts.get(value) || 0) + 1));
+      const singletons = [...counts.values()].filter(count => count === 1).length;
+      return {n_categories: counts.size, n_singleton_rows: singletons, singleton_fraction: singletons / n,
+        n_replicated_rows: n - singletons, n_repeated_categories: counts.size - singletons};
+    };
+    const categorical = {x: numericX ? null : categoryReplication(x), y: numericY ? null : categoryReplication(y)};
+    if (Object.values(categorical).some(summary => summary && !summary.n_repeated_categories)) {
+      return {status: 'unavailable', n, categorical,
+        reason: 'A categorical column has no repeated categories among complete pairs; association cannot separate group structure from individual identifiers.'};
+    }
     if (numericX && numericY) {
       const ranks = values => {
         const order = values.map((value, index) => ({value, index})).sort((a, b) => a.value - b.value), ranked = [];
@@ -314,7 +416,7 @@
       values.forEach((value, i) => { const g = groups.get(categories[i]) || {n: 0, sum: 0}; g.n++; g.sum += value; groups.set(categories[i], g); });
       const between = Array.from(groups.values()).reduce((sum, group) => sum + group.n * (group.sum / group.n - mean) ** 2, 0);
       const total = values.reduce((sum, value) => sum + (value - mean) ** 2, 0);
-      return {status: 'available', method: 'Correlation ratio (unsigned)', n, value: Math.sqrt(between / total)};
+      return {status: 'available', method: 'Correlation ratio (unsigned)', n, categorical, value: Math.sqrt(between / total)};
     }
     const a = new Map(), b = new Map(), cells = new Map();
     data.forEach(([x, y]) => {
@@ -322,7 +424,7 @@
       const key = JSON.stringify([x, y]), cell = cells.get(key) || {x, y, n: 0}; cell.n++; cells.set(key, cell);
     });
     const chi = Array.from(cells.values()).reduce((sum, cell) => sum + cell.n ** 2 / (a.get(cell.x) * b.get(cell.y) / n), 0) - n;
-    return {status: 'available', method: "Cramer's V (unsigned)", n,
+    return {status: 'available', method: "Cramer's V (unsigned)", n, categorical,
       value: Math.sqrt(Math.max(0, chi) / (n * Math.min(a.size - 1, b.size - 1)))};
   }
   function storedPair() {
@@ -330,10 +432,15 @@
     return stage().pairs[indices.join('_')];
   }
   function exportedPairScope() {
-    const rows = filteredRows();
-    const counts = splits().map(split => `${split}: ${number(rows.filter(row => row.partition === split).length)} of ` +
-      `${number(stage()[split + '_rows'])} rows`);
-    return `${state.filters.length ? 'Filtered exported sample' : 'Exported records'} · ` +
+    const samples = splits().map(split => ({split, ...pairSampleRows(split)}));
+    if (samples.some(sample => sample.sampled)) {
+      return 'Sampled relationships · ' + samples.map(sample => `${sample.split}: ` +
+        `${formatCount(sample.n_sample)} of ${formatCount(sample.n_population)} matching exported rows`).join('; ') +
+        '. Counts and association describe this sample.';
+    }
+    const counts = samples.map(sample => `${sample.split}: ${formatCount(sample.n_population)} of ` +
+      `${formatCount(stage()[sample.split + '_rows'])} rows`);
+    return `${state.filters.length ? 'Filtered exported rows' : 'Exported records'} · ` +
       `${state.stage === 'raw' ? 'Raw supplied values' : 'Values used by models'} · ${counts.join('; ')}`;
   }
   function pairData() {
@@ -341,7 +448,11 @@
     if (state.filters.length || (!stored && records.length)) {
       const x = state.column === profile.target ? state.y : state.column;
       const y = state.column === profile.target ? state.column : state.y;
-      return {x, y, source: 'exported', ...Object.fromEntries(splits().map(split => [split, sampledPair(x, y, split)]))};
+      filteredRows();
+      const key = JSON.stringify([filterKey, x, y]);
+      if (!derivedPairs.has(key)) derivedPairs.set(key,
+        {x, y, source: 'exported', ...Object.fromEntries(splits().map(split => [split, sampledPair(x, y, split)]))});
+      return derivedPairs.get(key);
     }
     return stored;
   }
@@ -377,7 +488,7 @@
       const index = active.indexOf(bin.x);
       const point = svgElement('circle', {cx: left + (index + .5) * step + (s - (series.length - 1) / 2) * 5,
         cy: bottom - bin.rate * height, r: 4, fill: colors[item.split]});
-      point.append(svgElement('title', {}, `${item.split} · ${labels[bin.x - 1]}: ${bin.events}/${bin.n} = ${number(100 * bin.rate)}%`));
+      point.append(svgElement('title', {}, `${item.split} · ${labels[bin.x - 1]}: ${formatCount(bin.events)}/${formatCount(bin.n)} = ${number(100 * bin.rate)}%`));
       plot.append(point);
     }));
     const ticks = plotWidth < 440 ? (['date', 'datetime'].includes(axis.kind) ? 2 : 3) : 5;
@@ -398,7 +509,7 @@
     const details = element('details'); details.append(element('summary', 'Event counts and rates by bin'));
     details.append(table(['Split', pair.x, 'Rows', 'Events', 'Event rate (%)'], series.flatMap(item =>
       item.bins.map(bin => [item.split, labels[bin.x - 1], bin.n, bin.events, bin.rate * 100])),
-    `Event: ${profile.target} = ${profile.positive}; denominator excludes missing pairs`));
+    `Event: ${profile.target} = ${profile.positive}; denominator excludes missing pairs`, [2, 3]));
     host.append(details); return true;
   }
   function renderPair() {
@@ -412,19 +523,43 @@
     const pair = pairData();
     if (!pair) {
       host.append(element('p', 'This pair was outside the aggregate computation budget. Its individual distributions remain available.'));
-      $('data-pair-note').textContent = `${profile.pair_coverage.included} of ${profile.pair_coverage.total} pairs included. ` +
+      $('data-pair-note').textContent = `${formatCount(profile.pair_coverage.included)} of ${formatCount(profile.pair_coverage.total)} pairs included. ` +
         'Row mode permits selected-pair exploration of the exported sample.'; return;
     }
     const xAxis = axisFor(state.column), yAxis = axisFor(state.y);
     const association = $('data-association');
     if (pair.source === 'exported') {
       association.append(element('p', exportedPairScope()));
+      if (splits().some(split => pair[split]?.sampled)) {
+        const details = element('details'); details.append(element('summary', 'How relationship rows were sampled'));
+        details.append(element('p', 'Column summaries, filters and tables use every matching exported row. ' +
+          'Relationship counts and associations use a uniform reservoir sample per split. ' +
+          `The browser uses Mulberry32 with report seed ${profile.pair_sampling?.seed ?? payload.manifest.seed}; ` +
+          'every pair uses the same selected rows until its filters change. ' +
+          'Set max_pair_rows = NULL in report_data_control() when generating the report to use every matching row.'));
+        association.append(details);
+      }
+    } else if (splits().some(split => pair[split]?.sampled)) {
+      association.append(element('p', pairSampleScope(pair)));
     }
     splits().forEach(split => {
       const reading = pair[split]?.association;
       association.append(element('p', reading?.status === 'available' ?
-        `${split}: ${reading.method} ${number(reading.value)} · n = ${number(reading.n)}` :
-        `${split}: association unavailable · n = ${number(reading?.n)}. ${reading?.reason || 'No retained unbinned pair values.'}`));
+        `${split}: ${reading.method} ${number(reading.value)} · n = ${formatCount(reading.n)}` :
+        `${split}: association unavailable · n = ${formatCount(reading?.n)}. ${reading?.reason || 'No retained unbinned pair values.'}`));
+      const categories = Object.entries(reading?.categorical || {}).filter(([, summary]) => summary);
+      if (categories.length) {
+        const details = element('details'); details.append(element('summary', `${split}: category replication`));
+        categories.forEach(([axis, summary]) => {
+          details.append(element('p', `${axis === 'x' ? pair.x : pair.y}: ${formatCount(summary.n_categories)} categories; ` +
+            `${formatCount(summary.n_singleton_rows)} rows in categories observed only once (${number(summary.singleton_fraction * 100)}%). ` +
+            `${formatCount(summary.n_repeated_categories)} categories have repeated observations.`));
+        });
+        if (categories.some(([, summary]) => summary.n_singleton_rows > 0)) {
+          details.append(element('p', 'Singleton categories can inflate association. A large value may reflect individual identifiers rather than a repeatable group pattern.'));
+        }
+        association.append(details);
+      }
     });
     association.append(element('span', 'Computed from unbinned complete pairs. Small association does not establish independence or exclude nonlinear or joint dependence.'));
     if (xAxis.status !== 'available' || yAxis.status !== 'available') {
@@ -441,7 +576,8 @@
     cellsBySplit.forEach(item => {
       const card = element('div', null, 'data-density-card'); card.append(element('h4', item.split));
       if (item.data?.status !== 'available') { card.append(element('p', item.data?.reason || 'Pair unavailable.')); combined.append(card); return; }
-      notes.push(`${item.split}: ${number(item.data.n_complete)} complete, ${number(item.data.n_excluded)} excluded`);
+      notes.push(`${item.split}: ${formatCount(item.data.n_complete)} complete, ${formatCount(item.data.n_excluded)} excluded` +
+        (item.data.sampled ? ` within ${formatCount(item.data.n_sample)} sampled of ${formatCount(item.data.n_population)} rows` : ''));
       const panelWidth = availableWidth(host) >= 740 ? Math.floor((availableWidth(host) - 14) / 2) : availableWidth(host);
       const left = Math.min(100, Math.floor(panelWidth * .30)), top = 32;
       const dense = xAxis.kind === 'categorical' && activeX.length > 5;
@@ -490,9 +626,9 @@
       const details = element('details'); details.append(element('summary', 'Joint counts for the same relationship'), combined);
       host.append(details);
     } else host.append(combined);
-    $('data-pair-note').textContent = notes.join(' · ') + `. Darker cells contain more rows; shared count scale up to ${maxCount}. ` +
+    $('data-pair-note').textContent = notes.join(' · ') + `. Darker cells contain more rows; shared count scale up to ${formatCount(maxCount)}. ` +
       'Empty cells mean zero complete pairs. Unused overflow categories are omitted from the plotted axes; exact counts retain their original bin definitions.';
-    $('data-pair-table').append(table(['Split', state.column, state.y, 'Rows'], tableRows, 'Occupied cells only; missing pairs excluded'));
+    $('data-pair-table').append(table(['Split', state.column, state.y, 'Rows'], tableRows, 'Occupied cells only; missing pairs excluded', [3]));
     const conditionalRows = [];
     splits().forEach(split => arr(pair[split]?.conditional).forEach(row => {
       conditionalRows.push([split, arr(axisFor(pair.x).labels)[row.x - 1], row.n, row.mean, row.median]);
@@ -500,7 +636,7 @@
     if (conditionalRows.length && pair.y === profile.target) {
       const details = element('details'); details.append(element('summary', `Observed ${profile.target} by ${pair.x}`));
       details.append(table(['Split', pair.x, 'Rows', `Mean ${profile.target}`, `Median ${profile.target}`],
-        conditionalRows, 'Observed averages within bins, not model predictions'));
+        conditionalRows, 'Observed averages within bins, not model predictions', [2]));
       $('data-conditional').append(details);
     }
   }
@@ -513,25 +649,30 @@
       host.append(chip);
     });
   }
-  function selectRow(key, announce = true) {
-    const row = records.find(item => item.row_key === key);
-    if (!row) return;
+  const selectRow = protect((key, announce = true) => {
+    const row = store.findKey(key);
+    if (row < 0) return;
     state.selected = key;
     const host = $('data-selected-row'); host.replaceChildren(element('strong',
-      `${row.partition} · ${row.source} row ${row.source_row} · ${row.retained ? 'retained' : 'removed by preprocessing'}`));
+      `${rowMeta(row, 'partition')} · ${rowMeta(row, 'source')} row ${rowMeta(row, 'source_row')} · ${rowMeta(row, 'retained') ? 'retained' : 'removed by preprocessing'}`));
+    host.append(element('p', `Record key: ${key}`, 'data-chart-note'));
     host.append(table(['Column', 'Raw supplied value', 'Processed model value'], names.map(name => [name,
-      payload.manifest.raw_status === 'available' ? formatRowValue(row, name, 'raw') : 'Unavailable',
+      payload.manifest.raw_status === 'available' ? formatRowValue(row, name, 'raw', true) : 'Unavailable',
       !['target', 'predictor'].includes(columns.find(column => column.name === name).role) ? 'Not used by model' :
-        row.retained ? formatRowValue(row, name, 'processed') : 'Row not retained'
+        rowMeta(row, 'retained') ? formatRowValue(row, name, 'processed', true) : 'Row not retained'
     ]), 'The same original observation before and after preprocessing'));
     root.querySelectorAll('[data-row-key]').forEach(node => {
       node.classList.toggle('is-selected', node.dataset.rowKey === key);
     });
     if (announce) window.dispatchEvent(new CustomEvent('axr:row-selected', {detail: {
-      row_key: key, partition: row.partition, processed_position: row.processed_position
+      row_key: key, partition: rowMeta(row, 'partition'), processed_position: rowMeta(row, 'processed_position')
     }}));
-  }
-  function renderScatter(rows) {
+  });
+  let scatterKey;
+  const renderScatter = protect(rows => {
+    const key = JSON.stringify([filterKey, state.column, state.y, availableWidth($('data-row-scatter'))]);
+    if (key === scatterKey) return;
+    scatterKey = key;
     const host = $('data-row-scatter'); host.replaceChildren();
     const xAxis = axisFor(state.column), yAxis = axisFor(state.y);
     if (state.column === state.y || !['numeric', 'date', 'datetime'].includes(xAxis.kind) ||
@@ -542,8 +683,12 @@
     const complete = rows.filter(row => finite(rowValue(row, state.column)) && finite(rowValue(row, state.y)));
     if (!complete.length) { host.append(element('p', 'No complete numeric pairs in the exported selection.')); return; }
     const extent = name => {
-      const values = complete.map(row => rowValue(row, name));
-      let low = Math.min(...values), high = Math.max(...values);
+      let low = Infinity, high = -Infinity;
+      for (const row of complete) {
+        const value = rowValue(row, name);
+        if (value < low) low = value;
+        if (value > high) high = value;
+      }
       if (low === high) { low -= .5; high += .5; }
       return [low, high];
     };
@@ -560,16 +705,19 @@
           fitLabel(formatValue(a, xAxis), usable / ticks - 8)),
         svgElement('text', {x: left - 8, y: py(b) + 5, 'text-anchor': 'end'}, fitLabel(formatValue(b, yAxis), left - 12)));
     }
-    complete.forEach((row, index) => {
-      const label = `${row.partition} source row ${row.source_row}: ${state.column} ${formatValue(rowValue(row, state.column), xAxis)}, ` +
+    const maximumPoints = 1500;
+    const displayed = complete.length <= maximumPoints ? complete : Array.from({length: maximumPoints}, (_, i) =>
+      complete[Math.floor(i * (complete.length - 1) / (maximumPoints - 1))]);
+    displayed.forEach((row, index) => {
+      const label = `${rowMeta(row, 'partition')} source row ${rowMeta(row, 'source_row')}: ${state.column} ${formatValue(rowValue(row, state.column), xAxis)}, ` +
         `${state.y} ${formatValue(rowValue(row, state.y), yAxis)}`;
       const point = svgElement('circle', {cx: px(rowValue(row, state.column)), cy: py(rowValue(row, state.y)),
-        r: 4, fill: colors[row.partition], opacity: .65, tabindex: index === 0 ? '0' : '-1', role: 'button', 'aria-label': label,
-        'data-row-key': row.row_key});
+        r: 4, fill: colors[rowMeta(row, 'partition')], opacity: .65, tabindex: index === 0 ? '0' : '-1', role: 'button', 'aria-label': label,
+        'data-row-key': rowMeta(row, 'row_key')});
       point.append(svgElement('title', {}, label));
-      point.addEventListener('click', () => selectRow(row.row_key));
+      point.addEventListener('click', () => selectRow(rowMeta(row, 'row_key')));
       point.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectRow(row.row_key); }
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectRow(rowMeta(row, 'row_key')); }
         if (['ArrowRight', 'ArrowLeft'].includes(event.key)) {
           event.preventDefault();
           const points = Array.from(plot.querySelectorAll('circle[data-row-key]'));
@@ -582,52 +730,65 @@
     });
     plot.append(svgElement('text', {x: left, y: 20}, fitLabel(state.y, usable)),
       svgElement('text', {x: left + usable / 2, y: 328, 'text-anchor': 'middle'}, fitLabel(state.column, usable)));
-    host.append(element('h4', `Individual records · ${complete.length} complete exported pairs`),
-      element('p', 'Focus a point, then use Left/Right to move and Enter to inspect its record.', 'data-chart-note'), plot);
-  }
-  function renderRows() {
+    host.append(element('h4', `Individual records · ${formatCount(displayed.length)} displayed of ${formatCount(complete.length)} complete exported pairs`),
+      element('p', (displayed.length < complete.length ?
+        'The scatter displays an evenly spaced sample in source order. Axes use every complete pair; all exported rows remain in the filters and table. ' : '') +
+        'Focus a point, then use Left/Right to move and Enter to inspect its record.', 'data-chart-note'), plot);
+  });
+  const renderRows = protect(() => {
     if (payload.mode !== 'rows') return;
-    const rows = filteredRows();
-    $('data-sample-note').textContent = `${records.length} of ${payload.manifest.full_rows} original rows embedded. ` +
-      `${payload.manifest.sampling}; seed ${payload.manifest.seed}. Full-data aggregates above remain separate until a filter is applied.`;
-    $('data-filter-status').textContent = `${rows.length} matching exported rows · ${state.filters.length} active filters. ` +
-      (state.filters.length ? 'Charts now describe the filtered exported sample.' : 'Charts above describe full data; scatter and table describe exported records.');
-    renderFilterChips(); renderScatter(rows);
-    rows.sort((a, b) => {
-      const left = state.sort === 'source_row' ? a.source_row : rowValue(a, state.sort);
-      const right = state.sort === 'source_row' ? b.source_row : rowValue(b, state.sort);
+    let rows = filteredRows();
+    $('data-sample-note').textContent = `${formatCount(records.length)} of ${formatCount(payload.manifest.full_rows)} original rows embedded. ` +
+      (records.length === payload.manifest.full_rows ? 'All source rows exported. ' : `${payload.manifest.sampling}; seed ${payload.manifest.seed}. `) +
+      `Column summaries use all available rows; each relationship chart states its own scope.`;
+    $('data-filter-status').textContent = `${formatCount(rows.length)} matching exported rows · ${formatCount(state.filters.length)} active filters. ` +
+      (state.filters.length ? 'Charts now describe the filtered exported rows.' : 'Scatter and table describe exported records; aggregate chart scopes are shown separately.');
+    renderFilterChips();
+    if ($('data-scatter-details').open) renderScatter(rows);
+    const orderKey = JSON.stringify([filterKey, state.sort, state.direction]);
+    if (orderKey !== sortedKey) {
+      orderedRows = rows.slice().sort((a, b) => {
+      const left = state.sort === 'source_row' ? rowMeta(a, 'source_row') : rowValue(a, state.sort);
+      const right = state.sort === 'source_row' ? rowMeta(b, 'source_row') : rowValue(b, state.sort);
       if (missing(left)) return missing(right) ? 0 : 1;
       if (missing(right)) return -1;
       return state.direction * (finite(left) && finite(right) ? left - right : String(left).localeCompare(String(right)));
-    });
+      });
+      sortedKey = orderKey;
+    }
+    rows = orderedRows;
     const size = 10, lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
     state.page = Math.min(state.page, lastPage);
     const selected = rows.slice(state.page * size, (state.page + 1) * size);
     const visible = Array.from(new Set([state.column, state.y, profile.target]));
-    const output = table(['Record', 'Split', 'Retained', ...visible], [], 'Exported source positions, not the entire original dataset');
+    const output = table(['Record', 'Split', 'Retained', ...visible], [], 'Exported records with original source positions');
     selected.forEach(row => {
-      const tr = element('tr'); tr.dataset.rowKey = row.row_key;
-      const cell = element('td'), button = element('button', `${row.source}:${row.source_row}`, 'data-row-link');
-      button.type = 'button'; button.addEventListener('click', () => selectRow(row.row_key)); cell.append(button);
-      tr.append(cell, element('td', row.partition), element('td', row.retained ? 'Yes' : 'No'));
+      const tr = element('tr'); tr.dataset.rowKey = rowMeta(row, 'row_key');
+      const cell = element('td'), button = element('button', `${rowMeta(row, 'source')}:${rowMeta(row, 'source_row')}`, 'data-row-link');
+      button.type = 'button'; button.addEventListener('click', () => selectRow(rowMeta(row, 'row_key'))); cell.append(button);
+      tr.append(cell, element('td', rowMeta(row, 'partition')), element('td', rowMeta(row, 'retained') ? 'Yes' : 'No'));
       visible.forEach(name => tr.append(element('td', formatRowValue(row, name))));
       output.tBodies[0].append(tr);
     });
     $('data-row-table').replaceChildren(output);
-    $('data-row-page').textContent = rows.length ? `${state.page * size + 1}–${Math.min(rows.length, (state.page + 1) * size)} of ${rows.length}` : 'No matching rows';
+    $('data-row-page').textContent = rows.length ? `${formatCount(state.page * size + 1)}–${formatCount(Math.min(rows.length, (state.page + 1) * size))} of ${formatCount(rows.length)}` : 'No matching rows';
     $('data-row-prev').disabled = state.page === 0; $('data-row-next').disabled = state.page === lastPage;
     if (state.selected) selectRow(state.selected, false);
-  }
+  });
   function render() {
+    try {
     $('data-column-select').value = state.column;
+    if ($('data-row-sort')) $('data-row-sort').value = state.sort;
+    $('data-variable-title').textContent = state.column;
+    $('data-variable-role').textContent = `${columnsByName.get(state.column).role} · ${axisFor(state.column).kind}`;
     root.querySelectorAll('[data-column-name]').forEach(button => {
       const name = button.dataset.columnName, column = columnsByName.get(name);
-      const count = splits().reduce((total, split) => total + (distribution(name, split).n_missing || 0), 0);
+      const count = splits().reduce((total, split) => total + (stage().columns[name][split].n_missing || 0), 0);
       button.setAttribute('aria-pressed', String(name === state.column));
       button.querySelector('span').textContent = `${column.role} · ${axisFor(name).kind}` +
-        (count > 0 ? ` · ${number(count)} missing` : '');
-      const scope = `${state.filters.length ? 'Filtered exported sample' : 'Full available rows'} · ` +
-        `${stage().population} · ${splits().join(' and ')}. Missing counts follow the selected values and splits.`;
+        (count > 0 ? ` · ${formatCount(count)} missing${state.filters.length ? ' in all rows' : ''}` : '');
+      const scope = `Full available rows · ${stage().population} · ${splits().join(' and ')}. ` +
+        'Column-list missing counts describe all available rows; the selected chart follows active filters.';
       button.title = scope;
       button.setAttribute('aria-description', scope);
     });
@@ -637,7 +798,11 @@
     });
     $('data-pair-control').hidden = state.view === 'distribution';
     $('data-scale-control').hidden = state.view !== 'distribution';
-    population(); renderDistribution(); renderPair(); renderRows();
+    population();
+    if (state.view === 'distribution') renderDistribution();
+    if (state.view === 'relationships') renderPair();
+    if (state.view === 'records') renderRows();
+    } catch (error) { showDataError(error); }
   }
   function chooseView(view) {
     if (!['distribution', 'relationships', 'records'].includes(view)) return;
@@ -661,7 +826,25 @@
     $(id).addEventListener('change', event => { state[key] = event.target.value; state.page = 0; render(); });
   });
   if (payload.mode === 'rows') {
-    const updateFilterInput = () => {
+    let categoryKey = null, categoryValues = [], chosenCategories = new Set();
+    const renderCategoryOptions = protect(() => {
+      const query = $('data-filter-level-search').value.toLowerCase();
+      let matching = 0;
+      const visible = [];
+      for (const value of categoryValues) {
+        if (!value.toLowerCase().includes(query)) continue;
+        matching++;
+        if (visible.length < 200) visible.push(value);
+      }
+      const shown = Array.from(new Set([...chosenCategories, ...visible]));
+      $('data-filter-levels').replaceChildren(...shown.map(value => {
+        const option = element('option', value); option.value = value;
+        option.selected = chosenCategories.has(value); return option;
+      }));
+      $('data-filter-level-count').textContent = `${formatCount(visible.length)} of ${formatCount(matching)} matching categories shown. ` +
+        `${formatCount(chosenCategories.size)} selected.` + (matching > visible.length ? ' Search to find others; selected values stay included.' : '');
+    });
+    const updateFilterInput = protect(() => {
       const axis = axisFor($('data-filter-column').value), input = $('data-filter-value');
       const operator = $('data-filter-op');
       Array.from(operator.options).forEach(option => {
@@ -673,20 +856,32 @@
       input.disabled = ['missing', 'present', 'nonfinite'].includes(op);
       input.parentElement.hidden = op === 'in';
       $('data-filter-level-label').hidden = op !== 'in';
+      $('data-filter-level-search-label').hidden = op !== 'in';
       if (op === 'in') {
-        const values = Array.from(new Set(records.map(row => rowValue(row, $('data-filter-column').value))
-          .filter(value => !missing(value)).map(String))).sort();
-        $('data-filter-levels').replaceChildren(...values.map(value => {
-          const option = element('option', value); option.value = value; return option;
-        }));
+        const key = JSON.stringify([state.stage, $('data-filter-column').value]);
+        if (key !== categoryKey) {
+          categoryKey = key; chosenCategories = new Set(); $('data-filter-level-search').value = '';
+          const values = new Set();
+          for (const row of records) {
+            const value = rowValue(row, $('data-filter-column').value);
+            if (!missing(value)) values.add(String(value));
+          }
+          categoryValues = Array.from(values).sort();
+        }
+        renderCategoryOptions();
       }
       input.type = axis.kind === 'date' ? 'date' : axis.kind === 'datetime' ? 'datetime-local' :
         ['ge', 'le'].includes(op) ? 'number' : 'text';
       if (input.type === 'number') input.step = 'any';
-    };
+    });
     $('data-filter-op').addEventListener('change', updateFilterInput);
     $('data-filter-column').addEventListener('change', updateFilterInput);
     $('data-stage').addEventListener('change', updateFilterInput);
+    $('data-filter-level-search').addEventListener('input', renderCategoryOptions);
+    $('data-filter-levels').addEventListener('change', () => {
+      chosenCategories = new Set(Array.from($('data-filter-levels').selectedOptions, option => option.value));
+      $('data-filter-level-count').textContent = `${formatCount(chosenCategories.size)} selected. Search to find additional categories.`;
+    });
     $('data-filter-form').addEventListener('submit', event => {
       event.preventDefault(); const op = $('data-filter-op').value, display = $('data-filter-value').value;
       const column = $('data-filter-column').value, kind = axisFor(column).kind;
@@ -695,7 +890,7 @@
         return;
       }
       if (op === 'in') {
-        const values = Array.from($('data-filter-levels').selectedOptions, option => option.value);
+        const values = Array.from(chosenCategories);
         if (!values.length) { $('data-filter-status').textContent = 'Select at least one category.'; return; }
         state.filters.push({column, op, values, value: '', display: values.join(', '), stage: state.stage});
         state.page = 0; render(); return;
@@ -714,30 +909,45 @@
       state.page = 0; render();
     });
     $('data-filter-reset').addEventListener('click', () => { state.filters = []; state.page = 0; render(); });
+    $('data-record-lookup').addEventListener('submit', event => {
+      event.preventDefault();
+      const key = $('data-record-key').value.trim();
+      if (store.findKey(key) < 0) {
+        $('data-record-status').textContent = 'That exact record key is not in this export.';
+        return;
+      }
+      $('data-record-status').textContent = '';
+      window.dispatchEvent(new CustomEvent('axr:select-row', {detail: {row_key: key}}));
+    });
+    $('data-scatter-details').addEventListener('toggle', () => {
+      if ($('data-scatter-details').open) renderScatter(filteredRows());
+    });
     $('data-row-sort').addEventListener('change', event => { state.sort = event.target.value; state.page = 0; renderRows(); });
     $('data-row-direction').addEventListener('click', event => {
       state.direction *= -1; event.target.textContent = state.direction === 1 ? 'Ascending' : 'Descending'; renderRows();
     });
     $('data-row-prev').addEventListener('click', () => { state.page--; renderRows(); });
     $('data-row-next').addEventListener('click', () => { state.page++; renderRows(); });
-    window.addEventListener('axr:select-row', event => {
-      const row = records.find(item => item.row_key === event.detail?.row_key);
-      if (!row) return;
-      state.view = 'records'; state.split = row.partition; state.filters = []; state.sort = 'source_row'; state.direction = 1;
+    window.addEventListener('axr:select-row', protect(event => {
+      const row = store.findKey(event.detail?.row_key);
+      if (row < 0) return;
+      state.view = 'records'; state.split = rowMeta(row, 'partition'); state.filters = []; state.sort = 'source_row'; state.direction = 1;
+      if (!rowMeta(row, 'retained') && profile.stages.raw) { state.stage = 'raw'; $('data-stage').value = 'raw'; }
       $('data-split').value = state.split; $('data-row-sort').value = 'source_row';
       $('data-row-direction').textContent = 'Ascending';
-      const order = filteredRows().sort((a, b) => a.source_row - b.source_row);
-      state.page = Math.max(0, Math.floor(order.findIndex(item => item.row_key === row.row_key) / 10));
-      render(); selectRow(row.row_key, true);
+      const order = filteredRows().slice().sort((a, b) => rowMeta(a, 'source_row') - rowMeta(b, 'source_row'));
+      state.page = Math.max(0, Math.floor(order.findIndex(item => rowMeta(item, 'row_key') === rowMeta(row, 'row_key')) / 10));
+      render(); selectRow(rowMeta(row, 'row_key'), true);
       requestAnimationFrame(() => $('data-selected-row').scrollIntoView({block: 'nearest'}));
-    });
+    }));
     updateFilterInput();
   }
   window.AutoXplainRData = {
     selectColumn: chooseColumn,
     selectView: chooseView,
     selectRow: key => payload.mode === 'rows' && window.dispatchEvent(new CustomEvent('axr:select-row', {detail: {row_key: key}})),
-    getState: () => ({...state, filters: state.filters.map(filter => ({...filter})), matchingRows: filteredRows().length})
+    getState: () => ({...state, filters: state.filters.map(filter => ({...filter})), matchingRows: filteredRows().length}),
+    loadedColumns: store.loadedColumns
   };
   window.addEventListener('hashchange', () => {
     if (window.location.hash === '#relationships') chooseView('relationships');

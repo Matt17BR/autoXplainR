@@ -1,6 +1,6 @@
 # Source and intellectual-property provenance
 
-This record covers the source tree prepared for AutoXplainR 0.6.0. It is kept
+This record covers the source tree prepared for AutoXplainR 0.7.0. It is kept
 outside the CRAN source archive because it documents repository governance
 rather than installed package behavior.
 
@@ -9,8 +9,16 @@ rather than installed package behavior.
 - The Git history through 2026-09-07 attributes the project source,
   documentation, tests, and generated website inputs to Matteo Mazzarelli, the
   author and maintainer named in `DESCRIPTION`.
-- The package contains no vendored third-party software or compiled binary.
-  Examples and tests use standard R data such as `mtcars` and `iris` or construct
+- The package includes the unmodified UMD distribution of fflate 0.8.3, with an
+  added attribution header, for offline report decompression. Its MIT license
+  and 2026 Arjun Barrett copyright notice are retained in
+  `inst/report/fflate-LICENSE.txt` and embedded in generated reports.
+  `inst/report/fflate-source.json` identifies the upstream archive, original
+  file and SHA256 checksums. `validation/scalability/reports/check-vendor.py`
+  verifies the distributed file and attribution. `DESCRIPTION` identifies the
+  third-party copyright holder separately from the package author.
+- The package contains no compiled binary. Examples and tests use standard R
+  data such as `mtcars` and `iris` or construct
   synthetic data at runtime. Public website reports deliberately embed their
   example records and fitted summaries: synthetic delivery and churn data, and
   R's `iris` data. Their generators are in `validation/`; website HTML is excluded

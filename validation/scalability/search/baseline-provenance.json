@@ -1,0 +1,8 @@
+{
+  "baseline_version": "0.6.2",
+  "source_archive": "/home/mmazzarelli/.cache/autoxplain-stress-0.6.2/published-release/AutoXplainR_0.6.2.tar.gz",
+  "sha256": "e15ee291f447414a16e10acce0f69cca826d7e58b424f5597c41ea9f56114624",
+  "native_threads": 1,
+  "holdout_used_to_choose_solver": false,
+  "comparison": "Identical saved training folds, additive k=5/gamma=1/select=TRUE; gam from published package, continuous and discrete BAM from installed mgcv1.9-4 wrapped for independent prediction/score checks. Published optimizer extraction rejects discrete BAM after successful native fits; retained as integration failures."
+}

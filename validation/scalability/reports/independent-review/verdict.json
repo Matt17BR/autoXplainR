@@ -1,0 +1,8 @@
+{
+  "cases": 8,
+  "raw_processed_cells": 1162,
+  "record_direct_equal": true,
+  "legacy_equal_except_AsIs_scalar_normalization_and_wire_known_levels": true,
+  "all_exported_category_classifications_equal": true,
+  "independent_python_zlib_hostile_unicode": true
+}

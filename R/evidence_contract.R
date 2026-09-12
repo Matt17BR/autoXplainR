@@ -25,6 +25,9 @@ model_identity_payload <- function(value, data_variables = character()) {
   if (is.list(value)) {
     output <- lapply(value, model_identity_payload, data_variables = data_variables)
     attributes(output) <- lapply(attributes(value), model_identity_payload, data_variables = data_variables)
+    if (inherits(value, "gam")) {
+      output$prediction_smooth_context <- gam_smooth_prediction_context(value, data_variables)
+    }
     # predict.glm(type = "response") executes this fitted object's inverse link.
     # Standard stats links retain their established identity; caller-defined
     # links additionally bind the lexical state they execute on perturbed rows.
