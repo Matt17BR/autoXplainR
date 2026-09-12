@@ -100,9 +100,9 @@ bench$summary
 #> 1      main_model computed                 6           2                     2
 #> 2 simple_baseline computed                 6           2                     2
 #>   min_ms_per_batch p25_ms_per_batch median_ms_per_batch p75_ms_per_batch
-#> 1        0.4285714        0.4464286           0.4642857        0.4821429
-#> 2        0.1811024        0.1870079           0.1929134        0.1988189
+#> 1        0.6216216        0.6216216           0.6216216        0.6216216
+#> 2        0.2876712        0.2979452           0.3082192        0.3184932
 #>   max_ms_per_batch median_ms_per_row warning
-#> 1        0.5000000        0.07738095        
-#> 2        0.2047244        0.03215223        
+#> 1        0.6216216        0.10360360        
+#> 2        0.3287671        0.05136986        
 ```
