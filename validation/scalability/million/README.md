@@ -87,6 +87,12 @@ Monte Carlo settings are recorded. The original one-call `controlled_full`
 benchmark uses the package's default report settings instead. Schedule and bound
 large replay/report processes just as you would fitting runs.
 
+`render-saved.R` provides a separate review report with six top features, up to
+four models, five permutation repeats, 5,000 explanation rows and 1,000 exported
+data rows. It records the chosen limits beside the HTML. That report helps
+inspect actual prediction errors and feature effects in a completed fit, while
+the one-call full-workflow measurements retain their own default settings.
+
 ## Reading evidence
 
 Each run records source hashes, package and engine versions, data provenance,
@@ -103,6 +109,10 @@ numerical setting, prediction, score, row count or fit seed still fails parity.
 Its `object.size()` results count shared vectors repeatedly and should not be
 mistaken for measured resident-memory attribution. `summarize.py` produces both
 a run index and inclusive stage durations; nested stage times must not be summed.
+Run it on each `baseline` or `candidate-v*` directory, then use
+`collect-results.py CACHE OUTPUT.json` to produce a portable combined index.
+That index retains failed attempts, distinguishes the two established harness
+mistakes below, and links the immutable candidate source manifests by hash.
 
 Initial harness mistakes are preserved in their original cache directories:
 one attempt could not serialize an R `table` before calling the package, and
@@ -135,6 +145,15 @@ five-fold CV, whose pooled RMSE was 0.772083. On the unchanged independent
 20,000-row evaluation set, RMSE improved from 1.6988 to 0.7475. All 15 default
 configurations completed; convergence remains a requirement for selection.
 
+For this regression generator, `conditional-reference.R` also calculates the
+known mean given the inputs the model can actually see. A hidden, independent,
+mean-zero `x3` contributes zero to that mean; the irrelevant missing `x8` changes
+nothing. This reference has RMSE 0.727177 on the fixed evaluation set, compared
+with 0.699287 when the hidden values are supplied. Its population RMSE is
+`sqrt(0.7^2 + 0.02 * 1.5^2) = 0.731437`. The new default's 0.7475 is therefore
+close to the reference that respects missing inputs. This calculation is a
+diagnostic reference only and was never used for fitting or selecting a model.
+
 That quality improvement has a cost: the public call increased from 49.104 to
 82.588 seconds. Peak RSS was 277,316 versus 257,500 KiB. Retaining OOF evidence
 for the recovered configurations increased the uncompressed result from
@@ -143,6 +162,30 @@ checks for every retained model. Actual native neural fitted-value arrays and
 the tree root independently confirm all 10,000 training rows were used.
 These observations support the new configurable iteration budget; they do not
 establish that 2,000 iterations will converge on every dataset.
+
+The two million-row classification controls also completed with every training
+row and the same 20,000 independent evaluation rows. The candidate planned native
+categorical boosting once from outer-training dimensions, then kept that
+representation fixed through both folds and the final fit. Tracing `xgb.train()`
+confirmed the actual final matrix contained 1,000,000 rows and 22 columns;
+the published matrix encoding had 55 columns. Category levels and imputation
+remained local to each training fold.
+
+| Million-row control | Published public call | Candidate public call | Published peak RSS | Candidate peak RSS | Published boosting log loss | Candidate boosting log loss |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Rare binary | 188.882 s | 70.777 s | 6,125,976 KiB | 3,503,424 KiB | 0.0699033 | 0.0686940 |
+| Four classes | 328.787 s | 200.551 s | 5,717,652 KiB | 3,257,168 KiB | 0.9219975 | 0.9050906 |
+
+These boosting losses are deliberately not presented as prediction parity:
+native category partitions are a different model representation from numeric
+contrasts. Both versions selected using CV only; the regularized and intercept
+baseline holdout losses remained identical. Fresh processes reloaded all three
+models, predicted every holdout row, preserved predictions when factor levels
+were reordered, and returned finite predictions for the tested missing values
+and previously unseen category. The candidate saved results still occupied
+871,494,857 and 705,542,148 bytes respectively because they retain the full data
+and evaluation evidence. These fit-only controls do not establish full-report
+latency or the cost of the unrestricted default search on a million rows.
 
 The raw evidence is kept outside the source package at
 `~/.cache/autoxplain-scale-0.7.0/`. Findings and final before/after measurements

@@ -337,6 +337,12 @@ split_row_overlap <- function(training, evaluation) {
     }
     if (!identical(first_type, second_type)) return(integer())
     value <- c(first[training_rows], second[evaluation_rows])
+    if (first_type == "text" && any(Encoding(value) == "bytes")) {
+      # Older R versions cannot match byte-marked and encoded text together.
+      # Other columns still narrow the candidates before exact serialization.
+      fallback <- TRUE
+      next
+    }
     group <- c(training_group, evaluation_group)
     if (first_type == "numeric") {
       # Comparing both binary64 words preserves the existing distinctions

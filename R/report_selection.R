@@ -523,11 +523,14 @@ selection_candidate_details <- function(candidate, evidence) {
   issues <- unique(c(folds$error, folds$warning))
   issues <- issues[!is.na(issues) & nzchar(issues)]
   detail <- vapply(seq_len(nrow(folds)), function(index) {
+    learned <- folds$learned[[index]] %||% NULL
+    # Reconstruction instructions belong in model details, not every CV fold.
+    if (is.list(learned)) learned$call_reconstruction <- NULL
     paste0(
       "<li><strong>Fold ", html_escape(folds$fold[[index]]), "</strong>: ",
       "requested: ", html_escape(model_spec_value(folds$requested_parameters[[index]])),
       "; effective: ", html_escape(model_spec_value(folds$effective_parameters[[index]])),
-      "; learned: ", html_escape(model_spec_value(folds$learned[[index]] %||% NULL)), "</li>"
+      "; learned: ", html_escape(model_spec_value(learned)), "</li>"
     )
   }, character(1))
   paste0(

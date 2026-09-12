@@ -5,8 +5,11 @@ stopifnot(length(args) == 3L)
 before_dir <- normalizePath(args[[1L]])
 after_dir <- normalizePath(args[[2L]])
 metadata <- jsonlite::read_json(file.path(after_dir, "input.json"), simplifyVector = TRUE)
-.libPaths(c(dirname(metadata$library), .libPaths()))
+library_path <- normalizePath(dirname(metadata$library), mustWork = TRUE)
+.libPaths(c(library_path, .libPaths()))
 library(AutoXplainR)
+loaded_library <- normalizePath(find.package("AutoXplainR"), mustWork = TRUE)
+stopifnot(loaded_library == file.path(library_path, "AutoXplainR"))
 script <- normalizePath(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)))
 fixture <- file.path(dirname(script), "fixtures.R")
 stopifnot(unname(tools::md5sum(fixture)) == metadata$fixture_source_md5)
@@ -100,6 +103,7 @@ compare("raw new-data predictions", before_replay, after_replay)
 jsonlite::write_json(list(
   status = if (length(failures)) "difference" else "identical_within_tolerance",
   tolerance = 1e-10, before = before_dir, after = after_dir,
+  library = loaded_library, version = as.character(packageVersion("AutoXplainR")),
   training_rows = nrow(after$training_data), evaluation_rows = nrow(after$test_data),
   models = length(after$models), full_holdout_predictions_checked_per_model = nrow(after$test_data),
   expected_metadata_changes = metadata_changes, failures = failures

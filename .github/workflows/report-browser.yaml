@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   generated-report:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -118,6 +118,10 @@ jobs:
           python validation/scalability/reports/check-vendor.py
           Rscript validation/scalability/reports/benchmark.R candidate 2500
           Rscript validation/scalability/reports/generate-compatibility.R
+          Rscript validation/scalability/reports/generate-chunk-fixtures.R
+          Rscript validation/scalability/reports/benchmark.R candidate 50000
+          python validation/scalability/reports/check-json-chunks.py --folder "$AXR_SCALE_OUTPUT/chunks" --report "$AXR_SCALE_OUTPUT/candidate/50000/report.html" --browsers chromium firefox webkit
+          python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/50000" --require-chunks --browsers chromium firefox webkit
           python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
           python validation/scalability/reports/check-codec.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
           python validation/scalability/reports/check-categories.py --folder "$AXR_SCALE_OUTPUT/compatibility" --browsers chromium firefox webkit

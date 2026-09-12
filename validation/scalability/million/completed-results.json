@@ -1,0 +1,1032 @@
+{
+  "scope": "Completed and failed staged measurements. Single Linux host, one native thread, external process bounds. Missing cases are not implied to have passed.",
+  "published_baseline_sha256": "e15ee291f447414a16e10acce0f69cca826d7e58b424f5597c41ea9f56114624",
+  "candidate_source_manifests": [
+    {
+      "series": "candidate-v1",
+      "source_manifest": "candidate-source-v1-manifest.json",
+      "manifest_sha256": "e03636710ce20ecc0e780dda470e10cff1fa5d3ca2a4195fd2d40d1c79de0b71"
+    },
+    {
+      "series": "candidate-v3",
+      "source_manifest": "candidate-source-v3-manifest.json",
+      "manifest_sha256": "cce2f82ff6f7a8eaf67eb4a03322ec9323c1c0ae1316edb6b41aaa4cde65b50c"
+    }
+  ],
+  "runs": [
+    {
+      "run": "multiclass-10000-controlled-fit",
+      "problem": "multiclass",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "error",
+      "failure_origin": "harness",
+      "failure_explanation": "verification tolerance stricter than the public native-probability contract",
+      "public_call_completed": true,
+      "public_call_seconds": null,
+      "wall_seconds": 8.733106829000462,
+      "peak_rss_kib": 384356,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": null,
+      "saved_bytes": null,
+      "error": "max(abs(rowSums(prediction) - 1)) < 1e-08 is not TRUE",
+      "last_stage": "caught_error",
+      "metrics": null,
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-10000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "multiclass-10000-controlled-fit-v2",
+      "problem": "multiclass",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 8.921,
+      "wall_seconds": 9.637104136999369,
+      "peak_rss_kib": 393264,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 26381524,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.9284,
+          "recorded_loss": 0.9284,
+          "maximum_probability_sum_error": 8.5682e-08
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.945,
+          "recorded_loss": 0.945,
+          "maximum_probability_sum_error": 2.2204e-16
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 1.2538,
+          "recorded_loss": 1.2538,
+          "maximum_probability_sum_error": 0
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-10000-controlled-fit-v2",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "multiclass-100000-controlled-fit",
+      "problem": "multiclass",
+      "rows": 100000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 36.859,
+      "wall_seconds": 37.8119154470005,
+      "peak_rss_kib": 833612,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 112053396,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.9217,
+          "recorded_loss": 0.9217,
+          "maximum_probability_sum_error": 8.9407e-08
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.9427,
+          "recorded_loss": 0.9427,
+          "maximum_probability_sum_error": 2.2204e-16
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 1.2533,
+          "recorded_loss": 1.2533,
+          "maximum_probability_sum_error": 0
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-100000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "multiclass-1000000-controlled-fit",
+      "problem": "multiclass",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 328.787,
+      "wall_seconds": 331.9742183610015,
+      "peak_rss_kib": 5717652,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 970841120,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.922,
+          "recorded_loss": 0.922,
+          "maximum_probability_sum_error": 8.9407e-08
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.9449,
+          "recorded_loss": 0.9449,
+          "maximum_probability_sum_error": 2.2204e-16
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 1.2533,
+          "recorded_loss": 1.2533,
+          "maximum_probability_sum_error": 0
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/multiclass-1000000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "rare_binary-10000-controlled-fit",
+      "problem": "rare_binary",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "error",
+      "failure_origin": "harness",
+      "failure_explanation": "fixture metadata serialization before the public call",
+      "public_call_completed": false,
+      "public_call_seconds": null,
+      "wall_seconds": 0.3158686349997879,
+      "peak_rss_kib": 89536,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": null,
+      "saved_bytes": null,
+      "error": "No method asJSON S3 class: table",
+      "last_stage": "caught_error",
+      "metrics": null,
+      "configurations_attempted": null,
+      "configurations_failed": null,
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-10000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "rare_binary-10000-controlled-fit-v2",
+      "problem": "rare_binary",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 5.803,
+      "wall_seconds": 6.382359278999502,
+      "peak_rss_kib": 387788,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 27905597,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.0718,
+          "recorded_loss": 0.0718
+        },
+        {
+          "model_id": "boosting_model",
+          "metric": "log_loss",
+          "loss": 0.0727,
+          "recorded_loss": 0.0727
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 0.1039,
+          "recorded_loss": 0.1039
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-10000-controlled-fit-v2",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "rare_binary-100000-controlled-fit",
+      "problem": "rare_binary",
+      "rows": 100000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 20.838,
+      "wall_seconds": 21.765746877999845,
+      "peak_rss_kib": 1105616,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 128991745,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.0712,
+          "recorded_loss": 0.0712,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "boosting_model",
+          "metric": "log_loss",
+          "loss": 0.07,
+          "recorded_loss": 0.07,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 0.1039,
+          "recorded_loss": 0.1039,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-100000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "rare_binary-1000000-controlled-fit",
+      "problem": "rare_binary",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 188.882,
+      "wall_seconds": 192.70755510399977,
+      "peak_rss_kib": 6125976,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 1140795555,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.0699,
+          "recorded_loss": 0.0699,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.0712,
+          "recorded_loss": 0.0712,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 0.1039,
+          "recorded_loss": 0.1039,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/rare_binary-1000000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "regression-10000-controlled-fit",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 6.302,
+      "wall_seconds": 7.232959578000191,
+      "peak_rss_kib": 367924,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 24981112,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6791,
+          "recorded_loss": 1.6791
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0353,
+          "recorded_loss": 2.0353
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "regression-10000-controlled-full",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_full",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 45.59,
+      "wall_seconds": 46.1150237060001,
+      "peak_rss_kib": 475652,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 25148456,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6791,
+          "recorded_loss": 1.6791,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0353,
+          "recorded_loss": 2.0353,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-controlled-full",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "regression-10000-default-fit",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "default_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 49.104,
+      "wall_seconds": 49.72758303299997,
+      "peak_rss_kib": 277316,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 4,
+      "saved_bytes": 39357524,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6988,
+          "recorded_loss": 1.6988,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "tree_model",
+          "metric": "rmse",
+          "loss": 1.7941,
+          "recorded_loss": 1.7941,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "linear_model",
+          "metric": "rmse",
+          "loss": 2.0348,
+          "recorded_loss": 2.0348,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 15,
+      "configurations_failed": [
+        {
+          "configuration_id": "neural_03",
+          "family": "neural",
+          "hyperparameters": "hidden units = 4, weight decay = 0.01",
+          "folds_completed": 1,
+          "optimization_issues": 4,
+          "status": "failed"
+        },
+        {
+          "configuration_id": "neural_07",
+          "family": "neural",
+          "hyperparameters": "hidden units = 4, weight decay = 0.001",
+          "folds_completed": 0,
+          "optimization_issues": 5,
+          "status": "failed"
+        },
+        {
+          "configuration_id": "neural_04",
+          "family": "neural",
+          "hyperparameters": "hidden units = 6, weight decay = 0.01",
+          "folds_completed": 0,
+          "optimization_issues": 5,
+          "status": "failed"
+        },
+        {
+          "configuration_id": "neural_05",
+          "family": "neural",
+          "hyperparameters": "hidden units = 8, weight decay = 0.001",
+          "folds_completed": 0,
+          "optimization_issues": 5,
+          "status": "failed"
+        }
+      ],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-10000-default-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "regression-100000-controlled-fit",
+      "problem": "regression",
+      "rows": 100000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 16.362,
+      "wall_seconds": 17.106397660998482,
+      "peak_rss_kib": 861988,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 104717029,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6845,
+          "recorded_loss": 1.6845,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0347,
+          "recorded_loss": 2.0347,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5202,
+          "recorded_loss": 2.5202,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-100000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "regression-1000000-controlled-fit",
+      "problem": "regression",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 145.331,
+      "wall_seconds": 147.80398678300116,
+      "peak_rss_kib": 4911800,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 903015420,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6835,
+          "recorded_loss": 1.6835,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0372,
+          "recorded_loss": 2.0372,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/regression-1000000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "wide-10000-controlled-fit",
+      "problem": "wide",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 30.915,
+      "wall_seconds": 33.10709715499979,
+      "peak_rss_kib": 1748036,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 135180197,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.8235,
+          "recorded_loss": 1.8235
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.1279,
+          "recorded_loss": 2.1279
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.6182,
+          "recorded_loss": 2.6182
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": null,
+      "families_refit_failed": null,
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/wide-10000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "wide-100000-controlled-fit",
+      "problem": "wide",
+      "rows": 100000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.6.2",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 126.832,
+      "wall_seconds": 129.58148854599858,
+      "peak_rss_kib": 6688820,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 568919930,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.8239,
+          "recorded_loss": 1.8239,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.1367,
+          "recorded_loss": 2.1367,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.618,
+          "recorded_loss": 2.618,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": null,
+      "series": "baseline",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/baseline/wide-100000-controlled-fit",
+      "library_role": "published0.6.2"
+    },
+    {
+      "run": "rare_binary-1000000-controlled-fit",
+      "problem": "rare_binary",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 70.777,
+      "wall_seconds": 73.73495373199876,
+      "peak_rss_kib": 3503424,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 871494857,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.0687,
+          "recorded_loss": 0.0687,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.0712,
+          "recorded_loss": 0.0712,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 0.1039,
+          "recorded_loss": 0.1039,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "candidate-v1",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/rare_binary-1000000-controlled-fit",
+      "library_role": "candidate-v1"
+    },
+    {
+      "run": "regression-10000-controlled-fit",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 1.566,
+      "wall_seconds": 2.1705329719989095,
+      "peak_rss_kib": 350324,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 22433567,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6791,
+          "recorded_loss": 1.6791,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0353,
+          "recorded_loss": 2.0353,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": null,
+      "series": "candidate-v1",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/regression-10000-controlled-fit",
+      "library_role": "candidate-v1"
+    },
+    {
+      "run": "regression-1000000-controlled-fit",
+      "problem": "regression",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 33.596,
+      "wall_seconds": 35.89544655099962,
+      "peak_rss_kib": 2814432,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 654947875,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 1.6835,
+          "recorded_loss": 1.6835,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "rmse",
+          "loss": 2.0372,
+          "recorded_loss": 2.0372,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "candidate-v1",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v1/regression-1000000-controlled-fit",
+      "library_role": "candidate-v1"
+    },
+    {
+      "run": "multiclass-1000000-controlled-fit",
+      "problem": "multiclass",
+      "rows": 1000000,
+      "evaluation_rows": 20000,
+      "mode": "controlled_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 200.551,
+      "wall_seconds": 203.48023839899906,
+      "peak_rss_kib": 3257168,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 3,
+      "saved_bytes": 705542148,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "log_loss",
+          "loss": 0.9051,
+          "recorded_loss": 0.9051,
+          "maximum_probability_sum_error": 8.5682e-08
+        },
+        {
+          "model_id": "regularized_model",
+          "metric": "log_loss",
+          "loss": 0.9449,
+          "recorded_loss": 0.9449,
+          "maximum_probability_sum_error": 2.2204e-16
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "log_loss",
+          "loss": 1.2533,
+          "recorded_loss": 1.2533,
+          "maximum_probability_sum_error": 0
+        }
+      ],
+      "configurations_attempted": 2,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "candidate-v3",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v3/multiclass-1000000-controlled-fit",
+      "library_role": "candidate-v3"
+    },
+    {
+      "run": "regression-10000-default-fit",
+      "problem": "regression",
+      "rows": 10000,
+      "evaluation_rows": 20000,
+      "mode": "default_fit",
+      "package": "0.7.0",
+      "status": "passed",
+      "failure_origin": null,
+      "failure_explanation": null,
+      "public_call_completed": true,
+      "public_call_seconds": 82.588,
+      "wall_seconds": 83.29649239399987,
+      "peak_rss_kib": 257500,
+      "peak_rss_source": "process peak from /usr/bin/time",
+      "models": 4,
+      "saved_bytes": 41768184,
+      "error": null,
+      "last_stage": "save_model",
+      "metrics": [
+        {
+          "model_id": "main_model",
+          "metric": "rmse",
+          "loss": 0.7475,
+          "recorded_loss": 0.7475,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "tree_model",
+          "metric": "rmse",
+          "loss": 1.7941,
+          "recorded_loss": 1.7941,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "linear_model",
+          "metric": "rmse",
+          "loss": 2.0348,
+          "recorded_loss": 2.0348,
+          "maximum_probability_sum_error": null
+        },
+        {
+          "model_id": "simple_baseline",
+          "metric": "rmse",
+          "loss": 2.5203,
+          "recorded_loss": 2.5203,
+          "maximum_probability_sum_error": null
+        }
+      ],
+      "configurations_attempted": 15,
+      "configurations_failed": [],
+      "families_resampling_failed": [],
+      "families_refit_failed": [],
+      "cold_replay_status": "passed",
+      "series": "candidate-v3",
+      "evidence_directory": "~/.cache/autoxplain-scale-0.7.0/candidate-v3/regression-10000-default-fit",
+      "library_role": "candidate-v3"
+    }
+  ]
+}

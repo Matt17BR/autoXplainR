@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "published_release_run": 34659828765,
+  "published_release_job": 103459820923,
+  "published_sha": "f71f7edcbe3f3cfbbd1831ab6c2eb4fd44647167",
+  "R": "4.1.3",
+  "rpart": "4.1.16",
+  "withr": "3.0.3",
+  "testthat": "3.3.2",
+  "baseline_warning_count": 692,
+  "candidate_warning_count": 698,
+  "baseline_warning_counts": {
+    "test-linear-rank.R rank-deficient linear fits retain native predictions and expose the warning": 6,
+    "test-tuning.R local tuning is reproducible and isolated from the outer holdout": 132,
+    "test-tuning.R best-score tuning rule chooses the minimum resampled loss": 66,
+    "test-tuning.R tuned classification models retain valid probability contracts": 212,
+    "test-tuning.R outer evaluation values cannot change training-only tuning": 135,
+    "test-tuning.R tuning validation is actionable": 38,
+    "test-tuning.R guided report explains tuning separately from final evaluation": 94,
+    "test-validation-design.R group holdouts and tuning keep entire units separate": 3,
+    "test-validation-design.R outer test labels cannot change grouped tuning or preprocessing": 6
+  },
+  "candidate_warning_counts": {
+    "test-linear-rank.R rank-deficient linear fits retain native predictions and expose the warning": 6,
+    "test-tuning-streaming.R streamed stochastic folds preserve paired records and OOF retention is optional": 6,
+    "test-tuning.R local tuning is reproducible and isolated from the outer holdout": 132,
+    "test-tuning.R best-score tuning rule chooses the minimum resampled loss": 66,
+    "test-tuning.R tuned classification models retain valid probability contracts": 212,
+    "test-tuning.R outer evaluation values cannot change training-only tuning": 135,
+    "test-tuning.R tuning validation is actionable": 38,
+    "test-tuning.R guided report explains tuning separately from final evaluation": 94,
+    "test-validation-design.R group holdouts and tuning keep entire units separate": 3,
+    "test-validation-design.R outer test labels cannot change grouped tuning or preprocessing": 6
+  },
+  "difference": "Six additional rpart internal partial-match warnings from the new streaming test; all other counts identical.",
+  "warnings_suppressed": false
+}

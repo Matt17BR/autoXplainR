@@ -14,9 +14,12 @@ million-row problem or every optional learner is practical.
 | Million-row rare-event classification, two configurations and two folds | 188.882 s | 70.777 s | Same search budget; automatic native categories change the boosting fit |
 | Peak process memory for that classification workflow | 6,125,976 KiB | 3,503,424 KiB | Whole fresh R process |
 | Held-out log loss for its primary model | 0.0699033 | 0.0686940 | All 20,000 fixed independent evaluation rows; lower is better |
+| Million-row four-class classification, two configurations and two folds | 328.787 s | 200.551 s | Same search budget; native categories change the boosting fit |
+| Peak process memory for that multiclass workflow | 5,717,652 KiB | 3,257,168 KiB | Whole fresh R process |
+| Held-out log loss for its primary model | 0.9220 | 0.9051 | All 20,000 fixed independent evaluation rows |
 | Ordinary core defaults on 10,000 nonlinear training rows | RMSE 1.6988; 49.104 s | RMSE 0.7475; 82.588 s | Same 20,000-row holdout; larger neural iteration budget |
-| 200,100 explicitly exported records, three numeric columns | 121.66 MB, 85.319 s | 17.55 MB, 5.266 s | Full HTML rendering from the same supplied model |
-| Wide report, 500 inputs and all 1,200 records | 59.88 MB, 16.277 s | 15.69 MB, 14.929 s | Full HTML rendering from the same saved fit |
+| 200,100 explicitly exported records, three numeric columns | 121.66 MB, 85.319 s | 17.56 MB, 5.064 s | Full HTML rendering from the same supplied model |
+| Wide report, 500 inputs and all 1,200 records | 59.88 MB, 16.277 s | 15.85 MB, 15.094 s | Full HTML rendering from the same saved fit |
 
 The million-row fitting comparison uses the immutable `candidate-source-v1`
 installation. It fits all one million training rows and scores a separately
@@ -33,16 +36,25 @@ boosting predictions change, while the regularized and intercept-only losses
 remain identical. Both versions passed fresh-session reload and complete
 holdout scoring, including reversed factor-level order and new/missing categories.
 
+The four-class workflow uses `candidate-source-v3`. It also fits every training
+row, using 22 native columns instead of 55 expanded columns for boosting. Its
+regularized and intercept-only losses are unchanged, every configuration
+completed, and both versions passed fresh-process reload and complete holdout
+probability checks. Its uncompressed saved result fell from 970,841,120 to
+705,542,148 bytes. The generating-probability reference has log loss 0.8550;
+the small search still leaves room for better fitting.
+
 The report comparisons isolate export and browser work. Their large numeric
 fixture uses a supplied linear model fitted to 100 rows. It is separate from
 the million-training-row experiment. A complete export of 1,000,100 records
-rendered in 20.451 seconds and produced an 83.33 MB HTML file. Compression makes
+rendered in 22.400 seconds and produced an 83.35 MB HTML file. Compression makes
 large exports cheaper; it does not make their information or browser-memory
 cost disappear. The default report exports aggregate summaries, and explicit
 record export defaults to a 5,000-row limit.
 
 These are individual runs on one machine, not estimates of a universal speedup.
-The report measurements precede subsequent browser correctness improvements.
+The report measurements use the frozen reporting source dated 2026-09-12;
+its manifest is recorded with the measurements.
 Full-render timings also include the new default explanation row cap. They do
 not isolate compression or serialization alone; preparation and payload sizes
 are recorded separately in the [report measurements](reports/README.md).
@@ -73,6 +85,13 @@ compress large blocks and decode columns locally as needed. The wide report's
 largest gain is file size and allocation; its rendering time improved modestly.
 The tall, full-record report previously paid much more to construct and serialize
 one R object per row, so its rendering improvement is larger.
+
+The first compressed million-record export still stalled in WebKit's HTML
+parser, before report code ran. Keeping large embedded text in smaller inert
+script blocks avoids that stall and reconstructs the exact JSON before use.
+The browser removes those temporary blocks after assembly. The original timeout
+and the successful boundary, data-fidelity and browser checks remain in the
+[report evidence](reports/README.md).
 
 ## Choices that can change results
 
@@ -111,8 +130,11 @@ The complete default `autoxplain()` workflow on the same 10,000 training rows
 then selected six hidden units with weight decay 0.01. All 15 configurations
 completed across every fold, compared with four neural configurations failing
 under the former limit. Independent scoring on the untouched 20,000-row holdout
-gave RMSE 0.7475 instead of 1.6988; the generating mean before missing inputs
-scored 0.6993. Runtime increased from 49.104 to 82.588 seconds. This is evidence
+gave RMSE 0.7475 instead of 1.6988. The known conditional mean after respecting
+missing inputs scored 0.7272; the generating mean with complete, unobservable
+inputs scored 0.6993. The [conditional reference](million/conditional-reference.R)
+uses the fixture's independent, mean-zero interaction input and is never used
+for model selection. Runtime increased from 49.104 to 82.588 seconds. This is evidence
 of better fitting on this problem at a higher cost, not a neural speedup or a
 claim that the core search is practical at one million rows.
 Both versions passed complete cold-session prediction replay. The uncompressed

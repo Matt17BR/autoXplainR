@@ -1,7 +1,56 @@
 """Decode report data with Python's zlib, independently of the browser codec."""
 import base64
 import json
+from html import unescape
+import re
 import zlib
+
+
+def read_json_text(html, identifier):
+    """Read ordinary or ordered inert-script text without executing browser code."""
+    main, chunks = [], []
+    for match in re.finditer(r'<script\b([^>]*)>(.*?)</script\s*>', html, re.S | re.I):
+        attrs = {name.lower(): unescape(value) for name, value in
+                 re.findall(r'([\w-]+)="([^"]*)"', match[1])}
+        if attrs.get("id") == identifier:
+            main.append((attrs, match[2]))
+        if attrs.get("data-json-owner") == identifier:
+            chunks.append((attrs, match[2]))
+    if len(main) != 1:
+        raise ValueError("Report JSON identifier is missing or duplicated")
+    attrs, body = main[0]
+    if "data-json-chunks" not in attrs:
+        if chunks:
+            raise ValueError("Unexpected report JSON chunks")
+        return body
+    count = int(attrs["data-json-chunks"])
+    if body or count < 1 or len(chunks) != count:
+        raise ValueError("Report JSON chunk count mismatch")
+    if any(item.get("type") != "application/octet-stream" or
+           item.get("data-json-chunk") != str(i + 1)
+           for i, (item, _) in enumerate(chunks)):
+        raise ValueError("Report JSON chunk order or type mismatch")
+    return "".join(text for _, text in chunks)
+
+
+def read_json_payload(html, identifier):
+    return json.loads(read_json_text(html, identifier))
+
+
+def replace_json_payload(html, identifier, payload):
+    """Replace a test payload, removing its old chunks so mutations stay active."""
+    read_json_text(html, identifier)  # Reject a malformed source before mutation.
+    encoded = json.dumps(payload, ensure_ascii=True).replace("<", r"\u003c").replace(">", r"\u003e").replace("&", r"\u0026")
+    def replace(match):
+        attrs = {name.lower(): unescape(value) for name, value in
+                 re.findall(r'([\w-]+)="([^"]*)"', match[1])}
+        if attrs.get("data-json-owner") == identifier:
+            return ""
+        if attrs.get("id") != identifier:
+            return match[0]
+        opening = re.sub(r'\sdata-json-chunks="[^"]*"', "", match[1])
+        return "<script" + opening + ">" + encoded + "</script>"
+    return re.sub(r'<script\b([^>]*)>(.*?)</script\s*>', replace, html, flags=re.S | re.I)
 
 
 def decode_block(block):

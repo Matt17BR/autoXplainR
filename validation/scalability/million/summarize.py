@@ -18,6 +18,16 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
     source = json.loads(input_path.read_text()) if input_path.exists() else {}
     result_path = directory / "result.json"
     result = json.loads(result_path.read_text()) if result_path.exists() else {}
+    checkpoint_path = directory / "public-call.json"
+    checkpoint = json.loads(checkpoint_path.read_text()) if checkpoint_path.exists() else {}
+    # Keep the original failure, while distinguishing the two established
+    # harness defects from a failure in the package under test.
+    harness_errors = {
+        "No method asJSON S3 class: table": "fixture metadata serialization before the public call",
+        "max(abs(rowSums(prediction) - 1)) < 1e-08 is not TRUE":
+            "verification tolerance stricter than the public native-probability contract",
+    }
+    harness_error = harness_errors.get(result.get("message"))
     tuning_path = directory / "tuning.json"
     tuning = json.loads(tuning_path.read_text()) if tuning_path.exists() else {}
     candidates = tuning.get("candidates", [])
@@ -51,6 +61,9 @@ for file in sorted(args.directory.glob("*/supervisor.json")):
         "rows": source.get("training_rows"), "evaluation_rows": source.get("evaluation_rows"),
         "mode": source.get("mode"), "package": source.get("package"), "library": source.get("library"),
         "status": "timeout" if supervisor["timed_out"] else result.get("status", "process_failure"),
+        "failure_origin": "harness" if harness_error else None,
+        "failure_explanation": harness_error,
+        "public_call_completed": checkpoint.get("status") == "public_call_returned",
         "public_call_seconds": result.get("public_call_seconds"),
         "wall_seconds": supervisor["wall_seconds"],
         "peak_rss_kib": int(match.group(1)) if match else supervisor.get("highest_recorded_rss_kib"),

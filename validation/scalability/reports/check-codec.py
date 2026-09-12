@@ -8,7 +8,7 @@ import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from report_payload import decode_data_payload
+from report_payload import decode_data_payload, read_json_payload, replace_json_payload
 from playwright.sync_api import sync_playwright
 from browser_runtime import launch
 
@@ -21,9 +21,7 @@ folder = args.folder.resolve()
 out = (args.output or folder / "codec").resolve()
 out.mkdir(parents=True, exist_ok=True)
 html = (folder / "report.html").read_text()
-pattern = r'(<script[^>]*id="axr-data-payload"[^>]*>)(.*?)(</script>)'
-match = re.search(pattern, html, re.S)
-wire = json.loads(match[2])
+wire = read_json_payload(html, "axr-data-payload")
 decoded = decode_data_payload(wire)
 source = json.loads((folder / "source.json").read_text())
 checks = []
@@ -34,8 +32,7 @@ def check(name, passed, evidence=None):
 
 
 def replace_wire(value):
-    data = json.dumps(value, ensure_ascii=True).replace("<", r"\u003c").replace(">", r"\u003e").replace("&", r"\u0026")
-    return html[:match.start(2)] + data + html[match.end(2):]
+    return replace_json_payload(html, "axr-data-payload", value)
 
 
 mutations = {"legacy": replace_wire(decoded)}

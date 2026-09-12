@@ -20,6 +20,11 @@ a model on a million training rows.
   zlib checksum. There is no network requirement. If decoding fails, the report
   shows an error and the existing distribution tables; model scores remain
   available.
+- Large JSON scripts use ordered inert text fragments of at most 1,048,576
+  characters. A constant script validates their owner and order, restores the
+  exact JSON text, then removes the fragments. This prevents an HTML-parser
+  stall found in WebKit before any report code ran. Unicode, JSON escapes and
+  full-precision numbers survive fragment boundaries unchanged.
 - Columns decode when they are needed. Closed plots do no work. Paging and
   repeated sorts reuse their previous result. All explicitly exported rows stay
   available to filters, tables and source-record selection.
@@ -48,14 +53,14 @@ Exact byte counts, process memory and source hashes are in
 
 | Explicit export | 0.6.2 HTML | Candidate HTML | 0.6.2 full render | Candidate full render |
 |---|---:|---:|---:|---:|
-| 500 predictors, 1,200 records | 59.88 MB | 15.84 MB | 16.277 s | 13.168 s |
-| 200,000 evaluation + 100 training rows | 121.66 MB | 17.56 MB | 85.319 s | 4.855 s |
-| 1,000,000 evaluation + 100 training rows | Not run | 83.34 MB | Not run | 21.126 s |
+| 500 predictors, 1,200 records | 59.88 MB | 15.85 MB | 16.277 s | 15.094 s |
+| 200,000 evaluation + 100 training rows | 121.66 MB | 17.56 MB | 85.319 s | 5.064 s |
+| 1,000,000 evaluation + 100 training rows | Not run | 83.35 MB | Not run | 22.400 s |
 
 MB means 1,000,000 bytes. Prepared R data for the 200,100-row case fell from
 650.11 MB to 29.82 MB. The million-row export retained 148.22 MB of prepared R
-data; the whole report process reached about 1.63 GiB RSS. The 200,100-row
-process peak fell from 1.32 GiB to 478 MiB. These are explicit all-row exports.
+data; the whole report process reached about 1.54 GiB RSS. The 200,100-row
+process peak fell from 1.32 GiB to 459 MiB. These are explicit all-row exports.
 Ordinary row exports still default to 5,000 records. An 83 MB file is still a
 large report; full export remains an explicit choice, not a promise that a
 million-row dashboard is inexpensive on every device.
@@ -66,24 +71,30 @@ rows. Separate preparation and serialization timings in the measurement JSON
 help distinguish those changes from the compact data format itself. Source
 snapshots and hashes identify the implementation used for each timed run.
 
-In Chromium, the final million-row report loaded in about 1.4 seconds and
-opened its Records view in 1.5 seconds. The 74 desktop/mobile checks passed,
+In Chromium, the final million-row report loaded in about 0.7 seconds and
+opened its Records view in 1.3 seconds. In WebKit those steps took about
+3.2 and 1.6 seconds. All 146 desktop/mobile checks across those engines passed,
 including exact source lookup, full-row filtering, paging and the full extent
 of the displayed scatter sample. Observed JavaScript heap readings were
-183 MB on desktop and 208 MB at mobile width; these are not browser peak RSS.
+219 MB on desktop and 208 MB at mobile width; these are not browser peak RSS.
 
 Opening an all-matching relationship fell from 1.919 seconds before the browser
-pair cap to 0.115 seconds, and revisiting it took 0.070 seconds. All 1,000,100
+pair cap to 0.098 seconds, and revisiting it took 0.059 seconds. All 1,000,100
 matching records remain available to filters and tables; the relationship
 explicitly describes its 10,000-row evaluation sample. The earlier operation
 completed without errors too. [Browser evidence](million-browser-results.json)
 records the measured tasks and scope.
 
-The same 83 MB file did not reach its initial load event within 30 seconds in
-the local WebKit WPE runtime. No row-task pass is claimed for that attempt, and
-no browser crash was observed. The smaller cross-engine gates passed. This
-large-file limit remains under investigation and must not be presented as
-universal browser support for million-record exports.
+The original 83 MB compact file did not reach its initial load event within
+30 seconds in the local WebKit WPE runtime. A JavaScript-disabled replay isolated
+the stall to parsing one 41 MB inert script. Splitting exactly the same text
+into bounded fragments reduced initial load to about 4.5 seconds in the
+prototype. The final R-generated report passed the complete task replay above.
+No data was removed or rounded. [Transport evidence](chunk-transport-results.json)
+preserves the original failure, exact payload hashes, boundary cases and
+corrected tasks. The final 500-predictor report also passed 40 source-value,
+relationship and navigation checks across Chromium and WebKit. Mobile checks
+use an emulated viewport on this desktop host, not a physical phone.
 
 ## Reproduce the checks
 
@@ -96,11 +107,15 @@ export AXR_SCALE_OUTPUT="$HOME/.cache/autoxplain-report-checks"
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
 Rscript validation/scalability/reports/benchmark.R candidate 2500
 Rscript validation/scalability/reports/generate-compatibility.R
+Rscript validation/scalability/reports/generate-chunk-fixtures.R
+Rscript validation/scalability/reports/benchmark.R candidate 50000
 python validation/scalability/reports/check-vendor.py
 python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
 python validation/scalability/reports/check-codec.py --folder "$AXR_SCALE_OUTPUT/candidate/2500" --browsers chromium firefox webkit
 python validation/scalability/reports/check-categories.py --folder "$AXR_SCALE_OUTPUT/compatibility" --browsers chromium firefox webkit
 python validation/scalability/reports/check-sampled-relationships.py --folder "$AXR_SCALE_OUTPUT/compatibility" --browsers chromium firefox webkit
+python validation/scalability/reports/check-browser.py --folder "$AXR_SCALE_OUTPUT/candidate/50000" --require-chunks --browsers chromium firefox webkit
+python validation/scalability/reports/check-json-chunks.py --folder "$AXR_SCALE_OUTPUT/chunks" --report "$AXR_SCALE_OUTPUT/candidate/50000/report.html" --browsers chromium firefox webkit
 ```
 
 Use `benchmark.R candidate 200000` or `candidate 1000000` for the large explicit
@@ -133,4 +148,13 @@ replacing any system library.
 
 The existing data-explorer, supplied-model, cutoff and prediction browser gates continue to run. Their
 oracles decode compact blocks with Python's zlib rather than borrowing the
-production JavaScript decoder.
+production JavaScript decoder. Static readers independently rejoin transport
+fragments and reject missing, reordered or wrongly attributed fragments.
+
+The column list describes missing values across all available rows. The selected
+distribution follows active row filters and gives its own denominator. The
+[scope replay](data-scope-results.json) tests a filter that removes every missing
+value, so those two counts must differ. Negative controls reject both a sidebar
+that falsely claims a filtered scope and a chart that keeps all-row missingness.
+This replay covers the messy-regression fixture; the complete CI suite also
+includes the classification fixtures.

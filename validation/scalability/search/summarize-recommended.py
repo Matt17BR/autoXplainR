@@ -13,7 +13,7 @@ variants = ("baseline", "candidate")
 if all((cache / "recommended" / "candidate_fixed_gam" / case /
         "summary.json").exists() for case in cases):
     variants += ("candidate_fixed_gam",)
-summaries, models, families = [], [], []
+summaries, models, families, candidates, failures = [], [], [], [], []
 for case in cases:
     identity = None
     for variant in variants:
@@ -44,12 +44,20 @@ for case in cases:
         for row in record["fold_fit_seconds_by_family"]:
             families.append(dict(case=case, variant=variant, family=row["family"],
                                  fold_fit_seconds=row["x"]))
+        candidates.extend(dict(case=case, variant=variant, **row)
+                          for row in record["candidates"])
+        failures.extend(dict(case=case, variant=variant, **row)
+                        for row in record["failed_folds"])
 
 for name, rows in (("recommended-comparison.csv", summaries),
                    ("recommended-retained-scores.csv", models),
-                   ("recommended-family-times.csv", families)):
+                   ("recommended-family-times.csv", families),
+                   ("recommended-configurations.csv", candidates),
+                   ("recommended-failed-folds.csv", failures)):
+    if not rows:
+        continue
     with (destination / name).open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(name, len(rows), "rows")

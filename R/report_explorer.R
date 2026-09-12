@@ -467,6 +467,7 @@ explorer_features <- function(result, audit, effects, models) {
         "ALE follows local changes in predictions and centers the effect at zero.",
         "Negative effects mean below this reference, not negative probabilities.",
         "PDP averages predictions with an input set to each displayed value.",
+        "A flat average curve can hide interactions, even for an important feature.",
         "These describe fitted associations, not the consequences of an intervention."
       )
     ),

@@ -22,6 +22,15 @@ else:
     shutil.copyfile(source, frozen)
 environment = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1")
 records = []
+library = output / ("baseline-library" if variant == "baseline" else "candidate-library") / "AutoXplainR"
+installed = {str(path.relative_to(library)): hashlib.sha256(path.read_bytes()).hexdigest()
+             for path in sorted(library.rglob("*")) if path.is_file()}
+assert installed, "Installed package must be available"
+if variant != "baseline":
+    expected = json.loads(source.with_name("candidate-final-installed-sha256.json").read_text())
+    assert installed == expected, "Candidate installation changed after its recorded source snapshot"
+(output / f"recommended-{variant}-installed-sha256.json").write_text(
+    json.dumps(installed, indent=2)+"\n")
 for case in cases:
     destination = output / "recommended" / variant / case
     destination.mkdir(parents=True, exist_ok=True)

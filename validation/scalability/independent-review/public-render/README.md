@@ -59,3 +59,19 @@ multiclass report's complete probability matrix and source identities against
 predictions saved from the original inputs. That added smoke passed against the
 preserved preliminary installed snapshot. The complete release gate must still
 run against the final checked archive.
+
+## Fragmented HTML payloads
+
+The HTML readers now accept both an ordinary JSON script and ordered inert
+text fragments. They concatenate the source text themselves rather than using
+the production browser assembler. The multiclass public-render test forces
+127-character fragments through the real rendering path, then applies the same
+native probability, class-order and source-row checks. The other two maintained
+cases still exercise ordinary scripts. All 41 assertions pass.
+
+Four readers, including the installed cold-process gate, also preserve exact
+Unicode, escaped script delimiters, vector shape and missing values in separate
+plain/fragmented checks. The compact review's eight cases and 1,162 original
+raw/processed cells pass again after its reader update. These small tests check
+data preservation. The report owner's browser gate separately checks a real
+report above the default fragment threshold and executes the assembler.

@@ -7,7 +7,7 @@ import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from report_payload import decode_data_payload, decode_prediction_payload
+from report_payload import decode_data_payload, decode_prediction_payload, read_json_payload
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("baseline", type=Path)
@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 def read(path, name):
     html = path.read_text()
-    return json.loads(re.search(r'<script[^>]*id="' + name + r'"[^>]*>(.*?)</script>', html, re.S)[1])
+    return read_json_payload(html, name)
 
 
 def digest(value):

@@ -1,43 +1,43 @@
-case,fold,solver,task,training_rows,validation_rows,coefficients,fit_seconds,score,max_prediction_difference,mean_prediction_difference,status,error
-friedman_noise_benchmark,1,gam,regression,960,240,121,6.957000000000001,1.687909783946993,0,0,ok,
-friedman_noise_benchmark,1,bam,regression,960,240,121,1.5620000000000012,1.6887698689016057,0.044672071473655706,0.015182328476202617,ok,
-friedman_noise_benchmark,1,bam_discrete,regression,960,240,121,0.7329999999999988,1.6878203046465132,0.029943341151208003,0.012019736064926241,failed,$ operator is invalid for atomic vectors
-friedman_noise_benchmark,2,gam,regression,960,240,121,7.758999999999999,1.6183895725955353,0,0,ok,
-friedman_noise_benchmark,2,bam,regression,960,240,121,1.7149999999999999,1.6148844633573844,0.13963729468294162,0.03603025989454299,ok,
-friedman_noise_benchmark,2,bam_discrete,regression,960,240,121,0.7980000000000018,1.6151228903526775,0.14604547086421604,0.03581023180095077,failed,$ operator is invalid for atomic vectors
-rare_interaction_benchmark,1,gam,binary,1999,501,61,1.908999999999999,0.1491020983983609,0,0,ok,
-rare_interaction_benchmark,1,bam,binary,1999,501,61,2.8279999999999994,0.14907986016261837,0.0018990132462566311,0.00029158476065708756,ok,
-rare_interaction_benchmark,1,bam_discrete,binary,1999,501,61,0.19200000000000017,0.14896888779736223,0.0037323064734580136,0.0005448416729698989,failed,$ operator is invalid for atomic vectors
-rare_interaction_benchmark,2,gam,binary,1999,501,61,1.926000000000002,0.17582739660697494,0,0,ok,
-rare_interaction_benchmark,2,bam,binary,1999,501,61,2.666999999999998,0.17585776450745358,0.0010570072745530457,0.0001203588710911853,ok,
-rare_interaction_benchmark,2,bam_discrete,binary,1999,501,61,0.18400000000000105,0.17599117537210396,0.004082261108452723,0.0005862289292644009,failed,$ operator is invalid for atomic vectors
-friedman_noise_benchmark-replicate,1,gam,regression,960,240,121,8.346,1.6997753579533341,0,0,ok,
-friedman_noise_benchmark-replicate,1,bam,regression,960,240,121,1.6759999999999948,1.697314490849739,0.16836498650195075,0.049285985066418056,ok,
-friedman_noise_benchmark-replicate,1,bam_discrete,regression,960,240,121,0.769999999999996,1.6992241423687755,0.0246678478957989,0.008066006767985218,failed,$ operator is invalid for atomic vectors
-friedman_noise_benchmark-replicate,2,gam,regression,960,240,121,6.805,1.7369944504697206,0,0,ok,
-friedman_noise_benchmark-replicate,2,bam,regression,960,240,121,1.1169999999999973,1.737245808397348,0.017758300061645027,0.0040021741090300895,ok,
-friedman_noise_benchmark-replicate,2,bam_discrete,regression,960,240,121,0.5890000000000057,1.7372457385392248,0.017762114367980697,0.004002201981463665,failed,$ operator is invalid for atomic vectors
-rare_interaction_benchmark-replicate,1,gam,binary,2000,500,61,2.463000000000001,0.2047531223663908,0,0,ok,
-rare_interaction_benchmark-replicate,1,bam,binary,2000,500,61,2.875,0.20469282795052227,0.005224069988599589,0.000496740616762463,ok,
-rare_interaction_benchmark-replicate,1,bam_discrete,binary,2000,500,61,0.22800000000000153,0.20438570584724328,0.011230480408718102,0.0010550467515240724,failed,$ operator is invalid for atomic vectors
-rare_interaction_benchmark-replicate,2,gam,binary,2000,500,61,1.973000000000006,0.20522508781994522,0,0,ok,
-rare_interaction_benchmark-replicate,2,bam,binary,2000,500,61,2.9110000000000014,0.20528935430297873,0.003503898879360978,0.0003159463325260432,ok,
-rare_interaction_benchmark-replicate,2,bam_discrete,binary,2000,500,61,0.20899999999999608,0.205282495111574,0.002692722294940997,0.00024209035157151708,failed,$ operator is invalid for atomic vectors
-bank,1,gam,binary,3999,1001,79,6.253999999999991,0.2675569535238898,0,0,ok,
-bank,1,bam,binary,3999,1001,79,21.570999999999998,0.2678440834222586,0.08467201794224011,0.003649047811673771,ok,
-bank,1,bam_discrete,binary,3999,1001,79,0.2079999999999984,0.2677818495461742,0.06074932914547887,0.0031917387968895404,failed,$ operator is invalid for atomic vectors
-bank,2,gam,binary,3999,1001,79,5.278000000000006,0.26701630787569575,0,0,ok,
-bank,2,bam,binary,3999,1001,79,3.0150000000000006,0.26700229849660984,0.005498385977104447,0.00037950825023499513,ok,
-bank,2,bam_discrete,binary,3999,1001,79,0.19299999999999784,0.2659401411879878,0.06862027961294864,0.004751474355102382,failed,$ operator is invalid for atomic vectors
-skew_factor_719,1,gam,regression,1280,320,39,0.8760000000000048,1.3898506779511128,0,0,ok,
-skew_factor_719,1,bam,regression,1280,320,39,0.24799999999999045,1.3898515027502136,2.8759665265720713e-05,7.003651509723224e-06,ok,
-skew_factor_719,1,bam_discrete,regression,1280,320,39,0.06499999999999773,1.4014980418278584,0.6865336364460983,0.1066865755571465,failed,$ operator is invalid for atomic vectors
-skew_factor_719,2,gam,regression,1280,320,39,0.42199999999999704,1.5060605363547115,0,0,ok,
-skew_factor_719,2,bam,regression,1280,320,39,0.27300000000001035,1.5060560474076525,0.00016198764577279867,6.352100237063922e-05,ok,
-skew_factor_719,2,bam_discrete,regression,1280,320,39,0.08799999999999386,1.5025455110075527,2.6862378630727575,0.08047777202267918,failed,$ operator is invalid for atomic vectors
-skew_factor_720,1,gam,regression,1280,320,39,0.9339999999999975,10.550884655860962,0,0,ok,
-skew_factor_720,1,bam,regression,1280,320,39,0.3790000000000049,10.550921405863084,0.0006651510672099903,1.4205514862308224e-05,ok,
-skew_factor_720,1,bam_discrete,regression,1280,320,39,0.10500000000000398,9.281360114591969,22.893880484159354,0.14797267722311525,failed,$ operator is invalid for atomic vectors
-skew_factor_720,2,gam,regression,1280,320,39,0.6730000000000018,1.4814477405778197,0,0,ok,
-skew_factor_720,2,bam,regression,1280,320,39,0.38700000000000045,1.4814450259019454,0.0003277543338309208,8.599068593590635e-05,ok,
-skew_factor_720,2,bam_discrete,regression,1280,320,39,0.0940000000000083,1.4931237589005952,0.2992973125489362,0.0636708009161265,failed,$ operator is invalid for atomic vectors
+case,fold,solver,task,training_rows,validation_rows,coefficients,fit_seconds,score,max_prediction_difference,mean_prediction_difference,status,error,final_nonconvergence_warning_count,warning_interpretation
+friedman_noise_benchmark,1,gam,regression,960,240,121,6.957000000000001,1.687909783946993,0,0,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark,1,bam,regression,960,240,121,1.5620000000000012,1.6887698689016057,0.044672071473655706,0.015182328476202617,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark,1,bam_discrete,regression,960,240,121,0.7329999999999988,1.6878203046465132,0.029943341151208003,0.012019736064926241,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark,2,gam,regression,960,240,121,7.758999999999999,1.6183895725955353,0,0,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark,2,bam,regression,960,240,121,1.7149999999999999,1.6148844633573844,0.13963729468294162,0.03603025989454299,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark,2,bam_discrete,regression,960,240,121,0.7980000000000018,1.6151228903526775,0.14604547086421604,0.03581023180095077,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,1,gam,binary,1999,501,61,1.908999999999999,0.1491020983983609,0,0,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,1,bam,binary,1999,501,61,2.8279999999999994,0.14907986016261837,0.0018990132462566311,0.00029158476065708756,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,1,bam_discrete,binary,1999,501,61,0.19200000000000017,0.14896888779736223,0.0037323064734580136,0.0005448416729698989,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,2,gam,binary,1999,501,61,1.926000000000002,0.17582739660697494,0,0,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,2,bam,binary,1999,501,61,2.666999999999998,0.17585776450745358,0.0010570072745530457,0.0001203588710911853,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark,2,bam_discrete,binary,1999,501,61,0.18400000000000105,0.17599117537210396,0.004082261108452723,0.0005862289292644009,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,1,gam,regression,960,240,121,8.346,1.6997753579533341,0,0,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,1,bam,regression,960,240,121,1.6759999999999948,1.697314490849739,0.16836498650195075,0.049285985066418056,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,1,bam_discrete,regression,960,240,121,0.769999999999996,1.6992241423687755,0.0246678478957989,0.008066006767985218,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,2,gam,regression,960,240,121,6.805,1.7369944504697206,0,0,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,2,bam,regression,960,240,121,1.1169999999999973,1.737245808397348,0.017758300061645027,0.0040021741090300895,ok,,0,No final nonconvergence warning was recorded.
+friedman_noise_benchmark-replicate,2,bam_discrete,regression,960,240,121,0.5890000000000057,1.7372457385392248,0.017762114367980697,0.004002201981463665,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,1,gam,binary,2000,500,61,2.463000000000001,0.2047531223663908,0,0,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,1,bam,binary,2000,500,61,2.875,0.20469282795052227,0.005224069988599589,0.000496740616762463,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,1,bam_discrete,binary,2000,500,61,0.22800000000000153,0.20438570584724328,0.011230480408718102,0.0010550467515240724,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,2,gam,binary,2000,500,61,1.973000000000006,0.20522508781994522,0,0,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,2,bam,binary,2000,500,61,2.9110000000000014,0.20528935430297873,0.003503898879360978,0.0003159463325260432,ok,,0,No final nonconvergence warning was recorded.
+rare_interaction_benchmark-replicate,2,bam_discrete,binary,2000,500,61,0.20899999999999608,0.205282495111574,0.002692722294940997,0.00024209035157151708,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+bank,1,gam,binary,3999,1001,79,6.253999999999991,0.2675569535238898,0,0,ok,,0,No final nonconvergence warning was recorded.
+bank,1,bam,binary,3999,1001,79,21.570999999999998,0.2678440834222586,0.08467201794224011,0.003649047811673771,ok,,1,"Native prediction succeeded, but a nonconvergence warning makes the score diagnostic only."
+bank,1,bam_discrete,binary,3999,1001,79,0.2079999999999984,0.2677818495461742,0.06074932914547887,0.0031917387968895404,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+bank,2,gam,binary,3999,1001,79,5.278000000000006,0.26701630787569575,0,0,ok,,0,No final nonconvergence warning was recorded.
+bank,2,bam,binary,3999,1001,79,3.0150000000000006,0.26700229849660984,0.005498385977104447,0.00037950825023499513,ok,,0,No final nonconvergence warning was recorded.
+bank,2,bam_discrete,binary,3999,1001,79,0.19299999999999784,0.2659401411879878,0.06862027961294864,0.004751474355102382,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+skew_factor_719,1,gam,regression,1280,320,39,0.8760000000000048,1.3898506779511128,0,0,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_719,1,bam,regression,1280,320,39,0.24799999999999045,1.3898515027502136,2.8759665265720713e-05,7.003651509723224e-06,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_719,1,bam_discrete,regression,1280,320,39,0.06499999999999773,1.4014980418278584,0.6865336364460983,0.1066865755571465,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+skew_factor_719,2,gam,regression,1280,320,39,0.42199999999999704,1.5060605363547115,0,0,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_719,2,bam,regression,1280,320,39,0.27300000000001035,1.5060560474076525,0.00016198764577279867,6.352100237063922e-05,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_719,2,bam_discrete,regression,1280,320,39,0.08799999999999386,1.5025455110075527,2.6862378630727575,0.08047777202267918,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+skew_factor_720,1,gam,regression,1280,320,39,0.9339999999999975,10.550884655860962,0,0,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_720,1,bam,regression,1280,320,39,0.3790000000000049,10.550921405863084,0.0006651510672099903,1.4205514862308224e-05,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_720,1,bam_discrete,regression,1280,320,39,0.10500000000000398,9.281360114591969,22.893880484159354,0.14797267722311525,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.
+skew_factor_720,2,gam,regression,1280,320,39,0.6730000000000018,1.4814477405778197,0,0,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_720,2,bam,regression,1280,320,39,0.38700000000000045,1.4814450259019454,0.0003277543338309208,8.599068593590635e-05,ok,,0,No final nonconvergence warning was recorded.
+skew_factor_720,2,bam_discrete,regression,1280,320,39,0.0940000000000083,1.4931237589005952,0.2992973125489362,0.0636708009161265,failed,$ operator is invalid for atomic vectors,0,No final nonconvergence warning was recorded.

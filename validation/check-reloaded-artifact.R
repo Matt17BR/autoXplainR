@@ -15,13 +15,35 @@ cat("Fresh-session installed library:", find.package("AutoXplainR"), "\n")
 cat("Fresh-session AutoXplainR version:", as.character(packageVersion("AutoXplainR")), "\n")
 
 read_report_payload <- function(html, id) {
-  marker <- paste0('<script type="application/json" id="', id, '">')
+  marker <- paste0('<script type="application/json" id="', id, '"')
   start <- regexpr(marker, html, fixed = TRUE)
-  stopifnot(start > 0)
+  stopifnot(start > 0L)
   tail <- substring(html, start + attr(start, "match.length"))
-  end <- regexpr("</script>", tail, fixed = TRUE)
-  stopifnot(end > 0)
-  jsonlite::fromJSON(substring(tail, 1L, end - 1L), simplifyVector = FALSE)
+  header_end <- regexpr(">", tail, fixed = TRUE)
+  stopifnot(header_end > 0L)
+  header <- substring(tail, 1L, header_end - 1L)
+  body <- substring(tail, header_end + 1L)
+  end <- regexpr("</script>", body, fixed = TRUE)
+  stopifnot(end > 0L)
+  json <- substring(body, 1L, end - 1L)
+  if (grepl('data-json-chunks="', header, fixed = TRUE)) {
+    count <- as.integer(sub('.*data-json-chunks="([0-9]+)".*', "\\1", header))
+    stopifnot(is.finite(count), count > 0L, identical(json, ""))
+    prefix <- paste0('<script type="application/octet-stream" data-json-owner="', id, '" data-json-chunk="')
+    positions <- gregexpr(prefix, html, fixed = TRUE)[[1L]]
+    stopifnot(length(positions) == count, all(positions > start))
+    pieces <- vapply(seq_len(count), function(index) {
+      tag <- paste0(prefix, index, '">')
+      position <- regexpr(tag, html, fixed = TRUE)
+      stopifnot(position == positions[[index]])
+      remaining <- substring(html, position + attr(position, "match.length"))
+      close <- regexpr("</script>", remaining, fixed = TRUE)
+      stopifnot(close > 0L)
+      substring(remaining, 1L, close - 1L)
+    }, character(1))
+    json <- paste0(pieces, collapse = "")
+  }
+  jsonlite::fromJSON(json, simplifyVector = FALSE)
 }
 
 decode_report_block <- function(value) {

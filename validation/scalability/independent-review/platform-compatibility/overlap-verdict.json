@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "cases": 307,
+  "oracle": "Published AutoXplainR 0.6.2 namespace, release tar SHA256 e15ee291f447414a16e10acce0f69cca826d7e58b424f5597c41ea9f56114624",
+  "source_md5": "831a07cd4f3f00c14a63199eb3345568",
+  "focused_assertions": 96,
+  "R": "4.5.2 Linux x86_64",
+  "r41_ci_after_fix": "pending",
+  "change": "Byte-marked candidate text uses exact serialized fallback; ordinary text retains columnwise grouping."
+}

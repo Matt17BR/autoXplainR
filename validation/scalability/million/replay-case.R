@@ -1,8 +1,11 @@
 # Fresh-process reload, full holdout prediction and optional standalone report.
 args <- commandArgs(TRUE)
 stopifnot(length(args) %in% c(2L, 3L))
-.libPaths(c(normalizePath(args[[1L]]), .libPaths()))
+library_path <- normalizePath(args[[1L]], mustWork = TRUE)
+.libPaths(c(library_path, .libPaths()))
 library(AutoXplainR)
+loaded_library <- normalizePath(find.package("AutoXplainR"), mustWork = TRUE)
+stopifnot(loaded_library == file.path(library_path, "AutoXplainR"))
 directory <- normalizePath(args[[2L]])
 stopifnot(!"glmnet" %in% loadedNamespaces(), !"xgboost" %in% loadedNamespaces())
 input <- jsonlite::read_json(file.path(directory, "input.json"), simplifyVector = TRUE)
@@ -49,7 +52,7 @@ if (length(args) == 3L && args[[3L]] == "report") {
   rendered <- file.info(file.path(directory, "reloaded-report.html"))$size > 10000
   stopifnot(rendered)
 }
-jsonlite::write_json(list(status = "passed", library = find.package("AutoXplainR"),
+jsonlite::write_json(list(status = "passed", library = loaded_library,
   version = as.character(packageVersion("AutoXplainR")), script_md5 = unname(tools::md5sum(script)),
   models = length(saved$expected),
   full_holdout_rows_per_model = input$evaluation_rows, losses = losses,

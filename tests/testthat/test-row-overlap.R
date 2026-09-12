@@ -62,6 +62,28 @@ test_that("mixed repeated rows agree with serialized equality in original evalua
   }
 })
 
+test_that("ordinary text overlap does not serialize rows", {
+  training <- data.frame(label = c("plain", enc2utf8("caf\u00e9"), NA_character_), value = 1:3)
+  evaluation <- training[c(3, 2, 1, 2), ]
+  evaluation$value[4] <- 99
+  expected <- overlap_oracle(training, evaluation)
+  local_mocked_bindings(split_row_keys = function(...) stop("must not serialize ordinary text"))
+  expect_identical(AutoXplainR:::split_row_overlap(training, evaluation), expected)
+  expect_identical(expected, 1:3)
+})
+
+test_that("byte-marked text retains exact matching after other columns narrow candidates", {
+  utf8 <- enc2utf8("caf\u00e9")
+  bytes <- iconv(utf8, "UTF-8", "latin1")
+  Encoding(bytes) <- "bytes"
+  training <- data.frame(text = c(bytes, utf8, bytes), value = c(1, 2, 3))
+  evaluation <- data.frame(text = c(utf8, bytes, bytes, utf8), value = c(1, 1, 4, 2))
+  expected <- overlap_oracle(training, evaluation)
+  expect_identical(expected, c(2L, 4L))
+  expect_identical(AutoXplainR:::split_row_overlap(training, evaluation), expected)
+  expect_identical(AutoXplainR:::split_row_overlap(training[2:1], evaluation[2:1]), expected)
+})
+
 test_that("nonstandard columns retain the legacy full-row equality fallback", {
   shared <- new.env(parent = emptyenv())
   shared$value <- 3

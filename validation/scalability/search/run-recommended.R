@@ -60,9 +60,13 @@ tryCatch(withCallingHandlers({
   record$model_count <- length(result$models)
   record$configuration_count <- nrow(result$tuning$candidates)
   record$configuration_status <- as.list(table(result$tuning$candidates$status))
+  record$candidates <- result$tuning$candidates[, c("configuration_id", "family",
+    "hyperparameters", "cv_score", "folds_completed", "selected", "status")]
   record$input_policy <- result$tuning$input_policy
   record$refit <- result$tuning$refit
   folds <- result$tuning$fold_scores
+  record$failed_folds <- folds[!is.finite(folds$score), c("configuration_id", "fold",
+    "optimization_status", "optimization_message", "warning", "error")]
   families <- result$tuning$candidates$family[match(folds$configuration_id,
     result$tuning$candidates$configuration_id)]
   record$fold_fit_seconds_by_family <- aggregate(folds$elapsed_ms / 1000,
@@ -78,7 +82,7 @@ tryCatch(withCallingHandlers({
   record$error <<- conditionMessage(e)
 })
 record$elapsed_seconds <- proc.time()[["elapsed"]] - started
-record$warnings <- warnings
+record$warnings <- as.list(unname(warnings))
 jsonlite::write_json(record, file.path(destination, "summary.json"),
   pretty = TRUE, auto_unbox = TRUE, digits = 16, null = "null", na = "null")
 cat(scenario, variant, record$status, record$elapsed_seconds, "seconds\n")

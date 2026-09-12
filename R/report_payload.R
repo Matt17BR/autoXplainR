@@ -11,7 +11,26 @@ report_json_script <- function(payload, id) {
   }
   json <- gsub("\u2028", "\\u2028", json, fixed = TRUE)
   json <- gsub("\u2029", "\\u2029", json, fixed = TRUE)
-  paste0('<script type="application/json" id="', html_escape(id), '">', json, "</script>")
+  report_json_chunks(json, id)
+}
+
+# A very large inert script can stall HTML parsing before report code runs.
+# Ordered text fragments retain the exact JSON and are reassembled before any
+# consumer reads it. Small scripts keep their existing byte representation.
+report_json_chunks <- function(json, id, chunk_size = 1048576L) {
+  size <- nchar(json, type = "chars")
+  opening <- paste0('<script type="application/json" id="', html_escape(id), '"')
+  if (size <= chunk_size) return(paste0(opening, ">", json, "</script>"))
+  starts <- seq.int(1L, size, by = chunk_size)
+  parts <- substring(json, starts, pmin(starts + chunk_size - 1L, size))
+  paste0(
+    opening, ' data-json-chunks="', length(parts), '"></script>',
+    paste0(
+      '<script type="application/octet-stream" data-json-owner="', html_escape(id),
+      '" data-json-chunk="', seq_along(parts), '">', parts, "</script>", collapse = ""
+    ),
+    "<script>", report_asset("json-chunks.js"), "</script>"
+  )
 }
 
 # jsonlite encodes data-frame columns together instead of dispatching once per

@@ -1,0 +1,10 @@
+{
+  "scope": "Known conditional-mean reference on the fixed independent regression evaluation set. Not used for fitting or selecting models.",
+  "rows": 20000,
+  "hidden_x3_rows": 374,
+  "complete_input_mean_rmse": 0.69928736501190514,
+  "observed_input_conditional_mean_rmse": 0.72717696012694533,
+  "population_conditional_mean_rmse": 0.73143694191638964,
+  "derivation": "Independent mean-zero x3 contributes zero to the conditional mean when hidden. Its expected residual variance adds 0.02 * 1.5^2 = 0.045 to the 0.49 noise variance, because Var(x3) = E(x4^2) = 1.",
+  "fixture_source_md5": "770d2c15e8d58d7742d23d0b7fbee79e"
+}

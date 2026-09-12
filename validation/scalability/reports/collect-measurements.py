@@ -8,11 +8,12 @@ import re
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--cache", type=Path, required=True)
 parser.add_argument("--output", type=Path, required=True)
+parser.add_argument("--candidate-dir", type=Path)
 args = parser.parse_args()
 cache = args.cache.resolve()
 measurements = []
 for variant, cases, base in [("baseline", ("wide-500", "200000"), cache),
-                              ("candidate", ("wide-500", "200000", "1000000"), cache / "final")]:
+                              ("candidate", ("wide-500", "200000", "1000000"), args.candidate_dir or cache / "final")]:
     for case in cases:
         folder = base / variant / case
         value = json.loads((folder / "measurement.json").read_text())

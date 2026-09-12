@@ -25,3 +25,8 @@ python3 validation/scalability/reports/independent-review/check.py
 ```
 
 Set `AXR_COMPACT_REVIEW_OUTPUT` to use another intermediate output folder.
+
+The source-text reader also accepts the ordered inert fragments used for large
+HTML payloads. It rejoins exact JSON text before writing the independent Python
+inputs. All eight cases and 1,162 raw/processed cells passed again after this
+reader change; the decoded-value oracles were unchanged.

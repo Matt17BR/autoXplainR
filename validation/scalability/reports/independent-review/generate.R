@@ -21,6 +21,38 @@ te$data$x[is.infinite(te$data$x)] <- NA_real_
 features <- setdiff(names(train),'y')
 result <- list(training_data=tr$data,test_data=te$data,target_column='y',features=features,task='regression',provenance=list(seed=4))
 result$data_context <- ns$capture_data_context(train,evaluation,'y',features,tr,te)
+read_review_json_text <- function(html, id) {
+  marker <- paste0('<script type="application/json" id="', id, '"')
+  start <- regexpr(marker, html, fixed = TRUE)
+  stopifnot(start > 0L)
+  tail <- substring(html, start + attr(start, "match.length"))
+  header_end <- regexpr(">", tail, fixed = TRUE)
+  stopifnot(header_end > 0L)
+  header <- substring(tail, 1L, header_end - 1L)
+  body <- substring(tail, header_end + 1L)
+  end <- regexpr("</script>", body, fixed = TRUE)
+  stopifnot(end > 0L)
+  json <- substring(body, 1L, end - 1L)
+  if (grepl('data-json-chunks="', header, fixed = TRUE)) {
+    count <- as.integer(sub('.*data-json-chunks="([0-9]+)".*', "\\1", header))
+    stopifnot(is.finite(count), count > 0L, identical(json, ""))
+    prefix <- paste0('<script type="application/octet-stream" data-json-owner="', id, '" data-json-chunk="')
+    positions <- gregexpr(prefix, html, fixed = TRUE)[[1L]]
+    stopifnot(length(positions) == count, all(positions > start))
+    pieces <- vapply(seq_len(count), function(index) {
+      tag <- paste0(prefix, index, '">')
+      position <- regexpr(tag, html, fixed = TRUE)
+      stopifnot(position == positions[[index]])
+      remaining <- substring(html, position + attr(position, "match.length"))
+      close <- regexpr("</script>", remaining, fixed = TRUE)
+      stopifnot(close > 0L)
+      substring(remaining, 1L, close - 1L)
+    }, character(1))
+    json <- paste0(pieces, collapse = "")
+  }
+  json
+}
+
 cases <- list(context=result)
 no_context <- result; no_context$data_context <- NULL; cases$no_context <- no_context
 no_training <- no_context; no_training$training_data <- NULL; cases$no_training <- no_training
@@ -33,10 +65,9 @@ for(case in names(cases)) for(limit in c(4L,100L)) {
  values <- list(legacy=ns$report_data_payload(records),records=ns$report_data_payload(records,compact=TRUE),columns=ns$report_data_payload(columns,compact=TRUE))
  for(name in names(values)) {
   script <- ns$report_json_script(values[[name]],'fixture')
-  stopifnot(length(gregexpr('</script>',script,fixed=TRUE)[[1]])==1)
-  body <- sub('^<script[^>]*>','',sub('</script>$','',script))
+  body <- read_review_json_text(script, 'fixture')
   writeLines(body,file.path(output,paste(case,limit,paste0(name,'.json'),sep='-')),useBytes=TRUE)
  }
 }
-writeLines(sub('^<script[^>]*>','',sub('</script>$','',ns$report_json_script(ns$report_payload_block(rep('</script> \u4f60\u597d',4000),vector=TRUE),'fixture'))),file.path(output,'compressed.json'),useBytes=TRUE)
+writeLines(read_review_json_text(ns$report_json_script(ns$report_payload_block(rep('</script> \u4f60\u597d',4000),vector=TRUE),'fixture'), 'fixture'),file.path(output,'compressed.json'),useBytes=TRUE)
 cat('Generated 8 public preparation scenarios with record, direct-column, and legacy wire paths.\n')

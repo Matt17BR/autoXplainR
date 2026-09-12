@@ -8,8 +8,9 @@ standard_prediction_model <- function(model) {
 
 gam_smooth_prediction_context <- function(model, data_variables = character()) {
   if (!inherits(model, "gam")) return(NULL)
-  contexts <- list()
-  methods_seen <- list()
+  state <- new.env(parent = emptyenv())
+  state$contexts <- list()
+  state$methods_seen <- list()
   registry <- get(".__S3MethodsTable__.", envir = asNamespace("mgcv"))
   inspect <- function(smooth) {
     for (class in class(smooth)) {
@@ -26,9 +27,9 @@ gam_smooth_prediction_context <- function(model, data_variables = character()) {
       )
       for (method in candidates) {
         if (is.null(method) || identical(environment(method), asNamespace("mgcv")) ||
-              any(vapply(methods_seen, identical, logical(1), method))) next
-        methods_seen[[length(methods_seen) + 1L]] <<- method
-        contexts[[paste0(name, "_", length(contexts) + 1L)]] <<-
+              any(vapply(state$methods_seen, identical, logical(1), method))) next
+        state$methods_seen[[length(state$methods_seen) + 1L]] <- method
+        state$contexts[[paste0(name, "_", length(state$contexts) + 1L)]] <-
           prediction_function_context(method, data_variables)
       }
     }
@@ -39,7 +40,7 @@ gam_smooth_prediction_context <- function(model, data_variables = character()) {
     invisible(NULL)
   }
   for (smooth in model$smooth) inspect(smooth)
-  if (length(contexts)) contexts else NULL
+  if (length(state$contexts)) state$contexts else NULL
 }
 
 resolved_custom_prediction_method <- function(model) {

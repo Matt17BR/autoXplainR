@@ -26,12 +26,15 @@
   preprocessing are still learned within each fold. Explicit encoding controls
   remain available because the representations can produce different models.
 - Training/evaluation overlap checks use exact column grouping instead of
-  serializing every full row. Regularized, forest, neural and MARS model calls
+  serializing every full row, with an exact fallback for byte-marked text on
+  older R versions. Regularized, forest, neural and MARS model calls
   no longer embed redundant training inputs and outcomes in saved fits. Their
   recorded settings and input reconstruction notes remain available.
 - Reports store exported values in compressed columns and decode them locally
   as needed. Source-row identity, filtering and record lookup retain the complete
-  exported sample. Dense scatter plots show a disclosed subset of points.
+  exported sample. Large embedded scripts are assembled from smaller text blocks
+  to avoid a reproduced WebKit parsing stall. Dense scatter plots show a
+  disclosed subset of points.
 - Default report explanations use at most 5,000 evaluation rows; pairwise data
   summaries use at most 10,000 rows per partition. Model scores, univariate
   distributions and missing-value counts still use all available rows. Reports

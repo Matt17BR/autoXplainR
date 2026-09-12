@@ -17,7 +17,7 @@ import platform
 import re
 
 from playwright.sync_api import sync_playwright
-from report_payload import decode_data_payload, decode_prediction_payload
+from report_payload import decode_data_payload, decode_prediction_payload, read_json_payload, replace_json_payload
 
 
 def close(actual, expected, tolerance=1e-10):
@@ -361,11 +361,7 @@ def binary_case_cutoff_checks(page, model_id, source, exported_rows, check, pref
 
 def wrong_model_mutation(browser, case_dir, output, oracle, check):
     html = (case_dir / "binary.html").read_text()
-    pattern = r'(<script[^>]*id="axr-predictions-payload"[^>]*>)(.*?)(</script>)'
-    match = re.search(pattern, html, flags=re.S)
-    if match is None:
-        raise RuntimeError("Missing Predictions payload for numeric mutation")
-    view = json.loads(match[2])
+    view = read_json_payload(html, "axr-predictions-payload")
     pair = next(((a, b, i) for a in oracle["prediction_source"] for b in oracle["prediction_source"] if a != b
                  for i in range(1, 100) if counts_at(oracle["prediction_source"][a], i / 100) !=
                  counts_at(oracle["prediction_source"][b], i / 100)), None)
@@ -374,7 +370,7 @@ def wrong_model_mutation(browser, case_dir, output, oracle, check):
     target, foreign, index = pair
     models = {model["model_id"]: model for model in view["models"]}
     models[target]["cutoffs"] = copy.deepcopy(models[foreign]["cutoffs"])
-    altered = html[:match.start(2)] + json.dumps(view).replace("</", "<\\/") + html[match.end(2):]
+    altered = replace_json_payload(html, "axr-predictions-payload", view)
     path = output / "wrong-cutoff-model.html"
     path.write_text(altered)
     page = browser.new_page(viewport={"width": 1440, "height": 1000})

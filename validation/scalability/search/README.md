@@ -16,9 +16,11 @@ fit because its convergence flag is a logical value rather than a list. Those
 
 Continuous BAM took 1.1–1.7 seconds on the four noisy Friedman regression folds,
 compared with 6.8–8.3 seconds for GAM. It was not uniformly faster: the first Bank
-Marketing fold took 21.6 seconds with BAM and 6.3 seconds with GAM. The two methods
-also produced different predictions. Similar average losses in these examples
-are evidence about these folds, not numerical identity or general equivalence.
+Marketing fold took 21.6 seconds with BAM and 6.3 seconds with GAM. That BAM fit
+also emitted a nonconvergence warning, which the original reader did not treat
+as failure; its score is diagnostic only. The two methods produced different
+predictions. Similar average losses in these examples are evidence about these
+folds, not numerical identity or general equivalence.
 
 Default-resolution discrete BAM was faster, but changed an extreme held-out
 prediction by 22.9 units in one skewed regression fold. Its RMSE happened to
@@ -33,16 +35,18 @@ differed by up to 0.069, which illustrates that resolution alone cannot make
 different fitting algorithms identical. `discrete-10000-comparison.csv` retains
 all follow-up scores, including those that became worse.
 
-`larger-and-rare-comparison.csv` adds 20 fits, all with checked convergence and
-none reaching the 120-second process limit. Some representative paired results
-are below. The score is RMSE for regression and log loss for classification;
-lower is better.
+`larger-and-rare-comparison.csv` adds 20 fits, none reaching the 120-second
+process limit. Its original reader labeled all fits converged, but a later
+warning audit found a nonconvergence warning in the Bank `k = 8` BAM run. That
+original label is unreliable; the table preserves it with an explicit warning
+annotation. Some representative paired results are below. The score is RMSE
+for regression and log loss for classification; lower is better.
 
 | Training problem | GAM seconds | BAM seconds | GAM score | BAM score |
 | --- | ---: | ---: | ---: | ---: |
 | Friedman, k = 8 | 25.04 | 2.26 | 1.690590 | 1.690580 |
 | Friedman, k = 10 | 38.86 | 2.64 | 1.678807 | 1.678795 |
-| Bank, k = 8 | 6.97 | 25.93 | 0.266948 | 0.267404 |
+| Bank, k = 8 (BAM score diagnostic only) | 6.97 | 25.93 | 0.266948 | 0.267404 |
 | Bank, k = 10 | 10.96 | 2.30 | 0.265733 | 0.266916 |
 | Rare event, seed 912 | 1.13 | 3.55 | 0.092736 | 0.096172 |
 | Rare event, seed 913 | 2.12 | 3.15 | 0.073123 | 0.072146 |
@@ -160,6 +164,24 @@ partway through. Use an external time limit and record timeouts as failures.
    before saving models or producing summaries; process time is a separate
    measurement. `candidate_fixed_gam` provides an optional control that pins
    every additive configuration to the former GAM procedure.
+5. `python3 validation/scalability/search/summarize-recommended.py` verifies
+   matching fixture hashes, seeds and timer checkpoints, then exports the
+   comparison, every retained score, every configuration and failed-fold reasons.
+
+The full public comparison measures the combined release changes. Both versions
+search 30 configurations, but the candidate's automatic additive procedure
+differs from the published default. The recommended portfolio does not include
+the neural family; its separate iteration-cap change does not affect these
+runs. Equal numbers of configurations do not mean equal computational work.
+This comparison cannot
+attribute an overall time or score difference to streaming alone; the separate
+fixed-procedure parity checks address that question. Every configuration status
+and every failed fold is exported alongside all retained models' scores.
+
+The driver verifies the installed candidate against
+`candidate-final-installed-sha256.json` before fitting and records the worker's
+SHA-256. `candidate-final-source-sha256.json` identifies its corresponding source
+snapshot. Later changes to the checkout do not alter these installed runs.
 
 Preprocessing learns from each fitting fold. Validation rows score the fit;
 none of these scripts opens the final evaluation data to choose the solver.

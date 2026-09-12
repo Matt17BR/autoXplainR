@@ -1,8 +1,10 @@
 # Render an already fitted case with explicit, bounded review settings.
 args <- commandArgs(TRUE)
 stopifnot(length(args) == 2L)
-.libPaths(c(normalizePath(args[[1L]]), .libPaths()))
+library_path <- normalizePath(args[[1L]])
+.libPaths(c(library_path, .libPaths()))
 library(AutoXplainR)
+stopifnot(normalizePath(find.package("AutoXplainR")) == file.path(library_path, "AutoXplainR"))
 directory <- normalizePath(args[[2L]])
 result <- readRDS(file.path(directory, "result.rds"))
 settings <- list(top_features = 6L, max_models = 4L, n_repeats = 5L,

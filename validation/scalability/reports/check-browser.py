@@ -8,7 +8,7 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from report_payload import decode_block
+from report_payload import decode_block, read_json_payload
 from playwright.sync_api import sync_playwright
 from browser_runtime import launch
 
@@ -16,18 +16,23 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--folder", type=Path, required=True)
 parser.add_argument("--browsers", nargs="+", default=["chromium"])
 parser.add_argument("--output", type=Path)
+parser.add_argument("--require-chunks", action="store_true")
 args = parser.parse_args()
 folder = args.folder.resolve()
 out = (args.output or folder / "browser").resolve()
 out.mkdir(parents=True, exist_ok=True)
 source = json.loads((folder / "source.json").read_text())
 html = (folder / "report.html").read_text()
-wire = json.loads(re.search(r'<script[^>]*id="axr-data-payload"[^>]*>(.*?)</script>', html, re.S)[1])
+if args.require_chunks:
+    for identifier in ("axr-data-payload", "axr-predictions-payload"):
+        marker = re.search(r'<script[^>]*id="' + identifier + r'"[^>]*data-json-chunks="(\d+)"', html)
+        assert marker is not None and int(marker[1]) > 1, "Natural large-row fixture must exercise chunked " + identifier
+wire = read_json_payload(html, "axr-data-payload")
 keys = decode_block(wire["rows"]["meta"]["row_key"])
 partitions = decode_block(wire["rows"]["meta"]["partition"])
 positions = decode_block(wire["rows"]["meta"]["source_row"])
 expected_keys = {positions[i]: key for i, key in enumerate(keys) if partitions[i] == "evaluation"}
-predictions = json.loads(re.search(r'<script[^>]*id="axr-predictions-payload"[^>]*>(.*?)</script>', html, re.S)[1])
+predictions = read_json_payload(html, "axr-predictions-payload")
 model = next(item for item in predictions["models"] if item["model_id"] == "linear")
 official = dict(n=model["n"], rmse=model["regression"]["metrics"][0],
                 density_rows=sum(item["n"] for item in model["regression"]["density"]),

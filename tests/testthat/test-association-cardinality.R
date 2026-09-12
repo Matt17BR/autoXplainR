@@ -22,8 +22,20 @@ test_that("observed-cell association matches an independent dense contingency re
   x <- rep(paste0("x", seq_len(1200)), each = 3)
   y <- sample(rep(paste0("y", seq_len(1100)), length.out = length(x)))
   counts <- table(x, y)
-  expected <- outer(rowSums(counts), colSums(counts)) / sum(counts)
-  statistic <- sum((counts - expected)^2 / expected)
+  expect_true(all(rowSums(counts) == 3))
+  column_n <- colSums(counts)
+  expect_setequal(unique(column_n), c(3, 4))
+  # E = column_n / 1200, so each Pearson residual term is
+  # (1200 * O - column_n)^2 / (1200 * column_n). Multiplying by
+  # 14400 makes every term an integer because column_n is 3 or 4.
+  # Their positive sum stays below 2^53 and is exact even when R has
+  # no extended-precision accumulator. Summing 1.32 million unscaled
+  # terms lost precision in the dense oracle on macOS ARM.
+  residual_numerator <- sweep(counts * 1200, 2L, column_n, "-")
+  scaled_terms <- sweep(residual_numerator^2, 2L, 12 / column_n, "*")
+  expect_true(all(scaled_terms == floor(scaled_terms)))
+  expect_lt(sum(scaled_terms), 2^53)
+  statistic <- sum(scaled_terms) / 14400
   reference <- sqrt(statistic / (sum(counts) * (min(dim(counts)) - 1)))
   value <- AutoXplainR:::feature_association(x, y)
   expect_equal(value, reference, tolerance = 1e-13)

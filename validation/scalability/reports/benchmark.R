@@ -22,6 +22,17 @@ if (case == "wide-500") {
   arguments <- list(audit = stored$audit)
   control <- report_data_control("rows", max_rows = nrow(result$training_data) + nrow(result$test_data))
   title <- "500 predictors across 80 sites"
+  partitions <- list(training = result$training_data, evaluation = result$test_data)
+  mapping <- result$data_context$row_map
+  last <- mapping[mapping$partition == "evaluation" &
+                    mapping$processed_position == nrow(result$test_data), , drop = FALSE]
+  stopifnot(nrow(last) == 1L)
+  jsonlite::write_json(list(
+    pair = lapply(partitions, function(data) list(n = nrow(data),
+      rho = cor(data$sensor_499, data$sensor_498, method = "spearman"))),
+    record = list(key = last$row_key, values = as.list(result$test_data[nrow(result$test_data),
+      c("sensor_499", "sensor_498", "response")]))
+  ), file.path(directory, "source.json"), auto_unbox = TRUE, pretty = TRUE, digits = 16)
 } else {
   n <- as.integer(case)
   stopifnot(!is.na(n), n >= 1000L, n <= 1000000L, variant != "baseline" || n <= 200000L)
