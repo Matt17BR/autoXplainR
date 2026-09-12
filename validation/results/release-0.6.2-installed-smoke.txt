@@ -1,0 +1,58 @@
+Fresh installation
+==================
+* installing *source* package ‘AutoXplainR’ ...
+** this is package ‘AutoXplainR’ version ‘0.6.2’
+** using staged installation
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+*** copying figures
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (AutoXplainR)
+
+
+Standard workflows
+==================
+regression : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+binary : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+multiclass : fit, raw predictions, report, RDS reuse, narrative, JSON export passed
+Missing values and novel categories: saved recipe prediction passed
+Existing models: first-level event, benchmark, row/summary reports and RDS reuse passed
+Namespaces before loading AutoXplainR: compiler, graphics, utils, grDevices, stats, datasets, methods, base
+Fresh-session installed library: /home/mmazzarelli/.cache/autoxplain-stress-0.6.2/published-release/library/AutoXplainR
+Fresh-session AutoXplainR version: 0.6.2
+regression : restored 4 models; raw responses/classes match saved outputs; report rendered
+binary : restored 4 models; raw responses/classes match saved outputs; report rendered
+multiclass : restored 3 models; raw responses/classes match saved outputs; report rendered
+recipe : restored 4 models; raw responses/classes match saved outputs; saved recipe reapplied
+existing_binary : restored 2 models; raw responses/classes match saved outputs; report rendered
+Fresh-session installed artifact replay passed.
+Installed artifact smoke passed from /home/mmazzarelli/.cache/autoxplain-stress-0.6.2/published-release/library/AutoXplainR
+
+
+Standard clean-process reload
+=============================
+Namespaces before loading AutoXplainR: compiler, graphics, utils, grDevices, stats, datasets, methods, base
+Fresh-session installed library: /home/mmazzarelli/.cache/autoxplain-stress-0.6.2/published-release/library/AutoXplainR
+Fresh-session AutoXplainR version: 0.6.2
+regression : restored 4 models; raw responses/classes match saved outputs; report rendered
+binary : restored 4 models; raw responses/classes match saved outputs; report rendered
+multiclass : restored 3 models; raw responses/classes match saved outputs; report rendered
+recipe : restored 4 models; raw responses/classes match saved outputs; saved recipe reapplied
+existing_binary : restored 2 models; raw responses/classes match saved outputs; report rendered
+Fresh-session installed artifact replay passed.
+
+
+Native clean-process reload
+===========================
+regression fresh native namespace reload and prediction passed
+binary fresh native namespace reload and prediction passed
+multiclass fresh native namespace reload and prediction passed
+scaled_kernel fresh native namespace reload and prediction passed
+Fresh artifact native replay passed: 8 models

@@ -1,0 +1,385 @@
+[
+  {
+    "case": "near_max_negative_gap_1",
+    "values": [
+      -1.7976931348623155e+308,
+      -1.7976931348623157e+308
+    ],
+    "expected_sd": 1.4112722170374585e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_negative_gap_3",
+    "values": [
+      -1.7976931348623151e+308,
+      -1.7976931348623157e+308
+    ],
+    "expected_sd": 4.233816651112375e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_negative_gap_10",
+    "values": [
+      -1.7976931348623137e+308,
+      -1.7976931348623157e+308
+    ],
+    "expected_sd": 1.4112722170374585e+293,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_negative_cluster",
+    "values": [
+      -1.7976931348623157e+308,
+      -1.7976931348623155e+308,
+      -1.7976931348623151e+308,
+      -1.7976931348623137e+308,
+      -1.7976931348623137e+308,
+      -1.7976931348623151e+308,
+      -1.7976931348623155e+308,
+      -1.7976931348623157e+308,
+      -1.7976931348623157e+308,
+      -1.7976931348623157e+308
+    ],
+    "expected_sd": 7.916553693430918e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_positive_gap_1",
+    "values": [
+      1.7976931348623155e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": 1.4112722170374585e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_positive_gap_3",
+    "values": [
+      1.7976931348623151e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": 4.233816651112375e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_positive_gap_10",
+    "values": [
+      1.7976931348623137e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": 1.4112722170374585e+293,
+    "unrepresentable": false
+  },
+  {
+    "case": "near_max_positive_cluster",
+    "values": [
+      1.7976931348623157e+308,
+      1.7976931348623155e+308,
+      1.7976931348623151e+308,
+      1.7976931348623137e+308,
+      1.7976931348623137e+308,
+      1.7976931348623151e+308,
+      1.7976931348623155e+308,
+      1.7976931348623157e+308,
+      1.7976931348623157e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": 7.916553693430918e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_negative_gap_1",
+    "values": [
+      -9.999999999999998e+307,
+      -1e+308
+    ],
+    "expected_sd": 1.4112722170374585e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_negative_gap_3",
+    "values": [
+      -9.999999999999994e+307,
+      -1e+308
+    ],
+    "expected_sd": 4.233816651112375e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_negative_gap_10",
+    "values": [
+      -9.99999999999998e+307,
+      -1e+308
+    ],
+    "expected_sd": 1.4112722170374585e+293,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_negative_cluster",
+    "values": [
+      -1e+308,
+      -9.999999999999998e+307,
+      -9.999999999999994e+307,
+      -9.99999999999998e+307,
+      -9.99999999999998e+307,
+      -9.999999999999994e+307,
+      -9.999999999999998e+307,
+      -1e+308,
+      -1e+308,
+      -1e+308
+    ],
+    "expected_sd": 7.916553693430918e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_positive_gap_1",
+    "values": [
+      9.999999999999998e+307,
+      1e+308
+    ],
+    "expected_sd": 1.4112722170374585e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_positive_gap_3",
+    "values": [
+      9.999999999999994e+307,
+      1e+308
+    ],
+    "expected_sd": 4.233816651112375e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_positive_gap_10",
+    "values": [
+      9.99999999999998e+307,
+      1e+308
+    ],
+    "expected_sd": 1.4112722170374585e+293,
+    "unrepresentable": false
+  },
+  {
+    "case": "large_positive_cluster",
+    "values": [
+      1e+308,
+      9.999999999999998e+307,
+      9.999999999999994e+307,
+      9.99999999999998e+307,
+      9.99999999999998e+307,
+      9.999999999999994e+307,
+      9.999999999999998e+307,
+      1e+308,
+      1e+308,
+      1e+308
+    ],
+    "expected_sd": 7.916553693430918e+292,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_negative_gap_1",
+    "values": [
+      -9.999999999999998e-161,
+      -1e-160
+    ],
+    "expected_sd": 1.1167797600127676e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_negative_gap_3",
+    "values": [
+      -9.999999999999995e-161,
+      -1e-160
+    ],
+    "expected_sd": 3.350339280038302e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_negative_gap_10",
+    "values": [
+      -9.999999999999984e-161,
+      -1e-160
+    ],
+    "expected_sd": 1.1167797600127676e-175,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_negative_cluster",
+    "values": [
+      -1e-160,
+      -9.999999999999998e-161,
+      -9.999999999999995e-161,
+      -9.999999999999984e-161,
+      -9.999999999999984e-161,
+      -9.999999999999995e-161,
+      -9.999999999999998e-161,
+      -1e-160,
+      -1e-160,
+      -1e-160
+    ],
+    "expected_sd": 6.264593624918861e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_positive_gap_1",
+    "values": [
+      9.999999999999998e-161,
+      1e-160
+    ],
+    "expected_sd": 1.1167797600127676e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_positive_gap_3",
+    "values": [
+      9.999999999999995e-161,
+      1e-160
+    ],
+    "expected_sd": 3.350339280038302e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_positive_gap_10",
+    "values": [
+      9.999999999999984e-161,
+      1e-160
+    ],
+    "expected_sd": 1.1167797600127676e-175,
+    "unrepresentable": false
+  },
+  {
+    "case": "small_positive_cluster",
+    "values": [
+      1e-160,
+      9.999999999999998e-161,
+      9.999999999999995e-161,
+      9.999999999999984e-161,
+      9.999999999999984e-161,
+      9.999999999999995e-161,
+      9.999999999999998e-161,
+      1e-160,
+      1e-160,
+      1e-160
+    ],
+    "expected_sd": 6.264593624918861e-176,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_negative_gap_1",
+    "values": [
+      -9.999999999999998e-201,
+      -1e-200
+    ],
+    "expected_sd": 1.0256002335997487e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_negative_gap_3",
+    "values": [
+      -9.999999999999995e-201,
+      -1e-200
+    ],
+    "expected_sd": 3.0768007007992455e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_negative_gap_10",
+    "values": [
+      -9.999999999999985e-201,
+      -1e-200
+    ],
+    "expected_sd": 1.0256002335997486e-215,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_negative_cluster",
+    "values": [
+      -1e-200,
+      -9.999999999999998e-201,
+      -9.999999999999995e-201,
+      -9.999999999999985e-201,
+      -9.999999999999985e-201,
+      -9.999999999999995e-201,
+      -9.999999999999998e-201,
+      -1e-200,
+      -1e-200,
+      -1e-200
+    ],
+    "expected_sd": 5.753120637726123e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_positive_gap_1",
+    "values": [
+      9.999999999999998e-201,
+      1e-200
+    ],
+    "expected_sd": 1.0256002335997487e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_positive_gap_3",
+    "values": [
+      9.999999999999995e-201,
+      1e-200
+    ],
+    "expected_sd": 3.0768007007992455e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_positive_gap_10",
+    "values": [
+      9.999999999999985e-201,
+      1e-200
+    ],
+    "expected_sd": 1.0256002335997486e-215,
+    "unrepresentable": false
+  },
+  {
+    "case": "tiny_positive_cluster",
+    "values": [
+      1e-200,
+      9.999999999999998e-201,
+      9.999999999999995e-201,
+      9.999999999999985e-201,
+      9.999999999999985e-201,
+      9.999999999999995e-201,
+      9.999999999999998e-201,
+      1e-200,
+      1e-200,
+      1e-200
+    ],
+    "expected_sd": 5.753120637726123e-216,
+    "unrepresentable": false
+  },
+  {
+    "case": "representable_boundary",
+    "values": [
+      -1.7976931348623157e+308,
+      -1.7976931348623157e+308,
+      -1.7976931348623157e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": 1.7976931348623157e+308,
+    "unrepresentable": false
+  },
+  {
+    "case": "unrepresentable_boundary",
+    "values": [
+      -1.7976931348623157e+308,
+      1.7976931348623157e+308
+    ],
+    "expected_sd": null,
+    "unrepresentable": true
+  },
+  {
+    "case": "wide_representable",
+    "values": [
+      -1e+308,
+      -3e+307,
+      2e+307,
+      7e+307
+    ],
+    "expected_sd": 7.257180352359081e+307,
+    "unrepresentable": false
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "baseline_ref": "813d9b0a18397028ff1c6caaa951b8e46ffa03bb",
+  "source_file": "R/matrix_blueprint.R",
+  "source_sha256": "e45445ce032f7adc086d2c25c5bb745df88ab89339428c4cca8f751703e25b62",
+  "ordinary_blueprint_configurations": 48,
+  "ordinary_blueprints_identical": true,
+  "baked_training_and_reordered_inputs_identical": true,
+  "sd_cases": 35,
+  "finite_sd_cases": 34,
+  "unrepresentable_sd_cases": 1,
+  "max_relative_sd_error": 2.2204460492503131e-16,
+  "relative_tolerance": 9.9999999999999998e-13,
+  "R_version": "R version 4.5.2 (2025-10-31)",
+  "platform": "x86_64-pc-linux-gnu",
+  "scope": "Blueprints and baked model-input matrices, not fitted models or full model predictions. No ARM binary run."
+}
