@@ -17,7 +17,7 @@ combine these questions into an evidence grade."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,8 @@ combine these questions into an evidence grade.</p>
 <span>  seed <span class="op">=</span> <span class="fl">123L</span>,</span>
 <span>  confidence <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  performance_tolerance <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  dependence_threshold <span class="op">=</span> <span class="fl">0.7</span></span>
+<span>  dependence_threshold <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  max_rows <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,6 +126,14 @@ correlation, mixed pairs use a correlation ratio, and categorical pairs
 use Cramer's V. Small values do not establish independence or rule out
 nonlinear or joint dependence.</p></dd>
 
+
+<dt id="arg-max-rows">max_rows<a class="anchor" aria-label="anchor" href="#arg-max-rows"></a></dt>
+<dd><p>Maximum evaluation rows for permutation importance and
+feature-dependence checks. <code>NULL</code> uses all rows. Model performance and
+prediction comparisons still use the complete evaluation set. Sampling
+is uniform without replacement and shared across models; its uncertainty
+is not included in shuffle intervals.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -152,7 +161,7 @@ for domain review, causal identification, or external validation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   explanation accord: unavailable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prediction accord:  unavailable</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   comparison: Fewer than two supplied models meet the performance tolerance.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Findings</span>

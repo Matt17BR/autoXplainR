@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,20 +162,20 @@ missing engine produces an installation instruction.</p>
 <span><span class="co">#&gt; 4                   decision tree</span></span>
 <span><span class="co">#&gt; 5                   decision tree</span></span>
 <span><span class="co">#&gt; 6 multinomial logistic regression</span></span>
-<span><span class="co">#&gt;                                         hyperparameters   cv_score      cv_se</span></span>
-<span><span class="co">#&gt; 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199</span></span>
-<span><span class="co">#&gt; 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168</span></span>
-<span><span class="co">#&gt; 3 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486</span></span>
-<span><span class="co">#&gt; 4  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488</span></span>
-<span><span class="co">#&gt; 5  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488</span></span>
-<span><span class="co">#&gt; 6                               default statistical fit         NA         NA</span></span>
-<span><span class="co">#&gt;   selected</span></span>
-<span><span class="co">#&gt; 1     TRUE</span></span>
-<span><span class="co">#&gt; 2    FALSE</span></span>
-<span><span class="co">#&gt; 3    FALSE</span></span>
-<span><span class="co">#&gt; 4    FALSE</span></span>
-<span><span class="co">#&gt; 5    FALSE</span></span>
-<span><span class="co">#&gt; 6    FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                 hyperparameters   cv_score</span></span>
+<span><span class="co">#&gt; 1 hidden units = 2, weight decay = 0.03, iteration limit = 2000 0.09445857</span></span>
+<span><span class="co">#&gt; 2  hidden units = 1, weight decay = 0.1, iteration limit = 2000 0.29456937</span></span>
+<span><span class="co">#&gt; 3         max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688</span></span>
+<span><span class="co">#&gt; 4          max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788</span></span>
+<span><span class="co">#&gt; 5          max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788</span></span>
+<span><span class="co">#&gt; 6                                       default statistical fit         NA</span></span>
+<span><span class="co">#&gt;        cv_se selected</span></span>
+<span><span class="co">#&gt; 1 0.03609199     TRUE</span></span>
+<span><span class="co">#&gt; 2 0.01072168    FALSE</span></span>
+<span><span class="co">#&gt; 3 1.40932486    FALSE</span></span>
+<span><span class="co">#&gt; 4 1.40612488    FALSE</span></span>
+<span><span class="co">#&gt; 5 1.40612488    FALSE</span></span>
+<span><span class="co">#&gt; 6         NA    FALSE</span></span></code></pre></div>
 <p>Every fold learns its preprocessing from that fold’s training rows.
 The default one-standard-error rule favors the first eligible family in
 the documented priority, then its smallest recorded within-family
@@ -267,14 +267,29 @@ restriction on penalized GAMs. Use another family or bring an externally
 fitted GAM through <code><a href="../reference/evaluate_models.html">evaluate_models()</a></code>. Other engine-specific
 limitations, including extreme numerical units, can still exclude
 individual candidates. Inspect the recorded reason.</p>
-<p>The broad preset can be slow even when every fit succeeds. On the
-1,200-row, 30-input nonlinear stress case, <code>recommended</code> took
-8 minutes 53 seconds, compared with 58 seconds for the explicit
-15-configuration regularized/forest/boosting search. Both selected the
-same boosted model. Individual GAM folds took 9 to 43 seconds as their
-basis limits increased. These timings describe one machine and one
-problem; they explain why the explicit family choice above can be more
-practical than searching every supported shape.</p>
+<p>The broad preset can be slow even when every fit succeeds. A fresh
+paired run on the 1,200-row, 30-input nonlinear stress case took 412
+seconds in version 0.6.2 and 65 seconds in the candidate, with all 30
+configurations successful. Both selected the same boosted model and had
+the same evaluation RMSE. These are single runs on one machine, not a
+general speed guarantee. An earlier, separate 0.6.2 run took 533
+seconds; it is not the paired baseline for the 65-second result.</p>
+<p>Automatic additive fitting uses continuous BAM at 10,000
+outer-training rows. Gaussian regression also uses BAM when the
+estimated work, rows times the number of coefficients squared, reaches
+10 million. Smaller binary problems retain nested GAM: BAM uses a
+different iteratively weighted procedure that failed on several training
+folds where GAM converged. The choice stays fixed across folds and the
+final refit, while each fitting partition learns its own preprocessing
+and smoothing penalties. This rule uses the task and training input
+size, not validation or final-test scores.</p>
+<p>The row threshold is a computational policy, not a guarantee of
+convergence or better predictions. Pin <code>solver = "gam"</code> or
+<code>solver = "bam"</code> in an additive grid when a particular
+fitting procedure matters. Covariate discretization requires the
+explicit <code>"bam_discrete"</code> choice. The smaller family set
+above remains useful when the broader search costs more than the
+additional models are worth.</p>
 </div>
 <div class="section level2">
 <h2 id="budget-explanations-and-the-report-separately">Budget explanations and the report separately<a class="anchor" aria-label="anchor" href="#budget-explanations-and-the-report-separately"></a>
@@ -285,23 +300,128 @@ a small report explicitly, then increase its explanation budget when the
 fitted models deserve closer investigation:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"first-look.html"</span>, top_features <span class="op">=</span> <span class="fl">3</span>, n_repeats <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>                    report_data <span class="op">=</span> <span class="st">"summary"</span><span class="op">)</span></span></code></pre></div>
+<span>                    explanation_rows <span class="op">=</span> <span class="fl">2000</span>, report_data <span class="op">=</span> <span class="st">"summary"</span>,</span>
+<span>                    uncertainty <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>Even a small feature audit first screens inputs; expensive prediction
 functions and hundreds of columns can take time. Five permutations are a
 first look, not precise importance estimates. The report records the
 budget and warns about unstable Monte Carlo estimates.</p>
+<p>This first report also omits paired score intervals. By default,
+those intervals use 1,000 bootstrap resamples of the complete evaluation
+set, independently of the explanation and export limits.
+<code>uncertainty = FALSE</code> skips that calculation; model scores
+still use the complete evaluation set. Omit this argument to include the
+intervals when the validation design supports them.</p>
+<p>Rendering returns the HTML path and leaves <code>result</code>
+unchanged. If the result was fitted with <code>explain = FALSE</code>,
+repeat the explanation settings in later renders: the first report does
+not save its evidence or budget back into <code>result</code>. Omitting
+those settings computes default explanations unless the result already
+contains retained explanations.</p>
+</div>
+<div class="section level2">
+<h2 id="larger-data">Larger data<a class="anchor" aria-label="anchor" href="#larger-data"></a>
+</h2>
+<p>The rows used to fit and score models are distinct from the rows used
+to explain them or included in HTML. <code><a href="../reference/autoxplain.html">autoxplain()</a></code> fits on
+the complete processed training partition and scores the complete
+processed evaluation partition. Rows removed by an explicit
+preprocessing rule remain recorded as omissions.</p>
+<p>The report’s default importance and effect calculations use at most
+5,000 evaluation rows. Pairwise plots and associations use at most
+10,000 rows per partition. Unfiltered distributions and missing counts
+use all available rows. Filtered charts and their counts describe only
+matching exported records; sidebar counts keep the full population.
+Official model scores always use the complete evaluation partition and
+are unchanged by filters. Each sampled view gives its own denominator. A
+rare class or small cluster can be absent from a uniform sample even
+when its full count is visible elsewhere. Increasing permutation repeats
+does not resolve that absence, and shuffle intervals do not measure
+row-sampling uncertainty.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
+<span>  <span class="va">training</span>, <span class="st">"outcome"</span>, test_data <span class="op">=</span> <span class="va">final_test</span>,</span>
+<span>  learners <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"regularized"</span>, <span class="st">"boosting"</span><span class="op">)</span>, max_models <span class="op">=</span> <span class="fl">12</span>, nfolds <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  tuning_control <span class="op">=</span> <span class="fu"><a href="../reference/tuning_control.html">tuning_control</a></span><span class="op">(</span>retain_oof <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  explanation_rows <span class="op">=</span> <span class="fl">5000</span>, report <span class="op">=</span> <span class="st">"model-report.html"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Include a bounded sample for record inspection and browser filters.</span></span>
+<span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span></span>
+<span>  <span class="va">result</span>, <span class="st">"records.html"</span>,</span>
+<span>  report_data <span class="op">=</span> <span class="fu"><a href="../reference/report_data_control.html">report_data_control</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"rows"</span>, max_rows <span class="op">=</span> <span class="fl">20000</span>, max_pair_rows <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Choose the search and validation design before looking at the final
+test scores. The example budget is a starting point, not a claim that
+twelve settings are enough for a difficult problem.
+<code>retain_oof = FALSE</code> saves memory by omitting case-level CV
+predictions; fold scores, candidate settings and selection remain
+available. Use the default <code>TRUE</code> when you need to inspect
+individual CV errors. This control does not reduce fitting rows or final
+evaluation rows.</p>
+<p>The measured million-row regression control used a smaller search:
+one regularized and one boosting configuration, two CV folds and
+<code>retain_oof = FALSE</code>. One call fitted all million training
+rows, scored all 20,000 independent evaluation rows and wrote a
+3,891,782-byte summary report in 81.055 seconds. Default explanations
+used 5,000 rows; all 1,000 paired bootstrap draws used the full
+evaluation set. The shallow selected model had RMSE 1.6835. A separate
+three-configuration search selected 600 boosting rounds at depth 6 and
+reached RMSE 0.7491 in 109.012 seconds with explanations disabled. These
+single-host results measure different workloads; see the <a href="https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md" class="external-link">measurements</a>.</p>
+<p>Large result checks write complete model and data state to a
+temporary file, then remove it. The temporary file system needs space
+for that serialization. If you need disk-backed temporary storage, set
+<code>TMPDIR</code> to an existing, writable directory on disk before
+starting R. Changing it after R starts does not move the session’s
+temporary directory.</p>
+<p>Neural configurations now allow up to 2,000 optimizer iterations, and
+stop earlier when they converge. The former 500-iteration ceiling
+excluded wider networks on the nonlinear stress problem even when more
+iterations produced useful fits. <code>maxit</code> is an explicit
+neural grid setting, so you can retain the former budget or choose
+another allowance. Inspect convergence and failed configurations
+alongside scores. A larger allowance can improve model selection but
+also increases fitting time; it does not guarantee convergence.</p>
+<p>Use <code>explanation_rows = NULL</code> to remove the report
+explanation cap and
+<code>report_data_control(max_pair_rows = NULL)</code> for all-row pair
+summaries. The lower-level
+<code><a href="../reference/calculate_permutation_importance.html">calculate_permutation_importance()</a></code>,
+<code><a href="../reference/audit_explanations.html">audit_explanations()</a></code> and <code><a href="../reference/explain_effect.html">explain_effect()</a></code> have
+no shared row cap by default and accept <code>max_rows</code>
+explicitly. PDP has its separate <code>sample_size</code> control: its
+curve and support distribution can use different row counts, both
+recorded in the result.</p>
+<p>Large reports store compressed column values and unpack them offline
+as needed. Compression does not remove exported values. The Data tab’s
+linked scatter shows at most 1,500 points; filters and record lookup use
+all exported rows. Exporting every row can still create a large file and
+considerable browser memory use; leave
+<code>report_data = "summary"</code> unless individual records serve a
+concrete purpose.</p>
+<p>For large categorical expansions, automatic boosting encoding uses
+native categorical splits instead of a numeric contrast matrix. The
+threshold is an estimated matrix with more than 50 million cells and
+more than twice the input width. The representation is fixed for a
+search from outer-training inputs; category mappings and preprocessing
+stay inside each fold. The two representations are different models, not
+interchangeable numerical shortcuts. Set
+<code>encoding = "matrix"</code> or <code>"native"</code> in an explicit
+boosting grid to control this choice. The search record and report show
+what was used and why.</p>
 <p>Use <code><a href="../reference/report_data_control.html">report_data_control()</a></code> to restrict exported columns
 or sample records if you need row filtering. Full records for hundreds
-of columns make a large HTML file. Aggregate mode keeps full-data
-profiles but does not allow row filtering. <code>max_models</code>
-bounds the number of attempted configurations, not elapsed time.
-<code>max_runtime_secs</code> is an H2O setting and does not impose a
-local-engine timeout.</p>
+of columns make a large HTML file. Aggregate mode keeps full univariate
+summaries and bounded pair summaries but does not allow row filtering.
+<code>max_models</code> bounds the number of attempted configurations,
+not elapsed time. <code>max_runtime_secs</code> is an H2O setting and
+does not impose a local-engine timeout.</p>
 </div>
 <div class="section level2">
 <h2 id="compare-fitted-behavior">Compare fitted behavior<a class="anchor" aria-label="anchor" href="#compare-fitted-behavior"></a>
 </h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span><span class="va">iris</span>, <span class="st">"Sepal.Length"</span>, model_set <span class="op">=</span> <span class="st">"comparison"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/compare_model_behavior.html">compare_model_behavior</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;AutoXplainR model behavior comparison&gt;</span></span>
@@ -347,7 +467,7 @@ local-engine timeout.</p>
 and prediction differences describe what these particular fitted models
 did on common evaluation rows. Disagreement does not supply prediction
 intervals or identify the correct prediction.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">effects</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_model_effects.html">compare_model_effects</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"Petal.Length"</span>, method <span class="op">=</span> <span class="st">"ale"</span>, n_points <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">effects</span><span class="op">)</span></span></code></pre></div>
 <p><img src="model-selection_files/figure-html/effects-1.png" class="r-plt" alt="" width="672"></p>
@@ -361,7 +481,7 @@ storage, not structural complexity. Use it when storage or runtime is
 relevant to a concrete constraint; a favorable Pareto position is not a
 model-selection rule.</p>
 <p>For repeated prediction measurements on the same rows:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bench</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/benchmark_predictions.html">benchmark_predictions</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/render_model_report.html">render_model_report</a></span><span class="op">(</span><span class="va">comparison</span>, <span class="st">"report.html"</span>, benchmark <span class="op">=</span> <span class="va">bench</span><span class="op">)</span></span></code></pre></div>
 <p>The benchmark records a common batch, warmup, repeated blocks,
@@ -383,7 +503,7 @@ creates its folds. Use the default keep-missing path, the base engine
 for fold-local preprocessing, or explicitly designed validation with
 <code>nfolds = 0</code>. H2O’s own transformations remain engine
 responsibilities.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">holdout</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">5L</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, by <span class="op">=</span> <span class="fl">5L</span><span class="op">)</span></span>
 <span><span class="va">h2o_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/autoxplain.html">autoxplain</a></span><span class="op">(</span></span>
 <span>  <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">holdout</span>, <span class="op">]</span>, <span class="st">"Species"</span>, test_data <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">holdout</span>, <span class="op">]</span>,</span>

@@ -13,7 +13,7 @@ labels, small groups and fitted model details can still disclose information."><
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,8 @@ labels, small groups and fitted model details can still disclose information.</p
 <span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  context_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  max_rows <span class="op">=</span> <span class="fl">5000L</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_pair_rows <span class="op">=</span> <span class="fl">10000L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,13 +97,26 @@ such as a site or time column excluded from fitting. Empty by default.</p></dd>
 <dt id="arg-max-rows">max_rows<a class="anchor" aria-label="anchor" href="#arg-max-rows"></a></dt>
 <dd><p>Maximum exported records across training and evaluation.
 Sampling allocates rows proportionally between splits and samples uniformly
-within each split. Unfiltered aggregate profiles use the full available
-data for each stage; browser row filters describe only the exported sample
+within each split. Browser row filters describe only this exported sample
 and leave model scores unchanged.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional sampling seed. <code>NULL</code> uses the analysis seed, or 2026.</p></dd>
+
+
+<dt id="arg-max-pair-rows">max_pair_rows<a class="anchor" aria-label="anchor" href="#arg-max-pair-rows"></a></dt>
+<dd><p>Maximum rows per partition used for relationship plots,
+conditional summaries and pairwise associations. The default is 10,000;
+<code>NULL</code> uses all rows. One uniform sample is shared by all pairs. Raw and
+processed samples retain the same source rows where possible. Counts and
+associations describe that sample, with its size shown in the report.
+Rare groups can be missed; increase this limit or use <code>NULL</code> to inspect them.
+Unfiltered individual-column distributions and missing counts use all
+available rows. Filtered charts and their counts describe only matching
+exported records; sidebar counts keep the full population. Model scores
+always use the complete evaluation partition and are unchanged by filters.
+This limit is independent of <code>max_rows</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

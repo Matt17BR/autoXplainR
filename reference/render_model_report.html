@@ -17,7 +17,7 @@ explanations use optional help and expandable details."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,8 @@ explanations use optional help and expandable details.</p>
 <span>  uncertainty <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  target_units <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  report_data <span class="op">=</span> <span class="st">"summary"</span>,</span>
-<span>  benchmark <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  benchmark <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  explanation_rows <span class="op">=</span> <span class="fl">5000L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -165,6 +166,14 @@ panels remain accessible to anyone receiving the file.</p></dd>
 <dd><p>Optional result of <code><a href="benchmark_predictions.html">benchmark_predictions()</a></code> made from the
 same unchanged models and evaluation data. Adds repeated prediction costs
 and their measurement protocol; rendering does not run a benchmark.</p></dd>
+
+
+<dt id="arg-explanation-rows">explanation_rows<a class="anchor" aria-label="anchor" href="#arg-explanation-rows"></a></dt>
+<dd><p>Maximum evaluation rows for newly computed
+explanations, as in <code><a href="autoxplain.html">autoxplain()</a></code>. Defaults to 5000. <code>NULL</code> removes this cap;
+PDP curves retain their separate 1000-row limit (see <code><a href="explain_effect.html">explain_effect()</a></code>).
+Supplying this explicitly recomputes default explanations with that scope;
+it does not replace a supplied <code>audit</code> or <code>effects</code> object.</p></dd>
 
 </dl></div>
     <div class="section level2">

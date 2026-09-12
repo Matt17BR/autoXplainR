@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@
 
 <div id="development-priorities" class="section level1">
 
-<p>AutoXplainR’s purpose is a short, inspectable path from a tabular prediction question to a baseline comparison, fitted explanations and a report. Existing packages already provide the underlying estimators and much of the reporting infrastructure. Integration and reader comprehension are hypotheses to test.</p>
+<p>AutoXplainR should make it easy to fit models, see where they fail and understand a report. It uses established estimators. Its value depends on whether people can get useful answers from the workflow.</p>
 <div class="section level2">
 <h2 id="id_060-make-exploration-useful">0.6.0: make exploration useful<a class="anchor" aria-label="anchor" href="#id_060-make-exploration-useful"></a></h2>
 <p>The <a href="validation/product-review-0.4.0.html">review of 0.4.0</a> found that statistical repairs had displaced the package’s main purpose: comparing models and understanding their behaviour. Version 0.5.0 restored tabs and model controls, but the next review found sparse charts, missing search rationale and little access to the supplied data. The <a href="validation/product-overhaul-0.6.0.html">0.6.0 work record</a> tracks the repairs and rejected intermediate designs.</p>
@@ -63,6 +63,11 @@
 </ul><p>See the <a href="RELEASE_CHECKLIST.html">release checklist</a>. A participant study can add independent evidence, but ordinary task acceptance must happen now.</p>
 </div>
 <div class="section level2">
+<h2 id="id_070-measured-scale-and-model-quality">0.7.0: measured scale and model quality<a class="anchor" aria-label="anchor" href="#id_070-measured-scale-and-model-quality"></a></h2>
+<p>The <a href="validation/scalability/findings.html">scalability work</a> separates fitting, scoring, explanations, export and browser costs. It includes million-row training problems, complete holdout checks, saved-model reloads, wider inputs and comparisons with stronger model configurations. Exact computational repairs are checked separately from changes to model families, solver policies or explanation samples. Supported examples have measured budgets; they do not establish a universal capacity for every learner or dataset.</p>
+<p>A two-configuration, two-fold search on one million simulated training rows completed with explanations and a summary report in 81.055 seconds. Scores and 1,000 bootstrap draws used all 20,000 evaluation rows; explanations used 5,000. A separate fit-only search reached RMSE 0.7491 with a larger boosting grid. The wide million-row fitting case also completed, but required nearly 12 GiB peak memory and a 3.34 GB saved result. Those costs still constrain practical use.</p>
+</div>
+<div class="section level2">
 <h2 id="next-interoperability-and-demonstrated-usefulness">Next: interoperability and demonstrated usefulness<a class="anchor" aria-label="anchor" href="#next-interoperability-and-demonstrated-usefulness"></a></h2>
 <ol style="list-style-type: decimal"><li>
 <strong>Framework-specific adapters.</strong> <code><a href="reference/evaluate_models.html">evaluate_models()</a></code> accepts native models and explicit prediction functions. Dedicated tidymodels and mlr3 adapters still need examples covering embedded recipes, probability-column order, new factor levels and serialization. Prefer these over more learner families.</li>
@@ -71,7 +76,7 @@
 <li>
 <strong>Report accessibility.</strong> Exercise keyboard order, contrast, table semantics, mobile layouts, print output and screen readers. Automated checks complement manual review; attractive screenshots do not establish accessibility.</li>
 <li>
-<strong>Compatibility and performance.</strong> Extend the retained schema and raw-data tests with wide/tall memory profiles and old-result migration fixtures. Report preparation and benchmarking have different scopes; test their call counts and resource costs separately before adding parallel execution.</li>
+<strong>Compatibility and performance.</strong> Extend the measured workloads to more real datasets, hardware and evaluation sizes, alongside old-result migration fixtures. Keep fitting, interval calculation, report export and browser measurements separate. Establish their resource costs before adding parallel execution. Assess a compact inference export separately from the evidence-rich result, with native serialization sizes and cold prediction checks; R object sizes alone cannot establish deployment memory requirements.</li>
 </ol></div>
 <div class="section level2">
 <h2 id="deferred-until-the-current-workflow-meets-those-criteria">Deferred until the current workflow meets those criteria<a class="anchor" aria-label="anchor" href="#deferred-until-the-current-workflow-meets-those-criteria"></a></h2>

@@ -78,15 +78,41 @@ Custom grids must be a named list keyed by learner family. Each family
 value may be a data frame (one configuration per row), a list of named
 parameter lists, or one named parameter list. Parameter names are exact
 adapter contracts: `linear` has no parameters; `regularized` uses
-`alpha` and `path_fraction`; `additive` uses `k`, `gamma`, and `select`;
-`tree` uses `maxdepth`, `cp`, and `minsplit`; `forest` uses `num.trees`,
-`mtry`, `min.node.size`, `sample.fraction`, and `splitrule`; `boosting`
-uses `nrounds`, `eta`, `max_depth`, `min_child_weight`, `subsample`,
-`colsample_bytree`, `reg_alpha`, and `reg_lambda`; `neural` uses `size`
-and `decay`; `kernel` uses `cost`, `gamma_multiplier`, and `epsilon`
-(fixed at `0.1` for classification because that backend ignores it);
-`neighbors` uses `k`, `distance`, and `kernel`; and `mars` uses `degree`
-and `nprune`.
+`alpha` and `path_fraction`; `additive` uses `k`, `gamma`, and `select`,
+with optional `solver` (`"auto"`, `"gam"`, `"bam"`, or `"bam_discrete"`)
+and `discrete_bins` (default 10000). `gam` uses nested REML
+optimization; `bam` uses fREML and builds its design in blocks;
+`bam_discrete` discretizes numeric covariates at the recorded
+resolution. The final fit and each training fold record their actual
+method. `auto` plans each configuration's solver once from the task and
+outer-training inputs: continuous BAM at 10,000 rows; Gaussian
+regression also uses BAM when rows times estimated coefficients squared
+reaches 10 million. Binary classification below 10,000 rows retains
+nested GAM because iteratively weighted BAM fitting can fail to converge
+on smaller samples. That solver stays fixed through validation and
+refitting; preprocessing and smoothing are still learned separately
+within each fitting partition. This is a computational policy, not a
+guarantee of faster fitting or equivalent predictions. Discretization is
+never automatic. Omitting the new controls preserves valid older custom
+grids. `tree` uses `maxdepth`, `cp`, and `minsplit`; `forest` uses
+`num.trees`, `mtry`, `min.node.size`, `sample.fraction`, and
+`splitrule`; `boosting` uses `nrounds`, `eta`, `max_depth`,
+`min_child_weight`, `subsample`, `colsample_bytree`, `reg_alpha`, and
+`reg_lambda`, with optional `encoding` (`"auto"`, `"matrix"`, or
+`"native"`). Native encoding uses categorical partitions and a quantized
+training matrix; it can change predictions. Auto switches when
+categorical expansion exceeds twice the input width and 50 million
+estimated matrix cells. This choice is planned once from the
+outer-training inputs and fixed across folds and refits; category levels
+and preprocessing are still learned within each fold. Each fit records
+the choice. `neural` uses `size` and `decay`, with optional `maxit`
+(default 2,000). This is the optimizer iteration limit, not a promise of
+convergence. Changing only this limit preserves the initialization seed;
+earlier two-parameter grids remain valid. Set `maxit = 500` to retain
+the former iteration budget. `kernel` uses `cost`, `gamma_multiplier`,
+and `epsilon` (fixed at `0.1` for classification because that backend
+ignores it); `neighbors` uses `k`, `distance`, and `kernel`; and `mars`
+uses `degree` and `nprune`.
 
 Family budgets are exact positive configuration counts. Their names must
 exactly match the learner families requested from

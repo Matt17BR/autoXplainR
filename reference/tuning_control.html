@@ -13,7 +13,7 @@ default loss, retained out-of-fold predictions, and failure isolation."></head><
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,12 +131,38 @@ argument of <code><a href="autoxplain.html">autoxplain()</a></code>.</p>
 may be a data frame (one configuration per row), a list of named parameter
 lists, or one named parameter list. Parameter names are exact adapter
 contracts: <code>linear</code> has no parameters; <code>regularized</code> uses <code>alpha</code> and
-<code>path_fraction</code>; <code>additive</code> uses <code>k</code>, <code>gamma</code>, and <code>select</code>; <code>tree</code> uses
+<code>path_fraction</code>; <code>additive</code> uses <code>k</code>, <code>gamma</code>, and <code>select</code>, with optional
+<code>solver</code> (<code>"auto"</code>, <code>"gam"</code>, <code>"bam"</code>, or <code>"bam_discrete"</code>) and
+<code>discrete_bins</code> (default 10000). <code>gam</code> uses nested REML optimization;
+<code>bam</code> uses fREML and builds its design in blocks; <code>bam_discrete</code> discretizes numeric
+covariates at the recorded resolution. The final fit and each training fold
+record their actual method. <code>auto</code> plans each configuration's solver once
+from the task and outer-training inputs: continuous BAM at 10,000 rows;
+Gaussian regression also uses BAM when rows times estimated coefficients squared
+reaches 10 million. Binary classification below 10,000 rows retains nested GAM
+because iteratively weighted BAM fitting can fail to converge on smaller samples.
+That solver
+stays fixed through validation and refitting; preprocessing and smoothing are
+still learned separately within each fitting partition.
+This is a computational policy, not a guarantee of
+faster fitting or equivalent predictions. Discretization is never automatic.
+Omitting the new controls preserves valid older
+custom grids. <code>tree</code> uses
 <code>maxdepth</code>, <code>cp</code>, and <code>minsplit</code>; <code>forest</code> uses <code>num.trees</code>, <code>mtry</code>,
 <code>min.node.size</code>, <code>sample.fraction</code>, and <code>splitrule</code>; <code>boosting</code> uses
 <code>nrounds</code>, <code>eta</code>, <code>max_depth</code>, <code>min_child_weight</code>, <code>subsample</code>,
-<code>colsample_bytree</code>, <code>reg_alpha</code>, and <code>reg_lambda</code>; <code>neural</code> uses <code>size</code> and
-<code>decay</code>; <code>kernel</code> uses <code>cost</code>, <code>gamma_multiplier</code>, and <code>epsilon</code> (fixed at
+<code>colsample_bytree</code>, <code>reg_alpha</code>, and <code>reg_lambda</code>, with optional <code>encoding</code>
+(<code>"auto"</code>, <code>"matrix"</code>, or <code>"native"</code>). Native encoding uses categorical
+partitions and a quantized training matrix; it can change predictions.
+Auto switches when categorical expansion exceeds twice the input width and
+50 million estimated matrix cells. This choice is planned once from the
+outer-training inputs and fixed across folds and refits; category levels and
+preprocessing are still learned within each fold. Each fit records the choice.
+<code>neural</code> uses <code>size</code> and <code>decay</code>, with optional <code>maxit</code> (default 2,000).
+This is the optimizer iteration limit, not a promise of convergence.
+Changing only this limit preserves the initialization seed; earlier
+two-parameter grids remain valid. Set <code>maxit = 500</code> to retain the former
+iteration budget. <code>kernel</code> uses <code>cost</code>, <code>gamma_multiplier</code>, and <code>epsilon</code> (fixed at
 <code>0.1</code> for classification because that backend ignores it);
 <code>neighbors</code> uses <code>k</code>, <code>distance</code>, and <code>kernel</code>; and <code>mars</code> uses <code>degree</code> and
 <code>nprune</code>.</p>

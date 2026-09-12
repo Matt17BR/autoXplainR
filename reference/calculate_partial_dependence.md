@@ -60,8 +60,10 @@ calculate_partial_dependence(
 
 - sample_size:
 
-  Maximum number of reference rows used by PDP. `NULL` uses all rows.
-  ALE always uses all rows that fall inside its bins.
+  Maximum number of reference rows used by PDP. `NULL` uses all rows
+  unless `max_rows` is set. The curve uses the smaller of these limits,
+  drawn once from the original reference population. Grid support uses
+  the separate `max_rows` sample; both row counts are recorded.
 
 - seed:
 

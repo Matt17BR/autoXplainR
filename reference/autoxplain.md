@@ -43,7 +43,8 @@ autoxplain(
   validation = NULL,
   explain = TRUE,
   report = NULL,
-  report_data = "summary"
+  report_data = "summary",
+  explanation_rows = 5000L
 )
 ```
 
@@ -237,6 +238,16 @@ autoxplain(
   to choose columns and limit exported rows. These settings govern HTML,
   not the raw data retained in the R result.
 
+- explanation_rows:
+
+  Maximum evaluation rows for default permutation importance, dependence
+  checks and fitted effects. Defaults to 5000; `NULL` removes this cap.
+  PDP curves retain their separate 1000-row limit;
+  [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)
+  exposes `sample_size` for explicit curve calculations. Explanations
+  record the uniform sample and its scope. Fitting, selection, model
+  scores and prediction diagnostics still use their complete partitions.
+
 ## Value
 
 An `autoxplain_result` containing fitted models, a leaderboard,
@@ -286,7 +297,7 @@ audit_explanations(explainers)
 #>   explanation accord: 0.647
 #>   prediction accord:  0.99
 #>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
-#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.
 #> 
 #> Findings
 #>   [warning] `cyl` exceeds the pairwise association threshold.

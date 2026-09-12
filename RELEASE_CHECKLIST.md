@@ -72,7 +72,7 @@ not stand in for a manual review.
 ## Optional: submit that release to CRAN
 
 Complete this section only when a CRAN submission is intended. Record
-**not applicable — GitHub release only** otherwise.
+**not applicable: GitHub release only** otherwise.
 
 - Review current CRAN requirements and the exact proposed source
   archive.

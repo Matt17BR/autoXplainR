@@ -105,14 +105,14 @@ result$leaderboard
 #> 4    4 simple_baseline intercept-only baseline  baseline baseline   stats
 #>       rmse      mae     r_squared training_time_ms model_size_kb complexity
 #> 1 2.003144 1.662172  9.339624e-01                1      67.79688          3
-#> 2 2.241207 1.837860  9.173332e-01                2      52.28125         20
+#> 2 2.241207 1.837860  9.173332e-01                1      52.28125         20
 #> 3 4.319412 3.508486  6.929447e-01                3      47.83594          4
 #> 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1
 #>   fit_warning prediction_time_ms
-#> 1                              1
+#> 1                              0
 #> 2                              1
 #> 3                              1
-#> 4                              0
+#> 4                              1
 result$evaluation$metric_definitions
 #>                                                                                                            rmse 
 #>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
@@ -155,15 +155,15 @@ result$explanations$audit$importance
 #> 6              1 4.319412  4.319412   rmse        20       0.1499773
 #> 7              1 2.241207 10.511210   rmse        20       0.1499773
 #> 8              1 2.241207  4.082203   rmse        20       0.1499773
-#>   associated_feature       shuffle_status dependence_status
-#> 1            service positive_loss_change    limited_screen
-#> 2        distance_km positive_loss_change    limited_screen
-#> 3            service   no_observed_change    limited_screen
-#> 4        distance_km   no_observed_change    limited_screen
-#> 5            service positive_loss_change    limited_screen
-#> 6        distance_km   no_observed_change    limited_screen
-#> 7            service positive_loss_change    limited_screen
-#> 8        distance_km positive_loss_change    limited_screen
+#>   associated_feature unavailable_reason       shuffle_status dependence_status
+#> 1            service                    positive_loss_change    limited_screen
+#> 2        distance_km                    positive_loss_change    limited_screen
+#> 3            service                      no_observed_change    limited_screen
+#> 4        distance_km                      no_observed_change    limited_screen
+#> 5            service                    positive_loss_change    limited_screen
+#> 6        distance_km                      no_observed_change    limited_screen
+#> 7            service                    positive_loss_change    limited_screen
+#> 8        distance_km                    positive_loss_change    limited_screen
 #>                                                                              claim
 #> 1   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
 #> 2   Shuffling increased loss; the fixed-sample Monte Carlo interval excludes zero.
@@ -178,8 +178,8 @@ result$explanations$audit$findings
 #> 1     note association_screen_scope
 #>                                                                     message
 #> 1 The pairwise association screen does not assess every form of dependence.
-#>                                                                                                                                                                                                                                  evidence
-#> 1 Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>                                                                                                                                                                                                                                                                                                                                               evidence
+#> 1 Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.
 #>                                                                                              recommendation
 #> 1 Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.
 #>   model feature                            scope     entities

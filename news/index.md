@@ -1,5 +1,74 @@
 # Changelog
 
+## AutoXplainR 0.7.0
+
+- Tuning prepares one fold at a time and scores each fit from one
+  prediction batch. Disabling retained out-of-fold predictions also
+  avoids constructing their case records. Fold scores, selection and
+  final evaluation remain available.
+- Paired score intervals reuse fixed row contributions and draw
+  observation indices directly. The full-evaluation resamples, paired
+  comparisons and interval results remain unchanged.
+- Large evidence fingerprints stream serialized values through a
+  temporary file instead of allocating another complete raw copy. Hashes
+  still cover every value and retain their previous format. Temporary
+  files are removed after hashing, including when an operation fails.
+- [`evidence_summary()`](https://matt17br.github.io/autoXplainR/reference/evidence_summary.md)
+  exports explanation class counts as ordinary named values, so its
+  documented JSON export also works with sampled classification audits.
+  The audit retains its original class-count tables.
+- Binary out-of-fold case losses now use the same probability clipping
+  as fold scoring, so their pooled loss reproduces the reported CV
+  score. A probability of 0.5 now selects the positive class in both
+  out-of-fold records and public predictions. These repair older
+  evidence inconsistencies; fitted probabilities, CV scores and model
+  selection are unchanged.
+- Additive grids expose GAM, BAM and discrete BAM fitting, including the
+  actual solver, smoothing method and discretization resolution.
+  Automatic computation choices are recorded separately from model
+  selection. Smaller binary problems retain GAM; Gaussian regression can
+  use BAM earlier when its estimated coefficient work is large. Final
+  BAM fitting failures override a successful smoothing-optimizer status;
+  the original warning and fitting stage are retained.
+- Neural grids expose `maxit`, with a default allowance of 2,000
+  iterations instead of 500. Fits still stop earlier when they converge.
+  The larger budget can recover previously excluded configurations and
+  change model selection; unsuccessful fits remain excluded by default.
+  Use `maxit = 500` for the former budget. Changing the budget preserves
+  initialization for the same architecture and weight penalty.
+- Boosting can use native categorical inputs without constructing a
+  large contrast matrix. Automatic encoding is planned from the outer
+  training inputs and fixed across cross-validation and refitting.
+  Category levels and all preprocessing are still learned within each
+  fold. Explicit encoding controls remain available because the
+  representations can produce different models.
+- Training/evaluation overlap checks use exact column grouping instead
+  of serializing every full row, with an exact fallback for byte-marked
+  text on older R versions. Regularized, forest, neural and MARS model
+  calls no longer embed redundant training inputs and outcomes in saved
+  fits. Their recorded settings and input reconstruction notes remain
+  available.
+- Reports store exported values in compressed columns and decode them
+  locally as needed. Source-row identity, filtering and record lookup
+  retain the complete exported sample. Large embedded scripts are
+  assembled from smaller text blocks to avoid a reproduced WebKit
+  parsing stall. Dense scatter plots show a disclosed subset of points.
+- Cost-chart help explains what R object sizes count: retained
+  diagnostics can dominate the estimate, shared data can be counted
+  repeatedly, and native engine allocations can be absent. These values
+  are not deployment-memory or saved-file sizes.
+- Default report explanations use at most 5,000 evaluation rows;
+  pairwise data summaries use at most 10,000 rows per partition. Model
+  scores, univariate distributions and missing-value counts still use
+  all available rows. Reports identify the samples, and both limits
+  accept `NULL` to remove those caps. PDP curves keep their separate,
+  recorded reference-row budget.
+- Explanation sampling preserves original row identities and
+  distinguishes PDP curve rows from support rows. Sampled AUC importance
+  is unavailable when the sample lacks an outcome class, while the full
+  evaluation score remains visible. Unique identifiers no longer receive
+  a misleading perfect categorical association.
+
 ## AutoXplainR 0.6.2
 
 - Grouped classification tuning balances outcome coverage as well as

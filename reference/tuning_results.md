@@ -87,14 +87,14 @@ tuning_results(tuned)
 #>         neural_01 neural       nnet    neural network
 #>           tree_02   tree      rpart     decision tree
 #>           tree_01   tree      rpart     decision tree
-#>                                       hyperparameters  cv_score      cv_se
-#>                               default statistical fit 0.3206438 0.01519006
-#>                  hidden units = 1, weight decay = 0.1 0.3396566 0.02236384
-#>  max depth = 4, pruning cp = 0.01, minimum split = 14 0.3950433 0.01588583
-#>  max depth = 2, pruning cp = 0.03, minimum split = 24 0.4084825 0.02533053
-#>  complexity_proxy selected status
-#>                 5     TRUE     ok
-#>                 7    FALSE     ok
-#>                 9    FALSE     ok
-#>                 4    FALSE     ok
+#>                                               hyperparameters  cv_score
+#>                                       default statistical fit 0.3206438
+#>  hidden units = 1, weight decay = 0.1, iteration limit = 2000 0.3396566
+#>          max depth = 4, pruning cp = 0.01, minimum split = 14 0.3950433
+#>          max depth = 2, pruning cp = 0.03, minimum split = 24 0.4084825
+#>       cv_se complexity_proxy selected status
+#>  0.01519006                5     TRUE     ok
+#>  0.02236384                7    FALSE     ok
+#>  0.01588583                9    FALSE     ok
+#>  0.02533053                4    FALSE     ok
 ```

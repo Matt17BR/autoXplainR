@@ -23,7 +23,8 @@ explain_effect(
   positive = NULL,
   class = NULL,
   grid_size = NULL,
-  return_all_classes = FALSE
+  return_all_classes = FALSE,
+  max_rows = NULL
 )
 ```
 
@@ -58,8 +59,10 @@ explain_effect(
 
 - sample_size:
 
-  Maximum number of reference rows used by PDP. `NULL` uses all rows.
-  ALE always uses all rows that fall inside its bins.
+  Maximum number of reference rows used by PDP. `NULL` uses all rows
+  unless `max_rows` is set. The curve uses the smaller of these limits,
+  drawn once from the original reference population. Grid support uses
+  the separate `max_rows` sample; both row counts are recorded.
 
 - seed:
 
@@ -90,6 +93,14 @@ explain_effect(
 
   Retained for compatibility. Multiclass callers should make separate
   class-specific explainers; `TRUE` is not supported by ALE.
+
+- max_rows:
+
+  Optional cap on reference rows for either method. `NULL` preserves the
+  full reference data. A finite cap selects a uniform sample without
+  replacement before computing bins, support, and effects. The returned
+  `sampling` attribute records this scope; descriptive bands do not
+  include uncertainty from selecting these rows.
 
 ## Value
 
@@ -122,7 +133,7 @@ explain_effect(x, feature = "wt")
 #> <AutoXplainR ALE effect>
 #>   feature: wt | rows: 32 | max association: 0.898
 #>   target:  predicted value
-#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.
 #>   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.
 #>     wt accumulated_effect std_error conf_low conf_high  n support
 #>  1.513        6.477667775        NA       NA        NA NA    0.50

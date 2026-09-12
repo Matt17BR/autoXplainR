@@ -19,7 +19,8 @@ audit_explanations(
   seed = 123L,
   confidence = 0.95,
   performance_tolerance = 0.05,
-  dependence_threshold = 0.7
+  dependence_threshold = 0.7,
+  max_rows = NULL
 )
 ```
 
@@ -67,6 +68,14 @@ audit_explanations(
   values do not establish independence or rule out nonlinear or joint
   dependence.
 
+- max_rows:
+
+  Maximum evaluation rows for permutation importance and
+  feature-dependence checks. `NULL` uses all rows. Model performance and
+  prediction comparisons still use the complete evaluation set. Sampling
+  is uniform without replacement and shared across models; its
+  uncertainty is not included in shuffle intervals.
+
 ## Value
 
 An object of class `autoxplain_audit`.
@@ -94,7 +103,7 @@ audit
 #>   explanation accord: unavailable
 #>   prediction accord:  unavailable
 #>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.
-#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.
 #>   comparison: Fewer than two supplied models meet the performance tolerance.
 #> 
 #> Findings

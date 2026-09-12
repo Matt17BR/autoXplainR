@@ -7,11 +7,13 @@ or
 result. Predictive performance is taken from the evaluation leaderboard
 and the secondary axis defaults to approximate model-object size. For
 local models this is R's in-memory
-[`object.size()`](https://rdrr.io/r/utils/object.size.html) estimate;
-H2O uses an engine-reported size when available. Size and runtime are
-operational resource proxies, not structural model complexity. A model
-is Pareto-efficient when no other supplied model is at least as good on
-both dimensions and strictly better on one.
+[`object.size()`](https://rdrr.io/r/utils/object.size.html) estimate. It
+includes retained diagnostics, may count shared data repeatedly and
+excludes native engine allocations. H2O uses an engine-reported size
+when available. These values are not a saved-file or deployment-memory
+comparison. Size and runtime are resource proxies, not structural model
+complexity. A model is Pareto-efficient when no other supplied model is
+at least as good on both dimensions and strictly better on one.
 
 ## Usage
 

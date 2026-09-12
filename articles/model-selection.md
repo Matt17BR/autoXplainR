@@ -65,20 +65,20 @@ tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected
 #> 4                   decision tree
 #> 5                   decision tree
 #> 6 multinomial logistic regression
-#>                                         hyperparameters   cv_score      cv_se
-#> 1                 hidden units = 2, weight decay = 0.03 0.09445857 0.03609199
-#> 2                  hidden units = 1, weight decay = 0.1 0.29456937 0.01072168
-#> 3 max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688 1.40932486
-#> 4  max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788 1.40612488
-#> 5  max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788 1.40612488
-#> 6                               default statistical fit         NA         NA
-#>   selected
-#> 1     TRUE
-#> 2    FALSE
-#> 3    FALSE
-#> 4    FALSE
-#> 5    FALSE
-#> 6    FALSE
+#>                                                 hyperparameters   cv_score
+#> 1 hidden units = 2, weight decay = 0.03, iteration limit = 2000 0.09445857
+#> 2  hidden units = 1, weight decay = 0.1, iteration limit = 2000 0.29456937
+#> 3         max depth = 6, pruning cp = 0.003, minimum split = 10 2.37836688
+#> 4          max depth = 2, pruning cp = 0.03, minimum split = 24 2.39466788
+#> 5          max depth = 4, pruning cp = 0.01, minimum split = 14 2.39466788
+#> 6                                       default statistical fit         NA
+#>        cv_se selected
+#> 1 0.03609199     TRUE
+#> 2 0.01072168    FALSE
+#> 3 1.40932486    FALSE
+#> 4 1.40612488    FALSE
+#> 5 1.40612488    FALSE
+#> 6         NA    FALSE
 ```
 
 Every fold learns its preprocessing from that fold’s training rows. The
@@ -190,14 +190,30 @@ fitted GAM through
 Other engine-specific limitations, including extreme numerical units,
 can still exclude individual candidates. Inspect the recorded reason.
 
-The broad preset can be slow even when every fit succeeds. On the
-1,200-row, 30-input nonlinear stress case, `recommended` took 8 minutes
-53 seconds, compared with 58 seconds for the explicit 15-configuration
-regularized/forest/boosting search. Both selected the same boosted
-model. Individual GAM folds took 9 to 43 seconds as their basis limits
-increased. These timings describe one machine and one problem; they
-explain why the explicit family choice above can be more practical than
-searching every supported shape.
+The broad preset can be slow even when every fit succeeds. A fresh
+paired run on the 1,200-row, 30-input nonlinear stress case took 412
+seconds in version 0.6.2 and 65 seconds in the candidate, with all 30
+configurations successful. Both selected the same boosted model and had
+the same evaluation RMSE. These are single runs on one machine, not a
+general speed guarantee. An earlier, separate 0.6.2 run took 533
+seconds; it is not the paired baseline for the 65-second result.
+
+Automatic additive fitting uses continuous BAM at 10,000 outer-training
+rows. Gaussian regression also uses BAM when the estimated work, rows
+times the number of coefficients squared, reaches 10 million. Smaller
+binary problems retain nested GAM: BAM uses a different iteratively
+weighted procedure that failed on several training folds where GAM
+converged. The choice stays fixed across folds and the final refit,
+while each fitting partition learns its own preprocessing and smoothing
+penalties. This rule uses the task and training input size, not
+validation or final-test scores.
+
+The row threshold is a computational policy, not a guarantee of
+convergence or better predictions. Pin `solver = "gam"` or
+`solver = "bam"` in an additive grid when a particular fitting procedure
+matters. Covariate discretization requires the explicit `"bam_discrete"`
+choice. The smaller family set above remains useful when the broader
+search costs more than the additional models are worth.
 
 ## Budget explanations and the report separately
 
@@ -209,7 +225,8 @@ closer investigation:
 ``` r
 
 render_model_report(result, "first-look.html", top_features = 3, n_repeats = 5,
-                    report_data = "summary")
+                    explanation_rows = 2000, report_data = "summary",
+                    uncertainty = FALSE)
 ```
 
 Even a small feature audit first screens inputs; expensive prediction
@@ -217,14 +234,127 @@ functions and hundreds of columns can take time. Five permutations are a
 first look, not precise importance estimates. The report records the
 budget and warns about unstable Monte Carlo estimates.
 
+This first report also omits paired score intervals. By default, those
+intervals use 1,000 bootstrap resamples of the complete evaluation set,
+independently of the explanation and export limits.
+`uncertainty = FALSE` skips that calculation; model scores still use the
+complete evaluation set. Omit this argument to include the intervals
+when the validation design supports them.
+
+Rendering returns the HTML path and leaves `result` unchanged. If the
+result was fitted with `explain = FALSE`, repeat the explanation
+settings in later renders: the first report does not save its evidence
+or budget back into `result`. Omitting those settings computes default
+explanations unless the result already contains retained explanations.
+
+## Larger data
+
+The rows used to fit and score models are distinct from the rows used to
+explain them or included in HTML.
+[`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md)
+fits on the complete processed training partition and scores the
+complete processed evaluation partition. Rows removed by an explicit
+preprocessing rule remain recorded as omissions.
+
+The report’s default importance and effect calculations use at most
+5,000 evaluation rows. Pairwise plots and associations use at most
+10,000 rows per partition. Unfiltered distributions and missing counts
+use all available rows. Filtered charts and their counts describe only
+matching exported records; sidebar counts keep the full population.
+Official model scores always use the complete evaluation partition and
+are unchanged by filters. Each sampled view gives its own denominator. A
+rare class or small cluster can be absent from a uniform sample even
+when its full count is visible elsewhere. Increasing permutation repeats
+does not resolve that absence, and shuffle intervals do not measure
+row-sampling uncertainty.
+
+``` r
+
+result <- autoxplain(
+  training, "outcome", test_data = final_test,
+  learners = c("regularized", "boosting"), max_models = 12, nfolds = 3,
+  tuning_control = tuning_control(retain_oof = FALSE),
+  explanation_rows = 5000, report = "model-report.html"
+)
+
+# Include a bounded sample for record inspection and browser filters.
+render_model_report(
+  result, "records.html",
+  report_data = report_data_control(mode = "rows", max_rows = 20000, max_pair_rows = 10000)
+)
+```
+
+Choose the search and validation design before looking at the final test
+scores. The example budget is a starting point, not a claim that twelve
+settings are enough for a difficult problem. `retain_oof = FALSE` saves
+memory by omitting case-level CV predictions; fold scores, candidate
+settings and selection remain available. Use the default `TRUE` when you
+need to inspect individual CV errors. This control does not reduce
+fitting rows or final evaluation rows.
+
+The measured million-row regression control used a smaller search: one
+regularized and one boosting configuration, two CV folds and
+`retain_oof = FALSE`. One call fitted all million training rows, scored
+all 20,000 independent evaluation rows and wrote a 3,891,782-byte
+summary report in 81.055 seconds. Default explanations used 5,000 rows;
+all 1,000 paired bootstrap draws used the full evaluation set. The
+shallow selected model had RMSE 1.6835. A separate three-configuration
+search selected 600 boosting rounds at depth 6 and reached RMSE 0.7491
+in 109.012 seconds with explanations disabled. These single-host results
+measure different workloads; see the
+[measurements](https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md).
+
+Large result checks write complete model and data state to a temporary
+file, then remove it. The temporary file system needs space for that
+serialization. If you need disk-backed temporary storage, set `TMPDIR`
+to an existing, writable directory on disk before starting R. Changing
+it after R starts does not move the session’s temporary directory.
+
+Neural configurations now allow up to 2,000 optimizer iterations, and
+stop earlier when they converge. The former 500-iteration ceiling
+excluded wider networks on the nonlinear stress problem even when more
+iterations produced useful fits. `maxit` is an explicit neural grid
+setting, so you can retain the former budget or choose another
+allowance. Inspect convergence and failed configurations alongside
+scores. A larger allowance can improve model selection but also
+increases fitting time; it does not guarantee convergence.
+
+Use `explanation_rows = NULL` to remove the report explanation cap and
+`report_data_control(max_pair_rows = NULL)` for all-row pair summaries.
+The lower-level
+[`calculate_permutation_importance()`](https://matt17br.github.io/autoXplainR/reference/calculate_permutation_importance.md),
+[`audit_explanations()`](https://matt17br.github.io/autoXplainR/reference/audit_explanations.md)
+and
+[`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)
+have no shared row cap by default and accept `max_rows` explicitly. PDP
+has its separate `sample_size` control: its curve and support
+distribution can use different row counts, both recorded in the result.
+
+Large reports store compressed column values and unpack them offline as
+needed. Compression does not remove exported values. The Data tab’s
+linked scatter shows at most 1,500 points; filters and record lookup use
+all exported rows. Exporting every row can still create a large file and
+considerable browser memory use; leave `report_data = "summary"` unless
+individual records serve a concrete purpose.
+
+For large categorical expansions, automatic boosting encoding uses
+native categorical splits instead of a numeric contrast matrix. The
+threshold is an estimated matrix with more than 50 million cells and
+more than twice the input width. The representation is fixed for a
+search from outer-training inputs; category mappings and preprocessing
+stay inside each fold. The two representations are different models, not
+interchangeable numerical shortcuts. Set `encoding = "matrix"` or
+`"native"` in an explicit boosting grid to control this choice. The
+search record and report show what was used and why.
+
 Use
 [`report_data_control()`](https://matt17br.github.io/autoXplainR/reference/report_data_control.md)
 to restrict exported columns or sample records if you need row
 filtering. Full records for hundreds of columns make a large HTML file.
-Aggregate mode keeps full-data profiles but does not allow row
-filtering. `max_models` bounds the number of attempted configurations,
-not elapsed time. `max_runtime_secs` is an H2O setting and does not
-impose a local-engine timeout.
+Aggregate mode keeps full univariate summaries and bounded pair
+summaries but does not allow row filtering. `max_models` bounds the
+number of attempted configurations, not elapsed time. `max_runtime_secs`
+is an H2O setting and does not impose a local-engine timeout.
 
 ## Compare fitted behavior
 

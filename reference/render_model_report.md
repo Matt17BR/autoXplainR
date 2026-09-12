@@ -29,7 +29,8 @@ render_model_report(
   uncertainty = "auto",
   target_units = NULL,
   report_data = "summary",
-  benchmark = NULL
+  benchmark = NULL,
+  explanation_rows = 5000L
 )
 ```
 
@@ -116,6 +117,16 @@ render_model_report(
   made from the same unchanged models and evaluation data. Adds repeated
   prediction costs and their measurement protocol; rendering does not
   run a benchmark.
+
+- explanation_rows:
+
+  Maximum evaluation rows for newly computed explanations, as in
+  [`autoxplain()`](https://matt17br.github.io/autoXplainR/reference/autoxplain.md).
+  Defaults to 5000. `NULL` removes this cap; PDP curves retain their
+  separate 1000-row limit (see
+  [`explain_effect()`](https://matt17br.github.io/autoXplainR/reference/explain_effect.md)).
+  Supplying this explicitly recomputes default explanations with that
+  scope; it does not replace a supplied `audit` or `effects` object.
 
 ## Value
 

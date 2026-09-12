@@ -164,14 +164,20 @@ does not establish independence, and none supplies a p-value or
 identifies a causal relationship. Binned target means and binary event
 rates summarize observed outcomes, not model predictions.
 
-Unfiltered profiles use all available rows for the selected stage. Row
-exports sample uniformly within partitions after allocating the row
-budget between them. Browser filters then describe only the embedded
-sample, with its displayed denominator. They do not recompute official
-model scores. Outcomes inspected after adaptive filtering remain
-exploratory uses of the same evaluation data. Aggregate export avoids
-individual record payloads but can reveal rare category labels or small
-counts; it is not an anonymization method.
+Unfiltered univariate profiles use all available rows for the selected
+stage. Pairwise summaries use a uniform sample of at most 10,000 rows
+per partition by default; `report_data_control(max_pair_rows = NULL)`
+uses every row. Their counts and associations describe that sample, not
+the full population. A small group can be missed. Categorical
+associations are unavailable for unique identifiers; rare categories can
+still inflate associations and require inspection. Row exports sample
+uniformly within partitions after allocating the row budget between
+them. Browser filters then describe only the embedded sample, with its
+displayed denominator. They do not recompute official model scores.
+Outcomes inspected after adaptive filtering remain exploratory uses of
+the same evaluation data. Aggregate export avoids individual record
+payloads but can reveal rare category labels or small counts; it is not
+an anonymization method.
 
 ## Scope and reference implementations
 

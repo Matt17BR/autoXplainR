@@ -124,8 +124,8 @@ audit$findings
 #> 1     note association_screen_scope
 #>                                                                     message
 #> 1 The pairwise association screen does not assess every form of dependence.
-#>                                                                                                                                                                                                                                  evidence
-#> 1 Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.
+#>                                                                                                                                                                                                                                                                                                                                               evidence
+#> 1 Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.
 #>                                                                                              recommendation
 #> 1 Review nonlinear relationships and joint support before interpreting shuffled inputs or marginal effects.
 #>   model feature                            scope     entities

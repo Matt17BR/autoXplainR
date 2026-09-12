@@ -23,7 +23,9 @@ calculate_permutation_importance(
   predict_function = NULL,
   task = "auto",
   positive = NULL,
-  n_permutations = NULL
+  n_permutations = NULL,
+  max_rows = NULL,
+  sample_seed = seed
 )
 ```
 
@@ -97,6 +99,19 @@ calculate_permutation_importance(
 - n_permutations:
 
   Deprecated alias for `n_repeats`.
+
+- max_rows:
+
+  Maximum evaluation rows used for shuffling. `NULL` uses all rows. A
+  smaller value selects a reproducible uniform sample without
+  replacement. The baseline and shuffled losses use the same sample; the
+  `full_baseline_score` attribute keeps the score on all supplied rows.
+  Monte Carlo intervals exclude uncertainty from sampling rows.
+
+- sample_seed:
+
+  Seed selecting evaluation rows, separate from the shuffle seed so
+  different models can use the same rows.
 
 ## Value
 

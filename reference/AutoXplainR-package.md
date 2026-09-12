@@ -72,3 +72,8 @@ Useful links:
 Authors:
 
 - Matteo Mazzarelli <matteo.mazzarelli@gmail.com>
+
+Other contributors:
+
+- Arjun Barrett (fflate library for offline report decompression)
+  \[copyright holder\]

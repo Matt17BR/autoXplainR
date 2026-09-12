@@ -9,7 +9,7 @@ explain_effect() and keep its default ALE method."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,7 +112,9 @@ ALE.</p></dd>
 
 <dt id="arg-sample-size">sample_size<a class="anchor" aria-label="anchor" href="#arg-sample-size"></a></dt>
 <dd><p>Maximum number of reference rows used by PDP. <code>NULL</code> uses
-all rows. ALE always uses all rows that fall inside its bins.</p></dd>
+all rows unless <code>max_rows</code> is set. The curve uses the smaller of these
+limits, drawn once from the original reference population. Grid support
+uses the separate <code>max_rows</code> sample; both row counts are recorded.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>

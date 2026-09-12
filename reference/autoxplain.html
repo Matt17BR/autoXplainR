@@ -19,7 +19,7 @@ pre-specified reference model and baseline.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,8 @@ pre-specified reference model and baseline.</p>
 <span>  validation <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  explain <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  report <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  report_data <span class="op">=</span> <span class="st">"summary"</span></span>
+<span>  report_data <span class="op">=</span> <span class="st">"summary"</span>,</span>
+<span>  explanation_rows <span class="op">=</span> <span class="fl">5000L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -290,6 +291,15 @@ predictions, and <code>"none"</code> omits data exploration and individual recor
 Use <code><a href="report_data_control.html">report_data_control()</a></code> to choose columns and limit exported rows.
 These settings govern HTML, not the raw data retained in the R result.</p></dd>
 
+
+<dt id="arg-explanation-rows">explanation_rows<a class="anchor" aria-label="anchor" href="#arg-explanation-rows"></a></dt>
+<dd><p>Maximum evaluation rows for default permutation
+importance, dependence checks and fitted effects. Defaults to 5000;
+<code>NULL</code> removes this cap. PDP curves retain their separate 1000-row limit;
+<code><a href="explain_effect.html">explain_effect()</a></code> exposes <code>sample_size</code> for explicit curve calculations.
+Explanations record the uniform sample and its scope. Fitting, selection,
+model scores and prediction diagnostics still use their complete partitions.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -337,7 +347,7 @@ identifier removal, is opt-in and recorded in the result.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   explanation accord: 0.647</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prediction accord:  0.99</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   scope: Separate descriptive diagnostics; no overall evidence grade. Shuffle intervals omit evaluation-sampling, fitting and selection uncertainty.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Findings</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   [warning] `cyl` exceeds the pairwise association threshold.</span>

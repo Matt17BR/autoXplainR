@@ -15,7 +15,7 @@ unqualified facts."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,8 @@ unqualified facts.</p>
 <span>  positive <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  grid_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  return_all_classes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  return_all_classes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  max_rows <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,7 +117,9 @@ first lower boundary and each upper boundary.</p></dd>
 
 <dt id="arg-sample-size">sample_size<a class="anchor" aria-label="anchor" href="#arg-sample-size"></a></dt>
 <dd><p>Maximum number of reference rows used by PDP. <code>NULL</code> uses
-all rows. ALE always uses all rows that fall inside its bins.</p></dd>
+all rows unless <code>max_rows</code> is set. The curve uses the smaller of these
+limits, drawn once from the original reference population. Grid support
+uses the separate <code>max_rows</code> sample; both row counts are recorded.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -149,6 +152,14 @@ explained. By default the first prediction column is used.</p></dd>
 should make separate class-specific explainers; <code>TRUE</code> is not supported by
 ALE.</p></dd>
 
+
+<dt id="arg-max-rows">max_rows<a class="anchor" aria-label="anchor" href="#arg-max-rows"></a></dt>
+<dd><p>Optional cap on reference rows for either method. <code>NULL</code>
+preserves the full reference data. A finite cap selects a uniform sample
+without replacement before computing bins, support, and effects. The
+returned <code>sampling</code> attribute records this scope; descriptive bands do
+not include uncertainty from selecting these rows.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -180,7 +191,7 @@ approximations, and wider bins can obscure within-bin nonlinear behavior.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;AutoXplainR ALE effect&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   feature: wt | rows: 32 | max association: 0.898</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   target:  predicted value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   association: Limited pairwise screen: absolute Spearman correlation for numeric pairs, correlation ratio for mixed pairs, and Cramer's V for categorical pairs. Small values do not establish independence or exclude nonlinear or joint dependence. Categorical pairs without repeated categories are unavailable; many rare categories can inflate association.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   bands:   Descriptive fixed-model bands propagated from within-bin variation in local prediction differences under an independent-bin approximation; unavailable if a bin has fewer than two rows and not model-fitting uncertainty, population confidence, or causal intervals.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     wt accumulated_effect std_error conf_low conf_high  n support</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.513        6.477667775        NA       NA        NA NA    0.50</span>
