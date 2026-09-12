@@ -86,6 +86,11 @@ with sync_playwright() as playwright:
         }'''))
         check(f'{case}: starts on one comparison tab', page.locator('.workspace-page:visible').count() == 1
               and is_visible(page, '#overview'))
+        reference_group = page.get_by_role('group', name='Primary model compared with reference', exact=True)
+        check(f'{case}: reference comparison has an accessible group name and values',
+              reference_group.count() == 1 and reference_group.is_visible()
+              and reference_group.get_by_role('term').count() == 3
+              and reference_group.get_by_role('definition').count() == 3)
         check(f'{case}: all fitted models visible', set(page.locator('[data-model-row]').evaluate_all(
             'rows => rows.map(row => row.dataset.modelRow)')) == set(ids))
         for spec in oracle['specifications']:
@@ -160,6 +165,10 @@ with sync_playwright() as playwright:
                 continue  # Keep recording a broken model selector without waiting on hidden controls.
             matched,evidence=importance_geometry(panel,rows)
             check(f'{case}/{model_id}: importance bars and shuffle intervals match R',matched,evidence)
+            importance_group = panel.get_by_role('group', name=f'Feature importance for {model_id}', exact=True)
+            check(f'{case}/{model_id}: feature controls have an accessible group name',
+                  importance_group.count() == 1 and importance_group.is_visible()
+                  and importance_group.locator('[data-pick-feature]').count() == len(rows))
             for row in rows:
                 button = panel.locator(f'[data-pick-feature="{row["feature"]}"]')
                 actual = float(button.locator('strong').inner_text())
@@ -381,7 +390,8 @@ with sync_playwright() as playwright:
                                   for entry in axe['violations']]
                     check(f'{width}/{tab}: automated accessibility', not violations, violations)
                     accessibility.append(dict(width=width, tab=tab,
-                                              incomplete=[entry['id'] for entry in axe['incomplete']]))
+                                              incomplete=[entry['id'] for entry in axe['incomplete']],
+                                              incomplete_details=axe['incomplete']))
                     page.screenshot(path=str(args.output_dir / f'{tab}-{width}.png'), full_page=True)
         # A wider system font exposed an intrinsic flex-width bug on CI. Keep
         # every model reachable at 320px even when font metrics differ by OS.

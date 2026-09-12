@@ -75,7 +75,7 @@ explorer_baseline_comparison <- function(result, models) {
     "Primary model"
   }
   paste0(
-    '<div class="baseline-comparison" aria-label="Primary model compared with reference">',
+    '<div class="baseline-comparison" role="group" aria-label="Primary model compared with reference">',
     "<dl><div><dt>", primary_role,
     "</dt><dd>", html_escape(explorer_label(result, board$model_id[primary])),
     " <strong>", report_number(board[[metric]][primary]), "</strong><span>", html_escape(label), "</span></dd></div>",

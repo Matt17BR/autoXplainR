@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "scope": "Separate review derivative from the original saved v5 result. No fitting or timing benchmark. The timed report and earlier wording-only derivative remain unchanged.",
+  "original_report_sha256": "665f438dc288e3d99c02ea8916a640fc1f22d61c25c9eb8f5c3bd54a6e12b257",
+  "previous_review_sha256": "b09ce22b6f3d739bf635f0f5c19aa3708feb05e7cad6c7d0afc8ecceca5c4f79",
+  "accessible_report_sha256": "32b39826eb8ecde9b61134720a34241037be86bfb76c1bfad3abc3b638ef5c3f",
+  "accessible_report": "~/.cache/autoxplain-scale-0.7.0/candidate-v5/regression-1000000-controlled-full/report-accessible-final.html",
+  "original_bytes": 3891782,
+  "previous_review_bytes": 3892128,
+  "accessible_bytes": 3892180,
+  "only_group_role_insertions": true,
+  "group_role_insertions": {
+    "baseline-comparison": 1,
+    "importance-bars": 3
+  },
+  "unchanged_json_payloads": {
+    "axr-data-payload": true,
+    "axr-predictions-payload": true,
+    "selection-evidence": true
+  },
+  "source_sha256": {
+    "R/report_summary.R": "1a42c76600bce1201931600e7f07e4d7c46fe77fa05b268abd1d767724de2ad4",
+    "R/report_explorer.R": "4730c6f98cea608247f8bd80f56c31965385f557fc407d3870f3101a2b30cc77"
+  },
+  "render_script_sha256": "fe51287431fce98b11330a20594f875110a02ed40862a2b3ade6db5997476a59",
+  "cache_verdict_sha256": "7c5e6e4bf42925e36c5fe81d64c85545cbc7dc02b355fbf751cdc2af2d5e3ab3"
+}
