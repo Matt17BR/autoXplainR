@@ -1,3 +1,58 @@
+# AutoXplainR 0.8.0
+
+- `portfolio = "tabular"` compares regularized models, random forests and
+  XGBoost in one call. Its 18-setting search screens candidates on a shared
+  training sample, then cross-validates the leading setting from each family.
+  It selects the best CV score by default and refits the retained models on
+  all training rows. Other portfolios keep their existing selection rule.
+- Adaptive boosting chooses its round count on a separate split inside each
+  training fold. The split learns its own preprocessing and respects recorded
+  groups. Final fits use the median fold choice, rounded up. Reports show the
+  actual stopping curves, settings, row counts and skipped calibration reasons.
+- Automatic forest settings account for training size and input width. Large
+  adaptive searches use 128 trees for screening and 128 or 256 for complete CV.
+  At four million training rows times predictors, automatic final forests use
+  256 trees; below that boundary they keep 500. All fold-training rows are
+  retained. Reports explain these budgets and their limits; explicit grids
+  keep their requested tree counts.
+- `tuning_control()` exposes search mode, native thread count, screening size,
+  finalists per family, boosting patience and a search scheduling budget.
+  Automatic large searches use up to four available CPU cores, respecting
+  process and job limits; explicit thread counts remain available.
+  Tuned forest and boosting workflows show progress automatically from 200
+  input rows, including periodic counts of completed importance shuffles.
+  `verbosity = "quiet"` remains available. Final refits and report work are
+  outside the optional search time budget. Progress message handlers cannot
+  change the random draws used for fitting or explanations.
+- Selection supports binary ROC AUC and regression RMSLE. AUC is maximized and
+  averaged within folds; predictions from different fitted models are not
+  ranked together. RMSLE requires nonnegative outcomes and predictions.
+  Undefined evaluation or explanation scores retain a reason and leave other
+  valid diagnostics available. Reports no longer describe an undefined
+  baseline comparison as a model failure.
+- Large AUC calculations avoid integer overflow, and paired AUC bootstrap
+  intervals reuse sorted probability groups while preserving the resampling
+  draws. One-class resamples are counted and intervals are withheld when too
+  few usable draws remain.
+- Failed fits retain the effective settings and seed actually attempted,
+  including calibrated boosting rounds and reduced forest validation budgets.
+  Calibration attempts remain counted when the subsequent model fit fails.
+  If every screened setting fails, the error includes the observed causes and
+  retains the screening records for inspection.
+  Supplied-fold report replay reconstructs the original row assignments from
+  the fitted result instead of substituting new folds.
+- Mixed multiclass searches bind forest and boosting probability records
+  without relying on native matrix row names. This fixes a crash after CV while
+  preserving each prediction's source row and class order.
+- Report preparation reuses full predictions within one computation and shares
+  identical probability batches across class-specific effect curves. Repeated
+  shuffles, scores, effect estimates and uncertainty calculations are preserved.
+  Changes to captured values in custom predictors invalidate their evidence
+  even when predictions on the original rows happen to remain unchanged.
+- Explanation functions and report generation now leave R's random-number
+  state unchanged, including after a prediction error. Internal sampling and
+  the returned statistics are unchanged.
+
 # AutoXplainR 0.7.0
 
 - Tuning prepares one fold at a time and scores each fit from one prediction

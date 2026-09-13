@@ -12,6 +12,15 @@ model_optimization_record <- function(model) {
   neural <- inherits(model, "autoxplain_tuned_nnet")
   wrapped <- inherits(model, "autoxplain_fitted_model")
   fit <- if (neural) model$model else if (wrapped) model$fit else model
+  if (wrapped && identical(model$backend, "xgboost")) {
+    return(optimization_record(
+      "not_applicable",
+      message = paste(
+        "Boosting completed its effective round count. Its recorded stopping rule chooses predictive rounds;",
+        "it is not an optimizer-convergence or model-adequacy test."
+      ), source = "XGBoost boosting rounds"
+    ))
+  }
   if (inherits(fit, "nnet")) {
     code <- fit$convergence
     if (length(code) != 1L || is.na(code)) {
@@ -109,7 +118,18 @@ tuning_learned_settings <- function(model) {
   wrapped <- inherits(model, "autoxplain_fitted_model")
   fit <- if (neural) model$model else if (wrapped) model$fit else model
   if (wrapped && model$backend == "xgboost") {
-    return(list(computation = model$fit_details$computation))
+    return(list(
+      computation = model$fit_details$computation,
+      round_selection = model$fit_details$round_selection,
+      threads = model$fit_details$threads %||% 1L
+    ))
+  }
+  if (wrapped && model$backend == "ranger") {
+    return(list(
+      threads = model$fit_details$threads %||% 1L,
+      oob_computed = model$fit_details$oob_computed,
+      forest_budget = model$fit_details$forest_budget
+    ))
   }
   if (neural) {
     return(list(
@@ -179,6 +199,22 @@ tuning_policy_sources <- function() {
   )
 }
 
+tuning_boosting_round_policy <- function(early_stopping) {
+  if (!isTRUE(early_stopping)) {
+    return(paste(
+      "Inner stopping calibration is disabled. Fits use their requested round counts,",
+      "including the separate reduced budget for adaptive screening when present."
+    ))
+  }
+  paste(
+    "Inner stopping calibration is enabled. CV and any adaptive screening attempt an inner training split",
+    "to choose rounds;",
+    "unusable splits keep their requested cap and record why calibration was skipped.",
+    "If any fold calibrates, final refits use the rounded-up median of successful folds' recorded round counts;",
+    "otherwise they keep the requested cap."
+  )
+}
+
 tuning_family_rationale <- function(family) {
   reasons <- c(
     linear = "One unpenalized reference fit; there is no parameter grid for this family.",
@@ -197,11 +233,10 @@ tuning_family_rationale <- function(family) {
     ),
     forest = paste(
       "Early tuples vary inputs per split, node size, sampling fraction and split rule.",
-      "The fixed 500-tree budget controls this search's computation; it is not an optimality claim."
+      "The planned tree count controls this search's computation; it is not an optimality claim."
     ),
     boosting = paste(
       "Presets jointly vary rounds, step size and tree capacity, then sampling controls.",
-      "These are fixed-round fits, without an early-stopping search.",
       "Automatic input encoding uses native categorical splits when dense categorical expansion exceeds",
       "twice the input width and 50 million cells; smaller designs retain numeric contrasts."
     ),
@@ -309,8 +344,11 @@ tuning_search_space <- function(grids, plan, n, p, task, custom_families) {
 
 tuning_selection_record <- function(candidates, selected_id, rule, metric = NULL) {
   valid <- candidates$status == "ok" & is.finite(candidates$cv_score)
-  best <- which(valid)[which.min(candidates$cv_score[valid])]
-  threshold <- candidates$cv_score[[best]] + if (rule == "one_se") candidates$cv_se[[best]] else 0
+  metric <- metric %||% "rmse"
+  best <- which(valid)[which.min(selection_metric_loss(candidates$cv_score[valid], metric))]
+  threshold <- selection_metric_threshold(
+    candidates$cv_score[[best]], if (rule == "one_se") candidates$cv_se[[best]] else 0, metric
+  )
   priority <- unique(candidates[c("family", "simplicity_rank", "complexity_definition")])
   priority <- priority[order(priority$simplicity_rank, priority$family), , drop = FALSE]
   list(
@@ -318,13 +356,18 @@ tuning_selection_record <- function(candidates, selected_id, rule, metric = NULL
     best_score = candidates$cv_score[[best]], best_se = candidates$cv_se[[best]],
     threshold = threshold, selected_configuration = selected_id,
     eligible = if (rule == "one_se") {
-      candidates$configuration_id[valid & candidates$cv_score <= threshold]
+      candidates$configuration_id[valid & selection_metric_eligible(candidates$cv_score, threshold, metric)]
     } else {
       selected_id
     },
     family_priority = priority,
-    score_method = if (identical(metric, "rmse")) {
-      "RMSE is the square root of squared losses pooled across validation rows."
+    score_method = if (identical(metric, "roc_auc")) {
+      paste(
+        "CV AUC is the validation-row-weighted mean of within-fold AUCs.",
+        "Predictions from different fitted models are not ranked together. Higher is better."
+      )
+    } else if (selection_root_mean_metric(metric)) {
+      paste(toupper(metric), "is the square root of squared losses pooled across validation rows.")
     } else {
       "CV loss is averaged across validation rows, weighting folds by their evaluated row counts."
     },
@@ -370,17 +413,28 @@ tuning_evidence <- function(result) {
     ))
   }
   candidates$within_threshold <- candidates$configuration_id %in% selection$eligible
+  if (!is.null(tuning$plan$parameters)) {
+    candidates$parameters <- I(tuning$plan$parameters[match(candidates$configuration_id, tuning$plan$configuration_id)])
+  }
   candidates$lowest_cv <- candidates$configuration_id == selection$best_configuration
   candidates$final_fit <- candidates$configuration_id == tuning$final_configuration
   families <- lapply(unique(candidates$family), function(family) {
     rows <- candidates[candidates$family == family, , drop = FALSE]
     valid <- rows$status == "ok" & is.finite(rows$cv_score)
-    best <- if (any(valid)) rows$configuration_id[which(valid)[which.min(rows$cv_score[valid])]] else NA_character_
+    best <- if (any(valid)) {
+      rows$configuration_id[which(valid)[which.min(selection_metric_loss(rows$cv_score[valid], tuning$metric))]]
+    } else {
+      NA_character_
+    }
     retained <- rows$configuration_id[!is.na(rows$retained_model_id %||% rep(NA_character_, nrow(rows)))]
     data.frame(
       family = family, best_cv = best, retained = paste(retained, collapse = ", "),
-      selection_role = if (any(rows$selected)) "global policy selection" else "lowest family CV, with refit fallback",
-      tested = nrow(rows), valid = sum(valid), failed = sum(!valid), stringsAsFactors = FALSE
+      selection_role = if (any(rows$selected)) "global policy selection" else "best family CV, with refit fallback",
+      tested = nrow(rows), valid = sum(valid),
+      failed = sum(rows$status %in% c("failed", "screening_failed")),
+      screened_out = sum(rows$status == "screened_out"),
+      not_attempted = sum(rows$status %in% c("not_screened_time_limit", "not_validated_time_limit")),
+      stringsAsFactors = FALSE
     )
   })
   folds <- tuning$fold_scores
@@ -390,10 +444,20 @@ tuning_evidence <- function(result) {
     "optimization_status", "optimization_message", "warning", "error",
     "requested_parameters", "effective_parameters", "learned", "elapsed_ms"
   ), names(folds))
+  screening <- tuning[["screening", exact = TRUE]]
+  if (!is.null(screening)) {
+    # The aggregate report contract omits raw identities and sampling vectors.
+    screening$partition[c(
+      "training_row", "validation_row", "training_source_row", "validation_source_row",
+      "training_sampling_weight", "validation_sampling_weight"
+    )] <- NULL
+  }
   list(
     schema_version = 1L, status = "computed", task = result$task, metric = tuning$metric,
     folds_used = tuning$folds_used, scope = tuning$scope_note,
     input_policy = tuning[["input_policy", exact = TRUE]],
+    screening = screening,
+    resources = tuning[["resources", exact = TRUE]],
     search_space = tuning$search_space %||% list(
       status = "not_recorded",
       limitation = paste(
@@ -419,7 +483,9 @@ tuning_boundary_evidence <- function(tuning) {
   for (family in unique(candidates$family)) {
     valid <- candidates$family == family & candidates$status == "ok" & is.finite(candidates$cv_score)
     if (!any(valid)) next
-    winner <- candidates$configuration_id[which(valid)[which.min(candidates$cv_score[valid])]]
+    winner <- candidates$configuration_id[
+      which(valid)[which.min(selection_metric_loss(candidates$cv_score[valid], tuning$metric %||% "rmse"))]
+    ]
     configurations <- plan$parameters[plan$family == family]
     selected <- plan$parameters[[match(winner, plan$configuration_id)]]
     for (parameter in names(selected)) {

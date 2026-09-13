@@ -90,8 +90,10 @@ Model details expose the retained fit and recorded preprocessing; supporting
 explanations use optional help and expandable details.
 }
 \examples{
-result <- autoxplain(mtcars, "mpg", seed = 2026)
+data <- mtcars[c("mpg", "wt", "hp")]
+result <- autoxplain(data, "mpg", model_set = "quick", explain = FALSE, seed = 2026)
 path <- tempfile(fileext = ".html")
+# Compute explanations once, when rendering this report.
 render_model_report(result, path, n_repeats = 3)
 unlink(path)
 }

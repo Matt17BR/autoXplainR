@@ -89,9 +89,11 @@ jobs:
           --case-dir /tmp/autoxplain-explorer-cases
           --output-dir "$RUNNER_TEMP/report-browser-results/cutoff-cases"
       - name: Verify selection decisions and fold charts
-        run: >-
-          python validation/check-selection.py
-          --output-dir "$RUNNER_TEMP/report-browser-results/selection"
+        run: |
+          for browser in chromium firefox webkit; do
+            python validation/check-selection.py --browser "$browser" \
+              --output-dir "$RUNNER_TEMP/report-browser-results/selection/$browser"
+          done
       - name: Verify supplied-model reports and repeated prediction costs
         run: >-
           python validation/check-supplied-models.py

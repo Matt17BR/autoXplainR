@@ -61,7 +61,10 @@ predict.autoxplain_fitted_model <- function(object, newdata, ...) {
 
 predict_ranger_backend <- function(object, newdata) {
   require_optional("ranger", "predicting with a random forest")
-  stats::predict(object$fit, data = newdata)$predictions
+  if (is.null(object$fit_details$threads)) {
+    return(stats::predict(object$fit, data = newdata, verbose = FALSE)$predictions)
+  }
+  stats::predict(object$fit, data = newdata, num.threads = object$fit_details$threads, verbose = FALSE)$predictions
 }
 
 predict_mgcv_backend <- function(object, newdata) {

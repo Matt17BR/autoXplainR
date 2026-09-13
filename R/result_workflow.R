@@ -6,7 +6,7 @@ assert_flag <- function(value, name) {
 }
 
 finalize_autoxplain <- function(result, design, explain, report, report_data = "summary",
-                                explanation_rows = 5000L) {
+                                explanation_rows = 5000L, progress = FALSE) {
   result$schema_version <- "2.0"
   result$provenance$package_version <- package_version_or_development()
   result$provenance$r_version <- paste(R.version$major, R.version$minor, sep = ".")
@@ -38,11 +38,17 @@ finalize_autoxplain <- function(result, design, explain, report, report_data = "
   }
   result <- seal_evaluation_result(result)
   if (isTRUE(explain) || !is.null(report)) {
-    result$explanations <- prepare_model_report_data(result, explanation_rows = explanation_rows)
+    search_progress(
+      progress, "Computing explanations using up to ",
+      search_progress_count(min(nrow(result$test_data), explanation_rows %||% Inf)), " evaluation rows."
+    )
+    result$explanations <- prepare_model_report_data(result, explanation_rows = explanation_rows, progress = progress)
   }
   if (!is.null(report)) {
+    search_progress(progress, "Writing HTML report: ", report, ".")
     result$report_file <- render_model_report(result, report, report_data = report_data)
   }
+  search_progress(progress, "Finished; ", length(result$models), " fitted models are available.")
   result
 }
 

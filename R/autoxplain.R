@@ -12,15 +12,19 @@
 #' [explain_model()] interface accepts models fitted by any framework.
 #'
 #' Numeric outcomes with exactly two distinct values are treated as binary
-#' classification by default. Potentially destructive preprocessing, such as
+#' classification by default; use `task = "regression"` to override this.
+#' Numeric outcomes with three or more values select regression. For numeric
+#' category codes such as `0, 1, 2`, set `task = "multiclass"` or convert the
+#' target to a factor before fitting. Potentially destructive preprocessing, such as
 #' identifier removal, is opt-in and recorded in the result.
 #'
-#' @param data Training data frame.
+#' @param data Training data frame containing observed outcomes. Read a CSV into
+#'   a data frame before calling this function.
 #' @param target_column Name of the outcome column.
 #' @param max_models Maximum number of configurations in local tuning or H2O
 #'   base models. The local budget is shared across requested learner families.
 #'   `NULL` chooses a portfolio-aware tuning budget (15 for core, 30 for
-#'   recommended, and 40 for extended) or 24 for H2O. Explicit values are
+#'   recommended, 40 for extended, and 18 for tabular) or 24 for H2O. Explicit values are
 #'   honored without a hidden cap.
 #' @param max_runtime_secs H2O training time budget in seconds; ignored by the
 #'   guided base engine. Use zero to disable the wall-clock limit and let the
@@ -28,7 +32,9 @@
 #' @param seed Reproducible split and local-fitting seed. For H2O, the seed
 #'   controls supported stochastic components but cannot guarantee an identical
 #'   time-limited search; see the returned reproducibility provenance.
-#' @param test_data Optional evaluation data. Supplied rows are labeled as a
+#' @param test_data Optional labeled evaluation data, including the target column
+#'   with observed outcomes. Use `predict(result, newdata)` for an unlabeled
+#'   competition test table after fitting. Supplied rows are labeled as a
 #'   neutral evaluation by default; use `evaluation_role = "test"` only when
 #'   their provenance supports an independent-test interpretation. H2O uses
 #'   them as validation rows only when `use_test_as_validation = TRUE` and
@@ -36,7 +42,7 @@
 #' @param test_fraction Fraction of `data` reserved for evaluation when
 #'   `test_data` is not supplied. Classification splits are stratified.
 #' @param engine One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently
-#'   resolves to the dependency-free `"base"` workflow.
+#'   resolves to the local `"base"` workflow.
 #' @param model_set Guided base-engine workflow. `"tuned"` is the default. `"quick"` fits the
 #'   pre-specified understandable model and baseline. `"comparison"` also fits
 #'   two pre-specified trees for a descriptive Pareto view. `"tuned"` compares
@@ -47,7 +53,12 @@
 #'   linear, regularized, additive (when supported), tree, forest, and boosting
 #'   families. `"extended"` adds neural, kernel, nearest-neighbor, and MARS
 #'   families. `"core"` retains the dependency-light linear/tree/neural
-#'   tournament. Missing optional backends produce one installation command
+#'   tournament. `"tabular"` compares regularized models, random forests and
+#'   XGBoost, with sample-based screening and inner training splits to choose
+#'   boosting rounds when enough rows and settings are available. This portfolio
+#'   requires R >= 4.3 for the supported XGBoost backend, while the core package
+#'   supports R >= 4.1. Missing optional
+#'   backends produce one installation command
 #'   rather than silently changing the tournament.
 #' @param learners Optional explicit learner-family vector overriding
 #'   `portfolio`. Inspect valid names with [learner_catalog()].
@@ -68,8 +79,10 @@
 #'   family-specific flexibility proxies
 #'   are shown by [learner_catalog()]. This heuristic does not establish that
 #'   eligible models are equivalent or that every tuning dimension is ordered.
-#'   `"best"` chooses the lowest resampled
-#'   error. Ignored by other workflows.
+#'   `"best"` chooses the best resampled score (highest AUC, lowest loss).
+#'   Omitting this argument uses `"best"` for `portfolio = "tabular"` when
+#'   `learners` is not supplied; other portfolios retain `"one_se"`.
+#'   Ignored by other workflows.
 #' @param tuning_control Optional advanced local-tuning settings returned by
 #'   [tuning_control()]. Leave `NULL` for the beginner defaults. This argument
 #'   is available only with `engine = "base"` and `model_set = "tuned"`.
@@ -83,7 +96,14 @@
 #' @param init_h2o Start a local H2O cluster when no connection is available.
 #' @param h2o_nthreads Threads used when starting H2O.
 #' @param h2o_max_mem_size Memory used when starting H2O.
-#' @param verbosity One of `"quiet"` or `"info"`.
+#' @param verbosity `"auto"` (default) prints progress for local tuned searches
+#'   with at least 200 input rows and a forest or boosting learner. Smaller
+#'   searches, quick workflows and H2O stay quiet by default. `"info"` prints
+#'   progress regardless of size; `"quiet"` suppresses progress. Messages identify
+#'   screening settings, CV folds, full refits, evaluation, explanations and report
+#'   writing. During input importance, completed shuffle counts are printed at
+#'   most every 30 seconds. A single fit or prediction can still take time between
+#'   messages; no completion-time estimate is implied. Warnings are unchanged.
 #' @param evaluation_role How to describe the evaluation rows. `"auto"` labels
 #'   package-generated outer splits as `"test"`, supplied data as the neutral
 #'   `"evaluation"`, and data actually used for H2O selection as
@@ -141,7 +161,7 @@ autoxplain <- function(data,
                        test_fraction = 0.2,
                        engine = c("auto", "base", "h2o"),
                        model_set = c("tuned", "quick", "comparison"),
-                       portfolio = c("core", "recommended", "extended"),
+                       portfolio = c("core", "recommended", "extended", "tabular"),
                        learners = NULL,
                        enable_preprocessing = TRUE,
                        preprocessing_config = list(),
@@ -156,7 +176,7 @@ autoxplain <- function(data,
                        init_h2o = TRUE,
                        h2o_nthreads = -1L,
                        h2o_max_mem_size = "2G",
-                       verbosity = c("quiet", "info"),
+                       verbosity = c("auto", "quiet", "info"),
                        evaluation_role = c("auto", "test", "validation", "evaluation"),
                        overlap_action = c("warn", "error", "ignore"),
                        validation = NULL,
@@ -169,6 +189,9 @@ autoxplain <- function(data,
   model_set <- match.arg(model_set)
   portfolio <- match.arg(portfolio)
   task <- match.arg(task)
+  if (missing(tuning_rule) && identical(portfolio, "tabular") && is.null(learners)) {
+    tuning_rule <- "best"
+  }
   tuning_rule <- match.arg(tuning_rule)
   verbosity <- match.arg(verbosity)
   evaluation_role <- match.arg(evaluation_role)
@@ -187,6 +210,7 @@ autoxplain <- function(data,
   report_data <- normalize_report_data_control(report_data)
   if (!is.null(report)) validate_html_destination(report, FALSE)
   validate_automl_inputs(data, target_column, test_data)
+  input_rows <- nrow(data)
   assert_probability(test_fraction, "test_fraction")
   if (test_fraction <= 0 || test_fraction >= 1) {
     stop("`test_fraction` must be greater than zero and less than one.", call. = FALSE)
@@ -227,6 +251,7 @@ autoxplain <- function(data,
       # this budget to search models.
       max_models <- 24L
     }
+    verbosity <- resolve_progress_verbosity(verbosity, resolved_engine, model_set, input_rows, resolved_learners)
     result <- fit_guided_base(
       data = data,
       target_column = target_column,
@@ -247,9 +272,12 @@ autoxplain <- function(data,
       evaluation_role = evaluation_role,
       overlap_action = overlap_action
     )
-    return(finalize_autoxplain(result, design, explain, report, report_data, explanation_rows))
+    return(finalize_autoxplain(
+      result, design, explain, report, report_data, explanation_rows, progress = verbosity == "info"
+    ))
   }
 
+  verbosity <- resolve_progress_verbosity(verbosity, resolved_engine, model_set, input_rows)
   if (is.null(max_models)) max_models <- 24L
   max_models <- assert_count(max_models, "max_models")
   max_runtime_secs <- assert_count(max_runtime_secs, "max_runtime_secs", minimum = 0L)
@@ -307,6 +335,7 @@ autoxplain <- function(data,
     ),
     preprocessing_config
   )
+  if (identical(verbosity, "quiet")) config$verbose <- FALSE
 
   preprocessing_contract <- validate_h2o_preprocessing_contract(
     enable_preprocessing, config, nfolds
@@ -465,7 +494,9 @@ autoxplain <- function(data,
     extract_model_characteristics(result),
     error = function(error) structure(list(), class = "autoxplainr_model_characteristics")
   )
-  finalize_autoxplain(result, design, explain, report, report_data, explanation_rows)
+  finalize_autoxplain(
+    result, design, explain, report, report_data, explanation_rows, progress = verbosity == "info"
+  )
 }
 
 default_local_tuning_budget <- function(portfolio, learners = NULL) {
@@ -476,6 +507,7 @@ default_local_tuning_budget <- function(portfolio, learners = NULL) {
     core = 15L,
     recommended = 30L,
     extended = 40L,
+    tabular = 18L,
     stop("Unknown model portfolio.", call. = FALSE)
   )
 }

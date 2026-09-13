@@ -1,0 +1,224 @@
+{
+  "phase": "development calibration only",
+  "generated_at": "2026-09-12 12:48:32",
+  "source_sha256": "3ca9a06614538f0577bf6c62b69e39be3d7f0b035b6ad65cf95f60773d51c52d",
+  "runner_sha256": "8ba20b920539f57f4edebef45147d79badff731926884f30078a847e2bf92451",
+  "ranger_version": "0.18.0",
+  "R_version": "R version 4.5.2 (2025-10-31)",
+  "prediction_threads": 2,
+  "bootstrap_seed": 80781,
+  "bootstrap_repeats": 300,
+  "tree_subset_seed": 80791,
+  "tree_subset_repeats": 30,
+  "records": [
+    {
+      "id": "sqrt_node5_500trees",
+      "parameters": {
+        "num.trees": 500,
+        "mtry": 9,
+        "min.node.size": 5,
+        "splitrule": "variance",
+        "sample.fraction": 0.80000000000000004,
+        "respect.unordered.factors": "order",
+        "num.threads": 2,
+        "seed": 80711,
+        "write.forest": true,
+        "verbose": false,
+        "oob.error": true
+      },
+      "rows_fitted": 40000,
+      "rows_scored": 10000,
+      "tree_prediction_bytes": 40000216,
+      "scores": [
+        {
+          "trees": 128,
+          "rmse": 9.6868879937711299,
+          "rmse_difference_from_500": 0.043578511832087941,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0.027071211358688133,
+            "median": 0.043974885119013152,
+            "q975": 0.062455500015993454
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6430760062862397,
+            "median": 9.6713663471767859,
+            "maximum": 9.6899774830518375
+          },
+          "independent_aggregation_maximum_difference": 1.3642420526593924e-12
+        },
+        {
+          "trees": 256,
+          "rmse": 9.6584710731256607,
+          "rmse_difference_from_500": 0.01516159118661875,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0.0061762173359946274,
+            "median": 0.015467150845001498,
+            "q975": 0.025508408075324188
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6420032811367538,
+            "median": 9.6516979183201119,
+            "maximum": 9.6620721240140544
+          },
+          "independent_aggregation_maximum_difference": 1.8189894035458565e-12
+        },
+        {
+          "trees": 500,
+          "rmse": 9.6433094819390419,
+          "rmse_difference_from_500": 0,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0,
+            "median": 0,
+            "q975": 0
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6433094819390419,
+            "median": 9.6433094819390419,
+            "maximum": 9.6433094819390419
+          },
+          "independent_aggregation_maximum_difference": 2.7284841053187847e-12
+        }
+      ]
+    },
+    {
+      "id": "third_node20_500trees",
+      "parameters": {
+        "num.trees": 500,
+        "mtry": 30,
+        "min.node.size": 20,
+        "splitrule": "variance",
+        "sample.fraction": 0.80000000000000004,
+        "respect.unordered.factors": "order",
+        "num.threads": 2,
+        "seed": 80711,
+        "write.forest": true,
+        "verbose": false,
+        "oob.error": true
+      },
+      "rows_fitted": 40000,
+      "rows_scored": 10000,
+      "tree_prediction_bytes": 40000216,
+      "scores": [
+        {
+          "trees": 128,
+          "rmse": 9.48111386261467,
+          "rmse_difference_from_500": 0.0085143877502993348,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": -0.010315483517639955,
+            "median": 0.0084924967408239738,
+            "q975": 0.024390214558973163
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.4745709648838456,
+            "median": 9.4997004836916705,
+            "maximum": 9.5171845187169257
+          },
+          "independent_aggregation_maximum_difference": 2.0463630789890885e-12
+        },
+        {
+          "trees": 256,
+          "rmse": 9.4718819321241554,
+          "rmse_difference_from_500": -0.00071754274021529341,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": -0.010590529914348367,
+            "median": -0.0010871873063527104,
+            "q975": 0.0089688981954026102
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.4698833289831175,
+            "median": 9.4823399495914042,
+            "maximum": 9.4887946296287922
+          },
+          "independent_aggregation_maximum_difference": 2.9558577807620168e-12
+        },
+        {
+          "trees": 500,
+          "rmse": 9.4725994748643707,
+          "rmse_difference_from_500": 0,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0,
+            "median": 0,
+            "q975": 0
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.4725994748643707,
+            "median": 9.4725994748643707,
+            "maximum": 9.4725994748643707
+          },
+          "independent_aggregation_maximum_difference": 3.637978807091713e-12
+        }
+      ]
+    },
+    {
+      "id": "extra_sqrt_node5_500trees",
+      "parameters": {
+        "num.trees": 500,
+        "mtry": 9,
+        "min.node.size": 5,
+        "splitrule": "extratrees",
+        "sample.fraction": 0.80000000000000004,
+        "respect.unordered.factors": "order",
+        "num.threads": 2,
+        "seed": 80711,
+        "write.forest": true,
+        "verbose": false,
+        "oob.error": true,
+        "num.random.splits": 5
+      },
+      "rows_fitted": 40000,
+      "rows_scored": 10000,
+      "tree_prediction_bytes": 40000216,
+      "scores": [
+        {
+          "trees": 128,
+          "rmse": 9.7041891722560294,
+          "rmse_difference_from_500": 0.031722366789235679,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0.014790395799645407,
+            "median": 0.031476666021333699,
+            "q975": 0.049236487863710411
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6822390933096756,
+            "median": 9.706283632441755,
+            "maximum": 9.7341805694526951
+          },
+          "independent_aggregation_maximum_difference": 1.3642420526593924e-12
+        },
+        {
+          "trees": 256,
+          "rmse": 9.6846722230476701,
+          "rmse_difference_from_500": 0.012205417580876343,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0.0013882775342192845,
+            "median": 0.012514752177147592,
+            "q975": 0.022786327147181505
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6667263174731843,
+            "median": 9.6831802369219773,
+            "maximum": 9.7008583021785864
+          },
+          "independent_aggregation_maximum_difference": 1.8189894035458565e-12
+        },
+        {
+          "trees": 500,
+          "rmse": 9.6724668054667937,
+          "rmse_difference_from_500": 0,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0,
+            "median": 0,
+            "q975": 0
+          },
+          "within_saved_forest_subset_rmse_quantiles": {
+            "minimum": 9.6724668054667937,
+            "median": 9.6724668054667937,
+            "maximum": 9.6724668054667937
+          },
+          "independent_aggregation_maximum_difference": 2.7284841053187847e-12
+        }
+      ]
+    }
+  ],
+  "scope": "Native prefix predictions and independent per-tree averages of three saved 500-tree forests. No model was fitted. Row bootstrap varies calibration rows, not training data. Tree subsets overlap and measure variation inside each saved forest, not independent fitting seeds. A 256-tree search fit can have a different parameter-derived seed; this is a fidelity diagnostic, not proof of identity."
+}

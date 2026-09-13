@@ -557,6 +557,9 @@ explorer_checks <- function(result, audit) {
 }
 
 model_explorer_html <- function(result, audit, effects, narrative, subgroup_check, title) {
+  # Normalize only serialization, after model and explanation computation.
+  # The report is in English; SVG and browser numeric attributes use periods.
+  withr::local_options(OutDec = ".")
   models <- explorer_models(result)
   identity <- report_view_model(result, audit)$identity
   nav <- c(

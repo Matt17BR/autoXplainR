@@ -21,12 +21,15 @@
 #' @param data Evaluation data. Required for a fitted model; ignored when
 #'   `model` is an explainer unless supplied to replace its evaluation data.
 #' @param target_column Outcome column name when `model` is a fitted model.
-#' @param metric One of `"auto"`, `"rmse"`, `"mae"`, `"logloss"`,
+#' @param metric One of `"auto"`, `"rmse"`, `"rmsle"`, `"mae"`, `"logloss"`,
 #'   `"brier"`, `"accuracy"`, or `"auc"`. The result-style names
-#'   `"log_loss"` and `"brier_score"` are accepted as aliases. With `"auto"`,
+#'   `"log_loss"`, `"brier_score"`, and `"roc_auc"` are accepted as aliases. With `"auto"`,
 #'   an explainer made from an `autoxplain_result` uses that result's primary
 #'   evaluation metric; otherwise regression defaults to RMSE and
-#'   classification to log loss.
+#'   classification to log loss. RMSLE requires nonnegative outcomes and
+#'   predictions; it does not clip negative predictions. A feature with a
+#'   negative shuffled prediction has unavailable importance, with the failed
+#'   repeat recorded. Other features can still be assessed.
 #' @param n_repeats Number of independent permutations.
 #' @param seed Random seed. The caller's random-number state is restored.
 #' @param features Character vector of features to evaluate. Defaults to all.
@@ -76,6 +79,35 @@ calculate_permutation_importance <- function(model,
                                              n_permutations = NULL,
                                              max_rows = NULL,
                                              sample_seed = seed) {
+  withr::with_preserve_seed(calculate_permutation_importance_impl(
+    model = model, data = data, target_column = target_column, metric = metric,
+    n_repeats = n_repeats, seed = seed, features = features,
+    feature_groups = feature_groups, within = within, confidence = confidence,
+    predict_function = predict_function, task = task, positive = positive,
+    n_permutations = n_permutations, max_rows = max_rows, sample_seed = sample_seed
+  ))
+}
+
+# Report preparation can reuse its validated snapshot within one computation.
+# Public callers always take the fresh prediction and identity path above.
+calculate_permutation_importance_impl <- function(model,
+                                                  data = NULL,
+                                                  target_column = NULL,
+                                                  metric = "auto",
+                                                  n_repeats = 20L,
+                                                  seed = 123L,
+                                                  features = NULL,
+                                                  feature_groups = NULL,
+                                                  within = NULL,
+                                                  confidence = 0.95,
+                                                  predict_function = NULL,
+                                                  task = "auto",
+                                                  positive = NULL,
+                                                  n_permutations = NULL,
+                                                  max_rows = NULL,
+                                                  sample_seed = seed,
+                                                  prediction_context = NULL,
+                                                  progress = FALSE) {
   if (!is.null(n_permutations)) {
     warning("`n_permutations` is deprecated; use `n_repeats`.", call. = FALSE)
     n_repeats <- n_permutations
@@ -96,6 +128,11 @@ calculate_permutation_importance <- function(model,
   evaluation_explainer <- explainer
   evaluation_explainer$data <- x
   evaluation_explainer$y <- y
+  context_values <- if (!is.null(prediction_context)) {
+    explanation_context_values(evaluation_explainer, prediction_context)
+  } else {
+    NULL
+  }
   sampling <- explanation_row_sample(nrow(x), max_rows, sample_seed)
 
   groups <- normalize_feature_groups(features, feature_groups, names(x))
@@ -105,8 +142,24 @@ calculate_permutation_importance <- function(model,
     explainer$task,
     primary_metric = explainer$metadata$primary_metric %||% NULL
   )
-  baseline_prediction <- predict(explainer, x)
-  full_baseline <- metric_score(y, baseline_prediction, metric, explainer)
+  baseline_prediction <- context_values$predictions %||% predict(explainer, x)
+  baseline_value <- tryCatch(
+    metric_score(y, baseline_prediction, metric, explainer),
+    autoxplain_rmsle_prediction_domain = function(error) {
+      if (metric == "rmsle") error else stop(error)
+    },
+    autoxplain_auc_outcome_domain = function(error) {
+      if (metric == "auc") error else stop(error)
+    }
+  )
+  unavailable_reason <- if (inherits(
+    baseline_value, c("autoxplain_rmsle_prediction_domain", "autoxplain_auc_outcome_domain")
+  )) {
+    paste("Importance is unavailable on the original evaluation rows.", conditionMessage(baseline_value))
+  } else {
+    ""
+  }
+  full_baseline <- if (nzchar(unavailable_reason)) NA_real_ else baseline_value
   if (sampling$sampled) {
     indices <- sampling$row_indices
     x <- x[indices, , drop = FALSE]
@@ -118,13 +171,11 @@ calculate_permutation_importance <- function(model,
       baseline_prediction[indices]
     }
   }
-  unavailable_reason <- if (metric == "auc" && length(unique(as.character(y))) < 2L) {
-    paste(
+  if (!nzchar(unavailable_reason) && metric == "auc" && length(unique(as.character(y))) < 2L) {
+    unavailable_reason <- paste(
       "AUC importance is unavailable because the sampled explanation rows do not contain both outcome classes.",
       "Increase max_rows or use all rows."
     )
-  } else {
-    ""
   }
   baseline <- if (nzchar(unavailable_reason)) NA_real_ else metric_score(y, baseline_prediction, metric, explainer)
   if (explainer$task != "regression") {
@@ -141,6 +192,9 @@ calculate_permutation_importance <- function(model,
     dimnames = list(names(groups), paste0("repeat_", seq_len(n_repeats)))
   )
   permuted_metric <- repeat_scores
+  unavailable_by_feature <- stats::setNames(rep("", length(groups)), names(groups))
+  failures <- list()
+  progress_state <- new_importance_progress(progress, explainer$label, length(groups), n_repeats)
 
   with_preserved_seed(seed, {
     if (!nzchar(unavailable_reason)) {
@@ -150,11 +204,29 @@ calculate_permutation_importance <- function(model,
           permutation <- stratified_permutation(nrow(x), strata)
           permuted <- x
           permuted[group] <- x[permutation, group, drop = FALSE]
-          score <- metric_score(y, predict(explainer, permuted), metric, explainer)
+          score <- tryCatch(
+            metric_score(y, predict(explainer, permuted), metric, explainer),
+            autoxplain_rmsle_prediction_domain = function(error) {
+              if (metric == "rmsle") error else stop(error)
+            }
+          )
+          if (inherits(score, "autoxplain_rmsle_prediction_domain")) {
+            reason <- paste0(
+              "Importance is unavailable after shuffling ", names(groups)[[group_index]],
+              " in repeat ", repeat_index, ". ", conditionMessage(score)
+            )
+            unavailable_by_feature[[group_index]] <- reason
+            failures[[length(failures) + 1L]] <- data.frame(
+              feature = names(groups)[[group_index]], repeat_id = repeat_index,
+              reason = conditionMessage(score), stringsAsFactors = FALSE
+            )
+            break
+          }
           permuted_metric[group_index, repeat_index] <- score
           repeat_scores[group_index, repeat_index] <- importance_delta(
             baseline, score, metric
           )
+          if (!is.null(progress_state)) update_importance_progress(progress_state, group_index, repeat_index)
         }
       }
     }
@@ -199,12 +271,22 @@ calculate_permutation_importance <- function(model,
   attr(out, "full_baseline_score") <- full_baseline
   attr(out, "sampling") <- sampling
   attr(out, "unavailable_reason") <- unavailable_reason
+  if (metric == "rmsle") {
+    attr(out, "unavailable_by_feature") <- unavailable_by_feature
+    attr(out, "permutation_failures") <- if (length(failures)) {
+      do.call(rbind, failures)
+    } else {
+      data.frame(feature = character(), repeat_id = integer(), reason = character())
+    }
+    attr(out, "permutations_completed") <- rowSums(is.finite(permuted_metric))
+  }
   attr(out, "n_repeats") <- n_repeats
   attr(out, "confidence") <- confidence
   attr(out, "interval_type") <- "Monte Carlo t interval across permutations"
   attr(out, "feature_groups") <- groups
   attr(out, "blocked_within") <- if (is.null(within)) NULL else within
-  attr(out, "explainer_fingerprint") <- current_explainer_fingerprint(evaluation_explainer)
+  attr(out, "explainer_fingerprint") <- context_values$fingerprint %||%
+    current_explainer_fingerprint(evaluation_explainer)
   out
 }
 
@@ -356,8 +438,8 @@ stratified_permutation <- function(n, strata = NULL) {
 
 resolve_metric <- function(metric, task, primary_metric = NULL) {
   choices <- c(
-    "auto", "rmse", "mae", "logloss", "log_loss", "brier", "brier_score",
-    "accuracy", "auc"
+    "auto", "rmse", "rmsle", "mae", "logloss", "log_loss", "brier", "brier_score",
+    "accuracy", "auc", "roc_auc"
   )
   if (!is.character(metric) || length(metric) != 1L || !metric %in% choices) {
     stop("`metric` must be one of: ", paste(choices, collapse = ", "), ".",
@@ -373,10 +455,10 @@ resolve_metric <- function(metric, task, primary_metric = NULL) {
       )
   }
   metric <- importance_metric_from_primary(metric) %||% metric
-  if (task == "regression" && !metric %in% c("rmse", "mae")) {
-    stop("Regression supports `rmse` and `mae`.", call. = FALSE)
+  if (task == "regression" && !metric %in% c("rmse", "rmsle", "mae")) {
+    stop("Regression supports `rmse`, `rmsle`, and `mae`.", call. = FALSE)
   }
-  if (task %in% c("binary", "multiclass") && metric %in% c("rmse", "mae")) {
+  if (task %in% c("binary", "multiclass") && metric %in% c("rmse", "rmsle", "mae")) {
     stop(
       "Classification supports `logloss`, `brier`, `accuracy`, and binary `auc`.",
       call. = FALSE
@@ -397,6 +479,7 @@ importance_metric_from_primary <- function(metric) {
   }
   mapped <- unname(c(
     rmse = "rmse",
+    rmsle = "rmsle",
     mae = "mae",
     log_loss = "logloss",
     logloss = "logloss",
@@ -419,6 +502,9 @@ metric_score <- function(y, prediction, metric, explainer) {
   if (metric == "rmse") {
     return(sqrt(mean((as.numeric(y) - prediction)^2)))
   }
+  if (metric == "rmsle") {
+    return(selection_rmsle(y, prediction))
+  }
   if (metric == "mae") {
     return(mean(abs(as.numeric(y) - prediction)))
   }
@@ -439,7 +525,7 @@ metric_score <- function(y, prediction, metric, explainer) {
   }
   if (metric == "auc") {
     observed <- as.character(y) == explainer$positive
-    return(binary_auc(observed, prediction))
+    return(selection_binary_auc(observed, prediction))
   }
   if (metric == "brier") {
     if (explainer$task == "binary") {
@@ -487,7 +573,7 @@ binary_auc <- function(observed, probability) {
     stop("AUC requires both outcome classes in the evaluation data.", call. = FALSE)
   }
   ranks <- rank(probability, ties.method = "average")
-  (sum(ranks[observed]) - positives * (positives + 1) / 2) / (positives * negatives)
+  (sum(ranks[observed]) - positives * (positives + 1) / 2) / (as.double(positives) * negatives)
 }
 
 importance_delta <- function(baseline, permuted, metric) {

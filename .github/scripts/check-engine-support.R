@@ -111,15 +111,22 @@ write_engine_report <- function(scope) {
 # Retain successful version provenance even when a following fitting test fails.
 write_engine_report(scope)
 if (run_tests) {
+  # Keep this filter aligned with the current-engine Linux/Windows workflow.
+  # These are package fixtures, not the external large-data benchmark runs.
   testthat::test_local(
     ".", filter = paste(
-      "native-engines|kernel-geometry|matrix-blueprint|audit-data-contracts|gam-model-settings",
-      "boosting-native|additive-solvers|forest-call|mars-call|regularized-call", sep = "|"
+      "native-engines|learner-registry|kernel-geometry|matrix-blueprint|audit-data-contracts|gam-model-settings",
+      "boosting-|additive-solvers|forest-|mars-call|regularized-call|neural-iterations",
+      "adaptive-|search-|thread-policy|tuning-multiclass-oof-binding",
+      "selection-metrics|competition-metric-integration|tuning-loss-evidence",
+      "explanation-|effect-computation|evaluation-snapshot|prediction-partial-bindings",
+      "stopping-policy-provenance|tuning-control|selection-screening-table|report-model-settings", sep = "|"
     ),
     stop_on_failure = TRUE
   )
   scope <- paste(
-    "Native adapters, geometry, matrix encoding, and audit data contracts passed.",
+    "Native adapters, adaptive search, forest budgets, stopping, threads, metrics, OOF evidence,",
+    "explanation/RNG contracts and selection reporting passed.",
     "H2O package loading/version verified; no Java cluster or live H2O fit was requested."
   )
 }

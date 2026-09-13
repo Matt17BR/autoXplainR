@@ -112,9 +112,9 @@ test_that("a supplied audit does not bypass the budget for newly rendered curves
   data$y <- data$x + data$z + rnorm(50)
   result <- evaluate_models(list(linear = lm(y ~ x + z, data)), data, "y")
   audit <- audit_explanations(as_explainers(result), max_rows = 5, n_repeats = 2)
-  original <- AutoXplainR::explain_effect
+  original <- AutoXplainR:::explain_effect_impl
   observed <- list()
-  local_mocked_bindings(explain_effect = function(...) {
+  local_mocked_bindings(explain_effect_impl = function(...) {
     effect <- original(...)
     observed[[length(observed) + 1L]] <<- attr(effect, "sampling")
     effect

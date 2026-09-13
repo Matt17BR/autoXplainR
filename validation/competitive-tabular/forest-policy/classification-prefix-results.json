@@ -1,0 +1,274 @@
+{
+  "generated_at": "2026-09-12 12:52:03",
+  "runner_sha256": "a6d7087d32337b1def4c0d0bb46a71aa7885de2e3565d11dd2a505dd05b830fd",
+  "preprocessing_source_sha256": "c871a39b984d569656c7921731841e9cd4d4d21004e3d5d367c9d013d9eb9a26",
+  "ranger_version": "0.18.0",
+  "R_version": "R version 4.5.2 (2025-10-31)",
+  "records": [
+    {
+      "id": "bank",
+      "phase": "development assessment, already used for iterative diagnosis",
+      "native_training_rows": 20000,
+      "scored_rows": 5000,
+      "native_predictors": 19,
+      "original_fit_threads": 1,
+      "prediction_threads": 2,
+      "maximum_tree_prediction_chunk_bytes": 8000592,
+      "model_sha256": "66b71536bf58adc02e38da03adc98670e05ecfd032ec8e30d7b2075c803d5347",
+      "feature_data_sha256": "be5712dafc8fb78007c302e922b43d957cdf3a3ef44df942299289039d6ea33d",
+      "outcome_data_sha256": "4fb5256806bab11296952acae75fe0128434798f210bd55cff0f9c34c116daa7",
+      "scores": [
+        {
+          "trees": 128,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.27445075253459233,
+            "unbounded_log_loss": "0.274450752534592",
+            "true_class_zero_probabilities": 0,
+            "all_class_zero_probabilities": 1,
+            "brier": 0.076821655030663974,
+            "accuracy": 0.8962,
+            "class_recall": {
+              "no": {
+                "rows": 4437,
+                "recall": 0.97656073923822406
+              },
+              "yes": {
+                "rows": 563,
+                "recall": 0.26287744227353466
+              }
+            }
+          },
+          "log_loss_difference_from_500": 0.0016817148279433625,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": -0.00024138501436501433,
+            "median": 0.0015251312093697903,
+            "q975": 0.0034304083378226772
+          },
+          "independent_aggregation_maximum_difference": 5.5511151231257827e-16,
+          "original_500_predictions_maximum_difference": {}
+        },
+        {
+          "trees": 256,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.27296794205584313,
+            "unbounded_log_loss": "0.272967942055843",
+            "true_class_zero_probabilities": 0,
+            "all_class_zero_probabilities": 0,
+            "brier": 0.076690550354306941,
+            "accuracy": 0.8972,
+            "class_recall": {
+              "no": {
+                "rows": 4437,
+                "recall": 0.97701149425287359
+              },
+              "yes": {
+                "rows": 563,
+                "recall": 0.26820603907637658
+              }
+            }
+          },
+          "log_loss_difference_from_500": 0.00019890434919414999,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": -0.00073152051475017818,
+            "median": 0.00016128097684107949,
+            "q975": 0.0010578766404347405
+          },
+          "independent_aggregation_maximum_difference": 8.8817841970012523e-16,
+          "original_500_predictions_maximum_difference": {}
+        },
+        {
+          "trees": 500,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.27276903770664901,
+            "unbounded_log_loss": "0.272769037706649",
+            "true_class_zero_probabilities": 0,
+            "all_class_zero_probabilities": 0,
+            "brier": 0.076628119390206709,
+            "accuracy": 0.8982,
+            "class_recall": {
+              "no": {
+                "rows": 4437,
+                "recall": 0.97791300428217265
+              },
+              "yes": {
+                "rows": 563,
+                "recall": 0.26998223801065718
+              }
+            }
+          },
+          "log_loss_difference_from_500": 0,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0,
+            "median": 0,
+            "q975": 0
+          },
+          "independent_aggregation_maximum_difference": 1.3322676295501878e-15,
+          "original_500_predictions_maximum_difference": 0
+        }
+      ]
+    },
+    {
+      "id": "covertype",
+      "phase": "development assessment, already used for iterative diagnosis",
+      "native_training_rows": 50000,
+      "scored_rows": 20000,
+      "native_predictors": 54,
+      "original_fit_threads": 1,
+      "prediction_threads": 2,
+      "maximum_tree_prediction_chunk_bytes": 28000984,
+      "model_sha256": "5799ee67b90fabfc737f55d182dd112d42b75293335bea72b89ca14d032d2fc9",
+      "feature_data_sha256": "4e2a579046c4cfd6b7a85e2d5ac982a541deba02a5b2849410e437f2de0ac4fb",
+      "outcome_data_sha256": "2d6b59bc5ad5f44d9c55e38a127765e00daa7eac338170d4565800844dc76e45",
+      "scores": [
+        {
+          "trees": 128,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.33714322066184471,
+            "unbounded_log_loss": "Inf",
+            "true_class_zero_probabilities": 1,
+            "all_class_zero_probabilities": 77360,
+            "brier": 0.18594876673894695,
+            "accuracy": 0.88319999999999999,
+            "class_recall": {
+              "spruce_fir": {
+                "rows": 7292,
+                "recall": 0.86204059243006037
+              },
+              "lodgepole_pine": {
+                "rows": 9752,
+                "recall": 0.92401558654634952
+              },
+              "ponderosa_pine": {
+                "rows": 1231,
+                "recall": 0.917140536149472
+              },
+              "cottonwood_willow": {
+                "rows": 94,
+                "recall": 0.78723404255319152
+              },
+              "aspen": {
+                "rows": 327,
+                "recall": 0.41284403669724773
+              },
+              "douglas_fir": {
+                "rows": 598,
+                "recall": 0.70568561872909696
+              },
+              "krummholz": {
+                "rows": 706,
+                "recall": 0.85977337110481589
+              }
+            }
+          },
+          "log_loss_difference_from_500": 0.0019437446485673687,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0.0011150494754025029,
+            "median": 0.0019312758609270173,
+            "q975": 0.0028384413934300357
+          },
+          "independent_aggregation_maximum_difference": 3.3306690738754696e-16,
+          "original_500_predictions_maximum_difference": {}
+        },
+        {
+          "trees": 256,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.33529419885392037,
+            "unbounded_log_loss": "Inf",
+            "true_class_zero_probabilities": 1,
+            "all_class_zero_probabilities": 73316,
+            "brier": 0.18463115499835031,
+            "accuracy": 0.88460000000000005,
+            "class_recall": {
+              "spruce_fir": {
+                "rows": 7292,
+                "recall": 0.8627262753702688
+              },
+              "lodgepole_pine": {
+                "rows": 9752,
+                "recall": 0.92657916324856437
+              },
+              "ponderosa_pine": {
+                "rows": 1231,
+                "recall": 0.91632818846466291
+              },
+              "cottonwood_willow": {
+                "rows": 94,
+                "recall": 0.75531914893617025
+              },
+              "aspen": {
+                "rows": 327,
+                "recall": 0.40672782874617736
+              },
+              "douglas_fir": {
+                "rows": 598,
+                "recall": 0.71070234113712372
+              },
+              "krummholz": {
+                "rows": 706,
+                "recall": 0.86118980169971671
+              }
+            }
+          },
+          "log_loss_difference_from_500": 9.4722840643039424e-05,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": -0.00031915455117039002,
+            "median": 8.3859845525774271e-05,
+            "q975": 0.00057035284498195571
+          },
+          "independent_aggregation_maximum_difference": 4.4408920985006262e-16,
+          "original_500_predictions_maximum_difference": {}
+        },
+        {
+          "trees": 500,
+          "metrics": {
+            "log_loss_floor_1e_15": 0.33519947601327738,
+            "unbounded_log_loss": "Inf",
+            "true_class_zero_probabilities": 1,
+            "all_class_zero_probabilities": 69274,
+            "brier": 0.18433040598111303,
+            "accuracy": 0.88590000000000002,
+            "class_recall": {
+              "spruce_fir": {
+                "rows": 7292,
+                "recall": 0.86519473395501922
+              },
+              "lodgepole_pine": {
+                "rows": 9752,
+                "recall": 0.92637407711238717
+              },
+              "ponderosa_pine": {
+                "rows": 1231,
+                "recall": 0.91876523151909018
+              },
+              "cottonwood_willow": {
+                "rows": 94,
+                "recall": 0.78723404255319152
+              },
+              "aspen": {
+                "rows": 327,
+                "recall": 0.40978593272171254
+              },
+              "douglas_fir": {
+                "rows": 598,
+                "recall": 0.71571906354515047
+              },
+              "krummholz": {
+                "rows": 706,
+                "recall": 0.86118980169971671
+              }
+            }
+          },
+          "log_loss_difference_from_500": 0,
+          "paired_row_bootstrap_difference_quantiles": {
+            "q025": 0,
+            "median": 0,
+            "q975": 0
+          },
+          "independent_aggregation_maximum_difference": 6.6613381477509392e-16,
+          "original_500_predictions_maximum_difference": 0
+        }
+      ]
+    }
+  ],
+  "scope": "Two saved native forests, no new fitting or parameter selection. Independent probability aggregation, log loss, Brier score and per-class recall checks. Row bootstrap describes this assessment sample only; models are not refitted. All targets are development assessment targets. Acceptance targets remain unopened."
+}

@@ -8,11 +8,18 @@ tuning_control(
   grids = NULL,
   family_budgets = NULL,
   fold_ids = NULL,
-  metric = c("auto", "rmse", "mae", "log_loss", "brier"),
+  metric = c("auto", "rmse", "mae", "rmsle", "log_loss", "brier", "auc"),
   retain_oof = TRUE,
   failure_policy = c("continue", "stop"),
   optimization_policy = c("exclude", "warn"),
-  family_priority = NULL
+  family_priority = NULL,
+  search = c("auto", "grid", "adaptive"),
+  threads = NULL,
+  screening_rows = 20000L,
+  finalists_per_family = 1L,
+  time_limit = NULL,
+  early_stopping = NULL,
+  patience = 30L
 )
 }
 \arguments{
@@ -24,9 +31,12 @@ requested learner family.}
 \item{fold_ids}{Optional atomic vector assigning every training row to one
 supplied V-fold.}
 
-\item{metric}{Selection loss. \code{"auto"} resolves to RMSE for regression and
-log loss for classification. Regression also supports \code{"mae"};
-classification also supports \code{"brier"}.}
+\item{metric}{Selection score. \code{"auto"} resolves to RMSE for regression and
+log loss for classification. Regression also supports \code{"mae"} and
+\code{"rmsle"} (root mean squared log error, requiring nonnegative outcomes and
+predictions). Classification also supports \code{"brier"}; binary classification
+supports \code{"auc"}, recorded as \code{roc_auc} and maximized. All other supported
+scores are minimized. RMSLE never clips negative values to make a fit eligible.}
 
 \item{retain_oof}{Retain row-level out-of-fold predictions and case losses.}
 
@@ -41,6 +51,56 @@ as unknown, not treated as proof of convergence.}
 \item{family_priority}{Optional character vector ordering every requested
 family for the one-standard-error policy, from most to least preferred.
 This is a user preference, not a statistical ordering of algorithms.}
+
+\item{search}{\code{"auto"} screens settings before full cross-validation for a
+forest/boosting portfolio (optionally with regularized regression), at
+least 200 training rows and at least two settings per requested family.
+Other portfolios, custom grids and exact budgets retain \code{"grid"} search.
+\code{"adaptive"} explicitly requests screening with package-generated settings;
+\code{"grid"} evaluates every scheduled configuration on every fold.
+When outer-training rows times predictor count reaches one million,
+adaptive forests use 256 trees per complete CV fit, dropping to 128 at
+four million rows times predictors. Automatic final refits use 500 trees
+below four million and 256 at or above that threshold. The final count is
+planned from input size before fitting; it is not a convergence test.
+Fewer trees can change predictions and explanations. The tree budget does
+not remove training rows, and final fits retain native out-of-bag diagnostics.
+Explicit preprocessing rules can still omit rows. The smaller validation
+forest is an approximation.
+Screening uses 128 trees. Grid search keeps each requested tree count in CV.}
+
+\item{threads}{Native threads per XGBoost or ranger fit. \code{NULL} (default)
+uses up to four available cores for automatic adaptive searches when
+outer-training rows times predictors reaches one million. Availability is
+resolved once using \code{\link[parallelly:availableCores]{parallelly::availableCores()}}, respecting process,
+scheduler and R check limits. Other searches use one thread automatically.
+A positive integer overrides this choice and is not clamped. Fits run
+sequentially; this does not parallelize folds or other backends. Reports
+retain the resolved count, and their replay code requests it explicitly.}
+
+\item{screening_rows}{Maximum total rows used for the common training and
+assessment split during adaptive screening. Full validation and refitting
+use all their training rows.}
+
+\item{finalists_per_family}{Successful settings per family promoted from
+screening to full cross-validation. Defaults to one; fewer advance if
+fewer succeed. Increasing this costs more complete folds and offers a
+check on the ranking from the smaller screening sample.}
+
+\item{time_limit}{Optional search scheduling budget in seconds. An in-progress
+fit is allowed to finish. At least one complete cross-validation candidate
+is attempted; unfinished candidates cannot win. Final refits, explanations
+and reporting are outside this budget. This is not a hard process timeout.
+Time-limited searches can choose different models on different machines.}
+
+\item{early_stopping}{Whether to choose boosting rounds on a separate split
+inside each training fold, then fit all fold-training rows at those rounds.
+\code{NULL} enables this for adaptive searches only. Final refits use the rounded-up
+median of successful folds' round choices. Assessment and final evaluation
+rows never choose the stopping point.}
+
+\item{patience}{Boosting rounds without improvement before inner calibration
+stops. The requested \code{nrounds} remains a maximum.}
 }
 \value{
 An \code{autoxplain_tuning_control} object for the \code{tuning_control}
@@ -48,8 +108,8 @@ argument of \code{\link[=autoxplain]{autoxplain()}}.
 }
 \description{
 \code{tuning_control()} is an optional escape hatch for users who need more
-control than the beginner defaults in \code{\link[=autoxplain]{autoxplain()}}. Omitting it preserves
-AutoXplainR's existing portfolio-aware search, stratified/random V-folds,
+control than the beginner defaults in \code{\link[=autoxplain]{autoxplain()}}. Omitting it uses
+AutoXplainR's portfolio-aware search, stratified/random V-folds,
 default loss, retained out-of-fold predictions, and failure isolation.
 }
 \details{
@@ -104,8 +164,10 @@ rolling-origin or forward-chaining specification. To avoid ambiguity after
 AutoXplainR's automatic holdout split, fold IDs are accepted only when
 \code{test_data} is supplied explicitly to \code{\link[=autoxplain]{autoxplain()}}. Candidate losses and
 their selection standard-error heuristic are weighted by the number of validation
-rows in each fold; RMSE uses pooled squared loss with a delta-method standard
-error on the RMSE scale. Overlapping training folds mean that this heuristic
+rows in each fold; RMSE and RMSLE use pooled squared losses with a delta-method
+standard error on the root-loss scale. AUC uses a row-weighted average of
+within-fold AUC values, without comparing prediction ranks across different
+fitted models. It has no row-level case loss. Overlapping training folds mean that this heuristic
 is not a confidence interval or a test of equivalent model performance.
 }
 \examples{

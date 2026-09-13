@@ -29,7 +29,7 @@ performance screening and permutation importance.}
 
 \item{n_repeats}{Number of permutations per model and feature.}
 
-\item{seed}{Reproducible seed.}
+\item{seed}{Reproducible seed; the caller's random-number state is restored.}
 
 \item{confidence}{Monte Carlo interval level.}
 

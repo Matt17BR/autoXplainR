@@ -1,0 +1,55 @@
+{
+  "scope": "Development-only harness verification; no acceptance data are opened.",
+  "evaluation_files_absent_during_fitting": true,
+  "engines": {
+    "ranger": {
+      "fit_process_sha256": "37d6b5a5c652de57fecf038d23fc04d732dd48343ca58f40ffded79ff2e78bc4",
+      "fit_model_sha256": "d75187c0d722f01c47cecfdde4ecd964102aa80c07560893a921dc1028b2f60a",
+      "staged_and_joint_prediction_files_identical": true,
+      "predictions_sha256": "d507f14a86517af435f009146db7a180b8a68a90715ce4b45f46aa6c67ee177d",
+      "cold_replay": {
+        "status": "ok",
+        "case": "rare_interaction",
+        "phase": "development",
+        "variant": "ranger",
+        "process_id": 3381978,
+        "max_absolute_prediction_difference": {
+          "ranger": 0
+        },
+        "predictions_sha256": "d507f14a86517af435f009146db7a180b8a68a90715ce4b45f46aa6c67ee177d",
+        "saved_model_sha256": "d75187c0d722f01c47cecfdde4ecd964102aa80c07560893a921dc1028b2f60a",
+        "verified_at": "2026-09-12 13:28:31 UTC",
+        "fresh_session": true
+      },
+      "combined_process_elapsed_seconds": 7.493999212005292,
+      "score_process_sha256": "ffe1be657eb634d273e9dfbbccdf922a595bd0245a90b0ac42de1b4fc9d7fb96"
+    },
+    "xgboost": {
+      "fit_process_sha256": "211e86e92833aa3759cbe127eb6ef2864bd5032f1cfa69577818f60bade4f70a",
+      "fit_model_sha256": "459d50136ecbd3d9413ff1d8b1fb387da401063c1fe60e74b879a05db837c9d0",
+      "staged_and_joint_prediction_files_identical": true,
+      "predictions_sha256": "dce73e6bcad8f41b0cb32272a2e00e55d651a2afa6d6c1b13f4b138d23284f42",
+      "cold_replay": {
+        "status": "ok",
+        "case": "rare_interaction",
+        "phase": "development",
+        "variant": "xgboost",
+        "process_id": 3382413,
+        "max_absolute_prediction_difference": {
+          "xgboost": 0
+        },
+        "predictions_sha256": "dce73e6bcad8f41b0cb32272a2e00e55d651a2afa6d6c1b13f4b138d23284f42",
+        "saved_model_sha256": "459d50136ecbd3d9413ff1d8b1fb387da401063c1fe60e74b879a05db837c9d0",
+        "verified_at": "2026-09-12 13:28:37 UTC",
+        "fresh_session": true
+      },
+      "combined_process_elapsed_seconds": 4.5946326490011415,
+      "score_process_sha256": "928f6807491846ea5ae1407f1ab7b8b0dd5505c6f58dafd47d88848870f35a93"
+    }
+  },
+  "repeat_scoring_consumes_remaining_budget": true,
+  "exhausted_budget_rejected_before_R": true,
+  "unfrozen_acceptance_rejected_before_R": true,
+  "check_script_sha256": "6d136d926cebcd5069a8c79699e433c092cf7a427a95714b34e1d592f4b52f23",
+  "status": "ok"
+}

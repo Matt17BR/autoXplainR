@@ -1,0 +1,11 @@
+{
+  "helper_original_md5": "6d73f620c8a266d0247f626c731852c5",
+  "verified_helper_sha256": "30e341d525fae7c48fed52464843c7bf331de62e61acca2418d22bc0fe7b9411",
+  "original_runner_sha256": "1cd698b64578721a007b64fa908a875377d989b0e4a7ca61357b001e20d50733",
+  "native_versions": {
+    "R": "4.5.2",
+    "xgboost": "3.2.1.1"
+  },
+  "threads": 1,
+  "scope": "Original timing cohort, before portable rerun. Original RDS recorded the helper MD5; SHA256 is verified from the current identical-MD5 helper. A full contemporaneous source manifest was not retained."
+}

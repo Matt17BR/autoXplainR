@@ -1,0 +1,2 @@
+"task","models","features","union_features","classes","near_optimal","evaluation_rows","sampled_rows","predicted_permutation_calls","predicted_effect_calls","predicted_full_fingerprint_predictions","actual_full_fingerprint_predictions","predicted_total_full_predictions","actual_total_full_predictions","supplied_explainer_identity_hashes","expected_supplied_explainer_identity_hashes","inferred_native_explainer_identity_hashes","elapsed_instrumented_seconds"
+"regression",5,90,26,1,5,180,50,4850,80,5,5,10,10,15,15,10,8.435

@@ -18,7 +18,7 @@
 #'   an `autoxplain_result` primary metric use that same metric for both
 #'   performance screening and permutation importance.
 #' @param n_repeats Number of permutations per model and feature.
-#' @param seed Reproducible seed.
+#' @param seed Reproducible seed; the caller's random-number state is restored.
 #' @param confidence Monte Carlo interval level.
 #' @param performance_tolerance Relative tolerance defining the empirical set
 #'   of near-optimal supplied models. For example, `0.05` retains models whose
@@ -55,6 +55,25 @@ audit_explanations <- function(explainers,
                                performance_tolerance = 0.05,
                                dependence_threshold = 0.7,
                                max_rows = NULL) {
+  withr::with_preserve_seed(audit_explanations_impl(
+    explainers = explainers, features = features, metric = metric,
+    n_repeats = n_repeats, seed = seed, confidence = confidence,
+    performance_tolerance = performance_tolerance,
+    dependence_threshold = dependence_threshold, max_rows = max_rows
+  ))
+}
+
+audit_explanations_impl <- function(explainers,
+                                    features = NULL,
+                                    metric = "auto",
+                                    n_repeats = 20L,
+                                    seed = 123L,
+                                    confidence = 0.95,
+                                    performance_tolerance = 0.05,
+                                    dependence_threshold = 0.7,
+                                    max_rows = NULL,
+                                    prediction_context = NULL,
+                                    progress = FALSE) {
   explainers <- normalize_explainers(explainers)
   n_repeats <- assert_count(n_repeats, "n_repeats")
   assert_probability(confidence, "confidence", open = TRUE)
@@ -92,14 +111,16 @@ audit_explanations <- function(explainers,
 
   importance_objects <- vector("list", length(explainers))
   for (index in seq_along(explainers)) {
-    importance_objects[[index]] <- calculate_permutation_importance(
+    explanation_progress(progress, "Checking input importance", explainers[[index]], features, max_rows, n_repeats)
+    importance_objects[[index]] <- calculate_permutation_importance_impl(
       explainers[[index]],
       metric = resolved_metric,
       n_repeats = n_repeats,
       seed = seed + index - 1L,
       features = features,
       confidence = confidence,
-      max_rows = max_rows, sample_seed = seed
+      max_rows = max_rows, sample_seed = seed, prediction_context = prediction_context,
+      progress = progress
     )
   }
   names(importance_objects) <- names(explainers)
@@ -130,7 +151,9 @@ audit_explanations <- function(explainers,
   importance$claim <- shuffle_diagnostic_claim(importance$shuffle_status)
 
   agreement <- explanation_agreement(importance_objects, performance$near_optimal, features)
-  prediction <- prediction_agreement(explainers, performance$near_optimal)
+  prediction <- prediction_agreement(
+    explainers, performance$near_optimal, prediction_context = prediction_context
+  )
   findings <- audit_findings(
     importance, dependence, performance, agreement, prediction,
     n_repeats, dependence_threshold, explainers
@@ -177,7 +200,10 @@ audit_explanations <- function(explainers,
         created_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
         package_version = package_version_or_development(),
         explainer_fingerprints = vapply(
-          explainers, current_explainer_fingerprint, character(1)
+          explainers, function(explainer) {
+            if (is.null(prediction_context)) return(current_explainer_fingerprint(explainer))
+            explanation_context_values(explainer, prediction_context)$fingerprint
+          }, character(1)
         ),
         model_labels = names(explainers),
         diagnostic_scope = paste(
@@ -237,18 +263,22 @@ normalize_explainers <- function(explainers) {
 }
 
 near_optimal_models <- function(scores, metric, tolerance) {
+  valid <- is.finite(scores)
+  if (!any(valid)) return(rep(FALSE, length(scores)))
   if (metric %in% c("accuracy", "auc")) {
-    best <- max(scores)
+    best <- max(scores[valid])
     gap <- best - scores
   } else {
-    best <- min(scores)
+    best <- min(scores[valid])
     gap <- scores - best
   }
-  gap <= tolerance * max(abs(best), sqrt(.Machine$double.eps)) + sqrt(.Machine$double.eps)
+  valid & gap <= tolerance * max(abs(best), sqrt(.Machine$double.eps)) + sqrt(.Machine$double.eps)
 }
 
 relative_performance_gap <- function(scores, metric) {
-  best <- if (metric %in% c("accuracy", "auc")) max(scores) else min(scores)
+  valid <- is.finite(scores)
+  if (!any(valid)) return(rep(NA_real_, length(scores)))
+  best <- if (metric %in% c("accuracy", "auc")) max(scores[valid]) else min(scores[valid])
   gap <- if (metric %in% c("accuracy", "auc")) best - scores else scores - best
   gap / max(abs(best), sqrt(.Machine$double.eps))
 }
@@ -267,7 +297,13 @@ combine_importance <- function(objects, dependence) {
   })
   out <- do.call(rbind, rows)
   out$unavailable_reason <- vapply(seq_len(nrow(out)), function(i) {
-    attr(objects[[out$model[[i]]]], "unavailable_reason") %||% ""
+    object <- objects[[out$model[[i]]]]
+    feature_reason <- attr(object, "unavailable_by_feature")[[out$feature[[i]]]]
+    if (length(feature_reason) && nzchar(feature_reason)) {
+      feature_reason
+    } else {
+      attr(object, "unavailable_reason") %||% ""
+    }
   }, character(1))
   rownames(out) <- NULL
   out[c("model", setdiff(names(out), "model"))]
@@ -407,6 +443,15 @@ shuffle_diagnostic_claim <- function(status) {
 
 explanation_agreement <- function(objects, near_optimal, features) {
   selected <- objects[near_optimal]
+  if (!length(selected)) {
+    return(list(
+      rank_correlation = matrix(numeric(), 0L, 0L),
+      mean_rank_correlation = NA_real_,
+      importance_ranges = data.frame(
+        feature = features, min_importance = NA_real_, max_importance = NA_real_, mean_importance = NA_real_
+      )
+    ))
+  }
   matrix_values <- vapply(selected, function(object) {
     values <- object$importance[match(features, object$feature)]
     setNames(values, features)
@@ -441,13 +486,16 @@ explanation_agreement <- function(objects, near_optimal, features) {
   )
 }
 
-prediction_agreement <- function(explainers, near_optimal) {
+prediction_agreement <- function(explainers, near_optimal, prediction_context = NULL) {
   selected <- explainers[near_optimal]
   if (length(selected) < 2L) {
     return(list(score = NA_real_, pairwise = NULL, ambiguity = NA_real_))
   }
   task <- selected[[1L]]$task
-  predictions <- lapply(selected, function(x) predict(x, x$data))
+  predictions <- lapply(selected, function(explainer) {
+    if (is.null(prediction_context)) return(predict(explainer, explainer$data))
+    explanation_context_values(explainer, prediction_context)$predictions
+  })
   if (task == "binary" && any(vapply(predictions, is.factor, logical(1)))) {
     hard <- vapply(seq_along(predictions), function(index) {
       value <- predictions[[index]]
@@ -553,8 +601,21 @@ audit_findings <- function(importance,
   }
   reasons <- unique(importance$unavailable_reason[nzchar(importance$unavailable_reason)])
   if (length(reasons)) {
+    action <- if (any(grepl("RMSLE", reasons, fixed = TRUE))) {
+      paste(
+        "Inspect the model's negative predictions on original or shuffled inputs.",
+        "Use a model with nonnegative predictions, or explicitly choose another metric for this diagnostic."
+      )
+    } else if (any(grepl("original evaluation rows.*AUC", reasons))) {
+      paste(
+        "Use representative evaluation data containing both outcome classes for AUC importance,",
+        "or explicitly choose another metric for this diagnostic."
+      )
+    } else {
+      "Increase the explanation row limit or use every evaluation row."
+    }
     add("note", "importance_unavailable", "Some permutation importance was unavailable.",
-      paste(reasons, collapse = " "), "Increase the explanation row limit or use every evaluation row.",
+      paste(reasons, collapse = " "), action,
       scope = "Sampled explanation rows"
     )
   }
@@ -593,7 +654,7 @@ audit_findings <- function(importance,
       "Inspect case-level disagreement before deployment and document the model-selection rule."
     )
   }
-  if (n_repeats < 20L) {
+  if (n_repeats < 20L && any(is.finite(importance$importance))) {
     add(
       "note", "low_monte_carlo_budget",
       "The permutation budget is small; its interval endpoints may depend on the shuffles drawn.",

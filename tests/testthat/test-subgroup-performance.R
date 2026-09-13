@@ -66,7 +66,7 @@ test_that("subgroup performance honors MAE without duplicating its supporting me
   diagnostic <- subgroup_performance(result, "segment", min_rows = 10, metric = "mae")
   expect_identical(result, original)
   expect_identical(result$evaluation$primary_metric, "rmse")
-  expect_error(subgroup_performance(result, "segment", metric = "brier_score"), "supported loss metric")
+  expect_error(subgroup_performance(result, "segment", metric = "brier_score"), "supported score")
 
   expect_identical(diagnostic$primary_metric, "mae")
   expect_identical(diagnostic$secondary_metric, "rmse")

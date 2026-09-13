@@ -1,0 +1,29 @@
+{
+  "yearprediction": {
+    "url": "https://archive.ics.uci.edu/static/public/203/yearpredictionmsd.zip",
+    "archive_sha256": "06f801af323bb7798e800583acce4ea1ed2697ac12c23f4424aea0a7a3d09e11",
+    "archive_bytes": 211011981,
+    "member": "YearPredictionMSD.txt",
+    "member_sha256": "4b6f8e50235b359e01689ae7fb33ad0f89677e9a15f25f3d6259327a6bb927bb",
+    "member_bytes": 448576698,
+    "license": "CC BY 4.0"
+  },
+  "covertype": {
+    "url": "https://archive.ics.uci.edu/static/public/31/covertype.zip",
+    "archive_sha256": "89a975c2457cd48e824238ae43c5a3cb762e42c4b4078d9b44a4514055105f6d",
+    "archive_bytes": 11251206,
+    "member": "covtype.data.gz",
+    "member_sha256": "614360d0257557dd1792834a85a1cdebfadc3c4f30b011d56afee7ffb5b15771",
+    "member_bytes": 11240707,
+    "license": "CC BY 4.0"
+  },
+  "bank": {
+    "url": "https://archive.ics.uci.edu/static/public/222/bank+marketing.zip",
+    "archive_sha256": "e0bf5f5de5b846e2f18e9d90606637267d46dfa260e0f17bb12e605db5efbeb4",
+    "archive_bytes": 1023843,
+    "member": "bank-additional.zip",
+    "member_sha256": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd",
+    "member_bytes": 444572,
+    "license": "CC BY 4.0"
+  }
+}

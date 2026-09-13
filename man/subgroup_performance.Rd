@@ -16,8 +16,10 @@ subgroup_performance(result, by, model = NULL, min_rows = 10L, metric = NULL)
 \item{min_rows}{Minimum rows used to label a group as large enough for a
 preliminary comparison. Smaller groups remain visible and are flagged.}
 
-\item{metric}{Optional loss metric for this descriptive comparison: \code{rmse}
-or \code{mae} for regression; \code{log_loss} or \code{brier_score} for classification.
+\item{metric}{Optional score for this descriptive comparison: \code{rmse},
+\code{mae} or \code{rmsle} for regression; \code{log_loss} or \code{brier_score} for classification;
+also \code{roc_auc} for binary classification. RMSLE requires nonnegative values;
+AUC is unavailable in groups containing only one outcome class.
 \code{NULL} uses the recorded evaluation metric. This does not change the
 official leaderboard, selected model, or stored evaluation evidence.}
 }

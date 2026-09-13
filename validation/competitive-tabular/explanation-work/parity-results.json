@@ -1,0 +1,426 @@
+{
+  "generated_at": "2026-09-12 13:39:06",
+  "purpose": "Independent complete report evidence parity across immutable pre-reuse and current sources",
+  "ignored_fields": "created_at only; fixtures already share every other creation timestamp",
+  "native_models": "One 32-tree ranger and one 24-round XGBoost model per task, fitted once on 140 rows, evaluated on 70 rows",
+  "native_threads": 1,
+  "explanation_rows": 31,
+  "repeats": 4,
+  "top_features": 3,
+  "fixture_sha256": "042706a31f0cb546900c89156b2e675c1731e585f07a7cde2f2e57c01888dc4e",
+  "runner_sha256": "ce7e2781e30547e5b7fa7d87991c09880aecedcdfb67dcba09bcc0759b2314c3",
+  "baseline_source_sha256": {
+    "DESCRIPTION": "e07824a8094cbd2d8f51201726fd2c4745d173788a49792c88ad20db3264ab59",
+    "NAMESPACE": "cf27b4390e685a59000e7af182b1b1bd9582c0acc2996ffeea61c3b149876e7c",
+    "R/adaptive_search.R": "b209d5e53046747f9c10505d9368a0738c504091efd1a15bd84b35b1fb00c2a4",
+    "R/auc_bootstrap.R": "a4dbb5b073e2eb408bbc0b55e2632a103536ee33ecd787da7a16107f9ff11f34",
+    "R/audit.R": "7a8123db0537354ffc884c1eb3b49e0f8854a41c7e199dae701c4ed283fab566",
+    "R/autoxplain.R": "9675924f1b5450795c393880536345751a4404e880ee14a4d5db834bdc6fdd67",
+    "R/AutoXplainR.R": "2693d4395d022ec5b6ca8a10fa0a9aa3a1d4225cc1a870516ca80f57a17eebf1",
+    "R/benchmark_predictions.R": "409ef169a4a84f82352b5be5398b03220547dc9147c932be6c4af0ade84b92d5",
+    "R/boosting_inputs.R": "beb86b9ec60e2cd948f5d4b854e340c87165bd3863f3ba1188e721033ed9c4fc",
+    "R/boosting_training.R": "30e341d525fae7c48fed52464843c7bf331de62e61acca2418d22bc0fe7b9411",
+    "R/calibration.R": "e3ffe19ef2f5155b1323d5f97ebd5a4714d000247fd5004a6eef8a1f10f55a5d",
+    "R/dashboard_generation.R": "bf264d884d9c4fd505c71203e62370ac4cbf92488bd311f6720b8001c9722ae7",
+    "R/data_context.R": "dc40373c298c77be348e6340c43e3bbc47855841f4147a1cbf8ebca9702b43a8",
+    "R/data_preprocessing.R": "64168e67b6db9a29da817eb187ea5a216f8c6650cbdfbb3a1ce9c63a7427cced",
+    "R/data_profile.R": "2fdc804068b899b1ac23ba3a78e906b5c02252b6dae39e5dd279e91f11b44c56",
+    "R/evaluate_models.R": "23c2336adfe69a40c618464f4c56e73cf2c4897c64a76fb0428e82fcc79ce7fc",
+    "R/evaluation_metric_status.R": "6b013f0d7f3f4b8666cde2317a0c1181c77f5917906d38caf0ffeeade114d1df",
+    "R/evaluation_snapshot.R": "ef2412584f360cb34b3c600abbed89677b62c0ad46b6043c1539a0fcf83abe46",
+    "R/evidence_contract.R": "3a619ce6bf0177e5c253a15b779700d87407017e91c0ca488d7e9c25a700ac93",
+    "R/evidence_summary.R": "51407bc14255d85da896b6e188764c8cc703f945816ad45ba5ebb8653c0347d1",
+    "R/explainer.R": "60605cd2372192cac163d0da824dd86f1cd1adc1fd3fc5dfc5047005e8aa4e84",
+    "R/explanation_sampling.R": "1bb848e6a85e0cbd8b3d0f06138d921631ee955a951804b44e8b6b5fc43c3788",
+    "R/fitted_model.R": "5dbc974181b43dc8b49dd0d9e2719f521cb82431cf9caa830ec3a009c0acb598",
+    "R/forest_validation_budget.R": "825cda2c845919427c472e86ffc944d102b61cccd3a6f2326df297a639286b25",
+    "R/guided_workflow.R": "6aadcfbe22dea6f096d155d31a0e279aed3020b51a050e69b5ffa80872a3440f",
+    "R/h2o_workflow.R": "2cac622fb044a4ecc32f8e5e3bf11b8a4d3e869096cfa71fc64778086fab3830",
+    "R/learner_backends.R": "ea83badd511f491d1e139db2b3121b88b83d60c93f9961210bbeb89e52bff873",
+    "R/learner_registry.R": "02336c3251060372f8ec3230879bd4dd98ebd9fa20ebd801610e54ca21bb435e",
+    "R/llm_integration.R": "8af9d2f548554284c6a65084bc30346a68f4c9e0dc249b878ba91d4c628c1d84",
+    "R/matrix_blueprint.R": "e45445ce032f7adc086d2c25c5bb745df88ab89339428c4cca8f751703e25b62",
+    "R/missingness_shift.R": "7840442bff8d0f96bb8a85e68210e83d500bdc236c3a3ca7a179a98e155d740e",
+    "R/model_behavior.R": "7e4371e6f05bdd64a37c08b4d00ff197a67bf5f84d8a8de036b114aade5736fa",
+    "R/model_characterization.R": "198435ee2a20929e0e0d702cd8b018980c7ba710fbc45dae95ae12dc29d27c92",
+    "R/model_effect_comparison.R": "d12f358455c2cdcc97de98d657d89cbd4831d648a94ba85475f25bbb724c7ab5",
+    "R/model_tradeoffs.R": "177cd10daad24ac0827ce77cfad7281bc18797c592974053c6eeb8a145653499",
+    "R/partial_dependence.R": "0bb8b09b4e5eceaab975043fea0268b8c6bd8f4d095ecd25ef2088da57cfc7a9",
+    "R/performance_uncertainty.R": "ca647ab5d3b5a770490e69ecfa97f34c0cb0e7cbbe90a7e2db733a7655150fe8",
+    "R/permutation_importance.R": "292c0729e62fece4116a21be9736a95743c142ba26ebabdefccdd624f7e2071b",
+    "R/plotting_functions.R": "393aa90eb3ac86e0e1012843eb69901ef34320b5abd9aafeece24eee6d2b2dcb",
+    "R/prediction_ambiguity.R": "6f3dc1504c92d15d17d1a2376ec11be4bedad8101ab44387a2b1bf92d0a5aff0",
+    "R/report_benchmark.R": "5aef63f33344ca83fbe105a6f24d83e43febf094914b5ce110319a4e36c486bb",
+    "R/report_charts.R": "57a9ca0b8bf6b0a3f06dc677ce1b49d5b0b3392f545e814d6a15925381e4ad3d",
+    "R/report_data.R": "80e227818fca9b1a87d0e1834dfb87aa33657ec9725610e54be80c4b6f8dab4e",
+    "R/report_disagreement.R": "cff99e789060b59ea677644fd74988c20102622fdb247b0f458a10b23a567579",
+    "R/report_explorer.R": "4730c6f98cea608247f8bd80f56c31965385f557fc407d3870f3101a2b30cc77",
+    "R/report_model_specs.R": "aba41220144bacefb1e993c50a32c817ce9060ec81d148e661d05ae36b5487b6",
+    "R/report_payload.R": "55fd68c6027bf3166ae07ddef4c7cd4c5c5314d7e2c00574f1fd5431924f450f",
+    "R/report_predictions.R": "bd9bb16794babfd7f989dccf49c461ac4627fce414b2c6fa4a00c76c5ac8f302",
+    "R/report_preparation.R": "7469275d13ec723ad05b6fe3f7dfa739c890b3868c62bbf9ba4b9f4d08845b3f",
+    "R/report_selection_rounds.R": "f5da1b11a7ff759a48c73e97e9e0b24d0f6901427633bf521cea30ee2672318d",
+    "R/report_selection.R": "01a69f0d597eca92fe828f8050595541676b6fbd604edc3dcdc7ebc6ca21a9b3",
+    "R/report_summary.R": "b146f62d8dbf630cd9c1f6ca0b5509a9e34cf94ac9d09ab3a5ddd61c4f83af23",
+    "R/report_view_model.R": "b0e9fbd63b99e8502093d426b54647e4b184d474b688874a168d32aa2279959e",
+    "R/reporting.R": "ab2cd742f18a8cba18a0945f5acdf1c98a4b801a1e1d8ff98b7b1816c67b9f6c",
+    "R/result_workflow.R": "045d5f3a31eadc58647a07372f74b9c84a6d6eb5597ecd05e0a9810551e38a7a",
+    "R/search_execution.R": "086ec91a4b9fd8b6b26769d8652cae21b221a2742a2e5596cdba7c1fd4aabbac",
+    "R/search_progress.R": "6e00522f5a6d99f3ecbee5de5fcc1dea6bdc4141f237433fde2c1b2d41f83ea0",
+    "R/selection_metrics.R": "c4d93cc2e7dde53dce7483f11ff0750f8df97259f0551e906b29b8d39ca9b962",
+    "R/subgroup_performance.R": "7ba3f536bb179413dd86edb4be5af0585d761e3ebea090f24043271d0ca609f6",
+    "R/threshold_diagnostics.R": "5b43f2ce82cf3400917babd0a2d0473fdba3fbf053380561cf98c796be5e5034",
+    "R/tuning_control.R": "a7030850cf6f0357f73077c5bc9179f9215b6c80fcf2c2bbc43b530aab6ab204",
+    "R/tuning_evidence.R": "12ee81b33e1391c2bfa51e6dd6d86be389343248e465de2c1444e717fccae8e3",
+    "R/tuning.R": "7644652980dc2bb86b7648df360d5a15f2ee975290e2eec045db9fbac313f4da",
+    "R/validation_split.R": "908d2f71ae7a834e5652ffb9e46cf4326748bf258256805486f46b6917b8b6b0"
+  },
+  "current_source_sha256": {
+    "DESCRIPTION": "3b012e31f6682af0e4699bf685d4cf7af1beb37b53a2da7dcf38c728ba985ec3",
+    "NAMESPACE": "cf27b4390e685a59000e7af182b1b1bd9582c0acc2996ffeea61c3b149876e7c",
+    "R/adaptive_search.R": "b51aad102b6518ebae55b241624ed06ff8f6e9c5d273e988e589e3a9d9c669ae",
+    "R/auc_bootstrap.R": "a4dbb5b073e2eb408bbc0b55e2632a103536ee33ecd787da7a16107f9ff11f34",
+    "R/audit.R": "baffee5a05d2e95a0541a8d43988213f15836634045e98059a7150c91375127b",
+    "R/autoxplain.R": "4fbf3cf0ce6aad356837a90c775bdfc06619adf769c1caba832c2a66a8695d6b",
+    "R/AutoXplainR.R": "2693d4395d022ec5b6ca8a10fa0a9aa3a1d4225cc1a870516ca80f57a17eebf1",
+    "R/benchmark_predictions.R": "409ef169a4a84f82352b5be5398b03220547dc9147c932be6c4af0ade84b92d5",
+    "R/boosting_inputs.R": "beb86b9ec60e2cd948f5d4b854e340c87165bd3863f3ba1188e721033ed9c4fc",
+    "R/boosting_training.R": "30e341d525fae7c48fed52464843c7bf331de62e61acca2418d22bc0fe7b9411",
+    "R/calibration.R": "e3ffe19ef2f5155b1323d5f97ebd5a4714d000247fd5004a6eef8a1f10f55a5d",
+    "R/dashboard_generation.R": "e3b8ef298e79d45f4dc826d810216fa96c7666ec042b4002aa2689dc40db8968",
+    "R/data_context.R": "dc40373c298c77be348e6340c43e3bbc47855841f4147a1cbf8ebca9702b43a8",
+    "R/data_preprocessing.R": "64168e67b6db9a29da817eb187ea5a216f8c6650cbdfbb3a1ce9c63a7427cced",
+    "R/data_profile.R": "2fdc804068b899b1ac23ba3a78e906b5c02252b6dae39e5dd279e91f11b44c56",
+    "R/effect_computation.R": "f43fb3c8d3e4578c556d6bcd88c6a5e88d84862fbb21e7566dc25c50857eace1",
+    "R/evaluate_models.R": "23c2336adfe69a40c618464f4c56e73cf2c4897c64a76fb0428e82fcc79ce7fc",
+    "R/evaluation_metric_status.R": "6b013f0d7f3f4b8666cde2317a0c1181c77f5917906d38caf0ffeeade114d1df",
+    "R/evaluation_snapshot.R": "8739909e625ebe6e00b5f696008c8b8f1c19e40671ac80f60cfd0c377c70351d",
+    "R/evidence_contract.R": "3a619ce6bf0177e5c253a15b779700d87407017e91c0ca488d7e9c25a700ac93",
+    "R/evidence_summary.R": "51407bc14255d85da896b6e188764c8cc703f945816ad45ba5ebb8653c0347d1",
+    "R/explainer.R": "60605cd2372192cac163d0da824dd86f1cd1adc1fd3fc5dfc5047005e8aa4e84",
+    "R/explanation_sampling.R": "1bb848e6a85e0cbd8b3d0f06138d921631ee955a951804b44e8b6b5fc43c3788",
+    "R/fitted_model.R": "5dbc974181b43dc8b49dd0d9e2719f521cb82431cf9caa830ec3a009c0acb598",
+    "R/forest_validation_budget.R": "817b998964109d9d4eee2e0a7739c040fe1a928fd9d9cc8a8dd40d6398600147",
+    "R/guided_workflow.R": "bddf931edd8008ed07d5a959c61c26a06204558605c58ffa2210912d3f64fbad",
+    "R/h2o_workflow.R": "2cac622fb044a4ecc32f8e5e3bf11b8a4d3e869096cfa71fc64778086fab3830",
+    "R/learner_backends.R": "ea83badd511f491d1e139db2b3121b88b83d60c93f9961210bbeb89e52bff873",
+    "R/learner_registry.R": "02336c3251060372f8ec3230879bd4dd98ebd9fa20ebd801610e54ca21bb435e",
+    "R/llm_integration.R": "8af9d2f548554284c6a65084bc30346a68f4c9e0dc249b878ba91d4c628c1d84",
+    "R/matrix_blueprint.R": "e45445ce032f7adc086d2c25c5bb745df88ab89339428c4cca8f751703e25b62",
+    "R/missingness_shift.R": "7840442bff8d0f96bb8a85e68210e83d500bdc236c3a3ca7a179a98e155d740e",
+    "R/model_behavior.R": "7e4371e6f05bdd64a37c08b4d00ff197a67bf5f84d8a8de036b114aade5736fa",
+    "R/model_characterization.R": "198435ee2a20929e0e0d702cd8b018980c7ba710fbc45dae95ae12dc29d27c92",
+    "R/model_effect_comparison.R": "d12f358455c2cdcc97de98d657d89cbd4831d648a94ba85475f25bbb724c7ab5",
+    "R/model_tradeoffs.R": "177cd10daad24ac0827ce77cfad7281bc18797c592974053c6eeb8a145653499",
+    "R/partial_dependence.R": "3703d2c35e893362290c007507c7c5ae2f43dbec0d2a8db2cbd728b769019717",
+    "R/performance_uncertainty.R": "ca647ab5d3b5a770490e69ecfa97f34c0cb0e7cbbe90a7e2db733a7655150fe8",
+    "R/permutation_importance.R": "ec1976c266decc8aa2f272839cea3d9f564a90ff62fcb1f53f9f25f7e0a6c953",
+    "R/plotting_functions.R": "393aa90eb3ac86e0e1012843eb69901ef34320b5abd9aafeece24eee6d2b2dcb",
+    "R/prediction_ambiguity.R": "6f3dc1504c92d15d17d1a2376ec11be4bedad8101ab44387a2b1bf92d0a5aff0",
+    "R/prediction_bindings.R": "1bb4de77db83548620575cbdde9023142ca9016ab6d3718e564aa03a9f789ffd",
+    "R/report_benchmark.R": "5aef63f33344ca83fbe105a6f24d83e43febf094914b5ce110319a4e36c486bb",
+    "R/report_charts.R": "57a9ca0b8bf6b0a3f06dc677ce1b49d5b0b3392f545e814d6a15925381e4ad3d",
+    "R/report_data.R": "80e227818fca9b1a87d0e1834dfb87aa33657ec9725610e54be80c4b6f8dab4e",
+    "R/report_disagreement.R": "cff99e789060b59ea677644fd74988c20102622fdb247b0f458a10b23a567579",
+    "R/report_explorer.R": "4730c6f98cea608247f8bd80f56c31965385f557fc407d3870f3101a2b30cc77",
+    "R/report_model_specs.R": "aba41220144bacefb1e993c50a32c817ce9060ec81d148e661d05ae36b5487b6",
+    "R/report_payload.R": "55fd68c6027bf3166ae07ddef4c7cd4c5c5314d7e2c00574f1fd5431924f450f",
+    "R/report_predictions.R": "bd9bb16794babfd7f989dccf49c461ac4627fce414b2c6fa4a00c76c5ac8f302",
+    "R/report_preparation.R": "9b4c03b3b72aa5636af116047e9f5e425606efa707502021db6c2ba885cc65e6",
+    "R/report_selection_rounds.R": "f5da1b11a7ff759a48c73e97e9e0b24d0f6901427633bf521cea30ee2672318d",
+    "R/report_selection.R": "ea39c8b268945d0e95749fba84ecaab5fb8c8c40048b3092119400e90c137235",
+    "R/report_summary.R": "b146f62d8dbf630cd9c1f6ca0b5509a9e34cf94ac9d09ab3a5ddd61c4f83af23",
+    "R/report_view_model.R": "b0e9fbd63b99e8502093d426b54647e4b184d474b688874a168d32aa2279959e",
+    "R/reporting.R": "b264c1d61659eaf5723aacc3c2360620d7ff53d01394846afe2bf01cc3ab139f",
+    "R/result_workflow.R": "0e6abf3b60eb702782321e517ef2de9d3b25dbc2c85122e42aa90785588f175e",
+    "R/search_execution.R": "086ec91a4b9fd8b6b26769d8652cae21b221a2742a2e5596cdba7c1fd4aabbac",
+    "R/search_progress.R": "9ef0f79d7d8825b8b28266499081f932afff9ef632baa9a6800e87261ea731d7",
+    "R/selection_metrics.R": "c4d93cc2e7dde53dce7483f11ff0750f8df97259f0551e906b29b8d39ca9b962",
+    "R/subgroup_performance.R": "7ba3f536bb179413dd86edb4be5af0585d761e3ebea090f24043271d0ca609f6",
+    "R/thread_policy.R": "0dd0003f4fc97b80453a7c0de0998eb94c3c9ba4751e56bce3b015d87f41ca6d",
+    "R/threshold_diagnostics.R": "5b43f2ce82cf3400917babd0a2d0473fdba3fbf053380561cf98c796be5e5034",
+    "R/tuning_control.R": "0f535f0f60d6676035248e2f0b0ef4ab469d832d7ddb38ab7e99f7b7046c72b8",
+    "R/tuning_evidence.R": "12ee81b33e1391c2bfa51e6dd6d86be389343248e465de2c1444e717fccae8e3",
+    "R/tuning.R": "0c2d3a83a8071904a2cbd1bab569f27bf83398b9b8430bba76af8fcf547d56fb",
+    "R/validation_split.R": "908d2f71ae7a834e5652ffb9e46cf4326748bf258256805486f46b6917b8b6b0"
+  },
+  "R_version": "R version 4.5.2 (2025-10-31)",
+  "ranger_version": "0.18.0",
+  "xgboost_version": "3.2.1.1",
+  "checks": [
+    {
+      "task": "regression",
+      "identical_complete_evidence": true,
+      "fields_identical": {
+        "screening": true,
+        "screening_by_model": true,
+        "audit": true,
+        "effects": true,
+        "failures": true,
+        "effects_by_model": true,
+        "config": true,
+        "effect_status": true
+      },
+      "difference": {},
+      "models": ["forest", "boosting"],
+      "audited_inputs": ["x", "category", "z"],
+      "effect_status": [
+        {
+          "model_id": "boosting",
+          "feature": "x",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "category",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "z",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "x",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "category",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "z",
+          "method": "ale",
+          "status": "available"
+        }
+      ],
+      "audited_repeat_matrices": {
+        "forest": [3, 4],
+        "boosting": [3, 4]
+      }
+    },
+    {
+      "task": "binary",
+      "identical_complete_evidence": true,
+      "fields_identical": {
+        "screening": true,
+        "screening_by_model": true,
+        "audit": true,
+        "effects": true,
+        "failures": true,
+        "effects_by_model": true,
+        "config": true,
+        "effect_status": true
+      },
+      "difference": {},
+      "models": ["forest", "boosting"],
+      "audited_inputs": ["category", "z", "tied", "x"],
+      "effect_status": [
+        {
+          "model_id": "boosting",
+          "feature": "category",
+          "prediction_class": "no",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "tied",
+          "prediction_class": "no",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "x",
+          "prediction_class": "no",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "category",
+          "prediction_class": "no",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "z",
+          "prediction_class": "no",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "tied",
+          "prediction_class": "no",
+          "method": "ale",
+          "status": "available"
+        }
+      ],
+      "audited_repeat_matrices": {
+        "forest": [4, 4],
+        "boosting": [4, 4]
+      }
+    },
+    {
+      "task": "multiclass",
+      "identical_complete_evidence": true,
+      "fields_identical": {
+        "screening": true,
+        "screening_by_model": true,
+        "audit": true,
+        "effects": true,
+        "failures": true,
+        "effects_by_model": true,
+        "config": true,
+        "effects_by_class": true,
+        "effect_status": true
+      },
+      "difference": {},
+      "models": ["forest", "boosting"],
+      "audited_inputs": ["x", "category", "tied"],
+      "effect_status": [
+        {
+          "model_id": "boosting",
+          "feature": "x",
+          "prediction_class": "a",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "tied",
+          "prediction_class": "a",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "category",
+          "prediction_class": "a",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "x",
+          "prediction_class": "b",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "category",
+          "prediction_class": "b",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "tied",
+          "prediction_class": "b",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "x",
+          "prediction_class": "b",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "tied",
+          "prediction_class": "b",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "category",
+          "prediction_class": "b",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "x",
+          "prediction_class": "c",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "category",
+          "prediction_class": "c",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "tied",
+          "prediction_class": "c",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "x",
+          "prediction_class": "c",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "tied",
+          "prediction_class": "c",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "boosting",
+          "feature": "category",
+          "prediction_class": "c",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "x",
+          "prediction_class": "a",
+          "method": "ale",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "category",
+          "prediction_class": "a",
+          "method": "pdp",
+          "status": "available"
+        },
+        {
+          "model_id": "forest",
+          "feature": "tied",
+          "prediction_class": "a",
+          "method": "ale",
+          "status": "available"
+        }
+      ],
+      "audited_repeat_matrices": {
+        "forest": [3, 4],
+        "boosting": [3, 4]
+      }
+    }
+  ]
+}

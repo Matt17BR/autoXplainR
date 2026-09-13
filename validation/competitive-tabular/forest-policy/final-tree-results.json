@@ -1,0 +1,1230 @@
+{
+  "scope": "Development-only fixed-configuration diagnostic. No acceptance data or full-workflow timing.",
+  "limitations": [
+    "Changing tree count changes the existing production-derived fitting seed; this measures both together.",
+    "The previously completed 500-tree fits ran at a different time; fit timings are not controlled speedup estimates.",
+    "Native references shared the host during some diagnostic stages; stage records disclose that overlap.",
+    "Covertype's development pool is below the automatic final 256-tree trigger; its 256-tree model is explicitly diagnostic.",
+    "Shuffle intervals condition on 5000 reference rows and fixed models; they exclude sampling and fitting uncertainty.",
+    "Detailed comparisons retain both ordinary model-set unions and additional borderline inputs, so are not complete default report timings."
+  ],
+  "sample_rows": 5000,
+  "screening_repeats": 5,
+  "detailed_repeats": 20,
+  "sample_seed": 80711,
+  "screening_permutation_seed": 80711,
+  "detailed_permutation_seed": 80712,
+  "source_freeze_declared_at": "2026-09-13T14:13:59Z",
+  "source_freeze_sha256": "3d392b19dabb437d5cf0ece657d2cc5e0aec683198f013d9ec06defb820cdd30",
+  "protocol_sha256": "9a65cba6acf7d2d8baa909e624b4622b4ff995258ec069379e22bfc09aa60c69",
+  "runner_sha256": "7091d636dd5649e4470c3f8d8a03f579a2a952d4847f21b4e5e7bf9c8dda9a1c",
+  "supervisor_sha256": "8850065594e122fab9fc77a463c0a5ccd9bd4994185e9df78dd5df42be9e78b1",
+  "collector_sha256": "763ae1d1ba829d588c5ffd9fb67805ec6e6ec975ed1e64278425fed5e88dd45b",
+  "records": {
+    "yearprediction": {
+      "raw_predictors": 90,
+      "removed_constant_features": [],
+      "primary_metric": "rmse",
+      "primary_loss_difference_256_minus500": 0.01529734257194093,
+      "primary_loss_relative_change": 0.0016103667606426342,
+      "sampled_class_counts": null,
+      "development_training_rows": 50000,
+      "development_assessment_rows": 20000,
+      "forests": {
+        "forest500": {
+          "metrics": {
+            "rmse": 9.499291059532187,
+            "mae": 6.838313754577015,
+            "r_squared": 0.2603376655625347
+          },
+          "classification": null,
+          "confusion_matrix_class_order": null,
+          "tree_count": 500,
+          "native_training_rows": 50000,
+          "effective_predictors": 90,
+          "parameters": {
+            "num.trees": 500,
+            "mtry": 30,
+            "min.node.size": 20,
+            "sample.fraction": 0.8,
+            "splitrule": "default"
+          },
+          "fit_seed": 1385187677,
+          "native_fit_evidence": {
+            "configuration_id": "forest_02",
+            "family": "forest",
+            "scope": "full_training_refit",
+            "backend_version": "0.18.0",
+            "search_seed": 80711,
+            "requested_parameters": {
+              "num.trees": 500,
+              "mtry": 30,
+              "min.node.size": 20,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "effective_parameters": {
+              "num.trees": 500,
+              "mtry": 30,
+              "min.node.size": 20,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "requested_parameter_key": "num.trees=integer:500|mtry=integer:30|min.node.size=integer:20|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "effective_parameter_key": "num.trees=integer:500|mtry=integer:30|min.node.size=integer:20|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "requested_configuration_seed": 1385187677,
+            "fit_seed": 1385187677,
+            "threads": 4,
+            "fit_work": {
+              "calibration_fit_attempts": 0,
+              "model_fit_attempts": 1
+            },
+            "optimization": {
+              "status": "not_applicable",
+              "code": null,
+              "message": "No iterative optimizer convergence claim is made for this fitting procedure.",
+              "iterations": null,
+              "source": "ranger"
+            },
+            "learned": {
+              "threads": 4,
+              "oob_computed": true,
+              "forest_budget": {
+                "policy_id": "forest-validation-budget-v2",
+                "scope": "full_training_refit",
+                "requested_num_trees": 500,
+                "effective_num_trees": 500,
+                "validation_num_trees": 128,
+                "screening_num_trees": 128,
+                "final_num_trees": 500,
+                "scope_note": "Screening uses 128 trees; complete CV uses 128 trees with all requested folds and fold-training rows. CV approximates configuration ranking. The full-training refit uses 500 trees, and held-out evaluation measures that final model."
+              }
+            }
+          },
+          "oob_prediction_error": 88.47778487528943,
+          "nodes": 4222234,
+          "model_bytes": 135540786,
+          "model_sha256": "e03bf48ec06bfe8bb4d8aeffd40421c632d7d4bf12ffa8eb78ee60020fffbe5c",
+          "replayed_predictions_sha256": "a765cd0d6938e5e1aafd7691a863e44a37cc346962d56ff1ea0b57c552096955",
+          "original_fit_seconds": 193.232,
+          "cold_replay_maximum_absolute_difference": 0,
+          "native_maximum_absolute_difference": 0,
+          "prediction_rows": 20000,
+          "prediction_timings_5000_seconds": [
+            1.0700000000000003,
+            0.7010000000000005,
+            0.7420000000000009
+          ],
+          "prediction_median_5000_seconds": 0.7420000000000009,
+          "screening_seconds": 265.158,
+          "detailed_importance_seconds": 271.56,
+          "ordinary_report_feature_union": [
+            "timbre_01",
+            "timbre_02",
+            "timbre_03",
+            "timbre_06",
+            "timbre_23",
+            "timbre_20",
+            "timbre_13",
+            "timbre_14",
+            "timbre_63",
+            "timbre_04",
+            "timbre_05",
+            "timbre_07",
+            "timbre_08"
+          ],
+          "ordinary_report_forest_permutation_calls": 710,
+          "detailed_comparison_features": [
+            "timbre_01",
+            "timbre_02",
+            "timbre_03",
+            "timbre_06",
+            "timbre_23",
+            "timbre_20",
+            "timbre_13",
+            "timbre_14",
+            "timbre_63",
+            "timbre_04",
+            "timbre_05",
+            "timbre_07",
+            "timbre_08",
+            "timbre_22",
+            "timbre_84",
+            "timbre_50",
+            "timbre_80",
+            "timbre_65"
+          ],
+          "additional_borderline_features": {
+            "forest500": [
+              "timbre_84",
+              "timbre_50"
+            ],
+            "forest256": [
+              "timbre_80",
+              "timbre_65"
+            ]
+          },
+          "screening_repeat_dimensions": [
+            90,
+            5
+          ],
+          "detailed_repeat_dimensions": [
+            18,
+            20
+          ],
+          "reference_rows_sha256": "4b3d3eef2bb92f0fdc77d7ef624206bd1e5fb42a6e399114ad7de2a36107b212",
+          "screening_repeat_scores_sha256": "7b26a056bd0f359905fb4f007f2d2aa07628ea5249d1d7af04783f9bafd4c821",
+          "detailed_repeat_scores_sha256": "9cdfe4e89562ed7f367520405e13620aef246c11d2179719796a648a49f514f0"
+        },
+        "forest256": {
+          "metrics": {
+            "rmse": 9.514588402104128,
+            "mae": 6.850043136962707,
+            "r_squared": 0.2579534921352248
+          },
+          "classification": null,
+          "confusion_matrix_class_order": null,
+          "tree_count": 256,
+          "native_training_rows": 50000,
+          "effective_predictors": 90,
+          "parameters": {
+            "num.trees": 256,
+            "mtry": 30,
+            "min.node.size": 20,
+            "sample.fraction": 0.8,
+            "splitrule": "default"
+          },
+          "fit_seed": 253049781,
+          "native_fit_evidence": {
+            "configuration_id": "forest_02",
+            "family": "forest",
+            "scope": "full_training_refit",
+            "backend_version": "0.18.0",
+            "search_seed": 80711,
+            "requested_parameters": {
+              "num.trees": 256,
+              "mtry": 30,
+              "min.node.size": 20,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "effective_parameters": {
+              "num.trees": 256,
+              "mtry": 30,
+              "min.node.size": 20,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "requested_parameter_key": "num.trees=integer:256|mtry=integer:30|min.node.size=integer:20|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "effective_parameter_key": "num.trees=integer:256|mtry=integer:30|min.node.size=integer:20|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "requested_configuration_seed": 253049781,
+            "fit_seed": 253049781,
+            "threads": 4,
+            "fit_work": {
+              "calibration_fit_attempts": 0,
+              "model_fit_attempts": 1
+            },
+            "optimization": {
+              "status": "not_applicable",
+              "code": null,
+              "message": "No iterative optimizer convergence claim is made for this fitting procedure.",
+              "iterations": null,
+              "source": "ranger"
+            },
+            "learned": {
+              "threads": 4,
+              "oob_computed": true,
+              "forest_budget": null
+            }
+          },
+          "oob_prediction_error": 88.96460798340061,
+          "nodes": 2163286,
+          "model_bytes": 69643487,
+          "model_sha256": "a6c88678f3846ac07cdf8258432072863be69b0d8d89e37e3f183c90f45f8c66",
+          "replayed_predictions_sha256": "02d9c7c9b4f3d8db2f619a8b4352a854d2abac52a284342af7fac9ce1a7c830f",
+          "original_fit_seconds": 211.273,
+          "cold_replay_maximum_absolute_difference": 0,
+          "native_maximum_absolute_difference": 0,
+          "prediction_rows": 20000,
+          "prediction_timings_5000_seconds": [
+            0.4109999999999996,
+            0.4150000000000009,
+            0.4989999999999988
+          ],
+          "prediction_median_5000_seconds": 0.4150000000000009,
+          "screening_seconds": 188.77599999999998,
+          "detailed_importance_seconds": 155.371,
+          "ordinary_report_feature_union": [
+            "timbre_01",
+            "timbre_02",
+            "timbre_03",
+            "timbre_06",
+            "timbre_23",
+            "timbre_20",
+            "timbre_13",
+            "timbre_14",
+            "timbre_63",
+            "timbre_22",
+            "timbre_04",
+            "timbre_05",
+            "timbre_07",
+            "timbre_08"
+          ],
+          "ordinary_report_forest_permutation_calls": 730,
+          "detailed_comparison_features": [
+            "timbre_01",
+            "timbre_02",
+            "timbre_03",
+            "timbre_06",
+            "timbre_23",
+            "timbre_20",
+            "timbre_13",
+            "timbre_14",
+            "timbre_63",
+            "timbre_04",
+            "timbre_05",
+            "timbre_07",
+            "timbre_08",
+            "timbre_22",
+            "timbre_84",
+            "timbre_50",
+            "timbre_80",
+            "timbre_65"
+          ],
+          "additional_borderline_features": {
+            "forest500": [
+              "timbre_84",
+              "timbre_50"
+            ],
+            "forest256": [
+              "timbre_80",
+              "timbre_65"
+            ]
+          },
+          "screening_repeat_dimensions": [
+            90,
+            5
+          ],
+          "detailed_repeat_dimensions": [
+            18,
+            20
+          ],
+          "reference_rows_sha256": "4b3d3eef2bb92f0fdc77d7ef624206bd1e5fb42a6e399114ad7de2a36107b212",
+          "screening_repeat_scores_sha256": "44aed7bde215d03459d2d2228c33c9623e99327accaae7794b24fbbf1b2d25c0",
+          "detailed_repeat_scores_sha256": "021c4386cb312c917497cd4684149b21cfd99ac8e5d43550b7423578ba496492"
+        }
+      },
+      "importance_comparison": {
+        "status": "ok",
+        "case": "yearprediction",
+        "scope": "Development diagnostic, not acceptance or a complete report.",
+        "overlap": [
+          {
+            "k": 8,
+            "common": [
+              "timbre_01",
+              "timbre_03",
+              "timbre_06",
+              "timbre_20",
+              "timbre_02",
+              "timbre_14",
+              "timbre_63"
+            ],
+            "only500": "timbre_23",
+            "only256": "timbre_22"
+          },
+          {
+            "k": 16,
+            "common": [
+              "timbre_01",
+              "timbre_03",
+              "timbre_06",
+              "timbre_20",
+              "timbre_02",
+              "timbre_14",
+              "timbre_23",
+              "timbre_63",
+              "timbre_22",
+              "timbre_16",
+              "timbre_41",
+              "timbre_40",
+              "timbre_36",
+              "timbre_13",
+              "timbre_57",
+              "timbre_73"
+            ],
+            "only500": [],
+            "only256": []
+          }
+        ],
+        "sign_changes": [
+          "timbre_65",
+          "timbre_84"
+        ],
+        "clearly_positive500_now_nonpositive": "timbre_65",
+        "source_freeze_sha256": "3d392b19dabb437d5cf0ece657d2cc5e0aec683198f013d9ec06defb820cdd30"
+      },
+      "source_sha256": {
+        "source_model": "faae760b6f30cb0c6e0823ad27344fe73d9960c2acd19c0f3c328e1aeb779b5f",
+        "source_process": "f1d1f7cfe8d492b8466ab792afcd6ec4ef5c103e2b6d1ed1281b9a0b569ba812",
+        "source_summary": "eabdb9d06502fc02d2c8e4e5f38d7805b1b7a2f09d3a6ba6a6528f0e5c46fbe0",
+        "source_predictions": "d2afd4b581ea3a0246adb5a49d5b1c6c915b0fff91dea2b7051274f3187e48f5",
+        "training": "3ca9a06614538f0577bf6c62b69e39be3d7f0b035b6ad65cf95f60773d51c52d",
+        "evaluation_features": "918104e7a5c28e702783d461ba3b4df54d2f6509ea8c5575f68048cb9ef50e45",
+        "evaluation_targets": "30356a7d0f8a4513820327aee5c0d1688dbca2c14705138b7e3786334330491a"
+      },
+      "stages": {
+        "detail-forest256": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:32:21Z",
+          "ended_at": "2026-09-13T14:35:01Z",
+          "process_elapsed_seconds": 160.2663879849997,
+          "peak_rss_kib": 666736,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "0d9bd13eb0d0b22a8fe9bd0732ffd32247d897d3000c13dbf2e41fe48658636b"
+        },
+        "detail-forest500": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:27:42Z",
+          "ended_at": "2026-09-13T14:32:21Z",
+          "process_elapsed_seconds": 279.2345529190002,
+          "peak_rss_kib": 919648,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "44d506da5ec049ec670bb51078ef0ab70a161b2e5e8a1b081da22ab5a867d5a1"
+        },
+        "fit": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:14:19Z",
+          "ended_at": "2026-09-13T14:17:56Z",
+          "process_elapsed_seconds": 217.02616045000013,
+          "peak_rss_kib": 728440,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "44ebc2261bd2439e285af09b05210ac4d50fc40153778d0c7dd1f67a77f3d436"
+        },
+        "prepare": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:13:59Z",
+          "ended_at": "2026-09-13T14:14:06Z",
+          "process_elapsed_seconds": 7.334557073000042,
+          "peak_rss_kib": 613888,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "1219fb436ab9feda86fcf05f44cde25bfff75bc9a13ecf160ef2e891d2ee0957"
+        },
+        "replay": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:18:03Z",
+          "ended_at": "2026-09-13T14:18:20Z",
+          "process_elapsed_seconds": 16.40620290600009,
+          "peak_rss_kib": 833420,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "6e1a07aedcdaa9e1c457e9ab50973ba87e76a5dc6b402f38b4e25c9544edd342"
+        },
+        "screen-forest256": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:24:28Z",
+          "ended_at": "2026-09-13T14:27:42Z",
+          "process_elapsed_seconds": 193.6047487259998,
+          "peak_rss_kib": 670828,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "cb17c9efb0c3991aed160f57e238161df2e25b6a3201d4f66304733634b8877d"
+        },
+        "screen-forest500": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:19:58Z",
+          "ended_at": "2026-09-13T14:24:28Z",
+          "process_elapsed_seconds": 269.83932065600015,
+          "peak_rss_kib": 989748,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "e153e9acba5db76b5b6f0f431660c19dec5456be5c0d8e03c1b0e110b46fe69d"
+        },
+        "screen-main_model": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:19:35Z",
+          "ended_at": "2026-09-13T14:19:56Z",
+          "process_elapsed_seconds": 20.46716035700001,
+          "peak_rss_kib": 446584,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "8fcee2cc92ae7bdfe244b5d1baf1458c2d54f16acb9551c2385ff54c62fa4bd8"
+        },
+        "screen-simple_baseline": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:19:56Z",
+          "ended_at": "2026-09-13T14:19:58Z",
+          "process_elapsed_seconds": 2.2216451209999377,
+          "peak_rss_kib": 271156,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "071d2d4cdeaeb250d9e6175a912be6adc8f6d5d1031e64fb2e8f8091879bb16f"
+        },
+        "summarize": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:35:02Z",
+          "ended_at": "2026-09-13T14:35:03Z",
+          "process_elapsed_seconds": 1.4217976269997052,
+          "peak_rss_kib": 168052,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "8f41cf562fdcf1afbce0c63be64fadc7fbc76c0a0bd508f6c31d4a5f903b483a"
+        }
+      }
+    },
+    "covertype": {
+      "raw_predictors": 54,
+      "removed_constant_features": "soil_15",
+      "primary_metric": "log_loss",
+      "primary_loss_difference_256_minus500": 1.0524061630157178e-05,
+      "primary_loss_relative_change": 3.1668992634514836e-05,
+      "sampled_class_counts": {
+        "spruce_fir": 1864,
+        "lodgepole_pine": 2399,
+        "ponderosa_pine": 288,
+        "cottonwood_willow": 27,
+        "aspen": 85,
+        "douglas_fir": 155,
+        "krummholz": 182
+      },
+      "development_training_rows": 50000,
+      "development_assessment_rows": 20000,
+      "forests": {
+        "forest500": {
+          "metrics": {
+            "log_loss": 0.33231437929197133,
+            "brier": 0.1834769474323106,
+            "accuracy": 0.8863,
+            "recall_by_class": {
+              "spruce_fir": 0.8640976412506857,
+              "lodgepole_pine": 0.9278096800656276,
+              "ponderosa_pine": 0.9179528838342811,
+              "cottonwood_willow": 0.8085106382978723,
+              "aspen": 0.40672782874617736,
+              "douglas_fir": 0.7123745819397993,
+              "krummholz": 0.8668555240793201
+            }
+          },
+          "classification": {
+            "confusion": [
+              [
+                6301,
+                950,
+                0,
+                0,
+                2,
+                2,
+                37
+              ],
+              [
+                599,
+                9048,
+                47,
+                0,
+                15,
+                35,
+                8
+              ],
+              [
+                0,
+                46,
+                1130,
+                8,
+                1,
+                46,
+                0
+              ],
+              [
+                0,
+                0,
+                17,
+                76,
+                0,
+                1,
+                0
+              ],
+              [
+                9,
+                171,
+                11,
+                0,
+                133,
+                3,
+                0
+              ],
+              [
+                1,
+                55,
+                111,
+                5,
+                0,
+                426,
+                0
+              ],
+              [
+                89,
+                5,
+                0,
+                0,
+                0,
+                0,
+                612
+              ]
+            ],
+            "class_counts": {
+              "spruce_fir": 7292,
+              "lodgepole_pine": 9752,
+              "ponderosa_pine": 1231,
+              "cottonwood_willow": 94,
+              "aspen": 327,
+              "douglas_fir": 598,
+              "krummholz": 706
+            },
+            "correct_by_class": {
+              "spruce_fir": 6301,
+              "lodgepole_pine": 9048,
+              "ponderosa_pine": 1130,
+              "cottonwood_willow": 76,
+              "aspen": 133,
+              "douglas_fir": 426,
+              "krummholz": 612
+            },
+            "zero_probabilities_by_class": {
+              "spruce_fir": 681,
+              "lodgepole_pine": 42,
+              "ponderosa_pine": 14796,
+              "cottonwood_willow": 17741,
+              "aspen": 9275,
+              "douglas_fir": 13965,
+              "krummholz": 10835
+            },
+            "true_class_zeros": 0,
+            "true_class_zeros_by_class": {
+              "spruce_fir": 0,
+              "lodgepole_pine": 0,
+              "ponderosa_pine": 0,
+              "cottonwood_willow": 0,
+              "aspen": 0,
+              "douglas_fir": 0,
+              "krummholz": 0
+            },
+            "unbounded_log_loss": 0.33231437929197133
+          },
+          "confusion_matrix_class_order": [
+            "spruce_fir",
+            "lodgepole_pine",
+            "ponderosa_pine",
+            "cottonwood_willow",
+            "aspen",
+            "douglas_fir",
+            "krummholz"
+          ],
+          "tree_count": 500,
+          "native_training_rows": 50000,
+          "effective_predictors": 53,
+          "parameters": {
+            "num.trees": 500,
+            "mtry": 18,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "default"
+          },
+          "fit_seed": 1221041465,
+          "native_fit_evidence": {
+            "configuration_id": "forest_02",
+            "family": "forest",
+            "scope": "full_training_refit",
+            "backend_version": "0.18.0",
+            "search_seed": 80711,
+            "requested_parameters": {
+              "num.trees": 500,
+              "mtry": 18,
+              "min.node.size": 5,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "effective_parameters": {
+              "num.trees": 500,
+              "mtry": 18,
+              "min.node.size": 5,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "requested_parameter_key": "num.trees=integer:500|mtry=integer:18|min.node.size=integer:5|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "effective_parameter_key": "num.trees=integer:500|mtry=integer:18|min.node.size=integer:5|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "requested_configuration_seed": 1221041465,
+            "fit_seed": 1221041465,
+            "threads": 4,
+            "fit_work": {
+              "calibration_fit_attempts": 0,
+              "model_fit_attempts": 1
+            },
+            "optimization": {
+              "status": "not_applicable",
+              "code": null,
+              "message": "No iterative optimizer convergence claim is made for this fitting procedure.",
+              "iterations": null,
+              "source": "ranger"
+            },
+            "learned": {
+              "threads": 4,
+              "oob_computed": true,
+              "forest_budget": {
+                "policy_id": "forest-validation-budget-v2",
+                "scope": "full_training_refit",
+                "requested_num_trees": 500,
+                "effective_num_trees": 500,
+                "validation_num_trees": 256,
+                "screening_num_trees": 128,
+                "final_num_trees": 500,
+                "scope_note": "Screening uses 128 trees; complete CV uses 256 trees with all requested folds and fold-training rows. CV approximates configuration ranking. The full-training refit uses 500 trees, and held-out evaluation measures that final model."
+              }
+            }
+          },
+          "oob_prediction_error": 0.09730911059125984,
+          "nodes": 4090552,
+          "model_bytes": 281003985,
+          "model_sha256": "c847d5ea6403ef4f92b90263aa747e6cdaee53bd4577113e14cc817164afd0ad",
+          "replayed_predictions_sha256": "f969992c36758394d5e19db5fad7d110c3bca00c1aea3b34e5fa2c462bae7479",
+          "original_fit_seconds": 38.879,
+          "cold_replay_maximum_absolute_difference": 0,
+          "native_maximum_absolute_difference": 0,
+          "prediction_rows": 20000,
+          "prediction_timings_5000_seconds": [
+            0.8740000000000006,
+            0.883,
+            0.9040000000000008
+          ],
+          "prediction_median_5000_seconds": 0.883,
+          "screening_seconds": 410.468,
+          "detailed_importance_seconds": 394.82,
+          "ordinary_report_feature_union": [
+            "elevation",
+            "horizontal_roadways",
+            "horizontal_fire",
+            "horizontal_hydrology",
+            "wilderness_1",
+            "vertical_hydrology",
+            "hillshade_noon",
+            "hillshade_9am",
+            "wilderness_4",
+            "aspect",
+            "slope"
+          ],
+          "ordinary_report_forest_permutation_calls": 485,
+          "detailed_comparison_features": [
+            "elevation",
+            "horizontal_roadways",
+            "horizontal_fire",
+            "horizontal_hydrology",
+            "wilderness_1",
+            "vertical_hydrology",
+            "hillshade_noon",
+            "hillshade_9am",
+            "wilderness_4",
+            "aspect",
+            "slope",
+            "soil_21",
+            "soil_25",
+            "soil_26"
+          ],
+          "additional_borderline_features": {
+            "forest500": [
+              "soil_21",
+              "soil_25"
+            ],
+            "forest256": [
+              "soil_26",
+              "soil_21"
+            ]
+          },
+          "screening_repeat_dimensions": [
+            53,
+            5
+          ],
+          "detailed_repeat_dimensions": [
+            14,
+            20
+          ],
+          "reference_rows_sha256": "4b3d3eef2bb92f0fdc77d7ef624206bd1e5fb42a6e399114ad7de2a36107b212",
+          "screening_repeat_scores_sha256": "329f26c94576d9b40202e252b204501764ffe7b40ced223cfecb3cd20f989d11",
+          "detailed_repeat_scores_sha256": "3c7740b4915a8ec0a9e9013384babecfb3a5ec441f66c160724f07dc0abb127d"
+        },
+        "forest256": {
+          "metrics": {
+            "log_loss": 0.3323249033536015,
+            "brier": 0.18361308526550868,
+            "accuracy": 0.88615,
+            "recall_by_class": {
+              "spruce_fir": 0.8667032364234778,
+              "lodgepole_pine": 0.9260664479081214,
+              "ponderosa_pine": 0.917140536149472,
+              "cottonwood_willow": 0.776595744680851,
+              "aspen": 0.42813455657492355,
+              "douglas_fir": 0.705685618729097,
+              "krummholz": 0.8611898016997167
+            }
+          },
+          "classification": {
+            "confusion": [
+              [
+                6320,
+                934,
+                0,
+                0,
+                1,
+                2,
+                35
+              ],
+              [
+                613,
+                9031,
+                51,
+                0,
+                15,
+                35,
+                7
+              ],
+              [
+                0,
+                48,
+                1129,
+                9,
+                1,
+                44,
+                0
+              ],
+              [
+                0,
+                0,
+                17,
+                73,
+                0,
+                4,
+                0
+              ],
+              [
+                9,
+                165,
+                10,
+                0,
+                140,
+                3,
+                0
+              ],
+              [
+                0,
+                57,
+                116,
+                3,
+                0,
+                422,
+                0
+              ],
+              [
+                92,
+                6,
+                0,
+                0,
+                0,
+                0,
+                608
+              ]
+            ],
+            "class_counts": {
+              "spruce_fir": 7292,
+              "lodgepole_pine": 9752,
+              "ponderosa_pine": 1231,
+              "cottonwood_willow": 94,
+              "aspen": 327,
+              "douglas_fir": 598,
+              "krummholz": 706
+            },
+            "correct_by_class": {
+              "spruce_fir": 6320,
+              "lodgepole_pine": 9031,
+              "ponderosa_pine": 1129,
+              "cottonwood_willow": 73,
+              "aspen": 140,
+              "douglas_fir": 422,
+              "krummholz": 608
+            },
+            "zero_probabilities_by_class": {
+              "spruce_fir": 1353,
+              "lodgepole_pine": 165,
+              "ponderosa_pine": 15298,
+              "cottonwood_willow": 18165,
+              "aspen": 10893,
+              "douglas_fir": 14771,
+              "krummholz": 12138
+            },
+            "true_class_zeros": 0,
+            "true_class_zeros_by_class": {
+              "spruce_fir": 0,
+              "lodgepole_pine": 0,
+              "ponderosa_pine": 0,
+              "cottonwood_willow": 0,
+              "aspen": 0,
+              "douglas_fir": 0,
+              "krummholz": 0
+            },
+            "unbounded_log_loss": 0.3323249033536015
+          },
+          "confusion_matrix_class_order": [
+            "spruce_fir",
+            "lodgepole_pine",
+            "ponderosa_pine",
+            "cottonwood_willow",
+            "aspen",
+            "douglas_fir",
+            "krummholz"
+          ],
+          "tree_count": 256,
+          "native_training_rows": 50000,
+          "effective_predictors": 53,
+          "parameters": {
+            "num.trees": 256,
+            "mtry": 18,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "default"
+          },
+          "fit_seed": 671430028,
+          "native_fit_evidence": {
+            "configuration_id": "forest_02",
+            "family": "forest",
+            "scope": "full_training_refit",
+            "backend_version": "0.18.0",
+            "search_seed": 80711,
+            "requested_parameters": {
+              "num.trees": 256,
+              "mtry": 18,
+              "min.node.size": 5,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "effective_parameters": {
+              "num.trees": 256,
+              "mtry": 18,
+              "min.node.size": 5,
+              "sample.fraction": 0.8,
+              "splitrule": "default"
+            },
+            "requested_parameter_key": "num.trees=integer:256|mtry=integer:18|min.node.size=integer:5|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "effective_parameter_key": "num.trees=integer:256|mtry=integer:18|min.node.size=integer:5|sample.fraction=double:8.0000000000000004e-01|splitrule=character:default",
+            "requested_configuration_seed": 671430028,
+            "fit_seed": 671430028,
+            "threads": 4,
+            "fit_work": {
+              "calibration_fit_attempts": 0,
+              "model_fit_attempts": 1
+            },
+            "optimization": {
+              "status": "not_applicable",
+              "code": null,
+              "message": "No iterative optimizer convergence claim is made for this fitting procedure.",
+              "iterations": null,
+              "source": "ranger"
+            },
+            "learned": {
+              "threads": 4,
+              "oob_computed": true,
+              "forest_budget": null
+            }
+          },
+          "oob_prediction_error": 0.09761779393149614,
+          "nodes": 2091658,
+          "model_bytes": 145059446,
+          "model_sha256": "4c94892fb946ca4be4caa5b18eb7b744d9f3cf11f0be3b06a48c0eb1be43b8f2",
+          "replayed_predictions_sha256": "8b7aa84c1aa0137572d217228819553da9fe08025945fca3d4dc2584ee68c7d3",
+          "original_fit_seconds": 33.211,
+          "cold_replay_maximum_absolute_difference": 0,
+          "native_maximum_absolute_difference": 0,
+          "prediction_rows": 20000,
+          "prediction_timings_5000_seconds": [
+            0.5299999999999994,
+            0.4740000000000002,
+            0.4269999999999996
+          ],
+          "prediction_median_5000_seconds": 0.4740000000000002,
+          "screening_seconds": 188.663,
+          "detailed_importance_seconds": 204.042,
+          "ordinary_report_feature_union": [
+            "elevation",
+            "horizontal_roadways",
+            "horizontal_fire",
+            "horizontal_hydrology",
+            "wilderness_1",
+            "vertical_hydrology",
+            "hillshade_noon",
+            "hillshade_9am",
+            "wilderness_4",
+            "aspect",
+            "slope"
+          ],
+          "ordinary_report_forest_permutation_calls": 485,
+          "detailed_comparison_features": [
+            "elevation",
+            "horizontal_roadways",
+            "horizontal_fire",
+            "horizontal_hydrology",
+            "wilderness_1",
+            "vertical_hydrology",
+            "hillshade_noon",
+            "hillshade_9am",
+            "wilderness_4",
+            "aspect",
+            "slope",
+            "soil_21",
+            "soil_25",
+            "soil_26"
+          ],
+          "additional_borderline_features": {
+            "forest500": [
+              "soil_21",
+              "soil_25"
+            ],
+            "forest256": [
+              "soil_26",
+              "soil_21"
+            ]
+          },
+          "screening_repeat_dimensions": [
+            53,
+            5
+          ],
+          "detailed_repeat_dimensions": [
+            14,
+            20
+          ],
+          "reference_rows_sha256": "4b3d3eef2bb92f0fdc77d7ef624206bd1e5fb42a6e399114ad7de2a36107b212",
+          "screening_repeat_scores_sha256": "e69150cd7348d1632b03f874d8b86c04b0930f2f098c7f4073d053ac364a3a40",
+          "detailed_repeat_scores_sha256": "cb78763eaa7b18863f47c5db6e3dee5b371aa3a8c201e83539a6f8ff1845ea03"
+        }
+      },
+      "importance_comparison": {
+        "status": "ok",
+        "case": "covertype",
+        "scope": "Development diagnostic, not acceptance or a complete report.",
+        "overlap": [
+          {
+            "k": 8,
+            "common": [
+              "elevation",
+              "horizontal_roadways",
+              "horizontal_fire",
+              "horizontal_hydrology",
+              "hillshade_noon",
+              "wilderness_4",
+              "wilderness_1",
+              "vertical_hydrology"
+            ],
+            "only500": [],
+            "only256": []
+          },
+          {
+            "k": 16,
+            "common": [
+              "elevation",
+              "horizontal_roadways",
+              "horizontal_fire",
+              "horizontal_hydrology",
+              "hillshade_noon",
+              "wilderness_4",
+              "wilderness_1",
+              "vertical_hydrology",
+              "aspect",
+              "hillshade_9am",
+              "wilderness_3",
+              "hillshade_3pm",
+              "soil_22",
+              "slope",
+              "soil_23",
+              "soil_4"
+            ],
+            "only500": [],
+            "only256": []
+          }
+        ],
+        "sign_changes": "soil_26",
+        "clearly_positive500_now_nonpositive": "soil_26",
+        "source_freeze_sha256": "3d392b19dabb437d5cf0ece657d2cc5e0aec683198f013d9ec06defb820cdd30"
+      },
+      "source_sha256": {
+        "source_model": "fa99aed7dbbd1be5bf6fba81cffcf4675871512bcfe2a176dd070c59eb33e5a6",
+        "source_process": "bbf1f6f6ac342789da5ce3b2f8ac2a011c9ad3f9116a8076b86a81844fa6982b",
+        "source_summary": "9844ff3666429659db03416c8cf49c1858e03cd42885c1b7df3db5a0187524a3",
+        "source_predictions": "7927500c3beff14d80675152dd87dc7d0ef2a6f23505b86bf990844e96113eed",
+        "training": "4c78f7019e96a2528da275996559992646606c8e30f8470da7397bfd67c15139",
+        "evaluation_features": "4e2a579046c4cfd6b7a85e2d5ac982a541deba02a5b2849410e437f2de0ac4fb",
+        "evaluation_targets": "2d6b59bc5ad5f44d9c55e38a127765e00daa7eac338170d4565800844dc76e45"
+      },
+      "stages": {
+        "detail-forest256": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:47:50Z",
+          "ended_at": "2026-09-13T14:51:24Z",
+          "process_elapsed_seconds": 214.03472001699993,
+          "peak_rss_kib": 1172440,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "409b845edb0fe40de4785016cffc2c9c1f0936f98621aba50d6caa900ff01e50"
+        },
+        "detail-forest500": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:51:24Z",
+          "ended_at": "2026-09-13T14:58:18Z",
+          "process_elapsed_seconds": 413.93682460399987,
+          "peak_rss_kib": 1941976,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "4ade7ff521eeda1f51fb6c6422c178bc3da4968e57a11ebebe382156b347d60e"
+        },
+        "fit": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:18:39Z",
+          "ended_at": "2026-09-13T14:19:17Z",
+          "process_elapsed_seconds": 37.68475461899993,
+          "peak_rss_kib": 967940,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "683251bab3db4f81462ac98c1fb4592777b2352233064b7c8693ab09e8842eef"
+        },
+        "prepare": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:18:28Z",
+          "ended_at": "2026-09-13T14:18:39Z",
+          "process_elapsed_seconds": 10.540946125000119,
+          "peak_rss_kib": 1076884,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "9562c390763aa6558a464c8916da2f7e917f284b9a39123b9b6e9699f5dc5cfe"
+        },
+        "replay": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:19:17Z",
+          "ended_at": "2026-09-13T14:19:30Z",
+          "process_elapsed_seconds": 13.396165842000073,
+          "peak_rss_kib": 1709940,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "a81bee99dee9af57d79db10f48e8c8b100b6e741f1f51f96a9443fea05e7394f"
+        },
+        "screen-forest256": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:37:21Z",
+          "ended_at": "2026-09-13T14:40:41Z",
+          "process_elapsed_seconds": 200.06926989999965,
+          "peak_rss_kib": 1138640,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "a6ca039bb3624f63d5334bd5a5c4bf0657c49850986ecf183725e17759fb6ebc"
+        },
+        "screen-forest500": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:40:41Z",
+          "ended_at": "2026-09-13T14:47:50Z",
+          "process_elapsed_seconds": 428.7545160650002,
+          "peak_rss_kib": 2010456,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 2,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "25491397fe7e146a1daa9b21e97f4747767048141c0f2d4d80c26dbd18078a9b"
+        },
+        "screen-main_model": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:35:03Z",
+          "ended_at": "2026-09-13T14:37:16Z",
+          "process_elapsed_seconds": 133.23315465700034,
+          "peak_rss_kib": 449472,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "154399b781622221535b7c131b1906f979a2b0f9af7fa69b5be20357d2f09142"
+        },
+        "screen-simple_baseline": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:37:16Z",
+          "ended_at": "2026-09-13T14:37:21Z",
+          "process_elapsed_seconds": 4.176409996000075,
+          "peak_rss_kib": 259244,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 1,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "821914200e063a46f1acd558336b074567b1ee8a1e1014d5d9601dcf8235ad26"
+        },
+        "summarize": {
+          "status": "ok",
+          "started_at": "2026-09-13T14:58:18Z",
+          "ended_at": "2026-09-13T14:58:20Z",
+          "process_elapsed_seconds": 1.3722407429995656,
+          "peak_rss_kib": 164544,
+          "threads": 4,
+          "wall_limit_seconds": 1200,
+          "address_space_limit_bytes": 25769803776,
+          "other_r_processes_at_start": 2,
+          "native_reference_shared_host": true,
+          "process_record_sha256": "a56a3187349960e26c9488ce09741c3900a38475cd9315a397e51eba8dd8038d"
+        }
+      }
+    }
+  }
+}

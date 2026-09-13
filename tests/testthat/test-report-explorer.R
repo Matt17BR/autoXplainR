@@ -49,7 +49,7 @@ test_that("model-specific effects are retained, reusable and reject stale model 
     expected <- AutoXplainR:::current_explainer_fingerprint(as_explainers(result, models = id)[[1]])
     for (effect in effects) expect_identical(attr(effect, "explainer_fingerprint"), expected)
   }
-  testthat::local_mocked_bindings(explain_effect = function(...) stop("must reuse"), .package = "AutoXplainR")
+  testthat::local_mocked_bindings(explain_effect_impl = function(...) stop("must reuse"), .package = "AutoXplainR")
   expect_no_error(render_model_report(result, tempfile(fileext = ".html")))
   changed <- result
   attr(changed$explanations$effects_by_model$small_tree[[1]], "explainer_fingerprint") <- "foreign"
@@ -196,7 +196,7 @@ test_that("multiclass reports retain and select every class without mixing cache
   expect_identical(attr(first, "prediction_class"), classes[1])
   expect_identical(attr(last, "prediction_class"), classes[3])
   expect_false(isTRUE(all.equal(first[[2]], last[[2]])))
-  testthat::local_mocked_bindings(explain_effect = function(...) stop("must reuse"), .package = "AutoXplainR")
+  testthat::local_mocked_bindings(explain_effect_impl = function(...) stop("must reuse"), .package = "AutoXplainR")
   path <- tempfile(fileext = ".html")
   expect_no_error(render_model_report(result, path))
   html <- paste(readLines(path), collapse = "\n")
@@ -216,4 +216,23 @@ test_that("a model outside the explanation budget offers recovery without an emp
   expect_match(html, "Rebuild the report with a larger model budget", fixed = TRUE)
   expect_match(html, "max_models = length(result$models)", fixed = TRUE)
   expect_equal(lengths(regmatches(html, gregexpr('class="feature-select"', html, fixed = TRUE))), 1L)
+})
+
+test_that("report serialization keeps numeric graphics valid with a comma decimal option", {
+  result <- autoxplain(mtcars[c("mpg", "wt", "hp")], "mpg", max_models = 3L, nfolds = 2L, explain = FALSE)
+  prepared <- prepare_model_report_data(result, n_repeats = 2L)
+  result$explanations <- prepared
+  result$.report_context <- prepare_report_context(result)
+  result$.report_export <- prepare_data_explorer(result, "summary")
+  result <- prepare_report_diagnostics(result)
+  render <- function() model_explorer_html(result, prepared$audit, prepared$effects, NULL, NULL, "Numeric report")
+  withr::local_options(OutDec = ".")
+  dot <- render()
+  selection <- render_model_selection(result)
+  explanation <- explanation_report_html(prepared$audit, "Numeric audit")
+  withr::local_options(OutDec = ",")
+  expect_identical(render(), dot)
+  expect_identical(render_model_selection(result), selection)
+  expect_identical(explanation_report_html(prepared$audit, "Numeric audit"), explanation)
+  expect_identical(getOption("OutDec"), ",")
 })

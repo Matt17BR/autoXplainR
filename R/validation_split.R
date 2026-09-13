@@ -117,6 +117,7 @@ prepare_validation_design <- function(data, target, test_data, validation, fract
     fold_ids <- match(fold_ids, unique(fold_ids))
     control <- control %||% tuning_control()
     control$fold_ids <- fold_ids
+    control$groups <- as.character(value[training])
   }
   predictors <- setdiff(names(data), column)
   list(

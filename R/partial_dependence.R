@@ -72,6 +72,30 @@ explain_effect <- function(model,
                            grid_size = NULL,
                            return_all_classes = FALSE,
                            max_rows = NULL) {
+  withr::with_preserve_seed(explain_effect_impl(
+    model, data, feature, method, n_points, quantile_range,
+    sample_size, seed, predict_function, task, positive, class, grid_size,
+    return_all_classes, max_rows
+  ))
+}
+
+explain_effect_impl <- function(model,
+                                data = NULL,
+                                feature = NULL,
+                                method = c("ale", "pdp"),
+                                n_points = 20L,
+                                quantile_range = c(0.05, 0.95),
+                                sample_size = 1000L,
+                                seed = 123L,
+                                predict_function = NULL,
+                                task = "auto",
+                                positive = NULL,
+                                class = NULL,
+                                grid_size = NULL,
+                                return_all_classes = FALSE,
+                                max_rows = NULL,
+                                prediction_context = NULL,
+                                prediction_cache = NULL) {
   method <- match.arg(method)
   if (!is.null(grid_size)) {
     warning("`grid_size` is deprecated; use `n_points`.", call. = FALSE)
@@ -82,8 +106,17 @@ explain_effect <- function(model,
   if (!is.null(sample_size)) sample_size <- assert_count(sample_size, "sample_size", 2L)
 
   input <- effect_input(
-    model, data, feature, predict_function, task, positive, class
+    model, data, feature, predict_function, task, positive, class, prediction_cache
   )
+  context <- NULL
+  if (!is.null(prediction_context)) {
+    evaluation_explainer <- model
+    evaluation_explainer$data <- input$data[names(model$data)]
+    if (!is.null(model$target) && model$target %in% names(input$data)) {
+      evaluation_explainer$y <- input$data[[model$target]]
+    }
+    context <- explanation_context_values(evaluation_explainer, prediction_context)
+  }
   if (isTRUE(return_all_classes) && method == "ale") {
     stop("ALE supports one prediction target at a time; set `class` explicitly.",
          call. = FALSE)
@@ -117,8 +150,10 @@ explain_effect <- function(model,
     if (!is.null(model$target) && model$target %in% names(input$data)) {
       effect_explainer$y <- input$data[[model$target]]
     }
-    attr(effect, "explainer_fingerprint") <- current_explainer_fingerprint(effect_explainer)
-    attr(effect, "reference_fingerprint") <- content_fingerprint(effect_explainer$data)
+    attr(effect, "explainer_fingerprint") <- context$fingerprint %||%
+      current_explainer_fingerprint(effect_explainer)
+    attr(effect, "reference_fingerprint") <- context$reference_fingerprint %||%
+      content_fingerprint(effect_explainer$data)
   }
   effect
 }
@@ -264,7 +299,8 @@ effect_input <- function(model,
                          predict_function,
                          task,
                          positive,
-                         class) {
+                         class,
+                         prediction_cache = NULL) {
   if (inherits(model, "autoxplain_explainer")) {
     if (is.character(data) && length(data) == 1L && is.null(feature)) {
       feature <- data
@@ -333,6 +369,9 @@ effect_input <- function(model,
     prediction_class
   } else {
     NULL
+  }
+  if (!is.null(prediction_cache)) {
+    prediction_function <- cache_effect_predictions(prediction_function, prediction_cache)
   }
   prediction_function <- select_prediction_target(prediction_function, selected_target)
   prediction_target <- switch(

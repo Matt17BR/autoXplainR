@@ -1,0 +1,71 @@
+{
+  "status": "ok",
+  "scope": "Saved development importance arrays only; no prediction or fitting.",
+  "checked_arrays": 12,
+  "records": {
+    "yearprediction": {
+      "screen-main_model": {
+        "dimensions": [90, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "acb49845c6a2557ee1998c765cda7ae652a59a8db980977b4c3bcc458a48240c"
+      },
+      "screen-simple_baseline": {
+        "dimensions": [90, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "8f09d4e63307a9d41093149690c93aa69322cd07ff9c4537c5574e233db25a89"
+      },
+      "screen-forest500": {
+        "dimensions": [90, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "7b26a056bd0f359905fb4f007f2d2aa07628ea5249d1d7af04783f9bafd4c821"
+      },
+      "screen-forest256": {
+        "dimensions": [90, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "44aed7bde215d03459d2d2228c33c9623e99327accaae7794b24fbbf1b2d25c0"
+      },
+      "detail-forest500": {
+        "dimensions": [18, 20],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "9cdfe4e89562ed7f367520405e13620aef246c11d2179719796a648a49f514f0"
+      },
+      "detail-forest256": {
+        "dimensions": [18, 20],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "021c4386cb312c917497cd4684149b21cfd99ac8e5d43550b7423578ba496492"
+      }
+    },
+    "covertype": {
+      "screen-main_model": {
+        "dimensions": [53, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "39ff2b7b4ee4632ffe92313e1dccc81caa48fd7ba9ec51c8a9d3e104b6904cf3"
+      },
+      "screen-simple_baseline": {
+        "dimensions": [53, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "8ace6a6038615a45354e956696d4df75dd4a35016b9f72101063ca246196cd77"
+      },
+      "screen-forest500": {
+        "dimensions": [53, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "329f26c94576d9b40202e252b204501764ffe7b40ced223cfecb3cd20f989d11"
+      },
+      "screen-forest256": {
+        "dimensions": [53, 5],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "e69150cd7348d1632b03f874d8b86c04b0930f2f098c7f4073d053ac364a3a40"
+      },
+      "detail-forest500": {
+        "dimensions": [14, 20],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "3c7740b4915a8ec0a9e9013384babecfb3a5ec441f66c160724f07dc0abb127d"
+      },
+      "detail-forest256": {
+        "dimensions": [14, 20],
+        "maximum_summary_difference": 0,
+        "repeat_scores_sha256": "cb78763eaa7b18863f47c5db6e3dee5b371aa3a8c201e83539a6f8ff1845ea03"
+      }
+    }
+  }
+}

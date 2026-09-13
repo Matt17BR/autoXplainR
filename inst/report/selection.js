@@ -35,6 +35,47 @@
     return lines.length;
   }
   var printing = false;
+  function layoutStoppingPlots() {
+    forEach(section.querySelectorAll(".selection-round-plot"), function (svg) {
+      var width = svg.getBoundingClientRect().width;
+      if (!width) return;
+      width = printing ? Math.min(width, 600) : width;
+      var left = 55, right = width - 15;
+      var lowRound = Number(svg.dataset.roundMin), highRound = Number(svg.dataset.roundMax);
+      var lowScore = Number(svg.dataset.scoreMin), highScore = Number(svg.dataset.scoreMax);
+      function x(value) { return left + (Number(value) - lowRound) / (highRound - lowRound) * (right - left); }
+      function y(value) { return 165 - (Number(value) - lowScore) / (highScore - lowScore) * 145; }
+      svg.setAttribute("viewBox", "0 0 " + width + " 215");
+      svg.style.height = "215px";
+      svg.querySelector(".selection-round-title").setAttribute("x", width < 400 ? 0 : left);
+      svg.querySelector(".selection-round-axis").setAttribute("x", (left + right) / 2);
+      forEach(svg.querySelectorAll(".selection-round-y-tick"), function (tick) {
+        tick.setAttribute("x", left - 10); tick.setAttribute("y", y(tick.dataset.value) + 4);
+      });
+      forEach(svg.querySelectorAll(".selection-round-grid"), function (line) {
+        line.setAttribute("x1", left); line.setAttribute("x2", right);
+        line.setAttribute("y1", y(line.dataset.value)); line.setAttribute("y2", y(line.dataset.value));
+      });
+      var lastTickRight = -Infinity;
+      forEach(svg.querySelectorAll(".selection-round-x-tick"), function (tick) {
+        tick.style.display = "";
+        var center = x(tick.dataset.value), half = tick.getComputedTextLength() / 2;
+        tick.setAttribute("x", center);
+        if (center - half < lastTickRight + 12 || center + half > width) tick.style.display = "none";
+        else lastTickRight = center + half;
+      });
+      forEach(svg.querySelectorAll(".selection-round-curve"), function (path) {
+        var rounds = path.dataset.rounds.split(","), scores = path.dataset.scores.split(",");
+        path.setAttribute("d", rounds.map(function (round, index) {
+          return (index ? "L" : "M") + x(round) + " " + y(scores[index]);
+        }).join(" "));
+      });
+      forEach(svg.querySelectorAll("[data-selected-round]"), function (point) {
+        point.setAttribute("cx", x(point.dataset.selectedRound));
+        point.setAttribute("cy", y(point.dataset.selectedScore));
+      });
+    });
+  }
   function layoutPlots() {
     forEach(section.querySelectorAll(".selection-plot"), function (svg) {
       if (!svg.getBoundingClientRect().width) return;
@@ -90,6 +131,7 @@
       var axis = svg.querySelector(".selection-axis-label");
       axis.setAttribute("x", (left + right) / 2); axis.setAttribute("y", height - 5);
     });
+    layoutStoppingPlots();
   }
   function filter() {
     var family = input.value;
@@ -132,8 +174,9 @@
     node.setAttribute("aria-controls", node.getAttribute("data-selection-inspect"));
     node.addEventListener("click", function (event) {
       var detail = document.getElementById(node.getAttribute("data-selection-inspect"));
-      if (!inspectCandidate(detail, false)) return;
+      if (!inspectCandidate(detail, true)) return;
       event.preventDefault();
+      history.replaceState(null, "", "#" + detail.id);
       detail.querySelector("summary").focus();
       detail.scrollIntoView({block: "nearest"});
     });

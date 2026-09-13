@@ -15,8 +15,10 @@
 #' @param model One model ID or index. `NULL` uses the recorded primary model.
 #' @param min_rows Minimum rows used to label a group as large enough for a
 #'   preliminary comparison. Smaller groups remain visible and are flagged.
-#' @param metric Optional loss metric for this descriptive comparison: `rmse`
-#'   or `mae` for regression; `log_loss` or `brier_score` for classification.
+#' @param metric Optional score for this descriptive comparison: `rmse`,
+#'   `mae` or `rmsle` for regression; `log_loss` or `brier_score` for classification;
+#'   also `roc_auc` for binary classification. RMSLE requires nonnegative values;
+#'   AUC is unavailable in groups containing only one outcome class.
 #'   `NULL` uses the recorded evaluation metric. This does not change the
 #'   official leaderboard, selected model, or stored evaluation evidence.
 #'
@@ -79,13 +81,20 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L, metri
   model_id <- names(selected)[[1L]]
   explainer <- report_explainers(result, models = model_id)[[1L]]
   predicted <- explainer$reference_predictions
-  overall <- evaluate_predictions(explainer$y, predicted, explainer)
+  extra_metrics <- intersect(metric %||% result$evaluation$primary_metric, "rmsle")
+  overall <- evaluate_predictions(explainer$y, predicted, explainer, extra_metrics = extra_metrics)
   primary_metric <- if (is.null(metric)) {
     subgroup_primary_metric(result, names(overall))
   } else {
-    supported <- if (result$task == "regression") c("rmse", "mae") else c("log_loss", "brier_score")
+    supported <- if (result$task == "regression") {
+      c("rmse", "mae", "rmsle")
+    } else if (result$task == "binary") {
+      c("log_loss", "brier_score", "roc_auc")
+    } else {
+      c("log_loss", "brier_score")
+    }
     if (!is.character(metric) || length(metric) != 1L || is.na(metric) || !metric %in% supported) {
-      stop("`metric` must be one supported loss metric for the result's task: ",
+      stop("`metric` must be one supported score for the result's task: ",
         paste(supported, collapse = ", "), ".", call. = FALSE
       )
     }
@@ -95,7 +104,7 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L, metri
   rows <- lapply(group_levels, function(group) {
     index <- which(groups == group)
     group_prediction <- subset_task_predictions(predicted, index, result$task)
-    metrics <- evaluate_predictions(explainer$y[index], group_prediction, explainer)
+    metrics <- evaluate_predictions(explainer$y[index], group_prediction, explainer, extra_metrics = extra_metrics)
     data.frame(
       group = group,
       rows = length(index),
@@ -129,7 +138,11 @@ subgroup_performance <- function(result, by, model = NULL, min_rows = 10L, metri
       primary_metric = primary_metric,
       secondary_metric = secondary_metric,
       overall_metrics = overall,
-      largest_observed_gap = diff(range(performance[[primary_metric]], na.rm = TRUE)),
+      largest_observed_gap = if (sum(is.finite(performance[[primary_metric]])) >= 2L) {
+        diff(range(performance[[primary_metric]], na.rm = TRUE))
+      } else {
+        NA_real_
+      },
       performance = performance,
       evaluation_role = role,
       context_source = "raw evaluation values before preprocessing",
@@ -171,7 +184,10 @@ print.autoxplain_subgroups <- function(x, ...) {
   cat("<AutoXplainR subgroup performance>\n")
   cat("  model:       ", x$model_id, "\n", sep = "")
   cat("  compared by: ", x$by, " (", x$n_groups, " groups)\n", sep = "")
-  cat("  metric:      ", x$primary_metric, " (lower is better)\n", sep = "")
+  cat("  metric:      ", x$primary_metric,
+    if (selection_metric_direction(x$primary_metric) == "maximize") " (higher is better)\n" else " (lower is better)\n",
+    sep = ""
+  )
   cat(
     "  largest gap: ", format(round(x$largest_observed_gap, 4L), trim = TRUE),
     "\n", sep = ""

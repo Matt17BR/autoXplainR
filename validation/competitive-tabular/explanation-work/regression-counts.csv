@@ -1,0 +1,8 @@
+"task","kind","calls","rows"
+"regression","context_probe",5,15
+"regression","context_reference",5,900
+"regression","full_agreement",5,900
+"regression","full_fingerprint",55,9900
+"regression","full_importance_baseline",10,1800
+"regression","sampled_ale",80,4000
+"regression","sampled_permutation",4850,242500

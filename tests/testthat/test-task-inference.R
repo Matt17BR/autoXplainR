@@ -10,7 +10,14 @@ test_that("automatic binary evaluation preserves declared classes missing from o
   importance <- calculate_permutation_importance(explainer, max_rows = 2, n_repeats = 2)
   expect_equal(attr(importance, "full_baseline_score"), log(2))
   expect_identical(attr(importance, "sampling")$absent_evaluation_classes, "yes")
-  expect_error(audit_explanations(explainer, metric = "auc", n_repeats = 2), "both.*classes")
+  before <- predict(explainer, explainer$data)
+  auc <- audit_explanations(explainer, metric = "auc", n_repeats = 2)
+  expect_gt(nrow(auc$importance), 0L)
+  expect_true(all(is.na(auc$importance$importance)))
+  expect_identical(auc$config$metric, "auc")
+  expect_true(all(grepl("both outcome classes", auc$importance$unavailable_reason, fixed = TRUE)))
+  expect_identical(explainer$task, "binary")
+  expect_identical(predict(explainer, explainer$data), before)
 })
 
 test_that("automatic multiclass evaluation retains absent declared probability columns", {

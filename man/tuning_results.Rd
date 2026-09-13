@@ -50,7 +50,7 @@ configuration cannot be refitted, AutoXplainR tries the remaining valid
 configurations in resampled-score order, records the first successful one in
 \code{final_configuration}, and marks \code{fallback_used}. Failed alternative-family
 refits are diagnosed but do not discard a usable primary model. Families for
-which every configuration failed resampling remain visible in
+which no attempted configuration completed resampling remain visible in
 \code{families_resampling_failed} and are excluded from paired prediction evidence.
 Each refit attempt repeats the requested/effective parameter and seed record
 for the complete outer-training data.

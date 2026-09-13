@@ -360,14 +360,62 @@ additive_learner_complexity <- function(parameters, n, p, task, n_classes) {
   max(1, p * parameters$k)
 }
 
+forest_search_policy <- function(n, p, task) {
+  n <- assert_count(n, "n", minimum = 2L)
+  p <- assert_count(p, "p")
+  work <- as.double(n) * p
+  large_work <- work >= 1e6
+  root_mtry <- as.integer(max(1, round(sqrt(p))))
+  mtry_upper <- if (large_work) as.integer(max(root_mtry, ceiling(p / 3))) else p
+  mtry_values <- if (large_work) {
+    unique(as.integer(c(root_mtry, round(sqrt(root_mtry * mtry_upper)), mtry_upper)))
+  } else {
+    unique(pmax(1L, pmin(p, c(
+      as.integer(round(sqrt(p))),
+      as.integer(round(p / 3)),
+      as.integer(round(2 * p / 3)),
+      p
+    ))))
+  }
+  row_scale <- if (large_work) sqrt(max(1, n / 50000)) else 1
+  base_nodes <- if (task == "regression") {
+    if (large_work) c(5L, 20L, 50L) else c(5L, 10L, 20L)
+  } else {
+    c(1L, 5L, 10L)
+  }
+  nodes <- as.integer(ceiling(base_nodes * row_scale))
+  node_upper <- min(100L, max(5L, as.integer(floor(n / 20))))
+  if (large_work) node_upper <- max(utils::tail(nodes, 1L), node_upper)
+  list(
+    policy_id = "forest-search-size-v1", rows = n, predictors = p,
+    row_predictor_work = work, large_work = large_work, row_scale = row_scale,
+    mtry_values = mtry_values, mtry_upper = mtry_upper, node_values = nodes,
+    node_lower = if (large_work) nodes[[1L]] else 1L,
+    node_upper = node_upper,
+    num.trees = 500L,
+    reason = if (large_work) {
+      paste0(
+        "At least one million rows times predictors triggers a bounded automatic forest search. ",
+        "At most ", mtry_upper, " of ", p, " predictors are tried per split; node sizes start at ",
+        nodes[[1L]], ". Above 50,000 training rows, split-node sizes grow with the square root of row count."
+      )
+    } else {
+      "The smaller training table retains the full automatic input-subset range and unscaled node sizes."
+    },
+    scope = paste(
+      "This is a computation policy, not a claim that these settings are optimal.",
+      "Larger nodes can miss fine structure. Explicit grids can request more predictors or smaller nodes.",
+      "Complete validation and refits share the planned settings; every final fit receives all its training rows.",
+      "Screening uses fewer trees and rescales node-size growth to its smaller training sample.",
+      "Both reduced and full settings are recorded. The node control is for splitting, not a leaf-size guarantee."
+    )
+  )
+}
+
 forest_learner_grid <- function(n, p, task, n_classes) {
-  base_mtry <- unique(pmax(1L, pmin(p, c(
-    as.integer(round(sqrt(p))),
-    as.integer(round(p / 3)),
-    as.integer(round(2 * p / 3)),
-    p
-  ))))
-  node <- if (task == "regression") c(5L, 10L, 20L) else c(1L, 5L, 10L)
+  policy <- forest_search_policy(n, p, task)
+  base_mtry <- policy$mtry_values
+  node <- policy$node_values
   template <- expand.grid(
     mtry = base_mtry,
     min_node_size = node,
@@ -390,7 +438,7 @@ forest_learner_grid <- function(n, p, task, n_classes) {
       base_mtry[[1L]], utils::tail(base_mtry, 1L),
       base_mtry[[ceiling(length(base_mtry) / 2)]], base_mtry[[1L]]
     ),
-    min_node_size = c(node[[2L]], node[[1L]], node[[3L]], node[[1L]]),
+    min_node_size = c(node[[2L]], node[[if (policy$large_work) 2L else 1L]], node[[3L]], node[[1L]]),
     sample_fraction = c(0.632, 0.8, 0.632, 0.8),
     splitrule = c("default", "default", "default", "extratrees"),
     stringsAsFactors = FALSE
@@ -398,7 +446,7 @@ forest_learner_grid <- function(n, p, task, n_classes) {
   template <- unique(rbind(anchors, template, extra))
   lapply(seq_len(nrow(template)), function(index) {
     list(
-      num.trees = 500L,
+      num.trees = policy$num.trees,
       mtry = template$mtry[[index]],
       min.node.size = template$min_node_size[[index]],
       sample.fraction = template$sample_fraction[[index]],
@@ -412,6 +460,8 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
   features <- setdiff(names(data), target)
   effective <- effective_learner_parameters("forest", parameters, data, target)
   effective_mtry <- effective$mtry
+  fit_scope <- attr(parameters, "autoxplain_fit_scope") %||% "full_training_refit"
+  oob_computed <- !fit_scope %in% c("resampling_fold", "screening")
   arguments <- list(
     x = data[features],
     y = data[[target]],
@@ -421,9 +471,11 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
     sample.fraction = parameters$sample.fraction,
     probability = task != "regression",
     respect.unordered.factors = "order",
-    num.threads = 1L,
+    num.threads = attr(parameters, "autoxplain_threads") %||% 1L,
+    oob.error = oob_computed,
     seed = seed,
-    write.forest = TRUE
+    write.forest = TRUE,
+    verbose = FALSE
   )
   if (!identical(parameters$splitrule, "default")) {
     arguments$splitrule <- parameters$splitrule
@@ -446,6 +498,8 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
     parameters = parameters,
     class_levels = if (task == "regression") NULL else levels(data[[target]]),
     fit_details = list(
+      threads = arguments$num.threads,
+      oob_computed = oob_computed,
       requested_mtry = parameters$mtry,
       effective_mtry = effective_mtry,
       training_predictors = length(features),
@@ -498,77 +552,16 @@ boosting_learner_grid <- function(n, p, task, n_classes) {
 }
 
 fit_boosting_learner <- function(data, target, task, parameters, seed) {
-  require_optional("xgboost", "fitting gradient-boosted trees")
-  features <- setdiff(names(data), target)
-  computation <- resolve_boosting_encoding(parameters, data, target)
-  native <- computation$encoding == "native"
-  blueprint <- if (native) {
-    fit_boosting_native_blueprint(data, features)
-  } else {
-    fit_matrix_blueprint(data, predictors = features)
-  }
-  x <- if (native) {
-    bake_boosting_native_blueprint(blueprint, data)
-  } else {
-    bake_matrix_blueprint(blueprint, data)
-  }
-  class_levels <- if (task == "regression") NULL else levels(data[[target]])
-  label <- if (task == "regression") {
-    data[[target]]
-  } else {
-    as.numeric(data[[target]]) - 1L
-  }
-  objective <- switch(task,
-    regression = "reg:squarederror",
-    binary = "binary:logistic",
-    multiclass = "multi:softprob"
-  )
-  metric <- switch(task,
-    regression = "rmse",
-    binary = "logloss",
-    multiclass = "mlogloss"
-  )
-  xgb_parameters <- list(
-    objective = objective,
-    eval_metric = metric,
-    eta = parameters$eta,
-    max_depth = parameters$max_depth,
-    min_child_weight = parameters$min_child_weight,
-    subsample = parameters$subsample,
-    colsample_bytree = parameters$colsample_bytree,
-    alpha = parameters$reg_alpha,
-    lambda = parameters$reg_lambda,
-    nthread = 1L,
-    seed = seed,
-    verbosity = 0L
-  )
-  if (task == "multiclass") xgb_parameters$num_class <- length(class_levels)
-  matrix <- if (native) {
-    xgb_parameters$tree_method <- "hist"
-    xgb_parameters$max_bin <- computation$max_bin
-    xgboost::xgb.QuantileDMatrix(data = x, label = label, nthread = 1L, max_bin = computation$max_bin)
-  } else {
-    xgboost::xgb.DMatrix(data = x, label = label, nthread = 1L)
-  }
-  fit <- xgboost::xgb.train(
-    params = xgb_parameters,
-    data = matrix,
-    nrounds = parameters$nrounds,
-    verbose = 0L
-  )
-  parameters$encoding <- computation$encoding
+  threads <- attr(parameters, "autoxplain_threads") %||% 1L
+  core <- fit_boosting_core(data, target, task, parameters, seed, threads = threads)
+  parameters$encoding <- core$computation$encoding
   new_autoxplain_fitted_model(
-    family = "boosting",
-    backend = "xgboost",
-    fit = fit,
-    task = task,
-    features = features,
-    parameters = parameters,
-    class_levels = class_levels,
-    blueprint = blueprint,
+    family = "boosting", backend = "xgboost", fit = core$fit,
+    task = task, features = setdiff(names(data), target), parameters = parameters,
+    class_levels = core$class_levels, blueprint = core$blueprint,
     fit_details = list(
-      computation = computation,
-      feature_map = if (native) blueprint$feature_map else NULL
+      computation = core$computation, threads = core$threads,
+      feature_map = if (core$computation$encoding == "native") core$blueprint$feature_map else NULL
     ),
     seed = seed
   )

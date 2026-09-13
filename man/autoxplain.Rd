@@ -14,7 +14,7 @@ autoxplain(
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
   model_set = c("tuned", "quick", "comparison"),
-  portfolio = c("core", "recommended", "extended"),
+  portfolio = c("core", "recommended", "extended", "tabular"),
   learners = NULL,
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
@@ -29,7 +29,7 @@ autoxplain(
   init_h2o = TRUE,
   h2o_nthreads = -1L,
   h2o_max_mem_size = "2G",
-  verbosity = c("quiet", "info"),
+  verbosity = c("auto", "quiet", "info"),
   evaluation_role = c("auto", "test", "validation", "evaluation"),
   overlap_action = c("warn", "error", "ignore"),
   validation = NULL,
@@ -40,14 +40,15 @@ autoxplain(
 )
 }
 \arguments{
-\item{data}{Training data frame.}
+\item{data}{Training data frame containing observed outcomes. Read a CSV into
+a data frame before calling this function.}
 
 \item{target_column}{Name of the outcome column.}
 
 \item{max_models}{Maximum number of configurations in local tuning or H2O
 base models. The local budget is shared across requested learner families.
 \code{NULL} chooses a portfolio-aware tuning budget (15 for core, 30 for
-recommended, and 40 for extended) or 24 for H2O. Explicit values are
+recommended, 40 for extended, and 18 for tabular) or 24 for H2O. Explicit values are
 honored without a hidden cap.}
 
 \item{max_runtime_secs}{H2O training time budget in seconds; ignored by the
@@ -58,7 +59,9 @@ fixed \code{max_models} budget govern the search.}
 controls supported stochastic components but cannot guarantee an identical
 time-limited search; see the returned reproducibility provenance.}
 
-\item{test_data}{Optional evaluation data. Supplied rows are labeled as a
+\item{test_data}{Optional labeled evaluation data, including the target column
+with observed outcomes. Use \code{predict(result, newdata)} for an unlabeled
+competition test table after fitting. Supplied rows are labeled as a
 neutral evaluation by default; use \code{evaluation_role = "test"} only when
 their provenance supports an independent-test interpretation. H2O uses
 them as validation rows only when \code{use_test_as_validation = TRUE} and
@@ -68,7 +71,7 @@ them as validation rows only when \code{use_test_as_validation = TRUE} and
 \code{test_data} is not supplied. Classification splits are stratified.}
 
 \item{engine}{One of \code{"auto"}, \code{"base"}, or \code{"h2o"}. \code{"auto"} currently
-resolves to the dependency-free \code{"base"} workflow.}
+resolves to the local \code{"base"} workflow.}
 
 \item{model_set}{Guided base-engine workflow. \code{"tuned"} is the default. \code{"quick"} fits the
 pre-specified understandable model and baseline. \code{"comparison"} also fits
@@ -81,7 +84,12 @@ selected configuration once on the configured evaluation rows.}
 linear, regularized, additive (when supported), tree, forest, and boosting
 families. \code{"extended"} adds neural, kernel, nearest-neighbor, and MARS
 families. \code{"core"} retains the dependency-light linear/tree/neural
-tournament. Missing optional backends produce one installation command
+tournament. \code{"tabular"} compares regularized models, random forests and
+XGBoost, with sample-based screening and inner training splits to choose
+boosting rounds when enough rows and settings are available. This portfolio
+requires R >= 4.3 for the supported XGBoost backend, while the core package
+supports R >= 4.1. Missing optional
+backends produce one installation command
 rather than silently changing the tournament.}
 
 \item{learners}{Optional explicit learner-family vector overriding
@@ -108,8 +116,10 @@ within one standard error of the best. The family priority and
 family-specific flexibility proxies
 are shown by \code{\link[=learner_catalog]{learner_catalog()}}. This heuristic does not establish that
 eligible models are equivalent or that every tuning dimension is ordered.
-\code{"best"} chooses the lowest resampled
-error. Ignored by other workflows.}
+\code{"best"} chooses the best resampled score (highest AUC, lowest loss).
+Omitting this argument uses \code{"best"} for \code{portfolio = "tabular"} when
+\code{learners} is not supplied; other portfolios retain \code{"one_se"}.
+Ignored by other workflows.}
 
 \item{tuning_control}{Optional advanced local-tuning settings returned by
 \code{\link[=tuning_control]{tuning_control()}}. Leave \code{NULL} for the beginner defaults. This argument
@@ -130,7 +140,14 @@ cross-validation metrics.}
 
 \item{h2o_max_mem_size}{Memory used when starting H2O.}
 
-\item{verbosity}{One of \code{"quiet"} or \code{"info"}.}
+\item{verbosity}{\code{"auto"} (default) prints progress for local tuned searches
+with at least 200 input rows and a forest or boosting learner. Smaller
+searches, quick workflows and H2O stay quiet by default. \code{"info"} prints
+progress regardless of size; \code{"quiet"} suppresses progress. Messages identify
+screening settings, CV folds, full refits, evaluation, explanations and report
+writing. During input importance, completed shuffle counts are printed at
+most every 30 seconds. A single fit or prediction can still take time between
+messages; no completion-time estimate is implied. Warnings are unchanged.}
 
 \item{evaluation_role}{How to describe the evaluation rows. \code{"auto"} labels
 package-generated outer splits as \code{"test"}, supplied data as the neutral
@@ -188,7 +205,10 @@ Set \code{engine = "h2o"} to use the optional H2O AutoML adapter. The lower-leve
 \code{\link[=explain_model]{explain_model()}} interface accepts models fitted by any framework.
 
 Numeric outcomes with exactly two distinct values are treated as binary
-classification by default. Potentially destructive preprocessing, such as
+classification by default; use \code{task = "regression"} to override this.
+Numeric outcomes with three or more values select regression. For numeric
+category codes such as \verb{0, 1, 2}, set \code{task = "multiclass"} or convert the
+target to a factor before fitting. Potentially destructive preprocessing, such as
 identifier removal, is opt-in and recorded in the result.
 }
 \examples{

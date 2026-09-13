@@ -1,5 +1,6 @@
 # Reproducible task fixtures and answer data for the actual report UI.
 pkgload::load_all(quiet = TRUE)
+source("validation/model-settings-oracle.R", local = TRUE)
 output <- Sys.getenv("EXPLORER_CASES", file.path(tempdir(), "autoxplain-explorer-cases"))
 # A stable temp path lets the separate browser process locate the fixtures.
 if (!nzchar(Sys.getenv("EXPLORER_CASES"))) output <- "/tmp/autoxplain-explorer-cases"
@@ -90,7 +91,11 @@ for (name in names(cases)) {
     prediction_source = prediction_source,
     specifications = lapply(names(result$models), function(id) {
       spec <- AutoXplainR:::model_specification(result, id)
-      list(id = id, summary = spec$summary, parameters = lapply(spec$parameters, AutoXplainR:::model_spec_value))
+      list(
+        id = id, summary = spec$summary,
+        parameters = lapply(spec$parameters, AutoXplainR:::model_spec_value),
+        numeric_parameters = model_settings_numeric_oracle(spec$parameters)
+      )
     }),
     classes = names(result$explanations$effects_by_class),
     class_curves = lapply(result$explanations$effects_by_class, function(models) {

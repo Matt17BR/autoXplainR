@@ -42,6 +42,32 @@ def active_model(page, section):
 def within_tolerance(actual, expected):
     return abs(actual - expected) <= max(1e-8, abs(expected) * .0006)
 
+def exact_settings(shown, specification):
+    if shown.keys() != specification['parameters'].keys():
+        return False
+    for key, text in shown.items():
+        numeric = (specification['numeric_parameters'] or {}).get(key)
+        if numeric is None:
+            if text != specification['parameters'][key]:
+                return False
+            continue
+        fields = text.split(', ')
+        if len(fields) != len(numeric['values']):
+            return False
+        labels = numeric['labels']
+        for index, (field, expected) in enumerate(zip(fields, numeric['values'])):
+            if labels is not None:
+                prefix = labels[index] + ' = '
+                if not field.startswith(prefix):
+                    return False
+                field = field[len(prefix):]
+            try:
+                if float(field) != float.fromhex(expected):
+                    return False
+            except ValueError:
+                return False
+    return True
+
 def check_layout(page, name, artifact):
     settled(page)
     layout = page.evaluate('''() => ({
@@ -113,7 +139,9 @@ with sync_playwright() as playwright:
             settings = dialog.locator('table').filter(has=page.locator('caption', has_text='Recorded settings, using R parameter names'))
             shown = dict(settings.locator('tbody tr').evaluate_all(
                 'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))'))
-            check(f'{case}/{spec["id"]}: detailed settings match R', shown == spec['parameters'])
+            settings_match = exact_settings(shown, spec)
+            check(f'{case}/{spec["id"]}: detailed settings match R', settings_match,
+                  None if settings_match else dict(shown=shown, expected=spec['numeric_parameters']))
             page.keyboard.press('Escape')
             check(f'{case}/{spec["id"]}: escape returns focus to model',
                   not dialog.is_visible() and link.evaluate('el => el === document.activeElement'))

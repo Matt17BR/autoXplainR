@@ -1,14 +1,15 @@
 # Source and intellectual-property provenance
 
-This record covers the source tree prepared for AutoXplainR 0.7.0. It is kept
+This record accompanies the unreleased AutoXplainR 0.8.0 candidate. It is kept
 outside the CRAN source archive because it documents repository governance
 rather than installed package behavior.
 
 ## Repository audit
 
-- The Git history through 2026-09-07 attributes the project source,
+- The historical Git audit through 2026-09-07 attributes the project source,
   documentation, tests, and generated website inputs to Matteo Mazzarelli, the
-  author and maintainer named in `DESCRIPTION`.
+  author and maintainer named in `DESCRIPTION`. That audit date is not a claim
+  that the subsequent 0.8.0 changes have completed their release provenance review.
 - The package includes the unmodified UMD distribution of fflate 0.8.3, with an
   added attribution header, for offline report decompression. Its MIT license
   and 2026 Arjun Barrett copyright notice are retained in

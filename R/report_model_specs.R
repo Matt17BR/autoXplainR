@@ -15,6 +15,28 @@ model_spec_value <- function(value) {
   paste(text, collapse = ", ")
 }
 
+model_spec_exact_value <- function(value) {
+  if (is.null(value) || !length(value)) return(model_spec_value(value))
+  if (is.list(value)) {
+    return(paste(paste(names(value), vapply(value, model_spec_exact_value, character(1)), sep = " = "),
+      collapse = "; "
+    ))
+  }
+  if (!is.numeric(value)) return(model_spec_value(value))
+  # Keep common decimals short while retaining every digit needed to recover
+  # a recorded double. Compact summaries use model_spec_value() separately.
+  output <- vapply(value, function(number) {
+    if (!is.finite(number)) return(as.character(number))
+    for (digits in seq_len(17L)) {
+      text <- format(number, digits = digits, trim = TRUE, scientific = FALSE, decimal.mark = ".")
+      if (identical(as.numeric(text), as.double(number))) return(text)
+    }
+    text
+  }, character(1))
+  if (!is.null(names(value))) output <- paste(names(value), output, sep = " = ")
+  paste(output, collapse = ", ")
+}
+
 model_specification <- function(result, id) {
   model <- result$models[[id]]
   if (is.null(model)) stop("No retained model with ID: ", id, call. = FALSE)
@@ -96,7 +118,7 @@ model_specification <- function(result, id) {
   }
   if (wrapped) {
     learned <- switch(model$backend,
-      ranger = list(Trees = fit$num.trees, `Inputs per split` = fit$mtry),
+      ranger = list(Trees = fit$num.trees, `Inputs per split` = fit$mtry, `Split rule` = fit$splitrule),
       glmnet = list(
         `Selected lambda` = model$fit_details$lambda,
         `Nonzero coefficients` = fit$df[model$fit_details$lambda_index]
@@ -139,8 +161,12 @@ model_specification <- function(result, id) {
       " \u00b7 ", length(fit$wts), " weights"
     )
   } else if (wrapped) {
+    displayed <- parameters
+    if (model$backend == "ranger" && identical(displayed$splitrule, "default") && length(fit$splitrule)) {
+      displayed$splitrule <- paste0(fit$splitrule, " (default)")
+    }
     paste0(
-      learner_definition(model$family)$describe(parameters),
+      learner_definition(model$family)$describe(displayed),
       if (model$backend == "glmnet") paste0("; lambda = ", model_spec_value(model$fit_details$lambda))
     )
   } else if (inherits(fit, "gam")) {
@@ -215,12 +241,17 @@ model_spec_table <- function(values, caption) {
     return("<p>Not recorded for this fit.</p>")
   }
   html_table(data.frame(
-    Setting = names(values), Value = vapply(values, model_spec_value, character(1)), row.names = NULL
+    Setting = names(values), Value = vapply(values, model_spec_exact_value, character(1)), row.names = NULL
   ), caption = caption)
 }
 
 model_spec_settings_help <- function(spec) {
   detail <- switch(spec$engine,
+    ranger = paste(
+      "mtry is the number of inputs considered at each split; sample.fraction controls rows drawn for each tree.",
+      "min.node.size is the minimum size for considering another split, not a guaranteed leaf size.",
+      "The fitted structure records the split rule actually used when the requested setting was default."
+    ),
     rpart = paste(
       "maxdepth caps the number of splits along a path; minsplit is the minimum rows considered for a split;",
       "minbucket is the minimum rows in a leaf. cp sets a minimum relative improvement for splitting.",
@@ -310,7 +341,14 @@ explorer_model_spec_details <- function(result, id) {
       role <- if (identical(id, result$provenance$primary_model_id)) "selected" else "alternative"
     }
     selection_rule <- if (identical(as.character(role[[1L]]), "alternative")) {
-      "Lowest training-CV loss within this family; refit fallback recorded if needed"
+      paste0(
+        if (selection_metric_direction(result$tuning$metric %||% "rmse") == "maximize") {
+          "Highest training-CV score"
+        } else {
+          "Lowest training-CV loss"
+        },
+        " within this family; refit fallback recorded if needed"
+      )
     } else if (identical(as.character(role[[1L]]), "fallback")) {
       paste0("Refit fallback after the ", result$tuning$selection_rule, " selection could not be fitted")
     } else {

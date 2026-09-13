@@ -409,6 +409,6 @@ data_info <- function(data) {
 }
 
 preprocessing_message <- function(verbose, ...) {
-  if (isTRUE(verbose)) message(...)
+  if (isTRUE(verbose)) withr::with_preserve_seed(message(...))
   invisible(NULL)
 }
