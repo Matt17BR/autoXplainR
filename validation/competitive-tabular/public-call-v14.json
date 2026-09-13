@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "recorded_at_utc": "2026-09-13T22:23:19.078864+00:00",
-  "status": "local_public_report_checks_verified_final_release_checks_pending",
+  "status": "published_release_and_public_download_verified",
   "candidate": "candidate-v14",
   "source_inventory_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
   "acceptance_freeze_sha256": "19224e05a92409af1f71eea9df53ceadfc1a2c8475fef5834a756d66978294fe",
@@ -949,7 +949,7 @@
       "manifest_sha256": "7c650aa0d7ed18479a7084575d90bda9c68722871e0026f09c85dc0712ede4fd",
       "source_files_bound": 86,
       "assets_bound": 11,
-      "scope": "Three public examples and six explorer fixtures rendered from saved fits with current CSS, without refitting. Actual header geometry and deliberate nowrap corruption are checked. Eight recaptured PNGs are byte-identical to the reviewed 0934351 images. The exact new mobile fixture screenshots were visually inspected. Final CI/archive/publication remain pending.",
+      "scope": "Three public examples and six explorer fixtures rendered from saved fits with current CSS, without refitting. Actual header geometry and deliberate nowrap corruption are checked. Eight recaptured PNGs are byte-identical to the reviewed 0934351 images. The exact new mobile fixture screenshots were visually inspected. All tagged release jobs passed; the public source download, isolated installation and fresh-session replay were verified.",
       "preserved_failure": "The first supervisor invocation stopped before package loading because it inherited the home working directory. Its record is preserved; a new invocation with explicit repository working directory completed."
     }
   },
@@ -961,5 +961,101 @@
     "Binary individual-case checks use the initial 0.50 cutoff. Aggregate threshold behavior has separate summary-report checks.",
     "These original v14 HTMLs retain the known mobile selected-table header collision. Current-source CSS compatibility review is separate.",
     "Implementer and automated walkthroughs are not participant usability research."
-  ]
+  ],
+  "release_verification": {
+    "scope": "Release verification is separate from the frozen v14 benchmark evidence. Published archive identity and fresh isolated installation are bound to the actual GitHub public download; small workflow smoke checks do not rerun the full-data benchmarks.",
+    "merged_main_commit": "3cb78eb246a6d3c67f42974dc78799433952ea61",
+    "annotated_tag": "v0.8.0",
+    "tag_object": "919d26ff81093094d7e447bd72c770c103bb388d",
+    "initial_tagged_gates_passed": 13,
+    "release_run_id": 34787869634,
+    "tagged_quality": {
+      "passed_assertions": 7583,
+      "failures": 0,
+      "warnings": 0,
+      "opt_in_skips": 2,
+      "coverage_percent": 93.42,
+      "proof_sha256": "b6ec9e709eda8388c9fed79d888796f3eb7d0e1ae9cd14dfa0f754e398766f6b"
+    },
+    "tagged_h2o": {
+      "passed_assertions": 110,
+      "failures": 0,
+      "warnings": 0,
+      "skips": 0,
+      "proof_sha256": "74dbc2ede499a54225b5e7b9a4c42e865a20e37488a47210c09df17f89a5e84c"
+    },
+    "website": {
+      "status": "deployed_and_verified",
+      "version": "0.8.0",
+      "default_url_assets_verified": 11,
+      "asset_verification_sha256": "9138326f7b13f99007a9c4c5be8dd6b11d356fe039884cd71377319c98b76506",
+      "index_verification_sha256": "34d325522e293c0e6403051b107373a9388ba9b6b08840d7a7793341bed77128"
+    },
+    "source_archive_publication_status": "published_and_download_verified",
+    "published_source_archive_sha256": "3e6f70a256e9bb6d28f8b8bd4dfcfa874ac7c46596c1d7399ffa5a45a446371f",
+    "published_archive_bytes": 2481686,
+    "public_download_fresh_install_status": "passed",
+    "staged_source_archive": {
+      "status": "checked_and_published",
+      "r_version": "4.6.1",
+      "check_errors": 0,
+      "check_warnings": 0,
+      "check_notes": 1,
+      "note_scope": "New submission",
+      "tests_examples_vignettes_pdf_html_manuals": "passed",
+      "installed_smoke_and_saved_artifact_replay": "passed",
+      "source_package_job": 103808708308,
+      "artifact_id": 10327244398,
+      "sha256": "3e6f70a256e9bb6d28f8b8bd4dfcfa874ac7c46596c1d7399ffa5a45a446371f",
+      "bytes": 2481686,
+      "selected_tagged_files_byte_identical": 252,
+      "proof_sha256": "9b7dd300ca08676c58fdeee2433705b9684f4df83eb6c4885a3ffabc774ab6ed",
+      "same_archive_r_devel_check": "passed",
+      "same_archive_r_devel": {
+        "r_revision": "2026-09-12 r90533",
+        "check_flags": [
+          "--as-cran",
+          "--no-manual"
+        ],
+        "errors": 0,
+        "check_warnings": 0,
+        "notes": 1,
+        "note_scope": "New submission",
+        "tests_examples_vignette_rebuilds": "passed",
+        "unavailable_optional_suggested_packages": 9,
+        "assertion_counts_retained": false,
+        "proof_sha256": "a54b1863394f6735b515f5a2988f0a9faa24c37bf258929c7ee833c45c2bc8c9"
+      }
+    },
+    "tagged_release_jobs_passed": 16,
+    "release_run_completed_at_utc": "2026-09-13T23:22:26Z",
+    "published_release_url": "https://github.com/Matt17BR/autoXplainR/releases/tag/v0.8.0",
+    "published_at_utc": "2026-09-13T23:22:24Z",
+    "public_download_selected_tagged_files_byte_identical": 246,
+    "public_download_verification_sha256": "20e5b61ba0efa6b1d7f30995e48c46d4c1d008f6527797a0d9cd1b0a221ba5f2",
+    "release_metadata_sha256": "1096c0d06357287ec381dc8bd4dc4eb40320dbb8671a335821bcfa9b4879727f",
+    "public_download_fresh_install": {
+      "r_version": "4.5.2",
+      "workflows": {
+        "regression": 4,
+        "binary": 4,
+        "multiclass": 3,
+        "recipe": 4,
+        "existing_binary": 2,
+        "native_boosting": 2,
+        "auto_bam_compact": 2
+      },
+      "retained_model_instances": 21,
+      "fresh_r_process_replay": "passed",
+      "rendered_replay_reports": 6,
+      "native_probability_and_source_row_decoding": "passed",
+      "compact_report_compressed_blocks": 9,
+      "compact_report_rows": 12000,
+      "elapsed_seconds": 26.29,
+      "peak_rss_kib": 287264,
+      "archive_sha256_before_and_after": "matched",
+      "excluded_model_scope": "The iris linear candidate was explicitly excluded for nonconvergence, leaving three retained multiclass models.",
+      "proof_sha256": "3bd9ab26acf5672fe47182e2d78a2817fa5f3b816d2792e3aee0b9277335bf89"
+    }
+  }
 }

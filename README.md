@@ -74,7 +74,7 @@ progress or `"info"` to show it on smaller datasets too.
 These controls were added after release 0.7.0. The
 [0.8.0 validation record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/release-0.8.0.md)
 reports completed full-data Covertype, Bank and YearPrediction comparisons,
-measured costs and remaining report and release checks. The
+measured costs, completed report checks and release status. The
 [development record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/DEVELOPMENT.md)
 also retains the earlier failures and interrupted requests.
 

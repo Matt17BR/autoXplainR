@@ -1,32 +1,30 @@
 ## GitHub release and CRAN preparation
 
-The unreleased AutoXplainR 0.8.0 candidate adds a tabular portfolio, adaptive
+AutoXplainR 0.8.0 adds a tabular portfolio, adaptive
 screening, training-only boosting round selection, size-aware forest budgets,
 and reports of the fitted settings and selection evidence. It also adds AUC
 and RMSLE selection and preserves actionable failure records.
 This is a preparation note, not a CRAN submission or acceptance record.
 CRAN submission is not part of this GitHub release preparation.
 
-The 0.8.0 release gates and verification of its published archive and public
-site remain pending. Completed full-data Covertype, Bank and YearPrediction
-calls and current platform/native-engine/H2O checks are recorded in
-`validation/release-0.8.0.md`. All three summary-report checks passed, with the
-original checker failures retained. Their exact desktop/mobile captures and
-selected-feature PDFs have also been visually reviewed. All three bounded rows
-exports passed value and browser-control checks, with individual-record
-walkthroughs. The mobile header correction passed 265 data-explorer checks and
-118 refreshed-gallery checks, with direct visual inspection. Final CI, archive
-and publication verification remain pending. These results do not establish a
-verified release archive or public site. Comparison protocols,
-development runs and machine-readable results are under
-`validation/competitive-tabular/`.
+PR #8 was merged at `3cb78eb`, and the annotated `v0.8.0` tag was pushed.
+All 16 tagged release jobs passed, including the 7,583-assertion quality suite
+and 110 live H2O assertions. The website serves 0.8.0; its three public reports
+and eight gallery images match the reviewed files at their default URLs. The
+published source archive matches the checked archive and tagged source files.
+Fresh isolated installation and saved-artifact replay from the public download
+passed for seven workflows.
+
+Completed full-data comparisons, report and sampled-record checks, measured
+tradeoffs and preserved failures are recorded in `validation/release-0.8.0.md`.
+Protocols and machine-readable results are under `validation/competitive-tabular/`.
+These measurements keep their original frozen benchmark source identity.
 
 Historical 0.7.0 evidence is recorded in `validation/release-0.7.0.md`: all
 16 release jobs passed for that release, followed by verification of its actual
 download and public site. Its scale measurements remain in
 `validation/scalability/findings.md`, and earlier checks remain in
-`validation/release-0.6.2.md`. These records do not validate the 0.8.0 candidate
-or any future 0.8.0 archive.
+`validation/release-0.6.2.md`. These historical records do not validate the 0.8.0 archive.
 
 Examples and vignettes use local data and models. H2O and hosted narrative
 integrations are opt-in. Reports compute in R and need no external service.

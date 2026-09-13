@@ -1,15 +1,16 @@
 # AutoXplainR 0.8.0 validation record
 
-Status: candidate under review. No 0.8.0 tag or release has been published.
-The repaired candidate has completed Covertype, Bank and YearPrediction, including
-the full public calls, cold replays, independent prediction checks and
-summary-report checks. Bank's earlier effect-row mismatch was a checker defect,
-retained with its correction below. All three bounded rows exports have passed
-value and browser-control checks. A mobile header defect in the original rows
-reports has a CSS correction verified on current-source fixtures and the
-refreshed gallery. At
-`d93f13b`, 265 data-explorer checks and 118 gallery checks passed. Final CI,
-archive and release verification remain pending.
+Status: [v0.8.0 is published](https://github.com/Matt17BR/autoXplainR/releases/tag/v0.8.0).
+PR #8 merged at `3cb78eb`, and all 16 tagged release jobs passed. The public
+source download matches the checked archive and tagged source files. The
+website serves 0.8.0 with all 11 reviewed report and gallery assets verified at
+their default URLs. Fresh isolated installation and saved-artifact replay from
+the public download passed for seven workflows.
+
+The three full-data public workflows, saved-model replays, summary and sampled
+record checks are complete. The later mobile-header correction passed 265
+data-explorer checks and 118 gallery checks. Benchmark measurements retain their
+original v14 source identity and the failures documented below.
 
 ## What changed
 
@@ -185,10 +186,68 @@ Comparing the 80 files under `R/` and `inst/report/` with `d93f13b`, 76 remain
 byte-identical. Three R changes retain the overlap diagnostic; the fourth
 change is the selected-record header CSS. These diagnostic and presentation
 changes do not alter model fitting or stored predictions. This file scope excludes other package assets. The
-final release archive will have its own identity and checks. The v14 measurements
+published release archive has its own identity and checks below. The v14 measurements
 must not be presented as a fresh benchmark of a later archive.
 
-## Current CI scope
+## CI, tag and deployed-site verification
+
+PR #8 was merged into main at `3cb78eb246a6d3c67f42974dc78799433952ea61`.
+The annotated `v0.8.0` tag points to that commit. In
+[release run 34787869634](https://github.com/Matt17BR/autoXplainR/actions/runs/34787869634),
+all 16 jobs passed, completing at 23:22:26 UTC on 2026-09-13: seven platform
+jobs, three engine jobs, browser, quality, live H2O, source-package, the same
+archive on R-devel and publication. The tagged quality suite passed 7,583 assertions with no
+failures or warnings and two opt-in skips; package coverage was 93.42%.
+The separate live H2O gate passed 110 assertions without failures, warnings or
+skips.
+
+The tagged source-package job then passed `R CMD check --as-cran` on R 4.6.1
+with no errors or warnings and one note for new-submission status. Full tests,
+examples, vignette rebuilding, PDF and HTML manuals, installation and saved-artifact
+smoke replay passed. The staged 2,481,686-byte archive has SHA-256
+`3e6f70a256e9bb6d28f8b8bd4dfcfa874ac7c46596c1d7399ffa5a45a446371f`.
+Its 252 selected package source files match the tagged commit, with standard
+build metadata additions in DESCRIPTION. The same archive then passed
+`--as-cran --no-manual` on R-devel 2026-09-12 r90533, with no errors or check
+warnings and only the new-submission note. Tests, examples and vignette rebuilds
+passed; nine optional suggested packages were absent, and assertion counts were
+not retained for this job. The manual checks above came from R 4.6.1.
+
+The public GitHub release was published at 23:22:24 UTC on 2026-09-13. Its
+downloaded `AutoXplainR_0.8.0.tar.gz` matches that exact checked archive checksum
+and byte count. A separate comparison verified 246 R/report, manual, test,
+NAMESPACE and NEWS files against the tagged source, with normalized DESCRIPTION
+fields matching. The published SHA256SUMS and release notes were also downloaded.
+Fresh isolated installation from the public download passed on R 4.5.2,
+followed by replay in a fresh R process: seven workflows, 21 retained model
+instances and six regenerated reports. Native probabilities and source-row
+identities matched, and all nine compact report blocks representing 12,000 rows
+were checked. The iris linear candidate was correctly excluded for explicit
+nonconvergence, leaving three retained multiclass models. This check took 26.29
+seconds with 287,264 KiB peak RSS; the archive checksum matched before and after.
+These small workflows verify installed-package and saved-artifact compatibility,
+not a rerun of the full-data benchmarks.
+
+The deployed homepage reports 0.8.0 and the tabular route. All three public
+report HTMLs and eight gallery PNGs at their ordinary URLs matched the reviewed
+repository files byte for byte. Direct inspection of the live model report
+confirmed the current four-model comparison, cost controls and selection view.
+This verifies the deployed examples; source-package verification is recorded
+separately above.
+
+The local pre-release archive check passed with no errors or warnings and one
+note for new-submission status and three then-unmerged documentation URLs.
+That 2,485,541-byte archive has SHA-256
+`19304942699c669a1d5be4aa78dc845bbb51ec35b2ed777c4466c6a6bd74bee1`;
+it is distinct from the published release artifact above. Fresh installation, seven
+smoke workflows and their fresh-session replays passed. Its 246 R/report,
+manual, test, NAMESPACE and NEWS files were byte-identical to the prior archive
+whose full tests passed 7,583 assertions; the dictionary added only Covertype
+and YearPrediction, and spelling passed. Full tests were not rerun on that
+later local archive. The first local check's missing-`qpdf` warning and
+missing-`tidy` note remain preserved alongside its incoming-submission note.
+
+Earlier CI evidence remains distinct:
 
 Commit `c9a3fb0b66b54cac7bfe2d01eb75b4868833ecda` passed all seven R-check jobs,
 all three native-engine jobs, statistics, lint, coverage and a separate live
@@ -220,8 +279,8 @@ byte-identical to the reviewed `0934351` images, and the three public HTML
 changes are CSS-only. The manifest was recorded after that review, followed
 by 118 passing gallery checks with no browser errors. An initial supervisor
 invocation used the wrong working directory and stopped before package loading;
-that failure is preserved. These completed local checks do not replace final
-CI or verification of the release archive.
+that failure is preserved. Those local checks are complemented by the passing tagged
+gates, archive checks and fresh public-download installation above.
 
 ## Defects found during review
 
@@ -448,20 +507,13 @@ vignette scripts and manuals; tests were run separately. Its archive SHA-256 is
 `e5d62c690fe36b54ac74eb3a14dfc8b30797204b75b17d67c9f9843b819702d1`.
 All three full public calls, cold replays and prediction checks have since
 completed on this candidate, as recorded above. Local report checks are complete;
-final CI and release-archive verification remain pending.
-The superseded v13 follow-up plan was checked but never run. A final release
-archive still requires its own checks.
+the tagged gates, published archive checks and fresh public-download
+installation have also passed.
+The superseded v13 follow-up plan was checked but never run.
 
-## Remaining gates
+## Verification boundary
 
-- Pass final browser CI with the header correction and refreshed gallery. Local
-  rows, gallery, geometry and overlap-warning checks have passed; preserve the
-  original immutable reports, checker failures and measured tradeoffs.
-- Require the integrated source and publication guard tests in final CI.
-  Preserve the original frozen harness and private acceptance diagnostics.
-- Retain the passing candidate platform/browser evidence and require the
-  version-tag workflow's platform, engine, H2O and quality gates to pass.
-- Build and check the final release archive, then verify its public download,
-  fresh installation and deployed report gallery.
-
+The GitHub release, source download, isolated installation and deployed-site
+checks described above are complete. The original benchmark hashes, measured
+tradeoffs and failed attempts remain unchanged.
 CRAN submission is outside this GitHub release.
