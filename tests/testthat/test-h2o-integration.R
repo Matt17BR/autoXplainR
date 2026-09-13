@@ -6,7 +6,7 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   data <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
   data$y <- as.integer(data$x1 + data$x2 > 0)
   result <- suppressWarnings(autoxplain(
-    data[1:75, ], "y", test_data = data[76:100, ], max_models = 1,
+    data[1:75, ], "y", test_data = rbind(data[76:100, ], data[1, ]), max_models = 1,
     max_runtime_secs = 0, nfolds = 2, seed = 101, verbosity = "quiet",
     engine = "h2o", evaluation_role = "test", include_algos = "GLM"
   ))
@@ -15,6 +15,11 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   expect_s3_class(result, "autoxplain_result")
   expect_equal(result$task, "binary")
   expect_equal(result$provenance$evaluation_role, "test")
+  overlap_note <- result$evaluation$notes[
+    result$evaluation$notes$code == "evaluation_row_overlap", , drop = FALSE
+  ]
+  expect_equal(nrow(overlap_note), 1L)
+  expect_match(overlap_note$message, "1 supplied evaluation record exactly matched", fixed = TRUE)
   expect_s3_class(result$engine_leaderboard, "data.frame")
   expect_identical(
     result$provenance$primary_model_id,
@@ -42,6 +47,15 @@ test_that("H2O AutoML integrates through the model-agnostic contract", {
   expect_match(html, "Compare the models", fixed = TRUE)
   expect_match(html, "Intercept-only baseline", fixed = TRUE)
   expect_match(html, "H2O choice", fixed = TRUE)
+  checks <- regmatches(html, regexpr('(?s)<section id="checks"[^>]*>.*?</section>', html, perl = TRUE))
+  warnings <- regmatches(checks, gregexpr(
+    '(?s)<article class="guided-note guided-note-warning">.*?</article>', checks, perl = TRUE
+  ))[[1L]]
+  overlap_warning <- warnings[grepl(overlap_note$message, warnings, fixed = TRUE)]
+  expect_length(overlap_warning, 1L)
+  expect_match(overlap_warning, paste0("<h3>", overlap_note$message, "</h3>"), fixed = TRUE)
+  expect_match(overlap_warning, overlap_note$recommendation, fixed = TRUE)
+  expect_false(grepl("evaluation row 26", html, fixed = TRUE))
   expect_false(grepl("is the pre-specified default for predict()", html, fixed = TRUE))
 
   set.seed(202)

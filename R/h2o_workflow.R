@@ -39,8 +39,10 @@ prepare_h2o_outer_split <- function(data,
                                     enable_preprocessing,
                                     preprocessing_config,
                                     overlap_action = c("warn", "error", "ignore")) {
-  if (!is.null(test_data)) {
+  overlap_note <- if (!is.null(test_data)) {
     check_evaluation_row_overlap(data, test_data, overlap_action)
+  } else {
+    NULL
   }
   split <- if (is.null(test_data)) {
     make_evaluation_split(data, target, task, test_fraction, seed)
@@ -117,6 +119,7 @@ prepare_h2o_outer_split <- function(data,
       evaluation$row_indices, setdiff(names(split$evaluation), target), drop = FALSE
     ],
     evaluation_row_indices = evaluation$row_indices,
+    evaluation_overlap_note = overlap_note,
     split_method = split$method,
     test_data_supplied = !is.null(test_data),
     test_fraction_requested = if (is.null(test_data)) test_fraction else NA_real_

@@ -115,6 +115,7 @@
 #'   the same values as training rows: warn (the default), error, or ignore.
 #'   Exact equality can indicate leakage but can also occur naturally, so this
 #'   check cannot establish whether the samples are independent.
+#'   Default warnings are retained in `result$evaluation$notes` and the report's Checks tab.
 #'
 #' @param validation Optional [validation_split()] specifying whole-group or
 #'   chronological evaluation. Split columns are excluded from model inputs.
@@ -427,6 +428,9 @@ autoxplain <- function(data,
     evaluation_provenance$evaluation_role,
     primary_model_id,
     used_for_selection = evaluation_provenance$test_used_for_validation
+  )
+  evaluated$summary$notes <- rbind(
+    evaluated$summary$notes, prepared$evaluation_overlap_note
   )
   reproducibility <- h2o_reproducibility_provenance(
     max_runtime_secs,

@@ -242,7 +242,7 @@ test_that("H2O evaluation roles reflect their actual selection use", {
 test_that("H2O preparation applies overlap policy and rejects infinite predictors", {
   training <- data.frame(x = seq_len(12), y = seq_len(12) + 0.5)
   expect_warning(
-    AutoXplainR:::prepare_h2o_outer_split(
+    warned <- AutoXplainR:::prepare_h2o_outer_split(
       data = training,
       test_data = training[1:2, , drop = FALSE],
       target = "y",
@@ -253,6 +253,11 @@ test_that("H2O preparation applies overlap policy and rejects infinite predictor
       preprocessing_config = h2o_preprocessing_config("keep")
     ),
     "may indicate training/evaluation leakage.*do not prove"
+  )
+  expect_identical(warned$evaluation_overlap_note$code, "evaluation_row_overlap")
+  expect_match(
+    warned$evaluation_overlap_note$message,
+    "2 supplied evaluation records exactly matched", fixed = TRUE
   )
   expect_error(
     AutoXplainR:::prepare_h2o_outer_split(
@@ -267,6 +272,37 @@ test_that("H2O preparation applies overlap policy and rejects infinite predictor
       overlap_action = "error"
     ),
     "values exactly match.*do not prove"
+  )
+
+  ignored <- AutoXplainR:::prepare_h2o_outer_split(
+    training, training[1:2, , drop = FALSE], "y", "regression", 0.2, 4L,
+    TRUE, h2o_preprocessing_config("keep"), overlap_action = "ignore"
+  )
+  expect_null(ignored$evaluation_overlap_note)
+  expect_identical(ignored$training$data, warned$training$data)
+  expect_identical(ignored$evaluation$data, warned$evaluation$data)
+  different <- training[1:2, , drop = FALSE]
+  different$y <- different$y + 100
+  clean <- AutoXplainR:::prepare_h2o_outer_split(
+    training, different, "y", "regression", 0.2, 4L,
+    TRUE, h2o_preprocessing_config("keep")
+  )
+  expect_null(clean$evaluation_overlap_note)
+
+  missing <- training
+  missing$x[1] <- NA_real_
+  expect_warning(
+    dropped <- AutoXplainR:::prepare_h2o_outer_split(
+      missing, missing[1:3, , drop = FALSE], "y", "regression", 0.2, 4L,
+      TRUE, h2o_preprocessing_config("drop_rows")
+    ),
+    "Found 3 rows"
+  )
+  expect_equal(nrow(dropped$evaluation$data), 2L)
+  expect_match(
+    dropped$evaluation_overlap_note$message,
+    "3 supplied evaluation records exactly matched a training record before preprocessing",
+    fixed = TRUE
   )
 
   evaluation <- data.frame(x = c(13, Inf), y = c(13.5, 14.5))

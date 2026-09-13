@@ -102,3 +102,45 @@ test_that("nonstandard columns retain the legacy full-row equality fallback", {
   expect_identical(AutoXplainR:::split_row_overlap(zero_columns, zero_columns), 1:3)
   expect_silent(AutoXplainR:::check_evaluation_row_overlap(training, training, "ignore"))
 })
+
+test_that("overlap notes count supplied records without exposing row positions", {
+  training <- data.frame(x = c(1, 1, 2), y = c(10, 10, 20), context = c("a", "a", "b"))
+  evaluation <- training[c(1, 1, 3), ]
+  evaluation$y[3] <- 21
+  evaluation$extra <- seq_len(3)
+  expect_warning(
+    checked <- withVisible(AutoXplainR:::check_evaluation_row_overlap(training, evaluation)),
+    "Found 2 rows.*evaluation rows 1, 2"
+  )
+  expect_false(checked$visible)
+  note <- checked$value
+  expect_identical(names(note), c("severity", "code", "message", "recommendation"))
+  expect_identical(note$severity, "warning")
+  expect_identical(note$code, "evaluation_row_overlap")
+  expect_match(note$message, "2 supplied evaluation records exactly matched", fixed = TRUE)
+  expect_match(note$message, "before preprocessing", fixed = TRUE)
+  expect_match(note$recommendation, "all training-table columns, including the outcome", fixed = TRUE)
+  expect_match(note$recommendation, "Coincident records can occur naturally", fixed = TRUE)
+  expect_match(note$recommendation, "do not prove", fixed = TRUE)
+  expect_match(note$recommendation, "Check row provenance", fixed = TRUE)
+  expect_false(grepl("evaluation rows 1, 2", note$message, fixed = TRUE))
+
+  evaluation$y <- evaluation$y + 100
+  checked <- withVisible(AutoXplainR:::check_evaluation_row_overlap(training, evaluation))
+  expect_false(checked$visible)
+  expect_null(checked$value)
+})
+
+test_that("skipped overlap checks return no independence claim or matching work", {
+  local_mocked_bindings(split_row_overlap = function(...) stop("Unexpected overlap computation"))
+  training <- data.frame(x = 1, y = 2)
+  for (arguments in list(
+    list(training, training, "ignore"),
+    list(training, NULL),
+    list(training, data.frame(x = 1))
+  )) {
+    checked <- withVisible(do.call(AutoXplainR:::check_evaluation_row_overlap, arguments))
+    expect_false(checked$visible)
+    expect_null(checked$value)
+  }
+})

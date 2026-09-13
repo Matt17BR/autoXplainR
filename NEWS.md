@@ -59,6 +59,10 @@
 - Summary reports include a complete R command for exporting linked individual
   error records. The command reuses the fitted result and creates a separate
   HTML file, with the exported data scope explained beside it.
+- Warnings about evaluation records matching training records now stay with
+  the saved result and appear in the report's Checks tab. The note reports
+  matches before preprocessing and explains why matching values alone do not
+  establish data leakage.
 - Cost comparisons prefer a usable repeated prediction benchmark, then retained
   fit time, batch prediction time and R object size. Durations use readable
   units; exact measurements and Pareto calculations are unchanged. Resource

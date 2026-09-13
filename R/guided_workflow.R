@@ -37,10 +37,11 @@ fit_guided_base <- function(data,
   progress <- identical(verbosity, "info")
   search_progress(progress, "Preparing ", search_progress_count(nrow(data)), " input rows.")
 
+  overlap_note <- NULL
   split <- if (is.null(test_data)) {
     make_evaluation_split(data, target_column, resolved_task, test_fraction, seed)
   } else {
-    check_evaluation_row_overlap(data, test_data, overlap_action)
+    overlap_note <- check_evaluation_row_overlap(data, test_data, overlap_action)
     validate_guided_predictors(test_data, target_column, allow_all_missing = enable_preprocessing)
     list(
       training = data,
@@ -154,6 +155,7 @@ fit_guided_base <- function(data,
     stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id),
     evaluation_role = resolved_evaluation_role
   )
+  evaluated$summary$notes <- rbind(evaluated$summary$notes, overlap_note)
   if (identical(model_set, "tuned")) {
     evaluated$summary$notes <- rbind(
       evaluated$summary$notes,
@@ -286,12 +288,12 @@ check_evaluation_row_overlap <- function(training,
                                          evaluation,
                                          action = c("warn", "error", "ignore")) {
   action <- match.arg(action)
-  if (identical(action, "ignore")) return(invisible(TRUE))
-  if (is.null(evaluation)) return(invisible(TRUE))
+  if (identical(action, "ignore")) return(invisible(NULL))
+  if (is.null(evaluation)) return(invisible(NULL))
   required <- names(training)
   if (!all(required %in% names(evaluation))) {
     # The schema validator supplies the more useful missing-column diagnosis.
-    return(invisible(TRUE))
+    return(invisible(NULL))
   }
   overlapping <- split_row_overlap(training[required], evaluation[required])
   if (length(overlapping)) {
@@ -308,8 +310,25 @@ check_evaluation_row_overlap <- function(training,
     )
     if (identical(action, "error")) stop(message, call. = FALSE)
     warning(message, call. = FALSE)
+    return(invisible(data.frame(
+      severity = "warning",
+      code = "evaluation_row_overlap",
+      message = paste0(
+        length(overlapping), " supplied evaluation record",
+        if (length(overlapping) == 1L) "" else "s",
+        " exactly matched a training record before preprocessing."
+      ),
+      recommendation = paste(
+        "Matching includes all training-table columns, including the outcome.",
+        "Coincident records can occur naturally; exact matches alone do not prove",
+        "that the samples are non-independent.",
+        "Check row provenance and how the training and evaluation samples were formed",
+        "before interpreting the scores."
+      ),
+      stringsAsFactors = FALSE
+    )))
   }
-  invisible(TRUE)
+  invisible(NULL)
 }
 
 split_row_overlap <- function(training, evaluation) {

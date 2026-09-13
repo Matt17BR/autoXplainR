@@ -160,7 +160,8 @@ study design.}
 \item{overlap_action}{What to do when supplied evaluation rows have exactly
 the same values as training rows: warn (the default), error, or ignore.
 Exact equality can indicate leakage but can also occur naturally, so this
-check cannot establish whether the samples are independent.}
+check cannot establish whether the samples are independent.
+Default warnings are retained in \code{result$evaluation$notes} and the report's Checks tab.}
 
 \item{validation}{Optional \code{\link[=validation_split]{validation_split()}} specifying whole-group or
 chronological evaluation. Split columns are excluded from model inputs.}
