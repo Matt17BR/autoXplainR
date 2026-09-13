@@ -70,7 +70,7 @@ run_adaptive_screening <- function(plan, raw_data, target, task, assignment, con
     )
     scored <- score_tuning_configuration(
       screen_plan[index, , drop = FALSE], prepared, target, task, 1L,
-      metric = control$metric, retain_oof = FALSE, failure_policy = control$failure_policy
+      metric = control$metric, retain_oof = FALSE, failure_policy = control$failure_policy, progress = progress
     )
     records[[index]] <- scored$score
   }
@@ -156,7 +156,8 @@ execute_complete_validation <- function(plan, raw_data, target, task, assignment
     )
     scored <- score_tuning_configuration(
       plan[index, , drop = FALSE], prepared, target, task, fold,
-      metric = control$metric, retain_oof = control$retain_oof, failure_policy = control$failure_policy
+      metric = control$metric, retain_oof = control$retain_oof,
+      failure_policy = control$failure_policy, progress = progress
     )
     records$fold_rows[[row_index]] <- scored$score
     if (control$retain_oof) records$prediction_rows[[row_index]] <- scored$predictions

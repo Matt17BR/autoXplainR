@@ -350,6 +350,18 @@ with sync_playwright() as p:
                 prefix + ": keyboard opens records",
                 page.locator("#data-records-panel").is_visible(),
             )
+            check(
+                prefix + ": records controls match exported content",
+                page.locator("#data-pair-control").is_visible() == (mode == "rows"),
+            )
+            record_scope = page.locator("#data-population").inner_text()
+            check(
+                prefix + ": records scope does not claim full data",
+                "Full data" not in record_scope
+                and ("Exported records" in record_scope if mode == "rows"
+                     else "Individual records are not embedded" in record_scope),
+                record_scope,
+            )
             page.locator("[data-data-view=distribution]").click()
             if kind == "binary":
                 box = page.locator("#data-distribution svg").bounding_box()

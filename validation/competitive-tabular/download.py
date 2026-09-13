@@ -10,6 +10,11 @@ import zipfile
 
 
 CACHE = Path(os.environ.get("AXR_TABULAR_DIR", "~/.cache/autoxplain-tabular-0.8.0")).expanduser()
+if (CACHE / "partitions.json").exists():
+    raise RuntimeError(
+        "Prepared partitions already exist. Use a new AXR_TABULAR_DIR to download or refresh "
+        "source metadata; preserve this cache and its recorded inputs."
+    )
 RAW = CACHE / "raw"
 RAW.mkdir(parents=True, exist_ok=True)
 SOURCES = {
@@ -19,12 +24,16 @@ SOURCES = {
 }
 
 
-def sha256(path):
+def stream_sha256(stream):
     digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1 << 20), b""):
-            digest.update(block)
+    for block in iter(lambda: stream.read(1 << 20), b""):
+        digest.update(block)
     return digest.hexdigest()
+
+
+def sha256(path):
+    with path.open("rb") as stream:
+        return stream_sha256(stream)
 
 
 manifest_path = RAW / "sources.json"
@@ -58,18 +67,35 @@ for name, (url, member) in SOURCES.items():
             with source.open(member) as input_stream, temporary.open("wb") as output:
                 shutil.copyfileobj(input_stream, output, length=1 << 20)
             temporary.replace(extracted)
+    nested_members = {}
     if name == "bank":
         nested_member = "bank-additional/bank-additional-full.csv"
         nested_info = "bank-additional/bank-additional-names.txt"
         with zipfile.ZipFile(extracted) as source:
             for entry in (nested_member, nested_info):
                 target = RAW / Path(entry).name
-                with source.open(entry) as input_stream, target.open("wb") as output:
-                    shutil.copyfileobj(input_stream, output)
+                with source.open(entry) as input_stream:
+                    expected_digest = stream_sha256(input_stream)
+                expected_bytes = source.getinfo(entry).file_size
+                if target.exists():
+                    if target.stat().st_size != expected_bytes or sha256(target) != expected_digest:
+                        raise RuntimeError(f"Cached extracted source changed: bank/{target.name}")
+                else:
+                    temporary = target.with_suffix(target.suffix + ".partial")
+                    with source.open(entry) as input_stream, temporary.open("wb") as output:
+                        shutil.copyfileobj(input_stream, output)
+                    if temporary.stat().st_size != expected_bytes or sha256(temporary) != expected_digest:
+                        raise RuntimeError(f"Extracted source does not match archive: bank/{target.name}")
+                    temporary.replace(target)
+                nested_members[target.name] = {
+                    "member": entry, "sha256": expected_digest, "bytes": expected_bytes,
+                }
     manifest[name] = {
         "url": url, "archive_sha256": digest, "archive_bytes": archive.stat().st_size,
         "member": member, "member_sha256": sha256(extracted), "member_bytes": extracted.stat().st_size,
         "license": "CC BY 4.0",
     }
+    if nested_members:
+        manifest[name]["nested_members"] = nested_members
     manifest_path.write_text(json.dumps(manifest | {k: v for k, v in previous.items() if k not in manifest}, indent=2) + "\n")
     print(f"Verified {name}: {digest}", flush=True)

@@ -843,8 +843,8 @@ selection_screening_details <- function(evidence) {
     values <- resources[vapply(resources, function(value) is.atomic(value) && length(value) == 1L, logical(1))]
     values$limitation <- NULL
     labels <- c(
-      threads = "Threads per native fit", search_time_limit = "Search scheduling limit (s)",
-      search_elapsed_seconds = "Search elapsed (s)", scheduling_limit_reached = "Scheduling limit reached",
+      threads = "Threads per native fit", search_time_limit = "Search scheduling limit",
+      search_elapsed_seconds = "Search elapsed", scheduling_limit_reached = "Scheduling limit reached",
       screening_fits = "Screening evaluations", validation_fits = "CV evaluations",
       calibration_fit_attempts = "Stopping pilot attempts", model_fit_attempts = "Screening/CV model fit attempts",
       refit_attempts = "Final refit attempts", baseline_fit_attempts = "Baseline fit attempts",
@@ -853,7 +853,14 @@ selection_screening_details <- function(evidence) {
     names <- ifelse(names(values) %in% names(labels), labels[names(values)], selection_status_label(names(values)))
     data.frame(
       Measure = names,
-      Value = vapply(values, model_spec_value, character(1)), check.names = FALSE
+      Value = vapply(seq_along(values), function(i) {
+        value <- values[[i]]
+        if (names(values)[i] %in% c("search_time_limit", "search_elapsed_seconds") && is.numeric(value)) {
+          paste0(report_duration(value), " (recorded: ", sprintf("%.17g", value), " s)")
+        } else {
+          model_spec_value(value)
+        }
+      }, character(1)), check.names = FALSE
     )
   } else {
     NULL

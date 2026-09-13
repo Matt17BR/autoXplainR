@@ -138,7 +138,14 @@ model_specification <- function(result, id) {
         `Fitting procedure` = model$fit_details$computation
       )),
       e1071 = list(`Support vectors` = fit$tot.nSV),
-      xgboost = list(`Input encoding and memory policy` = model$fit_details$computation),
+      xgboost = list(
+        `Encoded inputs` = if (length(model$blueprint$columns)) {
+          length(model$blueprint$columns)
+        } else if (length(model$blueprint$predictors)) {
+          length(model$blueprint$predictors)
+        },
+        `Native threads` = model$fit_details$threads
+      ),
       earth = list(`Retained terms` = length(fit$selected.terms)),
       kknn = list(`Training rows retained` = model$fit_details$training_rows),
       list()
@@ -280,6 +287,70 @@ model_spec_settings_help <- function(spec) {
   paste("Training controls and learned parameter values are different.", detail)
 }
 
+model_spec_boosting_policy <- function(result, id) {
+  model <- result$models[[id]]
+  if (!inherits(model, "autoxplain_fitted_model") || !identical(model$backend, "xgboost")) return("")
+  computation <- model$fit_details$computation
+  configuration <- attr(model, "autoxplain_tuning_fit")$configuration_id
+  # A supplied or older model need not belong to the result's recorded search.
+  # A search can also contain both automatic and explicit encoding settings.
+  search <- if (length(configuration) == 1L && configuration %in% result$tuning$candidates$configuration_id) {
+    result$tuning$input_policy$boosting
+  }
+  encoding <- computation$encoding %||% model$parameters$encoding
+  representation <- switch(encoding %||% "",
+    matrix = "Dense matrix; numeric inputs and categorical contrasts",
+    native = "Native categorical inputs; category partitions instead of contrasts",
+    "Not recorded"
+  )
+  values <- list(
+    `Resolved engine input` = representation,
+    `XGBoost input container` = computation$matrix_type,
+    `Encoding passed to the backend` = computation$requested,
+    `Search input policy` = if (length(search)) {
+      paste0(
+        if (identical(search$requested, "auto")) "Automatic" else model_spec_value(search$requested),
+        "; planned encoding = ", model_spec_value(search$encoding)
+      )
+    } else {
+      "Not recorded for this fit"
+    },
+    `Search policy reason` = search$reason,
+    `Backend policy reason` = if (identical(computation$requested, "auto")) computation$reason,
+    `Training rows used for the input estimate` = computation$rows,
+    `Original input columns` = computation$input_columns,
+    `Estimated contrast columns` = computation$matrix_columns_estimate,
+    `Estimated dense matrix cells` = computation$matrix_cells_estimate,
+    `Histogram bins (native encoding)` = if (identical(encoding, "native")) computation$max_bin
+  )
+  values <- values[!vapply(values, is.null, logical(1))]
+  raw <- list(backend = computation, search = search)
+  paste0(
+    "<details><summary>Input representation</summary>",
+    model_spec_table(values, "Recorded encoding decisions and planning estimates"),
+    "<p>A concrete backend encoding does not establish the original public request. ",
+    "The search policy describes automatic settings in the search, which may also include explicit choices. ",
+    "Matrix estimates are not measured memory use.</p>",
+    "<details><summary>Raw input-policy metadata</summary><pre><code>",
+    html_escape(paste(utils::capture.output(dput(raw)), collapse = "\n")),
+    "</code></pre></details></details>"
+  )
+}
+
+model_spec_preprocessing_vector <- function(values, enabled, kind) {
+  if (!length(values)) return("")
+  center <- identical(kind, "center")
+  identity <- if (center) 0 else 1
+  unchanged <- is.numeric(values) && all(is.finite(values)) && all(values == identity)
+  if (!isTRUE(enabled) && unchanged) {
+    return(paste0(
+      "<p>All ", length(values), " recorded ", if (center) "centers are 0" else "scales are 1",
+      if (center) " (no centering adjustment)." else " (no scaling adjustment).", "</p>"
+    ))
+  }
+  model_spec_table(as.list(values), if (center) "Encoded-column centers" else "Encoded-column scales")
+}
+
 explorer_model_spec_details <- function(result, id) {
   spec <- model_specification(result, id)
   model <- result$models[[id]]
@@ -308,10 +379,16 @@ explorer_model_spec_details <- function(result, id) {
     ""
   }
   recipe <- result$preprocessing_metadata$training_data$recipe
-  preprocessing <- c(
-    recipe[c("missing_value_strategy", "novel_level_strategy", "removed_columns")],
-    spec$blueprint[c("categorical_encoding", "centered", "scaled", "columns")]
+  preprocessing <- list(
+    `Missing values` = recipe$missing_value_strategy,
+    `Unseen categories` = recipe$novel_level_strategy,
+    `Removed input columns` = recipe$removed_columns,
+    `Categorical encoding` = spec$blueprint$categorical_encoding,
+    Centering = spec$blueprint$centered,
+    Scaling = spec$blueprint$scaled,
+    `Encoded input columns` = if (length(spec$blueprint$columns)) length(spec$blueprint$columns)
   )
+  preprocessing <- preprocessing[!vapply(preprocessing, is.null, logical(1))]
   if (is.null(spec$blueprint)) {
     native <- if (inherits(model, "autoxplain_fitted_model")) model$fit else model
     levels <- if (inherits(model, "H2OModel")) {
@@ -378,6 +455,7 @@ explorer_model_spec_details <- function(result, id) {
       )
     },
     "<h3>What was fitted</h3>", model_spec_table(spec$learned, "Measured structure of the retained fit"),
+    model_spec_boosting_policy(result, id),
     coefficient_html, tree_html,
     if (inherits(model, "H2OModel") && !is.null(model@model$model_summary)) {
       html_table(as.data.frame(model@model$model_summary), caption = "Fitted H2O model summary")
@@ -389,12 +467,17 @@ explorer_model_spec_details <- function(result, id) {
     if (length(tuning$requested_parameters)) model_spec_table(tuning$requested_parameters, "Requested search settings"),
     "</details><details><summary>Preprocessing and encoded inputs</summary>",
     model_spec_table(preprocessing, "Training-derived preprocessing"),
+    model_spec_preprocessing_vector(spec$blueprint$center, spec$blueprint$centered, "center"),
+    model_spec_preprocessing_vector(spec$blueprint$scale, spec$blueprint$scaled, "scale"),
+    if (length(spec$blueprint$columns)) paste0(
+      "<details><summary>Encoded input names (", length(spec$blueprint$columns), ")</summary>",
+      model_spec_table(list(Columns = spec$blueprint$columns), "Names passed to the fitted engine"), "</details>"
+    ),
     model_spec_table(recipe$imputations, "Training fill values for missing inputs"),
-    if (length(spec$blueprint$center)) model_spec_table(as.list(spec$blueprint$center), "Encoded-column centers"),
-    if (length(spec$blueprint$scale)) model_spec_table(as.list(spec$blueprint$scale), "Encoded-column scales"),
     "</details><h3>Inspect in R</h3><pre><code>", html_escape(paste0(
       "model <- result$models[[", deparse(id), "]]\n",
       "extract_model_characteristics(result)[[", deparse(id), "]]\n",
+      if (!is.null(spec$blueprint)) 'model$blueprint[c("centered", "scaled", "center", "scale")]\n',
       if (inherits(model, "autoxplain_tuned_nnet")) "model$model$wts" else "str(model, max.level = 1)"
     )), "</code></pre></div></details>"
   )

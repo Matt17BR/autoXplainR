@@ -209,7 +209,9 @@ adaptive_sample_rows <- function(rows, outcome, task, count) {
     stop("The screening sample cannot retain every outcome class.", call. = FALSE)
   }
   sizes <- lengths(strata)
-  ideal <- count * sizes / sum(sizes)
+  # Promote before multiplication: ordinary integer row counts can overflow
+  # even when the requested sample itself is small.
+  ideal <- as.double(count) * sizes / sum(sizes)
   allocated <- pmin(sizes, pmax(1L, as.integer(floor(ideal))))
   while (sum(allocated) > count) {
     removable <- which(allocated > 1L)

@@ -455,7 +455,7 @@ forest_learner_grid <- function(n, p, task, n_classes) {
   })
 }
 
-fit_forest_learner <- function(data, target, task, parameters, seed) {
+fit_forest_learner <- function(data, target, task, parameters, seed, progress = FALSE) {
   require_optional("ranger", "fitting random forests")
   features <- setdiff(names(data), target)
   effective <- effective_learner_parameters("forest", parameters, data, target)
@@ -475,7 +475,7 @@ fit_forest_learner <- function(data, target, task, parameters, seed) {
     oob.error = oob_computed,
     seed = seed,
     write.forest = TRUE,
-    verbose = FALSE
+    verbose = isTRUE(progress)
   )
   if (!identical(parameters$splitrule, "default")) {
     arguments$splitrule <- parameters$splitrule

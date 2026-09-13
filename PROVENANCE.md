@@ -6,10 +6,12 @@ rather than installed package behavior.
 
 ## Repository audit
 
-- The historical Git audit through 2026-09-07 attributes the project source,
-  documentation, tests, and generated website inputs to Matteo Mazzarelli, the
-  author and maintainer named in `DESCRIPTION`. That audit date is not a claim
-  that the subsequent 0.8.0 changes have completed their release provenance review.
+- The 2026-09-13 review covers changes from `v0.7.0` through commit
+  `23d541d1e2889da710c9fbe09252aa617f5dbf89`. All six commits record Matteo
+  Mazzarelli's account and email as author and committer. No new contributor or
+  bundled third-party implementation was identified in that review. Git
+  attribution records authorship claims; it does not independently establish
+  ownership.
 - The package includes the unmodified UMD distribution of fflate 0.8.3, with an
   added attribution header, for offline report decompression. Its MIT license
   and 2026 Arjun Barrett copyright notice are retained in
@@ -24,6 +26,13 @@ rather than installed package behavior.
   example records and fitted summaries: synthetic delivery and churn data, and
   R's `iris` data. Their generators are in `validation/`; website HTML is excluded
   from the R source archive. Screenshots show those same public examples.
+- The 0.8.0 modeling benchmarks also use UCI's YearPredictionMSD, Covertype and
+  Bank Marketing datasets. Their authors, DOIs, source links and CC BY 4.0 terms
+  are recorded in `validation/competitive-tabular/README.md`; `sources.json`
+  records the downloaded archive and member hashes. Raw observations, complete
+  predictions and fitted models remain outside Git. Committed results contain
+  compact measurements, feature summaries and file hashes. The benchmark
+  directory is excluded from the R source archive.
 - Optional model engines, reporting tools, and hosted narrative providers are
   integrations reached through declared R dependencies or user-supplied API
   endpoints. Their source code and credentials are not redistributed.

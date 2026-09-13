@@ -138,3 +138,40 @@ test_that("inspection distinguishes measurements that coincide at ordinary displ
   labels <- AutoXplainR:::report_chart_measurement_labels(c(1, 1 + 1e-12, 1 + 2e-12, 1))
   expect_identical(labels, c("1", "1.000000000001", "1.000000000002", "1"))
 })
+
+test_that("duration display preserves zero, subsecond and exact long measurements", {
+  show <- function(x) AutoXplainR:::report_resource_value(x, "training_time_ms")
+  expect_identical(
+    vapply(c(0, .125, 125, 1250, 124800, 3600000, 3661000, NA, Inf), show, character(1)),
+    c("~0 ms", "0.125 ms", "125 ms", "1.25 s", "2 min 5 s", "1 h", "1 h 1 min 1 s", "Unavailable", "Unavailable")
+  )
+  expect_identical(AutoXplainR:::report_resource_value(124800, "training_time_ms", TRUE), "124800 ms")
+  expect_identical(AutoXplainR:::report_resource_value(.125, "repeated_prediction_ms_per_row"), "0.125 ms / row")
+  expect_identical(AutoXplainR:::report_resource_value(124.8, "training_time_s"), "2 min 5 s")
+  expect_identical(AutoXplainR:::report_resource_value(0, "model_size_kb"), "0")
+})
+
+test_that("duration charts retain exact coordinates and accessible recorded values", {
+  trade <- structure(
+    data.frame(
+      model_id = c("a", "b"), model = c("A", "B"),
+      rmse = c(2, 1), training_time_ms = c(1000, 124800), pareto_optimal = c(TRUE, TRUE)
+    ),
+    performance_metric = "rmse", complexity_metric = "training_time_ms", higher_is_better = FALSE
+  )
+  html <- AutoXplainR:::tradeoff_chart(trade)
+  expect_match(html, 'data-x-format="duration-ms"', fixed = TRUE)
+  expect_match(html, 'data-x="124800"', fixed = TRUE)
+  expect_match(html, "2 min 5 s (recorded: 124800 ms)", fixed = TRUE)
+  expect_match(html, "Retained fit time", fixed = TRUE)
+  expect_match(html, "Resource values are exact recorded values", fixed = TRUE)
+  expect_identical(trade$training_time_ms, c(1000, 124800))
+  # The old chart interface still has numeric axes when no duration format exists.
+  point <- list(x = 1000, y = 2, model = "a", label = "A", color = "#17654e",
+                detail = "old measurement", frontier = "true")
+  old <- AutoXplainR:::report_chart_frame(
+    "cost", list(point), "Old numeric cost", "RMSE", "Old report", ""
+  )
+  expect_false(grepl("data-x-format=", old, fixed = TRUE))
+  expect_match(old, 'data-x="1000"', fixed = TRUE)
+})

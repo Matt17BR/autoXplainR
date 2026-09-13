@@ -95,11 +95,66 @@ test_that("a public native default reports progress at 200 rows and quiet overri
   expect_identical(automatic$result$tuning$selected_configuration, quiet$result$tuning$selected_configuration)
   expect_identical(automatic$result$tuning$out_of_fold_predictions, quiet$result$tuning$out_of_fold_predictions)
   expect_identical(predict(automatic$result, data), predict(quiet$result, data))
-  expect_identical(automatic$result$explanations$screening, quiet$result$explanations$screening)
+  automatic_explainers <- as_explainers(automatic$result)
+  quiet_explainers <- as_explainers(quiet$result)
+  fingerprints <- function(explainers) {
+    vapply(explainers, AutoXplainR:::current_explainer_fingerprint, character(1))
+  }
+  automatic_ids <- fingerprints(automatic_explainers)
+  quiet_ids <- fingerprints(quiet_explainers)
+  primary <- automatic$result$evaluation$primary_model_id
+  expect_identical(primary, quiet$result$evaluation$primary_model_id)
+  expect_true(automatic$result$models[[primary]]$fit$call$verbose)
+  expect_false(quiet$result$models[[primary]]$fit$call$verbose)
+  expect_false(identical(automatic_ids[[primary]], quiet_ids[[primary]]))
+  native_identity <- automatic$result$models[[primary]]
+  native_identity$fit$call$verbose <- quiet$result$models[[primary]]$fit$call$verbose
   expect_identical(
-    automatic$result$explanations$audit$importance_objects, quiet$result$explanations$audit$importance_objects
+    AutoXplainR:::model_identity_payload(native_identity),
+    AutoXplainR:::model_identity_payload(quiet$result$models[[primary]])
   )
-  expect_identical(automatic$result$explanations$effects, quiet$result$explanations$effects)
+  compare_bound_explanation <- function(left, right, model_id) {
+    # The truthful native call records verbose TRUE/FALSE, so model-bound
+    # identities differ. Check each binding before comparing every value and
+    # every remaining attribute; production fingerprint/cache guards stay strict.
+    expect_identical(attr(left, "explainer_fingerprint"), automatic_ids[[model_id]])
+    expect_identical(attr(right, "explainer_fingerprint"), quiet_ids[[model_id]])
+    attr(left, "explainer_fingerprint") <- NULL
+    attr(right, "explainer_fingerprint") <- NULL
+    expect_identical(left, right)
+  }
+  compare_bound_explanation(
+    automatic$result$explanations$screening,
+    quiet$result$explanations$screening, primary
+  )
+  left_importance <- automatic$result$explanations$audit$importance_objects
+  right_importance <- quiet$result$explanations$audit$importance_objects
+  expect_identical(names(left_importance), names(right_importance))
+  for (id in names(left_importance)) {
+    compare_bound_explanation(left_importance[[id]], right_importance[[id]], id)
+  }
+  left_effects <- automatic$result$explanations$effects
+  right_effects <- quiet$result$explanations$effects
+  expect_identical(names(left_effects), names(right_effects))
+  for (feature in names(left_effects)) {
+    compare_bound_explanation(left_effects[[feature]], right_effects[[feature]], primary)
+  }
+  expect_true(
+    AutoXplainR:::validate_attached_audit(
+      automatic$result$explanations$audit, automatic_explainers, automatic_ids
+    )
+  )
+  expect_true(
+    AutoXplainR:::validate_attached_audit(quiet$result$explanations$audit, quiet_explainers, quiet_ids)
+  )
+  expect_error(
+    AutoXplainR:::validate_attached_audit(automatic$result$explanations$audit, quiet_explainers),
+    "not made from the same"
+  )
+  expect_error(
+    AutoXplainR:::validate_report_effect_collection(left_effects, primary, NULL, quiet$result, quiet_ids),
+    "stale or foreign"
+  )
 })
 
 test_that("explicit progress reaches explanation and report stages with real artifacts", {

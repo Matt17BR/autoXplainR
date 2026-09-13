@@ -816,7 +816,11 @@ refit_tuned_candidates <- function(tuning,
     search_progress_fit(progress, "Full refit", configuration, nrow(data), role = role)
     fit_spec <- tuning_configuration_fit_spec(configuration, data, target)
     result <- safely_timed_model_fit(function() {
-      fitter(configuration, data, target, task)
+      if ("progress" %in% names(formals(fitter))) {
+        fitter(configuration, data, target, task, progress = isTRUE(progress))
+      } else {
+        fitter(configuration, data, target, task)
+      }
     })
     fitted_spec <- result$fit_spec
     if (is.list(fitted_spec)) {

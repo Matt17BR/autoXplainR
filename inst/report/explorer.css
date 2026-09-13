@@ -244,6 +244,11 @@
 .axr-chart-note {font-size: 12px; line-height: 1.55; color: #53665a; margin: 5px 0;}
 .axr-chart .axr-chart-values {margin-top: 6px;}
 .axr-chart .axr-chart-values summary {font-size: 12px; padding: 7px 0;}
+@media screen {
+  .comparison-chart .axr-chart > details:not([open]) {display: inline-block; vertical-align: top;
+    margin: 6px 16px 0 0; border: 0;}
+  .comparison-chart .axr-chart > details:not([open]) summary {padding: 7px 0;}
+}
 .axr-chart-tooltip {position: fixed; z-index: 110; max-width: min(340px, calc(100vw - 24px));
   padding: 9px 11px; border: 1px solid #839b89; background: #fffef9; color: #203b2a;
   box-shadow: 0 3px 12px #183d282b; font-size: 13px; line-height: 1.5; border-radius: 3px; pointer-events: none;}

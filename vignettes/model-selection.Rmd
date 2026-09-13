@@ -402,8 +402,11 @@ fits, not every competitive model or uncertainty from refitting. For multiclass
 outcomes, request a named class with `class = "virginica"`.
 
 `model_tradeoffs()` offers optional performance/resource comparisons. Its default
-size axis measures approximate R object storage, not structural complexity.
-Use it when storage or runtime is relevant to a concrete constraint; a favorable
+cost uses a recorded repeated prediction benchmark when available, then retained
+fit time, evaluation-batch prediction time, and R object size. It requires at
+least two finite score/cost pairs. Fit time excludes the search; R size includes
+retained diagnostics and excludes native allocations. Use these measurements
+for a concrete resource constraint; a favorable
 Pareto position is not a model-selection rule.
 
 For repeated prediction measurements on the same rows:

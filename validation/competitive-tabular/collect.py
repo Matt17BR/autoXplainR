@@ -3,6 +3,7 @@
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from public_results_sanitizer import publish_native_training
 import hashlib
 import json
 import os
@@ -180,9 +181,9 @@ result = {"scope": "Development only. Acceptance outcomes are not read or summar
                           "The first Year baseline supervisor did not sample RSS on timeout. Any memory checkpoint is a lower bound, not an exact peak."],
           "runs": rows}
 (destination / "development-results.json").write_text(json.dumps(result, indent=2) + "\n")
-(destination / "native-training-results.json").write_text(json.dumps({
+publish_native_training({
     "scope": "Full-training native fit-only records. Evaluation files and quality scores remain unopened by these fitting processes. Calibration metrics use training rows only.",
-    "runs": native_training}, indent=2) + "\n")
+    "runs": native_training}, destination / "native-training-results.json", cache)
 sources = json.loads((cache / "raw/sources.json").read_text())
 (destination / "sources.json").write_text(json.dumps(sources, indent=2) + "\n")
 partitions = json.loads((cache / "partitions.json").read_text())

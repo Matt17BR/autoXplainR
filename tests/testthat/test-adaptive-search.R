@@ -88,6 +88,53 @@ test_that("screening caps do not silently lose classes or discard an available r
   expect_error(sample_rows(1:100, rare, "multiclass", 2L), "every outcome class")
 })
 
+test_that("large class populations screen without integer overflow or split changes", {
+  withr::local_preserve_seed()
+  # Synthetic counts include a class represented once in each original fold.
+  # Integer training quotas times the two largest class counts exceed 2^31-1.
+  sizes <- c(220000L, 180000L, 30000L, 20000L, 10000L, 4805L, 5L)
+  data <- data.frame(x = seq_len(sum(sizes)), y = factor(rep(letters[1:7], sizes)))
+  ids <- unlist(lapply(sizes, function(n) rep(1:5, length.out = n)), use.names = FALSE)
+  partition <- AutoXplainR:::adaptive_screen_partition
+  set.seed(391L)
+  before <- .Random.seed
+  expect_warning(actual <- partition(data, "y", "multiclass", ids, 913L, 20000L), NA)
+  expect_identical(.Random.seed, before)
+  expect_length(actual$training_row, 16000L)
+  expect_length(actual$validation_row, 4000L)
+  combined <- c(actual$training_row, actual$validation_row)
+  expect_equal(anyDuplicated(combined), 0L)
+  expect_true(all(combined >= 1L & combined <= nrow(data)))
+  expect_true(all(ids[actual$training_row] != actual$fold))
+  expect_true(all(ids[actual$validation_row] == actual$fold))
+  expect_setequal(data$y[actual$training_row], levels(data$y))
+  expect_setequal(data$y[actual$validation_row], levels(data$y))
+  expect_equal(sum(data$y[actual$training_row] == "g"), 1L)
+  expect_equal(sum(data$y[actual$validation_row] == "g"), 1L)
+  expect_identical(actual$training_source_row, rownames(data)[actual$training_row])
+  expect_identical(actual$validation_source_row, rownames(data)[actual$validation_row])
+  expect_true(all(is.finite(c(actual$training_sampling_weight, actual$validation_sampling_weight))))
+  expect_equal(sum(actual$training_sampling_weight), sum(ids != actual$fold))
+  expect_equal(sum(actual$validation_sampling_weight), sum(ids == actual$fold))
+  set.seed(392L)
+  before <- .Random.seed
+  expect_identical(partition(data, "y", "multiclass", ids, 913L, 20000L), actual)
+  expect_identical(.Random.seed, before)
+  rm(".Random.seed", envir = .GlobalEnv)
+  expect_identical(partition(data, "y", "multiclass", ids, 913L, 20000L), actual)
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+})
+
+test_that("ordinary class sampling keeps its pre-overflow-fix sample", {
+  outcome <- factor(rep(c("a", "b", "c"), c(19L, 7L, 2L)))
+  # Recorded from the original integer-arithmetic implementation.
+  selected <- AutoXplainR:::with_preserved_seed(
+    91L,
+    AutoXplainR:::adaptive_sample_rows(seq_along(outcome), outcome, "multiclass", 13L)
+  )
+  expect_identical(selected, c(4L, 5L, 6L, 7L, 8L, 11L, 13L, 16L, 17L, 23L, 25L, 26L, 28L))
+})
+
 test_that("screening work limits are separate from the requested final configuration", {
   reduce <- AutoXplainR:::adaptive_screen_parameters
   forest <- list(num.trees = 800L, mtry = 7L, min.node.size = 3L, sample.fraction = .8, splitrule = "default")

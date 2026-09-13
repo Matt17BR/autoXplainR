@@ -5,10 +5,51 @@ manifest_file <- file.path(cache, "partitions.json")
 if (file.exists(manifest_file)) stop("Partitions already exist. Do not regenerate after inspecting outcomes.")
 raw <- file.path(cache, "raw")
 sources <- jsonlite::read_json(file.path(raw, "sources.json"), simplifyVector = FALSE)
+# Bind the manifest to the exact source files consumed below.
+expected_source_members <- c(yearprediction = "YearPredictionMSD.txt",
+  covertype = "covtype.data.gz", bank = "bank-additional.zip")
+source_repair <- "Rerun download.py or use a new cache; do not regenerate existing partitions."
+if (!is.list(sources) || !identical(sort(names(sources)), sort(names(expected_source_members)))) {
+  stop("Source metadata must contain exactly yearprediction, covertype and bank. ", source_repair)
+}
+for (name in names(expected_source_members)) {
+  if (!is.list(sources[[name]]) || !identical(sources[[name]]$member, unname(expected_source_members[[name]]))) {
+    stop("Source metadata has the wrong consumed member for ", name, ". ", source_repair)
+  }
+}
 for (name in names(sources)) {
   source_file <- file.path(raw, sources[[name]]$member)
   stopifnot(identical(tabular_hash(source_file), sources[[name]]$member_sha256))
 }
+# Verify extracted Bank files before any data reads or partition writes.
+verify_bank_nested_sources <- function(raw, bank_source) {
+  expected <- c("bank-additional-full.csv" = "bank-additional/bank-additional-full.csv",
+    "bank-additional-names.txt" = "bank-additional/bank-additional-names.txt")
+  repair <- paste("Rerun download.py to record and verify nested members, or use a new cache;",
+    "do not regenerate existing partitions.")
+  if (!is.list(bank_source) || !is.list(bank_source$nested_members)) {
+    stop("Bank nested-member metadata is missing or invalid. ", repair)
+  }
+  nested <- bank_source$nested_members
+  for (filename in names(expected)) {
+    metadata <- nested[[filename]]
+    valid <- is.list(metadata) && identical(metadata$member, unname(expected[[filename]])) &&
+      is.character(metadata$sha256) && length(metadata$sha256) == 1L &&
+      !is.na(metadata$sha256) && grepl("^[0-9a-f]{64}$", metadata$sha256) &&
+      is.numeric(metadata$bytes) && length(metadata$bytes) == 1L &&
+      is.finite(metadata$bytes) && metadata$bytes > 0 && metadata$bytes == floor(metadata$bytes)
+    if (!valid) stop("Bank nested-member metadata is missing or invalid for ", filename, ". ", repair)
+    path <- file.path(raw, filename)
+    info <- file.info(path)
+    if (!file.exists(path) || isTRUE(info$isdir) || !identical(unname(info$size), as.numeric(metadata$bytes)) ||
+        !identical(tabular_hash(path), metadata$sha256)) {
+      stop("Bank extracted source is missing or changed: ", filename, ". ", repair)
+    }
+  }
+  invisible(TRUE)
+}
+verify_bank_nested_sources(raw, sources$bank)
+
 data.table::setDTthreads(1L)
 cases <- list()
 save_partition <- function(name, task, data, training_rows, evaluation_rows, phase, source) {

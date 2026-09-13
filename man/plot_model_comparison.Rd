@@ -18,7 +18,8 @@ plot_model_comparison(
 \code{NULL}.}
 
 \item{complexity_metric}{Optional numeric leaderboard or model-metadata
-column. Model size is preferred when \code{NULL}.}
+column. \code{NULL} prefers usable repeated prediction timing, retained fit time,
+evaluation-batch prediction time, then model size.}
 
 \item{title}{Plot title.}
 }

@@ -35,6 +35,7 @@ jobs:
           dependencies: '"hard"'
           extra-packages: >-
             any::covr,
+            any::data.table,
             any::devtools,
             any::e1071,
             any::earth,
@@ -49,6 +50,12 @@ jobs:
             any::spelling,
             any::testthat,
             any::xgboost
+      - name: Verify benchmark source and publication guards
+        run: |
+          python3 -B validation/competitive-tabular/test-download-sources.py
+          Rscript --vanilla validation/competitive-tabular/test-prepare-consumed-sources.R
+          python3 -B validation/competitive-tabular/test-public-results-sanitizer.py
+          python3 -B validation/competitive-tabular/test-public-results-sanitizer.py --integration-gate
       - name: Verify generated documentation
         run: |
           roxygen2::roxygenise(".")

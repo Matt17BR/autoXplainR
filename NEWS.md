@@ -21,6 +21,8 @@
   process and job limits; explicit thread counts remain available.
   Tuned forest and boosting workflows show progress automatically from 200
   input rows, including periodic counts of completed importance shuffles.
+  Long forest fits also report completed-tree progress and an approximate
+  remaining time from ranger.
   `verbosity = "quiet"` remains available. Final refits and report work are
   outside the optional search time budget. Progress message handlers cannot
   change the random draws used for fitting or explanations.
@@ -44,6 +46,8 @@
 - Mixed multiclass searches bind forest and boosting probability records
   without relying on native matrix row names. This fixes a crash after CV while
   preserving each prediction's source row and class order.
+- Class-based screening and sampled report exports avoid integer overflow on
+  large datasets. Ordinary sample allocations and random draws are preserved.
 - Report preparation reuses full predictions within one computation and shares
   identical probability batches across class-specific effect curves. Repeated
   shuffles, scores, effect estimates and uncertainty calculations are preserved.
@@ -55,6 +59,14 @@
 - Summary reports include a complete R command for exporting linked individual
   error records. The command reuses the fitted result and creates a separate
   HTML file, with the exported data scope explained beside it.
+- Cost comparisons prefer a usable repeated prediction benchmark, then retained
+  fit time, batch prediction time and R object size. Durations use readable
+  units; exact measurements and Pareto calculations are unchanged. Resource
+  scope is visible beside the chart, including excluded native allocations.
+- Model details separate the search's encoding policy from the representation
+  passed to XGBoost. No-op centering and scaling vectors are summarized;
+  applied transformations and raw metadata remain inspectable. The Records
+  view identifies exported rows and hides controls that need absent records.
 
 # AutoXplainR 0.7.0
 

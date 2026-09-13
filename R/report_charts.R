@@ -93,7 +93,8 @@ report_chart_table <- function(rows, caption, method_note = NULL) {
 report_chart_frame <- function(kind, points, x_label, y_label, caption, table,
                                note = "", primary_model = NULL, zero = FALSE,
                                interval_note = NULL, reference = NULL,
-                               x_limits = NULL, y_limits = NULL, short_note = NULL) {
+                               x_limits = NULL, y_limits = NULL, short_note = NULL,
+                               x_format = NULL) {
   for (limits in list(x_limits, y_limits)) {
     if (is.null(limits)) next
     valid <- is.numeric(limits) && length(limits) == 2L &&
@@ -103,7 +104,7 @@ report_chart_frame <- function(kind, points, x_label, y_label, caption, table,
     }
   }
   attrs <- list(
-    kind = kind, `x-label` = x_label, `y-label` = y_label,
+    kind = kind, `x-label` = x_label, `y-label` = y_label, `x-format` = x_format,
     `primary-model` = primary_model, zero = if (zero) "true" else "false", reference = reference,
     `x-min` = x_limits[1], `x-max` = x_limits[2], `y-min` = y_limits[1], `y-max` = y_limits[2]
   )
@@ -115,7 +116,8 @@ report_chart_frame <- function(kind, points, x_label, y_label, caption, table,
   paste0(
     '<figure class="axr-chart"', report_chart_attrs(attrs), "><figcaption>", html_escape(caption),
     '</figcaption><div class="axr-chart-viewport">',
-    report_chart_fallback(kind, fallback_points, x_label, y_label, zero, reference, x_limits, y_limits), "</div>",
+    report_chart_fallback(kind, fallback_points, x_label, y_label, zero, reference, x_limits, y_limits, x_format),
+    "</div>",
     paste(vapply(points, report_chart_source, character(1)), collapse = ""),
     '<p class="axr-chart-detail" aria-live="polite">',
     "Values and support are available in the following table.</p>",
@@ -147,16 +149,19 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   labels <- vapply(seq_len(nrow(tradeoffs)), function(i) {
     report_chart_label(result, tradeoffs$model_id[i], tradeoffs$model[i])
   }, character(1))
-  x_label <- switch(resource,
-    training_time_ms = "Fit time (ms)",
-    prediction_time_ms = "Batch prediction time (ms)",
-    model_size_kb = "R object size (KiB)",
-    pretty_complexity(resource)
-  )
+  x_label <- report_resource_label(resource, result)
+  x_format <- report_resource_format(resource)
   unit <- if (metric %in% c("rmse", "mae")) result$provenance$target_units else NULL
   y_label <- paste0(pretty_metric(metric), if (!is.null(unit)) paste0(" (", unit, ")"))
   score_labels <- report_chart_measurement_labels(tradeoffs[[metric]])
-  resource_labels <- report_chart_measurement_labels(tradeoffs[[resource]])
+  resource_labels <- if (is.null(x_format)) {
+    report_chart_measurement_labels(tradeoffs[[resource]])
+  } else {
+    vapply(tradeoffs[[resource]], function(value) {
+      paste0(report_resource_value(value, resource), " (recorded: ",
+             report_resource_value(value, resource, exact = TRUE), ")")
+    }, character(1))
+  }
   points <- lapply(seq_len(nrow(tradeoffs)), function(i) {
     list(
       x = tradeoffs[[resource]][i], y = tradeoffs[[metric]][i], model = tradeoffs$model_id[i],
@@ -170,7 +175,8 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
     )
   })
   rows <- data.frame(
-    Model = labels, Score = tradeoffs[[metric]], Resource = tradeoffs[[resource]],
+    Model = labels, Score = tradeoffs[[metric]],
+    Resource = vapply(tradeoffs[[resource]], report_resource_value, character(1), metric = resource, exact = TRUE),
     `Not dominated` = tradeoffs$pareto_optimal, check.names = FALSE
   )
   names(rows)[2:3] <- c(y_label, x_label)
@@ -190,7 +196,11 @@ tradeoff_chart <- function(tradeoffs, result = NULL) {
   }
   report_chart_frame(
     "cost", points, x_label, y_label, "Predictive score and measured resource use",
-    report_chart_table(rows, "Retained model scores and resource measurements"), note,
+    report_chart_table(
+      rows, "Retained model scores and resource measurements",
+      "Resource values are exact recorded values in their original units; readable durations are rounded."
+    ), note,
+    x_format = x_format,
     short_note = if (nrow(report_chart_frontier_points(points)) > 1L) {
       "Pareto frontier (dashed): best observed score within each resource budget."
     } else {
@@ -372,12 +382,15 @@ report_chart_svg_text <- function(value, x, y, width = 300, anchor = "start", cl
 }
 
 report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, reference = NULL,
-                                  x_limits = NULL, y_limits = NULL) {
+                                  x_limits = NULL, y_limits = NULL, x_format = NULL) {
   width <- 300
   categorical <- identical(kind, "category")
   histogram <- identical(kind, "histogram")
   cost <- identical(kind, "cost")
   axis_number <- if (cost) report_chart_axis_number else report_axis_number
+  x_axis_number <- if (cost && !is.null(x_format)) function(value) {
+    report_duration(if (x_format == "duration-s") value else value / 1000, zero = "0 ms")
+  } else axis_number
   categories <- unique(vapply(points, function(point) point$category %||% "", character(1)))
   left <- if (categorical) 112 else 48
   label_width <- 126
@@ -445,7 +458,7 @@ report_chart_fallback <- function(kind, points, x_label, y_label, zero = FALSE, 
           '" y1="', top, '" y2="', bottom, '"/>'
         )
       },
-      report_chart_svg_text(axis_number(value), px(value), bottom + 20, anchor = "middle")
+      report_chart_svg_text(x_axis_number(value), px(value), bottom + 20, anchor = "middle")
     )
   }, character(1)), collapse = "")
   vertical <- if (!categorical) {

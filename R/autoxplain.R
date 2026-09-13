@@ -102,8 +102,10 @@
 #'   progress regardless of size; `"quiet"` suppresses progress. Messages identify
 #'   screening settings, CV folds, full refits, evaluation, explanations and report
 #'   writing. During input importance, completed shuffle counts are printed at
-#'   most every 30 seconds. A single fit or prediction can still take time between
-#'   messages; no completion-time estimate is implied. Warnings are unchanged.
+#'   most every 30 seconds. Long forest fits also print ranger's completed-tree
+#'   progress and approximate remaining-time estimate. Native updates depend on
+#'   completed work, so a fit or prediction can take time between messages.
+#'   Warnings are unchanged.
 #' @param evaluation_role How to describe the evaluation rows. `"auto"` labels
 #'   package-generated outer splits as `"test"`, supplied data as the neutral
 #'   `"evaluation"`, and data actually used for H2O selection as

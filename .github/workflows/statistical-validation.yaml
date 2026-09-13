@@ -18,7 +18,13 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::pkgload, any::iml, any::testthat
+          extra-packages: any::pkgload, any::iml, any::testthat, any::data.table
+      - name: Verify benchmark source and publication guards
+        run: |
+          python3 -B validation/competitive-tabular/test-download-sources.py
+          Rscript --vanilla validation/competitive-tabular/test-prepare-consumed-sources.R
+          python3 -B validation/competitive-tabular/test-public-results-sanitizer.py
+          python3 -B validation/competitive-tabular/test-public-results-sanitizer.py --integration-gate
       - name: Compare numerical output and record coverage simulation
         run: |
           Rscript validation/check-tuning-mutation.R

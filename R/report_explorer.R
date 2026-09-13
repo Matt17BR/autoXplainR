@@ -36,7 +36,7 @@ explorer_models <- function(result) {
   metrics <- intersect(names(result$evaluation$metric_definitions), names(board))
   if (!length(metrics)) metrics <- intersect(c("rmse", "mae", "logloss", "auc"), names(board))
   resources <- intersect(
-    c("repeated_prediction_ms_per_row", "model_size_kb", "training_time_ms", "prediction_time_ms"), names(board)
+    setdiff(tradeoff_resource_order(), c("size_mb", "model_size", "complexity")), names(board)
   )
   for (column in c(metrics, resources)) {
     if (!is.numeric(board[[column]])) stop("Report measurements must be numeric.", call. = FALSE)
@@ -44,7 +44,9 @@ explorer_models <- function(result) {
   resources <- resources[vapply(resources, function(column) any(is.finite(board[[column]])), logical(1))]
   # Start with a cost that can actually compare the displayed models. A partial
   # benchmark remains inspectable without making an empty chart the default.
-  comparable <- vapply(resources, function(column) sum(is.finite(board[[column]])) >= min(2L, nrow(board)), logical(1))
+  primary <- result$evaluation$primary_metric
+  if (is.null(primary) || !primary %in% metrics) primary <- if (length(metrics)) metrics[[1L]] else NULL
+  comparable <- tradeoff_resource_support(board, resources, primary) >= min(2L, nrow(board))
   resources <- resources[order(!comparable)]
   list(table = board, metrics = metrics, resources = resources)
 }
@@ -59,6 +61,79 @@ explorer_measurement <- function(x, resource = FALSE) {
   format(signif(x, 4), trim = TRUE, scientific = FALSE)
 }
 
+report_duration <- function(seconds, zero = "~0 ms") {
+  if (!is.finite(seconds)) return("Unavailable")
+  if (seconds < 0) return(paste0("-", report_duration(-seconds, zero)))
+  if (seconds == 0) return(zero)
+  number <- function(x) format(signif(x, 4L), trim = TRUE, scientific = FALSE)
+  if (seconds < 1) return(paste(number(seconds * 1000), "ms"))
+  if (seconds < 60) return(paste(number(seconds), "s"))
+  whole <- floor(seconds + .5)
+  hours <- floor(whole / 3600)
+  minutes <- floor((whole %% 3600) / 60)
+  seconds <- whole %% 60
+  parts <- c(
+    if (hours > 0) paste(hours, "h"), if (minutes > 0) paste(minutes, "min"),
+    if (seconds > 0) paste(seconds, "s")
+  )
+  paste(parts, collapse = " ")
+}
+
+report_resource_format <- function(metric) {
+  if (metric %in% c("training_time_ms", "prediction_time_ms")) return("duration-ms")
+  if (identical(metric, "training_time_s")) return("duration-s")
+  if (identical(metric, "repeated_prediction_ms_per_row")) return("duration-ms-per-row")
+  NULL
+}
+
+report_resource_value <- function(value, metric, exact = FALSE) {
+  if (!is.finite(value)) return("Unavailable")
+  style <- report_resource_format(metric)
+  if (is.null(style)) return(if (exact) sprintf("%.17g", value) else explorer_measurement(value))
+  unit <- switch(style, `duration-ms` = "ms", `duration-s` = "s", `duration-ms-per-row` = "ms / row")
+  if (exact) return(paste(sprintf("%.17g", value), unit))
+  duration <- report_duration(if (style == "duration-s") value else value / 1000)
+  paste0(duration, if (style == "duration-ms-per-row") " / row")
+}
+
+report_resource_label <- function(metric, result = NULL) {
+  if (metric %in% c("training_time_ms", "training_time_s")) return("Retained fit time")
+  switch(
+    metric,
+    prediction_time_ms = "Evaluation-batch prediction time",
+    repeated_prediction_ms_per_row = "Repeated prediction / row",
+    model_size_kb = if (identical(result$engine, "h2o")) "Reported model size (KiB)" else "R object size (KiB)",
+    pretty_complexity(metric)
+  )
+}
+
+report_resource_scope <- function(metric, result = NULL) {
+  if (metric %in% c("training_time_ms", "training_time_s")) return(paste(
+    "Time for the retained fit, excluding the search. Timings describe this machine;",
+    "small differences may reflect timer resolution."
+  ))
+  switch(
+    metric,
+    prediction_time_ms = paste(
+      "One prediction call on the evaluation batch, excluding metric calculation.",
+      "Small differences may reflect timer resolution."
+    ),
+    repeated_prediction_ms_per_row =
+      "Repeated common-batch timing divided by batch rows; this is not single-row request latency.",
+    model_size_kb = if (identical(result$engine, "h2o")) {
+      paste(
+        "H2O size is engine-reported; the baseline uses R object size.",
+        "These are not comparable deployment-memory measurements."
+      )
+    } else {
+      paste(
+        "R object size includes retained diagnostics and may count shared data repeatedly.",
+        "Native allocations are excluded; this is not deployment memory."
+      )
+    }, "Recorded resource measurement; inspect its units and scope before comparing models."
+  )
+}
+
 explorer_model_table <- function(result, models) {
   board <- models$table
   primary <- result$provenance$primary_model_id
@@ -69,18 +144,27 @@ explorer_model_table <- function(result, models) {
   } else {
     "Default prediction"
   }
-  resources <- c(
-    training_time_ms = "Fit (ms)", prediction_time_ms = "Predict batch (ms)", model_size_kb = "Size (KiB)",
-    repeated_prediction_ms_per_row = "Repeated predict (ms / row)"
-  )
+  resources <- vapply(models$resources, function(key) {
+    if (key %in% c("training_time_ms", "training_time_s")) return("Fit time")
+    switch(key,
+      prediction_time_ms = "Predict batch",
+      repeated_prediction_ms_per_row = "Predict / row",
+      model_size_kb = if (identical(result$engine, "h2o")) "Reported KiB" else "R size (KiB)",
+      report_resource_label(key, result)
+    )
+  }, character(1))
   headers <- paste0('<th scope="col" data-score-column="', models$metrics, '">',
     '<button type="button" data-sort="', models$metrics, '">',
     html_escape(vapply(models$metrics, pretty_metric, character(1))), ' <span aria-hidden="true">\u2195</span>',
     "</button></th>",
     collapse = ""
   )
+  resource_names <- vapply(models$resources, report_resource_label, character(1), result = result)
+  resource_scopes <- vapply(models$resources, report_resource_scope, character(1), result = result)
   headers <- paste0(headers, paste0('<th scope="col"><button type="button" data-sort="',
-    models$resources, '">', resources[models$resources], ' <span aria-hidden="true">\u2195</span></button></th>',
+    models$resources, '" aria-label="', html_escape(paste(resources, resource_names, sep = ": ")), '" title="',
+    html_escape(paste(resource_names, resource_scopes, sep = ": ")), '">',
+    html_escape(resources), ' <span aria-hidden="true">\u2195</span></button></th>',
     collapse = ""
   ))
   rows <- vapply(seq_len(nrow(board)), function(i) {
@@ -97,7 +181,12 @@ explorer_model_table <- function(result, models) {
     )
     costs <- paste0('<td class="number">',
       vapply(
-        models$resources, function(key) explorer_measurement(board[[key]][i], key != "model_size_kb"),
+        models$resources, function(key) {
+          paste0(
+            '<span title="', html_escape(report_resource_value(board[[key]][i], key, exact = TRUE)), '">',
+            html_escape(report_resource_value(board[[key]][i], key)), "</span>"
+          )
+        },
         character(1)
       ), "</td>",
       collapse = ""
@@ -124,9 +213,8 @@ explorer_model_table <- function(result, models) {
 
 explorer_tradeoffs <- function(result, models) {
   if (nrow(models$table) < 2L || !length(models$resources)) return("")
-  resources <- c(
-    training_time_ms = "Training time (ms)", prediction_time_ms = "Prediction time (ms)",
-    model_size_kb = "Model size (KiB)", repeated_prediction_ms_per_row = "Repeated prediction (ms / row)"
+  resources <- stats::setNames(
+    vapply(models$resources, report_resource_label, character(1), result = result), models$resources
   )
   plots <- lapply(models$metrics, function(metric) {
     paste(vapply(models$resources, function(resource) {
@@ -137,7 +225,11 @@ explorer_tradeoffs <- function(result, models) {
         trade$model <- vapply(trade$model_id, function(id) explorer_label(result, id), character(1))
         tradeoff_chart(trade, result)
       }
-      paste0('<div data-cost-plot="', metric, '" data-resource="', resource, '">', content, "</div>")
+      paste0(
+        '<div data-cost-plot="', metric, '" data-resource="', resource, '">',
+        '<p class="microcopy cost-measurement-scope">', html_escape(report_resource_scope(resource, result)), "</p>",
+        content, "</div>"
+      )
     }, character(1)), collapse = "")
   })
   paste0(

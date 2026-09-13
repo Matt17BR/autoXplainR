@@ -963,7 +963,8 @@ score_tuning_configuration <- function(configuration,
                                        fold_id,
                                        metric = if (task == "regression") "rmse" else "log_loss",
                                        retain_oof = TRUE,
-                                       failure_policy = "continue") {
+                                       failure_policy = "continue",
+                                       progress = FALSE) {
   started <- proc.time()[["elapsed"]]
   error <- ""
   fit_warning <- character()
@@ -985,7 +986,8 @@ score_tuning_configuration <- function(configuration,
           task,
           fit_spec = fit_spec,
           fit_scope = fold$fit_scope %||% "resampling_fold",
-          calibration = fold$boosting_calibration
+          calibration = fold$boosting_calibration,
+          progress = progress
         )
         fitted_spec <- attr(model, "autoxplain_tuning_fit")
         if (is.list(fitted_spec)) {
@@ -1413,12 +1415,12 @@ tuning_fold_uncertainty <- function(scores, validation_rows, metric) {
 }
 
 fit_tuning_configuration <- function(configuration, data, target, task, fit_spec = NULL,
-                                     fit_scope = "full_training_refit", calibration = NULL) {
+                                     fit_scope = "full_training_refit", calibration = NULL, progress = FALSE) {
   work <- new.env(parent = emptyenv())
   work$calibration_fit_attempts <- 0L
   work$model_fit_attempts <- 0L
   tryCatch(
-    fit_tuning_configuration_work(configuration, data, target, task, fit_spec, fit_scope, calibration, work),
+    fit_tuning_configuration_work(configuration, data, target, task, fit_spec, fit_scope, calibration, work, progress),
     error = function(condition) {
       condition$fit_work <- list(
         calibration_fit_attempts = work$calibration_fit_attempts, model_fit_attempts = work$model_fit_attempts
@@ -1437,7 +1439,7 @@ fit_tuning_configuration_work <- function(configuration,
                                           fit_spec = NULL,
                                           fit_scope = "full_training_refit",
                                           calibration = NULL,
-                                          work) {
+                                          work, progress = FALSE) {
   family <- configuration$family[[1L]]
   definition <- learner_definition(family)
   fit_spec <- fit_spec %||% tuning_configuration_fit_spec(
@@ -1500,13 +1502,22 @@ fit_tuning_configuration_work <- function(configuration,
   work$model_fit_attempts <- 1L
   model <- with_preserved_seed(
     fit_spec$fit_seed,
-    definition$fit(
-      data = data,
-      target = target,
-      task = task,
-      parameters = fit_parameters,
-      seed = fit_spec$fit_seed
-    )
+    if (family == "forest" && "progress" %in% names(formals(definition$fit))) {
+      # Runtime display policy is separate from parameters, keys and seeds.
+      # Legacy/custom fit functions retain their existing argument contract.
+      definition$fit(
+        data = data, target = target, task = task,
+        parameters = fit_parameters, seed = fit_spec$fit_seed, progress = isTRUE(progress)
+      )
+    } else {
+      definition$fit(
+        data = data,
+        target = target,
+        task = task,
+        parameters = fit_parameters,
+        seed = fit_spec$fit_seed
+      )
+    }
   )
   if (!is.null(round_selection)) model$fit_details$round_selection <- round_selection
   if (!is.null(forest_budget)) model$fit_details$forest_budget <- forest_budget

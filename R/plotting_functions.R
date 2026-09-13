@@ -260,7 +260,8 @@ plot_model_correlations <- function(autoxplain_result, test_data = NULL) {
 #' @param performance_metric Leaderboard metric; automatically selected when
 #'   `NULL`.
 #' @param complexity_metric Optional numeric leaderboard or model-metadata
-#'   column. Model size is preferred when `NULL`.
+#'   column. `NULL` prefers usable repeated prediction timing, retained fit time,
+#'   evaluation-batch prediction time, then model size.
 #' @param title Plot title.
 #'
 #' @return A Plotly scatter plot.
@@ -278,8 +279,24 @@ plot_model_comparison <- function(autoxplain_result,
   performance_metric <- attr(tradeoffs, "performance_metric")
   complexity_metric <- attr(tradeoffs, "complexity_metric")
   performance_label <- pretty_metric(performance_metric)
-  resource_label <- pretty_complexity(complexity_metric)
+  resource_label <- report_resource_label(complexity_metric, autoxplain_result)
+  resource_format <- report_resource_format(complexity_metric)
   tradeoffs$pareto_status <- ifelse(tradeoffs$pareto_optimal, "Pareto-efficient", "Dominated")
+  tradeoffs$resource_detail <- vapply(tradeoffs[[complexity_metric]], function(value) {
+    paste0(
+      report_resource_value(value, complexity_metric), " (recorded: ",
+      report_resource_value(value, complexity_metric, exact = TRUE), ")"
+    )
+  }, character(1))
+  tradeoffs$inspection <- paste(tradeoffs$resource_detail, tradeoffs$pareto_status, sep = "<br>")
+  cost_axis <- list(title = resource_label)
+  if (!is.null(resource_format)) {
+    ticks <- pretty(range(tradeoffs[[complexity_metric]]), n = 4L)
+    cost_axis <- c(cost_axis, list(
+      tickmode = "array", tickvals = ticks,
+      ticktext = vapply(ticks, report_resource_value, character(1), metric = complexity_metric)
+    ))
+  }
   plot <- plotly::plot_ly(
     tradeoffs,
     x = tradeoffs[[complexity_metric]],
@@ -291,10 +308,10 @@ plot_model_comparison <- function(autoxplain_result,
     mode = "markers",
     marker = list(size = 12, line = list(width = 1, color = "#ffffff")),
     hovertemplate = paste0(
-      "<b>%{text}</b><br>", resource_label, ": %{x}<br>",
+      "<b>%{text}</b><br>", resource_label, "<br>",
       performance_label, ": %{y:.5f}<br>%{customdata}<extra></extra>"
     ),
-    customdata = ~pareto_status
+    customdata = ~inspection
   )
   frontier <- tradeoffs[tradeoffs$pareto_optimal, , drop = FALSE]
   frontier <- frontier[order(frontier[[complexity_metric]]), , drop = FALSE]
@@ -313,7 +330,7 @@ plot_model_comparison <- function(autoxplain_result,
   plot |>
     plotly::layout(
       title = title,
-      xaxis = list(title = resource_label),
+      xaxis = cost_axis,
       yaxis = list(title = performance_label),
       margin = list(l = 70, r = 25, t = 55, b = 65),
       legend = list(orientation = "h", x = 0, y = -0.2)
