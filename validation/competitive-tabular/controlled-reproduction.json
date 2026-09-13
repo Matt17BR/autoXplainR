@@ -1,0 +1,35 @@
+{
+  "status": "ok",
+  "generator_sha256": "d154148366a3510747a89bc90de2be5cb6a220c5390aabb65d70d51d2670319f",
+  "scope": "Recreated controlled development partitions without using a previous cache as input. Compared complete generated data and all serialized partition files with the frozen originals.",
+  "cases": {
+    "friedman_noise": {
+      "training.rds": {
+        "sha256": "eda617d7cd8c61354ace450b5a6678be551069218bc1c9935e53e0b2d0fe08d9",
+        "byte_identical": true
+      },
+      "evaluation-features.rds": {
+        "sha256": "c803160cecf34f32bfbcf9a47d20bb350b9819cac094428fb23b83b6fe2fd1ac",
+        "byte_identical": true
+      },
+      "evaluation-targets.rds": {
+        "sha256": "1100de1f76cbcd40bcf923299a4717d35a3918784d732a94727c48b0115e4498",
+        "byte_identical": true
+      }
+    },
+    "rare_interaction": {
+      "training.rds": {
+        "sha256": "beb9943955ec91e162751fa02900fc96b02b32f351af716b76eafdb502cbacc2",
+        "byte_identical": true
+      },
+      "evaluation-features.rds": {
+        "sha256": "185e5315784c82bb6a8c4978ecab023b037dca77ea8ae2bd2c79adf202af2994",
+        "byte_identical": true
+      },
+      "evaluation-targets.rds": {
+        "sha256": "3a8ffbdd63f89a24b7c6fc582fc0b2389f8327bd817a1a16bd6a775cb0c363ac",
+        "byte_identical": true
+      }
+    }
+  }
+}

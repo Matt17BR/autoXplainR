@@ -6,13 +6,56 @@ prepare_report_context <- function(result, models = NULL) {
   explainers <- result_explainers(result, models = models)
   validate_evaluation_snapshot(result)
   validate_recorded_evaluation(result, explainers)
+  reference_fingerprints <- character(length(explainers))
+  for (index in seq_along(explainers)) {
+    same <- which(vapply(seq_len(index - 1L), function(previous) {
+      identical(explainers[[index]]$data, explainers[[previous]]$data)
+    }, logical(1)))
+    reference_fingerprints[[index]] <- if (length(same)) {
+      reference_fingerprints[[same[[1L]]]]
+    } else {
+      content_fingerprint(explainers[[index]]$data)
+    }
+  }
+  names(reference_fingerprints) <- names(explainers)
   structure(list(
     explainers = explainers,
     predictions = lapply(explainers, function(explainer) explainer$reference_predictions),
     fingerprints = vapply(explainers, function(explainer) {
       explainer$provenance$fingerprint
-    }, character(1))
+    }, character(1)),
+    reference_fingerprints = reference_fingerprints
   ), class = "autoxplain_report_context")
+}
+
+# Private workers may reuse only the context supplied by their current report
+# computation. Public explanation functions never infer permission from a saved
+# attribute. Mutable lexical state is checked again when computation completes.
+explanation_context_values <- function(explainer, prediction_context) {
+  if (is.null(prediction_context)) return(NULL)
+  id <- explainer$label
+  invalid <- function() {
+    stop("Explanation context does not match this model and ordered evaluation data.", call. = FALSE)
+  }
+  if (!inherits(prediction_context, "autoxplain_report_context") ||
+        length(id) != 1L || is.na(id) || !id %in% names(prediction_context$explainers)) invalid()
+  reference <- prediction_context$explainers[[id]]
+  fields <- c("model", "predict_function", "data", "y", "task", "positive", "class_levels")
+  if (!all(vapply(fields, function(field) identical(explainer[[field]], reference[[field]]), logical(1))) ||
+        !identical(explainer$provenance$fingerprint, prediction_context$fingerprints[[id]])) invalid()
+  list(predictions = prediction_context$predictions[[id]],
+       fingerprint = prediction_context$fingerprints[[id]],
+       reference_fingerprint = prediction_context$reference_fingerprints[[id]])
+}
+
+validate_explanation_context <- function(prediction_context) {
+  if (is.null(prediction_context)) return(invisible(TRUE))
+  current <- vapply(prediction_context$explainers, current_explainer_fingerprint, character(1))
+  if (!identical(current, prediction_context$fingerprints)) {
+    stop("Prediction state changed during explanation computation. Re-evaluate the models before reporting.",
+         call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 report_explainers <- function(result, models = NULL) {
@@ -142,11 +185,14 @@ validate_report_effect_collection <- function(values, id, prediction_class,
 # Explicit effects replace the primary model's displayed curves across classes.
 # Other models retain their independently validated evidence. Empty means none;
 # it never silently requests recomputation of the old primary curves.
-prepare_report_effects <- function(result, audit, effects = NULL, explicit_effects = FALSE) {
+prepare_report_effects <- function(result, audit, effects = NULL, explicit_effects = FALSE,
+                                   validate_context = TRUE, progress = FALSE) {
   primary <- result$provenance$primary_model_id %||% names(result$models)[[1L]]
   multiclass <- identical(result$task, "multiclass")
   classes <- if (multiclass) result_class_levels(result) else NA_character_
   ids <- names(audit$importance_objects)
+  if (is.null(result$.report_context)) result$.report_context <- prepare_report_context(result, models = ids)
+  prediction_context <- result$.report_context
   explainers <- report_explainers(result, models = ids)
   fingerprints <- report_fingerprints(result, models = ids, explainers = explainers)
   result$explanations$audit <- audit
@@ -185,6 +231,7 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
     }
     validate_report_effect_collection(effects[feature], primary, class, result, fingerprints)
   }
+  effect_bundles <- list()
   output <- lapply(classes, function(class) {
     saved <- if (multiclass) result$explanations$effects_by_class[[class]] else NULL
     if (!multiclass || identical(class, classes[[1L]])) {
@@ -224,17 +271,22 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
       }
       rows <- audit$importance[audit$importance$model == id, , drop = FALSE]
       features <- head(rows$feature[order(-rows$importance)], result$explanations$config$top_features %||% 8L)
+      if (is.null(effect_bundles[[id]])) {
+        explanation_progress(
+          progress, "Computing effect curves", explainers[[id]], features, result$explanations$config$explanation_rows
+        )
+      }
       stats::setNames(lapply(features, function(feature) {
         method <- if (is.numeric(explainers[[id]]$data[[feature]])) "ale" else "pdp"
-        tryCatch(
-          explain_effect(explainers[[id]], feature,
+        if (is.null(effect_bundles[[id]][[feature]])) {
+          effect_bundles[[id]][[feature]] <<- explain_effect_bundle(explainers[[id]], feature,
             method = method,
             n_points = 16L, seed = result$provenance$seed,
             max_rows = result$explanations$config$explanation_rows,
-            class = if (multiclass) class else NULL
-          ),
-          error = function(error) structure(conditionMessage(error), class = "effect_failure", method = method)
-        )
+            classes = classes, prediction_context = prediction_context
+          )
+        }
+        effect_bundles[[id]][[feature]][[if (multiclass) class else 1L]]
       }), features)
     })
     stats::setNames(values, ids)
@@ -245,5 +297,6 @@ prepare_report_effects <- function(result, audit, effects = NULL, explicit_effec
     result$explanations$effects <- Filter(function(effect) !inherits(effect, "effect_failure"), output[[1L]][[primary]])
   }
   result$explanations$effect_status <- report_effect_status(result)
+  if (isTRUE(validate_context) && length(effect_bundles)) validate_explanation_context(prediction_context)
   result
 }

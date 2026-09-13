@@ -19,14 +19,17 @@ analysis; smaller values are useful for examples and software tests.}
 \value{
 An \code{autoxplain_uncertainty} list with \code{estimates} (primary, baseline,
 and paired difference), all \code{draws}, resampling \code{unit}, and interpretation
-\code{notes}. Losses are RMSE or MAE for regression, log loss or Brier for
-classification, following the fitted result's primary metric.
+\code{notes}. Metrics are RMSE, RMSLE or MAE for regression; log loss, Brier,
+or binary ROC AUC for classification, following the fitted result's primary
+metric. For AUC, \code{bootstrap} records retained and discarded draw counts and
+identities; \code{n_boot} remains the number requested.
 }
 \description{
 Resamples evaluation observations, using the same sampled rows for the primary
 model and designated reference model (the intercept-only baseline in guided
-workflows). The models stay fixed. The difference is primary loss minus
-reference loss, so negative values favor the primary model.
+workflows). The models stay fixed. The difference is primary score minus
+reference score. Positive differences favor the primary for AUC;
+negative differences favor the primary for losses.
 This estimates evaluation-sample variability conditional on the fitted models;
 it does not include fitting, tuning, or feature-selection uncertainty.
 }
@@ -40,8 +43,16 @@ rejected because an IID bootstrap would ignore serial dependence.
 
 Intervals are approximate, can be unreliable in small or degenerate samples,
 and are not simultaneous across metrics or model comparisons. The configured
-primary loss is used; no model is selected using these intervals. A
+primary metric is used; no model is selected using these intervals. A
 validation-set interval does not make that set an independent test set.
+
+Binary AUC is computed from positive-negative pairs within each resampled
+evaluation set, with half credit for tied probabilities. Draws containing
+only one class are discarded and their IDs are retained in \code{bootstrap}.
+At least 20 usable draws and 80\% of the requested draws are required.
+This availability rule does not guarantee interval accuracy. When any
+draws are removed, the interval is conditional on sampling both classes.
+RMSLE requires nonnegative outcomes and predictions; negatives are not clipped.
 }
 \examples{
 result <- autoxplain(mtcars, "mpg", explain = FALSE)

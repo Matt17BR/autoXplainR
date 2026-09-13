@@ -1,0 +1,137 @@
+{
+  "protocol": "fixed-native-forest-v1",
+  "declared_on": "2026-09-13",
+  "scope": "Separate fixed 500-tree native full-training reference. Original two-setting full-training workflow is not claimed complete. Locked evaluation files remain closed during fit-only.",
+  "partitions_sha256": "32062856df331624b90aa10557fd601237c46682335d3b08b8d3658b6343e1b2",
+  "cases": {
+    "yearprediction": {
+      "source_cohort": "native-development-4t-v1",
+      "source_phase": "development",
+      "source_variant": "ranger",
+      "source_threads": 4,
+      "source_process_sha256": "f19c76e3fb6804cc79063403b88305a5c461581490ceb96adfbf63ce90ab92e9",
+      "source_summary_sha256": "bd10369a15409aa3a82a6a52093f6bd0eb76bb4fc7ae012f9b69107d2f0e3faa",
+      "source_selected_configuration": 2,
+      "selection_basis": "Previously recorded training-calibration primary loss only. Development evaluation metrics were not used to choose these settings.",
+      "calibration_primary_metric": "rmse",
+      "calibration_candidates": [
+        {
+          "parameters": {
+            "mtry": 9,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "variance"
+          },
+          "calibration_primary_loss": 9.643309481939054
+        },
+        {
+          "parameters": {
+            "mtry": 30,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "variance"
+          },
+          "calibration_primary_loss": 9.472447367928565
+        }
+      ],
+      "parameters": {
+        "mtry": 30,
+        "num.trees": 500,
+        "min.node.size": 5,
+        "sample.fraction": 0.8,
+        "splitrule": "variance"
+      },
+      "threads": 4,
+      "seed": 80711,
+      "full_training_rows": 463715
+    },
+    "covertype": {
+      "source_cohort": "native-development-4t-v1",
+      "source_phase": "development",
+      "source_variant": "ranger",
+      "source_threads": 4,
+      "source_process_sha256": "f02d1a85d473629df7789bf234a1173fb2f469d58aa8736f50771c42328676ce",
+      "source_summary_sha256": "6b4e254e8afbb26acffae1072517ae5d998451b481620c3fdce1f8b1fdc32cd9",
+      "source_selected_configuration": 2,
+      "selection_basis": "Previously recorded training-calibration primary loss only. Development evaluation metrics were not used to choose these settings.",
+      "calibration_primary_metric": "log_loss",
+      "calibration_candidates": [
+        {
+          "parameters": {
+            "mtry": 7,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "gini"
+          },
+          "calibration_primary_loss": 0.4875686395858746
+        },
+        {
+          "parameters": {
+            "mtry": 18,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "gini"
+          },
+          "calibration_primary_loss": 0.35515405220656127
+        }
+      ],
+      "parameters": {
+        "mtry": 18,
+        "num.trees": 500,
+        "min.node.size": 5,
+        "sample.fraction": 0.8,
+        "splitrule": "gini"
+      },
+      "threads": 4,
+      "seed": 80711,
+      "full_training_rows": 464810
+    },
+    "bank": {
+      "source_cohort": "native-development-v2",
+      "source_phase": "development",
+      "source_variant": "ranger",
+      "source_threads": 1,
+      "source_process_sha256": "bac3563f3ffe2e96daf07fa920f486acc883a3a65fb24c870f59bd67334cbe6c",
+      "source_summary_sha256": "27b1b1ee2dfe991e49340ea8fefabbaab8c232b54af7659d38a8a88a1839db5d",
+      "source_selected_configuration": 1,
+      "selection_basis": "Previously recorded training-calibration primary loss only. Development evaluation metrics were not used to choose these settings.",
+      "calibration_primary_metric": "log_loss",
+      "calibration_candidates": [
+        {
+          "parameters": {
+            "mtry": 4,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "gini"
+          },
+          "calibration_primary_loss": 0.28793263810995545
+        },
+        {
+          "parameters": {
+            "mtry": 6,
+            "num.trees": 500,
+            "min.node.size": 5,
+            "sample.fraction": 0.8,
+            "splitrule": "gini"
+          },
+          "calibration_primary_loss": 0.2922964402473506
+        }
+      ],
+      "parameters": {
+        "mtry": 4,
+        "num.trees": 500,
+        "min.node.size": 5,
+        "sample.fraction": 0.8,
+        "splitrule": "gini"
+      },
+      "threads": 4,
+      "seed": 80711,
+      "full_training_rows": 32951
+    }
+  }
+}

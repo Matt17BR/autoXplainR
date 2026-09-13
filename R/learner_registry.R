@@ -111,7 +111,7 @@ autoxplain_learner_registry <- function() {
       package = "glmnet",
       minimum_version = "5.0",
       tasks = c("regression", "binary", "multiclass"),
-      portfolios = c("recommended", "extended"),
+      portfolios = c("recommended", "extended", "tabular"),
       labels = c(
         regression = "regularized linear model",
         binary = "regularized logistic model",
@@ -192,7 +192,7 @@ autoxplain_learner_registry <- function() {
       package = "ranger",
       minimum_version = "0.18.0",
       tasks = c("regression", "binary", "multiclass"),
-      portfolios = c("recommended", "extended"),
+      portfolios = c("recommended", "extended", "tabular"),
       labels = c(
         regression = "random forest",
         binary = "probability random forest",
@@ -218,7 +218,7 @@ autoxplain_learner_registry <- function() {
       minimum_version = "3.2.1.1",
       current_cran_r_minimum = "4.3.0",
       tasks = c("regression", "binary", "multiclass"),
-      portfolios = c("recommended", "extended"),
+      portfolios = c("recommended", "extended", "tabular"),
       labels = c(
         regression = "XGBoost gradient-boosted trees",
         binary = "XGBoost gradient-boosted trees",
@@ -435,7 +435,8 @@ learner_model_label <- function(definition, task) {
 }
 
 portfolio_learner_families <- function(portfolio, task) {
-  portfolio <- match.arg(portfolio, c("recommended", "core", "extended"))
+  portfolio <- match.arg(portfolio, c("recommended", "core", "extended", "tabular"))
+  if (identical(portfolio, "tabular")) return(c("regularized", "forest", "boosting"))
   registry <- autoxplain_learner_registry()
   names(registry)[vapply(registry, function(item) {
     portfolio %in% item$portfolios && task %in% item$tasks
@@ -511,8 +512,11 @@ resolve_tuning_learners <- function(portfolio, learners, task) {
 #' Installs the CRAN packages required by an AutoXplainR model portfolio. This
 #' helper only changes the user's library when called explicitly; use
 #' `dry_run = TRUE` to inspect the missing packages without installing them.
+#' The `"tabular"` portfolio requires R >= 4.3 for the supported XGBoost backend,
+#' although the core AutoXplainR package supports R >= 4.1. Upgrade R first if
+#' needed; the installation helper does not upgrade R.
 #'
-#' @param portfolio One of `"recommended"` or `"extended"`.
+#' @param portfolio One of `"recommended"`, `"extended"` or `"tabular"`.
 #' @param task Task used to omit inapplicable learner backends. Defaults to
 #'   regression, whose recommended portfolio also covers binary classification.
 #' @param dry_run Print and visibly return the missing package plan without
@@ -526,7 +530,7 @@ resolve_tuning_learners <- function(portfolio, learners, task) {
 #'
 #' @examples
 #' install_model_engines("recommended", task = "regression", dry_run = TRUE)
-install_model_engines <- function(portfolio = c("recommended", "extended"),
+install_model_engines <- function(portfolio = c("recommended", "extended", "tabular"),
                                   task = c("regression", "binary", "multiclass"),
                                   dry_run = FALSE,
                                   ...) {

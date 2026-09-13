@@ -18,8 +18,9 @@ model_tradeoffs(
 task-appropriate primary metric.}
 
 \item{complexity_metric}{Numeric leaderboard or model-metadata column. The
-argument name is retained for compatibility; \code{NULL} prefers model size,
-then training or prediction time, and the returned object labels the exact
+argument name is retained for compatibility; \code{NULL} prefers a recorded
+repeated prediction benchmark, retained fit time, batch prediction time,
+then model size. The returned object labels the exact
 metric as a resource or structural-complexity proxy.}
 
 \item{include_baseline}{Include models labeled with the baseline role.}
@@ -32,7 +33,9 @@ and metric-direction metadata.
 Builds a two-objective comparison from an \code{\link[=autoxplain]{autoxplain()}} or \code{\link[=evaluate_models]{evaluate_models()}}
 result. Predictive
 performance is taken from the evaluation leaderboard and the secondary axis
-defaults to approximate model-object size. For local models this is R's
+defaults to a usable repeated prediction benchmark when supplied, then retained
+fit time, evaluation-batch prediction time, and approximate model-object size.
+A default cost needs at least two finite score/cost pairs. For local models size is R's
 in-memory \code{object.size()} estimate. It includes retained diagnostics, may
 count shared data repeatedly and excludes native engine allocations. H2O uses
 an engine-reported size when available. These values are not a saved-file or

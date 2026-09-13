@@ -97,7 +97,11 @@ prediction_function_context <- function(fun, data_variables = character()) {
     while (!identical(current, emptyenv())) {
       if (exists(name, current, inherits = FALSE)) {
         if (bindingIsActive(name, current)) unsupported(paste0("active binding `", name, "`"))
-        return(walk(get(name, current, inherits = FALSE)))
+        value <- get(name, current, inherits = FALSE)
+        if (!name %in% c("rm", "remove") && (identical(value, base::rm) || identical(value, base::remove))) {
+          unsupported("an alias of a binding-removal function")
+        }
+        return(walk(value))
       }
       current <- parent.env(current)
     }
@@ -151,7 +155,9 @@ prediction_function_context <- function(fun, data_variables = character()) {
       if (any(calls %in% dynamic)) {
         unsupported(paste0("dynamic or external call `", intersect(calls, dynamic)[[1L]], "()`"))
       }
-      globals <- codetools::findGlobals(clean, merge = TRUE)
+      removal <- prediction_unsupported_binding_removal(clean)
+      if (length(removal)) unsupported(removal[[1L]])
+      globals <- union(codetools::findGlobals(clean, merge = TRUE), prediction_partial_assignment_bindings(clean))
       dependencies <- lapply(sort(globals), binding, environment = environment(value))
       return(list(code = code, lexical_bindings = stats::setNames(dependencies, sort(globals)),
         attributes = lapply(attributes(clean), walk),
@@ -256,7 +262,9 @@ validate_recorded_evaluation <- function(result, explainers) {
   }
   evaluated <- lapply(explainers, function(explainer) {
     predicted <- explainer$reference_predictions
-    metrics <- evaluate_predictions(explainer$y, predicted, explainer)
+    metrics <- evaluate_predictions(
+      explainer$y, predicted, explainer, extra_metrics = intersect(result$evaluation$primary_metric, "rmsle")
+    )
     if (explainer$task != "regression") {
       metrics <- c(metrics, calibration_error = calibration_from_explainer(
         explainer, predicted = predicted

@@ -4,6 +4,7 @@ This is implementer acceptance automation, not a participant usability study.
 Requires the fixtures from render-explorer-cases.R, Playwright and axe-core.
 """
 import argparse
+from decimal import Decimal
 import hashlib
 import os
 import re
@@ -15,6 +16,7 @@ from pathlib import Path
 import subprocess
 from playwright.sync_api import sync_playwright
 from report_geometry import cost_geometry, effect_geometry, importance_geometry
+from report_measurements import resource_measurement
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -23,6 +25,8 @@ parser.add_argument('--axe-path', type=Path, required=True)
 parser.add_argument('--cases', nargs='+', default=['regression', 'binary', 'multiclass', 'quick'])
 args = parser.parse_args()
 args.output_dir.mkdir(parents=True, exist_ok=True)
+fixture_dir = args.output_dir / 'fixtures'
+fixture_dir.mkdir(exist_ok=True)
 
 def settled(page):
     page.evaluate("()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
@@ -41,6 +45,32 @@ def active_model(page, section):
 
 def within_tolerance(actual, expected):
     return abs(actual - expected) <= max(1e-8, abs(expected) * .0006)
+
+def exact_settings(shown, specification):
+    if shown.keys() != specification['parameters'].keys():
+        return False
+    for key, text in shown.items():
+        numeric = (specification['numeric_parameters'] or {}).get(key)
+        if numeric is None:
+            if text != specification['parameters'][key]:
+                return False
+            continue
+        fields = text.split(', ')
+        if len(fields) != len(numeric['values']):
+            return False
+        labels = numeric['labels']
+        for index, (field, expected) in enumerate(zip(fields, numeric['values'])):
+            if labels is not None:
+                prefix = labels[index] + ' = '
+                if not field.startswith(prefix):
+                    return False
+                field = field[len(prefix):]
+            try:
+                if float(field) != float.fromhex(expected):
+                    return False
+            except ValueError:
+                return False
+    return True
 
 def check_layout(page, name, artifact):
     settled(page)
@@ -69,9 +99,21 @@ with sync_playwright() as playwright:
     for case in args.cases:
         print(f"Checking {case}", flush=True)
         report = (args.case_dir / f'{case}.html').resolve()
-        oracle = json.loads(report.with_suffix('.json').read_text())
+        report_bytes = report.read_bytes()
+        oracle_bytes = report.with_suffix('.json').read_bytes()
+        report_sha256 = hashlib.sha256(report_bytes).hexdigest()
+        oracle_sha256 = hashlib.sha256(oracle_bytes).hexdigest()
+        # Keep the actual inputs, including on failure. Regeneration changes
+        # timings and chart geometry, so it cannot reproduce the same finding.
+        (fixture_dir / report.name).write_bytes(report_bytes)
+        (fixture_dir / report.with_suffix('.json').name).write_bytes(oracle_bytes)
+        report = (fixture_dir / report.name).resolve()
+        oracle_text = oracle_bytes.decode('utf-8')
+        oracle = json.loads(oracle_text)
+        cost_answers = {row['model_id']: row for row in json.loads(
+            oracle_text, parse_float=Decimal, parse_int=Decimal)['table']}
         ids = [row['model_id'] for row in oracle['table']]
-        check(f'{case}: fixture identity', True, hashlib.sha256(report.read_bytes()).hexdigest())
+        check(f'{case}: fixture identity', True, report_sha256)
         context = browser.new_context(viewport={'width': 1440, 'height': 1000})
         context.route('http://**/*', lambda route: route.abort())
         context.route('https://**/*', lambda route: route.abort())
@@ -95,14 +137,29 @@ with sync_playwright() as playwright:
             'rows => rows.map(row => row.dataset.modelRow)')) == set(ids))
         for spec in oracle['specifications']:
             row = page.locator(f'[data-model-row="{spec["id"]}"]')
-            measurements = next(item for item in oracle['table'] if item['model_id'] == spec['id'])
-            costs = row.locator('td.number:visible').all_text_contents()[1:]
-            costs_match = len(costs) == len(oracle['resources'])
-            for shown, resource in zip(costs, oracle['resources']):
-                expected = measurements.get(resource)
-                costs_match = costs_match and (shown == 'Unavailable' if expected is None else
-                    within_tolerance(0 if shown == '~0' else float(shown), expected))
-            check(f'{case}/{spec["id"]}: displayed cost measurements match R', costs_match)
+            measurements = cost_answers[spec['id']]
+            costs = row.evaluate('''row => [...row.closest('table').querySelectorAll('thead th')]
+              .filter(header => !header.hasAttribute('data-score-column') && header.querySelector('[data-sort]'))
+              .map(header => {
+                const resource = header.querySelector('[data-sort]').dataset.sort;
+                const cell = row.cells[header.cellIndex], spans = cell?.querySelectorAll('span[title]');
+                return {resource, raw: row.getAttribute('data-value-' + resource),
+                  shown: cell?.textContent.trim(), tooltip: spans?.length === 1 ? spans[0].title : null,
+                  visible: !!cell?.getBoundingClientRect().width};
+              })''')
+            resource_keys = [cost['resource'] for cost in costs]
+            check(f'{case}/{spec["id"]}: resource columns match R keys',
+                  len(resource_keys) == len(set(resource_keys)) == len(oracle['resources'])
+                  and set(resource_keys) == set(oracle['resources']) and all(cost['visible'] for cost in costs),
+                  dict(shown=resource_keys, expected=oracle['resources']))
+            for cost in costs:
+                resource = cost['resource']
+                if resource not in oracle['resources']:
+                    continue  # The complete key-set check above records the unexpected column.
+                matched, evidence = resource_measurement(resource, measurements.get(resource),
+                    cost['raw'], cost['tooltip'], cost['shown'])
+                check(f'{case}/{spec["id"]}/{resource}: raw, exact and displayed cost measurements match R',
+                      matched, None if matched else evidence)
             check(f'{case}/{spec["id"]}: visible fitted settings',
                   row.locator('.model-settings').inner_text() == spec['summary'])
             link = row.locator('[data-open-spec]')
@@ -113,7 +170,9 @@ with sync_playwright() as playwright:
             settings = dialog.locator('table').filter(has=page.locator('caption', has_text='Recorded settings, using R parameter names'))
             shown = dict(settings.locator('tbody tr').evaluate_all(
                 'rows => rows.map(row => Array.from(row.cells, cell => cell.textContent))'))
-            check(f'{case}/{spec["id"]}: detailed settings match R', shown == spec['parameters'])
+            settings_match = exact_settings(shown, spec)
+            check(f'{case}/{spec["id"]}: detailed settings match R', settings_match,
+                  None if settings_match else dict(shown=shown, expected=spec['numeric_parameters']))
             page.keyboard.press('Escape')
             check(f'{case}/{spec["id"]}: escape returns focus to model',
                   not dialog.is_visible() and link.evaluate('el => el === document.activeElement'))
@@ -225,11 +284,12 @@ with sync_playwright() as playwright:
             page.locator('[data-page-link=evaluation]').click()
             check(f'{case}/{model_id}: prediction panel follows model', active_model(page, 'evaluation') == model_id)
             panel = page.locator(f'#evaluation [data-model-panel="{model_id}"]')
-            command=panel.locator('pre').first
-            panel.locator('details:has(pre) summary').first.click()
+            command=panel.locator('[data-prediction-code]')
+            command_summary=panel.locator('details:has([data-prediction-code]) > summary')
+            command_summary.click()
             check(f'{case}/{model_id}: usable R prediction command',
                   command.is_visible() and f'model = "{model_id}"' in command.text_content())
-            panel.locator('details:has(pre) summary').first.click()
+            command_summary.click()
             expected = oracle.get('predictions',{}).get(model_id)
             if expected:
                 metrics=panel.locator('.prediction-metrics').inner_text()
@@ -389,7 +449,9 @@ with sync_playwright() as playwright:
                     violations = [{'id': entry['id'], 'nodes': [node['target'] for node in entry['nodes']]}
                                   for entry in axe['violations']]
                     check(f'{width}/{tab}: automated accessibility', not violations, violations)
-                    accessibility.append(dict(width=width, tab=tab,
+                    accessibility.append(dict(case=case, width=width, tab=tab,
+                                              fixture_sha256=report_sha256,
+                                              oracle_sha256=oracle_sha256,
                                               incomplete=[entry['id'] for entry in axe['incomplete']],
                                               incomplete_details=axe['incomplete']))
                     page.screenshot(path=str(args.output_dir / f'{tab}-{width}.png'), full_page=True)

@@ -1,0 +1,29 @@
+{
+  "phase": "development only",
+  "base_commit": "292846f2a77a82bbdd9352dc54e25c8d5a21db4b",
+  "state": "uncommitted 0.8.0 development changes over published 0.7.0",
+  "training_data_sha256": "3ca9a06614538f0577bf6c62b69e39be3d7f0b035b6ad65cf95f60773d51c52d",
+  "frozen_forest_policy_sources": {
+    "R/learner_backends.R": "ce7952e2856d1a38091031187c5b9776bf053fd35f940a64490c565bc156a341",
+    "R/adaptive_search.R": "b209d5e53046747f9c10505d9368a0738c504091efd1a15bd84b35b1fb00c2a4",
+    "tests/testthat/test-forest-search-policy.R": "dfaea528e8893c84c6deb7a3984ab792c9420e99d25ca08db72f99669c099fab"
+  },
+  "original_frozen_runner_sha256": "b7776b72befa045889364b4ae07734683d0054122fe5d7be98017a382b5deb62",
+  "portable_script_sha256": {
+    "screen-probe.R": "0b2a6a6dc9c0717ab766119a42a0da410ace75cf59b5ca91363b2e864ca45e1a",
+    "classification-prefix-probe.R": "a6d7087d32337b1def4c0d0bb46a71aa7885de2e3565d11dd2a505dd05b830fd",
+    "inference-probe.R": "87db89ea2fe9e8ace58a1125827164e89965ffecce68035f35ee2a814ab68f80",
+    "prefix-probe.R": "8ba20b920539f57f4edebef45147d79badff731926884f30078a847e2bf92451",
+    "precision-probe.R": "b5b497deb91c1b47b8c3d591850d661e6580c35b1cdf61c9aff826289284f53d",
+    "replay.R": "03b74693f4627957bdf21c69368385d90e5a7829aaf916d68bfc143ac87af374",
+    "run-probes.R": "44dd8db5f7e76ecfce60aa85c3e84eef88c964e7123a92bf0714097e41dc3715",
+    "classification-precision-probe.R": "b238bd343e2983f2337c610bbcd165ef83732f7b23fe8a94ab3dbf1b48486eb9"
+  },
+  "original_sweep_limitation": "Eight individual fits wrote records; enclosing process then failed parsing an edited script. Original pre-edit whole-script bytes were not retained. Later probes use the frozen runner. Independent saved-model replay is recorded separately.",
+  "native_versions": {
+    "R": "R version 4.5.2 (2025-10-31)",
+    "ranger": "0.18.0"
+  },
+  "benchmark_threads": 2,
+  "scope": "Calibration losses compare computation choices, not independent evaluation or locked acceptance. Two-thread timings cannot be compared as algorithmic gains against one- or four-thread reference times."
+}

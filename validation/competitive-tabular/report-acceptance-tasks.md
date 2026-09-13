@@ -1,0 +1,93 @@
+# Tasks for the final tabular report
+
+Use the actual completed large-data result, exported through the public API,
+in an offline browser. Record the report's byte size, export time, browser
+load time and any operation that fails or stalls. Check the visible result
+against the saved model and independent prediction scores. A smaller
+development report cannot establish that the full-data report works.
+
+The timed public call uses the default summary report. Complete its aggregate
+tasks in that file first. Summary mode deliberately omits individual records;
+disclosing that omission does not complete an individual-error task. Follow the
+report's export command on the saved fitted result to create a separate
+`report_data = "rows"` file for those tasks. Record that export's elapsed time,
+peak memory, byte size and sampled row coverage separately. Do not count it as
+part of the original one-call timing or imply that the default HTML contained
+those records. Check linked input values, outcomes, predictions and split IDs
+against independent saved values for the exported rows.
+
+## Choose a model and understand the cost
+
+1. Find the selected model and explain why it was selected without reading
+   implementation code. Its selection evidence must come from training
+   resampling. Held-out scores can favor another retained model.
+2. Compare the retained forest, booster and intercept-only baseline. Find
+   the number of training and evaluation rows, the reported metric's direction,
+   and the actual fitted settings. The model family name alone is insufficient.
+3. Distinguish the complete search cost from one final model's training time.
+   Find the explicit thread count and any configurations that failed, were
+   screened out or were not attempted. Screening results must not appear as
+   complete cross-validation results.
+4. For an adaptive large-data forest, find its 128-tree screen, 128- or 256-tree
+   full-row validation fits and actual final tree count. Under the
+   [current tree policy](forest-tree-budget-v3.md), final fits use 256 trees at
+   four million training rows times predictors and 500 below that boundary;
+   explicit grids retain their requested counts. For a booster, find the
+   maximum round limit, per-fold selected rounds and final fitted round count.
+   These values must agree with the retained native model and tuning evidence.
+
+## Check errors that an average score can hide
+
+5. In Bank Marketing, find the positive class, its prevalence and its recall
+   at the displayed threshold. A roughly 90% accuracy score must not obscure
+   the fact that many subscribers can still be missed. Review the excluded
+   call-duration feature and the limits of random contact-row evaluation
+   using the study-context check below.
+6. In Covertype, compare recall for aspen with the overall accuracy. Find the
+   confusion counts rather than inferring class performance from one headline
+   number. The report must preserve named class probabilities. Review the
+   same-area evaluation caveat using the study-context check below.
+7. In regression, inspect the distribution of residuals, find a poor prediction
+   and identify which data split it belongs to. Displayed row samples must be
+   labelled as samples; scores must still describe every evaluation row.
+8. If inspecting the controlled rare-event example, find an overconfident
+   forest error. Its zero-probability error must remain in log loss. Do not
+   improve the appearance of a result by changing metric clipping after scoring.
+
+## Use the result outside the report
+
+9. Save the full result, restart R and predict through the public API for every
+   retained model. Compare all evaluation predictions, not a convenient first
+   page, with the arrays written before saving. Check column names and factor
+   class order as well as numeric values.
+10. Copy the report to a separate directory and open it with network access
+    disabled. Navigate its tabs, change model and feature selections, use
+    keyboard-accessible explanations, and confirm that charts and tables still
+    contain meaningful data. A report requiring a running R session or missing
+    local files fails its shareable-report promise.
+
+## Study context that must come from the author
+
+The minimal benchmark call supplies tables, a target, a portfolio, an evaluation
+role and a report path. It does not pass the preparation metadata. The report
+cannot infer which columns were removed before fitting or whether observations
+share customers, places or time periods. The original wording of tasks 5 and 6
+required dataset-specific context that this call did not receive.
+
+Record that missing context as **not supplied and not assessed in the default
+report**, rather than marking it satisfied by a generic warning or recognizing
+the dataset. Keep the source-attributed Bank and Covertype caveats with the
+benchmark results. Check them against the [study protocol](README.md#data-and-isolation)
+and preparation records. All class, probability, confusion and recall checks
+above still apply to the original report.
+
+For a separate export with author-supplied context, verify that those notes are
+visible, attributed to the study author and retained when the HTML is opened
+offline. Keep the original default HTML and timing record. Record the annotated
+export separately; it does not prove that the original one-call report contained
+those facts. Do not change evaluation roles, partitions or model scores to add
+a caveat about their interpretation.
+
+This is a reproducible product walkthrough, not a claim that a representative
+sample of people has been observed using the package. Record defects and fixes
+from the walkthrough before the release, alongside the numerical checks.

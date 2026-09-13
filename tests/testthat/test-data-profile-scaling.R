@@ -176,3 +176,31 @@ test_that("identifier categories cannot masquerade as perfect pair associations"
   expect_identical(empty$n_categories, 0L)
   expect_equal(empty$singleton_fraction, 0)
 })
+
+test_that("row exports allocate a small cap across large integer partition sizes", {
+  withr::local_preserve_seed()
+  sizes <- c(500001L, 124999L)
+  sample_rows <- AutoXplainR:::data_sample_indices
+  set.seed(393L)
+  before <- .Random.seed
+  expect_warning(actual <- sample_rows(sizes, 5000L, 913L), NA)
+  expect_identical(lengths(actual), c(4000L, 1000L))
+  expect_identical(.Random.seed, before)
+  for (index in seq_along(sizes)) {
+    expect_equal(anyDuplicated(actual[[index]]), 0L)
+    expect_true(all(actual[[index]] >= 1L & actual[[index]] <= sizes[[index]]))
+    expect_identical(actual[[index]], sort(actual[[index]]))
+  }
+  expect_identical(sample_rows(sizes, 5000L, 913L), actual)
+  rm(".Random.seed", envir = .GlobalEnv)
+  expect_identical(sample_rows(sizes, 5000L, 913L), actual)
+  expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+})
+
+test_that("ordinary row exports keep their pre-overflow-fix samples", {
+  # Recorded from the original integer-arithmetic implementation.
+  expect_identical(
+    AutoXplainR:::data_sample_indices(c(37L, 12L), 13L, 99L),
+    list(c(4L, 9L, 13L, 20L, 22L, 30L, 32L, 33L, 34L, 35L), c(2L, 6L, 8L))
+  )
+})

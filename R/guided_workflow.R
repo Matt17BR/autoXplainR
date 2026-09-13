@@ -34,11 +34,14 @@ fit_guided_base <- function(data,
     test_data_supplied = !is.null(test_data),
     evaluation_role = evaluation_role
   )
+  progress <- identical(verbosity, "info")
+  search_progress(progress, "Preparing ", search_progress_count(nrow(data)), " input rows.")
 
+  overlap_note <- NULL
   split <- if (is.null(test_data)) {
     make_evaluation_split(data, target_column, resolved_task, test_fraction, seed)
   } else {
-    check_evaluation_row_overlap(data, test_data, overlap_action)
+    overlap_note <- check_evaluation_row_overlap(data, test_data, overlap_action)
     validate_guided_predictors(test_data, target_column, allow_all_missing = enable_preprocessing)
     list(
       training = data,
@@ -49,6 +52,9 @@ fit_guided_base <- function(data,
       method = "user-supplied evaluation data",
       moved_for_unseen_levels = 0L
     )
+  }
+  if (identical(tuning_control$metric, "rmsle")) {
+    selection_validate_rmsle_target(split$evaluation[[target_column]])
   }
 
   config <- utils::modifyList(
@@ -64,6 +70,7 @@ fit_guided_base <- function(data,
     ),
     preprocessing_config
   )
+  if (!progress) config$verbose <- FALSE
   # Keep the complete outer-training schema for resampling. Predictor removal
   # below is learned from all outer-training rows and is appropriate for the
   # final refit, but exposing it to inner resampling would leak feature-screening
@@ -121,8 +128,13 @@ fit_guided_base <- function(data,
     tuning_rule = tuning_rule,
     tuning_control = tuning_control,
     seed = seed,
-    learners = learners %||% c("linear", "tree", "neural")
+    learners = learners %||% c("linear", "tree", "neural"),
+    progress = progress
   ))
+  search_progress(
+    progress, "Evaluating ", length(fit$models), " models on ",
+    search_progress_count(nrow(evaluation_data)), " evaluation rows."
+  )
   evaluated <- evaluate_candidates(
     fit$models,
     evaluation_data,
@@ -143,6 +155,7 @@ fit_guided_base <- function(data,
     stats::setNames(fit$diagnostics$fit_warning, fit$diagnostics$model_id),
     evaluation_role = resolved_evaluation_role
   )
+  evaluated$summary$notes <- rbind(evaluated$summary$notes, overlap_note)
   if (identical(model_set, "tuned")) {
     evaluated$summary$notes <- rbind(
       evaluated$summary$notes,
@@ -275,12 +288,12 @@ check_evaluation_row_overlap <- function(training,
                                          evaluation,
                                          action = c("warn", "error", "ignore")) {
   action <- match.arg(action)
-  if (identical(action, "ignore")) return(invisible(TRUE))
-  if (is.null(evaluation)) return(invisible(TRUE))
+  if (identical(action, "ignore")) return(invisible(NULL))
+  if (is.null(evaluation)) return(invisible(NULL))
   required <- names(training)
   if (!all(required %in% names(evaluation))) {
     # The schema validator supplies the more useful missing-column diagnosis.
-    return(invisible(TRUE))
+    return(invisible(NULL))
   }
   overlapping <- split_row_overlap(training[required], evaluation[required])
   if (length(overlapping)) {
@@ -297,8 +310,25 @@ check_evaluation_row_overlap <- function(training,
     )
     if (identical(action, "error")) stop(message, call. = FALSE)
     warning(message, call. = FALSE)
+    return(invisible(data.frame(
+      severity = "warning",
+      code = "evaluation_row_overlap",
+      message = paste0(
+        length(overlapping), " supplied evaluation record",
+        if (length(overlapping) == 1L) "" else "s",
+        " exactly matched a training record before preprocessing."
+      ),
+      recommendation = paste(
+        "Matching includes all training-table columns, including the outcome.",
+        "Coincident records can occur naturally; exact matches alone do not prove",
+        "that the samples are non-independent.",
+        "Check row provenance and how the training and evaluation samples were formed",
+        "before interpreting the scores."
+      ),
+      stringsAsFactors = FALSE
+    )))
   }
-  invisible(TRUE)
+  invisible(NULL)
 }
 
 split_row_overlap <- function(training, evaluation) {
@@ -611,9 +641,14 @@ fit_base_candidates <- function(data,
                                 tuning_rule = "one_se",
                                 tuning_control = NULL,
                                 seed = 123L,
-                                learners = c("linear", "tree", "neural")) {
+                                learners = c("linear", "tree", "neural"),
+                                progress = FALSE) {
   primary_formula <- safe_reformulate(features, response = target)
   baseline_formula <- safe_reformulate(character(), response = target)
+  search_progress(
+    progress, if (identical(model_set, "tuned")) "Fitting the baseline on " else "Fitting reference models on ",
+    search_progress_count(nrow(data)), " training rows."
+  )
   if (task == "regression") {
     baseline <- timed_model_fit(function() stats::lm(baseline_formula, data = data))
     if (!identical(model_set, "tuned")) {
@@ -654,9 +689,10 @@ fit_base_candidates <- function(data,
       selection_rule = tuning_rule,
       control = tuning_control,
       seed = seed,
-      learners = learners
+      learners = learners,
+      progress = progress
     )
-    refitted <- refit_tuned_candidates(tuning, data, target, task)
+    refitted <- refit_tuned_candidates(tuning, data, target, task, progress = progress)
     tuning <- refitted$tuning
     fits <- c(refitted$fits, list(simple_baseline = baseline))
     labels <- c(refitted$labels, simple_baseline = "intercept-only baseline")
@@ -727,7 +763,8 @@ refit_tuned_candidates <- function(tuning,
                                    data,
                                    target,
                                    task,
-                                   fitter = fit_tuning_configuration) {
+                                   fitter = fit_tuning_configuration,
+                                   progress = FALSE) {
   valid <- tuning$candidates[
     tuning$candidates$status == "ok" & is.finite(tuning$candidates$cv_score),
     , drop = FALSE
@@ -784,6 +821,7 @@ refit_tuned_candidates <- function(tuning,
     attempt$effective_parameters <- I(list(fit_spec$effective_parameters))
     attempt$optimization <- I(list(result$optimization))
     attempt$learned <- I(list(result$learned))
+    attempt$model_fit_attempts <- result$fit_work$model_fit_attempts %||% as.integer(result$ok)
     attempts <- refit_state$attempts
     attempts[[length(attempts) + 1L]] <- attempt
     refit_state$attempts <- attempts
@@ -794,10 +832,21 @@ refit_tuned_candidates <- function(tuning,
       tuning$plan$configuration_id == row$configuration_id[[1L]],
       , drop = FALSE
     ]
+    search_progress_fit(progress, "Full refit", configuration, nrow(data), role = role)
     fit_spec <- tuning_configuration_fit_spec(configuration, data, target)
     result <- safely_timed_model_fit(function() {
-      fitter(configuration, data, target, task)
+      if ("progress" %in% names(formals(fitter))) {
+        fitter(configuration, data, target, task, progress = isTRUE(progress))
+      } else {
+        fitter(configuration, data, target, task)
+      }
     })
+    fitted_spec <- result$fit_spec
+    if (is.list(fitted_spec)) {
+      fit_spec$effective_parameters <- fitted_spec$effective_parameters
+      fit_spec$effective_parameter_key <- fitted_spec$effective_parameter_key
+      fit_spec$fit_seed <- fitted_spec$fit_seed
+    }
     if (result$ok) {
       change <- tuning_computation_change(tuning, row$configuration_id[[1L]], fit_spec$effective_parameters)
       if (nzchar(change)) {
@@ -820,7 +869,7 @@ refit_tuned_candidates <- function(tuning,
 
   primary_order <- order(
     !valid$selected,
-    valid$cv_score,
+    selection_metric_loss(valid$cv_score, tuning$metric %||% "rmse"),
     valid$simplicity_rank,
     valid$complexity_proxy,
     valid$configuration_id
@@ -871,7 +920,7 @@ refit_tuned_candidates <- function(tuning,
       , drop = FALSE
     ]
     family_rows <- family_rows[order(
-      family_rows$cv_score,
+      selection_metric_loss(family_rows$cv_score, tuning$metric %||% "rmse"),
       family_rows$simplicity_rank,
       family_rows$complexity_proxy,
       family_rows$configuration_id
@@ -910,9 +959,16 @@ refit_tuned_candidates <- function(tuning,
   ))
   refit_failed_families <- setdiff(unique(valid$family), retained_families)
   failed_families <- unique(c(resampling_failed_families, refit_failed_families))
+  not_retained <- setdiff(requested_families, retained_families)
+  if (!is.null(tuning$resources)) {
+    tuning$resources$refit_attempts <- nrow(attempt_table)
+    tuning$resources$baseline_fit_attempts <- 1L
+    tuning$resources$total_backend_fit_attempts <- tuning$resources$model_fit_attempts +
+      tuning$resources$calibration_fit_attempts + sum(attempt_table$model_fit_attempts) + 1L
+  }
   tuning$final_configuration <- final_id
   tuning$refit <- list(
-    status = if (length(failed_families)) {
+    status = if (length(not_retained)) {
       "partial"
     } else if (fallback_used) {
       "fallback"
@@ -926,7 +982,8 @@ refit_tuned_candidates <- function(tuning,
     families_retained = retained_families,
     families_resampling_failed = resampling_failed_families,
     families_refit_failed = refit_failed_families,
-    families_not_retained = failed_families,
+    families_not_validated = tuning$families_not_validated %||% character(),
+    families_not_retained = not_retained,
     attempts = attempt_table,
     note = paste(
       "Full-training refits were attempted independently. A failed alternative does not",
@@ -948,6 +1005,8 @@ safely_timed_model_fit <- function(callback) {
   error <- ""
   optimization <- NULL
   learned <- NULL
+  fit_work <- NULL
+  fit_spec <- NULL
   model <- tryCatch(
     withCallingHandlers(
       callback(),
@@ -960,13 +1019,17 @@ safely_timed_model_fit <- function(callback) {
       error <<- conditionMessage(condition)
       optimization <<- condition$optimization
       learned <<- condition$learned
+      fit_work <<- condition$fit_work
+      fit_spec <<- condition$fit_spec
       NULL
     }
   )
   if (!is.null(model)) {
     fit_record <- attr(model, "autoxplain_tuning_fit")
+    fit_spec <- fit_record %||% fit_spec
     optimization <- fit_record$optimization %||% optimization
     learned <- fit_record$learned %||% learned
+    fit_work <- fit_record$fit_work %||% fit_work
   }
   list(
     ok = !is.null(model) && !nzchar(error),
@@ -975,7 +1038,9 @@ safely_timed_model_fit <- function(callback) {
     warnings = warnings,
     error = error,
     optimization = optimization,
-    learned = learned
+    learned = learned,
+    fit_work = fit_work,
+    fit_spec = fit_spec
   )
 }
 
@@ -1033,7 +1098,9 @@ evaluate_candidates <- function(models,
     } else {
       calibration_from_explainer(explainer, predicted = predictions)
     }
-    metrics <- evaluate_predictions(explainer$y, predictions, explainer)
+    metrics <- evaluate_predictions(
+      explainer$y, predictions, explainer, extra_metrics = intersect(primary_metric, "rmsle")
+    )
     if (!is.null(calibration)) {
       metrics <- c(metrics, calibration_error = calibration$calibration_error)
     }
@@ -1053,18 +1120,20 @@ evaluate_candidates <- function(models,
     stop("The requested held-out primary metric is unavailable.", call. = FALSE)
   }
   scores <- vapply(metrics, function(x) x[[primary_metric]], numeric(1))
-  winner <- names(which.min(scores))[[1L]]
+  score_loss <- selection_metric_loss(scores, primary_metric)
+  winner <- if (any(is.finite(score_loss))) names(which.min(score_loss))[[1L]] else NA_character_
   baseline_score <- scores[["simple_baseline"]]
   primary_score <- scores[[primary_model_id]]
   improvement <- if (is.finite(baseline_score) && baseline_score > 0 &&
                        is.finite(primary_score)) {
-    (baseline_score - primary_score) / baseline_score
+    (selection_metric_loss(baseline_score, primary_metric) -
+       selection_metric_loss(primary_score, primary_metric)) / abs(baseline_score)
   } else {
     NA_real_
   }
   metric_names <- unique(unlist(lapply(metrics, names), use.names = FALSE))
   leaderboard <- data.frame(
-    rank = rank(scores, ties.method = "min"),
+    rank = rank(score_loss, ties.method = "min", na.last = "keep"),
     model_id = names(models),
     model = unname(labels[names(models)]),
     role = unname(roles[names(models)]),
@@ -1110,7 +1179,12 @@ evaluate_candidates <- function(models,
       winner = winner,
       metrics = metrics,
       improvement_over_baseline = improvement,
-      beats_baseline = is.finite(improvement) && improvement > 0,
+      beats_baseline = if (all(is.finite(c(primary_score, baseline_score)))) {
+        selection_metric_loss(primary_score, primary_metric) < selection_metric_loss(baseline_score, primary_metric)
+      } else {
+        NA
+      },
+      metric_availability = evaluation_metric_status(evaluated, primary_metric),
       metric_definitions = metric_definitions(task),
       evaluated_rows = nrow(data),
       predictions = guided_prediction_table(evaluated, task, primary_model_id),
@@ -1145,7 +1219,7 @@ model_backend_name <- function(model) {
   class(model)[[1L]]
 }
 
-evaluate_predictions <- function(observed, predicted, explainer) {
+evaluate_predictions <- function(observed, predicted, explainer, extra_metrics = character()) {
   if (explainer$task != "regression" &&
         (is.factor(predicted) || is.character(predicted) || is.logical(predicted))) {
     stop("Probability metrics require class probabilities; hard class labels support accuracy only.",
@@ -1154,11 +1228,20 @@ evaluate_predictions <- function(observed, predicted, explainer) {
   if (explainer$task == "regression") {
     residual <- as.numeric(observed) - as.numeric(predicted)
     denominator <- sum((as.numeric(observed) - mean(as.numeric(observed)))^2)
-    return(c(
+    output <- c(
       rmse = sqrt(mean(residual^2)),
       mae = mean(abs(residual)),
       r_squared = if (denominator > 0) 1 - sum(residual^2) / denominator else NA_real_
-    ))
+    )
+    if ("rmsle" %in% extra_metrics) {
+      output <- c(output, rmsle = if (all(is.finite(observed)) && all(is.finite(predicted)) &&
+                                        all(observed >= 0) && all(predicted >= 0)) {
+        selection_rmsle(as.numeric(observed), as.numeric(predicted))
+      } else {
+        NA_real_
+      })
+    }
+    return(output)
   }
   if (explainer$task == "binary") {
     truth <- as.character(observed) == explainer$positive
@@ -1170,7 +1253,7 @@ evaluate_predictions <- function(observed, predicted, explainer) {
       brier_score = mean((probability - as.numeric(truth))^2),
       accuracy = confusion[["accuracy"]],
       balanced_accuracy = confusion[["balanced_accuracy"]],
-      roc_auc = guided_binary_auc(truth, probability)
+      roc_auc = guided_binary_auc(truth, as.numeric(predicted))
     ))
   }
   probability <- as.matrix(predicted)[, explainer$class_levels, drop = FALSE]
@@ -1301,11 +1384,11 @@ guided_tuning_refit_notes <- function(tuning) {
       severity = "note",
       code = "tuning_family_resampling_failed",
       message = paste0(
-        "Every attempted configuration failed in at least one training-only fold for: ",
+        "No attempted setting produced complete validation scores for: ",
         paste(tuning$refit$families_resampling_failed, collapse = ", "), "."
       ),
       recommendation = paste(
-        "Inspect `tuning_results(result)$fold_scores$error`; these families were excluded",
+        "Inspect screening and fold errors in `tuning_results(result)`; these families were excluded",
         "from selection and cannot be compared using complete out-of-fold evidence."
       ),
       stringsAsFactors = FALSE
@@ -1421,6 +1504,23 @@ guided_evaluation_notes <- function(training,
       "Revisit data quality and model assumptions before interpreting fitted patterns as useful."
     )
   }
+  unavailable <- summary$metric_availability
+  if (is.data.frame(unavailable)) {
+    if (identical(summary$primary_metric, "roc_auc") && all(unavailable$status == "unavailable")) {
+      add(
+        "warning", "evaluation_metric_unavailable",
+        "ROC AUC is unavailable because the evaluation rows contain only one outcome class.",
+        "Evaluate on representative data containing both classes; other recorded scores remain available."
+      )
+    } else {
+      for (row in which(unavailable$status == "unavailable")) {
+        add(
+          "warning", "evaluation_metric_unavailable", unavailable$reason[[row]],
+          "Check the prediction domain and evaluation data; inspect the retained secondary scores."
+        )
+      }
+    }
+  }
   if (task == "regression" && is.finite(summary$metrics$main_model[["r_squared"]]) &&
         summary$metrics$main_model[["r_squared"]] < 0) {
     add(
@@ -1444,7 +1544,7 @@ guided_binary_auc <- function(truth, score) {
   negatives <- sum(!truth)
   if (!positives || !negatives) return(NA_real_)
   ranks <- rank(score, ties.method = "average")
-  (sum(ranks[truth]) - positives * (positives + 1) / 2) / (positives * negatives)
+  (sum(ranks[truth]) - positives * (positives + 1) / 2) / (as.double(positives) * negatives)
 }
 
 metric_definitions <- function(task) {
@@ -1452,6 +1552,10 @@ metric_definitions <- function(task) {
     return(c(
       rmse = "Typical prediction error, with larger mistakes weighted more heavily; lower is better.",
       mae = "Average absolute prediction error in the target's units; lower is better.",
+      rmsle = paste(
+        "Root mean squared log1p error; lower is better.",
+        "Requires nonnegative outcomes and predictions; invalid values are not clipped."
+      ),
       r_squared = paste(
         "Share of evaluation-set variation explained relative to predicting the",
         "evaluation-set mean; higher is better."
@@ -1459,7 +1563,14 @@ metric_definitions <- function(task) {
     ))
   }
   definitions <- c(
-    log_loss = "Probability error that penalizes confident wrong answers; lower is better.",
+    log_loss = paste(
+      "Probability error that penalizes confident wrong answers; lower is better.",
+      if (task == "binary") {
+        "For this score, probabilities are limited to [1e-15, 1 - 1e-15] to keep log errors finite."
+      } else {
+        "For this score, true-class probabilities below 1e-15 are treated as 1e-15 to keep log errors finite."
+      }
+    ),
     brier_score = if (task == "binary") {
       paste(
         "Mean squared error of the positive-class probability, from 0 (best)",

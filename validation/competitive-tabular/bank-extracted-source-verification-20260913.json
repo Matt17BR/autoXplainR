@@ -1,0 +1,22 @@
+{
+  "scope": "Post-preparation byte comparison only. No CSV parsing, model loading, fitting or partition changes.",
+  "verified_at": "2026-09-13T16:36:33.297840+00:00",
+  "source_manifest_sha256": "be3c94601e6744325095a47695217d4477dd5eec86e4585d173fc11eaf9f7745",
+  "archive_sha256": "e0bf5f5de5b846e2f18e9d90606637267d46dfa260e0f17bb12e605db5efbeb4",
+  "nested_archive_sha256": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd",
+  "files": {
+    "bank-additional-full.csv": {
+      "archive_member": "bank-additional/bank-additional-full.csv",
+      "bytes": 5834924,
+      "sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+      "byte_identical": true
+    },
+    "bank-additional-names.txt": {
+      "archive_member": "bank-additional/bank-additional-names.txt",
+      "bytes": 5458,
+      "sha256": "10045462a4c026f858dffa159370c4270510230c1fc63c6c91ca51bba4b3df26",
+      "byte_identical": true
+    }
+  },
+  "status": "passed"
+}

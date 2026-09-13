@@ -483,6 +483,20 @@ test_that("exactly matching evaluation rows have configurable leakage checks", {
     )
   )
   expect_s3_class(ignored, "autoxplain_result")
+  overlap_note <- warned$evaluation$notes[
+    warned$evaluation$notes$code == "evaluation_row_overlap", , drop = FALSE
+  ]
+  expect_equal(nrow(overlap_note), 1L)
+  expect_match(overlap_note$message, "1 supplied evaluation record exactly matched", fixed = TRUE)
+  expect_false("evaluation_row_overlap" %in% ignored$evaluation$notes$code)
+  expect_identical(names(warned$models), names(ignored$models))
+  expect_identical(lapply(warned$models, class), lapply(ignored$models, class))
+  expect_identical(lapply(warned$models, stats::coef), lapply(ignored$models, stats::coef))
+  expect_identical(lapply(warned$models, stats::fitted), lapply(ignored$models, stats::fitted))
+  expect_identical(warned$evaluation$metrics, ignored$evaluation$metrics)
+  expect_identical(warned$evaluation$predictions, ignored$evaluation$predictions)
+  expect_identical(warned$training_data, ignored$training_data)
+  expect_identical(warned$test_data, ignored$test_data)
 
   factor_training <- data.frame(
     x = factor(c("a", "b"), levels = c("a", "b")),
@@ -500,4 +514,23 @@ test_that("exactly matching evaluation rows have configurable leakage checks", {
     autoxplain(model_set = "quick", training, "mpg", overlap_action = "stop"),
     "arg.*overlap_action|one of"
   )
+
+  saved <- tempfile(fileext = ".rds")
+  report <- tempfile(fileext = ".html")
+  on.exit(unlink(c(saved, report)), add = TRUE)
+  saveRDS(warned, saved)
+  restored <- readRDS(saved)
+  expect_identical(restored$evaluation$notes, warned$evaluation$notes)
+  local_mocked_bindings(split_row_overlap = function(...) stop("Report repeated overlap computation"))
+  render_model_report(restored, report)
+  html <- paste(readLines(report, warn = FALSE), collapse = "\n")
+  checks <- regmatches(html, regexpr('(?s)<section id="checks"[^>]*>.*?</section>', html, perl = TRUE))
+  warnings <- regmatches(checks, gregexpr(
+    '(?s)<article class="guided-note guided-note-warning">.*?</article>', checks, perl = TRUE
+  ))[[1L]]
+  overlap_warning <- warnings[grepl(overlap_note$message, warnings, fixed = TRUE)]
+  expect_length(overlap_warning, 1L)
+  expect_match(overlap_warning, paste0("<h3>", overlap_note$message, "</h3>"), fixed = TRUE)
+  expect_match(overlap_warning, overlap_note$recommendation, fixed = TRUE)
+  expect_false(grepl("evaluation row 9", html, fixed = TRUE))
 })

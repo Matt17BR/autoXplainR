@@ -7,8 +7,8 @@ report_preparation_fixture <- function() {
 }
 
 test_that("secondary effect failures propagate to every aggregate status surface", {
-  original <- AutoXplainR::explain_effect
-  local_mocked_bindings(explain_effect = function(model, ...) {
+  original <- AutoXplainR:::explain_effect_impl
+  local_mocked_bindings(explain_effect_impl = function(model, ...) {
     if (model$label != "main_model") stop("secondary curve unavailable")
     original(model, ...)
   }, .package = "AutoXplainR")
@@ -31,8 +31,8 @@ test_that("secondary effect failures propagate to every aggregate status surface
 })
 
 test_that("one failed class of one model does not erase successful siblings", {
-  original <- AutoXplainR::explain_effect
-  local_mocked_bindings(explain_effect = function(model, ..., class = NULL) {
+  original <- AutoXplainR:::explain_effect_impl
+  local_mocked_bindings(explain_effect_impl = function(model, ..., class = NULL) {
     if (model$label == "simple_baseline" && identical(class, "versicolor")) stop("one class unavailable")
     original(model, ..., class = class)
   }, .package = "AutoXplainR")

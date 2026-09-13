@@ -1,0 +1,267 @@
+{
+  "generated_at": "2026-09-12 12:56:27",
+  "runner_sha256": "87db89ea2fe9e8ace58a1125827164e89965ffecce68035f35ee2a814ab68f80",
+  "source_sha256": {
+    "R/fitted_model.R": "5dbc974181b43dc8b49dd0d9e2719f521cb82431cf9caa830ec3a009c0acb598",
+    "R/explainer.R": "60605cd2372192cac163d0da824dd86f1cd1adc1fd3fc5dfc5047005e8aa4e84",
+    "R/evidence_contract.R": "3a619ce6bf0177e5c253a15b779700d87407017e91c0ca488d7e9c25a700ac93",
+    "R/permutation_importance.R": "292c0729e62fece4116a21be9736a95743c142ba26ebabdefccdd624f7e2071b",
+    "R/dashboard_generation.R": "bf264d884d9c4fd505c71203e62370ac4cbf92488bd311f6720b8001c9722ae7",
+    "R/report_preparation.R": "7469275d13ec723ad05b6fe3f7dfa739c890b3868c62bbf9ba4b9f4d08845b3f",
+    "R/audit.R": "7a8123db0537354ffc884c1eb3b49e0f8854a41c7e199dae701c4ed283fab566"
+  },
+  "ranger_version": "0.18.0",
+  "R_version": "R version 4.5.2 (2025-10-31)",
+  "records": [
+    {
+      "id": "sqrt_node5",
+      "native_trees": 500,
+      "native_training_rows": 40000,
+      "prediction_threads": 2,
+      "full_evaluation_rows": 10000,
+      "saved_128_and_500_prefix_predictions_identical": true,
+      "batched_and_separate_prediction_arrays_identical": true,
+      "timings": [
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 1000,
+          "seconds": 0.80999999999999961
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 5000,
+          "seconds": 1.7519999999999998
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 2.5069999999999997
+        },
+        {
+          "label": "five_separate",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 7.1110000000000024
+        },
+        {
+          "label": "one_batched",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 4.8649999999999984
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 10000,
+          "seconds": 2.5470000000000006
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 5000,
+          "seconds": 1.5480000000000018
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 1000,
+          "seconds": 0.84600000000000009
+        },
+        {
+          "label": "one_batched",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 5.5609999999999964
+        },
+        {
+          "label": "five_separate",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 7.0210000000000008
+        },
+        {
+          "label": "full_fingerprint_including_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 4.1649999999999991
+        },
+        {
+          "label": "importance_3_features_3_repeats",
+          "repetition": 1,
+          "predicted_rows": 65000,
+          "seconds": 20.076999999999998
+        }
+      ]
+    },
+    {
+      "id": "third_node20",
+      "native_trees": 500,
+      "native_training_rows": 40000,
+      "prediction_threads": 2,
+      "full_evaluation_rows": 10000,
+      "saved_128_and_500_prefix_predictions_identical": true,
+      "batched_and_separate_prediction_arrays_identical": true,
+      "timings": [
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 1000,
+          "seconds": 0.20799999999999841
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 5000,
+          "seconds": 0.79199999999998738
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 1.2580000000000098
+        },
+        {
+          "label": "five_separate",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 3.3439999999999941
+        },
+        {
+          "label": "one_batched",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 3.269999999999996
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 10000,
+          "seconds": 1.6569999999999965
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 5000,
+          "seconds": 0.73099999999999454
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 1000,
+          "seconds": 0.23999999999999488
+        },
+        {
+          "label": "one_batched",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 3.3780000000000001
+        },
+        {
+          "label": "five_separate",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 3.7660000000000053
+        },
+        {
+          "label": "full_fingerprint_including_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 2.2460000000000093
+        },
+        {
+          "label": "importance_3_features_3_repeats",
+          "repetition": 1,
+          "predicted_rows": 65000,
+          "seconds": 11.319000000000003
+        }
+      ]
+    },
+    {
+      "id": "extra_sqrt_node5",
+      "native_trees": 500,
+      "native_training_rows": 40000,
+      "prediction_threads": 2,
+      "full_evaluation_rows": 10000,
+      "saved_128_and_500_prefix_predictions_identical": true,
+      "batched_and_separate_prediction_arrays_identical": true,
+      "timings": [
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 1000,
+          "seconds": 0.73600000000000421
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 5000,
+          "seconds": 1.5390000000000015
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 2.7459999999999951
+        },
+        {
+          "label": "five_separate",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 7.0760000000000076
+        },
+        {
+          "label": "one_batched",
+          "repetition": 1,
+          "predicted_rows": 25000,
+          "seconds": 5.4869999999999806
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 10000,
+          "seconds": 3.2630000000000052
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 5000,
+          "seconds": 1.4539999999999793
+        },
+        {
+          "label": "wrapper_prediction",
+          "repetition": 2,
+          "predicted_rows": 1000,
+          "seconds": 0.71399999999999864
+        },
+        {
+          "label": "one_batched",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 4.695999999999998
+        },
+        {
+          "label": "five_separate",
+          "repetition": 2,
+          "predicted_rows": 25000,
+          "seconds": 7.6140000000000043
+        },
+        {
+          "label": "full_fingerprint_including_prediction",
+          "repetition": 1,
+          "predicted_rows": 10000,
+          "seconds": 5.4900000000000091
+        },
+        {
+          "label": "importance_3_features_3_repeats",
+          "repetition": 1,
+          "predicted_rows": 65000,
+          "seconds": 23.534999999999997
+        }
+      ]
+    }
+  ],
+  "scope": "Year development calibration predictors and targets only. No fitting. Timings include the package model prediction wrapper at two native threads and shared-host noise. The three-feature importance probe makes nine 5000-row perturbation predictions and two 10000-row predictions for baseline and identity, totaling 65000 rows."
+}

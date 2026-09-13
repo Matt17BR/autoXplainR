@@ -31,12 +31,15 @@ calculate_permutation_importance(
 
 \item{target_column}{Outcome column name when \code{model} is a fitted model.}
 
-\item{metric}{One of \code{"auto"}, \code{"rmse"}, \code{"mae"}, \code{"logloss"},
+\item{metric}{One of \code{"auto"}, \code{"rmse"}, \code{"rmsle"}, \code{"mae"}, \code{"logloss"},
 \code{"brier"}, \code{"accuracy"}, or \code{"auc"}. The result-style names
-\code{"log_loss"} and \code{"brier_score"} are accepted as aliases. With \code{"auto"},
+\code{"log_loss"}, \code{"brier_score"}, and \code{"roc_auc"} are accepted as aliases. With \code{"auto"},
 an explainer made from an \code{autoxplain_result} uses that result's primary
 evaluation metric; otherwise regression defaults to RMSE and
-classification to log loss.}
+classification to log loss. RMSLE requires nonnegative outcomes and
+predictions; it does not clip negative predictions. A feature with a
+negative shuffled prediction has unavailable importance, with the failed
+repeat recorded. Other features can still be assessed.}
 
 \item{n_repeats}{Number of independent permutations.}
 

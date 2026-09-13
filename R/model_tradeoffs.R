@@ -3,7 +3,9 @@
 #' Builds a two-objective comparison from an [autoxplain()] or [evaluate_models()]
 #' result. Predictive
 #' performance is taken from the evaluation leaderboard and the secondary axis
-#' defaults to approximate model-object size. For local models this is R's
+#' defaults to a usable repeated prediction benchmark when supplied, then retained
+#' fit time, evaluation-batch prediction time, and approximate model-object size.
+#' A default cost needs at least two finite score/cost pairs. For local models size is R's
 #' in-memory `object.size()` estimate. It includes retained diagnostics, may
 #' count shared data repeatedly and excludes native engine allocations. H2O uses
 #' an engine-reported size when available. These values are not a saved-file or
@@ -19,8 +21,9 @@
 #' @param performance_metric Numeric leaderboard metric. `NULL` selects the
 #'   task-appropriate primary metric.
 #' @param complexity_metric Numeric leaderboard or model-metadata column. The
-#'   argument name is retained for compatibility; `NULL` prefers model size,
-#'   then training or prediction time, and the returned object labels the exact
+#'   argument name is retained for compatibility; `NULL` prefers a recorded
+#'   repeated prediction benchmark, retained fit time, batch prediction time,
+#'   then model size. The returned object labels the exact
 #'   metric as a resource or structural-complexity proxy.
 #' @param include_baseline Include models labeled with the baseline role.
 #'
@@ -37,6 +40,10 @@ model_tradeoffs <- function(result,
   if (!is.logical(include_baseline) || length(include_baseline) != 1L ||
         is.na(include_baseline)) {
     stop("`include_baseline` must be TRUE or FALSE.", call. = FALSE)
+  }
+  use_benchmark <- is.null(complexity_metric) || identical(complexity_metric, "repeated_prediction_ms_per_row")
+  if (use_benchmark && !is.null(result$prediction_benchmark) && is.null(result$.report_benchmark)) {
+    result <- prepare_report_benchmark(result)
   }
   leaderboard <- enrich_tradeoff_leaderboard(result)
   if (!"model_id" %in% names(leaderboard)) {
@@ -64,7 +71,8 @@ model_tradeoffs <- function(result,
     leaderboard,
     complexity_metric,
     result$task,
-    kind = "complexity"
+    kind = "complexity",
+    performance_metric = performance_metric
   )
   usable <- is.finite(leaderboard[[performance_metric]]) &
     is.finite(leaderboard[[complexity_metric]])
@@ -90,7 +98,11 @@ model_tradeoffs <- function(result,
   attr(output, "performance_metric") <- performance_metric
   attr(output, "complexity_metric") <- complexity_metric
   attr(output, "secondary_metric") <- complexity_metric
-  attr(output, "secondary_metric_kind") <- behavior_tradeoff_kind(complexity_metric)
+  attr(output, "secondary_metric_kind") <- if (identical(complexity_metric, "repeated_prediction_ms_per_row")) {
+    "resource proxy"
+  } else {
+    behavior_tradeoff_kind(complexity_metric)
+  }
   attr(output, "higher_is_better") <- higher_is_better
   attr(output, "scope_note") <- paste(
     "Pareto status compares only the supplied models on the supplied evaluation data",
@@ -136,7 +148,21 @@ enrich_tradeoff_leaderboard <- function(result) {
   leaderboard
 }
 
-resolve_tradeoff_metric <- function(leaderboard, metric, task, kind) {
+tradeoff_resource_order <- function() {
+  c("repeated_prediction_ms_per_row", "training_time_ms", "training_time_s",
+    "prediction_time_ms", "model_size_kb", "size_mb", "model_size", "complexity")
+}
+
+tradeoff_resource_support <- function(leaderboard, resources, performance_metric = NULL) {
+  scores <- if (is.null(performance_metric)) {
+    rep(TRUE, nrow(leaderboard))
+  } else {
+    is.finite(leaderboard[[performance_metric]])
+  }
+  vapply(resources, function(column) sum(scores & is.finite(leaderboard[[column]])), integer(1))
+}
+
+resolve_tradeoff_metric <- function(leaderboard, metric, task, kind, performance_metric = NULL) {
   numeric_columns <- names(leaderboard)[vapply(leaderboard, is.numeric, logical(1))]
   if (!is.null(metric)) {
     if (!is.character(metric) || length(metric) != 1L || is.na(metric) ||
@@ -156,12 +182,15 @@ resolve_tradeoff_metric <- function(leaderboard, metric, task, kind) {
       )
     }
   } else {
-    c(
-      "model_size_kb", "size_mb", "model_size", "training_time_ms",
-      "training_time_s", "prediction_time_ms", "complexity"
-    )
+    tradeoff_resource_order()
   }
   available <- intersect(preferred, numeric_columns)
+  if (identical(kind, "complexity")) {
+    available <- available[tradeoff_resource_support(leaderboard, available, performance_metric) >= 2L]
+    if (!length(available)) {
+      stop("At least two models need finite performance and complexity values.", call. = FALSE)
+    }
+  }
   if (!length(available)) {
     stop("No suitable numeric ", kind, " metric is available.", call. = FALSE)
   }

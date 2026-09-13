@@ -1,0 +1,40 @@
+{
+  "captured_at": "2026-09-12T12:35:34.234568+00:00",
+  "cpu": {
+    "Architecture": "x86_64",
+    "Model name": "Intel(R) Core(TM) Ultra 9 185H",
+    "CPU(s)": "22",
+    "Thread(s) per core": "2",
+    "Core(s) per socket": "16",
+    "CPU max MHz": "5100.0000"
+  },
+  "allowed_logical_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "kernel": "7.0.0-31-generic",
+  "machine": "x86_64",
+  "physical_memory_total_kib": 63963944,
+  "measurement_scope": "Shared desktop session, not pinned to CPU cores. Other agents and native benchmark processes can run concurrently; wall times are observational.",
+  "snapshot_scope": "Captured after development runs began. Per-run R/backend versions and exact scripts are recorded separately."
+}

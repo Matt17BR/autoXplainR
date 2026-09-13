@@ -1,3 +1,17 @@
+test_that("an undefined primary score does not become a failed baseline comparison in prose", {
+  training <- data.frame(x = seq(1, 10, length.out = 80L))
+  training$y <- 2 + training$x + sin(training$x) / 10
+  evaluation <- data.frame(x = c(-20, -15, -10), y = c(3, 4, 5))
+  result <- autoxplain(
+    training, "y", test_data = evaluation, learners = "linear", max_models = 1L,
+    nfolds = 2L, explain = FALSE, tuning_control = tuning_control(metric = "rmsle")
+  )
+  text <- generate_natural_language_report(result, use_remote = FALSE)
+  expect_match(text, "RMSLE is unavailable", fixed = TRUE)
+  expect_false(grepl("It did not improve on", text, fixed = TRUE))
+  expect_false(grepl("improvement over", text, fixed = TRUE))
+})
+
 test_that("documented narrative merges retained evaluation and fitted explanations without recomputation", {
   result <- autoxplain(model_set = "quick", iris, "Species", seed = 2026)
   original <- result$explanations

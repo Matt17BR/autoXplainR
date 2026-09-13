@@ -1,0 +1,53 @@
+{
+  "recorded_at_utc": "2026-09-12T12:23:31.610342+00:00",
+  "status": "development measurement, not release acceptance",
+  "scope": "Synthetic fixed-model evaluation bootstrap; 2,000 training rows and 100,000 evaluation rows.",
+  "method": "Separate fresh R processes on the same host. The optimized run calls performance_uncertainty(); the reference reranks both original fitted score vectors in each identical paired row resample.",
+  "training_rows": 2000,
+  "evaluation_rows": 100000,
+  "models": 2,
+  "requested_draws": 1000,
+  "data_seed": 1941,
+  "bootstrap_seed": 123,
+  "metrics": {
+    "primary": 0.802206499364624,
+    "baseline": 0.5,
+    "difference": 0.302206499364624
+  },
+  "measurements": {
+    "optimized": {
+      "elapsed_seconds": 10.613,
+      "peak_process_rss_kib": 233252,
+      "retained_draws": 1000,
+      "discarded_draws": 0
+    },
+    "rerank": {
+      "elapsed_seconds": 32.167,
+      "peak_process_rss_kib": 231128,
+      "retained_draws": 1000,
+      "discarded_draws": 0
+    }
+  },
+  "parity": {
+    "identical_matrix": true,
+    "compared_values": 3000,
+    "maximum_absolute_difference": 0,
+    "draw_dimensions": [
+      1000,
+      3
+    ]
+  },
+  "timing_scope": "Bootstrap scoring and interval construction for optimized; scoring for rerank. Both exclude fixture fitting. Peak process RSS includes fitting and evaluation setup.",
+  "limitations": "Synthetic fixed-model evaluation uncertainty only. Single-host timings vary; this is not evidence of training scalability or competition performance.",
+  "r_version": "R version 4.5.2 (2025-10-31)",
+  "prediction_sha256": "de2af45a52edd0df28626686d706ea700506cd6cbd1cf050a7be286f267e9971",
+  "source_sha256": {
+    "R/auc_bootstrap.R": "a4dbb5b073e2eb408bbc0b55e2632a103536ee33ecd787da7a16107f9ff11f34",
+    "R/performance_uncertainty.R": "ca647ab5d3b5a770490e69ecfa97f34c0cb0e7cbbe90a7e2db733a7655150fe8",
+    "R/selection_metrics.R": "f6011f1a45b114ed0f1ab0a163c0ddce8a6ed6e805069514ff971bcedc011c31",
+    "R/guided_workflow.R": "01183012e5acdfdc9db4fb68fe1eef17c807ca96e7a911058e84f51382f47b5b",
+    "validation/competitive-tabular/probe-auc-bootstrap.R": "9057a716acc6d457111da82ae47094c70320b6dafb847b29b2e381c9e3f085f8"
+  },
+  "raw_evidence_cache": "~/.cache/autoxplain-tabular-0.8.0/auc-bootstrap",
+  "numeric_oracles": "The test suite independently compares paired bootstrap scores with explicit positive-negative pair enumeration, including ties and unequal whole groups."
+}

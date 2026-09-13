@@ -1,0 +1,24 @@
+{
+  "source_test_verification_sha256": "fa25f3853eff039f58b52387309dcd72cf8bb358479c5a10854897ff6e40b155",
+  "source_test_verification": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/reproducibility/unscored-xgboost-recovery-audit-v2/test-verification.json",
+  "status": "ok",
+  "source": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/reproducibility/native-staging-retry-check/runs/fit-only/rare_interaction/xgboost",
+  "source_files_unchanged": true,
+  "source_inventory_sha256": "ea86cd5c9fc0853fda711fb1e8e9a2368e931f3fd20c35bb1d29576720dae3b2",
+  "no_training_or_evaluation_partitions_in_test_cache": true,
+  "new_fits": 0,
+  "evaluation_replay_performed": false,
+  "native_boosted_rounds_verified": 48,
+  "recorded_training_rows": 2500,
+  "training_rows_native_verified": false,
+  "rejected_fixtures": {
+    "changed-summary-rows": "Training row, predictor or thread metadata differs.",
+    "changed-native-round-count": "Native boosted round count differs from the selected training-calibration round count.",
+    "changed-selected-round": "Selected rounds differ from the CSV minimum for setting 2",
+    "added-evaluation-predictions": "The fit has evaluation metrics, predictions or opened evaluation files.",
+    "changed-frozen-script": "Frozen script hash changed: run-one.R"
+  },
+  "successful_check": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/reproducibility/unscored-xgboost-recovery-audit-v2/small-fit-verification.json",
+  "checker_sha256": "eab33fcdb48d679eecf7bf05d1d72b228c87200ef8c56a923de9b0780028b78c",
+  "test_sha256": "3174f91f80948778fb236483938c6ff1822bcc29658a64d312a7cb8689a6ac1f"
+}

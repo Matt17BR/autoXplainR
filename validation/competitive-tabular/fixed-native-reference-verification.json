@@ -1,0 +1,50 @@
+{
+  "status": "ok",
+  "scope": "Development-only smoke, tamper and replay verification; no acceptance files opened.",
+  "evaluation_files_absent_during_fitting": true,
+  "new_calibration_fits": 0,
+  "verified_training_rows": 2500,
+  "verified_trees": 500,
+  "native_threads": 4,
+  "fit_process_sha256": "2467267df21dcd90b50e02f7e467fb360a38837f1bbc2f14b2fa665beac9a35e",
+  "fit_summary_sha256": "f3352a62eab9183a203f8976925127d514a38a00e020ade8e4825e725e2dd9eb",
+  "fit_model_sha256": "7ac0ab19ef43a2d04fde9a3bbe07d8e27fc10ed97003967548b9e1642ffe7eea",
+  "plan_sha256": "60df41100d932ddd3d1dafb6234a67c72f69dfa841b346afa0752f0b531808c4",
+  "rejected_before_R": [
+    "tampered-source-process",
+    "tampered-source-summary",
+    "changed-partitions",
+    "changed-protocol",
+    "changed-tree-count",
+    "changed-row-count",
+    "changed-calibration-loss",
+    "nonminimum-selection"
+  ],
+  "R_independent_provenance_rejection": true,
+  "original_workflow_retains_calibration": true,
+  "changed_saved_summary_rejected": true,
+  "unfrozen_acceptance_rejected": true,
+  "score_retry_consumes_remaining_combined_budget": true,
+  "acceptance_budget_metadata_without_training_files": {
+    "wall_limit_seconds": 7200,
+    "address_space_limit_bytes": 25769803776,
+    "fit_started": false,
+    "acceptance_files_present": false
+  },
+  "cold_replay": {
+    "status": "ok",
+    "case": "rare_interaction",
+    "phase": "development",
+    "variant": "ranger",
+    "process_id": 97773,
+    "max_absolute_prediction_difference": {
+      "ranger": 0
+    },
+    "predictions_sha256": "d507f14a86517af435f009146db7a180b8a68a90715ce4b45f46aa6c67ee177d",
+    "saved_model_sha256": "7ac0ab19ef43a2d04fde9a3bbe07d8e27fc10ed97003967548b9e1642ffe7eea",
+    "verified_at": "2026-09-13 14:12:25 UTC",
+    "fresh_session": true
+  },
+  "check_script_sha256": "4541ea1847dd1c7badb9221516dd2004e344f0f3493821b598756caa80851ac7",
+  "directory": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/reproducibility/fixed-native-reference-check-v3"
+}

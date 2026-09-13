@@ -106,21 +106,27 @@ prepare_model_report_data <- function(autoxplain_result,
                                       top_features = 8L,
                                       n_repeats = 20L,
                                       max_models = 5L,
-                                      explanation_rows = 5000L) {
+                                      explanation_rows = 5000L,
+                                      progress = FALSE) {
+  withr::local_preserve_seed()
   primary <- autoxplain_result$provenance$primary_model_id %||% names(autoxplain_result$models)[[1L]]
   selected <- head(c(primary, setdiff(names(autoxplain_result$models), primary)), max_models)
   if (is.null(autoxplain_result$.report_context)) {
     autoxplain_result$.report_context <- prepare_report_context(autoxplain_result, models = selected)
   }
   explainers <- report_explainers(autoxplain_result, models = selected)
+  prediction_context <- autoxplain_result$.report_context
   importance_metric <- result_importance_metric(autoxplain_result)
   screen_repeats <- min(5L, n_repeats)
   screening_by_model <- lapply(explainers, function(explainer) {
-    calculate_permutation_importance(
+    explanation_progress(
+      progress, "Screening input importance", explainer, names(explainer$data), explanation_rows, screen_repeats
+    )
+    calculate_permutation_importance_impl(
       explainer,
       metric = importance_metric, n_repeats = screen_repeats,
       seed = autoxplain_result$provenance$seed %||% 123L,
-      max_rows = explanation_rows
+      max_rows = explanation_rows, prediction_context = prediction_context, progress = progress
     )
   })
   screening <- screening_by_model[[1L]]
@@ -128,38 +134,32 @@ prepare_model_report_data <- function(autoxplain_result,
   features <- unique(unlist(lapply(screening_by_model, function(item) {
     head(item$feature[order(item$importance, decreasing = TRUE)], top_features)
   }), use.names = FALSE))
-  audit <- audit_explanations(
+  audit <- audit_explanations_impl(
     explainers,
     features = features,
     metric = importance_metric,
     n_repeats = n_repeats,
     seed = autoxplain_result$provenance$seed %||% 123L,
-    max_rows = explanation_rows
+    max_rows = explanation_rows, prediction_context = prediction_context, progress = progress
   )
   audit$provenance$automl_created_at <- autoxplain_result$provenance$created_at
   audit$provenance$automl_target <- autoxplain_result$target_column
   audit$provenance$automl_task <- autoxplain_result$task
   primary_rows <- audit$importance[audit$importance$model == primary, , drop = FALSE]
   effect_features <- head(primary_rows$feature[order(-primary_rows$importance)], top_features)
-  effects <- lapply(effect_features, function(feature) {
+  multiclass <- identical(autoxplain_result$task, "multiclass")
+  classes <- if (multiclass) explainers[[1L]]$class_levels else NA_character_
+  explanation_progress(progress, "Computing effect curves", explainers[[1L]], effect_features, explanation_rows)
+  primary_bundles <- lapply(effect_features, function(feature) {
     method <- if (is.numeric(explainers[[1L]]$data[[feature]])) "ale" else "pdp"
-    tryCatch(
-      explain_effect(
-        explainers[[1L]],
-        feature = feature,
-        method = method,
-        n_points = 16L,
-        max_rows = explanation_rows,
-        seed = autoxplain_result$provenance$seed %||% 123L,
-        class = if (autoxplain_result$task == "multiclass") {
-          explainers[[1L]]$class_levels[[1L]]
-        } else {
-          NULL
-        }
-      ),
-      error = function(error) structure(conditionMessage(error), class = "effect_failure", method = method)
+    explain_effect_bundle(
+      explainers[[1L]], feature, method = method,
+      n_points = 16L, max_rows = explanation_rows,
+      seed = autoxplain_result$provenance$seed %||% 123L,
+      classes = classes, prediction_context = prediction_context
     )
   })
+  effects <- lapply(primary_bundles, `[[`, 1L)
   names(effects) <- effect_features
   all_primary_effects <- effects
   failed <- vapply(effects, inherits, logical(1), "effect_failure")
@@ -176,11 +176,16 @@ prepare_model_report_data <- function(autoxplain_result,
     config = list(
       top_features = top_features, n_repeats = n_repeats, max_models = max_models,
       explanation_rows = explanation_rows
-    )
+    ),
+    effects_by_class = if (multiclass) stats::setNames(lapply(classes, function(class) {
+      values <- stats::setNames(lapply(primary_bundles, `[[`, class), effect_features)
+      stats::setNames(list(values), primary)
+    }), classes) else NULL
   )
   prepared <- autoxplain_result
   prepared$explanations <- output
-  prepared <- prepare_report_effects(prepared, audit, effects)
+  prepared <- prepare_report_effects(prepared, audit, effects, validate_context = FALSE, progress = progress)
+  validate_explanation_context(prediction_context)
   prepared$explanations
 }
 

@@ -13,6 +13,7 @@ Breiman
 Cawley
 Cloudflare
 CMD
+Covertype
 Cramer's
 DALEX
 Davison
@@ -94,6 +95,7 @@ Wedderburn
 XGBoost
 xgboost
 xplainfi
+YearPrediction
 Zhu
 Zhu's
 BAM
@@ -101,3 +103,4 @@ fREML
 fflate
 WebKit
 quantized
+RMSLE

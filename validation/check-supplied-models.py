@@ -10,6 +10,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright
 from report_payload import decode_data_payload, decode_prediction_payload
+from report_measurements import parse_duration
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -122,7 +123,23 @@ with sync_playwright() as p:
             marks=chart.locator('[data-chart-source]').evaluate_all('xs=>xs.map(x=>({id:x.dataset.model,value:+x.dataset.x}))')
             expected_cost={row['model_id']:row['median_ms_per_row'] for row in finite}
             check('cost source uses finite repeated per-row medians '+str(width),len(marks)==len(finite) and all(close(x['value'],expected_cost[x['id']]) for x in marks),marks)
-            check('visible repeated-cost axis has correct unit '+str(width),'Repeated prediction (ms / row)' in chart.inner_text())
+            axis_text = chart.locator('svg').evaluate('''svg => {
+              const bottom = +svg.querySelector('.axr-axis').getAttribute('y1');
+              const labels = [...svg.querySelectorAll('text[text-anchor="middle"]')];
+              return {
+                ticks: labels.filter(node => +node.getAttribute('y') > bottom &&
+                  +node.getAttribute('y') < bottom + 30).map(node => node.textContent.trim()),
+                title: labels.filter(node => +node.getAttribute('y') >= bottom + 30)
+                  .map(node => node.textContent.trim()).join(' ')
+              };
+            }''')
+            try:
+                readable_units = bool(axis_text['ticks']) and all(
+                    math.isfinite(parse_duration(tick)) for tick in axis_text['ticks'])
+            except ValueError:
+                readable_units = False
+            check('visible repeated-cost axis shows duration units and per-row scope '+str(width),
+                  readable_units and '/row' in ''.join(axis_text['title'].split()), axis_text)
         else:
             check('unavailable benchmark is not a selectable numeric cost '+str(width),'repeated_prediction_ms_per_row' not in options)
         table=page.locator('.benchmark-cost-table table')

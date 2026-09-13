@@ -50,8 +50,10 @@
 #' @export
 #'
 #' @examples
-#' result <- autoxplain(mtcars, "mpg", seed = 2026)
+#' data <- mtcars[c("mpg", "wt", "hp")]
+#' result <- autoxplain(data, "mpg", model_set = "quick", explain = FALSE, seed = 2026)
 #' path <- tempfile(fileext = ".html")
+#' # Compute explanations once, when rendering this report.
 #' render_model_report(result, path, n_repeats = 3)
 #' unlink(path)
 render_model_report <- function(result,
@@ -70,6 +72,7 @@ render_model_report <- function(result,
                                 report_data = "summary",
                                 benchmark = NULL,
                                 explanation_rows = 5000L) {
+  withr::local_preserve_seed()
   if (!inherits(result, "autoxplain_result")) {
     stop("`result` must be returned by `autoxplain()`.", call. = FALSE)
   }
@@ -223,7 +226,8 @@ render_subgroup_performance <- function(subgroups) {
     "<p class=\"eyebrow\">Performance context</p>",
     "<h2 id=\"subgroups-title\">Did performance vary across groups?</h2>",
     "<p>These rows compare the primary model across values of <strong>",
-    html_escape(subgroups$by), "</strong>. Positive gaps mean worse ",
+    html_escape(subgroups$by), "</strong>. Positive gaps mean ",
+    if (selection_metric_direction(subgroups$primary_metric) == "maximize") "better " else "worse ",
     html_escape(pretty_metric(subgroups$primary_metric)), " than the overall evaluation result.</p>",
     "<div class=\"cards\">",
     metric_card("Compared by", subgroups$by, "Chosen explicitly for this report"),
@@ -398,7 +402,7 @@ render_metric_definitions <- function(result) {
 
 pretty_metric <- function(metric) {
   labels <- c(
-    rmse = "RMSE", mae = "MAE", r_squared = "R-squared",
+    rmse = "RMSE", rmsle = "RMSLE", mae = "MAE", r_squared = "R-squared",
     log_loss = "log loss", logloss = "log loss", accuracy = "accuracy",
     brier = "Brier score", brier_score = "Brier score",
     calibration_error = "binned calibration gap",
@@ -580,6 +584,7 @@ render_explanation_report <- function(audit,
 }
 
 explanation_report_html <- function(audit, title) {
+  withr::local_options(OutDec = ".")
   summary <- audit$summary
   findings <- audit$findings
   generated <- audit$provenance$created_at
@@ -931,7 +936,7 @@ render_performance_uncertainty <- function(uncertainty, record = NULL, result = 
   )
   names(table) <- c("Model or comparison", "Estimate", paste(format_percent(uncertainty$confidence), "interval"))
   notes <- uncertainty$notes
-  important <- grepl("Fewer than|degenerate|reused", notes)
+  important <- grepl("Fewer than|degenerate|reused|Discarded", notes)
   assumptions <- notes[!important & !startsWith(notes, "Paired percentile intervals conditional on the fitted models;")]
   paste0(
     "<section id=\"uncertainty\" aria-labelledby=\"uncertainty-title\"><h2 id=\"uncertainty-title\">How variable is this score?</h2>",
@@ -939,10 +944,12 @@ render_performance_uncertainty <- function(uncertainty, record = NULL, result = 
       metric_label, " \u00b7 ", uncertainty$units, " evaluation ",
       uncertainty$unit, if (uncertainty$units != 1L) "s"
     )),
-    '<p class="microcopy">Negative differences favor ', html_escape(primary), ".</p>",
+    '<p class="microcopy">', if (metric %in% c("auc", "roc_auc")) "Positive" else "Negative",
+    " differences favor ", html_escape(primary), ".</p>",
     if (any(important)) paste0('<p class="baseline-caution">', html_escape(paste(notes[important], collapse = " ")), "</p>"),
     '<details class="uncertainty-method"><summary>Interval method and assumptions</summary>',
-    "<p>Paired percentile intervals conditional on the fitted models, from ", uncertainty$n_boot,
+    "<p>Paired percentile intervals conditional on the fitted models, from ",
+    uncertainty$bootstrap$retained %||% uncertainty$n_boot,
     " bootstrap draws. ", html_escape(paste(assumptions, collapse = " ")), "</p></details></section>"
   )
 }

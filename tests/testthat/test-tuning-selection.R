@@ -140,7 +140,7 @@ test_that("recorded grids preserve coverage and caller rationale is not invented
 test_that("tuning report retains controls, statuses, numeric evidence and executable grid code", {
   result <- autoxplain(mtcars, "mpg", max_models = 4, nfolds = 3, seed = 2026, explain = FALSE)
   evidence <- tuning_evidence(result)
-  expect_identical(result$tuning$schema_version, 5L)
+  expect_identical(result$tuning$schema_version, 6L)
   expect_identical(evidence$status, "computed")
   expected_fields <- c("requested_parameters", "effective_parameters", "learned", "optimization_status")
   expect_true(all(expected_fields %in% names(evidence$folds)))

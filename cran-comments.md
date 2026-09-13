@@ -1,20 +1,32 @@
 ## GitHub release and CRAN preparation
 
-AutoXplainR 0.7.0 reduces tuning overhead and report size, adds recorded
-computation choices for larger models, and separates complete-data evaluation
-from bounded explanations and exploration.
-This is a preparation note, not
-a CRAN submission or acceptance record. CRAN submission is not part of this
-GitHub release.
+The unreleased AutoXplainR 0.8.0 candidate adds a tabular portfolio, adaptive
+screening, training-only boosting round selection, size-aware forest budgets,
+and reports of the fitted settings and selection evidence. It also adds AUC
+and RMSLE selection and preserves actionable failure records.
+This is a preparation note, not a CRAN submission or acceptance record.
+CRAN submission is not part of this GitHub release preparation.
 
-The exact tested source, CI gates, actual published archive, fresh-session
-reloads, public report walkthrough and remaining limitations are recorded in
-`validation/release-0.7.0.md`. All 16 release jobs passed, followed by independent
-verification of the actual download and public site. The package source and
-tag are unchanged by that later evidence record.
-Current scalability measurements are in
-`validation/scalability/findings.md`. Historical checks remain in
-`validation/release-0.6.2.md` and do not establish anything about the new archive.
+The 0.8.0 release gates and verification of its published archive and public
+site remain pending. Completed full-data Covertype, Bank and YearPrediction
+calls and current platform/native-engine/H2O checks are recorded in
+`validation/release-0.8.0.md`. All three summary-report checks passed, with the
+original checker failures retained. Their exact desktop/mobile captures and
+selected-feature PDFs have also been visually reviewed. All three bounded rows
+exports passed value and browser-control checks, with individual-record
+walkthroughs. The mobile header correction passed 265 data-explorer checks and
+118 refreshed-gallery checks, with direct visual inspection. Final CI, archive
+and publication verification remain pending. These results do not establish a
+verified release archive or public site. Comparison protocols,
+development runs and machine-readable results are under
+`validation/competitive-tabular/`.
+
+Historical 0.7.0 evidence is recorded in `validation/release-0.7.0.md`: all
+16 release jobs passed for that release, followed by verification of its actual
+download and public site. Its scale measurements remain in
+`validation/scalability/findings.md`, and earlier checks remain in
+`validation/release-0.6.2.md`. These records do not validate the 0.8.0 candidate
+or any future 0.8.0 archive.
 
 Examples and vignettes use local data and models. H2O and hosted narrative
 integrations are opt-in. Reports compute in R and need no external service.

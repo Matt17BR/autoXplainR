@@ -4,7 +4,10 @@ The [scalability work](scalability/README.md) separates recommended-search cost,
 report storage and browser behavior, and fits with a million training rows.
 Each measurement identifies its source and workload. The
 [0.7.0 release record](release-0.7.0.md) records the published archive, fresh
-installation, saved-model reloads and executed public-report tasks.
+installation, saved-model reloads and executed public-report tasks. The current
+[0.8.0 validation record](release-0.8.0.md) reports completed full-data tabular
+calls, measured tradeoffs and remaining report and release gates; it does not
+claim a published 0.8.0 release.
 
 The [harder-modeling comparison](stress-modeling/findings.md) tests predictive
 quality against independently fitted reference models. The accompanying

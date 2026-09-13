@@ -446,7 +446,9 @@ data_sample_indices <- function(sizes, maximum, seed) {
   if (total <= maximum) {
     return(lapply(sizes, seq_len))
   }
-  allocation <- floor(maximum * sizes / total)
+  # A small export cap times a large partition can exceed the integer limit.
+  ideal <- as.double(maximum) * sizes / total
+  allocation <- floor(ideal)
   nonempty <- which(sizes > 0L)
   allocation[nonempty] <- pmax(allocation[nonempty], 1L)
   while (sum(allocation) > maximum) {
@@ -454,7 +456,7 @@ data_sample_indices <- function(sizes, maximum, seed) {
     allocation[index] <- allocation[index] - 1L
   }
   while (sum(allocation) < maximum) {
-    index <- which.max(maximum * sizes / total - allocation)
+    index <- which.max(ideal - allocation)
     allocation[index] <- allocation[index] + 1L
   }
   with_preserved_seed(seed, lapply(seq_along(sizes), function(i) {

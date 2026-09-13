@@ -47,10 +47,19 @@ jobs:
             any::e1071,
             any::earth,
             any::kknn
-      - name: Exercise every native learner adapter and portfolio
+      # Keep this filter aligned with check-engine-support.R so current and
+      # minimum engines exercise the same small native workflow contracts.
+      - name: Exercise native adapters, adaptive search and report contracts
         run: >-
           devtools::test(
-            filter = "native-engines|kernel-geometry|matrix-blueprint|gam-model-settings|boosting-native|additive-solvers|forest-call|mars-call|regularized-call",
+            filter = paste(
+              "native-engines|learner-registry|kernel-geometry|matrix-blueprint|audit-data-contracts|gam-model-settings",
+              "boosting-|additive-solvers|forest-|mars-call|regularized-call|neural-iterations",
+              "adaptive-|search-|thread-policy|tuning-multiclass-oof-binding",
+              "selection-metrics|competition-metric-integration|tuning-loss-evidence",
+              "explanation-|effect-computation|evaluation-snapshot|prediction-partial-bindings",
+              "stopping-policy-provenance|tuning-control|selection-screening-table|report-model-settings", sep = "|"
+            ),
             stop_on_failure = TRUE
           )
         shell: Rscript {0}

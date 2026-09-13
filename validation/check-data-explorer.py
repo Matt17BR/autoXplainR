@@ -200,6 +200,40 @@ def chart_layout(page):
     )
 
 
+def selected_record_header_layout(page):
+    return page.evaluate(
+        """async () => {
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const panel = document.getElementById('data-selected-row');
+      const cells = [...(panel?.querySelectorAll('thead th') || [])];
+      const headers = cells.map(cell => {
+        const box = cell.getBoundingClientRect(), range = document.createRange();
+        range.selectNodeContents(cell);
+        const text = [...range.getClientRects()].filter(r => r.width > 0 && r.height > 0)
+          .map(r => ({left:r.left, right:r.right, top:r.top, bottom:r.bottom}));
+        return {label:cell.textContent.trim(), text,
+          visible:cell.isConnected && box.width > 0 && box.height > 0
+            && cell.checkVisibility({checkVisibilityCSS:true, checkOpacity:true}),
+          fits:text.length > 0 && text.every(r => r.left >= box.left - 1
+            && r.right <= box.right + 1 && r.top >= box.top - 1 && r.bottom <= box.bottom + 1)};
+      });
+      const overlaps = [];
+      for (let a = 0; a < headers.length; a++) for (let b = a + 1; b < headers.length; b++) {
+        if (headers[a].text.some(x => headers[b].text.some(y =>
+          Math.min(x.right,y.right) - Math.max(x.left,y.left) > .5
+          && Math.min(x.bottom,y.bottom) - Math.max(x.top,y.top) > .5))) {
+          overlaps.push([headers[a].label,headers[b].label]);
+        }
+      }
+      const complete = JSON.stringify(headers.map(h => h.label)) ===
+        JSON.stringify(['Column','Raw supplied value','Processed model value']);
+      return {readable:complete && headers.every(h => h.visible && h.fits)
+        && !overlaps.length && panel.scrollWidth <= panel.clientWidth + 1,
+        headers, overlaps, panelWidth:panel?.clientWidth, panelScrollWidth:panel?.scrollWidth};
+    }"""
+    )
+
+
 def mobile_column_tasks(browser, path, prefix):
     page = browser.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
     page.goto(path.as_uri() + "#data")
@@ -349,6 +383,18 @@ with sync_playwright() as p:
             check(
                 prefix + ": keyboard opens records",
                 page.locator("#data-records-panel").is_visible(),
+            )
+            check(
+                prefix + ": records controls match exported content",
+                page.locator("#data-pair-control").is_visible() == (mode == "rows"),
+            )
+            record_scope = page.locator("#data-population").inner_text()
+            check(
+                prefix + ": records scope does not claim full data",
+                "Full data" not in record_scope
+                and ("Exported records" in record_scope if mode == "rows"
+                     else "Individual records are not embedded" in record_scope),
+                record_scope,
             )
             page.locator("[data-data-view=distribution]").click()
             if kind == "binary":
@@ -678,6 +724,8 @@ with sync_playwright() as p:
                     )
             for view in ["distribution", "relationships", "records"]:
                 page.locator("[data-data-view=" + view + "]").click()
+                if view == "records" and mode == "rows":
+                    page.locator("#data-row-table .data-row-link").first.click()
                 if view == "relationships" and kind == "binary":
                     page.locator("#data-pair > details").evaluate(
                         "(node)=>{node.open=true}"
@@ -693,6 +741,23 @@ with sync_playwright() as p:
                 for width in [1440, 768, 390, 320]:
                     page.set_viewport_size({"width": width, "height": 900})
                     layout = chart_layout(page)
+                    if view == "records" and mode == "rows" and width == 390:
+                        panel = page.locator("#data-selected-row")
+                        panel.scroll_into_view_if_needed()
+                        panel.evaluate("node => {node.scrollTop = 0; node.scrollLeft = 0}")
+                        header_layout = selected_record_header_layout(page)
+                        check(prefix + ": selected record headers fit their cells without overlap at 390px",
+                              header_layout["readable"], header_layout)
+                        panel.screenshot(path=str(out / (prefix.replace("/", "-") + "-selected-record-390.png")))
+                        headers = panel.locator("thead th")
+                        original_styles = headers.evaluate_all("nodes => nodes.map(node => node.getAttribute('style'))")
+                        headers.evaluate_all("nodes => nodes.forEach(node => {node.style.whiteSpace = 'nowrap'})")
+                        broken_layout = selected_record_header_layout(page)
+                        check(prefix + ": rejects selected record headers running into adjacent cells",
+                              not broken_layout["readable"]
+                              and any(not header["fits"] for header in broken_layout["headers"]), broken_layout)
+                        headers.evaluate_all("(nodes,styles) => nodes.forEach((node,index) => {if(styles[index] === null) node.removeAttribute('style'); else node.setAttribute('style',styles[index])})",
+                                             original_styles)
                     check(
                         prefix + ": " + view + " readable chart layout " + str(width),
                         not layout["overflow"]

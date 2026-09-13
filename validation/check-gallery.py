@@ -17,6 +17,7 @@ SCREENSHOTS = ('guided-overview.png', 'model-comparison.png', 'model-selection.p
                'model-data.png', 'model-patterns.png', 'model-predictions.png',
                'explanation-reliability.png', 'model-details.png')
 GENERATORS = ('validation/render-example.R', 'validation/render-explorer-cases.R',
+              'validation/model-settings-oracle.R',
               'validation/capture-screenshots.py', 'validation/check-gallery.py')
 REBUILD = ('Regenerate the public reports and screenshots, review them, then explicitly run '
            '`python validation/check-gallery.py --record`. See validation/README.md#report-screenshots. '

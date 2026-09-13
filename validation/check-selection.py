@@ -3,19 +3,23 @@ Run render-selection-fixture.R first; this gate does not calculate expected valu
 """
 from pathlib import Path
 import argparse
+import atexit
 import json
 import math
 import os
 import subprocess
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright
+from selection_browser_helpers import assert_requested_tuple, run_adaptive_checks
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-selection-cases'))
 parser.add_argument('--output-dir', type=Path, required=True)
+parser.add_argument('--browser', choices=['chromium', 'firefox', 'webkit'], default='chromium')
 args = parser.parse_args()
 args.output_dir.mkdir(parents=True, exist_ok=True)
 checks = []
+atexit.register(lambda: (args.output_dir/'selection-checks.json').write_text(json.dumps(checks, indent=2)))
 def check(name, passed, detail=None):
     checks.append(dict(check=name, passed=bool(passed), detail=detail))
 def settled(page):
@@ -28,6 +32,11 @@ expected = {'linear_01': ([3.6, 3.6], 3.6), 'tree_01': ([3, 3], 3),
 expected_labels = {'linear_01': 'No tuned controls', 'tree_01': 'depth 2; cp 0.03; split 8',
                    'tree_02': 'depth 4; cp 0.01; split 5', 'neural_01': '1 unit; decay 0.1',
                    'neural_02': '2 units; decay 0.03'}
+expected_settings = {
+    'linear_01': {}, 'tree_01': {'maxdepth': 2, 'cp': .03, 'minsplit': 8},
+    'tree_02': {'maxdepth': 4, 'cp': .01, 'minsplit': 5},
+    'neural_01': {'size': 1, 'decay': .1, 'maxit': 2000},
+    'neural_02': {'size': 2, 'decay': .03, 'maxit': 2000}}
 threshold = math.sqrt(7) + math.sqrt(20)/(2*math.sqrt(7))
 source = json.loads((args.case_dir/'selection-source.json').read_text())
 for candidate in source['candidates']:
@@ -36,7 +45,7 @@ for candidate in source['candidates']:
           candidate['cv_score'] is None if score is None else math.isclose(candidate['cv_score'], score))
 with sync_playwright() as p:
     options = {'executable_path': os.environ['BROWSER_EXECUTABLE']} if os.environ.get('BROWSER_EXECUTABLE') else {}
-    browser = p.chromium.launch(**options)
+    browser = getattr(p, args.browser).launch(**options)
     for width in [1440, 390, 320]:
         failure_id = 'selection-detail-6e657572616c5f3032'
         page = browser.new_page(viewport={'width': width, 'height': 900})
@@ -51,14 +60,14 @@ with sync_playwright() as p:
         check(f'keyboard Checks link opens and focuses the exact failed folds {width}',
               failed.is_visible() and failed.evaluate('node=>node.open') and
               page.locator('.selection-candidate:not([hidden])').count()==1 and
-              failed.locator('summary').evaluate('node=>node===document.activeElement') and
+              failed.locator(':scope > summary').evaluate('node=>node===document.activeElement') and
               'Fixture iteration limit' in failed.inner_text())
         check(f'failed configuration destination persists in URL {width}', page.url.endswith('#'+failure_id))
         page.reload(); settled(page)
         check(f'fresh deep link restores failed family and opens exact folds {width}',
               page.input_value('#selection-family-filter')=='neural' and failed.is_visible() and
               failed.evaluate('node=>node.open') and
-              failed.locator('summary').evaluate('node=>node===document.activeElement'))
+              failed.locator(':scope > summary').evaluate('node=>node===document.activeElement'))
         page.close()
         page = browser.new_page(viewport={'width': width, 'height': 900})
         page.goto((args.case_dir/'selection-oracle.html').resolve().as_uri()); settled(page)
@@ -78,22 +87,53 @@ with sync_playwright() as p:
             page.keyboard.press('Tab')
             check(f'normal tab order reaches first graph row {width} {family}',
                   figure.locator('.selection-plot-link').first.evaluate('node=>document.activeElement===node'))
-            geometry = figure.locator('svg').evaluate('''svg=>{
+            geometry_script = '''svg=>{
               const b=svg.getBoundingClientRect();
               const texts=[...svg.querySelectorAll('text')].filter(t=>getComputedStyle(t).display!=='none'&&t.textContent.trim());
-              const clipped=texts.filter(t=>{const a=t.getBoundingClientRect();return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1}).map(t=>t.textContent);
-              const small=texts.filter(t=>t.getBoundingClientRect().height<12).map(t=>t.textContent);
-              const overlaps=[];for(let i=0;i<texts.length;i++)for(let j=i+1;j<texts.length;j++){
-                const a=texts[i].getBoundingClientRect(),c=texts[j].getBoundingClientRect();
-                if(a.left<c.right&&a.right>c.left&&a.top<c.bottom&&a.bottom>c.top)overlaps.push([texts[i].textContent,texts[j].textContent]);}
-              return {clipped,small,overlaps,
+              // getBBox defaults to fill geometry, excluding the paper-colored
+              // text stroke that Firefox includes in getBoundingClientRect.
+              // Transform all corners so every check uses screen coordinates.
+              const labels=texts.map(t=>{
+                const box=t.getBBox(),matrix=t.getScreenCTM();
+                if(!matrix)throw new Error('Visible SVG text has no screen transform');
+                const corners=[[box.x,box.y],[box.x+box.width,box.y],
+                  [box.x,box.y+box.height],[box.x+box.width,box.y+box.height]]
+                  .map(([x,y])=>new DOMPoint(x,y).matrixTransform(matrix));
+                const left=Math.min(...corners.map(p=>p.x)),right=Math.max(...corners.map(p=>p.x));
+                const top=Math.min(...corners.map(p=>p.y)),bottom=Math.max(...corners.map(p=>p.y));
+                const client=t.getBoundingClientRect();
+                return {text:t.textContent,left,right,top,bottom,height:bottom-top,
+                  client:{left:client.left,right:client.right,top:client.top,bottom:client.bottom}};
+              });
+              const clipped=labels.filter(a=>a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1).map(a=>a.text);
+              const small=labels.filter(a=>a.height<12).map(a=>a.text);
+              const overlaps=[];for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){
+                const a=labels[i],c=labels[j];
+                if(a.left<c.right&&a.right>c.left&&a.top<c.bottom&&a.bottom>c.top)overlaps.push([a.text,c.text]);}
+              return {labels,clipped,small,overlaps,
                 ticks:[...svg.querySelectorAll('.selection-axis-tick')].filter(t=>getComputedStyle(t).display!=='none').map(t=>({value:+t.textContent,x:+t.getAttribute('x')})),
                 threshold:+svg.querySelector('.selection-cutoff').getAttribute('x1'),
                 rows:[...svg.querySelectorAll('.selection-plot-row')].map(r=>({
                   fold:[...r.querySelectorAll('.selection-fold-point')].map(x=>+x.getAttribute('cx')),
                   pooled:r.querySelector('.selection-score-point')?+r.querySelector('.selection-score-point').getAttribute('cx'):null}))};
-            }''')
+            }'''
+            geometry = figure.locator('svg').evaluate(geometry_script)
             check(f'label geometry {width} {family}', not geometry['clipped'] and not geometry['small'] and not geometry['overlaps'], geometry)
+            if width == 390 and family == 'tree':
+                row = figure.locator('.selection-plot-row').first
+                role = row.locator('.selection-role')
+                original_y = role.get_attribute('y')
+                expected_pair = [row.locator('.selection-row-label').text_content(), role.text_content()]
+                try:
+                    role.evaluate('(node,y)=>node.setAttribute("y",y)', row.locator('.selection-row-label').get_attribute('y'))
+                    settled(page)
+                    overlap = figure.locator('svg').evaluate(geometry_script)
+                    check('a real overlap between configuration and score text is rejected',
+                          expected_pair in overlap['overlaps'], overlap)
+                    figure.screenshot(path=str(args.output_dir/'text-overlap-negative-control.png'))
+                finally:
+                    role.evaluate('(node,y)=>node.setAttribute("y",y)', original_y)
+                    settled(page)
             a, b = geometry['ticks'][:2]
             def position(value):
                 return a['x']+(value-a['value'])*(b['x']-a['x'])/(b['value']-a['value'])
@@ -114,12 +154,12 @@ with sync_playwright() as p:
                 link.focus(); page.keyboard.press('Enter'); settled(page)
                 detail = page.locator('.selection-candidate:not([hidden])')
                 check(f'keyboard graph row opens one exact detail {width} {ident}',
-                      detail.count() == 1 and ident in detail.locator('summary').inner_text()
-                      and detail.locator('summary').evaluate('node=>document.activeElement===node'))
-                wanted = next(x['requested_parameters'] for x in source['folds'] if x['configuration_id'] == ident)
+                      detail.count() == 1 and ident in detail.locator(':scope > summary').inner_text()
+                      and detail.locator(':scope > summary').evaluate('node=>document.activeElement===node'))
                 values = detail.locator('.selection-settings').inner_text()
-                check(f'requested controls reach detail {width} {ident}', all(str(value).lower() in values.lower() for value in wanted.values()) if isinstance(wanted,dict) else 'requested:' in values)
-            precision.locator('summary').click(); settled(page)
+                assert_requested_tuple(check, f'exact requested controls reach detail {width} {ident}',
+                                       values, expected_settings[ident])
+            precision.locator(':scope > summary').click(); settled(page)
             table_rows = figure.locator('.selection-candidate-table tbody tr')
             check(f'precision table can be opened explicitly {width} {family}',
                   figure.locator('.selection-candidate-table').is_visible() and table_rows.count()==len(candidate_rows))
@@ -127,16 +167,17 @@ with sync_playwright() as p:
                 row = table_rows.nth(index)
                 ident = candidate['configuration_id']; score = expected[ident][1]
                 actual = row.locator('td').nth(1).inner_text()
-                check(f'precision view preserves requested tuple and pooled score {width} {ident}',
-                      (candidate['hyperparameters'] in row.inner_text() if family!='linear' else 'No tuned controls' in row.inner_text())
-                      and (actual=='n/a' if score is None else abs(float(actual)-score)<.00006))
+                assert_requested_tuple(check, f'precision view preserves exact requested tuple {width} {ident}',
+                                       row.locator('td a').inner_text(), expected_settings[ident])
+                check(f'precision view preserves pooled score {width} {ident}',
+                      actual=='n/a' if score is None else abs(float(actual)-score)<.00006)
                 row.locator('[data-selection-inspect]').click(); settled(page)
                 target = row.locator('[data-selection-inspect]').get_attribute('data-selection-inspect')
                 check(f'precision link reaches same fold evidence as graph {width} {ident}',
                       page.locator('.selection-candidate:not([hidden])').get_attribute('id')==target
                       and figure.locator(f'[data-selection-inspect="{target}"]').evaluate_all('nodes=>nodes.every(node=>node.getAttribute("aria-expanded")==="true")'))
             check(f'no page/table overflow {width} {family}', page.evaluate('()=>document.documentElement.scrollWidth<=innerWidth') and figure.locator('.selection-candidate-table').evaluate('x=>x.scrollWidth<=x.clientWidth+1'))
-            precision.locator('summary').click(); settled(page)
+            precision.locator(':scope > summary').click(); settled(page)
             page.screenshot(path=str(args.output_dir/f'{family}-{width}.png'), full_page=True)
         page.close()
         page = browser.new_page(viewport={'width': width, 'height': 900})
@@ -146,7 +187,7 @@ with sync_playwright() as p:
               and page.locator('.selection-decision').count()==0)
         check(f'compact summary retains score, model, parameters and agreement {width}',
               all(text in agreed.inner_text() for text in ['2.6458 RMSE', 'Neural network', '1 unit; decay 0.1',
-                  'Lowest CV loss, policy choice and final fit are the same configuration']))
+                  'Selected from 4 settings that completed cross-validation.']))
         check(f'agreed decision opens its actual family {width}',page.input_value('#selection-family-filter')=='neural')
         if width < 650:
             check(f'agreed summary fits a compact mobile block {width}',agreed.bounding_box()['height']<100,
@@ -158,42 +199,49 @@ with sync_playwright() as p:
     check('no-JS mobile retains all candidate details', page.locator('.selection-candidate').count()==5)
     check('no-JS mobile explains table fallback', 'All candidate and fold numbers' in page.locator('noscript').inner_text())
     precision=page.locator('.selection-precision').first
-    precision.locator('summary').click()
+    precision.locator(':scope > summary').click()
     check('no-JS exact settings open natively',precision.locator('table').is_visible())
     page.close()
     page=browser.new_page(viewport={'width':1440,'height':900})
     page.goto((args.case_dir/'selection-oracle.html').resolve().as_uri());settled(page)
     page.select_option('#selection-family-filter','tree');settled(page)
     page.locator('.selection-family:not([hidden]) .selection-plot-link').nth(1).click();settled(page)
+    page.locator('.selection-family:not([hidden]) .selection-rationale > summary').click();settled(page)
     def selection_state():
         return page.evaluate('''()=>({family:document.querySelector('#selection-family-filter').value,
           visible:[...document.querySelectorAll('.selection-family')].filter(x=>!x.hidden).map(x=>x.dataset.selectionFamily),
           opened:[...document.querySelectorAll('.selection-candidate')].filter(x=>!x.hidden&&x.open).map(x=>x.id)})''')
     before_print=selection_state()
-    page.pdf(path=str(args.output_dir/'selection.pdf'),format='A4',print_background=True)
-    settled(page)
-    check('print preserves chosen family and opened candidate after returning',selection_state()==before_print,before_print)
-    check('graph navigation is restored after printing', page.locator('.selection-plot-link').evaluate_all(
-        'nodes=>nodes.every(node=>node.getAttribute("href")==="#"+node.dataset.selectionInspect)'))
+    if args.browser == 'chromium':
+        page.pdf(path=str(args.output_dir/'selection.pdf'),format='A4',print_background=True)
+        settled(page)
+        check('print preserves chosen family and opened candidate after returning',selection_state()==before_print,before_print)
+        check('graph navigation is restored after printing', page.locator('.selection-plot-link').evaluate_all(
+            'nodes=>nodes.every(node=>node.getAttribute("href")==="#"+node.dataset.selectionInspect)'))
+    page.close()
+    run_adaptive_checks(browser, args.case_dir, args.output_dir, check, settled, pdf_enabled=args.browser == 'chromium')
     browser.close()
 # The PDF must contain the chosen tree setting's open evidence, not every family's
 # hidden candidate details. Family names in the decision summary are still valid.
-pdf_text=subprocess.check_output(['pdftotext',str(args.output_dir/'selection.pdf'),'-'],text=True)
-pdf_text=' '.join(pdf_text.split())
-check('PDF keeps the chosen family rationale', 'Decision tree: search rationale' in pdf_text and
-      'Neural network: search rationale' not in pdf_text and 'Linear regression: search rationale' not in pdf_text)
-check('PDF keeps only the explicitly opened fold detail', 'tree_02 fold scores' in pdf_text and
-      all(ident+' fold scores' not in pdf_text for ident in ['tree_01','linear_01','neural_01','neural_02']))
-# Poppler font sizes at zoom1 are PDF points, independent of screen viewBox math.
-pdf_result = subprocess.run(['pdftohtml', '-xml', '-stdout', '-zoom', '1',
-                            str(args.output_dir/'selection.pdf')], text=True, capture_output=True, check=True)
-check('selected family PDF has no broken named destinations',
-      'Bad named destination' not in pdf_result.stderr, pdf_result.stderr)
-root = ET.fromstring(pdf_result.stdout)
-fonts = {node.attrib['id']: float(node.attrib['size']) for node in root.iter('fontspec')}
-printed = [(''.join(node.itertext()), fonts[node.attrib['font']]) for node in root.iter('text')
-           if 'lower is better' in ''.join(node.itertext()) or ''.join(node.itertext()).startswith('depth ')]
-check('actual printed chart text is at least8pt', len(printed)>=3 and all(size>=8 for _,size in printed), printed)
+if args.browser == 'chromium':
+    pdf_text=subprocess.check_output(['pdftotext',str(args.output_dir/'selection.pdf'),'-'],text=True)
+    pdf_text=' '.join(pdf_text.split())
+    check('PDF keeps the explicitly opened family rationale',
+          'Preset tuples move from shallow trees and larger minimum splits toward deeper trees.' in pdf_text
+          and 'Small single-layer networks and several weight penalties bound the search cost.' not in pdf_text
+          and 'One unpenalized reference fit; there is no parameter grid for this family.' not in pdf_text)
+    check('PDF keeps only the explicitly opened fold detail', 'tree_02 fold scores' in pdf_text and
+          all(ident+' fold scores' not in pdf_text for ident in ['tree_01','linear_01','neural_01','neural_02']))
+    # Poppler font sizes at zoom1 are PDF points, independent of screen viewBox math.
+    pdf_result = subprocess.run(['pdftohtml', '-xml', '-stdout', '-zoom', '1',
+                                str(args.output_dir/'selection.pdf')], text=True, capture_output=True, check=True)
+    check('selected family PDF has no broken named destinations',
+          'Bad named destination' not in pdf_result.stderr, pdf_result.stderr)
+    root = ET.fromstring(pdf_result.stdout)
+    fonts = {node.attrib['id']: float(node.attrib['size']) for node in root.iter('fontspec')}
+    printed = [(''.join(node.itertext()), fonts[node.attrib['font']]) for node in root.iter('text')
+               if 'lower is better' in ''.join(node.itertext()) or ''.join(node.itertext()).startswith('depth ')]
+    check('actual printed chart text is at least8pt', len(printed)>=3 and all(size>=8 for _,size in printed), printed)
 (args.output_dir/'selection-checks.json').write_text(json.dumps(checks,indent=2))
-print(json.dumps({'checks':len(checks),'failures':[x for x in checks if not x['passed']]},indent=2))
+print(json.dumps({'browser':args.browser,'checks':len(checks),'failures':[x for x in checks if not x['passed']]},indent=2))
 raise SystemExit(0 if all(x['passed'] for x in checks) else 1)

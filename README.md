@@ -36,15 +36,60 @@ The default runs locally without Java, an API key or a language model. For a
 fast reference model and baseline, set `model_set = "quick"`. AutoXplainR is
 available on GitHub; it is not yet on CRAN.
 
+For larger tabular datasets, **version 0.8.0** adds a short route
+to regularized models, random forests and XGBoost. This portfolio requires
+R 4.3 or newer for XGBoost; the core package supports R 4.1 or newer.
+
+```r
+install_model_engines("tabular")  # one-time setup
+training <- read.csv("train.csv", check.names = FALSE)
+result <- autoxplain(training, "outcome", portfolio = "tabular", report = "report.html")
+
+competition_test <- read.csv("test.csv", check.names = FALSE)
+predictions <- predict(result, competition_test)
+```
+
+Replace `"outcome"` with your labeled training table's target column. A competition's
+unlabeled test table goes to `predict()`; `test_data` is for evaluation rows that
+also contain observed outcomes.
+Predictions are numeric values for regression, positive-class probabilities for
+binary classification, or a named probability matrix for multiclass. Use
+`predict(result, competition_test, type = "class")` when class labels are required.
+
+It starts with 18 candidate settings, screens them on a shared training sample,
+then cross-validates the leading setting from each family. Boosting
+chooses its number of rounds inside each training fold. The best CV finalist
+becomes the primary model; retained models are refitted on all training rows.
+Large forest searches use 128 or 256 trees per validation fit. When training rows
+times predictors reaches four million, the automatic final forest also uses 256
+trees; smaller searches keep 500. Reports explain the budget and show actual
+settings at each stage. Use `search = "grid"` in `tuning_control()` to validate
+each setting with its full requested tree count.
+Large automatic searches use up to four available CPU cores. Set
+`tuning_control(threads = 1)` to use one, or specify your own thread count.
+Tuned forest and boosting workflows announce their current stage, setting and
+fold from 200 input rows. Longer importance calculations also report completed
+shuffles, at most once every 30 seconds. Use `verbosity = "quiet"` to silence
+progress or `"info"` to show it on smaller datasets too.
+These controls were added after release 0.7.0. The
+[0.8.0 validation record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/release-0.8.0.md)
+reports completed full-data Covertype, Bank and YearPrediction comparisons,
+measured costs and remaining report and release checks. The
+[development record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/DEVELOPMENT.md)
+also retains the earlier failures and interrupted requests.
+
 `mtcars` is a small teaching example, not evidence that a model is ready for use.
 For your own analysis, choose predictors that are available when a prediction
 will be made. Exclude arbitrary identifiers and columns measured after the
 outcome. The [first-report tutorial](https://matt17br.github.io/autoXplainR/articles/autoxplainr-introduction.html)
 shows missing values, novel categories, an explicit split and recipe inspection.
 Numeric outcomes with exactly two values are treated as binary classification;
-use `task = "regression"` to override that choice. Binary probabilities refer to
-the **second outcome factor level**. For `factor(outcome, levels = c("no", "yes"))`,
-they are probabilities of `"yes"`. Set and inspect levels before fitting.
+use `task = "regression"` to override that choice. Numeric category codes with
+three or more values, such as `0, 1, 2`, otherwise select regression: set
+`task = "multiclass"` or convert the target to a factor before fitting.
+Binary probabilities refer to the **second outcome factor level**. For a binary
+classification target, `training$outcome <- factor(training$outcome, levels = c("no", "yes"))`
+makes them probabilities of `"yes"`. Set and inspect levels before fitting.
 
 ## A look inside the report
 
@@ -62,7 +107,8 @@ baseline, including a paired evaluation-sample interval when supported. Change
 the score or resource axis to inspect the tradeoff; points carry model names.
 The dashed **Pareto frontier** shows the best observed score available within
 each resource budget. Outlined points have no alternative that is at least as
-good on both displayed axes and better on one. The **CV choice** label records
+good on both displayed axes and better on one. If one model dominates all the
+others, the frontier is that single outlined point. The **CV choice** label records
 training selection; the best score on the held-out rows can belong to another
 model.
 
@@ -97,11 +143,12 @@ and Predictions. In R, use `extract_model_characteristics(result)` or inspect
 ### Understand the search
 
 **Model selection** connects the retained model to its candidate settings and
-fold scores. It separates the lowest cross-validation loss, the policy choice
+fold scores. It separates the best cross-validation score, the policy choice
 and the model that successfully refitted. Inspect the numerical selection
 threshold, parameter meanings, searched ranges and settings that failed.
-The preset grid is a practical starting search, not an optimal configuration
-claimed from the literature.
+For an adaptive search, it also shows screening, promotion and stopping
+decisions. The proposed settings are practical choices, not an optimal
+configuration claimed from the literature.
 
 [![Decision-tree search rationale, seven parameter settings and their cross-validation fold losses](man/figures/model-selection.png)](https://matt17br.github.io/autoXplainR/model-report.html#selection)
 
@@ -248,7 +295,7 @@ compare_model_behavior(tuned)
 |---|---|---|
 | `quick` | Linear/logistic/multinomial model and baseline | Pre-specified |
 | `comparison` | The same models plus two trees | Primary remains pre-specified; ranks are descriptive |
-| `tuned` (default) | Core or explicitly requested model families and baseline | Training-only cross-validation; one-standard-error rule by default |
+| `tuned` (default) | Requested portfolio or model families and baseline | Best CV score for `tabular`; one-standard-error rule otherwise, unless overridden |
 
 For a wider search, choose a portfolio and install its optional engines explicitly. The
 [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
@@ -266,6 +313,25 @@ the requested portfolio based on what happens to be installed. Training recipes
 are learned again inside each fold. Candidate settings, fold scores, warnings,
 failures and out-of-fold predictions are retained by `tuning_results()`.
 Experienced users can specify `learners`, `max_models` and `tuning_control()`.
+For example, this call selects by binary ROC AUC and allows four
+CPU threads in each forest or boosting fit, overriding the automatic allocation:
+
+```r
+result <- autoxplain(
+  training, "outcome", portfolio = "tabular",
+  tuning_control = tuning_control(metric = "auc", threads = 4)
+)
+```
+
+Use `metric = "rmsle"` for nonnegative regression outcomes scored on a log scale.
+Negative predictions are not clipped. A negative shuffled prediction makes that
+feature's RMSLE importance unavailable, with the reason shown in the report.
+`time_limit` in `tuning_control()` stops scheduling more search work after the
+budget is used; an active fit and the first complete candidate can finish.
+Final refits, explanations and report generation are outside that budget.
+See the [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
+for candidate budgets, exact grids and stopping evidence.
+
 Explicit optimizer nonconvergence excludes a candidate by default. The optional
 `optimization_policy = "warn"` retains it with its optimizer status; an unknown
 status is never presented as proof of convergence.
@@ -282,29 +348,19 @@ difference was small, and on rare outcomes better ranking did not always mean
 better probabilities. These are measured examples, not a general leaderboard.
 See the [results and reproducible protocol](https://github.com/Matt17BR/autoXplainR/blob/main/validation/stress-modeling/findings.md).
 
-For demanding tabular data, start with the optional portfolio and inspect both
+For demanding tabular data, try the `tabular` portfolio and inspect both
 failed configurations and the retained alternatives. High-dimensional linear
 fits can complete while making very poor predictions. The report preserves
 their scores and flags rank-deficient fits; it does not quietly discard them.
 The [model-selection guide](https://matt17br.github.io/autoXplainR/articles/model-selection.html)
 explains how to separate model fitting from a bounded explanation and report.
-A fresh comparison of the broad `recommended` search on the nonlinear case
-fell from 412 seconds in 0.6.2 to 65 seconds in the measured 0.7.0 candidate.
-All 30 configurations completed, with the same primary model and its complete
-holdout predictions. Bank Marketing retained all 30 configurations and every model's
-predictions with little timing change. These are single-host measurements;
-the [measurements](https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md)
-identify the exact sources, budgets and limitations. Choose families
-deliberately when turnaround time matters.
-
-On a simulated problem with one million training rows and 20 inputs, one call
-fitted a two-configuration regularized/boosting search with two CV folds and
-`retain_oof = FALSE`, then wrote a 3,891,782-byte summary report. The complete
-call took 81.055 seconds.
-Scores and 1,000 paired bootstrap draws used all 20,000 evaluation rows;
-explanations used 5,000. That small search had RMSE 1.6835. A separate
-three-configuration, fit-only search reached RMSE 0.7491 in 109.012 seconds.
-The better fit and the complete report timing come from different runs.
+The [0.7.0 scale measurements](https://github.com/Matt17BR/autoXplainR/blob/main/validation/scalability/findings.md)
+include complete million-row fits and a summary report. Those cases used small,
+specified searches. They do not establish the quality or cost of the new
+automatic search on an arbitrary large dataset. The
+[current comparison protocol](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/README.md)
+separates development data from final acceptance data and compares actual native
+forest and boosting fits.
 
 Larger data also need separate fitting, explanation and export budgets. The
 default explanation uses up to 5,000 evaluation rows, while scores still use

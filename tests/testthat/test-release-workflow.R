@@ -78,7 +78,7 @@ test_that("evaluation may omit trained classes without inventing metrics", {
 
 test_that("failed effects are retained and escaped in reports", {
   result <- autoxplain(model_set = "quick", mtcars, "mpg", explain = FALSE)
-  local_mocked_bindings(explain_effect = function(...) stop("<script>bad</script>"))
+  local_mocked_bindings(explain_effect_impl = function(...) stop("<script>bad</script>"))
   prepared <- AutoXplainR:::prepare_model_report_data(result, n_repeats = 2)
   expect_equal(nrow(prepared$failures), prepared$config$top_features)
   expect_length(prepared$effects, 0L)

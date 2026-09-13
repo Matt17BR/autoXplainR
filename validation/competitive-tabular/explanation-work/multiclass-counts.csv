@@ -1,0 +1,8 @@
+"task","kind","calls","rows"
+"multiclass","context_probe",5,15
+"multiclass","context_reference",5,900
+"multiclass","full_agreement",4,720
+"multiclass","full_fingerprint",135,24300
+"multiclass","full_importance_baseline",10,1800
+"multiclass","sampled_ale",240,12000
+"multiclass","sampled_permutation",4950,247500

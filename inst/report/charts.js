@@ -6,6 +6,17 @@
   const finite = Number.isFinite;
   const number = value => !finite(value) ? 'Unavailable' : value !== 0 && (Math.abs(value) < .001 || Math.abs(value) >= 1e6) ?
     Number(value.toPrecision(6)).toExponential() : Number(value.toPrecision(6)).toString();
+  const duration = seconds => {
+    if (!finite(seconds)) return 'Unavailable';
+    if (seconds < 0) return `-${duration(-seconds)}`;
+    if (seconds === 0) return '0 ms';
+    const short = value => Number(value.toPrecision(4)).toString();
+    if (seconds < 1) return `${short(seconds * 1000)} ms`;
+    if (seconds < 60) return `${short(seconds)} s`;
+    const whole = Math.floor(seconds + .5), hours = Math.floor(whole / 3600);
+    const minutes = Math.floor((whole % 3600) / 60), rest = whole % 60;
+    return [hours ? `${hours} h` : '', minutes ? `${minutes} min` : '', rest ? `${rest} s` : ''].filter(Boolean).join(' ');
+  };
   const numeric = (el, key) => el.dataset[key] === undefined ? NaN : Number(el.dataset[key]);
   const node = (name, attrs = {}, text) => {
     const el = document.createElementNS(NS, name);
@@ -251,10 +262,14 @@
       (xlimits[1] - xlimits[0]) * (right - left);
     const py = value => bottom - ((logScore ? Math.log10(value) : value) - ylimits[0]) / (ylimits[1] - ylimits[0]) * plotHeight;
     const xTickCount = Math.max(labelColumn ? 2 : 3, Math.floor((right - left) / 70));
+    // Formatting never changes source coordinates, scale eligibility or the frontier.
+    // Older saved HTML has no x-format and keeps its original numeric labels.
+    const xNumber = cost && figure.dataset.xFormat?.startsWith('duration-') ?
+      value => duration(figure.dataset.xFormat === 'duration-s' ? value : value / 1000) : number;
     (logCost ? logTicks(xlimits, xTickCount) : ticks(xlimits, xTickCount)).forEach(value => {
       const x = px(value);
       if (categorical) svg.append(node('line', {x1: x, x2: x, y1: top, y2: bottom, class: 'axr-grid'}));
-      text(svg, number(value), x, bottom + 20, {anchor: 'middle'});
+      text(svg, xNumber(value), x, bottom + 20, {anchor: 'middle'});
     });
     if (!categorical) yTicks.forEach(value => {
       svg.append(node('line', {x1: left, x2: right, y1: py(value), y2: py(value), class: 'axr-grid'}));

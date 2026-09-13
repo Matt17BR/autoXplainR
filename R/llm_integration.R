@@ -1337,7 +1337,8 @@ create_fallback_report <- function(context) {
         context$best_metric, "** was ", report_number(context$best_performance, 4L), "."
       )
     )
-    if (is.finite(context$baseline_performance %||% NA_real_)) {
+    if (is.finite(context$baseline_performance %||% NA_real_) &&
+          is.finite(context$best_performance %||% NA_real_)) {
       comparison <- if (isTRUE(context$beats_baseline)) {
         paste0(
           "That is a ", format_percent(context$improvement_over_baseline),

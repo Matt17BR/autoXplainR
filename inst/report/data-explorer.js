@@ -184,6 +184,13 @@
     return filteredDistributions.get(key);
   }
   function population() {
+    if (state.view === 'records') {
+      $('data-population').textContent = payload.mode === 'rows' ?
+        `${state.filters.length ? 'Filtered exported records' : 'Exported records'} · ` +
+          `${state.stage === 'raw' ? 'Raw supplied values' : 'Values used by models'}` :
+        'Individual records are not embedded in this report.';
+      return;
+    }
     if (state.view === 'relationships' && records.length && (state.filters.length || !storedPair())) {
       $('data-population').textContent = exportedPairScope();
       return;
@@ -796,7 +803,8 @@
     root.querySelectorAll('[data-data-view]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.dataView === state.view));
     });
-    $('data-pair-control').hidden = state.view === 'distribution';
+    $('data-pair-control').hidden = state.view === 'distribution' ||
+      (state.view === 'records' && payload.mode !== 'rows');
     $('data-scale-control').hidden = state.view !== 'distribution';
     population();
     if (state.view === 'distribution') renderDistribution();

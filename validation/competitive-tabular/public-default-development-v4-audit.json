@@ -1,0 +1,598 @@
+{
+  "scope": "Read-only audit of completed known rare-interaction development result. Original evidence preserved; no acceptance labels opened.",
+  "cohort": "public-default-development-v4",
+  "case": "rare_interaction",
+  "process": {
+    "threads": 4,
+    "process_status": "ok",
+    "process_elapsed_seconds": 97.75675521099765,
+    "peak_rss_kib": 350832
+  },
+  "source_audit_sha256": {
+    "browser-controls-audit.json": "9a2b0fce719c6eb6c21781baa82747dc6ac14655ba11c817433956fe93617748",
+    "saved-evidence-audit.json": "6a538bfb38c72572c8624823e8d8ab3a2c9f0e07caef066c2bdad20a5a45ce5f",
+    "integrity-audit.json": "a13257ce4d633d87fa827c036ea8a0f42e8ecf9f62c82853a2821501e5003e06"
+  },
+  "integrity_audit": {
+    "model.rds": {
+      "bytes": 7298258,
+      "sha256": "5fb9704b3ce005318721c9bf2cd6ab461c86b39c122685efd65ec43961181a4b"
+    },
+    "predictions.rds": {
+      "bytes": 48182,
+      "sha256": "0622e6dbe8e846994d24c8d579716079dbe71d185facbb32004ef5e90ad3a6e3"
+    },
+    "report.html": {
+      "bytes": 4247410,
+      "sha256": "36b19e5c23b3d248eccc22b756d773b0d19e812149094adc958785e59f0786b6"
+    },
+    "development_partition_hashes": "all match",
+    "evidence_verification_source_hashes": "match copied current verified source",
+    "originals_unchanged": true,
+    "summary_sha256": "3ffb1987ad1d26b774e172c5863b78c827bee628f13f8b99e5a8f88ff5144ba0",
+    "bundled_script_snapshot_differs": {
+      "check-evidence.R": "9a3af422d079e94f5071ace68bef4527a8902899b99b752b833a314cce6e747e",
+      "common.R": "4b0e2d7c0453bc99df889981f0a3ab75e3f1103132c1765d8277def365645c2a"
+    },
+    "report_prediction_payload_counts_accuracy_class_order": "all four models match independently verified summary; confusion totals1500 each"
+  },
+  "saved_evidence_audit": {
+    "status": "ok",
+    "source_package": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/runs/public-default-development-v4/rare_interaction/package",
+    "package_library": "/home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/candidates/candidate-v4/library/AutoXplainR",
+    "retained_models": [
+      "main_model",
+      "forest_model",
+      "regularized_model",
+      "simple_baseline"
+    ],
+    "prediction_shapes": {
+      "main_model": {
+        "rows": 1500,
+        "shape": "numeric positive-class probability vector",
+        "positive_class": "yes",
+        "target_class_order": [
+          "no",
+          "yes"
+        ]
+      },
+      "forest_model": {
+        "rows": 1500,
+        "shape": "numeric positive-class probability vector",
+        "positive_class": "yes",
+        "target_class_order": [
+          "no",
+          "yes"
+        ]
+      },
+      "regularized_model": {
+        "rows": 1500,
+        "shape": "numeric positive-class probability vector",
+        "positive_class": "yes",
+        "target_class_order": [
+          "no",
+          "yes"
+        ]
+      },
+      "simple_baseline": {
+        "rows": 1500,
+        "shape": "numeric positive-class probability vector",
+        "positive_class": "yes",
+        "target_class_order": [
+          "no",
+          "yes"
+        ]
+      }
+    },
+    "max_prediction_differences": {
+      "main_model": 0,
+      "forest_model": 0,
+      "regularized_model": 0,
+      "simple_baseline": 0
+    },
+    "training_rows": 2500,
+    "evaluation_rows": 1500,
+    "fold_counts": {
+      "1": 501,
+      "2": 501,
+      "3": 500,
+      "4": 499,
+      "5": 499
+    },
+    "oof_rows": 7500,
+    "complete_configurations": [
+      "boosting_03",
+      "forest_03",
+      "regularized_05"
+    ],
+    "candidate_status_counts": {
+      "ok": 3,
+      "screened_out": 15
+    },
+    "primary": "main_model",
+    "final_configuration": "boosting_03",
+    "actual_threads": 1,
+    "thread_request": "auto",
+    "native_forest": {
+      "training_rows": 2500,
+      "trees": 500
+    },
+    "native_booster_rounds": 62,
+    "boosting_recorded_training_rows": 2500,
+    "explanation_config": {
+      "top_features": 8,
+      "n_repeats": 20,
+      "max_models": 5,
+      "explanation_rows": 5000
+    },
+    "screening_repeats": 5,
+    "explanation_input_union": [
+      "x1",
+      "x2",
+      "x3",
+      "x14",
+      "x7",
+      "x15",
+      "x5",
+      "x8",
+      "x4",
+      "x6",
+      "x9",
+      "x12"
+    ],
+    "importance": {
+      "main_model": {
+        "features": 12,
+        "repeats": 20,
+        "rows_used": 1500,
+        "sampled": false
+      },
+      "forest_model": {
+        "features": 12,
+        "repeats": 20,
+        "rows_used": 1500,
+        "sampled": false
+      },
+      "regularized_model": {
+        "features": 12,
+        "repeats": 20,
+        "rows_used": 1500,
+        "sampled": false
+      },
+      "simple_baseline": {
+        "features": 12,
+        "repeats": 20,
+        "rows_used": 1500,
+        "sampled": false
+      }
+    },
+    "effects": {
+      "main_model": {
+        "features": [
+          "x1",
+          "x2",
+          "x3",
+          "x14",
+          "x7",
+          "x8",
+          "x15",
+          "x6"
+        ],
+        "all_reference_rows": 1500
+      },
+      "forest_model": {
+        "features": [
+          "x1",
+          "x2",
+          "x3",
+          "x14",
+          "x6",
+          "x9",
+          "x15",
+          "x4"
+        ],
+        "all_reference_rows": 1500
+      },
+      "regularized_model": {
+        "features": [
+          "x1",
+          "x2",
+          "x3",
+          "x15",
+          "x8",
+          "x6",
+          "x5",
+          "x12"
+        ],
+        "all_reference_rows": 1500
+      },
+      "simple_baseline": {
+        "features": [
+          "x1",
+          "x2",
+          "x3",
+          "x14",
+          "x7",
+          "x15",
+          "x5",
+          "x8"
+        ],
+        "all_reference_rows": 1500
+      }
+    },
+    "forest_zero_truth_probability_errors": 0,
+    "forest_minimum_truth_probability": 0.0015515873015873015,
+    "report": {
+      "bytes": 4247410,
+      "sha256": "36b19e5c23b3d248eccc22b756d773b0d19e812149094adc958785e59f0786b6"
+    },
+    "limitations": [
+      "Development case only; no locked acceptance labels opened.",
+      "Final retained-model replay and saved explanation evidence checked; explanations were not recomputed.",
+      "Native booster rounds checked directly; booster training-row count is retained metadata, not native row proof."
+    ]
+  },
+  "browser_controls_audit": {
+    "offline": true,
+    "load_ms": 455,
+    "errors": [],
+    "requests": [
+      "file:///home/mmazzarelli/.cache/autoxplain-tabular-0.8.0/recovery/2026-09-13/public-default-audit/replay-copy/report.html"
+    ],
+    "checks": [
+      {
+        "type": "tab",
+        "section": "#overview",
+        "text_length": 1962,
+        "svg": 18,
+        "tables": 19
+      },
+      {
+        "type": "tab",
+        "section": "#selection",
+        "text_length": 1254,
+        "svg": 10,
+        "tables": 68
+      },
+      {
+        "type": "tab",
+        "section": "#data",
+        "text_length": 989,
+        "svg": 1,
+        "tables": 3
+      },
+      {
+        "type": "tab",
+        "section": "#patterns",
+        "text_length": 1036,
+        "svg": 32,
+        "tables": 36
+      },
+      {
+        "type": "tab",
+        "section": "#evaluation",
+        "text_length": 1323,
+        "svg": 4,
+        "tables": 10
+      },
+      {
+        "type": "tab",
+        "section": "#checks",
+        "text_length": 1969,
+        "svg": 0,
+        "tables": 5
+      },
+      {
+        "type": "tab",
+        "section": "#provenance",
+        "text_length": 1405,
+        "svg": 0,
+        "tables": 32
+      },
+      {
+        "type": "select",
+        "id": "metric-select",
+        "value": "accuracy",
+        "visible_changed": true
+      },
+      {
+        "type": "select",
+        "id": "resource-select",
+        "value": "training_time_ms",
+        "visible_changed": true
+      },
+      {
+        "type": "select",
+        "id": "metric-select",
+        "value": "log_loss",
+        "visible_changed": true
+      },
+      {
+        "type": "keyboard",
+        "control": "help button",
+        "enter_expands": true,
+        "escape_closes": true
+      },
+      {
+        "type": "family-filter",
+        "value": "forest",
+        "visible_changed": true
+      },
+      {
+        "type": "family-filter",
+        "value": "regularized",
+        "visible_changed": true
+      },
+      {
+        "type": "family-filter",
+        "value": "all",
+        "visible_changed": true
+      },
+      {
+        "type": "family-filter",
+        "value": "boosting",
+        "visible_changed": true
+      },
+      {
+        "type": "column-button",
+        "feature": "x1",
+        "pressed": "true"
+      },
+      {
+        "type": "data-select",
+        "id": "data-split",
+        "value": "evaluation",
+        "visible_changed": true
+      },
+      {
+        "type": "data-select",
+        "id": "data-stage",
+        "value": "processed",
+        "visible_changed": true
+      },
+      {
+        "type": "data-view",
+        "value": "relationships",
+        "text_length": 1774
+      },
+      {
+        "type": "data-view",
+        "value": "records",
+        "text_length": 1010
+      },
+      {
+        "type": "data-view",
+        "value": "distribution",
+        "text_length": 982
+      },
+      {
+        "type": "model-feature",
+        "model": "forest_model",
+        "feature": "x2",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "forest_model",
+        "feature": "x4",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "main_model",
+        "feature": "x2",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "main_model",
+        "feature": "x6",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "regularized_model",
+        "feature": "x2",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "regularized_model",
+        "feature": "x12",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "simple_baseline",
+        "feature": "x2",
+        "plot_present": true
+      },
+      {
+        "type": "model-feature",
+        "model": "simple_baseline",
+        "feature": "x8",
+        "plot_present": true
+      },
+      {
+        "type": "comparison-model",
+        "value": "forest_model",
+        "visible_text": "FEATURES\n\nFeature importance & effects\n?\nExploring fitted effects\nInspect model\nProbability random forest\nXGBoost gradient-boosted trees\nRegularized logistic model\nIntercept-only baseline\nCompare with\nNo comparison\nProbability random forest\nXGBoost gradient-boosted trees\nRegularized logistic model\nIntercept-only baseline\nrounds = 62, learning rate = 0.05, depth = 10, child weight = 1, row/column sample = 0.8/0.8, input encoding = matrix\nModel details\nComparison: Probability random forest\ntrees = 500, mtry = 5, minimum node = 10, sample fraction = 0.632, split rule = default\nModel details\nChange in log loss when shuffled \n?\nReading feature importance for main_model\n\u2190 improves \u00b7 worsens \u2192\nx1\n+"
+      },
+      {
+        "type": "prediction-model",
+        "model": "forest_model",
+        "text_length": 1107,
+        "tables": 2
+      },
+      {
+        "type": "prediction-model",
+        "model": "main_model",
+        "text_length": 1133,
+        "tables": 2
+      },
+      {
+        "type": "prediction-model",
+        "model": "regularized_model",
+        "text_length": 1134,
+        "tables": 2
+      },
+      {
+        "type": "prediction-model",
+        "model": "simple_baseline",
+        "text_length": 1086,
+        "tables": 2
+      },
+      {
+        "type": "prediction-payload",
+        "mode": "summary",
+        "models": [
+          {
+            "id": "forest_model",
+            "n": 1500,
+            "labels": [
+              "no",
+              "yes"
+            ],
+            "positive": "yes",
+            "accuracy": 0.9513333333333334,
+            "confusion": [
+              {
+                "observed": "no",
+                "predicted": "no",
+                "count": 1335,
+                "rate": 0.9866962305986696
+              },
+              {
+                "observed": "no",
+                "predicted": "yes",
+                "count": 18,
+                "rate": 0.013303769401330377
+              },
+              {
+                "observed": "yes",
+                "predicted": "no",
+                "count": 55,
+                "rate": 0.3741496598639456
+              },
+              {
+                "observed": "yes",
+                "predicted": "yes",
+                "count": 92,
+                "rate": 0.6258503401360545
+              }
+            ]
+          },
+          {
+            "id": "main_model",
+            "n": 1500,
+            "labels": [
+              "no",
+              "yes"
+            ],
+            "positive": "yes",
+            "accuracy": 0.9493333333333334,
+            "confusion": [
+              {
+                "observed": "no",
+                "predicted": "no",
+                "count": 1337,
+                "rate": 0.9881744271988174
+              },
+              {
+                "observed": "no",
+                "predicted": "yes",
+                "count": 16,
+                "rate": 0.011825572801182557
+              },
+              {
+                "observed": "yes",
+                "predicted": "no",
+                "count": 60,
+                "rate": 0.40816326530612246
+              },
+              {
+                "observed": "yes",
+                "predicted": "yes",
+                "count": 87,
+                "rate": 0.5918367346938775
+              }
+            ]
+          },
+          {
+            "id": "regularized_model",
+            "n": 1500,
+            "labels": [
+              "no",
+              "yes"
+            ],
+            "positive": "yes",
+            "accuracy": 0.9166666666666666,
+            "confusion": [
+              {
+                "observed": "no",
+                "predicted": "no",
+                "count": 1350,
+                "rate": 0.9977827050997783
+              },
+              {
+                "observed": "no",
+                "predicted": "yes",
+                "count": 3,
+                "rate": 0.0022172949002217295
+              },
+              {
+                "observed": "yes",
+                "predicted": "no",
+                "count": 122,
+                "rate": 0.8299319727891157
+              },
+              {
+                "observed": "yes",
+                "predicted": "yes",
+                "count": 25,
+                "rate": 0.17006802721088435
+              }
+            ]
+          },
+          {
+            "id": "simple_baseline",
+            "n": 1500,
+            "labels": [
+              "no",
+              "yes"
+            ],
+            "positive": "yes",
+            "accuracy": 0.902,
+            "confusion": [
+              {
+                "observed": "no",
+                "predicted": "no",
+                "count": 1353,
+                "rate": 1
+              },
+              {
+                "observed": "no",
+                "predicted": "yes",
+                "count": 0,
+                "rate": 0
+              },
+              {
+                "observed": "yes",
+                "predicted": "no",
+                "count": 147,
+                "rate": 1
+              },
+              {
+                "observed": "yes",
+                "predicted": "yes",
+                "count": 0,
+                "rate": 0
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "status": "ok"
+  }
+}

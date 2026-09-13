@@ -49,8 +49,9 @@ explorer_baseline_comparison <- function(result, models) {
     return("")
   }
   difference <- board[[metric]][primary] - board[[metric]][baseline]
+  comparable <- is.finite(difference)
   value <- result$performance_uncertainty
-  unit <- if (result$task == "regression") result$provenance$target_units else NULL
+  unit <- if (metric %in% c("rmse", "mae")) result$provenance$target_units else NULL
   label <- paste(pretty_metric(metric), unit)
   interval <- if (!is.null(value)) {
     estimate <- value$estimates[value$estimates$quantity == "difference", , drop = FALSE]
@@ -63,7 +64,7 @@ explorer_baseline_comparison <- function(result, models) {
     paste0("No paired interval: ", result$.report_uncertainty$reason %||% "Not computed.")
   }
   important <- if (!is.null(value)) {
-    value$notes[grepl("Fewer than|degenerate|reused", value$notes)]
+    value$notes[grepl("Fewer than|degenerate|reused|Discarded", value$notes)]
   } else {
     character()
   }
@@ -78,13 +79,20 @@ explorer_baseline_comparison <- function(result, models) {
     '<div class="baseline-comparison" role="group" aria-label="Primary model compared with reference">',
     "<dl><div><dt>", primary_role,
     "</dt><dd>", html_escape(explorer_label(result, board$model_id[primary])),
-    " <strong>", report_number(board[[metric]][primary]), "</strong><span>", html_escape(label), "</span></dd></div>",
+    " <strong>", if (is.finite(board[[metric]][primary])) report_number(board[[metric]][primary]) else "Unavailable",
+    "</strong><span>", html_escape(label), "</span></dd></div>",
     "<div><dt>", html_escape(explorer_label(result, reference_id)), "</dt><dd><strong>",
     report_number(board[[metric]][baseline]),
     "</strong><span>", html_escape(label), "</span></dd></div>",
-    "<div><dt>Primary minus reference</dt><dd><strong>", if (difference > 0) "+" else "",
-    report_number(difference), "</strong><span>",
-    if (metric %in% higher_is_better_metrics()) "Positive favors the model" else "Negative favors the model",
+    "<div><dt>Primary minus reference</dt><dd><strong>", if (comparable && difference > 0) "+" else "",
+    if (comparable) report_number(difference) else "Unavailable", "</strong><span>",
+    if (!comparable) 'A required score is undefined; <a href="#checks">see Checks</a>' else if (
+      metric %in% higher_is_better_metrics()
+    ) {
+      "Positive favors the model"
+    } else {
+      "Negative favors the model"
+    },
     "</span></dd></div></dl>",
     '<p class="baseline-interval print-help">', html_escape(interval),
     if (!is.null(value)) {

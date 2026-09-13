@@ -1,6 +1,6 @@
 Package: AutoXplainR
 Title: Guided Model Fitting, Evaluation, and Explanation
-Version: 0.7.0
+Version: 0.8.0
 Authors@R:
     c(person(
       given = "Matteo",
@@ -49,6 +49,7 @@ Imports:
     jsonlite (>= 1.8.0),
     methods,
     nnet,
+    parallelly (>= 1.47.0),
     rpart,
     stats,
     tools,

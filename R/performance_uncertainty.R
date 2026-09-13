@@ -2,8 +2,9 @@
 #'
 #' Resamples evaluation observations, using the same sampled rows for the primary
 #' model and designated reference model (the intercept-only baseline in guided
-#' workflows). The models stay fixed. The difference is primary loss minus
-#' reference loss, so negative values favor the primary model.
+#' workflows). The models stay fixed. The difference is primary score minus
+#' reference score. Positive differences favor the primary for AUC;
+#' negative differences favor the primary for losses.
 #' This estimates evaluation-sample variability conditional on the fitted models;
 #' it does not include fitting, tuning, or feature-selection uncertainty.
 #'
@@ -22,13 +23,23 @@
 #'
 #'   Intervals are approximate, can be unreliable in small or degenerate samples,
 #'   and are not simultaneous across metrics or model comparisons. The configured
-#'   primary loss is used; no model is selected using these intervals. A
+#'   primary metric is used; no model is selected using these intervals. A
 #'   validation-set interval does not make that set an independent test set.
+#'
+#'   Binary AUC is computed from positive-negative pairs within each resampled
+#'   evaluation set, with half credit for tied probabilities. Draws containing
+#'   only one class are discarded and their IDs are retained in `bootstrap`.
+#'   At least 20 usable draws and 80% of the requested draws are required.
+#'   This availability rule does not guarantee interval accuracy. When any
+#'   draws are removed, the interval is conditional on sampling both classes.
+#'   RMSLE requires nonnegative outcomes and predictions; negatives are not clipped.
 #'
 #' @return An `autoxplain_uncertainty` list with `estimates` (primary, baseline,
 #'   and paired difference), all `draws`, resampling `unit`, and interpretation
-#'   `notes`. Losses are RMSE or MAE for regression, log loss or Brier for
-#'   classification, following the fitted result's primary metric.
+#'   `notes`. Metrics are RMSE, RMSLE or MAE for regression; log loss, Brier,
+#'   or binary ROC AUC for classification, following the fitted result's primary
+#'   metric. For AUC, `bootstrap` records retained and discarded draw counts and
+#'   identities; `n_boot` remains the number requested.
 #' @references Davison, A. C. and Hinkley, D. V. (1997). Bootstrap Methods and
 #'   Their Application. Cambridge University Press. <doi:10.1017/CBO9780511802843>.
 #' @export
@@ -53,8 +64,8 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
   explainers <- report_explainers(result, models = ids)
   reference <- explainers[[1L]]
   metric <- resolve_metric(result$evaluation$primary_metric, result$task)
-  if (!metric %in% c("rmse", "mae", "logloss", "brier")) {
-    stop("Bootstrap uncertainty supports RMSE, MAE, log loss, or Brier loss.", call. = FALSE)
+  if (!metric %in% c("rmse", "rmsle", "mae", "logloss", "brier", "auc")) {
+    stop("Bootstrap uncertainty supports RMSE, RMSLE, MAE, log loss, Brier, or binary ROC AUC.", call. = FALSE)
   }
   predictions <- report_predictions(result, models = ids, explainers = explainers)
   n <- length(reference$y)
@@ -71,15 +82,25 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
     n_units <- length(members)
   }
   if (n_units < 2L) stop("At least two evaluation sampling units are required.", call. = FALSE)
-  contributions <- lapply(predictions, function(prediction) {
-    uncertainty_case_values(reference$y, prediction, metric, reference)
-  })
-  score <- function(rows) {
-    values <- vapply(contributions, function(contribution) {
-      value <- mean(contribution[rows])
-      if (metric == "rmse") sqrt(value) else if (metric == "logloss") -value else value
-    }, numeric(1))
-    stats::setNames(c(values, values[[1L]] - values[[2L]]), c("primary", "baseline", "difference"))
+  if (metric == "auc") {
+    truth <- as.character(reference$y) == reference$positive
+    plans <- lapply(predictions, function(prediction) auc_bootstrap_plan(truth, prediction))
+    score <- function(rows) {
+      counts <- tabulate(rows, nbins = n)
+      values <- vapply(plans, auc_bootstrap_score, numeric(1), row_counts = counts)
+      stats::setNames(c(values, values[[1L]] - values[[2L]]), c("primary", "baseline", "difference"))
+    }
+  } else {
+    contributions <- lapply(predictions, function(prediction) {
+      uncertainty_case_values(reference$y, prediction, metric, reference)
+    })
+    score <- function(rows) {
+      values <- vapply(contributions, function(contribution) {
+        value <- mean(contribution[rows])
+        if (metric %in% c("rmse", "rmsle")) sqrt(value) else if (metric == "logloss") -value else value
+      }, numeric(1))
+      stats::setNames(c(values, values[[1L]] - values[[2L]]), c("primary", "baseline", "difference"))
+    }
   }
   draws <- with_preserved_seed(seed, {
     t(replicate(n_boot, {
@@ -88,6 +109,12 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
       score(rows)
     }))
   })
+  bootstrap <- NULL
+  if (metric == "auc") {
+    completed <- auc_bootstrap_complete_draws(draws, n_boot)
+    draws <- completed$draws
+    bootstrap <- completed$record
+  }
   probabilities <- c((1 - confidence) / 2, (1 + confidence) / 2)
   intervals <- apply(draws, 2L, stats::quantile, probs = probabilities, names = FALSE, type = 7)
   estimates <- data.frame(
@@ -95,13 +122,15 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
     estimate = unname(score(seq_len(n))),
     lower = intervals[1L, ], upper = intervals[2L, ], row.names = NULL
   )
-  structure(list(
+  output <- structure(list(
     estimates = estimates, draws = as.data.frame(draws), metric = result$evaluation$primary_metric,
     confidence = confidence, n_boot = n_boot, seed = seed, unit = unit, units = n_units,
     primary_model_id = ids[[1L]], reference_model_id = ids[[2L]],
     evaluation_role = result$provenance$evaluation_role,
     notes = c(
-      "Paired percentile intervals conditional on the fitted models; negative differences favor the primary model.",
+      paste0("Paired percentile intervals conditional on the fitted models; ",
+        if (metric == "auc") "positive" else "negative", " differences favor the primary model."
+      ),
       "These intervals omit fitting and selection uncertainty and assume independent sampling units.",
       if (n_units < 20L) "Fewer than 20 sampling units: interval endpoints may be very unstable.",
       if (any(vapply(as.data.frame(draws), function(x) length(unique(x)) == 1L, logical(1)))) {
@@ -109,6 +138,16 @@ performance_uncertainty <- function(result, n_boot = 1000L, confidence = 0.95, s
       }
     )
   ), class = "autoxplain_uncertainty")
+  if (!is.null(bootstrap)) {
+    output$bootstrap <- bootstrap
+    if (bootstrap$discarded > 0L) {
+      output$notes <- c(output$notes, paste(
+        "Discarded", bootstrap$discarded, "of", n_boot,
+        "bootstrap draws containing only one class. These intervals are conditional on sampling both classes."
+      ))
+    }
+  }
+  output
 }
 
 # The supported losses have fixed row contributions. Keep metric_score's exact
@@ -122,6 +161,7 @@ uncertainty_case_values <- function(y, prediction, metric, explainer) {
     )
   }
   if (metric == "rmse") return((as.numeric(y) - prediction)^2)
+  if (metric == "rmsle") return(selection_rmsle_case_loss(y, prediction))
   if (metric == "mae") return(abs(as.numeric(y) - prediction))
   if (metric == "brier") {
     if (explainer$task == "binary") {

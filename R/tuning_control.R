@@ -1,8 +1,8 @@
 #' Advanced controls for local model tuning
 #'
 #' `tuning_control()` is an optional escape hatch for users who need more
-#' control than the beginner defaults in [autoxplain()]. Omitting it preserves
-#' AutoXplainR's existing portfolio-aware search, stratified/random V-folds,
+#' control than the beginner defaults in [autoxplain()]. Omitting it uses
+#' AutoXplainR's portfolio-aware search, stratified/random V-folds,
 #' default loss, retained out-of-fold predictions, and failure isolation.
 #'
 #' Custom grids must be a named list keyed by learner family. Each family value
@@ -56,8 +56,10 @@
 #' AutoXplainR's automatic holdout split, fold IDs are accepted only when
 #' `test_data` is supplied explicitly to [autoxplain()]. Candidate losses and
 #' their selection standard-error heuristic are weighted by the number of validation
-#' rows in each fold; RMSE uses pooled squared loss with a delta-method standard
-#' error on the RMSE scale. Overlapping training folds mean that this heuristic
+#' rows in each fold; RMSE and RMSLE use pooled squared losses with a delta-method
+#' standard error on the root-loss scale. AUC uses a row-weighted average of
+#' within-fold AUC values, without comparing prediction ranks across different
+#' fitted models. It has no row-level case loss. Overlapping training folds mean that this heuristic
 #' is not a confidence interval or a test of equivalent model performance.
 #'
 #' @param grids Optional named per-family custom grids.
@@ -65,9 +67,12 @@
 #'   requested learner family.
 #' @param fold_ids Optional atomic vector assigning every training row to one
 #'   supplied V-fold.
-#' @param metric Selection loss. `"auto"` resolves to RMSE for regression and
-#'   log loss for classification. Regression also supports `"mae"`;
-#'   classification also supports `"brier"`.
+#' @param metric Selection score. `"auto"` resolves to RMSE for regression and
+#'   log loss for classification. Regression also supports `"mae"` and
+#'   `"rmsle"` (root mean squared log error, requiring nonnegative outcomes and
+#'   predictions). Classification also supports `"brier"`; binary classification
+#'   supports `"auc"`, recorded as `roc_auc` and maximized. All other supported
+#'   scores are minimized. RMSLE never clips negative values to make a fit eligible.
 #' @param retain_oof Retain row-level out-of-fold predictions and case losses.
 #' @param failure_policy `"continue"` records a failed configuration and keeps
 #'   searching; `"stop"` aborts on the first resampling or refit failure.
@@ -78,6 +83,49 @@
 #' @param family_priority Optional character vector ordering every requested
 #'   family for the one-standard-error policy, from most to least preferred.
 #'   This is a user preference, not a statistical ordering of algorithms.
+#' @param search `"auto"` screens settings before full cross-validation for a
+#'   forest/boosting portfolio (optionally with regularized regression), at
+#'   least 200 training rows and at least two settings per requested family.
+#'   Other portfolios, custom grids and exact budgets retain `"grid"` search.
+#'   `"adaptive"` explicitly requests screening with package-generated settings;
+#'   `"grid"` evaluates every scheduled configuration on every fold.
+#'   When outer-training rows times predictor count reaches one million,
+#'   adaptive forests use 256 trees per complete CV fit, dropping to 128 at
+#'   four million rows times predictors. Automatic final refits use 500 trees
+#'   below four million and 256 at or above that threshold. The final count is
+#'   planned from input size before fitting; it is not a convergence test.
+#'   Fewer trees can change predictions and explanations. The tree budget does
+#'   not remove training rows, and final fits retain native out-of-bag diagnostics.
+#'   Explicit preprocessing rules can still omit rows. The smaller validation
+#'   forest is an approximation.
+#'   Screening uses 128 trees. Grid search keeps each requested tree count in CV.
+#' @param threads Native threads per XGBoost or ranger fit. `NULL` (default)
+#'   uses up to four available cores for automatic adaptive searches when
+#'   outer-training rows times predictors reaches one million. Availability is
+#'   resolved once using [parallelly::availableCores()], respecting process,
+#'   scheduler and R check limits. Other searches use one thread automatically.
+#'   A positive integer overrides this choice and is not clamped. Fits run
+#'   sequentially; this does not parallelize folds or other backends. Reports
+#'   retain the resolved count, and their replay code requests it explicitly.
+#' @param screening_rows Maximum total rows used for the common training and
+#'   assessment split during adaptive screening. Full validation and refitting
+#'   use all their training rows.
+#' @param finalists_per_family Successful settings per family promoted from
+#'   screening to full cross-validation. Defaults to one; fewer advance if
+#'   fewer succeed. Increasing this costs more complete folds and offers a
+#'   check on the ranking from the smaller screening sample.
+#' @param time_limit Optional search scheduling budget in seconds. An in-progress
+#'   fit is allowed to finish. At least one complete cross-validation candidate
+#'   is attempted; unfinished candidates cannot win. Final refits, explanations
+#'   and reporting are outside this budget. This is not a hard process timeout.
+#'   Time-limited searches can choose different models on different machines.
+#' @param early_stopping Whether to choose boosting rounds on a separate split
+#'   inside each training fold, then fit all fold-training rows at those rounds.
+#'   `NULL` enables this for adaptive searches only. Final refits use the rounded-up
+#'   median of successful folds' round choices. Assessment and final evaluation
+#'   rows never choose the stopping point.
+#' @param patience Boosting rounds without improvement before inner calibration
+#'   stops. The requested `nrounds` remains a maximum.
 #'
 #' @return An `autoxplain_tuning_control` object for the `tuning_control`
 #'   argument of [autoxplain()].
@@ -95,12 +143,29 @@
 tuning_control <- function(grids = NULL,
                            family_budgets = NULL,
                            fold_ids = NULL,
-                           metric = c("auto", "rmse", "mae", "log_loss", "brier"),
+                           metric = c("auto", "rmse", "mae", "rmsle", "log_loss", "brier", "auc"),
                            retain_oof = TRUE,
                            failure_policy = c("continue", "stop"),
                            optimization_policy = c("exclude", "warn"),
-                           family_priority = NULL) {
+                           family_priority = NULL,
+                           search = c("auto", "grid", "adaptive"),
+                           threads = NULL,
+                           screening_rows = 20000L,
+                           finalists_per_family = 1L,
+                           time_limit = NULL,
+                           early_stopping = NULL,
+                           patience = 30L) {
   metric <- match.arg(metric)
+  search <- match.arg(search)
+  if (!is.null(threads)) threads <- assert_count(threads, "threads")
+  screening_rows <- assert_count(screening_rows, "screening_rows", minimum = 20L)
+  finalists_per_family <- assert_count(finalists_per_family, "finalists_per_family")
+  patience <- assert_count(patience, "patience")
+  if (!is.null(time_limit) && (!is.numeric(time_limit) || length(time_limit) != 1L ||
+                                 is.na(time_limit) || !is.finite(time_limit) || time_limit <= 0)) {
+    stop("`time_limit` must be NULL or a positive finite number of seconds.", call. = FALSE)
+  }
+  if (!is.null(early_stopping)) assert_tuning_flag(early_stopping, "early_stopping")
   failure_policy <- match.arg(failure_policy)
   optimization_policy <- match.arg(optimization_policy)
   invalid_priority <- !is.character(family_priority) || !length(family_priority) ||
@@ -121,7 +186,14 @@ tuning_control <- function(grids = NULL,
       retain_oof = retain_oof,
       failure_policy = failure_policy,
       optimization_policy = optimization_policy,
-      family_priority = family_priority
+      family_priority = family_priority,
+      search = search,
+      threads = threads,
+      screening_rows = screening_rows,
+      finalists_per_family = finalists_per_family,
+      time_limit = time_limit,
+      early_stopping = early_stopping,
+      patience = patience
     ),
     class = "autoxplain_tuning_control"
   )
@@ -129,8 +201,44 @@ tuning_control <- function(grids = NULL,
 
 #' @export
 print.autoxplain_tuning_control <- function(x, ...) {
+  search <- x[["search", exact = TRUE]] %||% "grid"
+  number <- function(value) format(value, big.mark = ",", scientific = FALSE, trim = TRUE)
+  finalists <- x[["finalists_per_family", exact = TRUE]] %||% 1L
+  screening <- paste0(
+    number(x[["screening_rows", exact = TRUE]] %||% 20000L), " rows; ",
+    number(finalists), if (finalists == 1L) " finalist" else " finalists", " per family"
+  )
+  screening <- if (identical(search, "grid")) {
+    paste0(screening, " (unused in grid search)")
+  } else {
+    paste0("limits: ", screening, if (identical(search, "auto")) " (if adaptive)" else "")
+  }
+  early_stopping <- x[["early_stopping", exact = TRUE]]
+  stopping <- if (is.null(early_stopping)) {
+    "automatic for adaptive boosting only"
+  } else if (isTRUE(early_stopping)) {
+    "enabled for boosting"
+  } else {
+    "disabled"
+  }
+  patience <- paste0(number(x[["patience", exact = TRUE]] %||% 30L), " rounds without improvement")
+  if (isFALSE(early_stopping) || (is.null(early_stopping) && identical(search, "grid"))) {
+    patience <- paste0(patience, " (unused)")
+  }
+  time_limit <- x[["time_limit", exact = TRUE]]
   cat("<AutoXplainR tuning control>\n")
   cat("  metric:     ", x$metric, "\n", sep = "")
+  cat("  search:     ", search, "\n", sep = "")
+  cat("  threads:    ", x[["threads", exact = TRUE]] %||% "automatic", " per native fit\n", sep = "")
+  cat("  screening:  ", screening, "\n", sep = "")
+  cat("  early stop: ", stopping, "\n", sep = "")
+  cat("  patience:   ", patience, "\n", sep = "")
+  cat("  time limit: ", if (is.null(time_limit)) "none" else paste0(number(time_limit), " s (search scheduling)"),
+      "\n", sep = "")
+  if (!is.null(time_limit)) {
+    cat("    Active fits finish; at least one complete CV candidate is attempted.\n")
+    cat("    Refits, explanations and reporting are outside the limit; total runtime can be longer.\n")
+  }
   cat("  OOF rows:   ", if (x$retain_oof) "retained" else "not retained", "\n", sep = "")
   cat("  failures:   ", x$failure_policy, "\n", sep = "")
   cat("  optimizer:  ", x$optimization_policy %||% "exclude", "\n", sep = "")
@@ -492,6 +600,24 @@ resolve_tuning_control <- function(control,
   }
 
   metric <- resolve_tuning_metric(control$metric, task)
+  if (identical(metric, "rmsle")) selection_validate_rmsle_target(outcome)
+  search_requested <- control$search %||% "auto"
+  adaptive_families <- all(learners %in% c("regularized", "forest", "boosting")) &&
+    any(learners %in% c("forest", "boosting"))
+  exact_plan <- length(control$grids) > 0L || !is.null(budgets)
+  search <- if (search_requested == "auto") {
+    if (adaptive_families && !exact_plan && max_models >= 2L * length(learners) &&
+          length(outcome) >= 200L) "adaptive" else "grid"
+  } else {
+    search_requested
+  }
+  if (search == "adaptive" && (!adaptive_families || exact_plan)) {
+    stop(
+      "Adaptive search supports regularized, forest and boosting families with package-generated grids. ",
+      "Use `search = \"grid\"` for custom grids, exact family budgets or other families.",
+      call. = FALSE
+    )
+  }
   family_priority <- control$family_priority
   if (!is.null(family_priority) && !setequal(family_priority, learners)) {
     stop("`family_priority` must order exactly the requested learner families.", call. = FALSE)
@@ -524,7 +650,18 @@ resolve_tuning_control <- function(control,
       failure_policy = control$failure_policy,
       optimization_policy = control$optimization_policy %||% "exclude",
       family_priority = family_priority,
-      max_models = max_models
+      max_models = max_models,
+      search_requested = search_requested,
+      search = search,
+      threads = control[["threads", exact = TRUE]],
+      threads_requested = control[["threads", exact = TRUE]] %||% "auto",
+      screening_rows = control$screening_rows %||% 20000L,
+      finalists_per_family = control$finalists_per_family %||% 1L,
+      time_limit = control$time_limit,
+      early_stopping = control$early_stopping %||% identical(search, "adaptive"),
+      early_stopping_requested = control$early_stopping,
+      patience = control$patience %||% 30L,
+      groups = control$groups %||% NULL
     ),
     class = "autoxplain_resolved_tuning_control"
   )
@@ -532,7 +669,9 @@ resolve_tuning_control <- function(control,
 
 resolve_tuning_metric <- function(metric, task) {
   allowed <- if (task == "regression") {
-    c("auto", "rmse", "mae")
+    c("auto", "rmse", "mae", "rmsle")
+  } else if (task == "binary") {
+    c("auto", "log_loss", "brier", "auc")
   } else {
     c("auto", "log_loss", "brier")
   }
@@ -547,6 +686,8 @@ resolve_tuning_metric <- function(metric, task) {
     if (task == "regression") "rmse" else "log_loss"
   } else if (metric == "brier") {
     "brier_score"
+  } else if (metric == "auc") {
+    "roc_auc"
   } else {
     metric
   }
@@ -567,7 +708,10 @@ default_resolved_tuning_control <- function(task, max_models, nfolds) {
       failure_policy = "continue",
       optimization_policy = "exclude",
       family_priority = NULL,
-      max_models = max_models
+      max_models = max_models,
+      search_requested = "grid", search = "grid", threads = 1L, threads_requested = 1L,
+      screening_rows = 20000L, finalists_per_family = 1L,
+      time_limit = NULL, early_stopping = FALSE, patience = 30L, groups = NULL
     ),
     class = "autoxplain_resolved_tuning_control"
   )
@@ -587,7 +731,18 @@ tuning_control_provenance <- function(control) {
     failure_policy = control$failure_policy,
     optimization_policy = control$optimization_policy %||% "exclude",
     family_priority = control$family_priority,
-    max_models = control$max_models
+    max_models = control$max_models,
+    search_requested = control$search_requested %||% "grid",
+    search = control$search %||% "grid",
+    threads = control[["threads", exact = TRUE]] %||% 1L,
+    threads_requested = control[["threads_requested", exact = TRUE]] %||%
+      control[["threads", exact = TRUE]] %||% "auto",
+    thread_policy = control$thread_policy,
+    screening_rows = control$screening_rows %||% 20000L,
+    finalists_per_family = control$finalists_per_family %||% 1L,
+    time_limit = control$time_limit,
+    early_stopping = control$early_stopping %||% FALSE,
+    patience = control$patience %||% 30L
   )
 }
 

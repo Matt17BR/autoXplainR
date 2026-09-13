@@ -32,7 +32,7 @@ FRAMES = {
     'selection': {
         'names': ('model-selection.png',),
         'start': '.selection-family-overview',
-        'end': '.selection-chart-wrap',
+        'end': '.selection-rationale',
         'required': ('.selection-family-overview', '.selection-filter',
                      '.selection-rationale', '.selection-chart-wrap'),
         'purpose': 'Family comparison, decision-tree search rationale and all seven settings.',
@@ -170,6 +170,7 @@ def main():
                 page.locator(f'[data-page-link={tab}]').click()
                 if tab == 'selection':
                     page.locator('#selection-family-filter').select_option('tree')
+                    page.locator('.selection-rationale:visible > summary').click()
                 if tab == 'patterns':
                     page.locator('#comparison-model-select').select_option(label='Neural network')
                 if tab == 'data':

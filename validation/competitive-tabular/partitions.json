@@ -1,0 +1,232 @@
+{
+  "prepared_at": "2026-09-12 12:10:16 UTC",
+  "protocol_sha256": "f9a5ebfc9499fb485d35ceaab9703f3b2713fc7b4608df03e6f9e43ecb16b856",
+  "sources_sha256": "be3c94601e6744325095a47695217d4477dd5eec86e4585d173fc11eaf9f7745",
+  "cases": {
+    "yearprediction/development": {
+      "name": "yearprediction",
+      "task": "regression",
+      "phase": "development",
+      "fit_seed": 80711,
+      "n_training": 50000,
+      "n_evaluation": 20000,
+      "predictors": 90,
+      "source": "Official artist-separated outer split; internal artist IDs unavailable.",
+      "class_levels": null,
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "918104e7a5c28e702783d461ba3b4df54d2f6509ea8c5575f68048cb9ef50e45",
+          "bytes": 14562461
+        },
+        "evaluation-targets.rds": {
+          "sha256": "30356a7d0f8a4513820327aee5c0d1688dbca2c14705138b7e3786334330491a",
+          "bytes": 80031
+        },
+        "training.rds": {
+          "sha256": "3ca9a06614538f0577bf6c62b69e39be3d7f0b035b6ad65cf95f60773d51c52d",
+          "bytes": 36842940
+        }
+      }
+    },
+    "yearprediction/acceptance": {
+      "name": "yearprediction",
+      "task": "regression",
+      "phase": "acceptance",
+      "fit_seed": 80711,
+      "n_training": 463715,
+      "n_evaluation": 51630,
+      "predictors": 90,
+      "source": "Official artist-separated outer split; internal artist IDs unavailable.",
+      "class_levels": null,
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "c2cecb06055039ff5b942c48ccf67a54aae8657473739e6d4bb5e94da35786ba",
+          "bytes": 37382683
+        },
+        "evaluation-targets.rds": {
+          "sha256": "7a00b46e72269c3f49e053e93bc76ca754f42d66ca58aa60dce898fb07857986",
+          "bytes": 206551
+        },
+        "training.rds": {
+          "sha256": "f15899be0b7a8c0d02fcb48780a8bbcd25679557691ff723449e1745caecfd00",
+          "bytes": 337958541
+        }
+      }
+    },
+    "covertype/development": {
+      "name": "covertype",
+      "task": "multiclass",
+      "phase": "development",
+      "fit_seed": 80711,
+      "n_training": 50000,
+      "n_evaluation": 20000,
+      "predictors": 54,
+      "source": "Stratified same-area row split, not geographic transfer; spatial dependence possible.",
+      "class_levels": [
+        "spruce_fir",
+        "lodgepole_pine",
+        "ponderosa_pine",
+        "cottonwood_willow",
+        "aspen",
+        "douglas_fir",
+        "krummholz"
+      ],
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "4e2a579046c4cfd6b7a85e2d5ac982a541deba02a5b2849410e437f2de0ac4fb",
+          "bytes": 4481526
+        },
+        "evaluation-targets.rds": {
+          "sha256": "2d6b59bc5ad5f44d9c55e38a127765e00daa7eac338170d4565800844dc76e45",
+          "bytes": 80244
+        },
+        "training.rds": {
+          "sha256": "4c78f7019e96a2528da275996559992646606c8e30f8470da7397bfd67c15139",
+          "bytes": 11642354
+        }
+      }
+    },
+    "covertype/acceptance": {
+      "name": "covertype",
+      "task": "multiclass",
+      "phase": "acceptance",
+      "fit_seed": 80711,
+      "n_training": 464810,
+      "n_evaluation": 116202,
+      "predictors": 54,
+      "source": "Stratified same-area row split, not geographic transfer; spatial dependence possible.",
+      "class_levels": [
+        "spruce_fir",
+        "lodgepole_pine",
+        "ponderosa_pine",
+        "cottonwood_willow",
+        "aspen",
+        "douglas_fir",
+        "krummholz"
+      ],
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "d561e5e8c10f4b5adf3c345a3a66ac22646ae8d11bd71b20d28ab73c6a845bc1",
+          "bytes": 26030774
+        },
+        "evaluation-targets.rds": {
+          "sha256": "bcc5f0c5865b1aa91979a78a57478a891a243ab2531ad3e35633be1ebfe0ffbd",
+          "bytes": 465052
+        },
+        "training.rds": {
+          "sha256": "c26cf4077512c79e2cd2606d883001a41e932e21121dfc40a935ee907803449f",
+          "bytes": 108210121
+        }
+      }
+    },
+    "bank/development": {
+      "name": "bank",
+      "task": "binary",
+      "phase": "development",
+      "fit_seed": 80711,
+      "n_training": 20000,
+      "n_evaluation": 5000,
+      "predictors": 19,
+      "source": "Contact-row split; duration removed; customer overlap and temporal dependence cannot be excluded.",
+      "class_levels": [
+        "no",
+        "yes"
+      ],
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "be5712dafc8fb78007c302e922b43d957cdf3a3ef44df942299289039d6ea33d",
+          "bytes": 1027293
+        },
+        "evaluation-targets.rds": {
+          "sha256": "4fb5256806bab11296952acae75fe0128434798f210bd55cff0f9c34c116daa7",
+          "bytes": 20129
+        },
+        "training.rds": {
+          "sha256": "e0c64d61dcedacc85af966f8d34bc5e62c6473e12917f7359926c9f7915c140e",
+          "bytes": 4281881
+        }
+      }
+    },
+    "bank/acceptance": {
+      "name": "bank",
+      "task": "binary",
+      "phase": "acceptance",
+      "fit_seed": 80711,
+      "n_training": 32951,
+      "n_evaluation": 8237,
+      "predictors": 19,
+      "source": "Contact-row split; duration removed; customer overlap and temporal dependence cannot be excluded.",
+      "class_levels": [
+        "no",
+        "yes"
+      ],
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "3198db3cd7dcbe2d9c99072fce0191fe169d3cf86dad1b3e2069c068c9944255",
+          "bytes": 1692524
+        },
+        "evaluation-targets.rds": {
+          "sha256": "dac535a57ca68cd359ca2554cec6abc06d24e16855066a1dcc93c151c3893098",
+          "bytes": 33077
+        },
+        "training.rds": {
+          "sha256": "c18542b76a641d7e56531ca49df6b6bd5c08284d6af578ef37d3a76693cf158b",
+          "bytes": 7054279
+        }
+      }
+    },
+    "friedman_noise/development": {
+      "name": "friedman_noise",
+      "task": "regression",
+      "phase": "development",
+      "fit_seed": 80711,
+      "n_training": 1200,
+      "n_evaluation": 800,
+      "predictors": 30,
+      "source": "Previously inspected development case; original SHA-256 d50cfa339fb54c2ab683dede09805879c321ff34d1addac3c919411452b273ea",
+      "class_levels": null,
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "c803160cecf34f32bfbcf9a47d20bb350b9819cac094428fb23b83b6fe2fd1ac",
+          "bytes": 196074
+        },
+        "evaluation-targets.rds": {
+          "sha256": "1100de1f76cbcd40bcf923299a4717d35a3918784d732a94727c48b0115e4498",
+          "bytes": 6431
+        },
+        "training.rds": {
+          "sha256": "eda617d7cd8c61354ace450b5a6678be551069218bc1c9935e53e0b2d0fe08d9",
+          "bytes": 304770
+        }
+      }
+    },
+    "rare_interaction/development": {
+      "name": "rare_interaction",
+      "task": "binary",
+      "phase": "development",
+      "fit_seed": 80711,
+      "n_training": 2500,
+      "n_evaluation": 1500,
+      "predictors": 15,
+      "source": "Previously inspected development case; original SHA-256 e712cf6a12b0d9651244d26d8170d4ace9152f5d55196c3de35a85cb51ac9091",
+      "class_levels": [
+        "no",
+        "yes"
+      ],
+      "files": {
+        "evaluation-features.rds": {
+          "sha256": "185e5315784c82bb6a8c4978ecab023b037dca77ea8ae2bd2c79adf202af2994",
+          "bytes": 186589
+        },
+        "evaluation-targets.rds": {
+          "sha256": "3a8ffbdd63f89a24b7c6fc582fc0b2389f8327bd817a1a16bd6a775cb0c363ac",
+          "bytes": 6129
+        },
+        "training.rds": {
+          "sha256": "beb9943955ec91e162751fa02900fc96b02b32f351af716b76eafdb502cbacc2",
+          "bytes": 323233
+        }
+      }
+    }
+  }
+}

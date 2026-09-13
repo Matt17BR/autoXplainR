@@ -5,14 +5,14 @@
 \title{Install optional model backends}
 \usage{
 install_model_engines(
-  portfolio = c("recommended", "extended"),
+  portfolio = c("recommended", "extended", "tabular"),
   task = c("regression", "binary", "multiclass"),
   dry_run = FALSE,
   ...
 )
 }
 \arguments{
-\item{portfolio}{One of \code{"recommended"} or \code{"extended"}.}
+\item{portfolio}{One of \code{"recommended"}, \code{"extended"} or \code{"tabular"}.}
 
 \item{task}{Task used to omit inapplicable learner backends. Defaults to
 regression, whose recommended portfolio also covers binary classification.}
@@ -31,6 +31,9 @@ invisibly.
 Installs the CRAN packages required by an AutoXplainR model portfolio. This
 helper only changes the user's library when called explicitly; use
 \code{dry_run = TRUE} to inspect the missing packages without installing them.
+The \code{"tabular"} portfolio requires R >= 4.3 for the supported XGBoost backend,
+although the core AutoXplainR package supports R >= 4.1. Upgrade R first if
+needed; the installation helper does not upgrade R.
 }
 \examples{
 install_model_engines("recommended", task = "regression", dry_run = TRUE)
