@@ -25,6 +25,8 @@ parser.add_argument('--axe-path', type=Path, required=True)
 parser.add_argument('--cases', nargs='+', default=['regression', 'binary', 'multiclass', 'quick'])
 args = parser.parse_args()
 args.output_dir.mkdir(parents=True, exist_ok=True)
+fixture_dir = args.output_dir / 'fixtures'
+fixture_dir.mkdir(exist_ok=True)
 
 def settled(page):
     page.evaluate("()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
@@ -97,12 +99,21 @@ with sync_playwright() as playwright:
     for case in args.cases:
         print(f"Checking {case}", flush=True)
         report = (args.case_dir / f'{case}.html').resolve()
-        oracle_text = report.with_suffix('.json').read_text()
+        report_bytes = report.read_bytes()
+        oracle_bytes = report.with_suffix('.json').read_bytes()
+        report_sha256 = hashlib.sha256(report_bytes).hexdigest()
+        oracle_sha256 = hashlib.sha256(oracle_bytes).hexdigest()
+        # Keep the actual inputs, including on failure. Regeneration changes
+        # timings and chart geometry, so it cannot reproduce the same finding.
+        (fixture_dir / report.name).write_bytes(report_bytes)
+        (fixture_dir / report.with_suffix('.json').name).write_bytes(oracle_bytes)
+        report = (fixture_dir / report.name).resolve()
+        oracle_text = oracle_bytes.decode('utf-8')
         oracle = json.loads(oracle_text)
         cost_answers = {row['model_id']: row for row in json.loads(
             oracle_text, parse_float=Decimal, parse_int=Decimal)['table']}
         ids = [row['model_id'] for row in oracle['table']]
-        check(f'{case}: fixture identity', True, hashlib.sha256(report.read_bytes()).hexdigest())
+        check(f'{case}: fixture identity', True, report_sha256)
         context = browser.new_context(viewport={'width': 1440, 'height': 1000})
         context.route('http://**/*', lambda route: route.abort())
         context.route('https://**/*', lambda route: route.abort())
@@ -438,7 +449,9 @@ with sync_playwright() as playwright:
                     violations = [{'id': entry['id'], 'nodes': [node['target'] for node in entry['nodes']]}
                                   for entry in axe['violations']]
                     check(f'{width}/{tab}: automated accessibility', not violations, violations)
-                    accessibility.append(dict(width=width, tab=tab,
+                    accessibility.append(dict(case=case, width=width, tab=tab,
+                                              fixture_sha256=report_sha256,
+                                              oracle_sha256=oracle_sha256,
                                               incomplete=[entry['id'] for entry in axe['incomplete']],
                                               incomplete_details=axe['incomplete']))
                     page.screenshot(path=str(args.output_dir / f'{tab}-{width}.png'), full_page=True)
