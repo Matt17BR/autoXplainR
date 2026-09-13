@@ -4,11 +4,12 @@ Status: candidate under review. No 0.8.0 tag or release has been published.
 The repaired candidate has completed Covertype, Bank and YearPrediction, including
 the full public calls, cold replays, independent prediction checks and
 summary-report checks. Bank's earlier effect-row mismatch was a checker defect,
-retained with its correction below. All bounded rows exports remain pending.
-On commit `c9a3fb0`, platform, native-engine, H2O, statistical, coverage and lint
-checks passed. The browser workflow stopped at the stale gallery guard after
-a diagnostic change; regeneration and browser verification
-remain required. This is not a completed release validation.
+retained with its correction below. All three bounded rows exports have passed
+value and browser-control checks. A mobile header defect in the original rows
+reports has a CSS correction verified on current-source fixtures and the
+refreshed gallery. At
+`d93f13b`, 265 data-explorer checks and 118 gallery checks passed. Final CI,
+archive and release verification remain pending.
 
 ## What changed
 
@@ -114,17 +115,54 @@ YearPrediction's oracle and all 12 browser groups also passed. For both cases,
 all four model scores and complete CV scores agreed exactly. Bank's original
 report preparation took 265.707 seconds and HTML generation 10.029 seconds;
 YearPrediction took 302.638 and 54.242 seconds respectively. These stages are
-already included in each public-process total. All three still require separately
-timed bounded rows exports and checks of actual records and poor predictions.
-Summary reports
-cannot establish those individual-record tasks. These are implementer
-walkthroughs, not participant research. All twelve exact desktop/mobile
-screenshots and all three complete selected-feature PDFs were also visually
-inspected without a material visual blocker in those views. The first Covertype
+already included in each public-process total. Summary reports cannot establish
+individual-record tasks; the separate rows checks below address those. These
+are implementer walkthroughs, not participant research. All twelve exact
+desktop/mobile screenshots and all three complete selected-feature PDFs were
+also visually inspected without a material visual blocker in those views. The first Covertype
 rows-export attempt stopped at a checker prerequisite that looked for the
 prediction schema at the wrong object level. A separately versioned correction
-addresses that prerequisite; the failed attempt remains preserved and supplies
-no completed rows-export evidence.
+addresses that prerequisite; the failed attempt remains preserved.
+
+The literal `render_model_report(result, output_file, report_data = "rows")`
+call has now exported 5,000 records for each case, using the saved v14 results
+and renderer. Covertype and Bank each contain 4,000 training and 1,000 evaluation
+records; YearPrediction contains 4,499 and 501. The independent checks verified
+every exported raw and processed cell, outcome, prediction and source-row
+identity: 550,000 cells for Covertype, 200,000 for Bank and 910,000 for
+YearPrediction. Each retained model has predictions for the sampled evaluation
+records only, giving 4,000 prediction cases for Covertype and Bank each and
+2,004 for YearPrediction. The exports reuse the retained explanations and do
+not refit models or replay all
+predictions. These exports and checks are separate from the original public
+process budget.
+
+| Rows derivative | HTML generation | Supervised export process | HTML size |
+| --- | ---: | ---: | ---: |
+| Covertype | 139.010 s | 169.535 s | 13.79 MB |
+| Bank | 10.845 s | 13.448 s | 2.49 MB |
+| YearPrediction | 55.920 s | 81.349 s | 9.49 MB |
+
+Browser checks covered all four models at 1,440 and 390 pixels, including the
+visible prediction values and links to original source records. These controls
+inspect the exported evaluation sample, which need not contain the globally
+worst prediction. Bank's first selected-table check read a detached browser
+node and failed after the export and numerical checks had passed. A versioned
+browser-only correction reads the current table atomically; its selected-record
+and prediction-table follow-ups passed without rerendering or replacing the
+original failed process. YearPrediction's six-stage workflow passed without a
+retry. Direct inspection covered individual records in all three actual exports
+and their screenshots.
+
+The original Covertype and Bank rows reports also have a real mobile defect:
+selected-record headings overlap at 320 and 390 pixels. YearPrediction's manual
+390-pixel review found the same issue. A more specific CSS selector restores
+wrapping. On the Covertype and Bank reports, injecting only the corrected CSS
+into browser memory passed containment and overlap checks at
+320, 390 and 1,440 pixels; the corrected views were also visually inspected.
+This is layout compatibility evidence, not a new export or change to the
+original HTML. Fresh current-source fixtures and gallery checks then passed,
+including geometry assertions that detect the heading collision.
 
 The Bank walkthrough found a real persistence defect: a warning that 551
 supplied evaluation records matched training values appeared in R but was lost
@@ -133,14 +171,22 @@ Commit `a37af69` retains that diagnostic for new fits and explains it in the
 report's Checks tab. It changes neither fitting nor selection. Existing v14
 artifacts remain unchanged and do not acquire a warning merely by rendering
 them again. Remote tests verify saved-result persistence, unchanged fits and
-predictions, and the corresponding live H2O path.
+predictions, and the corresponding live H2O path. A new small fixture with
+24 training rows and 11 evaluation rows, including three deliberate matches,
+retained the warning through initial rendering, saving and reloading the result,
+and rendering again. Direct inspection confirmed the warning in the reopened
+Checks view. That save/reload check occurred within one R invocation; it is
+not fresh-session evidence and
+does not add the missing warning to the old benchmark artifacts.
 
 The acceptance source inventory is
 `6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983`.
-Of its 84 runtime files, 81 remain byte-identical at `c9a3fb0`; the three R
-changes retain the overlap diagnostic. The final release archive will have its
-own identity and checks. The v14 measurements must not be presented as a fresh
-benchmark of a later archive.
+Comparing the 80 files under `R/` and `inst/report/` with `d93f13b`, 76 remain
+byte-identical. Three R changes retain the overlap diagnostic; the fourth
+change is the selected-record header CSS. These diagnostic and presentation
+changes do not alter model fitting or stored predictions. This file scope excludes other package assets. The
+final release archive will have its own identity and checks. The v14 measurements
+must not be presented as a fresh benchmark of a later archive.
 
 ## Current CI scope
 
@@ -157,10 +203,25 @@ are retained, previously documented compatibility findings. Modern R jobs had
 no test warnings. The source R-devel check's one note covers new-submission
 status and two benchmark links awaiting the main-branch merge.
 
-The browser job failed before generation or browser execution because three
-runtime files no longer match the gallery manifest. None of its downstream
-checks ran. Earlier passing browser evidence remains historical; a real gallery
-regeneration, visual review and passing final browser run are release gates.
+The `c9a3fb0` browser job failed before generation or browser execution because
+three runtime files no longer matched the gallery manifest. None of its
+downstream checks ran. The later regenerated gallery at `0934351` passed all
+118 local browser smoke checks, with direct inspection of eight PNGs and three
+public HTML examples. Its 86 source hashes and 11 asset hashes match that commit.
+The first combined gallery supervisor completed R generation, then Chrome
+failed under the inherited R address-space ceiling; only screenshot capture
+was repeated under a separate browser limit. That failure is preserved. The
+subsequent header CSS change received its own refresh at `d93f13b`: all three
+public examples and six explorer fixtures were rendered from saved fits, with
+no refit. All 265 data-explorer checks passed, including actual header-text
+geometry and deliberate nowrap corruption. The new binary and messy-regression
+mobile screenshots were visually inspected. Eight recaptured gallery PNGs are
+byte-identical to the reviewed `0934351` images, and the three public HTML
+changes are CSS-only. The manifest was recorded after that review, followed
+by 118 passing gallery checks with no browser errors. An initial supervisor
+invocation used the wrong working directory and stopped before package loading;
+that failure is preserved. These completed local checks do not replace final
+CI or verification of the release archive.
 
 ## Defects found during review
 
@@ -386,17 +447,16 @@ new-submission status and the same two pre-merge links. It checked examples,
 vignette scripts and manuals; tests were run separately. Its archive SHA-256 is
 `e5d62c690fe36b54ac74eb3a14dfc8b30797204b75b17d67c9f9843b819702d1`.
 All three full public calls, cold replays and prediction checks have since
-completed on this candidate, as recorded above. Report gates remain open.
+completed on this candidate, as recorded above. Local report checks are complete;
+final CI and release-archive verification remain pending.
 The superseded v13 follow-up plan was checked but never run. A final release
 archive still requires its own checks.
 
 ## Remaining gates
 
-- Complete bounded rows exports for all three actual saved results, including
-  source-record values, visible predictions, poor-prediction controls and offline
-  behavior. Preserve the completed public-call quality and runtime tradeoffs.
-- Render and inspect the retained-overlap diagnostic on the final source, then
-  regenerate and visually review the public gallery and pass browser CI.
+- Pass final browser CI with the header correction and refreshed gallery. Local
+  rows, gallery, geometry and overlap-warning checks have passed; preserve the
+  original immutable reports, checker failures and measured tradeoffs.
 - Require the integrated source and publication guard tests in final CI.
   Preserve the original frozen harness and private acceptance diagnostics.
 - Retain the passing candidate platform/browser evidence and require the

@@ -12,9 +12,12 @@ site remain pending. Completed full-data Covertype, Bank and YearPrediction
 calls and current platform/native-engine/H2O checks are recorded in
 `validation/release-0.8.0.md`. All three summary-report checks passed, with the
 original checker failures retained. Their exact desktop/mobile captures and
-selected-feature PDFs have also been visually reviewed. All bounded rows exports
-and gallery checks remain pending. These results do not establish a verified
-release archive or public site. Comparison protocols,
+selected-feature PDFs have also been visually reviewed. All three bounded rows
+exports passed value and browser-control checks, with individual-record
+walkthroughs. The mobile header correction passed 265 data-explorer checks and
+118 refreshed-gallery checks, with direct visual inspection. Final CI, archive
+and publication verification remain pending. These results do not establish a
+verified release archive or public site. Comparison protocols,
 development runs and machine-readable results are under
 `validation/competitive-tabular/`.
 

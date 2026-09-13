@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-13T22:01:08.350380+00:00",
-  "status": "three_public_calls_verified_report_checks_pending",
+  "recorded_at_utc": "2026-09-13T22:23:19.078864+00:00",
+  "status": "local_public_report_checks_verified_final_release_checks_pending",
   "candidate": "candidate-v14",
   "source_inventory_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
   "acceptance_freeze_sha256": "19224e05a92409af1f71eea9df53ceadfc1a2c8475fef5834a756d66978294fe",
@@ -175,14 +175,14 @@
         "predictions": "cfa625a83b799c0d8bd51ae76abd332c0ee35649ea9d792030726db3451161c2"
       },
       "metadata_audit_sha256": "6303e8b3881470821722fc3bef98dcc16a93c4c9afb244321ae13d957da4d48a",
-      "report_checks": "Independent summary-report numerical oracle, all 12 offline browser groups and original report timing extraction passed. Individual-record inspection and bounded rows export remain pending.",
+      "report_checks": "Summary oracle and all 12 offline browser groups passed; exact summary screenshots/PDF visually reviewed. Rows export, numeric and browser value/control checks passed, with direct individual-record inspection. Original narrow selected-record headers retain their defect; the subsequent CSS correction passed fresh fixture and gallery checks without rewriting the original HTML.",
       "report_check_evidence_sha256": {
         "oracle": "96f501dc9ab3db2984532b94ee402b52e2f5cb0321c4ef48c5a78e480d2e5c3e",
         "browser": "d55e7b6cdf0357758c7c7f223e0b68c0a93985a6b718d305d40318e4a73b89c0",
         "timing": "355a20486e974b7e29d79e030ee229bf0eb24adef6eace7ea121e94db121e702"
       },
       "capture_visual_review": {
-        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "scope": "Direct inspection covered the four exact desktop/mobile summary screenshots and complete selected-feature PDF without a material visual blocker. These implementer observations concern summary views; individual-record evidence is recorded separately.",
         "screenshot_sha256": {
           "evaluation-320.png": "17796b2427eea10fe1a2905b03c95fc5be3a66d73618018f785a5654b84c487e",
           "overview-1440.png": "35b8a619b26050e2f57786419f88304da90c0dfefa460d29151930f7c304d483",
@@ -193,6 +193,111 @@
         "pdf_render_sha256": "8a9a3dce71b5fc09cda078fc6998b895babdf6a0303e28f2f0fd7a5710b5cb33",
         "review_sha256": "0b37a8c85ba38d3152911dfd319ae6b90b258e7be04d0c36683d027ea60b7fd4",
         "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
+      },
+      "rows_derivative": {
+        "status": "export_numeric_and_browser_checks_passed_with_separate_header_compatibility_fix",
+        "scope": "Separate literal rows export from the original saved v14 result with the frozen v14 renderer. No refit, explanation recomputation or new full prediction replay. Original summary HTML and all fitted artifacts remain unchanged. Per-stage costs are additional to the original public call.",
+        "literal_call": "render_model_report(result, output_file, report_data = \"rows\")",
+        "renderer_source_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
+        "controls": {
+          "mode": "rows",
+          "columns": null,
+          "context_columns": [],
+          "max_rows": 5000,
+          "seed": 123,
+          "max_pair_rows": 10000
+        },
+        "records": 5000,
+        "by_split": {
+          "training": 4000,
+          "evaluation": 1000
+        },
+        "raw_and_processed_cells_verified": 550000,
+        "prediction_cases_verified": {
+          "main_model": 1000,
+          "forest_model": 1000,
+          "regularized_model": 1000,
+          "simple_baseline": 1000
+        },
+        "render_seconds": 139.01,
+        "load_seconds": 6.018,
+        "supervised_stages": [
+          {
+            "stage": "prerequisite",
+            "status": "ok",
+            "elapsed_seconds": 22.565481719000672,
+            "peak_rss_kib": 2650388
+          },
+          {
+            "stage": "export",
+            "status": "ok",
+            "elapsed_seconds": 169.5350077209987,
+            "peak_rss_kib": 4394048
+          },
+          {
+            "stage": "browser",
+            "status": "ok",
+            "elapsed_seconds": 7.180153702000098,
+            "peak_rss_kib": 707948
+          },
+          {
+            "stage": "oracle",
+            "status": "ok",
+            "elapsed_seconds": 45.51856500299982,
+            "peak_rss_kib": 3973864
+          },
+          {
+            "stage": "visible-rows",
+            "status": "ok",
+            "elapsed_seconds": 4.524203282002418,
+            "peak_rss_kib": 217728
+          },
+          {
+            "stage": "prediction-rows",
+            "status": "ok",
+            "elapsed_seconds": 6.227824880999833,
+            "peak_rss_kib": 211436
+          }
+        ],
+        "report": {
+          "bytes": 13788084,
+          "sha256": "39b7fa181ed6da9379c908f5236d5bb2f14ab4e4b9f864b18711c823433d039a"
+        },
+        "evidence_sha256": {
+          "process": "fab80bcf04d6eb919705d5626cd684e1f85180748845a0416b13663e352ec7c6",
+          "export": "c8b4344b8a9769cb508624bfa622b3c5d4a5e62f9a451cb03859a05aba99b094",
+          "oracle": "bdf1466d9ea3a60275b14f8603dd3ee66ca7b444b854a2ca72e756d39d6ef5a4"
+        },
+        "row_manifest_sha256": "54dea6c493e78680f3212ef299ff232190105c3c487b11c9a5d76503ac624011",
+        "numeric_scope": "All exported raw/processed cells, outcomes, predictions and source-row identities checked against the saved arrays. The 5000-record cap spans both splits; poor-prediction controls inspect the exported evaluation sample, which need not include the globally worst evaluation record.",
+        "visible_selected_cells_verified": 880,
+        "visible_prediction_cells_verified": 400,
+        "model_viewport_checks": 8,
+        "viewports": [
+          1440,
+          390
+        ],
+        "visible_rows_sha256": "f3933f1d6be8b836a87de9de57c7ce0d0cf3287c8285e429488bbf0d74caef5e",
+        "prediction_rows_sha256": "6e69f78e44c83bcd68433dd8f9142363641afba83d078003cb24243d0f7bff10",
+        "partial_handoff_sha256": "df027484bb77870dc30eb20532d5171ce504302176ea78725ee057e25af5a4f2",
+        "preserved_failure_scope": "An earlier v1 prerequisite checked the wrong prediction-schema location and failed before export. That attempt is not replaced or credited as a completed export.",
+        "header_layout_compatibility": {
+          "comparison_sha256": "5b37c1f4261ef4d513f9b1e19271c54657120ef739fb5f42dd793401f4dbde38",
+          "css_sha256": "f14bd71c08562dbad0bd86a1a2769095b9acf29a67139b01537a5e901e1ca614",
+          "scope": "Compatibility comparison on immutable actual rows HTML with current data-explorer.css injected into browser memory only. This is not a new R export, benchmark run, or model/value verification.",
+          "original_narrow_headers_readable": false,
+          "current_css_readable_widths": [
+            320,
+            390,
+            1440
+          ],
+          "fresh_current_source_fixture_and_gallery_status": "passed_at_d93f13b"
+        },
+        "stage_resource_scope": "Each R stage has a separate 1200-second and 24-GiB address-space limit; browser stages have a 1200-second limit. Reported stage RSS is distinct from the cumulative service memory peak. All derivative costs are excluded from original fitting/scoring timing.",
+        "manual_rows_review_sha256": "42e79479ebc91feea12eac51e9a9e0818c67bc90a3a64ac72acb8de692368226",
+        "original_process_status": "ok",
+        "exported_columns": 55,
+        "controls_scope": "Literal call supplies only report_data=\"rows\"; max_rows, max_pair_rows and saved-result seed resolve to the recorded defaults."
       }
     },
     "bank": {
@@ -350,7 +455,7 @@
         "predictions": "b59d1992df7095e15d95cf036b71e5bbf03928c44f495b6d79757f29ce7dbe2b"
       },
       "metadata_audit_sha256": "44a24553fdf8b0e7cc742efb2061b3c5770ec6083f9f4d850a3f976531f1f9d4",
-      "report_checks": "Independent summary-report oracle v5, all 12 offline browser groups and original report timing extraction passed. Bounded rows export remains pending.",
+      "report_checks": "Summary oracle and all 12 offline browser groups passed; exact summary screenshots/PDF visually reviewed. Rows export, numeric and browser value/control checks passed, with direct individual-record inspection. Original narrow selected-record headers retain their defect; the subsequent CSS correction passed fresh fixture and gallery checks without rewriting the original HTML.",
       "overlap_warning": {
         "matching_supplied_evaluation_records": 551,
         "meaning": "Values match before preprocessing; exact matches alone do not prove dependence. The original warning was console-only and absent from the v14 saved result and HTML. A later diagnostic-only source repair preserves it prospectively."
@@ -371,7 +476,7 @@
         "focused_controls_sha256": "857c75cceb52b179fd55f878eb8385497272935ee9d6994144ffe523a95abb89"
       },
       "capture_visual_review": {
-        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "scope": "Direct inspection covered the four exact desktop/mobile summary screenshots and complete selected-feature PDF without a material visual blocker. These implementer observations concern summary views; individual-record evidence is recorded separately.",
         "screenshot_sha256": {
           "evaluation-320.png": "9c1ff7ac7b46e43c8cb2406a0aa8c5e99d05ce2bbc8a6ec4870e170549265dde",
           "overview-1440.png": "9b73d37781ec4cbd9bb95627c73dbd5104ab0402a121b49f2d006deebfec795f",
@@ -381,6 +486,120 @@
         "pdf_sha256": "03a2d5d18b551c909907ac57aaf4388b3fa638ce74a26f83e701eea72a189abe",
         "pdf_render_sha256": "30cd6cc722752c840adb83c7f071331d55f002ecb23b7eaa7405408f5a490b16",
         "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
+      },
+      "rows_derivative": {
+        "status": "export_numeric_and_browser_checks_passed_with_separate_header_compatibility_fix",
+        "scope": "Separate literal rows export from the original saved v14 result with the frozen v14 renderer. No refit, explanation recomputation or new full prediction replay. Original summary HTML and all fitted artifacts remain unchanged. Per-stage costs are additional to the original public call.",
+        "literal_call": "render_model_report(result, output_file, report_data = \"rows\")",
+        "renderer_source_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
+        "controls": {
+          "mode": "rows",
+          "columns": null,
+          "context_columns": [],
+          "max_rows": 5000,
+          "seed": 123,
+          "max_pair_rows": 10000
+        },
+        "records": 5000,
+        "by_split": {
+          "training": 4000,
+          "evaluation": 1000
+        },
+        "raw_and_processed_cells_verified": 200000,
+        "prediction_cases_verified": {
+          "main_model": 1000,
+          "forest_model": 1000,
+          "regularized_model": 1000,
+          "simple_baseline": 1000
+        },
+        "render_seconds": 10.845,
+        "load_seconds": 0.884,
+        "supervised_stages": [
+          {
+            "stage": "prerequisite",
+            "status": "ok",
+            "elapsed_seconds": 2.1211170999995375,
+            "peak_rss_kib": 325284
+          },
+          {
+            "stage": "export",
+            "status": "ok",
+            "elapsed_seconds": 13.447749474002194,
+            "peak_rss_kib": 546788
+          },
+          {
+            "stage": "browser",
+            "status": "ok",
+            "elapsed_seconds": 3.4212352629983798,
+            "peak_rss_kib": 383620
+          },
+          {
+            "stage": "oracle",
+            "status": "ok",
+            "elapsed_seconds": 5.37671084899921,
+            "peak_rss_kib": 428204
+          },
+          {
+            "stage": "visible-rows",
+            "status": "failed",
+            "elapsed_seconds": 1.8181793919975462,
+            "peak_rss_kib": 203680
+          }
+        ],
+        "report": {
+          "bytes": 2486292,
+          "sha256": "546581abbc04714e17a3e7987056cf4d97827d3c1f5968b063f1917fc3ba49ec"
+        },
+        "evidence_sha256": {
+          "process": "e91053f41bb76545f4a666b27414dbb87b7e451ca23f6ff0034cf0db1640da61",
+          "export": "84c94bb5254121032f9b50b6bbca5c93edfe81e937d0ef9f5e0267d6ce16101f",
+          "oracle": "6b94afdf7021ab3e3881947527b47639decdd59a71bb6d1b0b8ee765d507e91e"
+        },
+        "row_manifest_sha256": "f542ecea3f08b42278a25500d09536e87431c545de8d0251a5abe1bf150482f4",
+        "numeric_scope": "All exported raw/processed cells, outcomes, predictions and source-row identities checked against the saved arrays. The 5000-record cap spans both splits; poor-prediction controls inspect the exported evaluation sample, which need not include the globally worst evaluation record.",
+        "visible_selected_cells_verified": 320,
+        "visible_prediction_cells_verified": 400,
+        "model_viewport_checks": 8,
+        "viewports": [
+          1440,
+          390
+        ],
+        "visible_rows_sha256": "5acf85eab0fdbfc9d1c2a4b8f7e96041e8567e026e5a158940a4c5d959a2bac0",
+        "prediction_rows_sha256": "c9a775f16f8b34e04fe81f99340c29d4592f5d4b464ef78d27c0fc4ed748afc9",
+        "partial_handoff_sha256": "df027484bb77870dc30eb20532d5171ce504302176ea78725ee057e25af5a4f2",
+        "browser_followup_handoff_sha256": "6fd1b158443c627d480f23f6d40b2ad048bfa9c3f4c5bf49ed24b91b82478031",
+        "browser_followup_stages": [
+          {
+            "stage": "visible-rows",
+            "status": "ok",
+            "gnu_time_elapsed_seconds": 1.8,
+            "peak_rss_kib": 203792
+          },
+          {
+            "stage": "prediction-rows",
+            "status": "ok",
+            "gnu_time_elapsed_seconds": 2.42,
+            "peak_rss_kib": 205056
+          }
+        ],
+        "preserved_failure_scope": "Original process remains failed after its visible-table checker read a detached node. A versioned browser-only correction reads the current table atomically; export and numerical proof were reused unchanged.",
+        "header_layout_compatibility": {
+          "comparison_sha256": "5b37c1f4261ef4d513f9b1e19271c54657120ef739fb5f42dd793401f4dbde38",
+          "css_sha256": "f14bd71c08562dbad0bd86a1a2769095b9acf29a67139b01537a5e901e1ca614",
+          "scope": "Compatibility comparison on immutable actual rows HTML with current data-explorer.css injected into browser memory only. This is not a new R export, benchmark run, or model/value verification.",
+          "original_narrow_headers_readable": false,
+          "current_css_readable_widths": [
+            320,
+            390,
+            1440
+          ],
+          "fresh_current_source_fixture_and_gallery_status": "passed_at_d93f13b"
+        },
+        "stage_resource_scope": "Each R stage has a separate 1200-second and 24-GiB address-space limit; browser stages have a 1200-second limit. Reported stage RSS is distinct from the cumulative service memory peak. All derivative costs are excluded from original fitting/scoring timing.",
+        "manual_rows_review_sha256": "df20e2bd67b1d17632902c786e7a91655c8d3e687482ee148f646a2eae66f60a",
+        "original_process_status": "failed",
+        "exported_columns": 20,
+        "controls_scope": "Literal call supplies only report_data=\"rows\"; max_rows, max_pair_rows and saved-result seed resolve to the recorded defaults."
       }
     },
     "yearprediction": {
@@ -558,7 +777,7 @@
       },
       "metadata_audit_sha256": "46c7ebdb9fb5dbfdd5c9d374294c69d60c9676570dc8e4edcb6d5d7e04f28c10",
       "report_manifest_sha256": "2cc6d1b77ba5c2dca1ea4193a95932914feb2a07b0a91c32bb326a7a820cc2e9",
-      "report_checks": "Independent summary-report oracle v5, all 12 offline browser groups and original report timing extraction passed. Bounded rows export remains pending.",
+      "report_checks": "Summary oracle and all 12 offline browser groups passed; exact summary screenshots/PDF visually reviewed. Rows export, numeric and browser value/control checks passed, with direct individual-record inspection. Original narrow selected-record headers retain their defect; the subsequent CSS correction passed fresh fixture and gallery checks without rewriting the original HTML.",
       "resource_accounting": {
         "scope": "Run.py gate uses max(inner GNU-time peak, its sampled child high-water). Outer controller samples a separate scope independently. Both measurements and their different exact values are retained; equality between them is not assumed.",
         "controller_gnu_peak_rss_kib": 7680972,
@@ -580,7 +799,7 @@
       },
       "original_report_stage_scope": "Existing public-call trace at millisecond precision, already included in complete_process_seconds. Preparation includes explanation/data work; rendering includes HTML generation/writing. These are not additional costs or re-export timings.",
       "capture_visual_review": {
-        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "scope": "Direct inspection covered the four exact desktop/mobile summary screenshots and complete selected-feature PDF without a material visual blocker. These implementer observations concern summary views; individual-record evidence is recorded separately.",
         "screenshot_sha256": {
           "evaluation-320.png": "d14031a8610ae0223fa7b392759a41edcac6d84dac3c9b0eca495643dc6800fa",
           "overview-1440.png": "9580efcd8d03d0ef0e364a94fa8c55d2e2e2f0bf9479661868ec78b86fac6b96",
@@ -590,9 +809,157 @@
         "pdf_sha256": "89cd2db761bc973cb28827abc67670f444d285c7d39ae1fa06957d8aa187cac6",
         "pdf_render_sha256": "20199ad419cc164f50f90299c7bdbf275e8d4f51beb82a78c3f262c88e63534d",
         "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
+      },
+      "rows_derivative": {
+        "status": "export_numeric_and_browser_checks_passed_original_mobile_header_defect_retained",
+        "scope": "Separate literal rows export from the original saved v14 result with the frozen v14 renderer. No refit, explanation recomputation or new full prediction replay. Original summary HTML and all fitted artifacts remain unchanged. Per-stage costs are additional to the original public call.",
+        "literal_call": "render_model_report(result, output_file, report_data = \"rows\")",
+        "renderer_source_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
+        "controls": {
+          "mode": "rows",
+          "columns": null,
+          "context_columns": [],
+          "max_rows": 5000,
+          "seed": 123,
+          "max_pair_rows": 10000
+        },
+        "records": 5000,
+        "by_split": {
+          "training": 4499,
+          "evaluation": 501
+        },
+        "raw_and_processed_cells_verified": 910000,
+        "prediction_cases_verified": {
+          "main_model": 501,
+          "forest_model": 501,
+          "regularized_model": 501,
+          "simple_baseline": 501
+        },
+        "render_seconds": 55.92,
+        "load_seconds": 3.731,
+        "supervised_stages": [
+          {
+            "stage": "prerequisite",
+            "status": "ok",
+            "elapsed_seconds": 17.504665265001677,
+            "peak_rss_kib": 1935120
+          },
+          {
+            "stage": "export",
+            "status": "ok",
+            "elapsed_seconds": 81.34870121499989,
+            "peak_rss_kib": 2947180
+          },
+          {
+            "stage": "browser",
+            "status": "ok",
+            "elapsed_seconds": 7.48039904399775,
+            "peak_rss_kib": 937372
+          },
+          {
+            "stage": "oracle",
+            "status": "ok",
+            "elapsed_seconds": 38.15039268500186,
+            "peak_rss_kib": 2921948
+          },
+          {
+            "stage": "visible-rows",
+            "status": "ok",
+            "elapsed_seconds": 2.6694894770007522,
+            "peak_rss_kib": 303732
+          },
+          {
+            "stage": "prediction-rows",
+            "status": "ok",
+            "elapsed_seconds": 2.870495002000098,
+            "peak_rss_kib": 232816
+          }
+        ],
+        "report": {
+          "bytes": 9491521,
+          "sha256": "c116245ae1ddb0bca1dbce70fc427f31dbbb563c901f0d258cb527b7caf238aa"
+        },
+        "evidence_sha256": {
+          "process": "a86d9628026dc61793da56f6c5e8f7774c22a6d2ec30734bf723ac1eb0548ad1",
+          "export": "c139236e44125b468b2c15a72c10977a179214f873e5c0ec835e28463d646838",
+          "oracle": "62eb257a739175dc109b617cab12b17687012c9dc56a33844a1433f834c3a92b"
+        },
+        "row_manifest_sha256": "451936347daf82aae73ebc99ecf82ac197907ea6106e2583c8ae92d00d4b2b58",
+        "numeric_scope": "All exported raw/processed cells, outcomes, predictions and source-row identities checked against the saved arrays. The 5000-record cap spans both splits; poor-prediction controls inspect the exported evaluation sample, which need not include the globally worst evaluation record.",
+        "visible_selected_cells_verified": 1456,
+        "visible_prediction_cells_verified": 320,
+        "model_viewport_checks": 8,
+        "viewports": [
+          1440,
+          390
+        ],
+        "visible_rows_sha256": "433d4e84b954c3f333920d5dd5afee29a9f1e2092377d41b06d8447619fdedf5",
+        "prediction_rows_sha256": "a385fae6149fdf53c0b60686414510fafaaa2180dcbabbf72b20febd051cae49",
+        "header_layout_scope": "Direct inspection found the same selected-record heading overlap in the original 390-pixel view. Current-CSS browser-memory compatibility is separately measured on Covertype and Bank, not claimed as a new Year export.",
+        "stage_resource_scope": "Each R stage has a separate 1200-second and 24-GiB address-space limit; browser stages have a 1200-second limit. Reported stage RSS is distinct from the cumulative service memory peak. All derivative costs are excluded from original fitting/scoring timing.",
+        "manual_rows_review_sha256": "3beefe2069e11ac404303c01873e8888b28d2f7eef3526c88437cd80d9b6901a",
+        "original_process_status": "ok",
+        "exported_columns": 91,
+        "controls_scope": "Literal call supplies only report_data=\"rows\"; max_rows, max_pair_rows and saved-result seed resolve to the recorded defaults."
       }
     }
   },
   "report_check_handoff_sha256": "a133e36038c8ed3d385c348a975a68f35e14d7aa76ea075da00575478de16849",
-  "report_check_followup_handoff_sha256": "983f714127910185ee06a49f39ac81e47192f9dd9eba5a176d582d6cc11f45fd"
+  "report_check_followup_handoff_sha256": "983f714127910185ee06a49f39ac81e47192f9dd9eba5a176d582d6cc11f45fd",
+  "presentation_followup": {
+    "scope": "Later diagnostic and report presentation checks do not change the immutable original v14 fits, predictions, metrics or HTML. They are not a new full-data benchmark of current source.",
+    "gallery": {
+      "commit": "0934351f42d093cfb883d73353d229edfc225b57",
+      "browser_checks_passed": 118,
+      "browser_receipt_sha256": "c34f03bb70768bb4c59521f7c9c47dc5c89cd242913278269193af2727e7bc28",
+      "visual_review_sha256": "615c114f0e07e1678b388e78bf0e6ce645f9f83e1cb889e8e9375a69d13f6cdb",
+      "scope": "Regenerated public examples and reviewed screenshots at the named commit. Later current-source CSS fixture and gallery verification is recorded separately below.",
+      "preserved_failure": "R/HTML generation completed in the first combined supervisor, then Chrome startup failed under the inherited R address-space ceiling. Only screenshot capture was repeated under its separate browser resource limit."
+    },
+    "overlap_warning_fixture": {
+      "training_rows": 24,
+      "evaluation_rows": 11,
+      "deliberate_matching_records": 3,
+      "fixture_sha256": "716d3d39a77edef8bf6c8a1047da6ddd95d6320b6bae122642cee678c2461a52",
+      "initial_report_sha256": "19f711cb30e0697e81cd7315ab5b06b6b4143543372fa94e9f37532714f518e7",
+      "reopened_report_sha256": "de96108948a9bb6a5f66cf98ed7c4c94471608f797de9d62344ae99f88e8fd1f",
+      "scope": "Fresh small fixture, initial render, save/reload and reopened render in one R invocation; retained warning verified and the reopened Checks view was visually reviewed. This is not fresh-session validation or a backfill into original v14 benchmark artifacts."
+    },
+    "current_source_scope": {
+      "scope": "Prospective report and diagnostic changes after the original frozen full-data benchmarks",
+      "runtime_files": 80,
+      "byte_identical": 76,
+      "changed": [
+        "R/autoxplain.R",
+        "R/guided_workflow.R",
+        "R/h2o_workflow.R",
+        "inst/report/data-explorer.css"
+      ],
+      "benchmark_source_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
+      "file_scope": "R/** and inst/report/** only",
+      "evidence_sha256": "c91cd4b0674b3723a5461063b67ad6024723f503ce5064eddb068c90f8f841e3"
+    },
+    "current_source_gallery": {
+      "commit": "d93f13b",
+      "data_explorer_checks_passed": 265,
+      "data_browser_receipt_sha256": "dca8031a590cd116804a78cb26f1dc4c98f7797b0846eef4827101693d8276e1",
+      "gallery_checks_passed": 118,
+      "gallery_browser_receipt_sha256": "c34f03bb70768bb4c59521f7c9c47dc5c89cd242913278269193af2727e7bc28",
+      "visual_review_sha256": "080f0d58be14f6017e28d50af1568b9040649f1eeb1ca7abbae457141126b11e",
+      "manifest_sha256": "7c650aa0d7ed18479a7084575d90bda9c68722871e0026f09c85dc0712ede4fd",
+      "source_files_bound": 86,
+      "assets_bound": 11,
+      "scope": "Three public examples and six explorer fixtures rendered from saved fits with current CSS, without refitting. Actual header geometry and deliberate nowrap corruption are checked. Eight recaptured PNGs are byte-identical to the reviewed 0934351 images. The exact new mobile fixture screenshots were visually inspected. Final CI/archive/publication remain pending.",
+      "preserved_failure": "The first supervisor invocation stopped before package loading because it inherited the home working directory. Its record is preserved; a new invocation with explicit repository working directory completed."
+    }
+  },
+  "rows_evidence_summary_sha256": "42c4fc49d984f1353c613918ea01d48c8692ffca3dea14a4815fe7d20d80c2d8",
+  "rows_combined_handoff_sha256": "b41f15b3083e1e686e03e4b2b1b0c51015937eff8b58d706af2f2154902a405a",
+  "rows_derivative_limitations": [
+    "Individual records are a bounded sample, not every source row. The globally worst evaluation record need not appear in that sample.",
+    "Training records contain input/outcome values; embedded model predictions concern retained evaluation records only.",
+    "Binary individual-case checks use the initial 0.50 cutoff. Aggregate threshold behavior has separate summary-report checks.",
+    "These original v14 HTMLs retain the known mobile selected-table header collision. Current-source CSS compatibility review is separate.",
+    "Implementer and automated walkthroughs are not participant usability research."
+  ]
 }
