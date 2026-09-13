@@ -104,15 +104,15 @@ def printed_importance(page):
     })''')
 
 
-def fold_error_layout(detail):
-    return detail.evaluate('''element=>{
+def fold_error_layout(region):
+    return region.evaluate('''element=>{
       const table=element.querySelector('table');
       const column=[...table.querySelectorAll('thead th')].findIndex(cell=>cell.textContent==='Error');
       const rows=[...table.querySelectorAll('tbody tr')], cell=rows[0]?.children[column];
       if(!cell) return {readable:false};
       const width=cell.getBoundingClientRect().width, font=parseFloat(getComputedStyle(cell).fontSize);
       const height=Math.max(...rows.map(row=>row.getBoundingClientRect().height));
-      const viewport=element.querySelector('.table-wrap').clientWidth;
+      const viewport=element.clientWidth;
       return {width,font,max_row_height:height,viewport:innerHeight,table_viewport:viewport,
         readable:width>=font*20 && width<=viewport+1 && height<=innerHeight/4};
     }''')
@@ -200,24 +200,37 @@ def main():
                             page.keyboard.press('Enter')
                             settled(page)
                             detail = page.locator(destination)
-                            evidence = detail.evaluate('''element=>{
-                              const table=element.querySelector('table');
-                              const column=[...table.querySelectorAll('thead th')]
-                                .findIndex(cell=>cell.textContent==='Error');
-                              const errors=column<0?[]:[...table.querySelectorAll('tbody tr')]
-                                .map(row=>row.children[column].textContent).filter(text=>text.trim());
-                              return {open:element.open, hidden:element.hidden,
-                                family:element.dataset.selectionFamily,
-                                selected:document.querySelector('#selection-family-filter').value,
-                                focused:document.activeElement===element.querySelector('summary'),
-                                errors, text:element.innerText};
-                            }''')
+                            configuration = bytes.fromhex(destination.removeprefix('#selection-detail-')).decode('utf-8')
+                            # The committed gallery's failed conventional learner has
+                            # one fold summary plus separate per-fold technical tables.
+                            fold_summary = detail.get_by_role(
+                                'region', name=f'{configuration} fold scores, sizes, seeds and engine status', exact=True)
+                            records = fold_summary.locator('table').evaluate('''table=>({
+                              fields:[...table.querySelectorAll('thead th')].map(cell=>cell.textContent),
+                              rows:[...table.querySelectorAll('tbody tr')]
+                                .map(row=>[...row.children].map(cell=>cell.textContent))
+                            })''')
+                            expected_fields = ['Fold', 'CV loss', 'Training rows', 'Validation rows', 'Seed', 'Optimizer', 'Error']
+                            check(prefix + ': the named fold summary keeps its fields and all five folds',
+                                  records['fields'] == expected_fields
+                                  and all(len(row) == len(expected_fields) for row in records['rows'])
+                                  and [row[0] for row in records['rows']] == ['1', '2', '3', '4', '5'], records)
+                            column = records['fields'].index('Error')
+                            fold_errors = [row[column] for row in records['rows'] if row[column].strip()]
+                            evidence = detail.evaluate('''element=>({
+                              open:element.open, hidden:element.hidden,
+                              family:element.dataset.selectionFamily,
+                              selected:document.querySelector('#selection-family-filter').value,
+                              focused:document.activeElement===element.querySelector('summary'),
+                              text:element.innerText
+                            })''')
+                            evidence['errors'] = fold_errors
                             check(prefix + ': warning opens the actual failed fold evidence',
                                   detail.is_visible() and evidence['open'] and not evidence['hidden']
                                   and evidence['family'] == evidence['selected'] and evidence['focused']
                                   and bool(evidence['errors'])
                                   and all(error in evidence['text'] for error in evidence['errors']), evidence)
-                            shape = fold_error_layout(detail)
+                            shape = fold_error_layout(fold_summary)
                             check(prefix + ': fold errors have readable lines and compact rows', shape['readable'], shape)
                             if width == 390 and index == 0:
                                 injected = page.add_style_tag(content='''@media screen{
@@ -227,16 +240,28 @@ def main():
                                     width:24px!important;min-width:0!important;max-width:24px!important}}
                                 ''')
                                 settled(page)
-                                bad = fold_error_layout(detail)
+                                bad = fold_error_layout(fold_summary)
                                 check(prefix + ': a crushed error column is rejected', not bad['readable'], bad)
                                 injected.evaluate('element=>element.remove()')
                                 settled(page)
                             page.screenshot(path=str(args.output_dir / f'{name}-{width}-failure-{index}.png'), full_page=True)
                             if width == 390:
-                                detail.locator('.table-wrap').evaluate('''element=>{
+                                scroll = fold_summary.evaluate('''element=>{
+                                  const maximum=Math.max(0,element.scrollWidth-element.clientWidth);
                                   element.scrollLeft=element.scrollWidth;
                                   element.scrollIntoView({block:'start'});
+                                  const region=element.getBoundingClientRect();
+                                  const errors=[...element.querySelectorAll('tbody tr')]
+                                    .map(row=>row.lastElementChild.getBoundingClientRect());
+                                  return {maximum,left:element.scrollLeft,
+                                    error_column_visible:errors.every(cell=>cell.left>=region.left-1&&cell.right<=region.right+1)};
                                 }''')
+                                # A wide summary may scroll inside its region. If it
+                                # already fits, do not require artificial overflow.
+                                check(prefix + ': the fold summary exposes complete errors after local scrolling',
+                                      scroll['error_column_visible']
+                                      and (scroll['maximum'] <= 1 or
+                                           (scroll['left'] > 0 and abs(scroll['left']-scroll['maximum']) <= 1)), scroll)
                                 page.screenshot(path=str(args.output_dir / f'{name}-{width}-failure-errors-{index}.png'))
                             page.locator('[data-page-link="checks"]').click()
                             settled(page)

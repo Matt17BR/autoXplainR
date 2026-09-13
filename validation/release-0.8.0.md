@@ -56,7 +56,7 @@ snapshots. R code, report assets, tests, help files and DESCRIPTION are identica
 | Complete R tests | 7,233 assertions passed; no failures or warnings | Two opt-in integrations skipped: live H2O and Gemini |
 | Source build and CRAN-style check | No errors or warnings; one note | Tests ran separately; manuals, examples and five vignette scripts passed |
 | Documentation, lint and spelling | Passed | Generated help is current |
-| Report exploration | 1,382 checks passed; no browser errors | Four example types in Chromium; unresolved automated contrast items require separate review |
+| Report exploration | 1,382 checks passed; no browser errors | Four example types in Chromium; separate contrast review found no confirmed failure in 355 undecided occurrences |
 | Committed gallery | 118 smoke checks passed | All three HTML reports and eight screenshots regenerated and visually inspected |
 | Adaptive selection UI | Chromium 608 and WebKit 596 checks passed | Independent selection fixture, keyboard, deep links, mobile charts and print; Firefox remains a CI gate |
 
@@ -71,6 +71,13 @@ Browser tasks and manual inspection are implementer walkthroughs, not a
 recruited-participant usability study. Counts describe individual runners and
 must not be added as unique tests. Shared-host timings are observations, not
 isolated speed measurements.
+
+The [contrast review](competitive-tabular/explorer-contrast-review-20260913.md)
+checks actual backgrounds, chart labels and mobile tab visibility. All 99
+initially off-screen labels became visible after scrolling; all 14 checked
+keyboard states exposed the selected tab. The hollow fold marker is faint but
+passes the graphical contrast threshold. This review resolves those recorded
+items and does not claim a complete accessibility certification.
 
 ## Remaining gates
 

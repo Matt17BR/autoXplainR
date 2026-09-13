@@ -19,7 +19,10 @@ development report cannot establish that the full-data report works.
    screened out or were not attempted. Screening results must not appear as
    complete cross-validation results.
 4. For an adaptive large-data forest, find its 128-tree screen, 128- or 256-tree
-   full-row validation fits and 500-tree final fit. For a booster, find the
+   full-row validation fits and actual final tree count. Under the
+   [current tree policy](forest-tree-budget-v3.md), final fits use 256 trees at
+   four million training rows times predictors and 500 below that boundary;
+   explicit grids retain their requested counts. For a booster, find the
    maximum round limit, per-fold selected rounds and final fitted round count.
    These values must agree with the retained native model and tuning evidence.
 
