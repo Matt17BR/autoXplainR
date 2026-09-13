@@ -4,28 +4,99 @@ No chart data-value attribute or JavaScript scale helper supplies expected value
 The checks also reject missing labels, wrong model identities and incorrect support.
 """
 import math
+from report_measurements import parse_duration
+
+
+DURATION_FORMATS = {
+    'training_time_ms': 'duration-ms',
+    'prediction_time_ms': 'duration-ms',
+    'training_time_s': 'duration-s',
+    'repeated_prediction_ms_per_row': 'duration-ms-per-row',
+}
 
 
 def on_axis(actual, expected, slope):
     return math.isclose(actual, expected, rel_tol=0, abs_tol=abs(slope) * .02)
 
 
-def calibration(svg, horizontal=False):
-    labels = svg.evaluate('''(svg, horizontal) => {
+def affine_axis_feasible(constraints):
+    """One increasing affine axis must intersect every (xlo,xhi,ylo,yhi) box.
+
+    For positive slope b, each box bounds the intercept by L-b*xhi and
+    U-b*xlo. Every lower bound must be below every upper bound. Each pair
+    therefore gives a linear bound on b, whose intersection is sufficient.
+    """
+    lower, upper = 0.0, math.inf
+    if not constraints or any(not all(math.isfinite(value) for value in box) or
+                              box[0] > box[1] or box[2] > box[3] for box in constraints):
+        return False
+    for xlo, xhi, lo, hi in constraints:
+        for other_xlo, other_xhi, other_lo, other_hi in constraints:
+            coefficient, bound = other_xlo - xhi, other_hi - lo
+            if coefficient > 0:
+                if bound <= 0:
+                    return False
+                upper = min(upper, math.nextafter(bound / coefficient, math.inf))
+            elif coefficient < 0:
+                lower = max(lower, math.nextafter(bound / coefficient, -math.inf))
+            elif bound < 0:
+                return False
+    return upper > 0 and lower <= upper
+
+
+def calibration(svg, horizontal=False, resource=None):
+    visible = svg.evaluate('''(svg, horizontal) => {
       const axis=svg.querySelector('.axr-axis'), bottom=+axis.getAttribute('y1');
       const left=+axis.getAttribute('x1');
-      return [...svg.querySelectorAll('text')].filter(t=>t.textContent.trim()!=='' && Number.isFinite(Number(t.textContent)))
+      const labels=[...svg.querySelectorAll('text')].filter(t=>t.textContent.trim()!=='')
         .filter(t=>horizontal ? t.getAttribute('text-anchor')==='middle' && +t.getAttribute('y')>bottom && +t.getAttribute('y')<bottom+30 :
           t.getAttribute('text-anchor')==='end' && +t.getAttribute('x')<left && +t.getAttribute('y')<=bottom+5)
-        .map(t=>({value:Number(t.textContent),pixel:horizontal ? +t.getAttribute('x') :
+        .map(t=>({text:t.textContent.trim(),pixel:horizontal ? +t.getAttribute('x') :
           [...svg.querySelectorAll('.axr-grid')].map(g=>+g.getAttribute('y1'))
             .sort((a,b)=>Math.abs(a-(+t.getAttribute('y')))-Math.abs(b-(+t.getAttribute('y'))))[0]}));
+      return {format:horizontal ? svg.closest('.axr-chart')?.getAttribute('data-x-format') : null, labels};
     }''', horizontal)
+    # The declaration selects units only. Visible ticks supply every expected
+    # coordinate; internal chart values and scale helpers are never consulted.
+    duration_format = visible['format']
+    if duration_format:
+        if duration_format not in ('duration-ms', 'duration-s', 'duration-ms-per-row'):
+            raise ValueError('Unknown visible duration axis format')
+        if resource is not None and DURATION_FORMATS.get(resource) != duration_format:
+            raise ValueError('Duration axis format differs from the expected resource unit')
+    labels = []
+    duration_intervals = []
+    for label in visible['labels']:
+        if duration_format:
+            # Per-row axes put the scope in their axis title; their ticks are
+            # durations without the table-cell " / row" suffix.
+            value = parse_duration(label['text'], per_row=False)
+            absolute_precision = 1e-8 if duration_format == 'duration-s' else 1e-11
+            radius = .5 if abs(value) >= 60 else max(absolute_precision, abs(value) * .0006)
+            if duration_format != 'duration-s':
+                value *= 1000
+                radius *= 1000
+        else:
+            # Older saved HTML has unformatted numeric cost ticks.
+            try:
+                value = float(label['text'])
+            except ValueError:
+                continue
+        if math.isfinite(value) and label['pixel'] is not None and math.isfinite(label['pixel']):
+            labels.append(dict(value=value, pixel=label['pixel']))
+            if duration_format:
+                duration_intervals.append((label['pixel'], label['pixel'], value-radius, value+radius))
     if len({x['value'] for x in labels}) < 2:
         raise ValueError('The numeric axis has fewer than two usable labeled ticks')
     lo, hi = min(labels, key=lambda x:x['value']), max(labels, key=lambda x:x['value'])
     slope = (hi['value']-lo['value'])/(hi['pixel']-lo['pixel'])
-    return lambda pixel: lo['value']+(pixel-lo['pixel'])*slope, slope
+    value_at = lambda pixel: lo['value']+(pixel-lo['pixel'])*slope
+    if duration_format:
+        # Coarse labels cannot prove subpixel placement. The cost check below
+        # requires one common axis for all rounding intervals and independent
+        # expected points, rather than widening each point's pixel tolerance.
+        value_at.duration_intervals = duration_intervals
+    return value_at, slope
 
 
 def points(svg, model=None):
@@ -47,12 +118,18 @@ def label_collisions(svg):
 
 def cost_geometry(plot, rows, metric, resource, higher):
     try:
-        svg=plot.locator('svg'); x_value,x_slope=calibration(svg,True); y_value,y_slope=calibration(svg)
+        svg=plot.locator('svg'); x_value,x_slope=calibration(svg,True,resource); y_value,y_slope=calibration(svg)
         dots=points(svg); available=[row for row in rows if row.get(metric) is not None and row.get(resource) is not None]
         if {dot['model'] for dot in dots}!={row['model_id'] for row in available} or len(dots)!=len(available):
             return False,'Plot omits or duplicates a measured model'
         if y_slope>=0 or x_slope<=0:
             return False,'Numerical axes must increase to the right and upward'
+        duration_intervals = getattr(x_value, 'duration_intervals', None)
+        if duration_intervals is not None:
+            expected_points = [(dot['x']-.02, dot['x']+.02, row[resource], row[resource])
+                               for dot in dots for row in available if row['model_id']==dot['model']]
+            if not affine_axis_feasible(duration_intervals + expected_points):
+                return False, 'Visible duration ticks and expected points admit no common increasing numeric axis'
         labels=svg.locator('.axr-model-label').all_text_contents()
         normalize=lambda text:''.join(text.split())
         if sorted(map(normalize,labels))!=sorted(normalize(row['model']) for row in available):
@@ -62,7 +139,7 @@ def cost_geometry(plot, rows, metric, resource, higher):
             return False,dict(overlapping_model_labels=collisions)
         for dot in dots:
             row=next(row for row in available if row['model_id']==dot['model'])
-            if not on_axis(x_value(dot['x']),row[resource],x_slope) or not on_axis(y_value(dot['y']),row[metric],y_slope):
+            if (duration_intervals is None and not on_axis(x_value(dot['x']),row[resource],x_slope)) or not on_axis(y_value(dot['y']),row[metric],y_slope):
                 return False,dict(model=dot['model'],plotted=[x_value(dot['x']),y_value(dot['y'])],expected=[row[resource],row[metric]])
             loss=-row[metric] if higher else row[metric]
             dominated=any(other[resource]<=row[resource] and (-other[metric] if higher else other[metric])<=loss and

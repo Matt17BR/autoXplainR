@@ -4,6 +4,7 @@ This is implementer acceptance automation, not a participant usability study.
 Requires the fixtures from render-explorer-cases.R, Playwright and axe-core.
 """
 import argparse
+from decimal import Decimal
 import hashlib
 import os
 import re
@@ -15,6 +16,7 @@ from pathlib import Path
 import subprocess
 from playwright.sync_api import sync_playwright
 from report_geometry import cost_geometry, effect_geometry, importance_geometry
+from report_measurements import resource_measurement
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--case-dir', type=Path, default=Path('/tmp/autoxplain-explorer-cases'))
@@ -95,7 +97,10 @@ with sync_playwright() as playwright:
     for case in args.cases:
         print(f"Checking {case}", flush=True)
         report = (args.case_dir / f'{case}.html').resolve()
-        oracle = json.loads(report.with_suffix('.json').read_text())
+        oracle_text = report.with_suffix('.json').read_text()
+        oracle = json.loads(oracle_text)
+        cost_answers = {row['model_id']: row for row in json.loads(
+            oracle_text, parse_float=Decimal, parse_int=Decimal)['table']}
         ids = [row['model_id'] for row in oracle['table']]
         check(f'{case}: fixture identity', True, hashlib.sha256(report.read_bytes()).hexdigest())
         context = browser.new_context(viewport={'width': 1440, 'height': 1000})
@@ -121,14 +126,29 @@ with sync_playwright() as playwright:
             'rows => rows.map(row => row.dataset.modelRow)')) == set(ids))
         for spec in oracle['specifications']:
             row = page.locator(f'[data-model-row="{spec["id"]}"]')
-            measurements = next(item for item in oracle['table'] if item['model_id'] == spec['id'])
-            costs = row.locator('td.number:visible').all_text_contents()[1:]
-            costs_match = len(costs) == len(oracle['resources'])
-            for shown, resource in zip(costs, oracle['resources']):
-                expected = measurements.get(resource)
-                costs_match = costs_match and (shown == 'Unavailable' if expected is None else
-                    within_tolerance(0 if shown == '~0' else float(shown), expected))
-            check(f'{case}/{spec["id"]}: displayed cost measurements match R', costs_match)
+            measurements = cost_answers[spec['id']]
+            costs = row.evaluate('''row => [...row.closest('table').querySelectorAll('thead th')]
+              .filter(header => !header.hasAttribute('data-score-column') && header.querySelector('[data-sort]'))
+              .map(header => {
+                const resource = header.querySelector('[data-sort]').dataset.sort;
+                const cell = row.cells[header.cellIndex], spans = cell?.querySelectorAll('span[title]');
+                return {resource, raw: row.getAttribute('data-value-' + resource),
+                  shown: cell?.textContent.trim(), tooltip: spans?.length === 1 ? spans[0].title : null,
+                  visible: !!cell?.getBoundingClientRect().width};
+              })''')
+            resource_keys = [cost['resource'] for cost in costs]
+            check(f'{case}/{spec["id"]}: resource columns match R keys',
+                  len(resource_keys) == len(set(resource_keys)) == len(oracle['resources'])
+                  and set(resource_keys) == set(oracle['resources']) and all(cost['visible'] for cost in costs),
+                  dict(shown=resource_keys, expected=oracle['resources']))
+            for cost in costs:
+                resource = cost['resource']
+                if resource not in oracle['resources']:
+                    continue  # The complete key-set check above records the unexpected column.
+                matched, evidence = resource_measurement(resource, measurements.get(resource),
+                    cost['raw'], cost['tooltip'], cost['shown'])
+                check(f'{case}/{spec["id"]}/{resource}: raw, exact and displayed cost measurements match R',
+                      matched, None if matched else evidence)
             check(f'{case}/{spec["id"]}: visible fitted settings',
                   row.locator('.model-settings').inner_text() == spec['summary'])
             link = row.locator('[data-open-spec]')
