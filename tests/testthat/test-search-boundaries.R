@@ -78,6 +78,9 @@ test_that("OOF retention cannot change adaptive AUC fitting or score aggregation
 })
 
 test_that("screening scores restore rare-class prevalence after sampling", {
+  local_mocked_bindings(
+    learner_is_available = function(definition) TRUE, .package = "AutoXplainR"
+  )
   data <- data.frame(x = seq_len(1000L), y = factor(rep("common", 1000L), c("common", "rare")))
   data$y[c(1L, 251L, 501L, 751L)] <- "rare"
   rownames(data) <- paste0("rare-source-", seq_len(nrow(data)))
@@ -316,6 +319,9 @@ test_that("discarding OOF predictions preserves actual omitted source rows and s
 })
 
 test_that("final rounds include skipped folds and round an even median upward", {
+  local_mocked_bindings(
+    learner_is_available = function(definition) TRUE, .package = "AutoXplainR"
+  )
   plan <- local_tuning_plan(1L, 90L, 2L, "regression", 1L, seed = 81L, learners = "boosting")
   scores <- data.frame(
     configuration_id = rep(plan$configuration_id, 3L), fold = 1:3, score = c(.9, 1.1, 1.2)

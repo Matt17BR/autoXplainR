@@ -1,4 +1,7 @@
 test_that("allocated adaptive search includes matched depth anchors within the existing budget", {
+  local_mocked_bindings(
+    learner_is_available = function(definition) TRUE, .package = "AutoXplainR"
+  )
   cases <- list(
     list(
       learners = c("forest", "boosting"), n = 50000L, p = 54L,
