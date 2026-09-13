@@ -8,10 +8,12 @@ This is a preparation note, not a CRAN submission or acceptance record.
 CRAN submission is not part of this GitHub release preparation.
 
 The 0.8.0 release gates and verification of its published archive and public
-site remain pending. Completed full-data Covertype and Bank calls and current
-platform/native-engine/H2O checks are recorded in `validation/release-0.8.0.md`,
-alongside pending YearPrediction, report and gallery checks. Those results do
-not establish a verified release archive or public site. Comparison protocols,
+site remain pending. Completed full-data Covertype, Bank and YearPrediction
+calls and current platform/native-engine/H2O checks are recorded in
+`validation/release-0.8.0.md`. Covertype's summary-report checks passed; Bank's
+effect-row oracle mismatch remains unresolved, and YearPrediction's report
+checks, all bounded rows exports and gallery checks remain pending. These
+results do not establish a verified release archive or public site. Comparison protocols,
 development runs and machine-readable results are under
 `validation/competitive-tabular/`.
 

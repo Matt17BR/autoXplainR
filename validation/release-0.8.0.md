@@ -1,10 +1,12 @@
 # AutoXplainR 0.8.0 validation record
 
 Status: candidate under review. No 0.8.0 tag or release has been published.
-The repaired candidate has completed Covertype and Bank, including the full
-public call, cold replay and independent prediction checks. YearPrediction is
-still running. On commit `c9a3fb0`, platform, native-engine, H2O, statistical,
-coverage and lint checks passed. The browser workflow stopped at the stale
+The repaired candidate has completed Covertype, Bank and YearPrediction, including
+the full public calls, cold replays and independent prediction checks. Covertype
+has also passed its independent summary-report checks. Bank's report oracle has
+an unresolved effect-row identity mismatch; YearPrediction's report checks and
+all bounded rows exports remain pending. On commit `c9a3fb0`, platform,
+native-engine, H2O, statistical, coverage and lint checks passed. The browser workflow stopped at the stale
 gallery guard after a diagnostic change; regeneration and browser verification
 remain required. This is not a completed release validation.
 
@@ -40,18 +42,35 @@ bounded, calibrated comparisons, not exhaustive optimization.
 | Covertype | 464,810 / 116,202 | 0.077365 | 0.083841 | 0.163064 | 0.141437 |
 | Bank | 32,951 / 8,237 | 0.272968 | 0.273094 | 0.273550 | 0.278254 |
 
-Lower log loss is better. Both primary models and forests pass the thresholds
-fixed in the protocol. Covertype's 256-tree forest is nevertheless 15.29% worse
-than its 500-tree native reference on log loss, close to the permitted limit
+| Dataset | Training / evaluation rows | AutoXplainR XGBoost RMSE | Native XGBoost RMSE | AutoXplainR forest RMSE | Native forest RMSE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| YearPrediction | 463,715 / 51,630 | 8.890530 | 8.917096 | 9.227795 | 9.232230 |
+
+Lower log loss and RMSE are better. All three primary models and forests pass
+the thresholds fixed in the protocol. Covertype's 256-tree forest is nevertheless
+15.29% worse than its 500-tree native reference on log loss, close to the permitted limit
 of 0.164652. That is a remaining quality and runtime tradeoff, not parity.
 Its XGBoost model improves log loss by 7.72%, but every training fold reaches
 the 2,000-round cap. This is a bounded search, not evidence that further
 training would be unhelpful.
 
+YearPrediction's primary RMSE is 0.30% below its native XGBoost reference; its
+256-tree forest is 0.05% below the native 500-tree reference. These small point
+differences do not establish statistical superiority. The forest reference is
+a separately declared fixed configuration chosen from earlier training
+calibration, not a completed original two-setting forest search; that original
+interruption remains recorded. Native XGBoost uses the original two-setting
+calibration and full-row refit. The package selects 1,996 boosting rounds from
+five training folds; four reach the 2,000-round calibration cap. Forest CV uses
+128 trees before the 256-tree final refit, so its CV score does not directly
+measure the final ensemble. There is no completed full-data 0.7.0 comparison
+for YearPrediction.
+
 | Dataset | Actual native threads | Complete public process | Observed peak RSS | Summary HTML |
 | --- | ---: | ---: | ---: | ---: |
 | Covertype | 4 | 80 min 7 s | 5.67 GiB | 12.04 MB |
 | Bank | 1 | 5 min 23 s | 0.64 GiB | 2.08 MB |
+| YearPrediction | 4 | 78 min 16 s | 7.33 GiB | 5.86 MB |
 
 These shared-host measurements include fitting, explanations, rendering and
 saving. They exclude the separately measured cold replay and verification.
@@ -59,6 +78,19 @@ Bank's automatic policy actually resolved to one native thread; its comparisons
 use the matching one-thread references. All four saved models on each dataset
 reproduced every evaluation prediction exactly. Independently recomputed scores
 also agree for all three fully cross-validated configurations on each dataset.
+YearPrediction's 206,520 replayed scalar predictions cover all 51,630 evaluation
+rows and four retained models. Full training rows are checked against native
+row counts where available; XGBoost retains input-construction metadata instead
+of a native row count. Its separate cold replay took 22.22 seconds and
+verification 110.89 seconds, each under its own 1,200-second limit and 24-GiB
+address-space ceiling.
+
+Peak RSS in the table comes from the original `run.py` process record.
+YearPrediction recorded 7,681,212 KiB there; the outer controller separately
+sampled 7,683,624 KiB, while GNU time reported 7,680,972 KiB. An audit-only
+assertion incorrectly required those independent samples to match exactly.
+That failed assertion is preserved; the corrected audit retains each scope
+without changing the original resource gate or rerunning the workflow.
 
 Bank illustrates why accuracy alone is insufficient. Positive outcomes make up
 11.27% of evaluation records. At the default 0.5 cutoff, the primary model has
@@ -67,11 +99,17 @@ the cutoff to 0.2 exposes the tradeoff: 57.11% recall and 45.26% precision.
 This interactive evaluation is not a claim that 0.2 is a validated deployment
 threshold.
 
-Direct walkthroughs of both original reports covered model controls, search,
+Direct walkthroughs of all three original reports covered model controls, search,
 costs, data relationships, comparative explanations and prediction diagnostics
-before consulting independent numerical answers. Independent rendered-value,
-offline and responsive checks and actual bounded rows exports remain pending.
-These are implementer walkthroughs, not participant research.
+before consulting the corresponding independent numerical answers. Covertype's
+summary-report oracle reproduced all model and complete CV scores, and all 12
+offline browser groups passed, including fitted controls and mobile behavior.
+Bank's oracle stopped on an unresolved effect reference-row identity mismatch;
+its browser and report-timing checks did not run. YearPrediction's independent
+report checks remain pending. All three still require separately timed bounded
+rows exports and checks of actual records and poor predictions. Summary reports
+cannot establish those individual-record tasks. These are implementer
+walkthroughs, not participant research.
 
 The Bank walkthrough found a real persistence defect: a warning that 551
 supplied evaluation records matched training values appeared in R but was lost
@@ -332,16 +370,20 @@ The v14 archive check completed with no errors or warnings and one note for
 new-submission status and the same two pre-merge links. It checked examples,
 vignette scripts and manuals; tests were run separately. Its archive SHA-256 is
 `e5d62c690fe36b54ac74eb3a14dfc8b30797204b75b17d67c9f9843b819702d1`.
-Covertype and Bank have since completed on this candidate, as recorded above;
-YearPrediction remains in progress. The superseded v13 follow-up plan was
-checked but never run. A final release archive still requires its own checks.
+All three full public calls, cold replays and prediction checks have since
+completed on this candidate, as recorded above. Report gates remain open.
+The superseded v13 follow-up plan was checked but never run. A final release
+archive still requires its own checks.
 
 ## Remaining gates
 
-- Complete YearPrediction's public call, cold replay and independent verification.
-  Covertype and Bank have passed those stages; preserve their remaining tradeoffs.
-- Finish independent report checks and bounded rows exports for all three actual
-  saved results, including visible records, predictions and offline behavior.
+- Resolve Bank's effect reference-row oracle mismatch and complete its pending
+  report checks; preserve the failed attempt. Finish YearPrediction's independent
+  report checks. Covertype's summary oracle and browser checks have passed;
+  visually inspect the exact retained screenshots and PDF from those checks.
+- Complete bounded rows exports for all three actual saved results, including
+  source-record values, visible predictions, poor-prediction controls and offline
+  behavior. Preserve the completed public-call quality and runtime tradeoffs.
 - Render and inspect the retained-overlap diagnostic on the final source, then
   regenerate and visually review the public gallery and pass browser CI.
 - Require the integrated source and publication guard tests in final CI.

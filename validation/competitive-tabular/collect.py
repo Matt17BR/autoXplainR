@@ -189,10 +189,11 @@ sources = json.loads((cache / "raw/sources.json").read_text())
 partitions = json.loads((cache / "partitions.json").read_text())
 (destination / "partitions.json").write_text(json.dumps(partitions, indent=2) + "\n")
 table = ["# Development measurements", "",
-         "Generated from the frozen process records by `collect.py`. These are development",
-         "comparisons, not locked acceptance results or leaderboard claims. The full",
-         "training sets, report workflow and large saved-model usability still require",
-         "their separate acceptance checks. Raw predictions and models stay in the cache.", "",
+         "Generated from the frozen process records by `collect.py`. These historical",
+         "development comparisons are not full-data acceptance or leaderboard claims.",
+         "The [0.8.0 validation record](../release-0.8.0.md) tracks the later complete public",
+         "calls and remaining report and release checks. Raw predictions and models stay",
+         "in the cache.", "",
          "Times include the declared workflow and saving its result. Only the",
          "`public-tabular` request includes default explanations and HTML generation;",
          "the paired and tabular comparisons disable them. Jobs shared the host, so times are",

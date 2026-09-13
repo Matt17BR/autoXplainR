@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-13T20:53:27.780459+00:00",
-  "status": "two_public_calls_verified_yearprediction_pending",
+  "recorded_at_utc": "2026-09-13T21:57:05.770410+00:00",
+  "status": "three_public_calls_verified_report_checks_pending",
   "candidate": "candidate-v14",
   "source_inventory_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
   "acceptance_freeze_sha256": "19224e05a92409af1f71eea9df53ceadfc1a2c8475fef5834a756d66978294fe",
@@ -175,7 +175,12 @@
         "predictions": "cfa625a83b799c0d8bd51ae76abd332c0ee35649ea9d792030726db3451161c2"
       },
       "metadata_audit_sha256": "6303e8b3881470821722fc3bef98dcc16a93c4c9afb244321ae13d957da4d48a",
-      "report_checks": "Manual aggregate workflow inspected; independent rendered-value/offline checks and bounded rows export remain pending."
+      "report_checks": "Independent summary-report numerical oracle, all 12 offline browser groups and original report timing extraction passed. Individual-record inspection and bounded rows export remain pending.",
+      "report_check_evidence_sha256": {
+        "oracle": "96f501dc9ab3db2984532b94ee402b52e2f5cb0321c4ef48c5a78e480d2e5c3e",
+        "browser": "d55e7b6cdf0357758c7c7f223e0b68c0a93985a6b718d305d40318e4a73b89c0",
+        "timing": "355a20486e974b7e29d79e030ee229bf0eb24adef6eace7ea121e94db121e702"
+      }
     },
     "bank": {
       "status": "public_call_replay_and_verification_passed",
@@ -332,16 +337,200 @@
         "predictions": "b59d1992df7095e15d95cf036b71e5bbf03928c44f495b6d79757f29ce7dbe2b"
       },
       "metadata_audit_sha256": "44a24553fdf8b0e7cc742efb2061b3c5770ec6083f9f4d850a3f976531f1f9d4",
-      "report_checks": "Manual aggregate workflow inspected; independent rendered-value/offline checks and bounded rows export remain pending.",
+      "report_checks": "Independent summary-report oracle failed with Effect reference-row identity mismatch. Cause unresolved; browser and timing extraction did not run. Bounded rows export remains pending.",
       "overlap_warning": {
         "matching_supplied_evaluation_records": 551,
         "meaning": "Values match before preprocessing; exact matches alone do not prove dependence. The original warning was console-only and absent from the v14 saved result and HTML. A later diagnostic-only source repair preserves it prospectively."
-      }
+      },
+      "report_check_failure_sha256": "f41cece168c59bf4be78625a0f3f15550d3f93b7404e62ac2a667022e78d5f99"
     },
     "yearprediction": {
-      "status": "public_process_running",
-      "scores_reviewed": false,
-      "note": "No outcome or completed-result claim. Publish results only after completed stages and the first manual report review."
+      "status": "public_call_replay_and_verification_passed",
+      "training_rows": 463715,
+      "evaluation_rows": 51630,
+      "resolved_public_defaults": {
+        "seed": 123,
+        "nfolds": 5,
+        "max_models": 18,
+        "threads": 4,
+        "threads_requested": "auto",
+        "fold_source": "automatic",
+        "task": "regression",
+        "explanations": {
+          "top_features": 8,
+          "n_repeats": 20,
+          "max_models": 5,
+          "explanation_rows": 5000
+        }
+      },
+      "metrics_by_model": {
+        "main_model": {
+          "rmse": 8.890530283287786,
+          "mae": 6.190916725112882,
+          "r_squared": 0.32881386116276445
+        },
+        "forest_model": {
+          "rmse": 9.227795030275855,
+          "mae": 6.554024742549736,
+          "r_squared": 0.2769247000824534
+        },
+        "regularized_model": {
+          "rmse": 9.51050554859387,
+          "mae": 6.80039961976805,
+          "r_squared": 0.23194051931291226
+        },
+        "simple_baseline": {
+          "rmse": 10.852463905136721,
+          "mae": 8.113069891987791,
+          "r_squared": -0.00010212000903231377
+        }
+      },
+      "quality": {
+        "primary_model": "main_model",
+        "primary_loss": 8.890530283287786,
+        "primary_limit": 9.362950651598988,
+        "primary_pass": true,
+        "forest_loss": {
+          "forest_model": 9.227795030275855
+        },
+        "forest_limit": 10.155453003043828,
+        "forest_pass": true
+      },
+      "native_references": {
+        "native-score-4t-v1/ranger": {
+          "variant": "ranger",
+          "metrics": {
+            "rmse": 9.232230002767116,
+            "mae": 6.593985880947768,
+            "r_squared": 0.2762294983210988
+          },
+          "source_cohort": "native-score-4t-v1",
+          "fit_cohort": "native-fixed500-full-fit-4t-v1",
+          "fit_and_all_scoring_seconds": 5285.828778921083
+        },
+        "native-score-4t-v1/xgboost": {
+          "variant": "xgboost",
+          "metrics": {
+            "rmse": 8.917095858665702,
+            "mae": 6.2030956917762206,
+            "r_squared": 0.32479675875066516
+          },
+          "source_cohort": "native-score-4t-v1",
+          "fit_cohort": "native-xgboost-full-fit-4t-v1",
+          "fit_and_all_scoring_seconds": 1171.2702958010004
+        }
+      },
+      "native_reference_scope": "Forest comparator: separate fixed 500-tree full-row cohort, with configuration chosen from earlier training calibration. Native XGBoost comparator: original two-setting training-calibration/full-row refit protocol. Both retain their original v9 score/replay/freeze lineage; interrupted original forest attempts receive no success credit. Both use four threads. Native costs include the original fit and all scoring attempts, excluding separate replay and verification.",
+      "complete_process_seconds": 4695.800965410999,
+      "observed_peak_rss_kib": 7681212,
+      "process_wall_limit_seconds": 7200,
+      "address_space_limit_bytes": 25769803776,
+      "search_elapsed_seconds": 3071.507,
+      "separate_stages": {
+        "replay": {
+          "elapsed_seconds": 22.22,
+          "observed_peak_rss_kib": 2995792
+        },
+        "verification": {
+          "elapsed_seconds": 110.89,
+          "observed_peak_rss_kib": 6051164
+        }
+      },
+      "replay_max_absolute_difference": {
+        "main_model": 0,
+        "forest_model": 0,
+        "regularized_model": 0,
+        "simple_baseline": 0
+      },
+      "scalar_predictions_replayed": 206520,
+      "complete_cv_configurations": 3,
+      "cv_score_differences": {
+        "boosting_06": 0,
+        "forest_02": 0,
+        "regularized_03": 0
+      },
+      "full_training_evidence": {
+        "main_model": {
+          "training_rows": 463715,
+          "scope": "Retained input-encoding row metadata; XGBoost stores no native training-row count."
+        },
+        "forest_model": {
+          "training_rows": 463715,
+          "scope": "Native ranger num.samples."
+        },
+        "regularized_model": {
+          "training_rows": 463715,
+          "scope": "Native glmnet nobs."
+        },
+        "simple_baseline": {
+          "training_rows": 463715,
+          "scope": "Native linear/generalized-linear nobs."
+        }
+      },
+      "forest_tree_counts": {
+        "screening_num_trees": 128,
+        "validation_num_trees": 128,
+        "final_num_trees": 256
+      },
+      "forest_validation_scope": "Every requested CV fold is retained; this tree budget does not sample or remove training rows. CV scores describe 128-tree fits and do not measure the final 256-tree model exactly. Final refits retain native OOB diagnostics. The held-out evaluation measures the final model; it does not select this budget. Use grid search or an explicit grid to validate the full requested tree count.",
+      "boosting_round_selection": {
+        "status": "fold_aggregate",
+        "selected_rounds": 1996,
+        "maximum_rounds": 2000,
+        "fold_rounds": [
+          1993,
+          2000,
+          1996,
+          1331,
+          1997
+        ],
+        "calibrated_folds": 5,
+        "scope": "The final fit uses every outer-training row at the rounded-up median of successful folds' round counts. 5 of 5 folds calibrated rounds on separate inner training splits; any skipped fold kept its requested round cap. The final evaluation outcomes did not choose this value.",
+        "fold_attempted_rounds": [
+          2000,
+          2000,
+          2000,
+          1361,
+          2000
+        ],
+        "fold_stop_reasons": [
+          "round_limit",
+          "round_limit",
+          "round_limit",
+          "patience_reached",
+          "round_limit"
+        ]
+      },
+      "published_0_7_comparison": {
+        "status": "no_declared_completed_full_comparison",
+        "scope": "Development-only published-release results and timeouts cannot supply a full acceptance comparison."
+      },
+      "report": {
+        "bytes": 5862080,
+        "sha256": "0e053b78e7a29a70eec285e55fea2aef0a6c00659984f996ee3668fa96f0ae75"
+      },
+      "original_artifact_sha256": {
+        "process": "b7fa45da966120d39ee4d3395e87887f6f9f2e5b912077df486b6d07cc214fd4",
+        "summary": "246ec24188b00e4277a4fbdf48e775d3c534576b519949200e036ddb56046e16",
+        "acceptance": "a99176fbb6e3f3676dea5fb1598801fd5db12a99b6ad4fbd5e3f51079f0f9fd3",
+        "replay": "77f89a2f260763e9a07963c60a3b10eb35bed6cb305b1851ab000c8fa8e28db2",
+        "result": "82de541887f871ece0ca3300e5dad8eef7bd0896d8fed3f458692af5c91195a4",
+        "predictions": "2eaa89923f6453c9a9943f36a36519c43aebef9ece1e640d1c0939dd3acaf16d"
+      },
+      "metadata_audit_sha256": "46c7ebdb9fb5dbfdd5c9d374294c69d60c9676570dc8e4edcb6d5d7e04f28c10",
+      "report_manifest_sha256": "2cc6d1b77ba5c2dca1ea4193a95932914feb2a07b0a91c32bb326a7a820cc2e9",
+      "report_checks": "Manual aggregate workflow inspected; independent numerical report, rendered-value/offline checks and bounded rows export remain pending.",
+      "resource_accounting": {
+        "scope": "Run.py gate uses max(inner GNU-time peak, its sampled child high-water). Outer controller samples a separate scope independently. Both measurements and their different exact values are retained; equality between them is not assumed.",
+        "controller_gnu_peak_rss_kib": 7680972,
+        "controller_sampled_high_water_rss_kib": 7683624,
+        "separate_stage_scope": "Replay and verification elapsed seconds are GNU-time process durations; RSS is the larger of GNU-time peak and the controller sample. Each stage has a separate 1200-second, 24-GiB address-space limit. These costs are excluded from the complete public-process budget.",
+        "preserved_supplemental_audit_failure": {
+          "sha256": "7eacd3ce8c7d674b77c62648339dca2f332d46a50dc4de80adc05fd9077427a8",
+          "scope": "An audit-only exact-equality assertion between independently sampled inner and outer RSS failed. The correction retains both values and their scopes. The original public run, acceptance guards and single successful adapter invocation were unchanged."
+        }
+      }
     }
-  }
+  },
+  "report_check_handoff_sha256": "a133e36038c8ed3d385c348a975a68f35e14d7aa76ea075da00575478de16849"
 }
