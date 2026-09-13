@@ -2,12 +2,12 @@
 
 Status: candidate under review. No 0.8.0 tag or release has been published.
 The repaired candidate has completed Covertype, Bank and YearPrediction, including
-the full public calls, cold replays and independent prediction checks. Covertype
-has also passed its independent summary-report checks. Bank's report oracle has
-an unresolved effect-row identity mismatch; YearPrediction's report checks and
-all bounded rows exports remain pending. On commit `c9a3fb0`, platform,
-native-engine, H2O, statistical, coverage and lint checks passed. The browser workflow stopped at the stale
-gallery guard after a diagnostic change; regeneration and browser verification
+the full public calls, cold replays, independent prediction checks and
+summary-report checks. Bank's earlier effect-row mismatch was a checker defect,
+retained with its correction below. All bounded rows exports remain pending.
+On commit `c9a3fb0`, platform, native-engine, H2O, statistical, coverage and lint
+checks passed. The browser workflow stopped at the stale gallery guard after
+a diagnostic change; regeneration and browser verification
 remain required. This is not a completed release validation.
 
 ## What changed
@@ -104,12 +104,27 @@ costs, data relationships, comparative explanations and prediction diagnostics
 before consulting the corresponding independent numerical answers. Covertype's
 summary-report oracle reproduced all model and complete CV scores, and all 12
 offline browser groups passed, including fitted controls and mobile behavior.
-Bank's oracle stopped on an unresolved effect reference-row identity mismatch;
-its browser and report-timing checks did not run. YearPrediction's independent
-report checks remain pending. All three still require separately timed bounded
-rows exports and checks of actual records and poor predictions. Summary reports
+Bank's first oracle stopped on an effect reference-row identity mismatch. The
+checker had conflated the outer support sample with the rows used for an
+individual ALE or PDP curve. Version 5 checks those distinct row counts and
+valid identities, including ALE's nonmissing-feature filter, and passed all
+12 synthetic controls. It does not independently reconstruct the seeded PDP
+draw. Bank's unchanged report then passed the oracle and all 12 browser groups.
+YearPrediction's oracle and all 12 browser groups also passed. For both cases,
+all four model scores and complete CV scores agreed exactly. Bank's original
+report preparation took 265.707 seconds and HTML generation 10.029 seconds;
+YearPrediction took 302.638 and 54.242 seconds respectively. These stages are
+already included in each public-process total. All three still require separately
+timed bounded rows exports and checks of actual records and poor predictions.
+Summary reports
 cannot establish those individual-record tasks. These are implementer
-walkthroughs, not participant research.
+walkthroughs, not participant research. All twelve exact desktop/mobile
+screenshots and all three complete selected-feature PDFs were also visually
+inspected without a material visual blocker in those views. The first Covertype
+rows-export attempt stopped at a checker prerequisite that looked for the
+prediction schema at the wrong object level. A separately versioned correction
+addresses that prerequisite; the failed attempt remains preserved and supplies
+no completed rows-export evidence.
 
 The Bank walkthrough found a real persistence defect: a warning that 551
 supplied evaluation records matched training values appeared in R but was lost
@@ -377,10 +392,6 @@ archive still requires its own checks.
 
 ## Remaining gates
 
-- Resolve Bank's effect reference-row oracle mismatch and complete its pending
-  report checks; preserve the failed attempt. Finish YearPrediction's independent
-  report checks. Covertype's summary oracle and browser checks have passed;
-  visually inspect the exact retained screenshots and PDF from those checks.
 - Complete bounded rows exports for all three actual saved results, including
   source-record values, visible predictions, poor-prediction controls and offline
   behavior. Preserve the completed public-call quality and runtime tradeoffs.

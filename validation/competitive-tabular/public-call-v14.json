@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-13T21:57:05.770410+00:00",
+  "recorded_at_utc": "2026-09-13T22:01:08.350380+00:00",
   "status": "three_public_calls_verified_report_checks_pending",
   "candidate": "candidate-v14",
   "source_inventory_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
@@ -180,6 +180,19 @@
         "oracle": "96f501dc9ab3db2984532b94ee402b52e2f5cb0321c4ef48c5a78e480d2e5c3e",
         "browser": "d55e7b6cdf0357758c7c7f223e0b68c0a93985a6b718d305d40318e4a73b89c0",
         "timing": "355a20486e974b7e29d79e030ee229bf0eb24adef6eace7ea121e94db121e702"
+      },
+      "capture_visual_review": {
+        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "screenshot_sha256": {
+          "evaluation-320.png": "17796b2427eea10fe1a2905b03c95fc5be3a66d73618018f785a5654b84c487e",
+          "overview-1440.png": "35b8a619b26050e2f57786419f88304da90c0dfefa460d29151930f7c304d483",
+          "patterns-320.png": "be755d41e176d0b8dca8d8d1425d9bc2ddb85deb476e0a1122195bc71648a306",
+          "selection-1440.png": "ae1e5f0a9b2a47dd02b459db5f002b52e2f31b6d1631c3ba8a05a9e60722f28d"
+        },
+        "pdf_sha256": "b1b8b1d80ade3c3aa7e7e6f97fb8cf0cc4ffe1eb15a4706716ed1ccfc881a236",
+        "pdf_render_sha256": "8a9a3dce71b5fc09cda078fc6998b895babdf6a0303e28f2f0fd7a5710b5cb33",
+        "review_sha256": "0b37a8c85ba38d3152911dfd319ae6b90b258e7be04d0c36683d027ea60b7fd4",
+        "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
       }
     },
     "bank": {
@@ -337,12 +350,38 @@
         "predictions": "b59d1992df7095e15d95cf036b71e5bbf03928c44f495b6d79757f29ce7dbe2b"
       },
       "metadata_audit_sha256": "44a24553fdf8b0e7cc742efb2061b3c5770ec6083f9f4d850a3f976531f1f9d4",
-      "report_checks": "Independent summary-report oracle failed with Effect reference-row identity mismatch. Cause unresolved; browser and timing extraction did not run. Bounded rows export remains pending.",
+      "report_checks": "Independent summary-report oracle v5, all 12 offline browser groups and original report timing extraction passed. Bounded rows export remains pending.",
       "overlap_warning": {
         "matching_supplied_evaluation_records": 551,
         "meaning": "Values match before preprocessing; exact matches alone do not prove dependence. The original warning was console-only and absent from the v14 saved result and HTML. A later diagnostic-only source repair preserves it prospectively."
       },
-      "report_check_failure_sha256": "f41cece168c59bf4be78625a0f3f15550d3f93b7404e62ac2a667022e78d5f99"
+      "report_check_failure_sha256": "f41cece168c59bf4be78625a0f3f15550d3f93b7404e62ac2a667022e78d5f99",
+      "report_check_evidence_sha256": {
+        "oracle": "01de629d1b9a637691811e23880f624fb4e58540c21139542c2689c28ef74f2a",
+        "browser": "3d5eb3edb4bc0d291f4a558098d7c6271d9e87278a289cdd7b8ca9a089506991",
+        "timing": "72c25d5384f495a0dd9ccb1f8684941ac8fd58c39f769cf623bf8debd9949903"
+      },
+      "original_report_stage_seconds": {
+        "prepare_model_report_data_seconds": 265.707,
+        "render_model_report_seconds": 10.029
+      },
+      "original_report_stage_scope": "Existing public-call trace at millisecond precision, already included in complete_process_seconds. Preparation includes explanation/data work; rendering includes HTML generation/writing. These are not additional costs or re-export timings.",
+      "report_check_correction": {
+        "scope": "V4 incorrectly required PDP curve rows to equal outer support rows. V5 uses method-aware counts/identity validity, exact ALE nonmissing filtering, separate hashes and the public 1000-row PDP curve cap. It does not independently reconstruct the seeded PDP draw. Other oracle logic is unchanged.",
+        "focused_controls_sha256": "857c75cceb52b179fd55f878eb8385497272935ee9d6994144ffe523a95abb89"
+      },
+      "capture_visual_review": {
+        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "screenshot_sha256": {
+          "evaluation-320.png": "9c1ff7ac7b46e43c8cb2406a0aa8c5e99d05ce2bbc8a6ec4870e170549265dde",
+          "overview-1440.png": "9b73d37781ec4cbd9bb95627c73dbd5104ab0402a121b49f2d006deebfec795f",
+          "patterns-320.png": "b2a5e6b664782a529821eba481e79bf0a63b6cb8fa6f3de408f66063b2daf5a0",
+          "selection-1440.png": "401b93f2fc34791b9e8a06329aff84755d87c87765cc425f94b0a02c12c7356a"
+        },
+        "pdf_sha256": "03a2d5d18b551c909907ac57aaf4388b3fa638ce74a26f83e701eea72a189abe",
+        "pdf_render_sha256": "30cd6cc722752c840adb83c7f071331d55f002ecb23b7eaa7405408f5a490b16",
+        "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
+      }
     },
     "yearprediction": {
       "status": "public_call_replay_and_verification_passed",
@@ -519,7 +558,7 @@
       },
       "metadata_audit_sha256": "46c7ebdb9fb5dbfdd5c9d374294c69d60c9676570dc8e4edcb6d5d7e04f28c10",
       "report_manifest_sha256": "2cc6d1b77ba5c2dca1ea4193a95932914feb2a07b0a91c32bb326a7a820cc2e9",
-      "report_checks": "Manual aggregate workflow inspected; independent numerical report, rendered-value/offline checks and bounded rows export remain pending.",
+      "report_checks": "Independent summary-report oracle v5, all 12 offline browser groups and original report timing extraction passed. Bounded rows export remains pending.",
       "resource_accounting": {
         "scope": "Run.py gate uses max(inner GNU-time peak, its sampled child high-water). Outer controller samples a separate scope independently. Both measurements and their different exact values are retained; equality between them is not assumed.",
         "controller_gnu_peak_rss_kib": 7680972,
@@ -529,8 +568,31 @@
           "sha256": "7eacd3ce8c7d674b77c62648339dca2f332d46a50dc4de80adc05fd9077427a8",
           "scope": "An audit-only exact-equality assertion between independently sampled inner and outer RSS failed. The correction retains both values and their scopes. The original public run, acceptance guards and single successful adapter invocation were unchanged."
         }
+      },
+      "report_check_evidence_sha256": {
+        "oracle": "e966d8c1d4f9210030b377c81765d1d3ed24e2790c5ab20c07598c85a6d52efa",
+        "browser": "50d24f61dcd103e7dcf4538b8c7ab7830c1ba0c247070ef40c53e9929c8138b5",
+        "timing": "724a0501f82f18aba8b4984703507552cf808d70212d94349b5412fd93eeeed1"
+      },
+      "original_report_stage_seconds": {
+        "prepare_model_report_data_seconds": 302.638,
+        "render_model_report_seconds": 54.242
+      },
+      "original_report_stage_scope": "Existing public-call trace at millisecond precision, already included in complete_process_seconds. Preparation includes explanation/data work; rendering includes HTML generation/writing. These are not additional costs or re-export timings.",
+      "capture_visual_review": {
+        "scope": "Root visually inspected the four exact desktop/mobile screenshots and complete selected-feature PDF without a material visual blocker. Implementer observations only; individual-record tasks remain pending.",
+        "screenshot_sha256": {
+          "evaluation-320.png": "d14031a8610ae0223fa7b392759a41edcac6d84dac3c9b0eca495643dc6800fa",
+          "overview-1440.png": "9580efcd8d03d0ef0e364a94fa8c55d2e2e2f0bf9479661868ec78b86fac6b96",
+          "patterns-320.png": "95c9cbb144570b77b50a9a86926afdbefb85eb6019b7ede2c0b84d79568a82ed",
+          "selection-1440.png": "a3df93c4929456b159268642520d01699514bc4135497c739d9bcdeee1986d88"
+        },
+        "pdf_sha256": "89cd2db761bc973cb28827abc67670f444d285c7d39ae1fa06957d8aa187cac6",
+        "pdf_render_sha256": "20199ad419cc164f50f90299c7bdbf275e8d4f51beb82a78c3f262c88e63534d",
+        "combined_review_sha256": "c0fee30b348e5228f3845af4ea61d6b349f0db24dea00e9ae479cf72255b9da2"
       }
     }
   },
-  "report_check_handoff_sha256": "a133e36038c8ed3d385c348a975a68f35e14d7aa76ea075da00575478de16849"
+  "report_check_handoff_sha256": "a133e36038c8ed3d385c348a975a68f35e14d7aa76ea075da00575478de16849",
+  "report_check_followup_handoff_sha256": "983f714127910185ee06a49f39ac81e47192f9dd9eba5a176d582d6cc11f45fd"
 }
