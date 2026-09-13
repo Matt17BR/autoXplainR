@@ -107,7 +107,8 @@ baseline, including a paired evaluation-sample interval when supported. Change
 the score or resource axis to inspect the tradeoff; points carry model names.
 The dashed **Pareto frontier** shows the best observed score available within
 each resource budget. Outlined points have no alternative that is at least as
-good on both displayed axes and better on one. The **CV choice** label records
+good on both displayed axes and better on one. If one model dominates all the
+others, the frontier is that single outlined point. The **CV choice** label records
 training selection; the best score on the held-out rows can belong to another
 model.
 
