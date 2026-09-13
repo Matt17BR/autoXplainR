@@ -40,12 +40,13 @@ against independent saved values for the exported rows.
 
 5. In Bank Marketing, find the positive class, its prevalence and its recall
    at the displayed threshold. A roughly 90% accuracy score must not obscure
-   the fact that many subscribers can still be missed. Identify the excluded
-   call-duration feature and the limits of random contact-row evaluation.
+   the fact that many subscribers can still be missed. Review the excluded
+   call-duration feature and the limits of random contact-row evaluation
+   using the study-context check below.
 6. In Covertype, compare recall for aspen with the overall accuracy. Find the
    confusion counts rather than inferring class performance from one headline
-   number. The report must preserve named class probabilities and the
-   same-area evaluation caveat.
+   number. The report must preserve named class probabilities. Review the
+   same-area evaluation caveat using the study-context check below.
 7. In regression, inspect the distribution of residuals, find a poor prediction
    and identify which data split it belongs to. Displayed row samples must be
    labelled as samples; scores must still describe every evaluation row.
@@ -64,6 +65,28 @@ against independent saved values for the exported rows.
     keyboard-accessible explanations, and confirm that charts and tables still
     contain meaningful data. A report requiring a running R session or missing
     local files fails its shareable-report promise.
+
+## Study context that must come from the author
+
+The minimal benchmark call supplies tables, a target, a portfolio, an evaluation
+role and a report path. It does not pass the preparation metadata. The report
+cannot infer which columns were removed before fitting or whether observations
+share customers, places or time periods. The original wording of tasks 5 and 6
+required dataset-specific context that this call did not receive.
+
+Record that missing context as **not supplied and not assessed in the default
+report**, rather than marking it satisfied by a generic warning or recognizing
+the dataset. Keep the source-attributed Bank and Covertype caveats with the
+benchmark results. Check them against the [study protocol](README.md#data-and-isolation)
+and preparation records. All class, probability, confusion and recall checks
+above still apply to the original report.
+
+For a separate export with author-supplied context, verify that those notes are
+visible, attributed to the study author and retained when the HTML is opened
+offline. Keep the original default HTML and timing record. Record the annotated
+export separately; it does not prove that the original one-call report contained
+those facts. Do not change evaluation roles, partitions or model scores to add
+a caveat about their interpretation.
 
 This is a reproducible product walkthrough, not a claim that a representative
 sample of people has been observed using the package. Record defects and fixes

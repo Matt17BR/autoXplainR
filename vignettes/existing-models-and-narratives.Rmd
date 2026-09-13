@@ -187,7 +187,7 @@ custom function on unobserved inputs. Changed models need a new evaluation via
 `evaluate_models()` rather than combining their predictions with saved scores.
 
 `generate_dashboard()` and `create_simple_dashboard()` were deprecated in 0.4.0
-and remain compatibility entry points in 0.6.0. Replace them with
+and remain available for compatibility. Replace them with
 `render_model_report(result, output_file)`. For a memo, pass
 `narrative = generate_natural_language_report(result)`. Each compatibility call
 emits one migration warning. Use `evaluate_models()` followed by
