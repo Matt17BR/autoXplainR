@@ -1,7 +1,31 @@
 on:
   push:
     branches: [main]
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - '.github/scripts/check-engine-support.R'
+      - '.github/workflows/native-model-engines.yaml'
+      - '.github/workflows/release.yaml'
   pull_request:
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - '.github/scripts/check-engine-support.R'
+      - '.github/workflows/native-model-engines.yaml'
+      - '.github/workflows/release.yaml'
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -14,6 +38,10 @@ name: native-model-engines
 
 permissions:
   contents: read
+
+concurrency:
+  group: native-model-engines-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   diverse-model-portfolio:

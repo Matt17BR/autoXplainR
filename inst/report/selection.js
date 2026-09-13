@@ -177,8 +177,8 @@
       if (!inspectCandidate(detail, true)) return;
       event.preventDefault();
       history.replaceState(null, "", "#" + detail.id);
-      detail.querySelector("summary").focus();
-      detail.scrollIntoView({block: "nearest"});
+      detail.querySelector("summary").focus({preventScroll: true});
+      detail.scrollIntoView({block: "nearest", behavior: "instant"});
     });
   });
   forEach(details, function (detail) {

@@ -154,7 +154,8 @@ with sync_playwright() as p:
                 link.focus(); page.keyboard.press('Enter'); settled(page)
                 detail = page.locator('.selection-candidate:not([hidden])')
                 check(f'keyboard graph row opens one exact detail {width} {ident}',
-                      detail.count() == 1 and ident in detail.locator(':scope > summary').inner_text()
+                      detail.count() == 1 and detail.evaluate('node=>node.open')
+                      and ident in detail.locator(':scope > summary').inner_text()
                       and detail.locator(':scope > summary').evaluate('node=>document.activeElement===node'))
                 values = detail.locator('.selection-settings').inner_text()
                 assert_requested_tuple(check, f'exact requested controls reach detail {width} {ident}',
@@ -171,11 +172,23 @@ with sync_playwright() as p:
                                        row.locator('td a').inner_text(), expected_settings[ident])
                 check(f'precision view preserves pooled score {width} {ident}',
                       actual=='n/a' if score is None else abs(float(actual)-score)<.00006)
-                row.locator('[data-selection-inspect]').click(); settled(page)
-                target = row.locator('[data-selection-inspect]').get_attribute('data-selection-inspect')
+                link = row.locator('[data-selection-inspect]')
+                target = link.get_attribute('data-selection-inspect')
+                # A real pointer press spans frames. Scrolling between down and
+                # up can send the click to the table body instead of this link.
+                link.click(delay=60); settled(page)
+                state = page.evaluate("""target=>({
+                  visible:[...document.querySelectorAll('.selection-candidate:not([hidden])')]
+                    .map(node=>({id:node.id,open:node.open})),
+                  expanded:[...document.querySelectorAll('[data-selection-inspect]')]
+                    .filter(node=>node.dataset.selectionInspect===target)
+                    .map(node=>node.getAttribute('aria-expanded')),
+                  focused:document.activeElement===document.getElementById(target)?.querySelector(':scope > summary')
+                })""", target)
                 check(f'precision link reaches same fold evidence as graph {width} {ident}',
-                      page.locator('.selection-candidate:not([hidden])').get_attribute('id')==target
-                      and figure.locator(f'[data-selection-inspect="{target}"]').evaluate_all('nodes=>nodes.every(node=>node.getAttribute("aria-expanded")==="true")'))
+                      state['visible']==[dict(id=target,open=True)] and state['focused']
+                      and len(state['expanded'])==2 and all(value=='true' for value in state['expanded']),
+                      dict(expected=target, **state))
             check(f'no page/table overflow {width} {family}', page.evaluate('()=>document.documentElement.scrollWidth<=innerWidth') and figure.locator('.selection-candidate-table').evaluate('x=>x.scrollWidth<=x.clientWidth+1'))
             precision.locator(':scope > summary').click(); settled(page)
             page.screenshot(path=str(args.output_dir/f'{family}-{width}.png'), full_page=True)

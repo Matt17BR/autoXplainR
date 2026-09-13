@@ -63,7 +63,15 @@ Rscript validation/check-tuning-mutation.R
 The normal report must pass; deliberately broken reports must fail for the
 intended reasons. These scripts never overwrite the original fixtures.
 
+Selection navigation is also checked with a 60 ms pointer press. This catches
+scrolling that moves a link between mouse-down and mouse-up. The check requires
+the intended fold details to be visible, open and focused, with both matching
+links marked expanded; failures include the actual state.
+
 The [GitHub workflow](../.github/workflows/report-browser.yaml) runs this check
-on pull requests and main and is a blocking dependency of release publication.
+on pull requests and main when report code, fixtures, browser checks or gallery
+assets change. Prose-only and benchmark-result updates do not run the browser
+suite. New commits cancel older browser runs on the same pull request. Manual
+runs remain available, and every release still requires the complete suite.
 The old `check-report-browser.py` and `results/browser-0.4.0.json` describe the
 historical scrolling report; their print contracts are not the current contract.

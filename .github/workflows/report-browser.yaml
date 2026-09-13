@@ -1,7 +1,39 @@
 on:
   push:
     branches: [main]
+    paths:
+      - 'R/**'
+      - 'inst/report/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - 'pkgdown/assets/**'
+      - 'man/figures/**'
+      - 'validation/*.R'
+      - 'validation/*.py'
+      - 'validation/gallery-manifest.json'
+      - 'validation/stress-reports/**/*.R'
+      - 'validation/stress-reports/**/*.py'
+      - 'validation/scalability/reports/**/*.R'
+      - 'validation/scalability/reports/**/*.py'
+      - '.github/workflows/report-browser.yaml'
+      - '.github/workflows/release.yaml'
   pull_request:
+    paths:
+      - 'R/**'
+      - 'inst/report/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - 'pkgdown/assets/**'
+      - 'man/figures/**'
+      - 'validation/*.R'
+      - 'validation/*.py'
+      - 'validation/gallery-manifest.json'
+      - 'validation/stress-reports/**/*.R'
+      - 'validation/stress-reports/**/*.py'
+      - 'validation/scalability/reports/**/*.R'
+      - 'validation/scalability/reports/**/*.py'
+      - '.github/workflows/report-browser.yaml'
+      - '.github/workflows/release.yaml'
   workflow_dispatch:
   workflow_call:
 
@@ -9,6 +41,10 @@ name: report-browser
 
 permissions:
   contents: read
+
+concurrency:
+  group: report-browser-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   generated-report:

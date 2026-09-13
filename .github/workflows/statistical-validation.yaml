@@ -2,10 +2,57 @@ name: statistical-validation
 on:
   push:
     branches: [main]
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - 'validation/check-tuning-mutation.R'
+      - 'validation/run-reference.R'
+      - 'validation/run-simulation.R'
+      - 'validation/competitive-tabular/download.py'
+      - 'validation/competitive-tabular/test-download-sources.py'
+      - 'validation/competitive-tabular/prepare.R'
+      - 'validation/competitive-tabular/common.R'
+      - 'validation/competitive-tabular/test-prepare-consumed-sources.R'
+      - 'validation/competitive-tabular/collect.py'
+      - 'validation/competitive-tabular/public_results_sanitizer.py'
+      - 'validation/competitive-tabular/test-public-results-sanitizer.py'
+      - 'validation/competitive-tabular/native-training-results.json'
+      - '.github/workflows/statistical-validation.yaml'
   pull_request:
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - 'validation/check-tuning-mutation.R'
+      - 'validation/run-reference.R'
+      - 'validation/run-simulation.R'
+      - 'validation/competitive-tabular/download.py'
+      - 'validation/competitive-tabular/test-download-sources.py'
+      - 'validation/competitive-tabular/prepare.R'
+      - 'validation/competitive-tabular/common.R'
+      - 'validation/competitive-tabular/test-prepare-consumed-sources.R'
+      - 'validation/competitive-tabular/collect.py'
+      - 'validation/competitive-tabular/public_results_sanitizer.py'
+      - 'validation/competitive-tabular/test-public-results-sanitizer.py'
+      - 'validation/competitive-tabular/native-training-results.json'
+      - '.github/workflows/statistical-validation.yaml'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: statistical-validation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   numerical-evidence:
     runs-on: ubuntu-latest

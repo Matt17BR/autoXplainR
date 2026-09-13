@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "recorded_at_utc": "2026-09-13T22:21:45.340911+00:00",
+  "recorded_at_utc": "2026-09-13T23:47:11.642498+00:00",
   "sources": {
     "DESCRIPTION": "8a3aeda95a4808739da81e7efee7f533223fa732b6d84b52452222a01bb88636",
     "R/AutoXplainR.R": "2693d4395d022ec5b6ca8a10fa0a9aa3a1d4225cc1a870516ca80f57a17eebf1",
@@ -82,7 +82,7 @@
     "inst/report/predictions.css": "4688a7b9b32af711e9062f9cb02626c0c71a7b092b01637768dee5382098e247",
     "inst/report/predictions.js": "e0b64ee8aeb34044251f681191306d258b8345f677fbfee0ab1862b7b4ff3773",
     "inst/report/selection.css": "6370195825d854acc1ef38b4d39a4d1d8ece1d37af94f2b803df07021e710718",
-    "inst/report/selection.js": "2dc9dc500634017de82fa924b584b5409c34b65c957b239613eb8b32183ee173",
+    "inst/report/selection.js": "bc017ab650dfbdcc32a44aeabc7ca1e05263b7d87cc222921b8695f33aaf894a",
     "validation/capture-screenshots.py": "334b66228ea58b089e4bef760c58f840acb99774d2fb27d5c64a73bb81849508",
     "validation/check-gallery.py": "a7e3669d9b53ce6d2e2ad9b978859ae956b2992a16a92acd171ca277949864f1",
     "validation/model-settings-oracle.R": "aa155333f933f7816091f26925ec82965a2a4166bf82611a92a2bf97318a75c7",
@@ -98,8 +98,8 @@
     "man/figures/model-patterns.png": "f72318870d8fa7a8f1b2b8993abdc9e15988fed98980b88c69469af6a6ff7385",
     "man/figures/model-predictions.png": "be957869fa5fcdd4ec3de3cc7338ad38b57e0fe9180eea8ef58ba6fe590c5f8b",
     "man/figures/model-selection.png": "1d989df0a6982bbd156f49cf104a699aea932e68025ed39d3a1698f3f9d77c35",
-    "pkgdown/assets/binary-report.html": "bf9f818ee04004ea7de414104bab4a71dd7ea74186455923ff449d123cadd4b1",
-    "pkgdown/assets/model-report.html": "6713d49eee9f531939d9410a46564be21de15549b1c7d897a264bd37b86400d5",
-    "pkgdown/assets/multiclass-report.html": "77457a4a64fee7dc6fdbe3bf1b52cb7b22d3babbfca87f4034715fed76a55b4b"
+    "pkgdown/assets/binary-report.html": "1338a42bfe27d9012aa57327994cf12ff7389086287673786d7117d95cc34e22",
+    "pkgdown/assets/model-report.html": "ef5a837d34e3fdeb93eee4fb1a26c8cd3ba68df96d010c07410a1af913b5f557",
+    "pkgdown/assets/multiclass-report.html": "3ec121105161dc74ccf69d3b481d5c58d6146ce7fdf294834db21e15e38d3bac"
   }
 }

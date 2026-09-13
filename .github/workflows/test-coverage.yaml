@@ -1,13 +1,51 @@
 on:
   push:
     branches: [main]
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'man/*.Rd'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - '.Rinstignore'
+      - '.covrignore'
+      - 'configure'
+      - 'configure.win'
+      - 'cleanup'
+      - 'cleanup.win'
+      - '.github/workflows/test-coverage.yaml'
   pull_request:
+    paths:
+      - 'R/**'
+      - 'src/**'
+      - 'inst/**'
+      - 'data/**'
+      - 'tests/**'
+      - 'man/*.Rd'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.Rprofile'
+      - '.Rinstignore'
+      - '.covrignore'
+      - 'configure'
+      - 'configure.win'
+      - 'cleanup'
+      - 'cleanup.win'
+      - '.github/workflows/test-coverage.yaml'
   workflow_dispatch:
 
 name: test-coverage
 
 permissions:
   contents: read
+
+concurrency:
+  group: test-coverage-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test-coverage:
