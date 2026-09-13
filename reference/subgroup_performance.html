@@ -13,7 +13,7 @@ collection or validation."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,8 +87,10 @@ preliminary comparison. Smaller groups remain visible and are flagged.</p></dd>
 
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
-<dd><p>Optional loss metric for this descriptive comparison: <code>rmse</code>
-or <code>mae</code> for regression; <code>log_loss</code> or <code>brier_score</code> for classification.
+<dd><p>Optional score for this descriptive comparison: <code>rmse</code>,
+<code>mae</code> or <code>rmsle</code> for regression; <code>log_loss</code> or <code>brier_score</code> for classification;
+also <code>roc_auc</code> for binary classification. RMSLE requires nonnegative values;
+AUC is unavailable in groups containing only one outcome class.
 <code>NULL</code> uses the recorded evaluation metric. This does not change the
 official leaderboard, selected model, or stored evaluation evidence.</p></dd>
 

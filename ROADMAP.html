@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,11 @@
 <p>A two-configuration, two-fold search on one million simulated training rows completed with explanations and a summary report in 81.055 seconds. Scores and 1,000 bootstrap draws used all 20,000 evaluation rows; explanations used 5,000. A separate fit-only search reached RMSE 0.7491 with a larger boosting grid. The wide million-row fitting case also completed, but required nearly 12 GiB peak memory and a 3.34 GB saved result. Those costs still constrain practical use.</p>
 </div>
 <div class="section level2">
+<h2 id="id_080-candidate-tabular-fitting-and-inspectable-search">0.8.0 candidate: tabular fitting and inspectable search<a class="anchor" aria-label="anchor" href="#id_080-candidate-tabular-fitting-and-inspectable-search"></a></h2>
+<p>The unreleased candidate adds a regularized/forest/boosting portfolio with shared-sample screening, complete CV for finalists, inner boosting round selection, and size-aware forest budgets. Reports connect screening, stopping, requested settings and actual fits. Native forest and boosting work can use up to four available CPU cores automatically; folds and settings remain sequential.</p>
+<p>The <a href="validation/competitive-tabular/README.html">competitive-tabular work</a> separates development measurements from final acceptance. Predictive quality, resource costs, report usefulness and release verification remain separate gates; an implemented control or a passing local check does not establish that they passed.</p>
+</div>
+<div class="section level2">
 <h2 id="next-interoperability-and-demonstrated-usefulness">Next: interoperability and demonstrated usefulness<a class="anchor" aria-label="anchor" href="#next-interoperability-and-demonstrated-usefulness"></a></h2>
 <ol style="list-style-type: decimal"><li>
 <strong>Framework-specific adapters.</strong> <code><a href="reference/evaluate_models.html">evaluate_models()</a></code> accepts native models and explicit prediction functions. Dedicated tidymodels and mlr3 adapters still need examples covering embedded recipes, probability-column order, new factor levels and serialization. Prefer these over more learner families.</li>
@@ -76,7 +81,7 @@
 <li>
 <strong>Report accessibility.</strong> Exercise keyboard order, contrast, table semantics, mobile layouts, print output and screen readers. Automated checks complement manual review; attractive screenshots do not establish accessibility.</li>
 <li>
-<strong>Compatibility and performance.</strong> Extend the measured workloads to more real datasets, hardware and evaluation sizes, alongside old-result migration fixtures. Keep fitting, interval calculation, report export and browser measurements separate. Establish their resource costs before adding parallel execution. Assess a compact inference export separately from the evidence-rich result, with native serialization sizes and cold prediction checks; R object sizes alone cannot establish deployment memory requirements.</li>
+<strong>Compatibility and performance.</strong> Extend the measured workloads to more real datasets, hardware and evaluation sizes, alongside old-result migration fixtures. Keep fitting, interval calculation, report export and browser measurements separate. Establish resource costs before adding parallel scheduling across folds or settings beyond the existing bounded native threading. Assess a compact inference export separately from the evidence-rich result, with native serialization sizes and cold prediction checks; R object sizes alone cannot establish deployment memory requirements.</li>
 </ol></div>
 <div class="section level2">
 <h2 id="deferred-until-the-current-workflow-meets-those-criteria">Deferred until the current workflow meets those criteria<a class="anchor" aria-label="anchor" href="#deferred-until-the-current-workflow-meets-those-criteria"></a></h2>

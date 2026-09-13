@@ -3,13 +3,16 @@
 Installs the CRAN packages required by an AutoXplainR model portfolio.
 This helper only changes the user's library when called explicitly; use
 `dry_run = TRUE` to inspect the missing packages without installing
-them.
+them. The `"tabular"` portfolio requires R \>= 4.3 for the supported
+XGBoost backend, although the core AutoXplainR package supports R \>=
+4.1. Upgrade R first if needed; the installation helper does not upgrade
+R.
 
 ## Usage
 
 ``` r
 install_model_engines(
-  portfolio = c("recommended", "extended"),
+  portfolio = c("recommended", "extended", "tabular"),
   task = c("regression", "binary", "multiclass"),
   dry_run = FALSE,
   ...
@@ -20,7 +23,7 @@ install_model_engines(
 
 - portfolio:
 
-  One of `"recommended"` or `"extended"`.
+  One of `"recommended"`, `"extended"` or `"tabular"`.
 
 - task:
 

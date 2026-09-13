@@ -57,8 +57,8 @@ resampling-selected configuration cannot be refitted, AutoXplainR tries
 the remaining valid configurations in resampled-score order, records the
 first successful one in `final_configuration`, and marks
 `fallback_used`. Failed alternative-family refits are diagnosed but do
-not discard a usable primary model. Families for which every
-configuration failed resampling remain visible in
+not discard a usable primary model. Families for which no attempted
+configuration completed resampling remain visible in
 `families_resampling_failed` and are excluded from paired prediction
 evidence. Each refit attempt repeats the requested/effective parameter
 and seed record for the complete outer-training data.
@@ -80,7 +80,7 @@ tuning_results(tuned)
 #>   selected:   linear regression (linear_01)
 #>   final fit:  linear_01
 #>   score:      0.32064 +/- 0.01519 SE
-#>   boundary:   Configuration ranking used only resamples of the outer training rows; the held-out evaluation rows were untouched until final scoring. Folds were assigned automatically within the outer training data. Every outer-training row received an out-of-fold prediction.
+#>   boundary:   Configuration ranking used only resamples of the outer training rows; the held-out evaluation rows were untouched until final scoring.  Folds were assigned automatically within the outer training data. Every outer-training row received an out-of-fold prediction.
 #>   proxy:      family-specific flexibility; values are not comparable across families
 #>  configuration_id family    backend             model
 #>         linear_01 linear stats/nnet linear regression

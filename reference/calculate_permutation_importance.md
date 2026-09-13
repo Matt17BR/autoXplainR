@@ -46,12 +46,16 @@ calculate_permutation_importance(
 
 - metric:
 
-  One of `"auto"`, `"rmse"`, `"mae"`, `"logloss"`, `"brier"`,
-  `"accuracy"`, or `"auc"`. The result-style names `"log_loss"` and
-  `"brier_score"` are accepted as aliases. With `"auto"`, an explainer
-  made from an `autoxplain_result` uses that result's primary evaluation
-  metric; otherwise regression defaults to RMSE and classification to
-  log loss.
+  One of `"auto"`, `"rmse"`, `"rmsle"`, `"mae"`, `"logloss"`, `"brier"`,
+  `"accuracy"`, or `"auc"`. The result-style names `"log_loss"`,
+  `"brier_score"`, and `"roc_auc"` are accepted as aliases. With
+  `"auto"`, an explainer made from an `autoxplain_result` uses that
+  result's primary evaluation metric; otherwise regression defaults to
+  RMSE and classification to log loss. RMSLE requires nonnegative
+  outcomes and predictions; it does not clip negative predictions. A
+  feature with a negative shuffled prediction has unavailable
+  importance, with the failed repeat recorded. Other features can still
+  be assessed.
 
 - n_repeats:
 

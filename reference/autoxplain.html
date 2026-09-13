@@ -19,7 +19,7 @@ pre-specified reference model and baseline.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@ pre-specified reference model and baseline.</p>
 <span>  test_fraction <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"base"</span>, <span class="st">"h2o"</span><span class="op">)</span>,</span>
 <span>  model_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tuned"</span>, <span class="st">"quick"</span>, <span class="st">"comparison"</span><span class="op">)</span>,</span>
-<span>  portfolio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"core"</span>, <span class="st">"recommended"</span>, <span class="st">"extended"</span><span class="op">)</span>,</span>
+<span>  portfolio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"core"</span>, <span class="st">"recommended"</span>, <span class="st">"extended"</span>, <span class="st">"tabular"</span><span class="op">)</span>,</span>
 <span>  learners <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  enable_preprocessing <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  preprocessing_config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -96,7 +96,7 @@ pre-specified reference model and baseline.</p>
 <span>  init_h2o <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  h2o_nthreads <span class="op">=</span> <span class="op">-</span><span class="fl">1L</span>,</span>
 <span>  h2o_max_mem_size <span class="op">=</span> <span class="st">"2G"</span>,</span>
-<span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"quiet"</span>, <span class="st">"info"</span><span class="op">)</span>,</span>
+<span>  verbosity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"quiet"</span>, <span class="st">"info"</span><span class="op">)</span>,</span>
 <span>  evaluation_role <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"test"</span>, <span class="st">"validation"</span>, <span class="st">"evaluation"</span><span class="op">)</span>,</span>
 <span>  overlap_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"warn"</span>, <span class="st">"error"</span>, <span class="st">"ignore"</span><span class="op">)</span>,</span>
 <span>  validation <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -112,7 +112,8 @@ pre-specified reference model and baseline.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>Training data frame.</p></dd>
+<dd><p>Training data frame containing observed outcomes. Read a CSV into
+a data frame before calling this function.</p></dd>
 
 
 <dt id="arg-target-column">target_column<a class="anchor" aria-label="anchor" href="#arg-target-column"></a></dt>
@@ -123,7 +124,7 @@ pre-specified reference model and baseline.</p>
 <dd><p>Maximum number of configurations in local tuning or H2O
 base models. The local budget is shared across requested learner families.
 <code>NULL</code> chooses a portfolio-aware tuning budget (15 for core, 30 for
-recommended, and 40 for extended) or 24 for H2O. Explicit values are
+recommended, 40 for extended, and 18 for tabular) or 24 for H2O. Explicit values are
 honored without a hidden cap.</p></dd>
 
 
@@ -140,7 +141,9 @@ time-limited search; see the returned reproducibility provenance.</p></dd>
 
 
 <dt id="arg-test-data">test_data<a class="anchor" aria-label="anchor" href="#arg-test-data"></a></dt>
-<dd><p>Optional evaluation data. Supplied rows are labeled as a
+<dd><p>Optional labeled evaluation data, including the target column
+with observed outcomes. Use <code>predict(result, newdata)</code> for an unlabeled
+competition test table after fitting. Supplied rows are labeled as a
 neutral evaluation by default; use <code>evaluation_role = "test"</code> only when
 their provenance supports an independent-test interpretation. H2O uses
 them as validation rows only when <code>use_test_as_validation = TRUE</code> and
@@ -154,7 +157,7 @@ them as validation rows only when <code>use_test_as_validation = TRUE</code> and
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p>One of <code>"auto"</code>, <code>"base"</code>, or <code>"h2o"</code>. <code>"auto"</code> currently
-resolves to the dependency-free <code>"base"</code> workflow.</p></dd>
+resolves to the local <code>"base"</code> workflow.</p></dd>
 
 
 <dt id="arg-model-set">model_set<a class="anchor" aria-label="anchor" href="#arg-model-set"></a></dt>
@@ -171,7 +174,12 @@ selected configuration once on the configured evaluation rows.</p></dd>
 linear, regularized, additive (when supported), tree, forest, and boosting
 families. <code>"extended"</code> adds neural, kernel, nearest-neighbor, and MARS
 families. <code>"core"</code> retains the dependency-light linear/tree/neural
-tournament. Missing optional backends produce one installation command
+tournament. <code>"tabular"</code> compares regularized models, random forests and
+XGBoost, with sample-based screening and inner training splits to choose
+boosting rounds when enough rows and settings are available. This portfolio
+requires R &gt;= 4.3 for the supported XGBoost backend, while the core package
+supports R &gt;= 4.1. Missing optional
+backends produce one installation command
 rather than silently changing the tournament.</p></dd>
 
 
@@ -210,8 +218,10 @@ within one standard error of the best. The family priority and
 family-specific flexibility proxies
 are shown by <code><a href="learner_catalog.html">learner_catalog()</a></code>. This heuristic does not establish that
 eligible models are equivalent or that every tuning dimension is ordered.
-<code>"best"</code> chooses the lowest resampled
-error. Ignored by other workflows.</p></dd>
+<code>"best"</code> chooses the best resampled score (highest AUC, lowest loss).
+Omitting this argument uses <code>"best"</code> for <code>portfolio = "tabular"</code> when
+<code>learners</code> is not supplied; other portfolios retain <code>"one_se"</code>.
+Ignored by other workflows.</p></dd>
 
 
 <dt id="arg-tuning-control">tuning_control<a class="anchor" aria-label="anchor" href="#arg-tuning-control"></a></dt>
@@ -248,7 +258,16 @@ cross-validation metrics.</p></dd>
 
 
 <dt id="arg-verbosity">verbosity<a class="anchor" aria-label="anchor" href="#arg-verbosity"></a></dt>
-<dd><p>One of <code>"quiet"</code> or <code>"info"</code>.</p></dd>
+<dd><p><code>"auto"</code> (default) prints progress for local tuned searches
+with at least 200 input rows and a forest or boosting learner. Smaller
+searches, quick workflows and H2O stay quiet by default. <code>"info"</code> prints
+progress regardless of size; <code>"quiet"</code> suppresses progress. Messages identify
+screening settings, CV folds, full refits, evaluation, explanations and report
+writing. During input importance, completed shuffle counts are printed at
+most every 30 seconds. Long forest fits also print ranger's completed-tree
+progress and approximate remaining-time estimate. Native updates depend on
+completed work, so a fit or prediction can take time between messages.
+Warnings are unchanged.</p></dd>
 
 
 <dt id="arg-evaluation-role">evaluation_role<a class="anchor" aria-label="anchor" href="#arg-evaluation-role"></a></dt>
@@ -263,7 +282,8 @@ study design.</p></dd>
 <dd><p>What to do when supplied evaluation rows have exactly
 the same values as training rows: warn (the default), error, or ignore.
 Exact equality can indicate leakage but can also occur naturally, so this
-check cannot establish whether the samples are independent.</p></dd>
+check cannot establish whether the samples are independent.
+Default warnings are retained in <code>result$evaluation$notes</code> and the report's Checks tab.</p></dd>
 
 
 <dt id="arg-validation">validation<a class="anchor" aria-label="anchor" href="#arg-validation"></a></dt>
@@ -313,7 +333,10 @@ evaluation predictions, preprocessing provenance, and (by default)
     <p>Set <code>engine = "h2o"</code> to use the optional H2O AutoML adapter. The lower-level
 <code><a href="explain_model.html">explain_model()</a></code> interface accepts models fitted by any framework.</p>
 <p>Numeric outcomes with exactly two distinct values are treated as binary
-classification by default. Potentially destructive preprocessing, such as
+classification by default; use <code>task = "regression"</code> to override this.
+Numeric outcomes with three or more values select regression. For numeric
+category codes such as <code>0, 1, 2</code>, set <code>task = "multiclass"</code> or convert the
+target to a factor before fitting. Potentially destructive preprocessing, such as
 identifier removal, is opt-in and recorded in the result.</p>
     </div>
 

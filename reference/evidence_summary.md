@@ -67,12 +67,14 @@ evidence$evaluation
 #> 
 #> 
 #> $metric_definitions
-#>                                                                                                            rmse 
-#>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
-#>                                                                                                             mae 
-#>                                     "Average absolute prediction error in the target's units; lower is better." 
-#>                                                                                                       r_squared 
-#> "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better." 
+#>                                                                                                                             rmse 
+#>                                         "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
+#>                                                                                                                              mae 
+#>                                                      "Average absolute prediction error in the target's units; lower is better." 
+#>                                                                                                                            rmsle 
+#> "Root mean squared log1p error; lower is better. Requires nonnegative outcomes and predictions; invalid values are not clipped." 
+#>                                                                                                                        r_squared 
+#>                  "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better." 
 #> 
 #> $improvement_over_baseline
 #> [1] 0.6290783

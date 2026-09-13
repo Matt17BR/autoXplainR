@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,26 @@
       <small>Source: <a href="https://github.com/Matt17BR/autoXplainR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.0" id="autoxplainr-080">AutoXplainR 0.8.0<a class="anchor" aria-label="anchor" href="#autoxplainr-080"></a></h2>
+<ul><li>
+<code>portfolio = "tabular"</code> compares regularized models, random forests and XGBoost in one call. Its 18-setting search screens candidates on a shared training sample, then cross-validates the leading setting from each family. It selects the best CV score by default and refits the retained models on all training rows. Other portfolios keep their existing selection rule.</li>
+<li>Adaptive boosting chooses its round count on a separate split inside each training fold. The split learns its own preprocessing and respects recorded groups. Final fits use the median fold choice, rounded up. Reports show the actual stopping curves, settings, row counts and skipped calibration reasons.</li>
+<li>Automatic forest settings account for training size and input width. Large adaptive searches use 128 trees for screening and 128 or 256 for complete CV. At four million training rows times predictors, automatic final forests use 256 trees; below that boundary they keep 500. All fold-training rows are retained. Reports explain these budgets and their limits; explicit grids keep their requested tree counts.</li>
+<li>
+<code><a href="../reference/tuning_control.html">tuning_control()</a></code> exposes search mode, native thread count, screening size, finalists per family, boosting patience and a search scheduling budget. Automatic large searches use up to four available CPU cores, respecting process and job limits; explicit thread counts remain available. Tuned forest and boosting workflows show progress automatically from 200 input rows, including periodic counts of completed importance shuffles. Long forest fits also report completed-tree progress and an approximate remaining time from ranger. <code>verbosity = "quiet"</code> remains available. Final refits and report work are outside the optional search time budget. Progress message handlers cannot change the random draws used for fitting or explanations.</li>
+<li>Selection supports binary ROC AUC and regression RMSLE. AUC is maximized and averaged within folds; predictions from different fitted models are not ranked together. RMSLE requires nonnegative outcomes and predictions. Undefined evaluation or explanation scores retain a reason and leave other valid diagnostics available. Reports no longer describe an undefined baseline comparison as a model failure.</li>
+<li>Large AUC calculations avoid integer overflow, and paired AUC bootstrap intervals reuse sorted probability groups while preserving the resampling draws. One-class resamples are counted and intervals are withheld when too few usable draws remain.</li>
+<li>Failed fits retain the effective settings and seed actually attempted, including calibrated boosting rounds and reduced forest validation budgets. Calibration attempts remain counted when the subsequent model fit fails. If every screened setting fails, the error includes the observed causes and retains the screening records for inspection. Supplied-fold report replay reconstructs the original row assignments from the fitted result instead of substituting new folds.</li>
+<li>Mixed multiclass searches bind forest and boosting probability records without relying on native matrix row names. This fixes a crash after CV while preserving each prediction’s source row and class order.</li>
+<li>Class-based screening and sampled report exports avoid integer overflow on large datasets. Ordinary sample allocations and random draws are preserved.</li>
+<li>Report preparation reuses full predictions within one computation and shares identical probability batches across class-specific effect curves. Repeated shuffles, scores, effect estimates and uncertainty calculations are preserved. Changes to captured values in custom predictors invalidate their evidence even when predictions on the original rows happen to remain unchanged.</li>
+<li>Explanation functions and report generation now leave R’s random-number state unchanged, including after a prediction error. Internal sampling and the returned statistics are unchanged.</li>
+<li>Summary reports include a complete R command for exporting linked individual error records. The command reuses the fitted result and creates a separate HTML file, with the exported data scope explained beside it.</li>
+<li>Warnings about evaluation records matching training records now stay with the saved result and appear in the report’s Checks tab. The note reports matches before preprocessing and explains why matching values alone do not establish data leakage.</li>
+<li>Cost comparisons prefer a usable repeated prediction benchmark, then retained fit time, batch prediction time and R object size. Durations use readable units; exact measurements and Pareto calculations are unchanged. Resource scope is visible beside the chart, including excluded native allocations.</li>
+<li>Model details separate the search’s encoding policy from the representation passed to XGBoost. No-op centering and scaling vectors are summarized; applied transformations and raw metadata remain inspectable. The Records view identifies exported rows and hides controls that need absent records.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="autoxplainr-070">AutoXplainR 0.7.0<a class="anchor" aria-label="anchor" href="#autoxplainr-070"></a></h2>
 <ul><li>Tuning prepares one fold at a time and scores each fit from one prediction batch. Disabling retained out-of-fold predictions also avoids constructing their case records. Fold scores, selection and final evaluation remain available.</li>

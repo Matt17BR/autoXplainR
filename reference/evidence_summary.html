@@ -13,7 +13,7 @@ statistics, and diagnostic messages remain; review them before sharing."></head>
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,12 +117,14 @@ or changing the meaning of a field requires a new schema major version.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $metric_definitions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                            rmse </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                             mae </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                     "Average absolute prediction error in the target's units; lower is better." </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                       r_squared </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                             rmse </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                         "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                              mae </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                      "Average absolute prediction error in the target's units; lower is better." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                            rmsle </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "Root mean squared log1p error; lower is better. Requires nonnegative outcomes and predictions; invalid values are not clipped." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                        r_squared </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better." </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $improvement_over_baseline</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6290783</span>

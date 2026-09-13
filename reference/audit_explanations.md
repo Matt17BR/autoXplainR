@@ -48,7 +48,7 @@ audit_explanations(
 
 - seed:
 
-  Reproducible seed.
+  Reproducible seed; the caller's random-number state is restored.
 
 - confidence:
 

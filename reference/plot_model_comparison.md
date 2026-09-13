@@ -25,8 +25,9 @@ plot_model_comparison(
 
 - complexity_metric:
 
-  Optional numeric leaderboard or model-metadata column. Model size is
-  preferred when `NULL`.
+  Optional numeric leaderboard or model-metadata column. `NULL` prefers
+  usable repeated prediction timing, retained fit time, evaluation-batch
+  prediction time, then model size.
 
 - title:
 

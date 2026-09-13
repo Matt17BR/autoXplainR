@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,12 +48,13 @@
 
 <div id="source-and-intellectual-property-provenance" class="section level1">
 
-<p>This record covers the source tree prepared for AutoXplainR 0.7.0. It is kept outside the CRAN source archive because it documents repository governance rather than installed package behavior.</p>
+<p>This record accompanies the unreleased AutoXplainR 0.8.0 candidate. It is kept outside the CRAN source archive because it documents repository governance rather than installed package behavior.</p>
 <div class="section level2">
 <h2 id="repository-audit">Repository audit<a class="anchor" aria-label="anchor" href="#repository-audit"></a></h2>
-<ul><li>The Git history through 2026-09-07 attributes the project source, documentation, tests, and generated website inputs to Matteo Mazzarelli, the author and maintainer named in <code>DESCRIPTION</code>.</li>
+<ul><li>The initial 2026-09-13 review covered six commits from <code>v0.7.0</code> through <code>23d541d1e2889da710c9fbe09252aa617f5dbf89</code>. A follow-up review covered the next five commits through <code>c9a3fb0b66b54cac7bfe2d01eb75b4868833ecda</code>, comprising 68 changed files and 12 additions. The initial commits record Matteo Mazzarelli’s account and email as author and committer; the next five record <code>Matt17BR &lt;matteo.mazzarelli@gmail.com&gt;</code> in both roles. No additional contributor or newly bundled third-party implementation was identified. Git attribution records authorship claims; it does not independently establish ownership.</li>
 <li>The package includes the unmodified UMD distribution of fflate 0.8.3, with an added attribution header, for offline report decompression. Its MIT license and 2026 Arjun Barrett copyright notice are retained in <code>inst/report/fflate-LICENSE.txt</code> and embedded in generated reports. <code>inst/report/fflate-source.json</code> identifies the upstream archive, original file and SHA256 checksums. <code>validation/scalability/reports/check-vendor.py</code> verifies the distributed file and attribution. <code>DESCRIPTION</code> identifies the third-party copyright holder separately from the package author.</li>
 <li>The package contains no compiled binary. Examples and tests use standard R data such as <code>mtcars</code> and <code>iris</code> or construct synthetic data at runtime. Public website reports deliberately embed their example records and fitted summaries: synthetic delivery and churn data, and R’s <code>iris</code> data. Their generators are in <code>validation/</code>; website HTML is excluded from the R source archive. Screenshots show those same public examples.</li>
+<li>The 0.8.0 modeling benchmarks also use UCI’s YearPredictionMSD, Covertype and Bank Marketing datasets. Their authors, DOIs, source links and CC BY 4.0 terms are recorded in <code>validation/competitive-tabular/README.md</code>; <code>sources.json</code> records the downloaded archive and member hashes. Raw observations, complete predictions and fitted models remain outside Git. Committed results contain measurements, feature summaries, file hashes, benchmark command references and host/resource metadata, including local cache paths. The published host-wide process snapshot contains counts and a digest rather than process arguments; raw diagnostic originals remain in the private cache. The benchmark directory is excluded from the R source archive.</li>
 <li>Optional model engines, reporting tools, and hosted narrative providers are integrations reached through declared R dependencies or user-supplied API endpoints. Their source code and credentials are not redistributed.</li>
 <li>Statistical methods are implemented for this project from their published descriptions. Central method sources are cited in <code>DESCRIPTION</code>, the statistical-methods vignette, and the package citation material; source code from those publications or from other R packages is not bundled here.</li>
 <li>AutoXplainR’s project-specific source and documentation are released under the MIT license. <code>DESCRIPTION</code>, <code>LICENSE</code>, and <code>LICENSE.md</code> record the author, copyright holder, years, and distribution terms.</li>

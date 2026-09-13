@@ -62,7 +62,7 @@ confidence interval.
 
 1.  **Permutation randomness.** Repeated shuffles vary even for the same
     fitted model and evaluation rows. Importance intervals are t
-    intervals for the mean loss change over those shuffles. More repeats
+    intervals for the mean importance over those shuffles. More repeats
     reduce this Monte Carlo error.
 2.  **Evaluation sampling.** Different evaluation observations give
     different scores even with the fitted model held fixed.
@@ -103,13 +103,13 @@ or a remedy for an unrepresentative test set. See [Davison and Hinkley,
 
 ## Importance and fitted effects
 
-Permutation importance is the change in evaluation loss when a feature
-or feature group is shuffled. Negative importance is possible.
-Correlated inputs can substitute for each other or make shuffled
-combinations implausible. Grouping features preserves their relationship
-during joint shuffling, while blocking within strata only permits
-shuffles inside those strata. Neither is a general conditional
-importance estimator.
+Permutation importance measures the increase in evaluation loss, or the
+decrease in AUC or accuracy, when a feature or feature group is
+shuffled. Negative importance is possible. Correlated inputs can
+substitute for each other or make shuffled combinations implausible.
+Grouping features preserves their relationship during joint shuffling,
+while blocking within strata only permits shuffles inside those strata.
+Neither is a general conditional importance estimator.
 
 Fisher, Rudin and Dominici’s [model reliance
 paper](https://jmlr.org/papers/v20/18-760.html) provides motivation for

@@ -22,7 +22,7 @@ autoxplain(
   test_fraction = 0.2,
   engine = c("auto", "base", "h2o"),
   model_set = c("tuned", "quick", "comparison"),
-  portfolio = c("core", "recommended", "extended"),
+  portfolio = c("core", "recommended", "extended", "tabular"),
   learners = NULL,
   enable_preprocessing = TRUE,
   preprocessing_config = list(),
@@ -37,7 +37,7 @@ autoxplain(
   init_h2o = TRUE,
   h2o_nthreads = -1L,
   h2o_max_mem_size = "2G",
-  verbosity = c("quiet", "info"),
+  verbosity = c("auto", "quiet", "info"),
   evaluation_role = c("auto", "test", "validation", "evaluation"),
   overlap_action = c("warn", "error", "ignore"),
   validation = NULL,
@@ -52,7 +52,8 @@ autoxplain(
 
 - data:
 
-  Training data frame.
+  Training data frame containing observed outcomes. Read a CSV into a
+  data frame before calling this function.
 
 - target_column:
 
@@ -63,8 +64,8 @@ autoxplain(
   Maximum number of configurations in local tuning or H2O base models.
   The local budget is shared across requested learner families. `NULL`
   chooses a portfolio-aware tuning budget (15 for core, 30 for
-  recommended, and 40 for extended) or 24 for H2O. Explicit values are
-  honored without a hidden cap.
+  recommended, 40 for extended, and 18 for tabular) or 24 for H2O.
+  Explicit values are honored without a hidden cap.
 
 - max_runtime_secs:
 
@@ -80,11 +81,13 @@ autoxplain(
 
 - test_data:
 
-  Optional evaluation data. Supplied rows are labeled as a neutral
-  evaluation by default; use `evaluation_role = "test"` only when their
-  provenance supports an independent-test interpretation. H2O uses them
-  as validation rows only when `use_test_as_validation = TRUE` and
-  `nfolds = 0`.
+  Optional labeled evaluation data, including the target column with
+  observed outcomes. Use `predict(result, newdata)` for an unlabeled
+  competition test table after fitting. Supplied rows are labeled as a
+  neutral evaluation by default; use `evaluation_role = "test"` only
+  when their provenance supports an independent-test interpretation. H2O
+  uses them as validation rows only when `use_test_as_validation = TRUE`
+  and `nfolds = 0`.
 
 - test_fraction:
 
@@ -94,7 +97,7 @@ autoxplain(
 - engine:
 
   One of `"auto"`, `"base"`, or `"h2o"`. `"auto"` currently resolves to
-  the dependency-free `"base"` workflow.
+  the local `"base"` workflow.
 
 - model_set:
 
@@ -112,9 +115,13 @@ autoxplain(
   compares linear, regularized, additive (when supported), tree, forest,
   and boosting families. `"extended"` adds neural, kernel,
   nearest-neighbor, and MARS families. `"core"` retains the
-  dependency-light linear/tree/neural tournament. Missing optional
-  backends produce one installation command rather than silently
-  changing the tournament.
+  dependency-light linear/tree/neural tournament. `"tabular"` compares
+  regularized models, random forests and XGBoost, with sample-based
+  screening and inner training splits to choose boosting rounds when
+  enough rows and settings are available. This portfolio requires R \>=
+  4.3 for the supported XGBoost backend, while the core package supports
+  R \>= 4.1. Missing optional backends produce one installation command
+  rather than silently changing the tournament.
 
 - learners:
 
@@ -153,8 +160,11 @@ autoxplain(
   family-specific flexibility proxies are shown by
   [`learner_catalog()`](https://matt17br.github.io/autoXplainR/reference/learner_catalog.md).
   This heuristic does not establish that eligible models are equivalent
-  or that every tuning dimension is ordered. `"best"` chooses the lowest
-  resampled error. Ignored by other workflows.
+  or that every tuning dimension is ordered. `"best"` chooses the best
+  resampled score (highest AUC, lowest loss). Omitting this argument
+  uses `"best"` for `portfolio = "tabular"` when `learners` is not
+  supplied; other portfolios retain `"one_se"`. Ignored by other
+  workflows.
 
 - tuning_control:
 
@@ -192,7 +202,17 @@ autoxplain(
 
 - verbosity:
 
-  One of `"quiet"` or `"info"`.
+  `"auto"` (default) prints progress for local tuned searches with at
+  least 200 input rows and a forest or boosting learner. Smaller
+  searches, quick workflows and H2O stay quiet by default. `"info"`
+  prints progress regardless of size; `"quiet"` suppresses progress.
+  Messages identify screening settings, CV folds, full refits,
+  evaluation, explanations and report writing. During input importance,
+  completed shuffle counts are printed at most every 30 seconds. Long
+  forest fits also print ranger's completed-tree progress and
+  approximate remaining-time estimate. Native updates depend on
+  completed work, so a fit or prediction can take time between messages.
+  Warnings are unchanged.
 
 - evaluation_role:
 
@@ -206,7 +226,8 @@ autoxplain(
   What to do when supplied evaluation rows have exactly the same values
   as training rows: warn (the default), error, or ignore. Exact equality
   can indicate leakage but can also occur naturally, so this check
-  cannot establish whether the samples are independent.
+  cannot establish whether the samples are independent. Default warnings
+  are retained in `result$evaluation$notes` and the report's Checks tab.
 
 - validation:
 
@@ -263,8 +284,12 @@ lower-level
 interface accepts models fitted by any framework.
 
 Numeric outcomes with exactly two distinct values are treated as binary
-classification by default. Potentially destructive preprocessing, such
-as identifier removal, is opt-in and recorded in the result.
+classification by default; use `task = "regression"` to override this.
+Numeric outcomes with three or more values select regression. For
+numeric category codes such as `0, 1, 2`, set `task = "multiclass"` or
+convert the target to a factor before fitting. Potentially destructive
+preprocessing, such as identifier removal, is opt-in and recorded in the
+result.
 
 ## Examples
 

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -178,21 +178,23 @@ silently treated as an existing one.</p>
 <span><span class="co">#&gt; 4    4 simple_baseline intercept-only baseline  baseline baseline   stats</span></span>
 <span><span class="co">#&gt;       rmse      mae     r_squared training_time_ms model_size_kb complexity</span></span>
 <span><span class="co">#&gt; 1 2.003144 1.662172  9.339624e-01                1      67.79688          3</span></span>
-<span><span class="co">#&gt; 2 2.241207 1.837860  9.173332e-01                2      52.28125         20</span></span>
-<span><span class="co">#&gt; 3 4.319412 3.508486  6.929447e-01                4      47.83594          4</span></span>
-<span><span class="co">#&gt; 4 7.795201 6.683058 -5.052385e-05                3      56.07812          1</span></span>
+<span><span class="co">#&gt; 2 2.241207 1.837860  9.173332e-01                1      52.28125         20</span></span>
+<span><span class="co">#&gt; 3 4.319412 3.508486  6.929447e-01                3      47.83594          4</span></span>
+<span><span class="co">#&gt; 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1</span></span>
 <span><span class="co">#&gt;   fit_warning prediction_time_ms</span></span>
 <span><span class="co">#&gt; 1                              1</span></span>
 <span><span class="co">#&gt; 2                              1</span></span>
-<span><span class="co">#&gt; 3                              2</span></span>
+<span><span class="co">#&gt; 3                              1</span></span>
 <span><span class="co">#&gt; 4                              0</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">metric_definitions</span></span>
-<span><span class="co">#&gt;                                                                                                            rmse </span></span>
-<span><span class="co">#&gt;                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
-<span><span class="co">#&gt;                                                                                                             mae </span></span>
-<span><span class="co">#&gt;                                     "Average absolute prediction error in the target's units; lower is better." </span></span>
-<span><span class="co">#&gt;                                                                                                       r_squared </span></span>
-<span><span class="co">#&gt; "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."</span></span>
+<span><span class="co">#&gt;                                                                                                                             rmse </span></span>
+<span><span class="co">#&gt;                                         "Typical prediction error, with larger mistakes weighted more heavily; lower is better." </span></span>
+<span><span class="co">#&gt;                                                                                                                              mae </span></span>
+<span><span class="co">#&gt;                                                      "Average absolute prediction error in the target's units; lower is better." </span></span>
+<span><span class="co">#&gt;                                                                                                                            rmsle </span></span>
+<span><span class="co">#&gt; "Root mean squared log1p error; lower is better. Requires nonnegative outcomes and predictions; invalid values are not clipped." </span></span>
+<span><span class="co">#&gt;                                                                                                                        r_squared </span></span>
+<span><span class="co">#&gt;                  "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">evaluation</span><span class="op">$</span><span class="va">notes</span></span>
 <span><span class="co">#&gt;   severity                 code                                       message</span></span>
 <span><span class="co">#&gt; 1  caution small_evaluation_set Only 48 rows were available for test scoring.</span></span>

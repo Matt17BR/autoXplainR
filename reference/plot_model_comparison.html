@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,8 @@
 
 <dt id="arg-complexity-metric">complexity_metric<a class="anchor" aria-label="anchor" href="#arg-complexity-metric"></a></dt>
 <dd><p>Optional numeric leaderboard or model-metadata
-column. Model size is preferred when <code>NULL</code>.</p></dd>
+column. <code>NULL</code> prefers usable repeated prediction timing, retained fit time,
+evaluation-batch prediction time, then model size.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>

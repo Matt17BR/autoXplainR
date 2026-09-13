@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -142,7 +142,7 @@ not an independent-test confidence interval.</p>
 <li>
 <strong>Permutation randomness.</strong> Repeated shuffles vary even
 for the same fitted model and evaluation rows. Importance intervals are
-t intervals for the mean loss change over those shuffles. More repeats
+t intervals for the mean importance over those shuffles. More repeats
 reduce this Monte Carlo error.</li>
 <li>
 <strong>Evaluation sampling.</strong> Different evaluation
@@ -183,13 +183,13 @@ or a remedy for an unrepresentative test set. See <a href="https://doi.org/10.10
 <div class="section level2">
 <h2 id="importance-and-fitted-effects">Importance and fitted effects<a class="anchor" aria-label="anchor" href="#importance-and-fitted-effects"></a>
 </h2>
-<p>Permutation importance is the change in evaluation loss when a
-feature or feature group is shuffled. Negative importance is possible.
-Correlated inputs can substitute for each other or make shuffled
-combinations implausible. Grouping features preserves their relationship
-during joint shuffling, while blocking within strata only permits
-shuffles inside those strata. Neither is a general conditional
-importance estimator.</p>
+<p>Permutation importance measures the increase in evaluation loss, or
+the decrease in AUC or accuracy, when a feature or feature group is
+shuffled. Negative importance is possible. Correlated inputs can
+substitute for each other or make shuffled combinations implausible.
+Grouping features preserves their relationship during joint shuffling,
+while blocking within strata only permits shuffles inside those strata.
+Neither is a general conditional importance estimator.</p>
 <p>Fisher, Rudin and Dominici’s <a href="https://jmlr.org/papers/v20/18-760.html" class="external-link">model reliance paper</a>
 provides motivation for examining more than one competitive model.
 AutoXplainR compares only supplied fitted candidates; it does not

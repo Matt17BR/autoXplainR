@@ -13,6 +13,63 @@ descriptive. Use `"tuned"` when the analysis calls for model selection:
 candidates are compared using training-only cross-validation before the
 selected model is scored on the outer evaluation set.
 
+## Start with regularized models, forests and XGBoost
+
+The unreleased 0.8.0 candidate adds `portfolio = "tabular"` for this
+combination. It requires R 4.3 or newer for the supported XGBoost
+backend; the core package supports R 4.1 or newer. Install the three
+optional engines once, then read your labeled CSV and name its outcome
+column:
+
+``` r
+
+install_model_engines("tabular")
+training <- read.csv("train.csv", check.names = FALSE)
+result <- autoxplain(training, "outcome", portfolio = "tabular", report = "report.html")
+```
+
+Replace `"outcome"` with the target column’s name. Before fitting,
+identify its task: numeric outcomes with exactly two values select
+binary classification; other numeric outcomes select regression. Numeric
+category codes with three or more values, such as `0, 1, 2`, need
+`task = "multiclass"` or conversion to a factor. Use
+`task = "regression"` for a numeric two-value regression outcome. For a
+binary classification example, set
+`training$outcome <- factor(training$outcome, levels = c("no", "yes"))`
+before fitting to make `"yes"` the probability target.
+
+`test_data` must contain observed outcomes. Keep a competition’s
+unlabeled test CSV for prediction after fitting:
+
+``` r
+
+competition_test <- read.csv("test.csv", check.names = FALSE)
+predictions <- predict(result, competition_test)
+```
+
+The output is a numeric vector for regression, a vector of
+positive-class probabilities for binary classification, or a matrix with
+one probability column per multiclass outcome.
+`predict(result, competition_test, type = "class")` returns class labels
+for classification.
+
+This starts with 18 candidate settings. On at least 200 outer-training
+rows, it screens them on a shared sample and takes the best successful
+setting from each family into five-fold cross-validation. It selects the
+best CV finalist, refits the retained settings on all training rows and
+evaluates them on a separate holdout. The report includes those models
+and an intercept-only baseline. Regression, binary classification and
+multiclass classification use the same call.
+
+Small datasets skip screening and cross-validate each scheduled preset.
+The [0.8.0 validation
+record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/release-0.8.0.md)
+reports completed Covertype, Bank and YearPrediction comparisons,
+including forest quality tradeoffs, measured costs and remaining report
+and release checks. These results do not establish competition-level
+performance. Inspect the fitted results before deciding what additional
+modeling work the data need.
+
 ## Choose a portfolio
 
 ``` r
@@ -29,22 +86,23 @@ as.data.frame(learner_catalog())[, c("family", "backend", "supported_tasks", "po
 #> 8       kernel      e1071 regression, binary, multiclass
 #> 9    neighbors       kknn regression, binary, multiclass
 #> 10        mars      earth             regression, binary
-#>                     portfolios
-#> 1  core, recommended, extended
-#> 2        recommended, extended
-#> 3        recommended, extended
-#> 4  core, recommended, extended
-#> 5        recommended, extended
-#> 6        recommended, extended
-#> 7               core, extended
-#> 8                     extended
-#> 9                     extended
-#> 10                    extended
+#>                        portfolios
+#> 1     core, recommended, extended
+#> 2  recommended, extended, tabular
+#> 3           recommended, extended
+#> 4     core, recommended, extended
+#> 5  recommended, extended, tabular
+#> 6  recommended, extended, tabular
+#> 7                  core, extended
+#> 8                        extended
+#> 9                        extended
+#> 10                       extended
 ```
 
 | Portfolio | Included families | Dependencies |
 |----|----|----|
 | `core` | Linear, tree, neural | Ordinary package dependencies |
+| `tabular` | Regularized, forest, boosting | `glmnet`, `ranger`, `xgboost` |
 | `recommended` | Linear, regularized, additive, tree, forest, boosting | Optional engines installed explicitly |
 | `extended` | All ten, including kernel, nearest-neighbor and MARS | Additional optional engines |
 
@@ -82,14 +140,18 @@ tuning$candidates[, c("model", "hyperparameters", "cv_score", "cv_se", "selected
 ```
 
 Every fold learns its preprocessing from that fold’s training rows. The
-default one-standard-error rule favors the first eligible family in the
-documented priority, then its smallest recorded within-family capacity
-proxy. Some tuning dimensions are not ordered by that proxy; for
-example, a neural weight-count proxy does not order weight decay.
-Cross-family priority is a package policy, not a statistical ordering of
-model families. Fold-score standard errors are a selection heuristic,
-not independent-test confidence intervals. Use `tuning_rule = "best"`
-for the lowest resampled error instead.
+core portfolio’s default one-standard-error rule favors the first
+eligible family in the documented priority, then its smallest recorded
+within-family capacity proxy. Some tuning dimensions are not ordered by
+that proxy; for example, a neural weight-count proxy does not order
+weight decay. Cross-family priority is a package policy, not a
+statistical ordering of model families. Fold-score standard errors are a
+selection heuristic, not independent-test confidence intervals. Use
+`tuning_rule = "best"` for the best resampled score instead. This is
+already the default for `portfolio = "tabular"` when `learners` and
+`tuning_rule` are not supplied. An explicit `learners` list retains the
+usual one-standard-error default; choose `tuning_rule = "best"` when
+that is the intended policy.
 
 ``` r
 
@@ -120,9 +182,9 @@ Fold and refit records retain the status and reason.
 `optimization_policy = "warn"` in
 [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
 deliberately keeps such fits with a warning; an unreported optimizer
-status remains unknown. Successful family representatives use their
-lowest valid within-family CV loss, while the primary follows the
-configured global selection rule. These are different choices.
+status remains unknown. Successful family representatives use their best
+valid within-family CV score, while the primary follows the configured
+global selection rule. These are different choices.
 
 ``` r
 
@@ -131,89 +193,147 @@ result <- autoxplain(my_data, "outcome", model_set = "tuned", portfolio = "recom
 ```
 
 [`tuning_control()`](https://matt17br.github.io/autoXplainR/reference/tuning_control.md)
-accepts explicit parameter grids, fold IDs, selection rules and failure
-policies. Inspect its help and
+accepts explicit parameter grids, fold IDs, selection metrics and
+failure policies. Inspect its help and
 [`tuning_results()`](https://matt17br.github.io/autoXplainR/reference/tuning_results.md)
 before changing these defaults. Chronological tuning is not implemented;
 temporal model selection requires an explicit rolling-origin design
 outside this workflow.
 
-## Harder data need a deliberate search
+## How the tabular search spends its budget
 
-The core portfolio keeps installation simple. It does not include
-regularization, random forests or boosting. With many predictors,
-nonlinear interactions or weak signals, try `portfolio = "recommended"`
-before concluding that useful prediction is impossible. It schedules 30
-configurations by default. You can also choose families and a budget
-explicitly:
+The first stage compares varied settings on one common
+training/validation sample of at most 20,000 outer-training rows, with
+up to 128 forest trees and 600 boosting rounds. The best successful
+setting in each family receives complete cross-validation. Large
+adaptive searches, with at least one million training rows times
+predictors, use 256 trees per forest validation fit. At four million
+rows times predictors, they use 128. The final all-training forest has
+256 trees in that largest tier and 500 below it. Smaller searches retain
+500 trees for both CV and the final fit. Every requested fold and all of
+its training rows are retained; the smaller validation forests’ scores
+approximate the final forest’s performance. These tree counts are
+computation defaults, not convergence tests. Boosting allows up to 2,000
+rounds and stops after 30 rounds without improvement on its inner score.
+Screening scores are shown separately because they describe a different
+workload.
+
+`search = "auto"` also chooses this adaptive path for an explicit
+combination of `regularized`, `forest` and `boosting` that includes a
+forest or booster, has at least 200 outer-training rows and has a budget
+of at least two settings per family. Custom grids or exact family
+budgets use `search = "grid"`. Choose that mode explicitly to give every
+scheduled configuration full CV.
+
+Boosting chooses its round count on an approximately 80/20 split made
+inside each fitting fold, before preprocessing. The inner training rows
+alone learn that split’s recipe. After stopping, the model is refitted
+on the whole fitting fold for scoring. The final model uses all
+outer-training rows and the rounded-up median of the successful folds’
+round counts. If an inner split is skipped, the fit keeps the requested
+round budget and records the reason. The final evaluation rows never
+select rounds.
+
+Screening uses training outcomes to choose which settings reach full CV.
+Those CV scores are therefore **selection evidence conditional on
+screening**, not an unbiased accuracy estimate for the whole search
+procedure. Keep a final evaluation set separate before choosing the
+search. Repeated decisions based on its scores turn it into development
+data.
+
+Supply `test_data` when you have a separate labeled evaluation set;
+otherwise the default holdout comes from the labeled input table.
 
 ``` r
 
-install_model_engines("recommended")
 result <- autoxplain(
   training, "outcome", test_data = final_test, evaluation_role = "test",
-  learners = c("regularized", "forest", "boosting"),
-  max_models = 30, nfolds = 5, explain = FALSE, seed = 2026
+  portfolio = "tabular", explain = FALSE, seed = 2026,
+  tuning_control = tuning_control(threads = 4, finalists_per_family = 2)
 )
-tuning_results(result)$candidates
+search <- tuning_results(result)
+search$screening$promotion
+search$candidates
 result$leaderboard
-result$model_diagnostics
 ```
 
-Keep `final_test` separate before making modeling choices. Select the
-search and metric using the training problem, then inspect its held-out
-result once. Repeated choices based on the same test scores turn that
-set into development data.
+This example takes up to two successful settings per family into full
+CV, instead of the default one. It explicitly requests four CPU threads
+in each native forest or boosting fit. Automatic adaptive searches with
+at least one million training rows times predictors use up to four
+available cores; smaller and exact searches use one. The automatic
+allocation respects process and job limits through
+[`parallelly::availableCores()`](https://parallelly.futureverse.org/reference/availableCores.html).
+An explicit count overrides it. Candidate fits still run sequentially,
+and replay records the resolved count. Increasing finalists spends more
+time checking the screening decision. Increasing `max_models` instead
+proposes more settings to screen.
 
-The [stress
-comparison](https://github.com/Matt17BR/autoXplainR/blob/main/validation/stress-modeling/findings.md)
-uses independent native fits, two synthetic replicates and a real
-mixed-data problem. Regularization was particularly useful when
-predictors outnumbered training rows. Boosting improved the nonlinear
-regression example. Neither guaranteed an improvement in every
-classification metric. Accuracy alone can be misleading for rare
-outcomes: inspect probability loss, ranking and mistakes at a decision
-cutoff appropriate to the intended use.
+Tuned forest and boosting workflows show their current stage, setting
+and fold automatically from 200 input rows. During longer importance
+calculations, updates count successful shuffles at most once every 30
+seconds. An active native fit or prediction finishes before an update
+can appear. Set `verbosity = "quiet"` to silence progress or
+`verbosity = "info"` to enable it on smaller inputs.
 
-Failed configurations remain in the search record. A model can also
-finish but be unsuitable. Rank-deficient linear fits now record that
-their coefficients are not uniquely determined and that new predictions
-may be unstable. Their actual scores stay in the comparison.
+Use `tuning_control(time_limit = 600)` to stop scheduling additional
+search work after ten minutes. The initial screening round and the first
+usable candidate are allowed to complete, and an active fit is not
+interrupted. Final refits, explanations and report generation are
+outside this budget. The record distinguishes a failed fit, a
+screened-out setting and a setting skipped because the budget was used.
+`time_limit` is a scheduling control, not a hard timeout.
 
-The automatic GAM adapter excludes a fit when its number of predictor
-terms is at least its number of fitting rows. This conservative resource
-policy is checked inside each fold. It avoids an expensive search that
-was unproductive in the wide-data stress case; it is not a mathematical
-restriction on penalized GAMs. Use another family or bring an externally
-fitted GAM through
-[`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md).
-Other engine-specific limitations, including extreme numerical units,
-can still exclude individual candidates. Inspect the recorded reason.
+The report’s **Model selection** tab shows promotion decisions, actual
+settings, fold scores, round choices and failure reasons. In R, inspect
+`search$screening`, `search$fold_scores` and `search$refit`. Settings
+cover plausible alternatives; they are not an exhaustive search or a
+guarantee that the best model was found. The [current comparison
+protocol](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/README.md)
+tests the development workflow against native forests and XGBoost on
+separate development and acceptance data.
 
-The broad preset can be slow even when every fit succeeds. A fresh
-paired run on the 1,200-row, 30-input nonlinear stress case took 412
-seconds in version 0.6.2 and 65 seconds in the candidate, with all 30
-configurations successful. Both selected the same boosted model and had
-the same evaluation RMSE. These are single runs on one machine, not a
-general speed guarantee. An earlier, separate 0.6.2 run took 533
-seconds; it is not the paired baseline for the 65-second result.
+## Choose the score that matches the problem
 
-Automatic additive fitting uses continuous BAM at 10,000 outer-training
-rows. Gaussian regression also uses BAM when the estimated work, rows
-times the number of coefficients squared, reaches 10 million. Smaller
-binary problems retain nested GAM: BAM uses a different iteratively
-weighted procedure that failed on several training folds where GAM
-converged. The choice stays fixed across folds and the final refit,
-while each fitting partition learns its own preprocessing and smoothing
-penalties. This rule uses the task and training input size, not
-validation or final-test scores.
+Set the metric before fitting. It governs candidate selection and, when
+enabled, the stopping decision for boosting. It also becomes the main
+held-out report score.
 
-The row threshold is a computational policy, not a guarantee of
-convergence or better predictions. Pin `solver = "gam"` or
-`solver = "bam"` in an additive grid when a particular fitting procedure
-matters. Covariate discretization requires the explicit `"bam_discrete"`
-choice. The smaller family set above remains useful when the broader
-search costs more than the additional models are worth.
+| Task | `tuning_control(metric = ...)` | Interpretation |
+|----|----|----|
+| Regression | `"rmse"` (default), `"mae"` | Prediction error in the outcome’s units; lower is better |
+| Nonnegative regression | `"rmsle"` | Root mean squared error after [`log1p()`](https://rdrr.io/r/base/Log.html); lower is better |
+| Binary or multiclass | `"log_loss"` (default), `"brier"` | Probability error; lower is better |
+| Binary | `"auc"` | Positive-negative ranking, with half credit for ties; higher is better |
+
+``` r
+
+result <- autoxplain(training, "outcome", portfolio = "tabular",
+                     tuning_control = tuning_control(metric = "auc"))
+```
+
+Binary probabilities refer to the second outcome factor level. Set the
+levels explicitly, for example
+`factor(outcome, levels = c("no", "yes"))`. AUC is recorded as
+`roc_auc`. Its CV score averages within-fold AUC, weighted by each
+fold’s evaluated row count. It does not rank predictions from different
+fold models together. AUC has no additive per-row loss, so its
+out-of-fold `case_loss` is `NA`; probabilities and class labels remain
+available. The fold SE is only a selection heuristic, not a confidence
+interval for AUC.
+
+RMSLE requires nonnegative outcomes and predictions. It does not
+transform the training target or clip negative predictions. A candidate
+with a negative validation prediction cannot receive a valid RMSLE
+score. If a shuffle produces a negative prediction, that feature’s
+importance is unavailable and the report explains why; the other
+features can still be inspected.
+
+Failed configurations remain in the search record. A completed model can
+still be unsuitable: compare its held-out score with the baseline and
+inspect its mistakes. AUC assesses ranking; log loss and calibration
+assess probability quality. A good result on one does not imply a good
+result on the others.
 
 ## Budget explanations and the report separately
 
@@ -292,8 +412,8 @@ settings and selection remain available. Use the default `TRUE` when you
 need to inspect individual CV errors. This control does not reduce
 fitting rows or final evaluation rows.
 
-The measured million-row regression control used a smaller search: one
-regularized and one boosting configuration, two CV folds and
+The 0.7.0 million-row regression control used a smaller fixed search:
+one regularized and one boosting configuration, two CV folds and
 `retain_oof = FALSE`. One call fitted all million training rows, scored
 all 20,000 independent evaluation rows and wrote a 3,891,782-byte
 summary report in 81.055 seconds. Default explanations used 5,000 rows;
@@ -353,8 +473,9 @@ to restrict exported columns or sample records if you need row
 filtering. Full records for hundreds of columns make a large HTML file.
 Aggregate mode keeps full univariate summaries and bounded pair
 summaries but does not allow row filtering. `max_models` bounds the
-number of attempted configurations, not elapsed time. `max_runtime_secs`
-is an H2O setting and does not impose a local-engine timeout.
+candidate pool, not elapsed time. Adaptive screening and early-stopping
+calibration can fit a candidate more than once. `max_runtime_secs` is an
+H2O setting and does not impose a local-engine timeout.
 
 ## Compare fitted behavior
 
@@ -422,10 +543,13 @@ refitting. For multiclass outcomes, request a named class with
 `class = "virginica"`.
 
 [`model_tradeoffs()`](https://matt17br.github.io/autoXplainR/reference/model_tradeoffs.md)
-offers optional performance/resource comparisons. Its default size axis
-measures approximate R object storage, not structural complexity. Use it
-when storage or runtime is relevant to a concrete constraint; a
-favorable Pareto position is not a model-selection rule.
+offers optional performance/resource comparisons. Its default cost uses
+a recorded repeated prediction benchmark when available, then retained
+fit time, evaluation-batch prediction time, and R object size. It
+requires at least two finite score/cost pairs. Fit time excludes the
+search; R size includes retained diagnostics and excludes native
+allocations. Use these measurements for a concrete resource constraint;
+a favorable Pareto position is not a model-selection rule.
 
 For repeated prediction measurements on the same rows:
 

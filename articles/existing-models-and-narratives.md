@@ -301,9 +301,9 @@ rather than combining their predictions with saved scores.
 [`generate_dashboard()`](https://matt17br.github.io/autoXplainR/reference/generate_dashboard.md)
 and
 [`create_simple_dashboard()`](https://matt17br.github.io/autoXplainR/reference/create_simple_dashboard.md)
-were deprecated in 0.4.0 and remain compatibility entry points in 0.6.0.
-Replace them with `render_model_report(result, output_file)`. For a
-memo, pass `narrative = generate_natural_language_report(result)`. Each
+were deprecated in 0.4.0 and remain available for compatibility. Replace
+them with `render_model_report(result, output_file)`. For a memo, pass
+`narrative = generate_natural_language_report(result)`. Each
 compatibility call emits one migration warning. Use
 [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
 followed by

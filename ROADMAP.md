@@ -69,6 +69,22 @@ with a larger boosting grid. The wide million-row fitting case also
 completed, but required nearly 12 GiB peak memory and a 3.34 GB saved
 result. Those costs still constrain practical use.
 
+## 0.8.0 candidate: tabular fitting and inspectable search
+
+The unreleased candidate adds a regularized/forest/boosting portfolio
+with shared-sample screening, complete CV for finalists, inner boosting
+round selection, and size-aware forest budgets. Reports connect
+screening, stopping, requested settings and actual fits. Native forest
+and boosting work can use up to four available CPU cores automatically;
+folds and settings remain sequential.
+
+The [competitive-tabular
+work](https://matt17br.github.io/autoXplainR/validation/competitive-tabular/README.md)
+separates development measurements from final acceptance. Predictive
+quality, resource costs, report usefulness and release verification
+remain separate gates; an implemented control or a passing local check
+does not establish that they passed.
+
 ## Next: interoperability and demonstrated usefulness
 
 1.  **Framework-specific adapters.**
@@ -90,8 +106,9 @@ result. Those costs still constrain practical use.
 4.  **Compatibility and performance.** Extend the measured workloads to
     more real datasets, hardware and evaluation sizes, alongside
     old-result migration fixtures. Keep fitting, interval calculation,
-    report export and browser measurements separate. Establish their
-    resource costs before adding parallel execution. Assess a compact
+    report export and browser measurements separate. Establish resource
+    costs before adding parallel scheduling across folds or settings
+    beyond the existing bounded native threading. Assess a compact
     inference export separately from the evidence-rich result, with
     native serialization sizes and cold prediction checks; R object
     sizes alone cannot establish deployment memory requirements.

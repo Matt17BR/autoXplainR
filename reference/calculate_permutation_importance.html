@@ -13,7 +13,7 @@ stability, and the evaluation contract required for an explanation audit."></hea
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,12 +100,15 @@ stability, and the evaluation contract required for an explanation audit.</p>
 
 
 <dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
-<dd><p>One of <code>"auto"</code>, <code>"rmse"</code>, <code>"mae"</code>, <code>"logloss"</code>,
+<dd><p>One of <code>"auto"</code>, <code>"rmse"</code>, <code>"rmsle"</code>, <code>"mae"</code>, <code>"logloss"</code>,
 <code>"brier"</code>, <code>"accuracy"</code>, or <code>"auc"</code>. The result-style names
-<code>"log_loss"</code> and <code>"brier_score"</code> are accepted as aliases. With <code>"auto"</code>,
+<code>"log_loss"</code>, <code>"brier_score"</code>, and <code>"roc_auc"</code> are accepted as aliases. With <code>"auto"</code>,
 an explainer made from an <code>autoxplain_result</code> uses that result's primary
 evaluation metric; otherwise regression defaults to RMSE and
-classification to log loss.</p></dd>
+classification to log loss. RMSLE requires nonnegative outcomes and
+predictions; it does not clip negative predictions. A feature with a
+negative shuffled prediction has unavailable importance, with the failed
+repeat recorded. Other features can still be assessed.</p></dd>
 
 
 <dt id="arg-n-repeats">n_repeats<a class="anchor" aria-label="anchor" href="#arg-n-repeats"></a></dt>

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">AutoXplainR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -340,7 +340,7 @@ unobserved inputs. Changed models need a new evaluation via
 with saved scores.</p>
 <p><code><a href="../reference/generate_dashboard.html">generate_dashboard()</a></code> and
 <code><a href="../reference/create_simple_dashboard.html">create_simple_dashboard()</a></code> were deprecated in 0.4.0 and
-remain compatibility entry points in 0.6.0. Replace them with
+remain available for compatibility. Replace them with
 <code>render_model_report(result, output_file)</code>. For a memo, pass
 <code>narrative = generate_natural_language_report(result)</code>. Each
 compatibility call emits one migration warning. Use

@@ -32,10 +32,13 @@ subgroup_performance(result, by, model = NULL, min_rows = 10L, metric = NULL)
 
 - metric:
 
-  Optional loss metric for this descriptive comparison: `rmse` or `mae`
-  for regression; `log_loss` or `brier_score` for classification. `NULL`
-  uses the recorded evaluation metric. This does not change the official
-  leaderboard, selected model, or stored evaluation evidence.
+  Optional score for this descriptive comparison: `rmse`, `mae` or
+  `rmsle` for regression; `log_loss` or `brier_score` for
+  classification; also `roc_auc` for binary classification. RMSLE
+  requires nonnegative values; AUC is unavailable in groups containing
+  only one outcome class. `NULL` uses the recorded evaluation metric.
+  This does not change the official leaderboard, selected model, or
+  stored evaluation evidence.
 
 ## Value
 

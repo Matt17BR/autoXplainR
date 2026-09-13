@@ -105,21 +105,23 @@ result$leaderboard
 #> 4    4 simple_baseline intercept-only baseline  baseline baseline   stats
 #>       rmse      mae     r_squared training_time_ms model_size_kb complexity
 #> 1 2.003144 1.662172  9.339624e-01                1      67.79688          3
-#> 2 2.241207 1.837860  9.173332e-01                2      52.28125         20
-#> 3 4.319412 3.508486  6.929447e-01                4      47.83594          4
-#> 4 7.795201 6.683058 -5.052385e-05                3      56.07812          1
+#> 2 2.241207 1.837860  9.173332e-01                1      52.28125         20
+#> 3 4.319412 3.508486  6.929447e-01                3      47.83594          4
+#> 4 7.795201 6.683058 -5.052385e-05                2      56.07812          1
 #>   fit_warning prediction_time_ms
 #> 1                              1
 #> 2                              1
-#> 3                              2
+#> 3                              1
 #> 4                              0
 result$evaluation$metric_definitions
-#>                                                                                                            rmse 
-#>                        "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
-#>                                                                                                             mae 
-#>                                     "Average absolute prediction error in the target's units; lower is better." 
-#>                                                                                                       r_squared 
-#> "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."
+#>                                                                                                                             rmse 
+#>                                         "Typical prediction error, with larger mistakes weighted more heavily; lower is better." 
+#>                                                                                                                              mae 
+#>                                                      "Average absolute prediction error in the target's units; lower is better." 
+#>                                                                                                                            rmsle 
+#> "Root mean squared log1p error; lower is better. Requires nonnegative outcomes and predictions; invalid values are not clipped." 
+#>                                                                                                                        r_squared 
+#>                  "Share of evaluation-set variation explained relative to predicting the evaluation-set mean; higher is better."
 result$evaluation$notes
 #>   severity                 code                                       message
 #> 1  caution small_evaluation_set Only 48 rows were available for test scoring.

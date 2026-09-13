@@ -5,15 +5,18 @@ Builds a two-objective comparison from an
 or
 [`evaluate_models()`](https://matt17br.github.io/autoXplainR/reference/evaluate_models.md)
 result. Predictive performance is taken from the evaluation leaderboard
-and the secondary axis defaults to approximate model-object size. For
-local models this is R's in-memory
-[`object.size()`](https://rdrr.io/r/utils/object.size.html) estimate. It
-includes retained diagnostics, may count shared data repeatedly and
-excludes native engine allocations. H2O uses an engine-reported size
-when available. These values are not a saved-file or deployment-memory
-comparison. Size and runtime are resource proxies, not structural model
-complexity. A model is Pareto-efficient when no other supplied model is
-at least as good on both dimensions and strictly better on one.
+and the secondary axis defaults to a usable repeated prediction
+benchmark when supplied, then retained fit time, evaluation-batch
+prediction time, and approximate model-object size. A default cost needs
+at least two finite score/cost pairs. For local models size is R's
+in-memory [`object.size()`](https://rdrr.io/r/utils/object.size.html)
+estimate. It includes retained diagnostics, may count shared data
+repeatedly and excludes native engine allocations. H2O uses an
+engine-reported size when available. These values are not a saved-file
+or deployment-memory comparison. Size and runtime are resource proxies,
+not structural model complexity. A model is Pareto-efficient when no
+other supplied model is at least as good on both dimensions and strictly
+better on one.
 
 ## Usage
 
@@ -40,9 +43,10 @@ model_tradeoffs(
 - complexity_metric:
 
   Numeric leaderboard or model-metadata column. The argument name is
-  retained for compatibility; `NULL` prefers model size, then training
-  or prediction time, and the returned object labels the exact metric as
-  a resource or structural-complexity proxy.
+  retained for compatibility; `NULL` prefers a recorded repeated
+  prediction benchmark, retained fit time, batch prediction time, then
+  model size. The returned object labels the exact metric as a resource
+  or structural-complexity proxy.
 
 - include_baseline:
 
