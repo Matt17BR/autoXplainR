@@ -6,6 +6,16 @@ load time and any operation that fails or stalls. Check the visible result
 against the saved model and independent prediction scores. A smaller
 development report cannot establish that the full-data report works.
 
+The timed public call uses the default summary report. Complete its aggregate
+tasks in that file first. Summary mode deliberately omits individual records;
+disclosing that omission does not complete an individual-error task. Follow the
+report's export command on the saved fitted result to create a separate
+`report_data = "rows"` file for those tasks. Record that export's elapsed time,
+peak memory, byte size and sampled row coverage separately. Do not count it as
+part of the original one-call timing or imply that the default HTML contained
+those records. Check linked input values, outcomes, predictions and split IDs
+against independent saved values for the exported rows.
+
 ## Choose a model and understand the cost
 
 1. Find the selected model and explain why it was selected without reading

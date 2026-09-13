@@ -87,22 +87,53 @@ with sync_playwright() as p:
             page.keyboard.press('Tab')
             check(f'normal tab order reaches first graph row {width} {family}',
                   figure.locator('.selection-plot-link').first.evaluate('node=>document.activeElement===node'))
-            geometry = figure.locator('svg').evaluate('''svg=>{
+            geometry_script = '''svg=>{
               const b=svg.getBoundingClientRect();
               const texts=[...svg.querySelectorAll('text')].filter(t=>getComputedStyle(t).display!=='none'&&t.textContent.trim());
-              const clipped=texts.filter(t=>{const a=t.getBoundingClientRect();return a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1}).map(t=>t.textContent);
-              const small=texts.filter(t=>t.getBoundingClientRect().height<12).map(t=>t.textContent);
-              const overlaps=[];for(let i=0;i<texts.length;i++)for(let j=i+1;j<texts.length;j++){
-                const a=texts[i].getBoundingClientRect(),c=texts[j].getBoundingClientRect();
-                if(a.left<c.right&&a.right>c.left&&a.top<c.bottom&&a.bottom>c.top)overlaps.push([texts[i].textContent,texts[j].textContent]);}
-              return {clipped,small,overlaps,
+              // getBBox defaults to fill geometry, excluding the paper-colored
+              // text stroke that Firefox includes in getBoundingClientRect.
+              // Transform all corners so every check uses screen coordinates.
+              const labels=texts.map(t=>{
+                const box=t.getBBox(),matrix=t.getScreenCTM();
+                if(!matrix)throw new Error('Visible SVG text has no screen transform');
+                const corners=[[box.x,box.y],[box.x+box.width,box.y],
+                  [box.x,box.y+box.height],[box.x+box.width,box.y+box.height]]
+                  .map(([x,y])=>new DOMPoint(x,y).matrixTransform(matrix));
+                const left=Math.min(...corners.map(p=>p.x)),right=Math.max(...corners.map(p=>p.x));
+                const top=Math.min(...corners.map(p=>p.y)),bottom=Math.max(...corners.map(p=>p.y));
+                const client=t.getBoundingClientRect();
+                return {text:t.textContent,left,right,top,bottom,height:bottom-top,
+                  client:{left:client.left,right:client.right,top:client.top,bottom:client.bottom}};
+              });
+              const clipped=labels.filter(a=>a.left<b.left-1||a.right>b.right+1||a.top<b.top-1||a.bottom>b.bottom+1).map(a=>a.text);
+              const small=labels.filter(a=>a.height<12).map(a=>a.text);
+              const overlaps=[];for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){
+                const a=labels[i],c=labels[j];
+                if(a.left<c.right&&a.right>c.left&&a.top<c.bottom&&a.bottom>c.top)overlaps.push([a.text,c.text]);}
+              return {labels,clipped,small,overlaps,
                 ticks:[...svg.querySelectorAll('.selection-axis-tick')].filter(t=>getComputedStyle(t).display!=='none').map(t=>({value:+t.textContent,x:+t.getAttribute('x')})),
                 threshold:+svg.querySelector('.selection-cutoff').getAttribute('x1'),
                 rows:[...svg.querySelectorAll('.selection-plot-row')].map(r=>({
                   fold:[...r.querySelectorAll('.selection-fold-point')].map(x=>+x.getAttribute('cx')),
                   pooled:r.querySelector('.selection-score-point')?+r.querySelector('.selection-score-point').getAttribute('cx'):null}))};
-            }''')
+            }'''
+            geometry = figure.locator('svg').evaluate(geometry_script)
             check(f'label geometry {width} {family}', not geometry['clipped'] and not geometry['small'] and not geometry['overlaps'], geometry)
+            if width == 390 and family == 'tree':
+                row = figure.locator('.selection-plot-row').first
+                role = row.locator('.selection-role')
+                original_y = role.get_attribute('y')
+                expected_pair = [row.locator('.selection-row-label').text_content(), role.text_content()]
+                try:
+                    role.evaluate('(node,y)=>node.setAttribute("y",y)', row.locator('.selection-row-label').get_attribute('y'))
+                    settled(page)
+                    overlap = figure.locator('svg').evaluate(geometry_script)
+                    check('a real overlap between configuration and score text is rejected',
+                          expected_pair in overlap['overlaps'], overlap)
+                    figure.screenshot(path=str(args.output_dir/'text-overlap-negative-control.png'))
+                finally:
+                    role.evaluate('(node,y)=>node.setAttribute("y",y)', original_y)
+                    settled(page)
             a, b = geometry['ticks'][:2]
             def position(value):
                 return a['x']+(value-a['value'])*(b['x']-a['x'])/(b['value']-a['value'])

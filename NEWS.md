@@ -52,6 +52,9 @@
 - Explanation functions and report generation now leave R's random-number
   state unchanged, including after a prediction error. Internal sampling and
   the returned statistics are unchanged.
+- Summary reports include a complete R command for exporting linked individual
+  error records. The command reuses the fitted result and creates a separate
+  HTML file, with the exported data scope explained beside it.
 
 # AutoXplainR 0.7.0
 

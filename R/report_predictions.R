@@ -567,8 +567,15 @@ explorer_predictions <- function(result, models) {
         )
       } else {
         paste0(
-          '<p class="prediction-scope">Individual errors are not embedded. ',
-          'Use report_data = "rows" to export linked evaluation records.</p>'
+          '<p class="prediction-scope">Individual error records are not included.</p>',
+          '<details class="prediction-export-help"><summary>Include individual error records</summary>',
+          "<p>Run this in R with your fitted result. The new HTML includes individual input values, ",
+          "outcomes and predictions; anyone receiving it can read the exported records.</p>",
+          '<pre tabindex="0" role="region" aria-label="Export a report with individual records"><code>',
+          html_escape(paste0(
+            'render_model_report(result, "report-with-rows.html",\n',
+            '  report_data = "rows")'
+          )), "</code></pre></details>"
         )
       },
       '<details><summary>Use this fitted model in R</summary><pre tabindex="0"><code data-prediction-code>',

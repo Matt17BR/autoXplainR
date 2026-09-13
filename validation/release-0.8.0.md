@@ -46,10 +46,29 @@ not establish acceptance quality.
 
 The tested source snapshot is `candidate-v6`, inventory SHA-256
 `afa4e63bfa1506cdce8e51d1b0271aa844f02a868d20123df6b3b07710e438ed`.
-The final intended acceptance installation is `candidate-v7`, inventory SHA-256
-`3a1c080bf67f906d29713431d1f4a9fc1a52406c6bbc82fb3a63380b3546413e`.
-Only README wording and two overview screenshot copies differ between these
-snapshots. R code, report assets, tests, help files and DESCRIPTION are identical.
+The most recent frozen installation is `candidate-v8`, inventory SHA-256
+`2db164f2c2ff5f98f23fc5863094281927baa5fd43f23e19e164baba8daa5a06`.
+README wording, two overview screenshot copies and two test files differ between
+these snapshots. R code, report assets, help files and DESCRIPTION are identical.
+The test changes isolate three planning checks from optional engine installation;
+they preserve the real dependency guard and native fitting tests. Both affected
+files passed 260 assertions with engines installed. A fresh process also passed
+the 59 relevant assertions without loading any optional native engine namespace.
+
+A subsequent walkthrough found that summary reports offered only an argument
+fragment for exporting individual errors. The working report now provides a
+collapsed help panel with a complete command and the exported data scope. The
+command was copied from the HTML and executed for eight summary/none paths
+across four saved synthetic results. Every export contained linked records and
+every retained model's predictions stayed unchanged. All 52 visible-help checks
+passed on desktop and phone, including keyboard opening and code scrolling.
+The three affected report test files and source lint passed. A new snapshot
+must include this help before acceptance; candidate-v8 does not contain it.
+
+The gallery was regenerated from the same saved fitted examples after that
+change. All three HTML files and eight screenshots were byte-identical because
+the public examples already export individual records. The refreshed manifest
+binds the new source, and all 118 committed-gallery browser checks passed.
 
 | Check | Result | Scope |
 | --- | --- | --- |
@@ -59,6 +78,7 @@ snapshots. R code, report assets, tests, help files and DESCRIPTION are identica
 | Report exploration | 1,382 checks passed; no browser errors | Four example types in Chromium; separate contrast review found no confirmed failure in 355 undecided occurrences |
 | Committed gallery | 118 smoke checks passed | All three HTML reports and eight screenshots regenerated and visually inspected |
 | Adaptive selection UI | Chromium 608 and WebKit 596 checks passed | Independent selection fixture, keyboard, deep links, mobile charts and print; Firefox remains a CI gate |
+| Fold-table layout and print | 131 checks passed | Named fold table, complete errors, mobile scrolling and an inspected PDF page |
 
 The candidate archive checked locally has SHA-256
 `c899d2cf0f51403e2650452f3d204769f2e417b611673c9de52e66b4e3211f29`
@@ -78,6 +98,17 @@ initially off-screen labels became visible after scrolling; all 14 checked
 keyboard states exposed the selected tab. The hollow fold marker is faint but
 passes the graphical contrast threshold. This review resolves those recorded
 items and does not claim a complete accessibility certification.
+
+The first CI round passed current and minimum native engines, numerical
+references, lint, and 93.12% statement coverage. The separate
+[live H2O run](https://github.com/Matt17BR/autoXplainR/actions/runs/34764504254)
+passed on commit `7d0bc1edf604aaea5b1f6f002908ede3e570d3c6`.
+The next round passed all seven R-check jobs and all three native-engine jobs,
+plus lint, statistics and coverage. Its Firefox chart check failed on text
+rectangle overlaps; the screenshots show separate readable labels. The
+[CI review](competitive-tabular/ci-review-20260913.md) records that diagnosis
+and the pending cross-browser verification. No package code changed in response
+to those CI failures.
 
 ## Remaining gates
 
