@@ -6,12 +6,14 @@ rather than installed package behavior.
 
 ## Repository audit
 
-- The 2026-09-13 review covers changes from `v0.7.0` through commit
-  `23d541d1e2889da710c9fbe09252aa617f5dbf89`. All six commits record Matteo
-  Mazzarelli's account and email as author and committer. No new contributor or
-  bundled third-party implementation was identified in that review. Git
-  attribution records authorship claims; it does not independently establish
-  ownership.
+- The initial 2026-09-13 review covered six commits from `v0.7.0` through
+  `23d541d1e2889da710c9fbe09252aa617f5dbf89`. A follow-up review covered the next
+  five commits through `c9a3fb0b66b54cac7bfe2d01eb75b4868833ecda`, comprising
+  68 changed files and 12 additions. The initial commits record Matteo
+  Mazzarelli's account and email as author and committer; the next five record
+  `Matt17BR <matteo.mazzarelli@gmail.com>` in both roles. No additional contributor
+  or newly bundled third-party implementation was identified. Git attribution
+  records authorship claims; it does not independently establish ownership.
 - The package includes the unmodified UMD distribution of fflate 0.8.3, with an
   added attribution header, for offline report decompression. Its MIT license
   and 2026 Arjun Barrett copyright notice are retained in
@@ -31,8 +33,11 @@ rather than installed package behavior.
   are recorded in `validation/competitive-tabular/README.md`; `sources.json`
   records the downloaded archive and member hashes. Raw observations, complete
   predictions and fitted models remain outside Git. Committed results contain
-  compact measurements, feature summaries and file hashes. The benchmark
-  directory is excluded from the R source archive.
+  measurements, feature summaries, file hashes, benchmark command references
+  and host/resource metadata, including local cache paths. The published
+  host-wide process snapshot contains counts and a digest rather than process
+  arguments; raw diagnostic originals remain in the private cache. The
+  benchmark directory is excluded from the R source archive.
 - Optional model engines, reporting tools, and hosted narrative providers are
   integrations reached through declared R dependencies or user-supplied API
   endpoints. Their source code and credentials are not redistributed.

@@ -8,9 +8,12 @@ This is a preparation note, not a CRAN submission or acceptance record.
 CRAN submission is not part of this GitHub release preparation.
 
 The 0.8.0 release gates and verification of its published archive and public
-site remain pending. Local candidate checks and development measurements do
-not establish those outcomes. The comparison protocols and recorded development
-runs are under `validation/competitive-tabular/`; they are not an acceptance claim.
+site remain pending. Completed full-data Covertype and Bank calls and current
+platform/native-engine/H2O checks are recorded in `validation/release-0.8.0.md`,
+alongside pending YearPrediction, report and gallery checks. Those results do
+not establish a verified release archive or public site. Comparison protocols,
+development runs and machine-readable results are under
+`validation/competitive-tabular/`.
 
 Historical 0.7.0 evidence is recorded in `validation/release-0.7.0.md`: all
 16 release jobs passed for that release, followed by verification of its actual

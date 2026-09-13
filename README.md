@@ -72,8 +72,11 @@ fold from 200 input rows. Longer importance calculations also report completed
 shuffles, at most once every 30 seconds. Use `verbosity = "quiet"` to silence
 progress or `"info"` to show it on smaller datasets too.
 These controls were added after release 0.7.0. The
-[real-data comparisons](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/DEVELOPMENT.md)
-record predictive quality, failures and measured costs for each tested request.
+[0.8.0 validation record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/release-0.8.0.md)
+reports completed full-data Covertype and Bank comparisons, remaining acceptance
+work and measured costs. The
+[development record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/competitive-tabular/DEVELOPMENT.md)
+also retains the earlier failures and interrupted requests.
 
 `mtcars` is a small teaching example, not evidence that a model is ready for use.
 For your own analysis, choose predictors that are available when a prediction

@@ -1,10 +1,12 @@
 # AutoXplainR 0.8.0 validation record
 
 Status: candidate under review. No 0.8.0 tag or release has been published.
-All 14 CI jobs passed on the preceding candidate. Its first full-data run
-passed YearPrediction and then stopped on a Covertype screening overflow.
-Repairs are being verified in a follow-up candidate; final package checks,
-remaining full-data calls and publication remain release gates.
+The repaired candidate has completed Covertype and Bank, including the full
+public call, cold replay and independent prediction checks. YearPrediction is
+still running. On commit `c9a3fb0`, platform, native-engine, H2O, statistical,
+coverage and lint checks passed. The browser workflow stopped at the stale
+gallery guard after a diagnostic change; regeneration and browser verification
+remain required. This is not a completed release validation.
 
 ## What changed
 
@@ -22,6 +24,90 @@ native references, quality thresholds and process budgets. The
 interruptions alongside successes. They do not establish full-data acceptance.
 The complete public call must fit, explain, render and save its results within
 7,200 seconds and 24 GiB on each declared acceptance case.
+
+## Current full-data results
+
+These are complete `portfolio = "tabular"` calls with automatic search,
+five-fold CV, default explanations, a summary report and a saved result.
+The [machine-readable record](competitive-tabular/public-call-v14.json) retains
+the individual model scores, actual controls, artifact hashes and separately
+charged replay and verification costs. The evaluation partitions were inspected
+in earlier development and are not new unseen holdouts. Native references are
+bounded, calibrated comparisons, not exhaustive optimization.
+
+| Dataset | Training / evaluation rows | AutoXplainR XGBoost log loss | Native XGBoost log loss | AutoXplainR forest log loss | Native forest log loss |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Covertype | 464,810 / 116,202 | 0.077365 | 0.083841 | 0.163064 | 0.141437 |
+| Bank | 32,951 / 8,237 | 0.272968 | 0.273094 | 0.273550 | 0.278254 |
+
+Lower log loss is better. Both primary models and forests pass the thresholds
+fixed in the protocol. Covertype's 256-tree forest is nevertheless 15.29% worse
+than its 500-tree native reference on log loss, close to the permitted limit
+of 0.164652. That is a remaining quality and runtime tradeoff, not parity.
+Its XGBoost model improves log loss by 7.72%, but every training fold reaches
+the 2,000-round cap. This is a bounded search, not evidence that further
+training would be unhelpful.
+
+| Dataset | Actual native threads | Complete public process | Observed peak RSS | Summary HTML |
+| --- | ---: | ---: | ---: | ---: |
+| Covertype | 4 | 80 min 7 s | 5.67 GiB | 12.04 MB |
+| Bank | 1 | 5 min 23 s | 0.64 GiB | 2.08 MB |
+
+These shared-host measurements include fitting, explanations, rendering and
+saving. They exclude the separately measured cold replay and verification.
+Bank's automatic policy actually resolved to one native thread; its comparisons
+use the matching one-thread references. All four saved models on each dataset
+reproduced every evaluation prediction exactly. Independently recomputed scores
+also agree for all three fully cross-validated configurations on each dataset.
+
+Bank illustrates why accuracy alone is insufficient. Positive outcomes make up
+11.27% of evaluation records. At the default 0.5 cutoff, the primary model has
+90.08% accuracy but only 24.03% positive-class recall. In the report, changing
+the cutoff to 0.2 exposes the tradeoff: 57.11% recall and 45.26% precision.
+This interactive evaluation is not a claim that 0.2 is a validated deployment
+threshold.
+
+Direct walkthroughs of both original reports covered model controls, search,
+costs, data relationships, comparative explanations and prediction diagnostics
+before consulting independent numerical answers. Independent rendered-value,
+offline and responsive checks and actual bounded rows exports remain pending.
+These are implementer walkthroughs, not participant research.
+
+The Bank walkthrough found a real persistence defect: a warning that 551
+supplied evaluation records matched training values appeared in R but was lost
+from the saved result and report. Exact matches alone do not prove dependence.
+Commit `a37af69` retains that diagnostic for new fits and explains it in the
+report's Checks tab. It changes neither fitting nor selection. Existing v14
+artifacts remain unchanged and do not acquire a warning merely by rendering
+them again. Remote tests verify saved-result persistence, unchanged fits and
+predictions, and the corresponding live H2O path.
+
+The acceptance source inventory is
+`6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983`.
+Of its 84 runtime files, 81 remain byte-identical at `c9a3fb0`; the three R
+changes retain the overlap diagnostic. The final release archive will have its
+own identity and checks. The v14 measurements must not be presented as a fresh
+benchmark of a later archive.
+
+## Current CI scope
+
+Commit `c9a3fb0b66b54cac7bfe2d01eb75b4868833ecda` passed all seven R-check jobs,
+all three native-engine jobs, statistics, lint, coverage and a separate live
+H2O run. Statement coverage was 93.11%. The native jobs tested both current and
+declared minimum engine versions. Live H2O passed 110 assertions with package
+and server 3.44.0.3, the declared minimum, and Java 17.
+
+The R 4.1 job passed with one note for unavailable suggested dependencies and
+612 test warnings: 606 strict partial-match warnings from `rpart` 4.1.16's own
+prediction code and six rank-deficient linear-model fixture warnings. These
+are retained, previously documented compatibility findings. Modern R jobs had
+no test warnings. The source R-devel check's one note covers new-submission
+status and two benchmark links awaiting the main-branch merge.
+
+The browser job failed before generation or browser execution because three
+runtime files no longer match the gallery manifest. None of its downstream
+checks ran. Earlier passing browser evidence remains historical; a real gallery
+regeneration, visual review and passing final browser run are release gates.
 
 ## Defects found during review
 
@@ -107,8 +193,8 @@ keyboard states exposed the selected tab. The hollow fold marker is faint but
 passes the graphical contrast threshold. This review resolves those recorded
 items and does not claim a complete accessibility certification.
 
-The [provenance review](../PROVENANCE.md) covers the six commits from `v0.7.0`
-through the candidate head. The bundled decompressor and its retained MIT
+The initial [provenance review](../PROVENANCE.md) covered the six commits from
+`v0.7.0` through `23d541d`. The bundled decompressor and its retained MIT
 license passed the vendor check. Benchmark data sources and attribution are
 recorded; their raw observations, complete predictions and fitted models are
 not committed or included in the source archive.
@@ -162,9 +248,10 @@ the large-data acceptance results.
 All eight native references completed fitting, held-out scoring and independent
 verification. Every saved model reproduced all evaluation predictions exactly in
 a fresh R session. The one-thread Bank references match the declared automatic
-thread policy; the public call's actual resolved controls still need checking.
+thread policy; the public call's actual resolved controls had not yet been checked
+at this stage. The completed v14 result above now confirms one thread.
 The candidate, installed package, protocol and exact native artifacts
-were frozen before held-out scoring. The final acceptance manifest has SHA-256
+were frozen before held-out scoring. The original v9 acceptance manifest has SHA-256
 `a0ff580cb3a565dd6ccfad7c1532d48d035ffdd2414b17d12160537a7655b510`.
 The separately reviewed controller began on 13 September 2026 at 16:11 UTC.
 
@@ -241,17 +328,22 @@ manifest refreshed. Final v14 source inventory:
 `6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983`.
 The final print fix passed 13 independent browser/PDF checks: closed support
 is omitted from print, while expanded support and its table remain printable.
-The final archive check and three final-candidate public calls are still required. The superseded v13 follow-up plan was checked but never
-authorized or run.
+The v14 archive check completed with no errors or warnings and one note for
+new-submission status and the same two pre-merge links. It checked examples,
+vignette scripts and manuals; tests were run separately. Its archive SHA-256 is
+`e5d62c690fe36b54ac74eb3a14dfc8b30797204b75b17d67c9f9843b819702d1`.
+Covertype and Bank have since completed on this candidate, as recorded above;
+YearPrediction remains in progress. The superseded v13 follow-up plan was
+checked but never run. A final release archive still requires its own checks.
 
 ## Remaining gates
 
-- Complete the public call on all three full datasets and compare its results
-  with the verified native and applicable published-version references.
-- Complete final-source verification of the repaired quota arithmetic, native
-  progress and report presentation, including an actual bounded rows export.
-- Independently check quality, every retained model's full training population,
-  full predictions, cold replay, resource use and the actual large reports.
+- Complete YearPrediction's public call, cold replay and independent verification.
+  Covertype and Bank have passed those stages; preserve their remaining tradeoffs.
+- Finish independent report checks and bounded rows exports for all three actual
+  saved results, including visible records, predictions and offline behavior.
+- Render and inspect the retained-overlap diagnostic on the final source, then
+  regenerate and visually review the public gallery and pass browser CI.
 - Require the integrated source and publication guard tests in final CI.
   Preserve the original frozen harness and private acceptance diagnostics.
 - Retain the passing candidate platform/browser evidence and require the

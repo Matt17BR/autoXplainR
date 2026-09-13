@@ -65,10 +65,12 @@ refits the retained settings on all training rows and evaluates them on a
 separate holdout. The report includes those models and an intercept-only baseline.
 Regression, binary classification and multiclass classification use the same call.
 
-Small datasets skip screening and cross-validate each scheduled preset. Larger real-data
-comparisons of the new search are in progress; the new defaults do not establish
-competition-level performance. Inspect the fitted results before deciding what
-additional modeling work the data need.
+Small datasets skip screening and cross-validate each scheduled preset. The
+[0.8.0 validation record](https://github.com/Matt17BR/autoXplainR/blob/main/validation/release-0.8.0.md)
+reports completed Covertype and Bank comparisons, including forest quality
+tradeoffs, measured costs and remaining acceptance work. These results do not
+establish competition-level performance. Inspect the fitted results before
+deciding what additional modeling work the data need.
 
 ## Choose a portfolio
 

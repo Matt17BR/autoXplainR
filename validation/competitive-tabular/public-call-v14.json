@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-13T20:53:27.780459+00:00",
+  "status": "two_public_calls_verified_yearprediction_pending",
+  "candidate": "candidate-v14",
+  "source_inventory_sha256": "6d7e7f8eea29e8168b3665c6923e46f33ce56d4b35d0d4d4384a58ea5cf4f983",
+  "acceptance_freeze_sha256": "19224e05a92409af1f71eea9df53ceadfc1a2c8475fef5834a756d66978294fe",
+  "cohort": "public-default-followup-v14",
+  "scope": "Original complete public processes, including default explanations, summary HTML and saved results. Replay and verification costs are separate. Previously inspected evaluation partitions are not new unseen holdouts. This is not final report acceptance or release verification.",
+  "cases": {
+    "covertype": {
+      "status": "public_call_replay_and_verification_passed",
+      "training_rows": 464810,
+      "evaluation_rows": 116202,
+      "resolved_public_defaults": {
+        "seed": 123,
+        "nfolds": 5,
+        "max_models": 18,
+        "threads": 4,
+        "threads_requested": "auto",
+        "fold_source": "automatic",
+        "task": "multiclass",
+        "explanations": {
+          "top_features": 8,
+          "n_repeats": 20,
+          "max_models": 5,
+          "explanation_rows": 5000
+        }
+      },
+      "metrics_by_model": {
+        "main_model": {
+          "log_loss": 0.07736537702719332,
+          "brier": 0.04247368767694909,
+          "accuracy": 0.9716269943718697,
+          "recall_by_class": {
+            "spruce_fir": 0.9672866314199395,
+            "lodgepole_pine": 0.9802329685845393,
+            "ponderosa_pine": 0.9734302894700042,
+            "cottonwood_willow": 0.8888888888888888,
+            "aspen": 0.8846761453396524,
+            "douglas_fir": 0.9452922545349841,
+            "krummholz": 0.9680643588493418
+          }
+        },
+        "forest_model": {
+          "log_loss": 0.1630635955115078,
+          "brier": 0.0782201966826592,
+          "accuracy": 0.9577890225641555,
+          "recall_by_class": {
+            "spruce_fir": 0.9472715256797583,
+            "lodgepole_pine": 0.976314860571832,
+            "ponderosa_pine": 0.9633617675849532,
+            "cottonwood_willow": 0.8451730418943534,
+            "aspen": 0.7888362295945235,
+            "douglas_fir": 0.9026778001727613,
+            "krummholz": 0.9407606045831302
+          }
+        },
+        "regularized_model": {
+          "log_loss": 0.641208791057386,
+          "brier": 0.38461506679431984,
+          "accuracy": 0.7224316276828282,
+          "recall_by_class": {
+            "spruce_fir": 0.6997262084592145,
+            "lodgepole_pine": 0.7991528415107659,
+            "ponderosa_pine": 0.8467347224164452,
+            "cottonwood_willow": 0.26229508196721313,
+            "aspen": 0.00105318588730911,
+            "douglas_fir": 0.18197523754678951,
+            "krummholz": 0.5336421257922964
+          }
+        },
+        "simple_baseline": {
+          "log_loss": 1.2051518872584772,
+          "brier": 0.6230932802048637,
+          "accuracy": 0.4875991807369925,
+          "recall_by_class": {
+            "spruce_fir": 0,
+            "lodgepole_pine": 1,
+            "ponderosa_pine": 0,
+            "cottonwood_willow": 0,
+            "aspen": 0,
+            "douglas_fir": 0,
+            "krummholz": 0
+          }
+        }
+      },
+      "quality": {
+        "primary_model": "main_model",
+        "primary_loss": 0.07736537702719332,
+        "primary_limit": 0.09422459758600035,
+        "primary_pass": true,
+        "forest_loss": {
+          "forest_model": 0.1630635955115078
+        },
+        "forest_limit": 0.16465215371131392,
+        "forest_pass": true
+      },
+      "native_references": {
+        "native-score-4t-v1/ranger": {
+          "variant": "ranger",
+          "metrics": {
+            "log_loss": 0.14143665540114256,
+            "brier": 0.06657081913775326,
+            "accuracy": 0.963485998519819,
+            "recall_by_class": {
+              "spruce_fir": 0.9549896148036254,
+              "lodgepole_pine": 0.9789092834451112,
+              "ponderosa_pine": 0.9682561879457419,
+              "cottonwood_willow": 0.8724954462659381,
+              "aspen": 0.8199052132701422,
+              "douglas_fir": 0.9127555427584221,
+              "krummholz": 0.9514870794734276
+            }
+          },
+          "source_cohort": "native-score-4t-v1"
+        },
+        "native-score-4t-v1/xgboost": {
+          "variant": "xgboost",
+          "metrics": {
+            "log_loss": 0.08384054326000032,
+            "brier": 0.04504408262168548,
+            "accuracy": 0.9706287327240495,
+            "recall_by_class": {
+              "spruce_fir": 0.9652095921450151,
+              "lodgepole_pine": 0.979932933286269,
+              "ponderosa_pine": 0.973570130051741,
+              "cottonwood_willow": 0.8779599271402551,
+              "aspen": 0.885202738283307,
+              "douglas_fir": 0.9438525770227469,
+              "krummholz": 0.9675767918088737
+            }
+          },
+          "source_cohort": "native-score-4t-v1"
+        }
+      },
+      "native_reference_scope": "Retained v9 native references matched to actual package threads, including a fixed 500-tree native forest. These are bounded comparisons, not exhaustive optimization.",
+      "complete_process_seconds": 4807.255708657001,
+      "observed_peak_rss_kib": 5940424,
+      "process_wall_limit_seconds": 7200,
+      "address_space_limit_bytes": 25769803776,
+      "search_elapsed_seconds": 3199.4130000000005,
+      "separate_stages": {
+        "replay": {
+          "elapsed_seconds": 37.54,
+          "observed_peak_rss_kib": 4694772
+        },
+        "verification": {
+          "elapsed_seconds": 67.86,
+          "observed_peak_rss_kib": 5628000
+        }
+      },
+      "replay_max_absolute_difference": {
+        "main_model": 0,
+        "forest_model": 0,
+        "regularized_model": 0,
+        "simple_baseline": 0
+      },
+      "complete_cv_configurations": 3,
+      "cv_score_differences": {
+        "boosting_03": 0,
+        "forest_02": 0,
+        "regularized_03": 0
+      },
+      "report": {
+        "bytes": 12044865,
+        "sha256": "d0e8cfbca703cf812c5c55c94b120841f6426d7493cd760e1a9b484fcc154fff"
+      },
+      "original_artifact_sha256": {
+        "process": "f16cac4ac42a69ecd57f693f19b1e5ec9ad585bae5925d5cdd1d3bec11ab6bdb",
+        "summary": "56c32d95e21ef5da5cd7747a9d1326fe2cb11cac97c5cba204faa6b87ee5a5eb",
+        "acceptance": "d16553b7b10889a46ac892c5cefdfe1207e75ea4bcb568c411f432d64055a149",
+        "replay": "d095d37bf28620733759022910be24d8d403fa6a69dcd4e12a17201a1ec706e5",
+        "result": "320d871b3a0ac1ebaf714b491e6dbed6945d94b77791a2a4f900ddc4a5776703",
+        "predictions": "cfa625a83b799c0d8bd51ae76abd332c0ee35649ea9d792030726db3451161c2"
+      },
+      "metadata_audit_sha256": "6303e8b3881470821722fc3bef98dcc16a93c4c9afb244321ae13d957da4d48a",
+      "report_checks": "Manual aggregate workflow inspected; independent rendered-value/offline checks and bounded rows export remain pending."
+    },
+    "bank": {
+      "status": "public_call_replay_and_verification_passed",
+      "training_rows": 32951,
+      "evaluation_rows": 8237,
+      "resolved_public_defaults": {
+        "seed": 123,
+        "nfolds": 5,
+        "max_models": 18,
+        "threads": 1,
+        "threads_requested": "auto",
+        "fold_source": "automatic",
+        "task": "binary",
+        "explanations": {
+          "top_features": 8,
+          "n_repeats": 20,
+          "max_models": 5,
+          "explanation_rows": 5000
+        }
+      },
+      "metrics_by_model": {
+        "main_model": {
+          "log_loss": 0.2729682725727712,
+          "brier": 0.07742015634643808,
+          "accuracy": 0.9008134029379629,
+          "recall_by_class": {
+            "no": 0.9846764263237104,
+            "yes": 0.24030172413793102
+          },
+          "auc": 0.7994524936191092,
+          "average_precision": 0.4553365968552202,
+          "prevalence": 0.11266237707903363
+        },
+        "forest_model": {
+          "log_loss": 0.27355030330750496,
+          "brier": 0.07701730911496024,
+          "accuracy": 0.8991137550078913,
+          "recall_by_class": {
+            "no": 0.9818032562594062,
+            "yes": 0.2478448275862069
+          },
+          "auc": 0.7935443460117663,
+          "average_precision": 0.4561267104051498,
+          "prevalence": 0.11266237707903363
+        },
+        "regularized_model": {
+          "log_loss": 0.2783142983052417,
+          "brier": 0.07880162650565191,
+          "accuracy": 0.898385334466432,
+          "recall_by_class": {
+            "no": 0.9850868791900397,
+            "yes": 0.21551724137931033
+          },
+          "auc": 0.7886310748203679,
+          "average_precision": 0.4510129028127215,
+          "prevalence": 0.11266237707903363
+        },
+        "simple_baseline": {
+          "log_loss": 0.3520457299916091,
+          "brier": 0.09996956597514461,
+          "accuracy": 0.8873376229209664,
+          "recall_by_class": {
+            "no": 1,
+            "yes": 0
+          },
+          "auc": 0.5,
+          "average_precision": 0.11266237707903363,
+          "prevalence": 0.11266237707903363
+        }
+      },
+      "quality": {
+        "primary_model": "main_model",
+        "primary_loss": 0.2729682725727712,
+        "primary_limit": 0.30240296480935097,
+        "primary_pass": true,
+        "forest_loss": {
+          "forest_model": 0.27355030330750496
+        },
+        "forest_limit": 0.3219923249750171,
+        "forest_pass": true
+      },
+      "native_references": {
+        "native-bank-score-1t-v1/ranger": {
+          "variant": "ranger",
+          "metrics": {
+            "log_loss": 0.2782541956304497,
+            "brier": 0.07814171345241792,
+            "accuracy": 0.8981425276192788,
+            "recall_by_class": {
+              "no": 0.9767410042413462,
+              "yes": 0.2790948275862069
+            },
+            "auc": 0.7904159698010483,
+            "average_precision": 0.4504228437342873,
+            "prevalence": 0.11266237707903363
+          },
+          "source_cohort": "native-bank-score-1t-v1"
+        },
+        "native-bank-score-1t-v1/xgboost": {
+          "variant": "xgboost",
+          "metrics": {
+            "log_loss": 0.2730936043721372,
+            "brier": 0.07736417963084055,
+            "accuracy": 0.8991137550078913,
+            "recall_by_class": {
+              "no": 0.981392803393077,
+              "yes": 0.2510775862068966
+            },
+            "auc": 0.7992611995838858,
+            "average_precision": 0.45501398926967423,
+            "prevalence": 0.11266237707903363
+          },
+          "source_cohort": "native-bank-score-1t-v1"
+        }
+      },
+      "native_reference_scope": "Original calibrated native references, matched to actual package threads. These are bounded two-setting references, not exhaustive optimization.",
+      "complete_process_seconds": 323.24374157999773,
+      "observed_peak_rss_kib": 670632,
+      "process_wall_limit_seconds": 7200,
+      "address_space_limit_bytes": 25769803776,
+      "search_elapsed_seconds": 35.443000000000005,
+      "separate_stages": {
+        "replay": {
+          "elapsed_seconds": 3.0,
+          "observed_peak_rss_kib": 471644
+        },
+        "verification": {
+          "elapsed_seconds": 8.21,
+          "observed_peak_rss_kib": 699852
+        }
+      },
+      "replay_max_absolute_difference": {
+        "main_model": 0,
+        "forest_model": 0,
+        "regularized_model": 0,
+        "simple_baseline": 0
+      },
+      "complete_cv_configurations": 3,
+      "cv_score_differences": {
+        "boosting_02": 0,
+        "forest_05": 0,
+        "regularized_03": 0
+      },
+      "report": {
+        "bytes": 2075709,
+        "sha256": "d1ed665dcf801b416b5ca153c739d745b88dd6ef6e124c58261fff67168f3844"
+      },
+      "original_artifact_sha256": {
+        "process": "14d025f2ea25b83cdb464d4af553dae343075e61440b959576ee69f498467457",
+        "summary": "b546891e797d1073c80224d934cdb3e184708d8a7014de436185ec63add438a8",
+        "acceptance": "9e115635bdeb18aca0154c7c9e1d906b99fbd7525c2992667451360fd6122840",
+        "replay": "e936488a1e70dd9d77ef65a12b9976501a645ec34a32314488e6e16c5769ee8f",
+        "result": "8fa35a576b9bf93c271e3fe0e7e9d6598b310b36ed7af2edc8fad31475e6cfbb",
+        "predictions": "b59d1992df7095e15d95cf036b71e5bbf03928c44f495b6d79757f29ce7dbe2b"
+      },
+      "metadata_audit_sha256": "44a24553fdf8b0e7cc742efb2061b3c5770ec6083f9f4d850a3f976531f1f9d4",
+      "report_checks": "Manual aggregate workflow inspected; independent rendered-value/offline checks and bounded rows export remain pending.",
+      "overlap_warning": {
+        "matching_supplied_evaluation_records": 551,
+        "meaning": "Values match before preprocessing; exact matches alone do not prove dependence. The original warning was console-only and absent from the v14 saved result and HTML. A later diagnostic-only source repair preserves it prospectively."
+      }
+    },
+    "yearprediction": {
+      "status": "public_process_running",
+      "scores_reviewed": false,
+      "note": "No outcome or completed-result claim. Publish results only after completed stages and the first manual report review."
+    }
+  }
+}
