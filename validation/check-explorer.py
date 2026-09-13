@@ -253,11 +253,12 @@ with sync_playwright() as playwright:
             page.locator('[data-page-link=evaluation]').click()
             check(f'{case}/{model_id}: prediction panel follows model', active_model(page, 'evaluation') == model_id)
             panel = page.locator(f'#evaluation [data-model-panel="{model_id}"]')
-            command=panel.locator('pre').first
-            panel.locator('details:has(pre) summary').first.click()
+            command=panel.locator('[data-prediction-code]')
+            command_summary=panel.locator('details:has([data-prediction-code]) > summary')
+            command_summary.click()
             check(f'{case}/{model_id}: usable R prediction command',
                   command.is_visible() and f'model = "{model_id}"' in command.text_content())
-            panel.locator('details:has(pre) summary').first.click()
+            command_summary.click()
             expected = oracle.get('predictions',{}).get(model_id)
             if expected:
                 metrics=panel.locator('.prediction-metrics').inner_text()

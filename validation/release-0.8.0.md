@@ -46,10 +46,12 @@ not establish acceptance quality.
 
 The tested source snapshot is `candidate-v6`, inventory SHA-256
 `afa4e63bfa1506cdce8e51d1b0271aa844f02a868d20123df6b3b07710e438ed`.
-The most recent frozen installation is `candidate-v8`, inventory SHA-256
-`2db164f2c2ff5f98f23fc5863094281927baa5fd43f23e19e164baba8daa5a06`.
-README wording, two overview screenshot copies and two test files differ between
-these snapshots. R code, report assets, help files and DESCRIPTION are identical.
+The current frozen installation is `candidate-v9`, inventory SHA-256
+`8f8ba04c4560c0274861cfb8559703eb5b5123f6ce311ec05bfb9d77f1044b5f`.
+Changes after candidate-v6 comprise README wording, two overview screenshot
+copies, two test files, the summary-report help described below and its NEWS
+entry. Fitting and statistical code, report styles/scripts, help files and
+DESCRIPTION are unchanged.
 The test changes isolate three planning checks from optional engine installation;
 they preserve the real dependency guard and native fitting tests. Both affected
 files passed 260 assertions with engines installed. A fresh process also passed
@@ -62,8 +64,8 @@ command was copied from the HTML and executed for eight summary/none paths
 across four saved synthetic results. Every export contained linked records and
 every retained model's predictions stayed unchanged. All 52 visible-help checks
 passed on desktop and phone, including keyboard opening and code scrolling.
-The three affected report test files and source lint passed. A new snapshot
-must include this help before acceptance; candidate-v8 does not contain it.
+The three affected report test files and source lint passed. Candidate-v9
+includes this help; its other 252 packaged source files match candidate-v8.
 
 The gallery was regenerated from the same saved fitted examples after that
 change. All three HTML files and eight screenshots were byte-identical because
@@ -80,10 +82,13 @@ binds the new source, and all 118 committed-gallery browser checks passed.
 | Adaptive selection UI | Chromium 608 and WebKit 596 checks passed | Independent selection fixture, keyboard, deep links, mobile charts and print; Firefox remains a CI gate |
 | Fold-table layout and print | 131 checks passed | Named fold table, complete errors, mobile scrolling and an inspected PDF page |
 
-The candidate archive checked locally has SHA-256
-`c899d2cf0f51403e2650452f3d204769f2e417b611673c9de52e66b4e3211f29`
-and contains 2,444,140 bytes. It is a candidate-v6 archive, not a published
-artifact. The note covers new-submission status and two benchmark links whose
+The current candidate archive checked locally has SHA-256
+`878184be2e59ec3459197c5044f0f3de4adfdf937bcbd77b0b9ed509fca6a9f2`
+and contains 2,444,156 bytes. It is a candidate-v9 archive, not a published
+artifact. Build and check took 50.329 and 198.654 seconds. All 24 example topics,
+five vignette scripts and the PDF/HTML manuals passed. The archive's source
+entries were verified against the snapshot, with only documented build-generated
+fields and vignette outputs added. The note covers new-submission status and two benchmark links whose
 files have not reached the public main branch. Those links must be checked again
 after publication of the documentation.
 
