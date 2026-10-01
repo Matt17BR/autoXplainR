@@ -65,7 +65,7 @@ jobs:
           extra-packages: |
             any::pkgload
             any::jsonlite
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v6
