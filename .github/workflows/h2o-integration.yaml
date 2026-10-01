@@ -18,7 +18,7 @@ jobs:
       AUTOXPLAIN_RUN_H2O: true
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
